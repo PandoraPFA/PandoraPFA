@@ -53,21 +53,6 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::GetCurrentList(const TrackList *pTrackList, std::string &trackListName) const
-{
-	NameToTrackListMap::const_iterator iter = m_nameToTrackListMap.find(m_currentListName);
-	
-	if (m_nameToTrackListMap.end() == iter)
-		return STATUS_CODE_NOT_INITIALIZED;
-	
-	pTrackList = iter->second;
-	trackListName = m_currentListName;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode TrackManager::GetList(const std::string &listName, const TrackList *pTrackList) const
 {
 	NameToTrackListMap::const_iterator iter = m_nameToTrackListMap.find(listName);
@@ -82,7 +67,7 @@ StatusCode TrackManager::GetList(const std::string &listName, const TrackList *p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::SetCurrentList(const Algorithm *const pAlgorithm, const std::string &trackListName)
+StatusCode TrackManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &trackListName)
 {
 	if (m_nameToTrackListMap.end() == m_nameToTrackListMap.find(trackListName))
 		return STATUS_CODE_NOT_FOUND;
@@ -94,17 +79,10 @@ StatusCode TrackManager::SetCurrentList(const Algorithm *const pAlgorithm, const
 
 	AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
 
-	if (m_algorithmInfoMap.end() != iter)
-	{
-		iter->second.m_parentTrackListName = trackListName;
-	}
-	else
-	{
-		AlgorithmInfo algorithmInfo;
-		algorithmInfo.m_parentTrackListName = trackListName;
+	if (m_algorithmInfoMap.end() == iter)
+		return STATUS_CODE_NOT_FOUND;
 
-		m_algorithmInfoMap[pAlgorithm] = algorithmInfo;
-	}
+	iter->second.m_parentListName = trackListName;
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -122,20 +100,12 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
 
 	AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
 
-	if (m_algorithmInfoMap.end() != iter)
-	{
-		temporaryListNameStream << "_" << iter->second.m_temporaryTrackListNames.size();
-		iter->second.m_temporaryTrackListNames.insert(temporaryListNameStream.str());
-	}
-	else
-	{
-		AlgorithmInfo algorithmInfo;
-		algorithmInfo.m_parentTrackListName = m_currentListName;
-		algorithmInfo.m_temporaryTrackListNames.insert(temporaryListNameStream.str());
+	if (m_algorithmInfoMap.end() == iter)
+		return STATUS_CODE_NOT_FOUND;
 
-		m_algorithmInfoMap[pAlgorithm] = algorithmInfo;
-	}
-	
+	temporaryListNameStream << "_" << iter->second.m_temporaryListNames.size();
+
+	iter->second.m_temporaryListNames.insert(temporaryListNameStream.str());
 	temporaryListName = temporaryListNameStream.str();
 
 	m_nameToTrackListMap[temporaryListName] = new TrackList(trackList);
@@ -146,14 +116,17 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::SaveCurrentList(const std::string &newListName)
+StatusCode TrackManager::SaveTemporaryList(const Algorithm *const pAlgorithm, const std::string &newListName, const std::string &temporaryListName)
 {
 	if (m_nameToTrackListMap.end() != m_nameToTrackListMap.find(newListName))
-		return STATUS_CODE_FAILURE;
+		return STATUS_CODE_NOT_ALLOWED;
 
-	NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(m_currentListName);
+	NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(temporaryListName);
 
-	if ((m_nameToTrackListMap.end() == iter) || (iter->second->empty()))
+	if (m_nameToTrackListMap.end() == iter)
+		return STATUS_CODE_NOT_FOUND;
+
+	if (iter->second->empty())
 		return STATUS_CODE_NOT_INITIALIZED;
 
 	if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, new TrackList)).second)
@@ -161,7 +134,8 @@ StatusCode TrackManager::SaveCurrentList(const std::string &newListName)
 
 	*(m_nameToTrackListMap[newListName]) = *(iter->second);
 	m_savedLists.insert(newListName);	
-	m_currentListName = newListName;
+
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveTemporaryList(pAlgorithm, temporaryListName));
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -184,6 +158,22 @@ StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode TrackManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
+{
+	if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
+		return STATUS_CODE_ALREADY_INITIALIZED;
+	
+	AlgorithmInfo algorithmInfo;
+	algorithmInfo.m_parentListName = m_currentListName;
+
+	if (!m_algorithmInfoMap.insert(AlgorithmInfoMap::value_type(pAlgorithm, algorithmInfo)).second)
+		return STATUS_CODE_FAILURE;
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode TrackManager::ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm)
 {
 	AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
@@ -191,8 +181,8 @@ StatusCode TrackManager::ResetAfterAlgorithmCompletion(const Algorithm *const pA
 	if (m_algorithmInfoMap.end() == algorithmListIter)
 		return STATUS_CODE_NOT_FOUND;
 
-	for (StringSet::const_iterator listNameIter = algorithmListIter->second.m_temporaryTrackListNames.begin(),
-		listNameIterEnd = algorithmListIter->second.m_temporaryTrackListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
+	for (StringSet::const_iterator listNameIter = algorithmListIter->second.m_temporaryListNames.begin(),
+		listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
 	{
 		NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(*listNameIter);
 		
@@ -202,7 +192,7 @@ StatusCode TrackManager::ResetAfterAlgorithmCompletion(const Algorithm *const pA
 		m_nameToTrackListMap.erase(iter);
 	}
 
-	m_currentListName = algorithmListIter->second.m_parentTrackListName;
+	m_currentListName = algorithmListIter->second.m_parentListName;
 	m_algorithmInfoMap.erase(algorithmListIter);
 
 	return STATUS_CODE_SUCCESS;
@@ -232,6 +222,26 @@ StatusCode TrackManager::ResetForNextEvent()
 	m_nameToTrackListMap.clear();
 	m_savedLists.clear();
 	m_currentListName.clear();
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName)
+{
+	m_nameToTrackListMap.erase(m_nameToTrackListMap.find(temporaryListName));
+
+	AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);	
+
+	if (m_algorithmInfoMap.end() == algorithmListIter)
+		return STATUS_CODE_NOT_FOUND;
+
+	StringSet *pStringSet = &(algorithmListIter->second.m_temporaryListNames);
+	pStringSet->erase(pStringSet->find(temporaryListName));
+
+	if (temporaryListName == m_currentListName)
+		m_currentListName = algorithmListIter->second.m_parentListName;
 
 	return STATUS_CODE_SUCCESS;
 }

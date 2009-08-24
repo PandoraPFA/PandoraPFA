@@ -33,6 +33,21 @@ private:
 	StatusCode CreateTrack(const PandoraApi::TrackParameters &trackParameters);
 
 	/**
+	 *	@brief	Get the current track list name
+	 * 
+	 *	@param	trackListName to receive the current track list name
+	 */
+	StatusCode GetCurrentListName(std::string &trackListName) const;
+
+	/**
+	 *	@brief	Get the algorithm input track list name
+	 * 
+	 *	@param	pAlgorithm address of the algorithm
+	 *	@param	trackListName to receive the algorithm input track list name
+	 */
+	StatusCode GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &trackListName) const;
+	
+	/**
 	 *	@brief	Get the current track list
 	 * 
 	 *	@param	pTrackList to receive the current track list
@@ -40,6 +55,15 @@ private:
 	 */
 	StatusCode GetCurrentList(const TrackList *pTrackList, std::string &trackListName) const;
 
+	/**
+	 *	@brief	Get the algorithm input track list
+	 * 
+	 *	@param	pAlgorithm address of the algorithm
+	 *	@param	pTrackList to receive the algorithm input track list
+	 *	@param	trackListName to receive the name of the algorithm input track list
+	 */
+	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *pTrackList, std::string &trackListName) const;
+	
 	/**
 	 *	@brief	Get a track list
 	 * 
@@ -49,29 +73,31 @@ private:
 	StatusCode GetList(const std::string &listName, const TrackList *pTrackList) const;
 	
 	/**
-	 *	@brief	Change the current track list to a pre-existing list
+	 *	@brief	Replace the current and algorithm input lists with a pre-existing list
 	 *
 	 *	@param	pAlgorithm address of the algorithm changing the current track list
-	 *	@param	trackListName the name of the new current track list
+	 *	@param	trackListName the name of the new current (and algorithm input) track list
 	 */	
-	StatusCode SetCurrentList(const Algorithm *const pAlgorithm, const std::string &trackListName);
+	StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &trackListName);
 
 	/**
-	 *	@brief	Change the current track list to a specified temporary list of tracks and set as current
+	 *	@brief	Change the current track list to a specified temporary list of tracks
 	 *
 	 *	@param	pAlgorithm address of the algorithm changing the current track list
-	 *	@param	temporaryTrackList the specified temporary list of tracks
+	 *	@param	trackList the specified temporary list of tracks
 	 *	@param	temporaryListName to receive the name of the temporary list
 	 */	
 	StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const TrackList &trackList, 
 		std::string &temporaryListName);
 
 	/**
-	 *	@brief	Save the current track list under a new specified name
+	 *	@brief	Save a temporary track list under a new specified name
 	 *
-	 *	@param	newListName the new list name
+	 *	@param	pAlgorithm the algorithm associated with the temporary tracks
+	 *	@param	newListName the name of the new track list to be created
+	 *	@param	temporaryListName the name of the temporary track list to save
 	 */		
-	StatusCode SaveCurrentList(const std::string &newListName);
+	StatusCode SaveTemporaryList(const Algorithm *const pAlgorithm, const std::string &newListName, const std::string &temporaryListName);
 
 	/**
 	 *	@brief	Save a list of tracks as a new list with a specified name
@@ -80,6 +106,13 @@ private:
 	 *	@param	newListName the new list name
 	 */	
 	StatusCode SaveList(const TrackList &trackList, const std::string &newListName);
+
+	/**
+	 *	@brief	Register an algorithm with the track manager
+	 * 
+	 *	@param	pAlgorithm address of the algorithm
+	 */
+	StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
 
 	/**
 	 *	@brief	Remove temporary lists and reset the current track list to that when algorithm was initialized
@@ -94,13 +127,21 @@ private:
 	StatusCode ResetForNextEvent();
 
 	/**
+	 *	@brief	Remove a temporary track list
+	 * 
+	 *	@param	pAlgorithm the algorithm associated with the temporary tracks
+	 *	@param	temporaryListName the name of the temporary track list
+	 */
+	StatusCode RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
+
+	/**
 	 *	@brief	AlgorithmInfo class
 	 */	
 	class AlgorithmInfo
 	{
 	public:
-		std::string					m_parentTrackListName;			///< The current track list when algorithm was initialized
-		StringSet					m_temporaryTrackListNames;		///< The temporary track list names		
+		std::string					m_parentListName;				///< The current track list when algorithm was initialized
+		StringSet					m_temporaryListNames;			///< The temporary track list names		
 	};
 
 	typedef std::map<std::string, TrackList *> NameToTrackListMap;
@@ -117,6 +158,60 @@ private:
 	friend class PandoraApiImpl;
 	friend class PandoraContentApiImpl;	
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode TrackManager::GetCurrentListName(std::string &trackListName) const
+{
+	if (m_currentListName.empty())
+		return STATUS_CODE_NOT_INITIALIZED;
+		
+	trackListName = m_currentListName;
+	
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode TrackManager::GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &trackListName) const
+{
+	AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
+
+	if (m_algorithmInfoMap.end() == iter)
+		return this->GetCurrentListName(trackListName);
+
+	trackListName = iter->second.m_parentListName;
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode TrackManager::GetCurrentList(const TrackList *pTrackList, std::string &trackListName) const
+{
+	trackListName = m_currentListName;
+
+	return this->GetList(trackListName, pTrackList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *pTrackList,
+	std::string &trackListName) const
+{
+	AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
+
+	if (m_algorithmInfoMap.end() != iter)
+	{
+		trackListName = iter->second.m_parentListName;
+	}
+	else
+	{
+		trackListName = m_currentListName;
+	}
+	
+	return this->GetList(trackListName, pTrackList);	
+}
 
 } // namespace pandora
 

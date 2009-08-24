@@ -43,12 +43,36 @@ private:
 	StatusCode CreateCluster(CLUSTER_PARAMETERS *pClusterParameters);
 
 	/**
+	 *	@brief	Get the current cluster list name
+	 * 
+	 *	@param	clusterListName to receive the current cluster list name
+	 */
+	StatusCode GetCurrentListName(std::string &clusterListName) const;
+
+	/**
+	 *	@brief	Get the algorithm input cluster list name
+	 * 
+	 *	@param	pAlgorithm address of the algorithm
+	 *	@param	clusterListName to receive the algorithm input cluster list name
+	 */
+	StatusCode GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &clusterListName) const;
+
+	/**
 	 *	@brief	Get the current cluster list
 	 * 
 	 *	@param	pClusterList to receive the current cluster list
 	 *	@param	clusterListName to receive the name of the current cluster list
 	 */
 	StatusCode GetCurrentList(const ClusterList *pClusterList, std::string &clusterListName) const;
+
+	/**
+	 *	@brief	Get the algorithm input cluster list
+	 * 
+	 *	@param	pAlgorithm address of the algorithm
+	 *	@param	pClusterList to receive the algorithm input cluster list
+	 *	@param	clusterListName to receive the name of the algorithm input cluster list
+	 */
+	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *pClusterList, std::string &clusterListName) const;
 
 	/**
 	 *	@brief	Get a cluster list
@@ -59,12 +83,12 @@ private:
 	StatusCode GetList(const std::string &listName, const ClusterList *pClusterList) const;
 
 	/**
-	 *	@brief	Change the current cluster list to a pre-existing list
+	 *	@brief	Replace the current and algorithm input lists with a pre-existing list
 	 *
-	 *	@param	pAlgorithm address of the algorithm changing the current cluster list
-	 *	@param	clusterListName the name of the new current cluster list
+	 *	@param	pAlgorithm address of the algorithm changing the cluster lists
+	 *	@param	clusterListName the name of the new current (and algorithm input) cluster list
 	 */	
-	StatusCode SetCurrentList(const Algorithm *const pAlgorithm, const std::string &clusterListName);
+	StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &clusterListName);
 	
 	/**
 	 *	@brief	Make a temporary cluster list and set it to be the current cluster list
@@ -101,6 +125,13 @@ private:
 		const std::string &temporaryListName, const ClusterList *const pClusterList = NULL);
 
 	/**
+	 *	@brief	Register an algorithm with the cluster manager
+	 * 
+	 *	@param	pAlgorithm address of the algorithm
+	 */
+	StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
+	
+	/**
 	 *	@brief	Remove temporary lists and reset the current cluster list to that when algorithm was initialized
 	 * 
 	 *	@param	pAlgorithm the algorithm associated with the temporary clusters
@@ -121,27 +152,13 @@ private:
 	StatusCode RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
 
 	/**
-	 *	@brief	Get (and store) the name of the parent cluster list undergoing reclustering
-	 *
-	 *	@param	parentClusterListName to receive the parent cluster list name
-	 */	
-	StatusCode GetReclusterListName(std::string &parentClusterListName);
-
-	/**
-	 *	@brief	Get (and reset) the name of the parent cluster list undergoing reclustering
-	 *
-	 *	@param	parentClusterListName to receive the parent cluster list name
-	 */		
-	StatusCode GetAndResetReclusterListName(std::string &parentClusterListName);
-
-	/**
 	 *	@brief	AlgorithmInfo class
 	 */	
 	class AlgorithmInfo
 	{
 	public:
-		std::string					m_parentClusterListName;		///< The current cluster list when algorithm was initialized
-		StringSet					m_temporaryClusterListNames;	///< The temporary cluster list names
+		std::string					m_parentListName;				///< The current cluster list when algorithm was initialized
+		StringSet					m_temporaryListNames;			///< The temporary cluster list names
 	};
 
 	typedef std::map<std::string, ClusterList *> NameToClusterListMap;
@@ -152,12 +169,65 @@ private:
 
 	bool							m_canMakeNewClusters;			///< Whether the manager is allowed to make new clusters
 	std::string						m_currentListName;				///< The name of the current cluster list
-	std::string						m_reclusterListName;			///< The name of the parent cluster list undergoing reclustering
 	StringSet						m_savedLists;					///< The set of saved cluster lists
 
 	friend class PandoraApiImpl;
 	friend class PandoraContentApiImpl;	
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::GetCurrentListName(std::string &clusterListName) const
+{
+	if (m_currentListName.empty())
+		return STATUS_CODE_NOT_INITIALIZED;
+		
+	clusterListName = m_currentListName;
+	
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &clusterListName) const
+{
+	AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
+
+	if (m_algorithmInfoMap.end() == iter)
+		return this->GetCurrentListName(clusterListName);
+
+	clusterListName = iter->second.m_parentListName;
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::GetCurrentList(const ClusterList *pClusterList, std::string &clusterListName) const
+{
+	clusterListName = m_currentListName;
+
+	return this->GetList(clusterListName, pClusterList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *pClusterList,
+	std::string &clusterListName) const
+{
+	AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
+
+	if (m_algorithmInfoMap.end() != iter)
+	{
+		clusterListName = iter->second.m_parentListName;
+	}
+	else
+	{
+		clusterListName = m_currentListName;
+	}
+	
+	return this->GetList(clusterListName, pClusterList);	
+}
 
 } // namespace pandora
 

@@ -110,12 +110,11 @@ public:
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newClusterListName the new cluster list name
-	 *	@param	currentClusterListName the current cluster list name
-	 *	@param	pClustersToSave a subset of the current cluster list - only clusters in both this and the current lists
-	 * 			will be saved
+	 *	@param	pClustersToSave a subset of the algorithm input cluster list - only clusters in both this and the current
+	 * 			cluster lists will be saved
 	 */
 	StatusCode SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-		const std::string &currentClusterListName, const ClusterList *const pClustersToSave = NULL) const;
+		const ClusterList *const pClustersToSave = NULL) const;
 
 	/**
 	 *	@brief	Save the current cluster list under a new name; use this new list as a permanent replacement for the current
@@ -123,12 +122,11 @@ public:
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newClusterListName the new cluster list name
-	 *	@param	currentClusterListName the current cluster list name
-	 *	@param	pClustersToSave a subset of the current cluster list - only clusters in both this and the current lists
-	 * 			will be saved
+	 *	@param	pClustersToSave a subset of the current cluster list - only clusters in both this and the current
+	 * 			cluster lists will be saved
 	 */
 	StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-		const std::string &currentClusterListName, const ClusterList *const pClustersToSave = NULL) const;
+		const ClusterList *const pClustersToSave = NULL) const;
 
 private:
 	/**

@@ -114,6 +114,15 @@ StatusCode PandoraContentApi::EndReclustering(const pandora::Algorithm &algorith
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName, 
+	pandora::ClusterList *pNewClusterList)
+{
+	std::string newClusterListName;
+	return PandoraContentApi::RunClusteringAlgorithm(algorithm, clusteringAlgorithmName, pNewClusterList, newClusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName, 
 	pandora::ClusterList *pNewClusterList, std::string &newClusterListName)
 {
 	return algorithm.GetPandoraContentApiImpl()->RunClusteringAlgorithm(algorithm, clusteringAlgorithmName, pNewClusterList, newClusterListName);
@@ -121,36 +130,32 @@ StatusCode PandoraContentApi::RunClusteringAlgorithm(const pandora::Algorithm &a
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string newClusterListName,
-	const std::string currentClusterListName)
+StatusCode PandoraContentApi::SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string newClusterListName)
 {
-	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndRemoveCaloHits(algorithm, newClusterListName, currentClusterListName);
+	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndRemoveCaloHits(algorithm, newClusterListName);
 }
 		
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-	const std::string &currentClusterListName, const pandora::ClusterList &clustersToSave)
+	const pandora::ClusterList &clustersToSave)
 {
-	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndRemoveCaloHits(algorithm, newClusterListName, currentClusterListName,
-		&clustersToSave);
+	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndRemoveCaloHits(algorithm, newClusterListName, &clustersToSave);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName)
+{
+	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-	const std::string &currentClusterListName)
+	const pandora::ClusterList &clustersToSave)
 {
-	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, currentClusterListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-	const std::string &currentClusterListName, const pandora::ClusterList &clustersToSave)
-{
-	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, 
-		currentClusterListName,	&clustersToSave);
+	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, &clustersToSave);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

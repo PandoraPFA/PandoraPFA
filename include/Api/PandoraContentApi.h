@@ -161,8 +161,18 @@ public:
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	clusteringAlgorithmName the name of the clustering algorithm to run
-	 *	@param	pNewClusterList the address of the new cluster list populated
-	 *	@param	newClusterListName the name of the new cluster list populated
+	 *	@param	pNewClusterList to receive the address of the new cluster list populated
+	 */
+	static StatusCode RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName, 
+		pandora::ClusterList *pNewClusterList);
+		
+	/**
+	 *	@brief	Run a clustering algorithm (an algorithm that will create new cluster objects)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	clusteringAlgorithmName the name of the clustering algorithm to run
+	 *	@param	pNewClusterList to receive the address of the new cluster list populated
+	 *	@param	newClusterListName to receive the name of the new cluster list populated
 	 */
 	static StatusCode RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName, 
 		pandora::ClusterList *pNewClusterList, std::string &newClusterListName);
@@ -172,22 +182,19 @@ public:
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newClusterListName the new cluster list name
-	 *	@param	currentClusterListName the current cluster list name
 	 */
-	static StatusCode SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string newClusterListName,
-		const std::string currentClusterListName);
+	static StatusCode SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string newClusterListName);
 
 	/**
 	 *	@brief	Save the current cluster list and remove the constituent hits from the current ordered calo hit list
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newClusterListName the new cluster list name
-	 *	@param	currentClusterListName the current cluster list name
-	 *	@param	clustersToSave a subset of the current cluster list - only clusters in both this and the current lists
-	 * 			will be saved
+	 *	@param	clustersToSave a subset of the current cluster list - only clusters in both this and the current
+	 * 			cluster list will be saved
 	 */		
 	static StatusCode SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-		const std::string &currentClusterListName, const pandora::ClusterList &clustersToSave);
+		const pandora::ClusterList &clustersToSave);
 
 	/**
 	 *	@brief	Save the current cluster list under a new name; use this new list as a permanent replacement for the current
@@ -195,10 +202,8 @@ public:
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newClusterListName the new cluster list name
-	 *	@param	currentClusterListName the current cluster list name
 	 */
-	static StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-		const std::string &currentClusterListName);
+	static StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName);
 		
 	/**
 	 *	@brief	Save the current cluster list under a new name; use this new list as a permanent replacement for the current
@@ -206,12 +211,11 @@ public:
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newClusterListName the new cluster list name
-	 *	@param	currentClusterListName the current cluster list name
-	 *	@param	clustersToSave a subset of the current cluster list - only clusters in both this and the current lists
-	 * 			will be saved
+	 *	@param	clustersToSave a subset of the current cluster list - only clusters in both this and the current
+	 * 			cluster list will be saved
 	 */
 	static StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-		const std::string &currentClusterListName, const pandora::ClusterList &clustersToSave);
+		const pandora::ClusterList &clustersToSave);
 };
 
 #endif // #ifndef PANDORA_CONTENT_API_H

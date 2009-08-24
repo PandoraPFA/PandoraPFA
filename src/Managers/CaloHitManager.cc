@@ -55,21 +55,6 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::GetCurrentList(const OrderedCaloHitList *pOrderedCaloHitList, std::string &orderedCaloHitListName) const
-{
-	NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(m_currentListName);
-	
-	if (m_nameToOrderedCaloHitListMap.end() == iter)
-		return STATUS_CODE_NOT_INITIALIZED;
-	
-	pOrderedCaloHitList = iter->second;
-	orderedCaloHitListName = m_currentListName;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode CaloHitManager::GetList(const std::string &listName, const OrderedCaloHitList *pOrderedCaloHitList) const
 {
 	NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);
@@ -84,7 +69,7 @@ StatusCode CaloHitManager::GetList(const std::string &listName, const OrderedCal
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::SetCurrentList(const Algorithm *const pAlgorithm, const std::string &orderedCaloHitListName)
+StatusCode CaloHitManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &orderedCaloHitListName)
 {
 	if (m_nameToOrderedCaloHitListMap.end() == m_nameToOrderedCaloHitListMap.find(orderedCaloHitListName))
 		return STATUS_CODE_NOT_FOUND;
@@ -96,17 +81,10 @@ StatusCode CaloHitManager::SetCurrentList(const Algorithm *const pAlgorithm, con
 
 	AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
 
-	if (m_algorithmInfoMap.end() != iter)
-	{
-		iter->second.m_parentOrderedCaloHitListName = orderedCaloHitListName;
-	}
-	else
-	{
-		AlgorithmInfo algorithmInfo;
-		algorithmInfo.m_parentOrderedCaloHitListName = orderedCaloHitListName;
-
-		m_algorithmInfoMap[pAlgorithm] = algorithmInfo;
-	}
+	if (m_algorithmInfoMap.end() == iter)
+		return STATUS_CODE_NOT_FOUND;
+		
+	iter->second.m_parentListName = orderedCaloHitListName;
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -124,20 +102,12 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
 
 	AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
 
-	if (m_algorithmInfoMap.end() != iter)
-	{
-		temporaryListNameStream << "_" << iter->second.m_temporaryOrderedCaloHitListNames.size();
-		iter->second.m_temporaryOrderedCaloHitListNames.insert(temporaryListNameStream.str());
-	}
-	else
-	{
-		AlgorithmInfo algorithmInfo;
-		algorithmInfo.m_parentOrderedCaloHitListName = m_currentListName;
-		algorithmInfo.m_temporaryOrderedCaloHitListNames.insert(temporaryListNameStream.str());
+	if (m_algorithmInfoMap.end() == iter)
+		return STATUS_CODE_NOT_FOUND;
 
-		m_algorithmInfoMap[pAlgorithm] = algorithmInfo;
-	}
-	
+	temporaryListNameStream << "_" << iter->second.m_temporaryListNames.size();
+
+	iter->second.m_temporaryListNames.insert(temporaryListNameStream.str());
 	temporaryListName = temporaryListNameStream.str();
 
 	m_nameToOrderedCaloHitListMap[temporaryListName] = new OrderedCaloHitList(orderedCaloHitList);
@@ -169,22 +139,27 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::SaveCurrentList(const std::string &newListName)
+StatusCode CaloHitManager::SaveTemporaryList(const Algorithm *const pAlgorithm, const std::string &newListName,
+	const std::string &temporaryListName)
 {
 	if (m_nameToOrderedCaloHitListMap.end() != m_nameToOrderedCaloHitListMap.find(newListName))
 		return STATUS_CODE_FAILURE;
 
-	NameToOrderedCaloHitListMap::iterator iter = m_nameToOrderedCaloHitListMap.find(m_currentListName);
+	NameToOrderedCaloHitListMap::iterator iter = m_nameToOrderedCaloHitListMap.find(temporaryListName);
 
-	if ((m_nameToOrderedCaloHitListMap.end() == iter) || (iter->second->empty()))
+	if (m_nameToOrderedCaloHitListMap.end() == iter)
+		return STATUS_CODE_NOT_FOUND;
+
+	if (iter->second->empty())
 		return STATUS_CODE_NOT_INITIALIZED;
 
 	if (!m_nameToOrderedCaloHitListMap.insert(NameToOrderedCaloHitListMap::value_type(newListName, new OrderedCaloHitList)).second)
 		return STATUS_CODE_FAILURE;
 
 	*(m_nameToOrderedCaloHitListMap[newListName]) = *(iter->second);
-	m_savedLists.insert(newListName);
-	m_currentListName = newListName;
+	m_savedLists.insert(newListName);	
+
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveTemporaryList(pAlgorithm, temporaryListName));
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -207,34 +182,34 @@ StatusCode CaloHitManager::SaveList(const OrderedCaloHitList &orderedCaloHitList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::AddCaloHitsToCurrentList(const OrderedCaloHitList &orderedCaloHitList)
+StatusCode CaloHitManager::AddCaloHitsToList(const std::string &listName, const OrderedCaloHitList &orderedCaloHitList)
 {
-	NameToOrderedCaloHitListMap::iterator currentListIter = m_nameToOrderedCaloHitListMap.find(m_currentListName);
+	NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.find(listName);
 
-	if (m_nameToOrderedCaloHitListMap.end() == currentListIter)
-		return STATUS_CODE_NOT_INITIALIZED;
+	if (m_nameToOrderedCaloHitListMap.end() == listIter)
+		return STATUS_CODE_NOT_FOUND;
 
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, currentListIter->second->Add(orderedCaloHitList));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Add(orderedCaloHitList));
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 	
-StatusCode CaloHitManager::AddCaloHitsToCurrentList(const ClusterList &clusterList)
+StatusCode CaloHitManager::AddCaloHitsToList(const std::string &listName, const ClusterList &clusterList)
 {
 	if (clusterList.empty())
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	NameToOrderedCaloHitListMap::iterator currentListIter = m_nameToOrderedCaloHitListMap.find(m_currentListName);
+	NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.find(listName);
 
-	if (m_nameToOrderedCaloHitListMap.end() == currentListIter)
-		return STATUS_CODE_NOT_INITIALIZED;
+	if (m_nameToOrderedCaloHitListMap.end() == listIter)
+		return STATUS_CODE_NOT_FOUND;
 
 	for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
 	{
 		const OrderedCaloHitList *const pOrderedCaloHitList = (*iter)->GetOrderedCaloHitList();
-		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, currentListIter->second->Add(*pOrderedCaloHitList));
+		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Add(*pOrderedCaloHitList));
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -242,34 +217,34 @@ StatusCode CaloHitManager::AddCaloHitsToCurrentList(const ClusterList &clusterLi
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::RemoveCaloHitsFromCurrentList(const OrderedCaloHitList &orderedCaloHitList)
+StatusCode CaloHitManager::RemoveCaloHitsFromList(const std::string &listName, const OrderedCaloHitList &orderedCaloHitList)
 {
-	NameToOrderedCaloHitListMap::iterator currentListIter = m_nameToOrderedCaloHitListMap.find(m_currentListName);
+	NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.find(listName);
 
-	if (m_nameToOrderedCaloHitListMap.end() == currentListIter)
-		return STATUS_CODE_NOT_INITIALIZED;
+	if (m_nameToOrderedCaloHitListMap.end() == listIter)
+		return STATUS_CODE_NOT_FOUND;
 
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, currentListIter->second->Remove(orderedCaloHitList));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Remove(orderedCaloHitList));
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::RemoveCaloHitsFromCurrentList(const ClusterList &clusterList)
+StatusCode CaloHitManager::RemoveCaloHitsFromList(const std::string &listName, const ClusterList &clusterList)
 {
 	if (clusterList.empty())
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	NameToOrderedCaloHitListMap::iterator currentListIter = m_nameToOrderedCaloHitListMap.find(m_currentListName);
+	NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.find(listName);
 
-	if (m_nameToOrderedCaloHitListMap.end() == currentListIter)
-		return STATUS_CODE_NOT_INITIALIZED;
+	if (m_nameToOrderedCaloHitListMap.end() == listIter)
+		return STATUS_CODE_NOT_FOUND;
 
 	for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
 	{
 		const OrderedCaloHitList *const pOrderedCaloHitList = (*iter)->GetOrderedCaloHitList();
-		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, currentListIter->second->Remove(*pOrderedCaloHitList));
+		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Remove(*pOrderedCaloHitList));
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -292,6 +267,22 @@ StatusCode CaloHitManager::MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode CaloHitManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
+{
+	if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
+		return STATUS_CODE_ALREADY_INITIALIZED;
+	
+	AlgorithmInfo algorithmInfo;
+	algorithmInfo.m_parentListName = m_currentListName;
+
+	if (!m_algorithmInfoMap.insert(AlgorithmInfoMap::value_type(pAlgorithm, algorithmInfo)).second)
+		return STATUS_CODE_FAILURE;
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode CaloHitManager::ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm)
 {
 	AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
@@ -299,8 +290,8 @@ StatusCode CaloHitManager::ResetAfterAlgorithmCompletion(const Algorithm *const 
 	if (m_algorithmInfoMap.end() == algorithmListIter)
 		return STATUS_CODE_NOT_FOUND;
 
-	for (StringSet::const_iterator listNameIter = algorithmListIter->second.m_temporaryOrderedCaloHitListNames.begin(),
-		listNameIterEnd = algorithmListIter->second.m_temporaryOrderedCaloHitListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
+	for (StringSet::const_iterator listNameIter = algorithmListIter->second.m_temporaryListNames.begin(),
+		listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
 	{
 		NameToOrderedCaloHitListMap::iterator iter = m_nameToOrderedCaloHitListMap.find(*listNameIter);
 		
@@ -310,7 +301,7 @@ StatusCode CaloHitManager::ResetAfterAlgorithmCompletion(const Algorithm *const 
 		m_nameToOrderedCaloHitListMap.erase(iter);
 	}
 
-	m_currentListName = algorithmListIter->second.m_parentOrderedCaloHitListName;
+	m_currentListName = algorithmListIter->second.m_parentListName;
 	m_algorithmInfoMap.erase(algorithmListIter);
 
 	return STATUS_CODE_SUCCESS;
@@ -335,6 +326,26 @@ StatusCode CaloHitManager::ResetForNextEvent()
 	m_nameToOrderedCaloHitListMap.clear();	
 	m_savedLists.clear();
 	m_currentListName.clear();
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitManager::RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName)
+{
+	m_nameToOrderedCaloHitListMap.erase(m_nameToOrderedCaloHitListMap.find(temporaryListName));
+
+	AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);	
+
+	if (m_algorithmInfoMap.end() == algorithmListIter)
+		return STATUS_CODE_NOT_FOUND;
+
+	StringSet *pStringSet = &(algorithmListIter->second.m_temporaryListNames);
+	pStringSet->erase(pStringSet->find(temporaryListName));
+
+	if (temporaryListName == m_currentListName)
+		m_currentListName = algorithmListIter->second.m_parentListName;
 
 	return STATUS_CODE_SUCCESS;
 }
