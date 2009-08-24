@@ -91,15 +91,6 @@ private:
 		std::string &temporaryListName);
 
 	/**
-	 *	@brief	Save a temporary track list under a new specified name
-	 *
-	 *	@param	pAlgorithm the algorithm associated with the temporary tracks
-	 *	@param	newListName the name of the new track list to be created
-	 *	@param	temporaryListName the name of the temporary track list to save
-	 */		
-	StatusCode SaveTemporaryList(const Algorithm *const pAlgorithm, const std::string &newListName, const std::string &temporaryListName);
-
-	/**
 	 *	@brief	Save a list of tracks as a new list with a specified name
 	 * 
 	 *	@param	pTrackList the list of tracks
@@ -125,14 +116,6 @@ private:
 	 *	@brief	Reset the track manager
 	 */	
 	StatusCode ResetForNextEvent();
-
-	/**
-	 *	@brief	Remove a temporary track list
-	 * 
-	 *	@param	pAlgorithm the algorithm associated with the temporary tracks
-	 *	@param	temporaryListName the name of the temporary track list
-	 */
-	StatusCode RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
 
 	/**
 	 *	@brief	AlgorithmInfo class

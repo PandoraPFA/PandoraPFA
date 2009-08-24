@@ -113,7 +113,7 @@ public:
 	 *	@param	pClustersToSave a subset of the algorithm input cluster list - only clusters in both this and the current
 	 * 			cluster lists will be saved
 	 */
-	StatusCode SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
+	StatusCode SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
 		const ClusterList *const pClustersToSave = NULL) const;
 
 	/**
@@ -127,6 +127,42 @@ public:
 	 */
 	StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
 		const ClusterList *const pClustersToSave = NULL) const;
+
+	/**
+	 *	@brief	Save the current ordered calo hit list under a new name
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the new ordered calo hit list name
+	 */
+	StatusCode SaveOrderedCaloHitList(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList,
+		const std::string &newListName) const;
+
+	/**
+	 *	@brief	Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
+	 * 			current list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the new ordered calo hit list name
+	 */
+	StatusCode SaveOrderedCaloHitListAndReplaceCurrent(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList,
+		const std::string &newListName) const;
+
+	/**
+	 *	@brief	Save the current track list under a new name
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the new ordered calo hit list name
+	 */
+	StatusCode SaveTrackList(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const;
+
+	/**
+	 *	@brief	Save the current track list under a new name; use this new list as a permanent replacement for the current
+	 * 			list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the new track list name
+	 */
+	StatusCode SaveTrackListAndReplaceCurrent(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const;
 
 private:
 	/**

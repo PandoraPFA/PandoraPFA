@@ -130,17 +130,17 @@ StatusCode PandoraContentApi::RunClusteringAlgorithm(const pandora::Algorithm &a
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string newClusterListName)
+StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string newClusterListName)
 {
-	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndRemoveCaloHits(algorithm, newClusterListName);
+	return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName);
 }
 		
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::SaveClusterListAndRemoveCaloHits(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
+StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
 	const pandora::ClusterList &clustersToSave)
 {
-	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndRemoveCaloHits(algorithm, newClusterListName, &clustersToSave);
+	return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName, &clustersToSave);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -156,6 +156,38 @@ StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Al
 	const pandora::ClusterList &clustersToSave)
 {
 	return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, &clustersToSave);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApi::SaveOrderedCaloHitList(const pandora::Algorithm &algorithm,
+	const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
+{
+	return algorithm.GetPandoraContentApiImpl()->SaveOrderedCaloHitList(algorithm, orderedCaloHitList, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(const pandora::Algorithm &algorithm,
+	const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
+{
+	return algorithm.GetPandoraContentApiImpl()->SaveOrderedCaloHitListAndReplaceCurrent(algorithm, orderedCaloHitList, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApi::SaveTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
+	const std::string &newListName)
+{
+	return algorithm.GetPandoraContentApiImpl()->SaveTrackList(algorithm, trackList, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApi::SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
+	const std::string &newListName)
+{
+	return algorithm.GetPandoraContentApiImpl()->SaveTrackListAndReplaceCurrent(algorithm, trackList, newListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

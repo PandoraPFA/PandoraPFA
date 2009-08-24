@@ -116,32 +116,6 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::SaveTemporaryList(const Algorithm *const pAlgorithm, const std::string &newListName, const std::string &temporaryListName)
-{
-	if (m_nameToTrackListMap.end() != m_nameToTrackListMap.find(newListName))
-		return STATUS_CODE_NOT_ALLOWED;
-
-	NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(temporaryListName);
-
-	if (m_nameToTrackListMap.end() == iter)
-		return STATUS_CODE_NOT_FOUND;
-
-	if (iter->second->empty())
-		return STATUS_CODE_NOT_INITIALIZED;
-
-	if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, new TrackList)).second)
-		return STATUS_CODE_FAILURE;
-
-	*(m_nameToTrackListMap[newListName]) = *(iter->second);
-	m_savedLists.insert(newListName);	
-
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveTemporaryList(pAlgorithm, temporaryListName));
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string &newListName)
 {
 	if (m_nameToTrackListMap.end() != m_nameToTrackListMap.find(newListName))
@@ -222,26 +196,6 @@ StatusCode TrackManager::ResetForNextEvent()
 	m_nameToTrackListMap.clear();
 	m_savedLists.clear();
 	m_currentListName.clear();
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode TrackManager::RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName)
-{
-	m_nameToTrackListMap.erase(m_nameToTrackListMap.find(temporaryListName));
-
-	AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);	
-
-	if (m_algorithmInfoMap.end() == algorithmListIter)
-		return STATUS_CODE_NOT_FOUND;
-
-	StringSet *pStringSet = &(algorithmListIter->second.m_temporaryListNames);
-	pStringSet->erase(pStringSet->find(temporaryListName));
-
-	if (temporaryListName == m_currentListName)
-		m_currentListName = algorithmListIter->second.m_parentListName;
 
 	return STATUS_CODE_SUCCESS;
 }

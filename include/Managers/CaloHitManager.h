@@ -109,15 +109,6 @@ private:
 	 */	
 	StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const ClusterList &clusterList,
 		std::string &temporaryListName);
-	
-	/**
-	 *	@brief	Save a temporary ordered calo hit list under a new specified name
-	 *
-	 *	@param	pAlgorithm the algorithm associated with the temporary ordered calo hits
-	 *	@param	newListName the name of the new ordered calo hit list to be created
-	 *	@param	temporaryListName the name of the temporary ordered calo hit list to save
-	 */		
-	StatusCode SaveTemporaryList(const Algorithm *const pAlgorithm, const std::string &newListName, const std::string &temporaryListName);
 
 	/**
 	 *	@brief	Save an ordered calo hit list as a new list with a specified name
@@ -184,14 +175,6 @@ private:
 	 *	@brief	Reset the calo hit manager
 	 */	
 	StatusCode ResetForNextEvent();
-
-	/**
-	 *	@brief	Remove a temporary ordered calo hit list
-	 * 
-	 *	@param	pAlgorithm the algorithm associated with the temporary ordered calo hits
-	 *	@param	temporaryListName the name of the temporary ordered calo hit list
-	 */
-	StatusCode RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
 
 	/**
 	 *	@brief	AlgorithmInfo class

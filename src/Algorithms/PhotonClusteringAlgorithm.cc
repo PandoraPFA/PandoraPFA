@@ -20,7 +20,7 @@ StatusCode PhotonClusteringAlgorithm::Run()
 	ClusterList clustersToSave;
 
 	//Save the clusters and remove the hits - clustersToSave argument is optional
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndRemoveCaloHits(*this, "newClusterListName",
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, "newClusterListName",
 		clustersToSave));
 
 	return STATUS_CODE_SUCCESS;

@@ -146,7 +146,7 @@ StatusCode PandoraContentApiImpl::RunClusteringAlgorithm(const Algorithm &algori
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::SaveClusterListAndRemoveCaloHits(const Algorithm &algorithm, const std::string &newClusterListName,
+StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, const std::string &newClusterListName,
 	const ClusterList *const pClustersToSave) const
 {
 	std::string currentClusterListName;
@@ -156,9 +156,9 @@ StatusCode PandoraContentApiImpl::SaveClusterListAndRemoveCaloHits(const Algorit
 	const ClusterList *pNewClusterList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetList(newClusterListName, pNewClusterList));
 
-	std::string currentCaloHitListName;
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->GetCurrentListName(currentCaloHitListName));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->RemoveCaloHitsFromList(currentCaloHitListName, *pNewClusterList));
+	std::string inputOrderedCaloHitListName;
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->GetAlgorithmInputListName(&algorithm, inputOrderedCaloHitListName));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->RemoveCaloHitsFromList(inputOrderedCaloHitListName, *pNewClusterList));
 	
 	return STATUS_CODE_SUCCESS;
 }
@@ -168,11 +168,42 @@ StatusCode PandoraContentApiImpl::SaveClusterListAndRemoveCaloHits(const Algorit
 StatusCode PandoraContentApiImpl::SaveClusterListAndReplaceCurrent(const Algorithm &algorithm, const std::string &newClusterListName,
 	const ClusterList *const pClustersToSave) const
 {
-	std::string currentClusterListName;
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetCurrentListName(currentClusterListName));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveTemporaryClusters(&algorithm, newClusterListName, currentClusterListName, pClustersToSave));
-
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SaveClusterList(algorithm, newClusterListName, pClustersToSave));
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newClusterListName));
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::SaveOrderedCaloHitList(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName) const
+{
+	return m_pPandora->m_pCaloHitManager->SaveList(orderedCaloHitList, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::SaveOrderedCaloHitListAndReplaceCurrent(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName) const
+{
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SaveOrderedCaloHitList(algorithm, orderedCaloHitList, newListName));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newListName));
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::SaveTrackList(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const
+{
+	return m_pPandora->m_pTrackManager->SaveList(trackList, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::SaveTrackListAndReplaceCurrent(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const
+{
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SaveTrackList(algorithm, trackList, newListName));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newListName));
 
 	return STATUS_CODE_SUCCESS;
 }
