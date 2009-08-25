@@ -191,7 +191,7 @@ StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorit
 		
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode ClusterManager::AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit)
+StatusCode ClusterManager::AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit)
 {
 	// Only in the manager modifier functions are these const_casts allowed!
 	return const_cast<Cluster*>(pCluster)->AddCaloHit(const_cast<CaloHit*>(pCaloHit));

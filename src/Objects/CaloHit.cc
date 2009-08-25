@@ -28,11 +28,8 @@ StatusCode CaloHit::SetPfoTarget()
 		return STATUS_CODE_FAILURE;
 
 	pMCParticle->GetPfoTarget( pMCParticle );
-
-	if (NULL == pMCParticle)
-		return STATUS_CODE_FAILURE;
-
-	m_pMCParticle = pMCParticle;
+	
+	PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, SetMCParticle( pMCParticle ) );
 	
 	return STATUS_CODE_SUCCESS;
 }

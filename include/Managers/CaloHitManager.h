@@ -149,12 +149,20 @@ private:
  	 *	@param	clusterList the cluster list containing the hits
 	 */	
 	StatusCode RemoveCaloHitsFromList(const std::string &listName, const ClusterList &clusterList);
-	
+
 	/**
 	 *	@brief	Match calo hits to their correct mc particles for particle flow (the MCParticles know which is their pfo-target)
+	 *              (short version)
 	 * 
 	 */
 	StatusCode MatchCaloHitsToMCPfoTargets();
+
+        /**
+ 	*       @brief Match calo hits to their correct mc particles for particle flow (long version)
+ 	*
+ 	*       @param caloHitToPfoTargetMap the calo hit uid to mc pfo target map
+ 	*/
+ 	StatusCode MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap &caloHitToPfoTargetMap); 
 
 	/**
 	 *	@brief	Register an algorithm with the calo hit manager

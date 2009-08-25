@@ -81,13 +81,27 @@ private:
 	StatusCode SetMCParentDaughterRelationship(const Uid parentUid, const Uid daughterUid);
 
 	/**
-	 *	@brief	Set calo hit to mc particle relationship
+	 *	@brief	Set calo hit to mc particle uid relationship
 	 * 
 	 *	@param	caloHitUid the calo hit unique identifier
 	 *	@param	mcParticleUid the mc particle unique identifier
 	 *	@param	mcParticleWeight weighting to assign to the mc particle
 	 */
 	StatusCode SetCaloHitToMCParticleRelationship(const Uid caloHitUid, const Uid mcParticleUid, const float mcParticleWeight);
+
+	/**
+	 *	@brief	Create the calo hit to mc particle relationships from the user given and afterwards selected relationships
+	 *              This function is not accessible for the user
+	 * 
+	 */
+	StatusCode CreateCaloHitToMCParticleRelationships();
+	
+        /**
+ 	* @brief Create a map relating calo hit uid to mc pfo target
+ 	*
+ 	* @param caloHitToPfoTargetMap to receive the calo hit uid to mc pfo target map
+ 	*/
+ 	StatusCode CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToPfoTargetMap); 
 
 	/**
 	 *	@brief	Select pfo targets
@@ -106,7 +120,8 @@ private:
 	
 
 	UidToMCParticleMap		m_uidToMCParticleMap;		///< The uid to mc particle map
-	UidToMCParticleMapWeighted     	m_caloHitUidToMCParticleMap;	///< The calo hit to mc particle relation map
+	UidToMCParticleUidMapWeighted  	m_caloHitUidToMCParticleUidMap;	///< The calo hit to mc particle uid relation map
+	UidToMCParticleMap  	        m_caloHitUidToMCParticleMap;	///< The calo hit to mc particle relation map
 
 	const MCPfoSelection	*m_pMCPfoSelection;			///< The mc pfo selection instance
 

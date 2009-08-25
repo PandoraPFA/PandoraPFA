@@ -61,8 +61,12 @@ typedef std::set<std::string> StringSet;
 
 typedef const void * Uid;
 typedef std::map<Uid, MCParticle *> UidToMCParticleMap;
-typedef std::pair< float, MCParticle * > WeightedMCParticle;
-typedef std::multimap<Uid, WeightedMCParticle > UidToMCParticleMapWeighted;
+
+/* typedef std::pair< float, MCParticle * > WeightedMCParticle; */
+/* typedef std::multimap<Uid, WeightedMCParticle > UidToMCParticleMapWeighted; */
+
+typedef std::pair< float, Uid > WeightedMCParticleUid;
+typedef std::map<Uid, WeightedMCParticleUid > UidToMCParticleUidMapWeighted;
 
 } // namespace pandora
 

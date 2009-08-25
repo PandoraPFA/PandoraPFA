@@ -162,17 +162,26 @@ StatusCode TestMCManager::Test_SetCaloHitToMCParticleRelationship()
 	MCParticle* mcParticle = NULL;
 	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, mcParticle ); 
 	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)101,(void*)200, 1.0 ) == STATUS_CODE_SUCCESS ); 
+
 	MCParticle* sameMcParticle = NULL;
 	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, sameMcParticle ); 
 	assert( mcParticle == sameMcParticle );
 
-        std::cout << "        check if it fails to associate the same calohit two times (it should fail) " << std::endl;
-	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)101,(void*)200, 1.0 ) == STATUS_CODE_FAILURE ); // for one CaloHit only one MCParticle can be associated --> error when tried to associate a second time to the same calohit
+        std::cout << "        associate a second mcparticle to the calohit " << std::endl;
+	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)190,(void*)200, 0.8 ) == STATUS_CODE_SUCCESS ); // for one CaloHit only one MCParticle can be associated --> when the second one is associated, only the one with the larger weight is taken
+
+        std::cout << "        associate a third mcparticle to the calohit " << std::endl;
+	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)191,(void*)200, 0.7 ) == STATUS_CODE_SUCCESS ); // for one CaloHit only one MCParticle can be associated --> when the second one is associated, only the one with the larger weight is taken
 
         std::cout << "        check if association with different MCParticle-Uid produces a different MCParticle" << std::endl;
 	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)102,(void*)201, 1.0 ) == STATUS_CODE_SUCCESS ); 
+
+	assert( pMcManager->CreateCaloHitToMCParticleRelationships() ); // create the relationships now
+
 	MCParticle* differentMcParticle = NULL;
 	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)201, differentMcParticle ); 
+	assert( mcParticle != NULL );
+	assert( differentMcParticle != NULL );
 	assert( mcParticle != differentMcParticle );
 	
 
