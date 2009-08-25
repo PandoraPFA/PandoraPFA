@@ -60,7 +60,7 @@ public:
 	 *	@param	pseudoLayer the pseudo layer
 	 *	@param	pCaloHitList to receive the address of the relevant calo hit list
 	 */
-	StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *pCaloHitList) const;
+	StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
 	
 private:
 	/**

@@ -53,7 +53,7 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::GetList(const std::string &listName, const ClusterList *pClusterList) const
+StatusCode ClusterManager::GetList(const std::string &listName, const ClusterList *&pClusterList) const
 {
 	NameToClusterListMap::const_iterator iter = m_nameToClusterListMap.find(listName);
 	
@@ -92,18 +92,16 @@ StatusCode ClusterManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm 
 
 StatusCode ClusterManager::MakeTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName)
 {
-	std::ostringstream temporaryListNameStream;
-	temporaryListNameStream << pAlgorithm;
-
 	AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
 
 	if (m_algorithmInfoMap.end() == iter)
 		return STATUS_CODE_NOT_FOUND;
-		
-	temporaryListNameStream << "_" << iter->second.m_temporaryListNames.size();
 
-	iter->second.m_temporaryListNames.insert(temporaryListNameStream.str());
+	std::ostringstream temporaryListNameStream;
+	temporaryListNameStream << pAlgorithm << "_" << iter->second.m_temporaryListNames.size();
+
 	temporaryListName = temporaryListNameStream.str();
+	iter->second.m_temporaryListNames.insert(temporaryListName);
 
 	m_nameToClusterListMap[temporaryListName] = new ClusterList;
 	m_currentListName = temporaryListName;
@@ -130,7 +128,7 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
 
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MakeTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
 
-	if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(m_currentListName))
+	if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(temporaryListName))
 		return STATUS_CODE_FAILURE;
 
 	for (ClusterList::iterator clusterIter = originalClusterListIter->second->begin(),
@@ -191,6 +189,47 @@ StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorit
 	return STATUS_CODE_SUCCESS;
 }
 		
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit)
+{
+	// Only in the manager modifier functions are these const_casts allowed!
+	return const_cast<Cluster*>(pCluster)->AddCaloHit(const_cast<CaloHit*>(pCaloHit));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::DeleteCluster(const Cluster *pCluster)
+{
+	NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
+
+	if (m_nameToClusterListMap.end() == listIter)
+		return STATUS_CODE_NOT_INITIALIZED;
+
+	// Only in the manager modifier functions are these const_casts allowed!
+	ClusterList::iterator clusterIter = listIter->second->find(const_cast<Cluster*>(pCluster));
+
+	if (listIter->second->end() == clusterIter)
+		return STATUS_CODE_NOT_FOUND;
+
+	delete *clusterIter;
+	listIter->second->erase(clusterIter);
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs)
+{
+	// Only in the manager modifier functions are these const_casts allowed!
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, 
+		const_cast<OrderedCaloHitList*>(pClusterLhs->GetOrderedCaloHitList())->Add( *(pClusterRhs->GetOrderedCaloHitList()) ));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->DeleteCluster(pClusterRhs));
+
+	return STATUS_CODE_SUCCESS;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)

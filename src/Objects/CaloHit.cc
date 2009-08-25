@@ -19,30 +19,6 @@ bool CaloHit::operator< (const CaloHit &rhs) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHit::GetPseudoLayer(PseudoLayer &pseudoLayer) const
-{
-	if (!m_isSortedIntoPseudoLayer)
-		return STATUS_CODE_NOT_INITIALIZED;
-
-	pseudoLayer = m_pseudoLayer;
-	
-	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode CaloHit::GetMCParticle(MCParticle *pMCParticle) const
-{
-	if (NULL == m_pMCParticle)
-		return STATUS_CODE_NOT_INITIALIZED;
-
-	pMCParticle = m_pMCParticle;
-	
-	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode CaloHit::SetPfoTarget()
 {
         MCParticle* pMCParticle = NULL;
@@ -66,6 +42,7 @@ StatusCode CaloHit::SetPfoTarget()
 CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
 	m_isSortedIntoPseudoLayer(false),
 	m_energy(caloHitParameters.m_energy),
+	m_layer(caloHitParameters.m_layer),
 	m_pMCParticle(NULL),
 	m_pParentAddress(caloHitParameters.m_pParentAddress)
 {

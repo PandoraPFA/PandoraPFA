@@ -18,8 +18,6 @@
 
 #include "Pandora.h"
 
-#include <iostream>
-
 namespace pandora
 {
 
@@ -86,14 +84,21 @@ StatusCode PandoraContentApiImpl::MatchCaloHitsToMCPfoTargets() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::GetCurrentClusterList(ClusterList *const pClusterList, std::string &clusterListName) const
+StatusCode PandoraContentApiImpl::OrderInputCaloHits() const
+{
+	return m_pPandora->m_pCaloHitManager->OrderInputCaloHits();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::GetCurrentClusterList(const ClusterList *&pClusterList, std::string &clusterListName) const
 {
 	return m_pPandora->m_pClusterManager->GetCurrentList(pClusterList, clusterListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(OrderedCaloHitList *const pOrderedCaloHitList,
+StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList,
 	std::string &orderedCaloHitListName) const
 {
 	return m_pPandora->m_pCaloHitManager->GetCurrentList(pOrderedCaloHitList, orderedCaloHitListName);
@@ -101,7 +106,7 @@ StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(OrderedCaloHitLis
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::GetCurrentTrackList(TrackList *const pTrackList, std::string &trackListName) const
+StatusCode PandoraContentApiImpl::GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const
 {
 	return m_pPandora->m_pTrackManager->GetCurrentList(pTrackList, trackListName);
 }
@@ -136,13 +141,34 @@ StatusCode PandoraContentApiImpl::EndReclustering(const Algorithm &algorithm, co
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
 StatusCode PandoraContentApiImpl::RunClusteringAlgorithm(const Algorithm &algorithm, const std::string &clusteringAlgorithmName,
-	ClusterList *pNewClusterList, std::string &newClusterListName) const
+	const ClusterList *&pNewClusterList, std::string &newClusterListName) const
 {
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MakeTemporaryListAndSetCurrent(&algorithm,	newClusterListName));
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RunAlgorithm(clusteringAlgorithmName));
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetCurrentList(pNewClusterList, newClusterListName));
 
 	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit) const
+{
+	return m_pPandora->m_pClusterManager->AddCaloHitToCluster(pCluster, pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::DeleteCluster(const Cluster *pCluster) const
+{
+	return m_pPandora->m_pClusterManager->DeleteCluster(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs) const
+{
+	return m_pPandora->m_pClusterManager->MergeAndDeleteClusters(pClusterLhs, pClusterRhs);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	

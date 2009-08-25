@@ -10,14 +10,14 @@
 #include "EVENT/LCCollection.h"
 #include "EVENT/Track.h"
 
+#include "UTIL/CellIDDecoder.h"
+
 // User algorithm includes here
 
 
 #include "Api/PandoraApi.h"
 
 #include "PandoraPFANewProcessor.h"
-
-#include <iostream>
 
 PandoraPFANewProcessor pandoraPFANewProcessor;
 
@@ -140,17 +140,17 @@ StatusCode PandoraPFANewProcessor::CreateTracks(const LCEvent *const pLCEvent)
 				PandoraApi::Track::Parameters trackParameters;
 				trackParameters.m_momentum = 10;
 				trackParameters.m_pParentAddress = pTrack;
-				
+
 				PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pandora, trackParameters));
 			}
 		}
 		catch (StatusCodeException &statusCodeException)
 		{
-			std::cout << "Failed to extract track collection: " << statusCodeException.ToString() << std::endl;
-		}		
+			std::cout << "Failed to extract a track: " << statusCodeException.ToString() << std::endl;
+		}
 		catch (...)
 		{
-			std::cout << "Failed to extract track collection" << std::endl;
+			std::cout << "Failed to extract a track, unrecognised exception" << std::endl;
 		}
 	}
 	
@@ -167,26 +167,30 @@ StatusCode PandoraPFANewProcessor::CreateCaloHits(const LCEvent *const pLCEvent)
 	{
 		try
 		{
+			CellIDDecoder<CalorimeterHit>::setDefaultEncoding("M:3,S-1:3,I:9,J:9,K-1:6");
+
 			const LCCollection *pCaloHitCollection = pLCEvent->getCollection(*iter);
+			CellIDDecoder<CalorimeterHit> cellIdDecoder(pCaloHitCollection);
 
 			for (int i = 0; i < pCaloHitCollection->getNumberOfElements(); ++i)
 			{
 				CalorimeterHit* pCaloHit = dynamic_cast<CalorimeterHit*>(pCaloHitCollection->getElementAt(i));
-				
+
 				PandoraApi::CaloHit::Parameters caloHitParameters;
 				caloHitParameters.m_energy = pCaloHit->getEnergy();
 				caloHitParameters.m_pParentAddress = pCaloHit;
-				
+				caloHitParameters.m_layer = cellIdDecoder(pCaloHit)["K-1"];
+
 				PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pandora, caloHitParameters));
 			}
 		}
 		catch (StatusCodeException &statusCodeException)
 		{
-			std::cout << "Failed to extract calo hit collection: " << statusCodeException.ToString() << std::endl;
-		}		
+			std::cout << "Failed to extract a calo hit: " << statusCodeException.ToString() << std::endl;
+		}
 		catch (...)
 		{
-			std::cout << "Failed to extract calo hit collection" << std::endl;
+			std::cout << "Failed to extract a calo hit, unrecognised exception" << std::endl;
 		}
 	}
 	
@@ -199,7 +203,8 @@ StatusCode PandoraPFANewProcessor::ProcessParticleFlowObjects(const LCEvent *con
 {
 	// Insert user code here ...
 	PandoraApi::ParticleFlowObjectList particleFlowObjectList;
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::GetParticleFlowObjects(m_pandora, particleFlowObjectList));
+	PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=,
+		PandoraApi::GetParticleFlowObjects(m_pandora, particleFlowObjectList));
 	
 	return STATUS_CODE_SUCCESS;
 }

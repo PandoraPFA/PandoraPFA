@@ -6,8 +6,6 @@
  *	$Log: $
  */
 
-#include <iostream>
-
 #include "Managers/MCManager.h"
 
 #include "Objects/MCParticle.h"

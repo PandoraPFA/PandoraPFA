@@ -20,6 +20,11 @@ class TrackManager
 {
 public:
 	/**
+	 *	@brief	Default constructor
+	 */
+	TrackManager();
+	
+	/**
 	 *	@brief	Destructor
 	 */
 	~TrackManager();
@@ -53,7 +58,7 @@ private:
 	 *	@param	pTrackList to receive the current track list
 	 *	@param	trackListName to receive the name of the current track list
 	 */
-	StatusCode GetCurrentList(const TrackList *pTrackList, std::string &trackListName) const;
+	StatusCode GetCurrentList(const TrackList *&pTrackList, std::string &trackListName) const;
 
 	/**
 	 *	@brief	Get the algorithm input track list
@@ -62,7 +67,7 @@ private:
 	 *	@param	pTrackList to receive the algorithm input track list
 	 *	@param	trackListName to receive the name of the algorithm input track list
 	 */
-	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *pTrackList, std::string &trackListName) const;
+	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *&pTrackList, std::string &trackListName) const;
 	
 	/**
 	 *	@brief	Get a track list
@@ -70,7 +75,7 @@ private:
  	 *	@param	listName the name of the list
 	 *	@param	pTrackList to receive the track list
 	 */
-	StatusCode GetList(const std::string &listName, const TrackList *pTrackList) const;
+	StatusCode GetList(const std::string &listName, const TrackList *&pTrackList) const;
 	
 	/**
 	 *	@brief	Replace the current and algorithm input lists with a pre-existing list
@@ -170,7 +175,7 @@ inline StatusCode TrackManager::GetAlgorithmInputListName(const Algorithm *const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode TrackManager::GetCurrentList(const TrackList *pTrackList, std::string &trackListName) const
+inline StatusCode TrackManager::GetCurrentList(const TrackList *&pTrackList, std::string &trackListName) const
 {
 	trackListName = m_currentListName;
 
@@ -179,7 +184,7 @@ inline StatusCode TrackManager::GetCurrentList(const TrackList *pTrackList, std:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *pTrackList,
+inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *&pTrackList,
 	std::string &trackListName) const
 {
 	AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);	

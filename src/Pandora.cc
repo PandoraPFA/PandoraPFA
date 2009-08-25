@@ -25,8 +25,6 @@
 #include "Managers/ParticleFlowObjectManager.h"
 #include "Managers/TrackManager.h"
 
-#include <iostream>
-
 namespace pandora
 {
 
@@ -70,12 +68,12 @@ StatusCode Pandora::ProcessEvent()
 
 	// May call prepare event method here eventually
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MatchCaloHitsToMCPfoTargets(*this));
-	//PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::OrderCaloHitsByPseudoLayer(*this));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::OrderInputCaloHits(*this));
 
 	// Will loop over algorithms here eventually
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "PrimaryClustering"));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "PhotonClustering"));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "Reclustering"));
+//	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "PhotonClustering"));
+//	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "Reclustering"));
 
 	return STATUS_CODE_SUCCESS;
 }

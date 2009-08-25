@@ -13,21 +13,30 @@ namespace pandora
 
 Cluster::Cluster(CaloHit *pCaloHit)
 {
+	if (NULL == pCaloHit)
+		throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+	
 	this->AddCaloHit(pCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Cluster::Cluster(const InputCaloHitList *pCaloHitList)
+Cluster::Cluster(InputCaloHitList *pCaloHitList)
 {
+	if (NULL == pCaloHitList)
+		throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+	
 	for (InputCaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
 		this->AddCaloHit(*iter);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Cluster::Cluster(const Track *pTrack)
+Cluster::Cluster(Track *pTrack)
 {
+	if (NULL == pTrack)
+		throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);	
+	
 	// TODO, case where track specified
 }
 

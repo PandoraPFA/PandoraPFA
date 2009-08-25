@@ -12,10 +12,10 @@ using namespace pandora;
 
 StatusCode ReclusteringAlgorithm::Run()
 {
-	TrackList *pInputTrackList = NULL;
+	const TrackList *pInputTrackList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pInputTrackList));
 
-	ClusterList *pInputClusterList = NULL;
+	const ClusterList *pInputClusterList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList));
 
 	if ((NULL == pInputTrackList) || (NULL == pInputClusterList))
@@ -37,7 +37,7 @@ StatusCode ReclusteringAlgorithm::Run()
 			
 			// Repeat for many clustering algorithms, using pReclusterCandidates to calculate a figure of merit
 			std::string reclusterCandidatesListName;
-			ClusterList *pReclusterCandidatesList = NULL;
+			const ClusterList *pReclusterCandidatesList = NULL;
 			PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, "Clustering", 
 				pReclusterCandidatesList, reclusterCandidatesListName));
 		

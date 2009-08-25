@@ -51,12 +51,17 @@ public:
 	StatusCode MatchCaloHitsToMCPfoTargets() const;
 
 	/**
+	 *	@brief	Order input calo hits by pseudo layer
+	 */
+	StatusCode OrderInputCaloHits() const;
+
+	/**
 	 *	@brief	Get the current cluster list
 	 * 
 	 *	@param	pClusterList to receive the address of the current cluster list
 	 *	@param	clusterListName to receive the current cluster list name
 	 */
-	StatusCode GetCurrentClusterList(ClusterList *const pClusterList, std::string &clusterListName) const;
+	StatusCode GetCurrentClusterList(const ClusterList *&pClusterList, std::string &clusterListName) const;
 
 	/**
 	 *	@brief	Get the current ordered calo hit list
@@ -64,7 +69,7 @@ public:
 	 *	@param	pOrderedCaloHitList to receive the address of the current ordered calo hit list
 	 *	@param	orderedCaloHitListName to receive the current ordered calo hit list name
 	 */
-	StatusCode GetCurrentOrderedCaloHitList(OrderedCaloHitList *const pOrderedCaloHitList, std::string &orderedCaloHitListName) const;
+	StatusCode GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList, std::string &orderedCaloHitListName) const;
 
 	/**
 	 *	@brief	Get the current track list
@@ -72,7 +77,7 @@ public:
 	 *	@param	pTrackList to receive the address of the current track list
 	 *	@param	trackListName to receive the current track list name
 	 */
-	StatusCode GetCurrentTrackList(TrackList *const pTrackList, std::string &trackListName) const;
+	StatusCode GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const;
 
 	/**
 	 *	@brief	Initialize reclustering operations
@@ -103,8 +108,31 @@ public:
 	 *	@param	newClusterListName the name of the new cluster list populated
 	 */
 	 StatusCode RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName,
-		ClusterList *pNewClusterList, std::string &newClusterListName) const;
+		const ClusterList *&pNewClusterList, std::string &newClusterListName) const;
 
+	/**
+	 *	@brief	Add a calo hit to a cluster
+	 * 
+	 *	@param	pCluster address of the cluster to modify
+	 *	@param	pCaloHit address of the hit to add
+	 */
+	StatusCode AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit) const;
+
+	/**
+	 *	@brief	Delete a cluster and remove it from the current cluster list
+	 * 
+	 *	@param	pCluster address of the cluster to delete
+	 */
+	StatusCode DeleteCluster(const Cluster *pCluster) const;
+
+	/**
+	 *	@brief	Merge two clusters, deleting the original clusters and removing them from the current cluster list
+	 * 
+	 *	@param	pClusterLhs address of the first cluster
+	 *	@param	pClusterRhs address of the second cluster
+	 */
+	StatusCode MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs) const;
+		
 	/**
 	 *	@brief	Save the current cluster list and remove the constituent hits from the current ordered calo hit list
 	 * 

@@ -63,7 +63,7 @@ private:
 	 *	@param	pClusterList to receive the current cluster list
 	 *	@param	clusterListName to receive the name of the current cluster list
 	 */
-	StatusCode GetCurrentList(const ClusterList *pClusterList, std::string &clusterListName) const;
+	StatusCode GetCurrentList(const ClusterList *&pClusterList, std::string &clusterListName) const;
 
 	/**
 	 *	@brief	Get the algorithm input cluster list
@@ -72,7 +72,7 @@ private:
 	 *	@param	pClusterList to receive the algorithm input cluster list
 	 *	@param	clusterListName to receive the name of the algorithm input cluster list
 	 */
-	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *pClusterList, std::string &clusterListName) const;
+	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *&pClusterList, std::string &clusterListName) const;
 
 	/**
 	 *	@brief	Get a cluster list
@@ -80,7 +80,7 @@ private:
  	 *	@param	listName the name of the list
 	 *	@param	pClusterList to receive the cluster list
 	 */
-	StatusCode GetList(const std::string &listName, const ClusterList *pClusterList) const;
+	StatusCode GetList(const std::string &listName, const ClusterList *&pClusterList) const;
 
 	/**
 	 *	@brief	Replace the current and algorithm input lists with a pre-existing list
@@ -123,6 +123,29 @@ private:
 	 */
 	StatusCode SaveTemporaryClusters(const Algorithm *const pAlgorithm, const std::string &newListName,
 		const std::string &temporaryListName, const ClusterList *const pClusterList = NULL);
+
+	/**
+	 *	@brief	Add a calo hit to a cluster
+	 * 
+	 *	@param	pCluster address of the cluster to modify
+	 *	@param	pCaloHit address of the hit to add
+	 */
+	StatusCode AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit);
+
+	/**
+	 *	@brief	Delete a cluster and remove it from the current cluster list
+	 * 
+	 *	@param	pCluster address of the cluster to delete
+	 */
+	StatusCode DeleteCluster(const Cluster *pCluster);
+
+	/**
+	 *	@brief	Merge two clusters, deleting the original clusters and removing them from the current cluster list
+	 * 
+	 *	@param	pClusterLhs address of the first cluster
+	 *	@param	pClusterRhs address of the second cluster
+	 */
+	StatusCode MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs);
 
 	/**
 	 *	@brief	Register an algorithm with the cluster manager
@@ -203,7 +226,7 @@ inline StatusCode ClusterManager::GetAlgorithmInputListName(const Algorithm *con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode ClusterManager::GetCurrentList(const ClusterList *pClusterList, std::string &clusterListName) const
+inline StatusCode ClusterManager::GetCurrentList(const ClusterList *&pClusterList, std::string &clusterListName) const
 {
 	clusterListName = m_currentListName;
 
@@ -212,7 +235,7 @@ inline StatusCode ClusterManager::GetCurrentList(const ClusterList *pClusterList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *pClusterList,
+inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *&pClusterList,
 	std::string &clusterListName) const
 {
 	AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);	

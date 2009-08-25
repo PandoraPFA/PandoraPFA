@@ -13,7 +13,7 @@ using namespace pandora;
 StatusCode PrimaryClusteringAlgorithm::Run()
 {
 	// Run initial clustering algorithm
-	ClusterList *pClusterList = NULL;
+	const ClusterList *pClusterList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, "Clustering", pClusterList));
 
 	// Select some clusters (a subset of those in pClusterList) to save

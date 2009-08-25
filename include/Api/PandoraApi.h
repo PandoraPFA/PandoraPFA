@@ -46,8 +46,9 @@ public:
 	class CaloHitParameters
 	{
 	public:
-		float	m_energy;			///< The calo hit energy
-		void	*m_pParentAddress;	///< The address of the parent calo hit in the user framework
+		float			m_energy;				///< The calo hit energy
+		unsigned int	m_layer;				///< The layer in which the calo hit is located
+		void			*m_pParentAddress;		///< The address of the parent calo hit in the user framework
 	};
 
 	/**
@@ -56,8 +57,8 @@ public:
 	class TrackParameters
 	{
 	public:
-		float	m_momentum;			///< The track momentum
-		void	*m_pParentAddress;	///< The address of the parent track in the user framework
+		float			m_momentum;				///< The track momentum
+		void			*m_pParentAddress;		///< The address of the parent track in the user framework
 	};
 
 	/**
@@ -66,7 +67,7 @@ public:
 	class GeometryParameters
 	{
 	public:
-		float	m_tpcInnerRadius;	///< The inner tpc radius
+		float			m_tpcInnerRadius;		///< The inner tpc radius
 	};
 
 	/**
@@ -75,12 +76,12 @@ public:
 	class MCParticleParameters
 	{
 	public:
-		float	m_energy;	        ///< The MC particle's energy
-		float	m_momentum;			///< The MC particle's momentum
-		float	m_innerRadius;		///< The MC particle's path's inner radius
-		float	m_outerRadius;		///< The MC particle's path's outer radius
-		int		m_particleId;		///< The MC particle's ID (PDG code)
-		void	*m_pParentAddress;	///< The address of the parent MC particle in the user framework
+		float			m_energy;				///< The MC particle's energy
+		float			m_momentum;				///< The MC particle's momentum
+		float			m_innerRadius;			///< The MC particle's path's inner radius
+		float			m_outerRadius;			///< The MC particle's path's outer radius
+		int				m_particleId;			///< The MC particle's ID (PDG code)
+		void			*m_pParentAddress;		///< The address of the parent MC particle in the user framework
 	};
 
 	// Objects available for construction by pandora
@@ -88,6 +89,19 @@ public:
 	typedef ObjectCreationHelper<TrackParameters> Track;
 	typedef ObjectCreationHelper<GeometryParameters> Geometry;	
 	typedef ObjectCreationHelper<GeometryParameters> MCParticle;	
+
+	/**
+	 *	@brief	ParticleFlowObject class
+	 */
+	class ParticleFlowObject
+	{
+	public:
+		float							m_energy;					///< The particle flow object energy
+		pandora::TrackAddressVector		m_trackAddressVector;		///< The track address vector
+		pandora::ClusterAddressVector	m_clusterAddressVector;		///< The cluster address vector
+	};	
+
+	typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
 
 	/**
 	 *	@brief	Process an event
@@ -126,19 +140,6 @@ public:
 	 */
 	static StatusCode SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
 		const void *pMCParticleParentAddress, const float mcParticleWeight = 1);
-
-	/**
-	 *	@brief	ParticleFlowObject class
-	 */
-	class ParticleFlowObject
-	{
-	public:
-		float							m_energy;					///< The particle flow object energy
-		pandora::TrackAddressVector		m_trackAddressVector;		///< The track address vector
-		pandora::ClusterAddressVector	m_clusterAddressVector;		///< The cluster address vector
-	};	
-
-	typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
 
 	/**
 	 *	@brief	Get the particle flow objects

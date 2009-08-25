@@ -19,6 +19,13 @@ const std::string TrackManager::INPUT_LIST_NAME = "input";
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+TrackManager::TrackManager() :
+	m_currentListName(INPUT_LIST_NAME)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 TrackManager::~TrackManager()
 {
 	(void) this->ResetForNextEvent();
@@ -53,10 +60,10 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::GetList(const std::string &listName, const TrackList *pTrackList) const
+StatusCode TrackManager::GetList(const std::string &listName, const TrackList *&pTrackList) const
 {
 	NameToTrackListMap::const_iterator iter = m_nameToTrackListMap.find(listName);
-	
+
 	if (m_nameToTrackListMap.end() == iter)
 		return STATUS_CODE_NOT_INITIALIZED;
 	
@@ -95,18 +102,16 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
 	if (trackList.empty())
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	std::ostringstream temporaryListNameStream;
-	temporaryListNameStream << pAlgorithm;
-
 	AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
 
 	if (m_algorithmInfoMap.end() == iter)
 		return STATUS_CODE_NOT_FOUND;
 
-	temporaryListNameStream << "_" << iter->second.m_temporaryListNames.size();
+	std::ostringstream temporaryListNameStream;
+	temporaryListNameStream << pAlgorithm << "_" << iter->second.m_temporaryListNames.size();
 
-	iter->second.m_temporaryListNames.insert(temporaryListNameStream.str());
 	temporaryListName = temporaryListNameStream.str();
+	iter->second.m_temporaryListNames.insert(temporaryListName);
 
 	m_nameToTrackListMap[temporaryListName] = new TrackList(trackList);
 	m_currentListName = temporaryListName;	
@@ -195,7 +200,7 @@ StatusCode TrackManager::ResetForNextEvent()
 
 	m_nameToTrackListMap.clear();
 	m_savedLists.clear();
-	m_currentListName.clear();
+	m_currentListName = INPUT_LIST_NAME;
 
 	return STATUS_CODE_SUCCESS;
 }

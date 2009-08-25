@@ -47,7 +47,7 @@ public:
 	 *	@param	pseudoLayer the pseudo layer
 	 *	@param	pCaloHitList to receive the address of the relevant calo hit list
 	 */
-	StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *pCaloHitList) const;
+	StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
 	
 private:
 	/**
@@ -62,14 +62,14 @@ private:
 	 * 
 	 *	@param	pCaloHitList calo hits with which to create cluster
 	 */
-	Cluster(const InputCaloHitList *pCaloHitList);
+	Cluster(InputCaloHitList *pCaloHitList);
 
 	/**
 	 *	@brief	Constructor
 	 * 
 	 *	@param	pTrack address of track with which to seed cluster
 	 */
-	Cluster(const Track *pTrack);
+	Cluster(Track *pTrack);
 
 	/**
 	 *	@brief	Destructor
@@ -97,7 +97,7 @@ inline StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *pCaloHitList) const
+inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
 	return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
 }

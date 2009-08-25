@@ -62,7 +62,7 @@ private:
 	 *	@param	pOrderedCaloHitList to receive the current ordered calo hit list
 	 *	@param	orderedCaloHitListName to receive the name of the current ordered calo hit list
 	 */
-	StatusCode GetCurrentList(const OrderedCaloHitList *pOrderedCaloHitList, std::string &orderedCaloHitListName) const;
+	StatusCode GetCurrentList(const OrderedCaloHitList *&pOrderedCaloHitList, std::string &orderedCaloHitListName) const;
 
 	/**
 	 *	@brief	Get the algorithm input ordered calo hit list
@@ -71,7 +71,7 @@ private:
 	 *	@param	pOrderedCaloHitList to receive the algorithm input ordered calo hit list
 	 *	@param	orderedCaloHitListName to receive the name of the algorithm input ordered calo hit list
 	 */
-	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const OrderedCaloHitList *pOrderedCaloHitList,
+	StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const OrderedCaloHitList *&pOrderedCaloHitList,
 		std::string &orderedCaloHitListName) const;
 	
 	/**
@@ -80,7 +80,7 @@ private:
  	 *	@param	listName the name of the list
 	 *	@param	pOrderedCaloHitList to receive the ordered calo hit list
 	 */
-	StatusCode GetList(const std::string &listName, const OrderedCaloHitList *pOrderedCaloHitList) const;
+	StatusCode GetList(const std::string &listName, const OrderedCaloHitList *&pOrderedCaloHitList) const;
 	
 	/**
 	 *	@brief	Replace the current and algorithm input lists with a pre-existing list
@@ -230,7 +230,7 @@ inline StatusCode CaloHitManager::GetAlgorithmInputListName(const Algorithm *con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode CaloHitManager::GetCurrentList(const OrderedCaloHitList *pOrderedCaloHitList, std::string &orderedCaloHitListName) const
+inline StatusCode CaloHitManager::GetCurrentList(const OrderedCaloHitList *&pOrderedCaloHitList, std::string &orderedCaloHitListName) const
 {
 	orderedCaloHitListName = m_currentListName;
 
@@ -239,7 +239,7 @@ inline StatusCode CaloHitManager::GetCurrentList(const OrderedCaloHitList *pOrde
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode CaloHitManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const OrderedCaloHitList *pOrderedCaloHitList,
+inline StatusCode CaloHitManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const OrderedCaloHitList *&pOrderedCaloHitList,
 	std::string &orderedCaloHitListName) const
 {
 	AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);	

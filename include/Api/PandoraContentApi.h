@@ -68,6 +68,13 @@ public:
 	static StatusCode MatchCaloHitsToMCPfoTargets(const pandora::Pandora &pandora);
 	
 	/**
+	 *	@brief	Order input calo hits by pseudo layer
+	 * 
+	 *	@param	pandora the pandora instance containing the calo hits
+	 */
+	static StatusCode OrderInputCaloHits(const pandora::Pandora &pandora);
+
+	/**
 	 *	@brief	Run an algorithm registered with pandora
 	 * 
 	 *	@param	pandora the pandora instance with which the algorithm is registered
@@ -89,7 +96,7 @@ public:
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	pClusterList to receive the address of the current cluster list
 	 */
-	static StatusCode GetCurrentClusterList(const pandora::Algorithm &algorithm, pandora::ClusterList *const pClusterList);
+	static StatusCode GetCurrentClusterList(const pandora::Algorithm &algorithm, const pandora::ClusterList *&pClusterList);
 
 	/**
 	 *	@brief	Get the current cluster list
@@ -98,7 +105,7 @@ public:
 	 *	@param	pClusterList to receive the address of the current cluster list
 	 *	@param	clusterListName to receive the current cluster list name
 	 */
-	static StatusCode GetCurrentClusterList(const pandora::Algorithm &algorithm, pandora::ClusterList *const pClusterList,
+	static StatusCode GetCurrentClusterList(const pandora::Algorithm &algorithm, const pandora::ClusterList *&pClusterList,
 		std::string &clusterListName);
 
 	/**
@@ -107,7 +114,7 @@ public:
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	pOrderedCaloHitList to receive the address of the current ordered calo hit list
 	 */
-	static StatusCode GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, pandora::OrderedCaloHitList *const pOrderedCaloHitList);
+	static StatusCode GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const pandora::OrderedCaloHitList *&pOrderedCaloHitList);
 
 	/**
 	 *	@brief	Get the current ordered calo hit list
@@ -116,7 +123,7 @@ public:
 	 *	@param	pOrderedCaloHitList to receive the address of the current ordered calo hit list
 	 *	@param	orderedCaloHitListName to receive the current ordered calo hit list name
 	 */
-	static StatusCode GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, pandora::OrderedCaloHitList *const pOrderedCaloHitList,
+	static StatusCode GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const pandora::OrderedCaloHitList *&pOrderedCaloHitList,
 		std::string &orderedCaloHitListName);
 
 	/**
@@ -125,7 +132,7 @@ public:
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	pTrackList to receive the address of the current track list
 	 */
-	static StatusCode GetCurrentTrackList(const pandora::Algorithm &algorithm, pandora::TrackList *const pTrackList);
+	static StatusCode GetCurrentTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList *&pTrackList);
 
 	/**
 	 *	@brief	Get the current track list
@@ -134,7 +141,7 @@ public:
 	 *	@param	pTrackList to receive the address of the current track list
 	 *	@param	trackListName to receive the current track list name
 	 */
-	static StatusCode GetCurrentTrackList(const pandora::Algorithm &algorithm, pandora::TrackList *const pTrackList,
+	static StatusCode GetCurrentTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList *&pTrackList,
 		std::string &trackListName);
 
 	/**
@@ -164,7 +171,7 @@ public:
 	 *	@param	pNewClusterList to receive the address of the new cluster list populated
 	 */
 	static StatusCode RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName, 
-		pandora::ClusterList *pNewClusterList);
+		const pandora::ClusterList *&pNewClusterList);
 		
 	/**
 	 *	@brief	Run a clustering algorithm (an algorithm that will create new cluster objects)
@@ -175,7 +182,35 @@ public:
 	 *	@param	newClusterListName to receive the name of the new cluster list populated
 	 */
 	static StatusCode RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName, 
-		pandora::ClusterList *pNewClusterList, std::string &newClusterListName);
+		const pandora::ClusterList *&pNewClusterList, std::string &newClusterListName);
+
+	/**
+	 *	@brief	Add a calo hit to a cluster
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	pCluster address of the cluster to modify
+	 *	@param	pCaloHit address of the hit to add
+	 */
+	static StatusCode AddCaloHitToCluster(const pandora::Algorithm &algorithm, const pandora::Cluster *pCluster,
+		const pandora::CaloHit *pCaloHit);
+
+	/**
+	 *	@brief	Delete a cluster and remove it from the current cluster list
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	pCluster address of the cluster to delete
+	 */
+	static StatusCode DeleteCluster(const pandora::Algorithm &algorithm, const pandora::Cluster *pCluster);
+
+	/**
+	 *	@brief	Merge two clusters, deleting the original clusters and removing them from the current cluster list
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	pClusterLhs address of the first cluster
+	 *	@param	pClusterRhs address of the second cluster
+	 */
+	static StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, const pandora::Cluster *pClusterLhs,
+		const pandora::Cluster *pClusterRhs);
 
 	/**
 	 *	@brief	Save the current cluster list and remove the constituent hits from the current ordered calo hit list

@@ -8,6 +8,7 @@
 #ifndef BASIC_TYPES_H
 #define BASIC_TYPES_H 1
 
+#include <iostream>
 #include <map>
 #include <set>
 #include <vector>

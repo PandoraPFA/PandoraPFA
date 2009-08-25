@@ -44,9 +44,14 @@ StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::CaloHitParameters &ca
 
 StatusCode CaloHitManager::OrderInputCaloHits()
 {
-	// TODO ORDER BY PSEUDO LAYER
 	OrderedCaloHitList orderedCaloHitList;
-	
+
+	for (InputCaloHitList::iterator iter = m_inputCaloHitList.begin(), iterEnd = m_inputCaloHitList.end(); iter != iterEnd; ++iter)
+	{
+		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer((*iter)->m_layer)); // TODO don't just use input layer
+		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.AddCaloHit(*iter));
+	}
+
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(orderedCaloHitList, INPUT_LIST_NAME));
 	m_currentListName = INPUT_LIST_NAME;
 
@@ -55,7 +60,7 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::GetList(const std::string &listName, const OrderedCaloHitList *pOrderedCaloHitList) const
+StatusCode CaloHitManager::GetList(const std::string &listName, const OrderedCaloHitList *&pOrderedCaloHitList) const
 {
 	NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);
 	
@@ -97,18 +102,16 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
 	if (orderedCaloHitList.empty())
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	std::ostringstream temporaryListNameStream;
-	temporaryListNameStream << pAlgorithm;
-
 	AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);	
 
 	if (m_algorithmInfoMap.end() == iter)
 		return STATUS_CODE_NOT_FOUND;
 
-	temporaryListNameStream << "_" << iter->second.m_temporaryListNames.size();
+	std::ostringstream temporaryListNameStream;
+	temporaryListNameStream << pAlgorithm << "_" << iter->second.m_temporaryListNames.size();
 
-	iter->second.m_temporaryListNames.insert(temporaryListNameStream.str());
 	temporaryListName = temporaryListNameStream.str();
+	iter->second.m_temporaryListNames.insert(temporaryListName);
 
 	m_nameToOrderedCaloHitListMap[temporaryListName] = new OrderedCaloHitList(orderedCaloHitList);
 	m_currentListName = temporaryListName;

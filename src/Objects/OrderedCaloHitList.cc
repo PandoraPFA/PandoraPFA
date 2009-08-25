@@ -64,7 +64,7 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode OrderedCaloHitList::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *pCaloHitList) const
+StatusCode OrderedCaloHitList::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
 	OrderedCaloHitList::const_iterator iter = this->find(pseudoLayer);
 	
