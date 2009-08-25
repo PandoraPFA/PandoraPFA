@@ -11,8 +11,6 @@
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 
-#include "Objects/MCParticle.h"
-
 #include <sstream>
 
 namespace pandora
