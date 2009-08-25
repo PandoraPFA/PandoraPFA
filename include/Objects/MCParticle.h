@@ -51,7 +51,14 @@ public:
 	 * 
 	 *	@param	pMCParticle to receive the address of the pfo target
 	 */	
-	StatusCode GetPfoTarget(MCParticle *pMCParticle) const;
+	StatusCode GetPfoTarget(MCParticle*& pMCParticle) const;
+	
+	/**
+	 *	@brief	Get pfo target particle
+	 * 
+	 *	@param	pMCParticle to receive the address of the pfo target
+	 */	
+	Uid GetUid() const;
 
 private:
 	/**
@@ -118,6 +125,8 @@ private:
 	bool				m_isInitialized;	///< Whether particle information has been initialized
 
 	friend class MCManager;
+
+	friend class TestMCManager;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,7 +159,7 @@ inline bool MCParticle::IsPfoTargetSet() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode MCParticle::GetPfoTarget(MCParticle *pMCParticle) const
+inline StatusCode MCParticle::GetPfoTarget(MCParticle*& pMCParticle) const
 {
 	if (NULL == m_pPfoTarget)
 		return STATUS_CODE_NOT_INITIALIZED;
@@ -190,6 +199,13 @@ inline StatusCode MCParticle::SetPfoTarget(MCParticle *mcParticle)
 	m_pPfoTarget = mcParticle;
 
 	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline Uid MCParticle::GetUid() const
+{
+   return m_uid;
 }
 
 } // namespace pandora

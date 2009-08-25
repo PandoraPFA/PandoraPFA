@@ -52,13 +52,8 @@ public:
 	 */
 	~MCManager();
 
-private:
-	/**
-	 *	@brief	Create a mc particle
-	 * 
-	 *	@param	mcParticleParameters the mc particle parameters
-	 */
-	StatusCode CreateMCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters);
+
+protected:
 
 	/**
 	 *	@brief	Retrieve a mc particle, creating an empty mc particle if it does not already exist
@@ -66,8 +61,17 @@ private:
 	 *	@param	mcParticleUid the unique identifier of the mc particle
 	 *	@param	pMCParticle to receive the address of the mc particle
 	 */
-	StatusCode RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle* pMCParticle);
+	StatusCode RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle*& pMCParticle);
 	
+
+
+private:
+	/**
+	 *	@brief	Create a mc particle
+	 * 
+	 *	@param	mcParticleParameters the mc particle parameters
+	 */
+	StatusCode CreateMCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters);
 	/**
 	 *	@brief	Set mc particle relationship
 	 * 
@@ -91,13 +95,6 @@ private:
 	StatusCode SelectPfoTargets();
 	
 	/**
-	 *	@brief	Create a map relating calo hit uid to mc pfo target
-	 * 
-	 *	@param	caloHitToPfoTargetMap to receive the calo hit uid to mc pfo target map
-	 */
-	StatusCode CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToPfoTargetMap) const;
-	
-	/**
 	 *	@brief	Delete non pfo targets
 	 */
 	StatusCode DeleteNonPfoTargets();
@@ -107,42 +104,17 @@ private:
 	 */	
 	StatusCode ResetForNextEvent();
 	
-	/**
-	 *	@brief	UidAndWeight class
-	 */	
-	class UidAndWeight
-	{
-	public:
-		/**
-		 *	@brief	UidAndWeight class
-		 * 
-		 *	@param	uid the unique identifier
-		 *	@param	weight the weight
-		 */	
-		UidAndWeight(const Uid uid, const float weight);
-
-		Uid					m_uid;						///< The unique identifier
-		float				m_weight;					///< The weight
-	};
-
-	typedef std::map<Uid, UidAndWeight> UidRelationMap;
 
 	UidToMCParticleMap		m_uidToMCParticleMap;		///< The uid to mc particle map
-	UidRelationMap			m_caloHitToMCParticleMap;	///< The calo hit to mc particle relation map
+	UidToMCParticleMapWeighted     	m_caloHitUidToMCParticleMap;	///< The calo hit to mc particle relation map
 
 	const MCPfoSelection	*m_pMCPfoSelection;			///< The mc pfo selection instance
 
 	friend class PandoraApiImpl;
 	friend class PandoraContentApiImpl;	
+
+	friend class TestMCManager;
 };
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline MCManager::UidAndWeight::UidAndWeight(const Uid uid, const float weight) :
-	m_uid(uid),
-	m_weight(weight)
-{
-}
 
 } // namespace pandora
 

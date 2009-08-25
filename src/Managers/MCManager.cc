@@ -6,6 +6,8 @@
  *	$Log: $
  */
 
+#include <iostream>
+
 #include "Managers/MCManager.h"
 
 #include "Objects/MCParticle.h"
@@ -56,8 +58,9 @@ StatusCode MCManager::CreateMCParticle(const PandoraApi::MCParticleParameters &m
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCManager::RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle* pMCParticle)
+StatusCode MCManager::RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle*& pMCParticle)
 {
+	pMCParticle = NULL;
 	UidToMCParticleMap::const_iterator iter = m_uidToMCParticleMap.find(mcParticleUid);
 
 	if(m_uidToMCParticleMap.end() != iter) 
@@ -70,11 +73,15 @@ StatusCode MCManager::RetrieveExistingOrCreateEmptyMCParticle(const Uid mcPartic
 	else
 	{
 		pMCParticle = new MCParticle(mcParticleUid);
+// 		if ((NULL == pMCParticle) || (!m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(mcParticleUid, pMCParticle)).second))
+// 			return STATUS_CODE_FAILURE;
 
-		if ((NULL == pMCParticle) || (!m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(mcParticleUid, pMCParticle)).second))
+		if ((NULL == pMCParticle)  )
 			return STATUS_CODE_FAILURE;
+		else 
+    		        m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(mcParticleUid, pMCParticle));
 	}
-
+	
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -98,18 +105,20 @@ StatusCode MCManager::SetMCParentDaughterRelationship(const Uid parentUid, const
 
 StatusCode MCManager::SetCaloHitToMCParticleRelationship(const Uid caloHitUid, const Uid mcParticleUid, const float mcParticleWeight)
 {
-	UidRelationMap::iterator iter = m_caloHitToMCParticleMap.find(caloHitUid);
-	
-	if (m_caloHitToMCParticleMap.end() != iter)
-	{
-		if (mcParticleWeight > iter->second.m_weight)
-			iter->second = UidAndWeight(mcParticleUid, mcParticleWeight);
-	}
-	else
-	{
-		if (!m_caloHitToMCParticleMap.insert(UidRelationMap::value_type(caloHitUid, UidAndWeight(mcParticleUid, mcParticleWeight))).second)
-			return STATUS_CODE_FAILURE;
-	}
+        
+       UidToMCParticleMapWeighted::const_iterator it = m_caloHitUidToMCParticleMap.find( caloHitUid );
+	if( it != m_caloHitUidToMCParticleMap.end() )
+                return STATUS_CODE_FAILURE;
+
+        MCParticle* pMCParticle = NULL;
+	PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, RetrieveExistingOrCreateEmptyMCParticle(mcParticleUid, pMCParticle) ); ///< get the MCParticle for the uid (it's created if it's not existing)
+
+        // check if I really got something 
+	if (NULL == pMCParticle)
+                return STATUS_CODE_FAILURE;
+		
+	// create the association 
+	m_caloHitUidToMCParticleMap.insert(UidToMCParticleMapWeighted::value_type(caloHitUid, std::make_pair(mcParticleWeight,pMCParticle)));
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -129,27 +138,6 @@ StatusCode MCManager::SelectPfoTargets()
 	return STATUS_CODE_SUCCESS;
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode MCManager::CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToPfoTargetMap) const
-{
-	for (UidRelationMap::const_iterator relationIter = m_caloHitToMCParticleMap.begin(), relationIterEnd = m_caloHitToMCParticleMap.end();
-		relationIter != relationIterEnd; ++relationIter)
-	{
-		UidToMCParticleMap::const_iterator mcParticleIter = m_uidToMCParticleMap.find(relationIter->second.m_uid);
-		
-		if ((m_uidToMCParticleMap.end() == mcParticleIter) || (!mcParticleIter->second->IsInitialized()))
-			continue;
-
-		MCParticle *pMCParticle = NULL;
-		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticleIter->second->GetPfoTarget(pMCParticle));
-
-		if (!caloHitToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
-			return STATUS_CODE_FAILURE;
-	}
-	
-	return STATUS_CODE_SUCCESS;
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -175,9 +163,9 @@ StatusCode MCManager::ResetForNextEvent()
 		delete iter->second;
 
 	m_uidToMCParticleMap.clear();
-	m_caloHitToMCParticleMap.clear();
+	m_caloHitUidToMCParticleMap.clear();
 
-	if (!m_uidToMCParticleMap.empty() || !m_caloHitToMCParticleMap.empty())
+	if (!m_uidToMCParticleMap.empty() || !m_caloHitUidToMCParticleMap.empty())
 		return STATUS_CODE_FAILURE;
 	
 	return STATUS_CODE_SUCCESS;

@@ -19,7 +19,7 @@ namespace pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TestMCManager::Test_GetMCParticle()
+StatusCode TestMCManager::Test_RetrieveExistingOrCreateEmptyMCParticle()
 {
         std::cout << "--- --- GetMCParticle | START ------------------------------" << std::endl;
    
@@ -28,16 +28,21 @@ StatusCode TestMCManager::Test_GetMCParticle()
 	assert( pMcManager != 0 ); // problem at creating a MCManager
 	
         std::cout << "        get MCParticle" << std::endl;
-	MCParticle* mcParticle = pMcManager->GetMCParticle( (void*)123 ); 
-	assert( mcParticle != 0 ); // MCParticle could not be created
+	MCParticle* mcParticle = NULL;
+	std::cout << "        mcParticle address before " << mcParticle << std::endl;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)123, mcParticle ); 
+	std::cout << "        mcParticle address afterwards " << mcParticle << std::endl;
+	assert( mcParticle != NULL ); // MCParticle could not be created
 
         std::cout << "        get the same MCParticle again" << std::endl;
-	MCParticle* sameMcParticle = pMcManager->GetMCParticle( (void*)123 ); 
-	assert( sameMcParticle != 0 );          // i should get again an address != NULL
+	MCParticle* sameMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)123, sameMcParticle ); 
+	assert( sameMcParticle != NULL );          // i should get again an address != NULL
 	assert( mcParticle == sameMcParticle ); // the same particle should have been given back again
 
         std::cout << "        get another MCParticle" << std::endl;
-	MCParticle* differentMcParticle = pMcManager->GetMCParticle( (void*)567 ); 
+	MCParticle* differentMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)567, differentMcParticle ); 
 	assert( differentMcParticle != NULL );       // should be a != NULL
 	assert( mcParticle != differentMcParticle ); // should be different pointers
 	
@@ -72,12 +77,15 @@ StatusCode TestMCManager::Test_CreateMCParticle()
 	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS ); 
 
         std::cout << "        get the created MCParticle" << std::endl;
-	MCParticle* mcParticle = pMcManager->GetMCParticle( (void*)100 ); 
+	MCParticle* mcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)100, mcParticle ); 
 	assert( mcParticle != 0 ); // MCParticle has not been created
 	assert( mcParticle->GetUid() == (void*)100 ); // check if the Uid of the created MCParticle coincides with the one asked for
 	assert( mcParticle->IsRootParticle() == true ); // after creation, it MCParticle should be a root-particle (of a MC-tree with exactly one node)
-	assert( mcParticle->IsPfoTarget() == true ); // after creation, the pfo-target should be "this"
-	assert( mcParticle->GetPfoTarget() == mcParticle ); // pfo-target should be "this"
+	assert( mcParticle->IsPfoTarget() == false ); // after creation, the pfo-target should be NULL (not set)
+	MCParticle *pfo = NULL;
+	mcParticle->GetPfoTarget( pfo );
+	assert( pfo == NULL ); // pfo-target should be NULL
 	assert( mcParticle->IsPfoTargetSet() == false ); // the MCParticle should know, that the pfo-target is still the default ("this")
 	
 
@@ -90,37 +98,43 @@ StatusCode TestMCManager::Test_CreateMCParticle()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TestMCManager::Test_SetMCParticleRelationship()
+StatusCode TestMCManager::Test_SetMCParentDaughterRelationship()
 {
-        std::cout << "--- --- SetMCParticleRelationship | START ------------------------------" << std::endl;
+        std::cout << "--- --- SetMCParentDaughterRelationship | START ------------------------------" << std::endl;
    
         std::cout << "        create MCManager" << std::endl;
         MCManager* pMcManager = new MCManager();
 	assert( pMcManager != 0 ); // problem at creating a MCManager
 	
         std::cout << "        create relationship between non-yet-existing MCParticles" << std::endl;
-	assert( pMcManager->SetMCParticleRelationship( (void*)100, (void*)200 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)100, (void*)200 ) == STATUS_CODE_SUCCESS );
 
         std::cout << "        check if the MCParticles have been created implicitly" << std::endl;
-	MCParticle* firstMcParticle = pMcManager->GetMCParticle( (void*)100 ); 
+	MCParticle* firstMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)100, firstMcParticle ); 
 	assert( firstMcParticle != NULL ); // this particle should have been created
-	MCParticle* secondMcParticle = pMcManager->GetMCParticle( (void*)200 ); 
+	MCParticle* secondMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, secondMcParticle ); 
 	assert( secondMcParticle != NULL ); // this particle should have been created as well
 	assert( firstMcParticle != secondMcParticle ); // these two should be different
 
         std::cout << "        create another relationship between non-yet-existing MCParticles" << std::endl;
-	assert( pMcManager->SetMCParticleRelationship( (void*)300, (void*)400 ) == STATUS_CODE_SUCCESS );
-	MCParticle* thirdMcParticle = pMcManager->GetMCParticle( (void*)300 ); 
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)300, (void*)400 ) == STATUS_CODE_SUCCESS );
+	MCParticle* thirdMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)300, thirdMcParticle ); 
 	assert( thirdMcParticle != NULL ); // this particle should have been created
-	MCParticle* fourthMcParticle = pMcManager->GetMCParticle( (void*)400 ); 
+	MCParticle* fourthMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)400, fourthMcParticle ); 
 	assert( fourthMcParticle != NULL ); // this particle should have been created as well
 	assert( thirdMcParticle != fourthMcParticle ); // these two should be different
 
         std::cout << "        create a relationship between two of the existing MCParticles" << std::endl;
-	assert( pMcManager->SetMCParticleRelationship( (void*)100, (void*)300 ) == STATUS_CODE_SUCCESS );
-	MCParticle* copyOfFirstMcParticle = pMcManager->GetMCParticle( (void*)100 ); 
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)100, (void*)300 ) == STATUS_CODE_SUCCESS );
+	MCParticle* copyOfFirstMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)100, copyOfFirstMcParticle ); 
 	assert( copyOfFirstMcParticle != NULL ); // this particle should be there already
-	MCParticle* copyOfThirdMcParticle = pMcManager->GetMCParticle( (void*)300 ); 
+	MCParticle* copyOfThirdMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)300, copyOfThirdMcParticle ); 
 	assert( copyOfThirdMcParticle != NULL ); // this particle should be there already
 	assert( copyOfFirstMcParticle == firstMcParticle ); // these should be the same
 	assert( copyOfThirdMcParticle == thirdMcParticle ); // these should be the same
@@ -128,15 +142,15 @@ StatusCode TestMCManager::Test_SetMCParticleRelationship()
         std::cout << "        delete MCManager" << std::endl;
 	delete pMcManager;
 
-        std::cout << "--- --- SetMCParticleRelationship | END ------------------------------" << std::endl;
+        std::cout << "--- --- SetMCParentDaughterRelationship | END ------------------------------" << std::endl;
 	return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TestMCManager::Test_AssociateCaloHitWithMCParticle()
+StatusCode TestMCManager::Test_SetCaloHitToMCParticleRelationship()
 {
-        std::cout << "--- --- AssociateCaloHitWithMCParticle | START ------------------------------" << std::endl;
+        std::cout << "--- --- SetCaloHitToMCParticleRelationship | START ------------------------------" << std::endl;
    
         std::cout << "        create MCManager" << std::endl;
         MCManager* pMcManager = new MCManager();
@@ -144,18 +158,21 @@ StatusCode TestMCManager::Test_AssociateCaloHitWithMCParticle()
 	
 
         std::cout << "        make association of two calohit-uids with MCParticle-uid (without existing MCParticle)" << std::endl;
-	assert( pMcManager->AssociateCaloHitWithMCParticle( (void*)100,(void*)200 ) == STATUS_CODE_SUCCESS ); 
-	MCParticle* mcParticle = pMcManager->GetMCParticle( (void*)200 ); 
-	assert( pMcManager->AssociateCaloHitWithMCParticle( (void*)101,(void*)200 ) == STATUS_CODE_SUCCESS ); 
-	MCParticle* sameMcParticle = pMcManager->GetMCParticle( (void*)200 ); 
+	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)100,(void*)200, 1.0 ) == STATUS_CODE_SUCCESS ); 
+	MCParticle* mcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, mcParticle ); 
+	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)101,(void*)200, 1.0 ) == STATUS_CODE_SUCCESS ); 
+	MCParticle* sameMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, sameMcParticle ); 
 	assert( mcParticle == sameMcParticle );
 
         std::cout << "        check if it fails to associate the same calohit two times (it should fail) " << std::endl;
-	assert( pMcManager->AssociateCaloHitWithMCParticle( (void*)101,(void*)200 ) == STATUS_CODE_FAILURE ); // for one CaloHit only one MCParticle can be associated --> error when tried to associate a second time to the same calohit
+	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)101,(void*)200, 1.0 ) == STATUS_CODE_FAILURE ); // for one CaloHit only one MCParticle can be associated --> error when tried to associate a second time to the same calohit
 
         std::cout << "        check if association with different MCParticle-Uid produces a different MCParticle" << std::endl;
-	assert( pMcManager->AssociateCaloHitWithMCParticle( (void*)102,(void*)201 ) == STATUS_CODE_SUCCESS ); 
-	MCParticle* differentMcParticle = pMcManager->GetMCParticle( (void*)201 ); 
+	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)102,(void*)201, 1.0 ) == STATUS_CODE_SUCCESS ); 
+	MCParticle* differentMcParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)201, differentMcParticle ); 
 	assert( mcParticle != differentMcParticle );
 	
 
@@ -177,11 +194,13 @@ StatusCode TestMCManager::Test_SelectPfoTargets()
 	assert( pMcManager != 0 ); // problem at creating a MCManager
 
         std::cout << "        get MCParticle" << std::endl;
-	MCParticle* root0Particle = pMcManager->GetMCParticle( (void*)100 ); 
+	MCParticle* root0Particle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)100, root0Particle ); 
 	assert( root0Particle != 0 ); // MCParticle could not be created
 	
         std::cout << "        get MCParticle" << std::endl;
-	MCParticle* root1Particle = pMcManager->GetMCParticle( (void*)101 ); 
+	MCParticle* root1Particle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)101, root1Particle ); 
 	assert( root1Particle != 0 ); // MCParticle could not be created
 
         std::cout << "        build a MCParticle-tree by adding relationships" << std::endl;
@@ -207,47 +226,92 @@ StatusCode TestMCManager::Test_SelectPfoTargets()
 	 *
 	 */
         std::cout << "        create relationships" << std::endl;
-	pMcManager->GetMCParticle( (void*)102 );
+	MCParticle *isolatedParticle = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)102, isolatedParticle );
 
-	assert( pMcManager->SetMCParticleRelationship( (void*)100, (void*)200 ) == STATUS_CODE_SUCCESS );
-	assert( pMcManager->SetMCParticleRelationship( (void*)100, (void*)201 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)100, (void*)200 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)100, (void*)201 ) == STATUS_CODE_SUCCESS );
 
-	assert( pMcManager->SetMCParticleRelationship( (void*)101, (void*)210 ) == STATUS_CODE_SUCCESS );
-	assert( pMcManager->SetMCParticleRelationship( (void*)101, (void*)211 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)101, (void*)210 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)101, (void*)211 ) == STATUS_CODE_SUCCESS );
 
-	assert( pMcManager->SetMCParticleRelationship( (void*)200, (void*)300 ) == STATUS_CODE_SUCCESS );
-	assert( pMcManager->SetMCParticleRelationship( (void*)200, (void*)301 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)200, (void*)300 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)200, (void*)301 ) == STATUS_CODE_SUCCESS );
 
-	assert( pMcManager->SetMCParticleRelationship( (void*)301, (void*)400 ) == STATUS_CODE_SUCCESS );
-	assert( pMcManager->SetMCParticleRelationship( (void*)301, (void*)401 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)301, (void*)400 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)301, (void*)401 ) == STATUS_CODE_SUCCESS );
 
-	assert( pMcManager->SetMCParticleRelationship( (void*)210, (void*)310 ) == STATUS_CODE_SUCCESS );
-	assert( pMcManager->SetMCParticleRelationship( (void*)210, (void*)311 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)210, (void*)310 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)210, (void*)311 ) == STATUS_CODE_SUCCESS );
 
         std::cout << "        create cross-parental relationship" << std::endl;
-	assert( pMcManager->SetMCParticleRelationship( (void*)210, (void*)301 ) == STATUS_CODE_SUCCESS );
+	assert( pMcManager->SetMCParentDaughterRelationship( (void*)210, (void*)301 ) == STATUS_CODE_SUCCESS );
 
         std::cout << "        get one MCParticle which will be the PfoTarget" << std::endl;
-	MCParticle* pfoTarget = pMcManager->GetMCParticle( (void*)200 );
+	MCParticle* pfoTarget = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, pfoTarget );
 
         std::cout << "        set the PfoTarget in the whole MCParticle tree" << std::endl;
 	pfoTarget->SetPfoTargetInTree( pfoTarget );
 
         std::cout << "        check all MCParticles in the tree if their pfo-target is set correctly" << std::endl;
-	assert( pMcManager->GetMCParticle( (void*)100 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in parent
-	assert( pMcManager->GetMCParticle( (void*)201 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in sister
-	assert( pMcManager->GetMCParticle( (void*)200 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in self
-	assert( pMcManager->GetMCParticle( (void*)300 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in daughter
-	assert( pMcManager->GetMCParticle( (void*)301 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in daughter
-	assert( pMcManager->GetMCParticle( (void*)400 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in grand-daughter
-	assert( pMcManager->GetMCParticle( (void*)401 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in grand-daughter
-	assert( pMcManager->GetMCParticle( (void*)210 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in other-family connection
-	assert( pMcManager->GetMCParticle( (void*)101 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in other-family parent
-	assert( pMcManager->GetMCParticle( (void*)211 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in other-family sister
-	assert( pMcManager->GetMCParticle( (void*)310 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in other-family daughter
-	assert( pMcManager->GetMCParticle( (void*)311 )->GetPfoTarget() == pfoTarget ); // check if pfo target is set right in other-family daughter
+	MCParticle *mcP = NULL;
+	MCParticle *pfo = NULL;
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)100, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo != NULL );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in parent
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)201, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in sister
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in self
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)300, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in daughter
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)301, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in daughter
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)400, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in grand-daughter
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)401, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in grand-daughter
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)210, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in other-family connection
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)101, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in other-family parent
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)211, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in other-family sister
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)310, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in other-family daughter
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)311, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
+	assert( pfo == pfoTarget ); // check if pfo target is set right in other-family daughter
 
-	assert( pMcManager->GetMCParticle( (void*)102 )->GetPfoTarget() != pfoTarget ); // check if pfo target NOT set in isolated MCParticle
+	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)102, mcP );
+	pfo = NULL;
+	assert( mcP->GetPfoTarget(pfo) != STATUS_CODE_SUCCESS );
+	assert( pfo == NULL );
+	assert( pfo != pfoTarget ); // check if pfo target NOT set in isolated MCParticle
 
 
         std::cout << "        delete MCManager" << std::endl;
@@ -280,10 +344,10 @@ StatusCode TestMCManager::Test_Combined()
 StatusCode TestMCManager::Test_All()
 {
         std::cout << "--- --- ALL | START ------------------------------" << std::endl;
-        assert( Test_GetMCParticle() == STATUS_CODE_SUCCESS );
+        assert( Test_RetrieveExistingOrCreateEmptyMCParticle() == STATUS_CODE_SUCCESS );
         assert( Test_CreateMCParticle() == STATUS_CODE_SUCCESS );
-	assert( Test_SetMCParticleRelationship() == STATUS_CODE_SUCCESS );
-	assert( Test_AssociateCaloHitWithMCParticle() == STATUS_CODE_SUCCESS );
+	assert( Test_SetMCParentDaughterRelationship() == STATUS_CODE_SUCCESS );
+	assert( Test_SetCaloHitToMCParticleRelationship() == STATUS_CODE_SUCCESS );
 	assert( Test_SelectPfoTargets() == STATUS_CODE_SUCCESS );
 	assert( Test_Combined() == STATUS_CODE_SUCCESS );
 

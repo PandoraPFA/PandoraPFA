@@ -11,6 +11,8 @@
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 
+#include "Objects/MCParticle.h"
+
 #include <sstream>
 
 namespace pandora
@@ -224,14 +226,11 @@ StatusCode CaloHitManager::RemoveCaloHitsFromList(const std::string &listName, c
 	
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap &caloHitToPfoTargetMap)
+StatusCode CaloHitManager::MatchCaloHitsToMCPfoTargets()
 {
 	for (InputCaloHitList::iterator iter = m_inputCaloHitList.begin(), iterEnd = m_inputCaloHitList.end(); iter != iterEnd; ++iter)
 	{
-		UidToMCParticleMap::const_iterator pfoTargetIter = caloHitToPfoTargetMap.find((*iter)->GetParentCaloHitAddress());
-		
-		if (caloHitToPfoTargetMap.end() != pfoTargetIter)
-			PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetMCParticle(pfoTargetIter->second));
+  	        PANDORA_RETURN_RESULT_IF( (*iter)->SetPfoTarget(), !=, STATUS_CODE_SUCCESS );
 	}
 
 	return STATUS_CODE_SUCCESS;

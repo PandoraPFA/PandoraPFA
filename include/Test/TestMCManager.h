@@ -26,7 +26,7 @@ public:
 	/**
 	 *	@brief	test the GetMCParticle method
 	 */
-	 StatusCode Test_GetMCParticle();
+	 StatusCode Test_RetrieveExistingOrCreateEmptyMCParticle();
    
 	/**
 	 *	@brief	test the GetMCParticle method
@@ -36,12 +36,12 @@ public:
 	/**
 	 *	@brief	test the GetMCParticle method
 	 */
-	 StatusCode Test_SetMCParticleRelationship();
+	 StatusCode Test_SetMCParentDaughterRelationship();
 
 	/**
 	 *	@brief	test the AssociateCaloHitWithMCParticle method
 	 */
-	 StatusCode Test_AssociateCaloHitWithMCParticle();
+	 StatusCode Test_SetCaloHitToMCParticleRelationship();
 
 	/**
 	 *	@brief	test the y method
