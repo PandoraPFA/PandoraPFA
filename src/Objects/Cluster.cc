@@ -53,4 +53,11 @@ Cluster::~Cluster()
 	m_orderedCaloHitList.clear();
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
+{
+	return m_orderedCaloHitList.Add(*(pCluster->GetOrderedCaloHitList()));
+}
+
 } // namespace pandora

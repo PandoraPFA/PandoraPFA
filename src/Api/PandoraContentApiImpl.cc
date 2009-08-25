@@ -152,21 +152,21 @@ StatusCode PandoraContentApiImpl::RunClusteringAlgorithm(const Algorithm &algori
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit) const
+StatusCode PandoraContentApiImpl::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const
 {
 	return m_pPandora->m_pClusterManager->AddCaloHitToCluster(pCluster, pCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::DeleteCluster(const Cluster *pCluster) const
+StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster) const
 {
 	return m_pPandora->m_pClusterManager->DeleteCluster(pCluster);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs) const
+StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs) const
 {
 	return m_pPandora->m_pClusterManager->MergeAndDeleteClusters(pClusterLhs, pClusterRhs);
 }

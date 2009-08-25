@@ -58,6 +58,11 @@ private:
 	CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters);
 
 	/**
+	 *	@brief	Destructor
+	 */
+	~CaloHit();
+	
+	/**
 	 *	@brief	Set the mc particle associated with the calo hit
 	 * 
 	 *	@param	pMCParticle to receive the address of the mc particle

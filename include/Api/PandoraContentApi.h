@@ -185,14 +185,13 @@ public:
 		const pandora::ClusterList *&pNewClusterList, std::string &newClusterListName);
 
 	/**
-	 *	@brief	Add a calo hit to a cluster
-	 * 
-	 *	@param	algorithm the algorithm calling this function
-	 *	@param	pCluster address of the cluster to modify
-	 *	@param	pCaloHit address of the hit to add
+	 *      @brief  Add a calo hit to a cluster
+	 *
+	 *      @param  algorithm the algorithm calling this function       
+	 *      @param  pCluster address of the cluster to modify
+	 *      @param  pCaloHit address of the hit to add
 	 */
-	static StatusCode AddCaloHitToCluster(const pandora::Algorithm &algorithm, const pandora::Cluster *pCluster,
-		const pandora::CaloHit *pCaloHit);
+	static StatusCode AddCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
 
 	/**
 	 *	@brief	Delete a cluster and remove it from the current cluster list
@@ -200,7 +199,7 @@ public:
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	pCluster address of the cluster to delete
 	 */
-	static StatusCode DeleteCluster(const pandora::Algorithm &algorithm, const pandora::Cluster *pCluster);
+	static StatusCode DeleteCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster);
 
 	/**
 	 *	@brief	Merge two clusters, deleting the original clusters and removing them from the current cluster list
@@ -209,8 +208,8 @@ public:
 	 *	@param	pClusterLhs address of the first cluster
 	 *	@param	pClusterRhs address of the second cluster
 	 */
-	static StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, const pandora::Cluster *pClusterLhs,
-		const pandora::Cluster *pClusterRhs);
+	static StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterLhs,
+		pandora::Cluster *pClusterRhs);
 
 	/**
 	 *	@brief	Save the current cluster list and remove the constituent hits from the current ordered calo hit list

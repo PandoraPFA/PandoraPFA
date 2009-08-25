@@ -125,19 +125,19 @@ private:
 		const std::string &temporaryListName, const ClusterList *const pClusterList = NULL);
 
 	/**
-	 *	@brief	Add a calo hit to a cluster
-	 * 
-	 *	@param	pCluster address of the cluster to modify
-	 *	@param	pCaloHit address of the hit to add
+	 *      @brief  Add a calo hit to a cluster
+	 *
+	 *      @param  pCluster address of the cluster to modify
+	 *      @param  pCaloHit address of the hit to add
 	 */
-	StatusCode AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit);
-
+	StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit);
+	
 	/**
 	 *	@brief	Delete a cluster and remove it from the current cluster list
 	 * 
 	 *	@param	pCluster address of the cluster to delete
 	 */
-	StatusCode DeleteCluster(const Cluster *pCluster);
+	StatusCode DeleteCluster(Cluster *pCluster);
 
 	/**
 	 *	@brief	Merge two clusters, deleting the original clusters and removing them from the current cluster list
@@ -145,7 +145,7 @@ private:
 	 *	@param	pClusterLhs address of the first cluster
 	 *	@param	pClusterRhs address of the second cluster
 	 */
-	StatusCode MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs);
+	StatusCode MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs);
 
 	/**
 	 *	@brief	Register an algorithm with the cluster manager

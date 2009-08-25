@@ -33,13 +33,6 @@ public:
 	 *	@return	Address of the ordered calo hit list
 	 */	
 	const OrderedCaloHitList *const GetOrderedCaloHitList() const;
-	
-	/**
-	 *	@brief	Add a calo hit to the cluster
-	 * 
-	 *	@param	pCaloHit the address of the calo hit
-	 */
-	StatusCode AddCaloHit(CaloHit *const pCaloHit);
 
 	/**
 	 *	@brief	Get calo hits in specified pseudo layer
@@ -75,6 +68,20 @@ private:
 	 *	@brief	Destructor
 	 */
 	~Cluster();
+	
+	/**
+	 *	@brief	Add a calo hit to the cluster
+	 * 
+	 *	@param	pCaloHit the address of the calo hit
+	 */
+	StatusCode AddCaloHit(CaloHit *const pCaloHit);
+
+	/**
+	 *	@brief	Add the calo hits from a second cluster to this
+	 * 
+	 *	@param	pCluster the address of the second cluster
+	 */
+	StatusCode AddHitsFromSecondCluster(Cluster *const pCluster);
 
 	OrderedCaloHitList		m_orderedCaloHitList;	///< The ordered calo hit list
 
@@ -90,16 +97,16 @@ inline const OrderedCaloHitList *const Cluster::GetOrderedCaloHitList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
+inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
-	return m_orderedCaloHitList.AddCaloHit(pCaloHit);
+	return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
+inline StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 {
-	return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
+	return m_orderedCaloHitList.AddCaloHit(pCaloHit);
 }
 
 } // namespace pandora

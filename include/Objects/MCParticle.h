@@ -76,6 +76,11 @@ private:
 	MCParticle(const Uid uid);
 
 	/**
+	 *	@brief	Destructor
+	 */
+	~MCParticle();
+
+	/**
 	 *	@brief	Set mc particle properties
 	 * 
 	 *	@param	mcParticleParameters the mc particle parametersle id
@@ -125,7 +130,6 @@ private:
 	bool				m_isInitialized;	///< Whether particle information has been initialized
 
 	friend class MCManager;
-
 	friend class TestMCManager;
 };
 
@@ -169,6 +173,14 @@ inline StatusCode MCParticle::GetPfoTarget(MCParticle*& pMCParticle) const
 	return STATUS_CODE_SUCCESS;
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline Uid MCParticle::GetUid() const
+{
+   return m_uid;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline StatusCode MCParticle::AddDaughter(MCParticle* mcParticle)
@@ -199,13 +211,6 @@ inline StatusCode MCParticle::SetPfoTarget(MCParticle *mcParticle)
 	m_pPfoTarget = mcParticle;
 
 	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline Uid MCParticle::GetUid() const
-{
-   return m_uid;
 }
 
 } // namespace pandora

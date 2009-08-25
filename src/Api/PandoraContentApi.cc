@@ -137,23 +137,22 @@ StatusCode PandoraContentApi::RunClusteringAlgorithm(const pandora::Algorithm &a
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::AddCaloHitToCluster(const pandora::Algorithm &algorithm, const pandora::Cluster *pCluster,
-	const pandora::CaloHit *pCaloHit)
+StatusCode PandoraContentApi::AddCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit)
 {
 	return algorithm.GetPandoraContentApiImpl()->AddCaloHitToCluster(pCluster, pCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::DeleteCluster(const pandora::Algorithm &algorithm, const pandora::Cluster *pCluster)
+StatusCode PandoraContentApi::DeleteCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster)
 {
 	return algorithm.GetPandoraContentApiImpl()->DeleteCluster(pCluster);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &algorithm, const pandora::Cluster *pClusterLhs,
-	const pandora::Cluster *pClusterRhs)
+StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterLhs,
+	pandora::Cluster *pClusterRhs)
 {
 	return algorithm.GetPandoraContentApiImpl()->MergeAndDeleteClusters(pClusterLhs, pClusterRhs);
 }

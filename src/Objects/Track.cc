@@ -23,5 +23,11 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
 	m_pParentAddress(trackParameters.m_pParentAddress)
 {
 }
-	
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Track::~Track()
+{
+}
+
 } // namespace pandora

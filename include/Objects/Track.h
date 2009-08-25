@@ -38,7 +38,12 @@ private:
 	 *	@param	parameters the calo hit parameters
 	 */
 	 Track(const PandoraApi::TrackParameters &trackParameters);
- 
+
+	/**
+	 *	@brief	Destructor
+	 */
+	~Track();
+
 	float	m_momentum;				///< The track momentum
 	void	*m_pParentAddress;		///< The address of the parent track in the user framework
 	

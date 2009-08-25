@@ -111,19 +111,19 @@ public:
 		const ClusterList *&pNewClusterList, std::string &newClusterListName) const;
 
 	/**
-	 *	@brief	Add a calo hit to a cluster
-	 * 
-	 *	@param	pCluster address of the cluster to modify
-	 *	@param	pCaloHit address of the hit to add
+	 *      @brief  Add a calo hit to a cluster
+	 *
+	 *      @param  pCluster address of the cluster to modify
+	 *      @param  pCaloHit address of the hit to add
 	 */
-	StatusCode AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit) const;
-
+	StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const;
+	
 	/**
 	 *	@brief	Delete a cluster and remove it from the current cluster list
 	 * 
 	 *	@param	pCluster address of the cluster to delete
 	 */
-	StatusCode DeleteCluster(const Cluster *pCluster) const;
+	StatusCode DeleteCluster(Cluster *pCluster) const;
 
 	/**
 	 *	@brief	Merge two clusters, deleting the original clusters and removing them from the current cluster list
@@ -131,7 +131,7 @@ public:
 	 *	@param	pClusterLhs address of the first cluster
 	 *	@param	pClusterRhs address of the second cluster
 	 */
-	StatusCode MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs) const;
+	StatusCode MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs) const;
 		
 	/**
 	 *	@brief	Save the current cluster list and remove the constituent hits from the current ordered calo hit list

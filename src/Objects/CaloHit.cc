@@ -45,4 +45,10 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
 {
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+CaloHit::~CaloHit()
+{
+}
+
 } // namespace pandora

@@ -188,26 +188,24 @@ StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorit
 	
 	return STATUS_CODE_SUCCESS;
 }
-		
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::AddCaloHitToCluster(const Cluster *pCluster, const CaloHit *pCaloHit)
+inline StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
 {
-	// Only in the manager modifier functions are these const_casts allowed!
-	return const_cast<Cluster*>(pCluster)->AddCaloHit(const_cast<CaloHit*>(pCaloHit));
+	return pCluster->AddCaloHit(pCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::DeleteCluster(const Cluster *pCluster)
+StatusCode ClusterManager::DeleteCluster(Cluster *pCluster)
 {
 	NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
 
 	if (m_nameToClusterListMap.end() == listIter)
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	// Only in the manager modifier functions are these const_casts allowed!
-	ClusterList::iterator clusterIter = listIter->second->find(const_cast<Cluster*>(pCluster));
+	ClusterList::iterator clusterIter = listIter->second->find(pCluster);
 
 	if (listIter->second->end() == clusterIter)
 		return STATUS_CODE_NOT_FOUND;
@@ -220,11 +218,9 @@ StatusCode ClusterManager::DeleteCluster(const Cluster *pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::MergeAndDeleteClusters(const Cluster *pClusterLhs, const Cluster *pClusterRhs)
+StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs)
 {
-	// Only in the manager modifier functions are these const_casts allowed!
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, 
-		const_cast<OrderedCaloHitList*>(pClusterLhs->GetOrderedCaloHitList())->Add( *(pClusterRhs->GetOrderedCaloHitList()) ));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterLhs->AddHitsFromSecondCluster(pClusterRhs));
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->DeleteCluster(pClusterRhs));
 
 	return STATUS_CODE_SUCCESS;
