@@ -76,12 +76,6 @@ private:
 	 */
 	StatusCode SetPseudoLayer(const PseudoLayer &pseudoLayer);
 
-	/**
-	 *	@brief	Get the pfo target from the mc particle and set it to be the new mc particle
-	 * 
-	 */
-	StatusCode SetPfoTarget();
-
 	bool			m_isSortedIntoPseudoLayer;	///< Whether the calo hit has been sorted into a pseudo layer
 	
 	float			m_energy;					///< The calo hit energy

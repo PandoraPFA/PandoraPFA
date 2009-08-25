@@ -191,7 +191,7 @@ StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
+StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
 {
 	return pCluster->AddCaloHit(pCaloHit);
 }

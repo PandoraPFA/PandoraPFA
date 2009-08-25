@@ -19,23 +19,6 @@ bool CaloHit::operator< (const CaloHit &rhs) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHit::SetPfoTarget()
-{
-        MCParticle* pMCParticle = NULL;
-	PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, GetMCParticle( pMCParticle ) );
-
-	if (NULL == pMCParticle)
-		return STATUS_CODE_FAILURE;
-
-	pMCParticle->GetPfoTarget( pMCParticle );
-	
-	PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, SetMCParticle( pMCParticle ) );
-	
-	return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
 	m_isSortedIntoPseudoLayer(false),
 	m_energy(caloHitParameters.m_energy),

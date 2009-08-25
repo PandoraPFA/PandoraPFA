@@ -52,19 +52,6 @@ public:
 	 */
 	~MCManager();
 
-
-protected:
-
-	/**
-	 *	@brief	Retrieve a mc particle, creating an empty mc particle if it does not already exist
-	 * 
-	 *	@param	mcParticleUid the unique identifier of the mc particle
-	 *	@param	pMCParticle to receive the address of the mc particle
-	 */
-	StatusCode RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle*& pMCParticle);
-	
-
-
 private:
 	/**
 	 *	@brief	Create a mc particle
@@ -72,6 +59,15 @@ private:
 	 *	@param	mcParticleParameters the mc particle parameters
 	 */
 	StatusCode CreateMCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters);
+
+	/**
+	 *	@brief	Retrieve a mc particle, creating an empty mc particle if it does not already exist
+	 * 
+	 *	@param	mcParticleUid the unique identifier of the mc particle
+	 *	@param	pMCParticle to receive the address of the mc particle
+	 */
+	StatusCode RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle *&pMCParticle);
+	
 	/**
 	 *	@brief	Set mc particle relationship
 	 * 
@@ -81,7 +77,7 @@ private:
 	StatusCode SetMCParentDaughterRelationship(const Uid parentUid, const Uid daughterUid);
 
 	/**
-	 *	@brief	Set calo hit to mc particle uid relationship
+	 *	@brief	Set calo hit to mc particle relationship
 	 * 
 	 *	@param	caloHitUid the calo hit unique identifier
 	 *	@param	mcParticleUid the mc particle unique identifier
@@ -90,23 +86,16 @@ private:
 	StatusCode SetCaloHitToMCParticleRelationship(const Uid caloHitUid, const Uid mcParticleUid, const float mcParticleWeight);
 
 	/**
-	 *	@brief	Create the calo hit to mc particle relationships from the user given and afterwards selected relationships
-	 *              This function is not accessible for the user
-	 * 
-	 */
-	StatusCode CreateCaloHitToMCParticleRelationships();
-	
-        /**
- 	* @brief Create a map relating calo hit uid to mc pfo target
- 	*
- 	* @param caloHitToPfoTargetMap to receive the calo hit uid to mc pfo target map
- 	*/
- 	StatusCode CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToPfoTargetMap); 
-
-	/**
 	 *	@brief	Select pfo targets
 	 */
 	StatusCode SelectPfoTargets();
+	
+	/**
+	 *	@brief	Create a map relating calo hit uid to mc pfo target
+	 * 
+	 *	@param	caloHitToPfoTargetMap to receive the calo hit uid to mc pfo target map
+	 */
+	StatusCode CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToPfoTargetMap) const;
 	
 	/**
 	 *	@brief	Delete non pfo targets
@@ -118,18 +107,43 @@ private:
 	 */	
 	StatusCode ResetForNextEvent();
 	
+	/**
+	 *	@brief	UidAndWeight class
+	 */	
+	class UidAndWeight
+	{
+	public:
+		/**
+		 *	@brief	UidAndWeight class
+		 * 
+		 *	@param	uid the unique identifier
+		 *	@param	weight the weight
+		 */	
+		UidAndWeight(const Uid uid, const float weight);
+
+		Uid					m_uid;						///< The unique identifier
+		float				m_weight;					///< The weight
+	};
+
+	typedef std::map<Uid, UidAndWeight> UidRelationMap;
 
 	UidToMCParticleMap		m_uidToMCParticleMap;		///< The uid to mc particle map
-	UidToMCParticleUidMapWeighted  	m_caloHitUidToMCParticleUidMap;	///< The calo hit to mc particle uid relation map
-	UidToMCParticleMap  	        m_caloHitUidToMCParticleMap;	///< The calo hit to mc particle relation map
+	UidRelationMap			m_caloHitToMCParticleMap;	///< The calo hit to mc particle relation map
 
 	const MCPfoSelection	*m_pMCPfoSelection;			///< The mc pfo selection instance
 
 	friend class PandoraApiImpl;
-	friend class PandoraContentApiImpl;	
-
+	friend class PandoraContentApiImpl;
 	friend class TestMCManager;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline MCManager::UidAndWeight::UidAndWeight(const Uid uid, const float weight) :
+	m_uid(uid),
+	m_weight(weight)
+{
+}
 
 } // namespace pandora
 
