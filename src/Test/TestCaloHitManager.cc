@@ -194,6 +194,8 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 	pMcManager->SetCaloHitToMCParticleRelationship( (void*)9004, (void*)401, 1.0 );
 
 
+	pMcManager->SelectPfoTargets();
+
 	UidToMCParticleMap caloHitToPfoTargetMap;
 	pMcManager->CreateCaloHitToPfoTargetMap(caloHitToPfoTargetMap);
 
