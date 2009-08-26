@@ -107,12 +107,17 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const Pseu
 	if (this->end() == listIter)
 		return STATUS_CODE_NOT_FOUND;
 	
-	CaloHitList::iterator caloHitIter = listIter->second->find(pCaloHit);
-	
-	if (listIter->second->end() == caloHitIter)
+	std::pair<CaloHitList::const_iterator, CaloHitList::const_iterator> range;
+	range = listIter->second->equal_range(pCaloHit);
+
+	if (listIter->second->end() == range.first)
 		return STATUS_CODE_NOT_FOUND;
-	
-	listIter->second->erase(caloHitIter);
+
+	for (CaloHitList::iterator caloHitIter = range.first, caloHitIterEnd = range.second; caloHitIter != caloHitIterEnd; ++caloHitIter)
+	{
+		if (pCaloHit == *caloHitIter)
+			listIter->second->erase(caloHitIter);
+	}
 	
 	if (listIter->second->empty())
 		this->erase(listIter);

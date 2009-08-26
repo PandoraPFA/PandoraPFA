@@ -31,18 +31,23 @@ public:
 	bool operator< (const CaloHit &rhs) const;	
 
 	/**
-	 *	@brief	Get address of the mc particle associated with the calo hit
-	 * 
-	 *	@param	pMCParticle to receive the address of the mc particle
+	 *	@brief	Get the calo hit energy
 	 */
-	StatusCode GetMCParticle(MCParticle *pMCParticle) const;
-	
+	float GetEnergy() const;
+
 	/**
 	 *	@brief	Get pseudo layer for the calo hit
 	 * 
 	 *	@param	pseudoLayer to receive the pseudo layer
 	 */
 	StatusCode GetPseudoLayer(PseudoLayer &pseudoLayer) const;
+	
+	/**
+	 *	@brief	Get address of the mc particle associated with the calo hit
+	 * 
+	 *	@param	pMCParticle to receive the address of the mc particle
+	 */
+	StatusCode GetMCParticle(MCParticle *pMCParticle) const;
 
 	/**
 	 *	@brief	Get the address of the parent calo hit in the user framework
@@ -97,14 +102,9 @@ inline void *CaloHit::GetParentCaloHitAddress() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode CaloHit::GetMCParticle(MCParticle *pMCParticle) const
+inline float CaloHit::GetEnergy() const
 {
-	if (NULL == m_pMCParticle)
-		return STATUS_CODE_NOT_INITIALIZED;
-
-	pMCParticle = m_pMCParticle;
-	
-	return STATUS_CODE_SUCCESS;
+	return m_energy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,6 +115,18 @@ inline StatusCode CaloHit::GetPseudoLayer(PseudoLayer &pseudoLayer) const
 		return STATUS_CODE_NOT_INITIALIZED;
 
 	pseudoLayer = m_pseudoLayer;
+	
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode CaloHit::GetMCParticle(MCParticle *pMCParticle) const
+{
+	if (NULL == m_pMCParticle)
+		return STATUS_CODE_NOT_INITIALIZED;
+
+	pMCParticle = m_pMCParticle;
 	
 	return STATUS_CODE_SUCCESS;
 }

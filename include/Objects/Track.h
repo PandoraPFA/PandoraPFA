@@ -24,12 +24,17 @@ public:
 	 * 
 	 *	@param	rhs track to compare with
 	 */
-	 bool operator< (const Track &rhs) const;
+	bool operator< (const Track &rhs) const;
+
+	/**
+	 *	@brief	Get the track momentum
+	 */
+	float GetMomentum() const;
 
 	/**
 	 *	@brief	Get the address of the parent track in the user framework
 	 */
-	 void *GetParentTrackAddress() const;
+	void *GetParentTrackAddress() const;
 	 
 private:
 	/**
@@ -37,7 +42,7 @@ private:
 	 * 
 	 *	@param	parameters the calo hit parameters
 	 */
-	 Track(const PandoraApi::TrackParameters &trackParameters);
+	Track(const PandoraApi::TrackParameters &trackParameters);
 
 	/**
 	 *	@brief	Destructor
@@ -49,6 +54,13 @@ private:
 	
 	friend class TrackManager;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Track::GetMomentum() const
+{
+	return m_momentum;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
