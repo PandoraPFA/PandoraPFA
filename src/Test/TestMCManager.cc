@@ -176,7 +176,7 @@ StatusCode TestMCManager::Test_SetCaloHitToMCParticleRelationship()
         std::cout << "        check if association with different MCParticle-Uid produces a different MCParticle" << std::endl;
 	assert( pMcManager->SetCaloHitToMCParticleRelationship( (void*)102,(void*)201, 1.0 ) == STATUS_CODE_SUCCESS ); 
 
-	assert( pMcManager->CreateCaloHitToMCParticleRelationships() ); // create the relationships now
+//	assert( pMcManager->CreateCaloHitToMCParticleRelationships() ); // create the relationships now
 
 	MCParticle* differentMcParticle = NULL;
 	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)201, differentMcParticle ); 

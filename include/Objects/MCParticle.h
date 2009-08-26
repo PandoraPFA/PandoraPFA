@@ -121,16 +121,17 @@ private:
 	float				m_momentum;			///< Momentum of the particle
 	float				m_innerRadius;		///< Inner radius of the particle's path
 	float				m_outerRadius;		///< Outer radius of the particle's path
-	int					m_particleId;		///< Particle id (particle type)
+	int				m_particleId;		///< Particle id (particle type)
 
 	MCParticle			*m_pPfoTarget;		///< The pfo target
-	MCParticleList		m_daughterList;		///< The list of mc daughter particles
+	MCParticleList                  m_daughterList;		///< The list of mc daughter particles
 	MCParticleList		m_parentList;		///< The list of mc parent particles
 
 	bool				m_isInitialized;	///< Whether particle information has been initialized
 
 	friend class MCManager;
 	friend class TestMCManager;
+	friend class TestCaloHitManager;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
