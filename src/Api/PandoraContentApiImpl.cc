@@ -97,6 +97,13 @@ StatusCode PandoraContentApiImpl::GetCurrentClusterList(const ClusterList *&pClu
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
+StatusCode PandoraContentApiImpl::GetCurrentClusterListName(std::string &clusterListName) const
+{
+	return m_pPandora->m_pClusterManager->GetCurrentListName(clusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
 StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList,
 	std::string &orderedCaloHitListName) const
 {
@@ -105,9 +112,23 @@ StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(const OrderedCalo
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
+StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitListName(std::string &orderedCaloHitListName) const
+{
+	return m_pPandora->m_pCaloHitManager->GetCurrentListName(orderedCaloHitListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
 StatusCode PandoraContentApiImpl::GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const
 {
 	return m_pPandora->m_pTrackManager->GetCurrentList(pTrackList, trackListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::GetCurrentTrackListName(std::string &trackListName) const
+{
+	return m_pPandora->m_pTrackManager->GetCurrentListName(trackListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
@@ -191,6 +212,13 @@ StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, co
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
+StatusCode PandoraContentApiImpl::ReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName) const
+{
+	return m_pPandora->m_pClusterManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newClusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
 StatusCode PandoraContentApiImpl::SaveClusterListAndReplaceCurrent(const Algorithm &algorithm, const std::string &newClusterListName,
 	const ClusterList *const pClustersToSave) const
 {
@@ -209,6 +237,13 @@ StatusCode PandoraContentApiImpl::SaveOrderedCaloHitList(const Algorithm &algori
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
+StatusCode PandoraContentApiImpl::ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName) const
+{
+	return m_pPandora->m_pCaloHitManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
 StatusCode PandoraContentApiImpl::SaveOrderedCaloHitListAndReplaceCurrent(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName) const
 {
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SaveOrderedCaloHitList(algorithm, orderedCaloHitList, newListName));
@@ -222,6 +257,13 @@ StatusCode PandoraContentApiImpl::SaveOrderedCaloHitListAndReplaceCurrent(const 
 StatusCode PandoraContentApiImpl::SaveTrackList(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const
 {
 	return m_pPandora->m_pTrackManager->SaveList(trackList, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
+StatusCode PandoraContentApiImpl::ReplaceCurrentTrackList(const pandora::Algorithm &algorithm, const std::string &newListName) const
+{
+	return m_pPandora->m_pTrackManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	

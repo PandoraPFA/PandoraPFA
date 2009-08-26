@@ -76,7 +76,6 @@ StatusCode OrderedCaloHitList::GetCaloHitsInPseudoLayer(const PseudoLayer pseudo
 	return STATUS_CODE_SUCCESS;
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer)
@@ -120,6 +119,5 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const Pseu
 
 	return STATUS_CODE_SUCCESS;
 }
-
 
 } // namespace pandora

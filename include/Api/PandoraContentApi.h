@@ -109,6 +109,14 @@ public:
 		std::string &clusterListName);
 
 	/**
+	 *	@brief	Get the current cluster list name
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	clusterListName to receive the current cluster list name
+	 */
+	static StatusCode GetCurrentClusterListName(const pandora::Algorithm &algorithm, std::string &clusterListName);
+
+	/**
 	 *	@brief	Get the current ordered calo hit list
 	 * 
 	 *	@param	algorithm the algorithm calling this function
@@ -127,6 +135,14 @@ public:
 		std::string &orderedCaloHitListName);
 
 	/**
+	 *	@brief	Get the current ordered calo hit list name
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	orderedCaloHitListName to receive the current ordered calo hit list name
+	 */
+	static StatusCode GetCurrentOrderedCaloHitListName(const pandora::Algorithm &algorithm, std::string &orderedCaloHitListName);
+
+	/**
 	 *	@brief	Get the current track list
 	 * 
 	 *	@param	algorithm the algorithm calling this function
@@ -143,6 +159,14 @@ public:
 	 */
 	static StatusCode GetCurrentTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList *&pTrackList,
 		std::string &trackListName);
+
+	/**
+	 *	@brief	Get the current track list name
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	trackListName to receive the current track list name
+	 */
+	static StatusCode GetCurrentTrackListName(const pandora::Algorithm &algorithm, std::string &trackListName);
 
 	/**
 	 *	@brief	Initialize reclustering operations
@@ -185,11 +209,11 @@ public:
 		const pandora::ClusterList *&pNewClusterList, std::string &newClusterListName);
 
 	/**
-	 *      @brief  Add a calo hit to a cluster
+	 *	@brief  Add a calo hit to a cluster
 	 *
-	 *      @param  algorithm the algorithm calling this function       
-	 *      @param  pCluster address of the cluster to modify
-	 *      @param  pCaloHit address of the hit to add
+	 *	@param  algorithm the algorithm calling this function       
+	 *	@param  pCluster address of the cluster to modify
+	 *	@param  pCaloHit address of the hit to add
 	 */
 	static StatusCode AddCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
 
@@ -231,6 +255,15 @@ public:
 		const pandora::ClusterList &clustersToSave);
 
 	/**
+	 *	@brief	Replace the current cluster list with a pre-saved list; use this new list as a permanent replacement
+	 *			for the current list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newClusterListName the name of the replacement cluster list
+	 */		
+	static StatusCode ReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName);
+
+	/**
 	 *	@brief	Save the current cluster list under a new name; use this new list as a permanent replacement for the current
 	 * 			list (will persist outside the current algorithm)
 	 * 
@@ -261,13 +294,22 @@ public:
 		const std::string &newListName);
 
 	/**
+	 *	@brief	Replace the current ordered calo hit list with a pre-saved list; use this new list as a permanent replacement
+	 *			for the current list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the name of the replacement ordered calo hit list
+	 */		
+	static StatusCode ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName);
+	
+	/**
 	 *	@brief	Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
 	 * 			current list (will persist outside the current algorithm)
 	 * 
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newListName the new ordered calo hit list name
 	 */
-	StatusCode SaveOrderedCaloHitListAndReplaceCurrent(const pandora::Algorithm &algorithm, 
+	static StatusCode SaveOrderedCaloHitListAndReplaceCurrent(const pandora::Algorithm &algorithm, 
 		const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName);
 
 	/**
@@ -276,7 +318,16 @@ public:
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newListName the new ordered calo hit list name
 	 */
-	StatusCode SaveTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList, const std::string &newListName);
+	static StatusCode SaveTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList, const std::string &newListName);
+
+	/**
+	 *	@brief	Replace the current track list with a pre-saved list; use this new list as a permanent replacement
+	 *			for the current list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the name of the replacement track list
+	 */		
+	static StatusCode ReplaceCurrentTrackList(const pandora::Algorithm &algorithm, const std::string &newListName);
 
 	/**
 	 *	@brief	Save the current track list under a new name; use this new list as a permanent replacement for the current
@@ -285,7 +336,7 @@ public:
 	 *	@param	algorithm the algorithm calling this function
 	 *	@param	newListName the new track list name
 	 */
-	StatusCode SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
+	static StatusCode SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
 		const std::string &newListName);		
 };
 

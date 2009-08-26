@@ -64,6 +64,13 @@ public:
 	StatusCode GetCurrentClusterList(const ClusterList *&pClusterList, std::string &clusterListName) const;
 
 	/**
+	 *	@brief	Get the current cluster list name
+	 * 
+	 *	@param	clusterListName to receive the current cluster list name
+	 */
+	StatusCode GetCurrentClusterListName(std::string &clusterListName) const;
+
+	/**
 	 *	@brief	Get the current ordered calo hit list
 	 * 
 	 *	@param	pOrderedCaloHitList to receive the address of the current ordered calo hit list
@@ -72,6 +79,13 @@ public:
 	StatusCode GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList, std::string &orderedCaloHitListName) const;
 
 	/**
+	 *	@brief	Get the current ordered calo hit list name
+	 * 
+	 *	@param	orderedCaloHitListName to receive the current ordered calo hit list name
+	 */
+	StatusCode GetCurrentOrderedCaloHitListName(std::string &orderedCaloHitListName) const;
+	
+	/**
 	 *	@brief	Get the current track list
 	 * 
 	 *	@param	pTrackList to receive the address of the current track list
@@ -79,6 +93,13 @@ public:
 	 */
 	StatusCode GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const;
 
+	/**
+	 *	@brief	Get the current track list name
+	 * 
+	 *	@param	trackListName to receive the current track list name
+	 */
+	StatusCode GetCurrentTrackListName(std::string &trackListName) const;
+	
 	/**
 	 *	@brief	Initialize reclustering operations
 	 * 
@@ -145,6 +166,15 @@ public:
 		const ClusterList *const pClustersToSave = NULL) const;
 
 	/**
+	 *	@brief	Replace the current cluster list with a pre-saved list; use this new list as a permanent replacement
+	 *			for the current list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newClusterListName the name of the replacement cluster list
+	 */		
+	StatusCode ReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName) const;
+	
+	/**
 	 *	@brief	Save the current cluster list under a new name; use this new list as a permanent replacement for the current
 	 * 			list (will persist outside the current algorithm)
 	 * 
@@ -166,6 +196,15 @@ public:
 		const std::string &newListName) const;
 
 	/**
+	 *	@brief	Replace the current ordered calo hit list with a pre-saved list; use this new list as a permanent replacement
+	 *			for the current list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the name of the replacement ordered calo hit list
+	 */		
+	StatusCode ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName) const;
+	
+	/**
 	 *	@brief	Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
 	 * 			current list (will persist outside the current algorithm)
 	 * 
@@ -183,6 +222,15 @@ public:
 	 */
 	StatusCode SaveTrackList(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const;
 
+	/**
+	 *	@brief	Replace the current track list with a pre-saved list; use this new list as a permanent replacement
+	 *			for the current list (will persist outside the current algorithm)
+	 * 
+	 *	@param	algorithm the algorithm calling this function
+	 *	@param	newListName the name of the replacement track list
+	 */		
+	StatusCode ReplaceCurrentTrackList(const pandora::Algorithm &algorithm, const std::string &newListName) const;
+	
 	/**
 	 *	@brief	Save the current track list under a new name; use this new list as a permanent replacement for the current
 	 * 			list (will persist outside the current algorithm)
