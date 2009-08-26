@@ -155,7 +155,7 @@ StatusCode MCManager::CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToP
 
 StatusCode MCManager::DeleteNonPfoTargets()
 {
-	for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
+	for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(); iter != m_uidToMCParticleMap.end(); ++iter)
 	{
 		if (!iter->second->IsPfoTarget())
 		{

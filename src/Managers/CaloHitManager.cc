@@ -291,8 +291,8 @@ StatusCode CaloHitManager::ResetForNextEvent()
 
 	m_inputCaloHitList.clear();
 
-	for (NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.begin(),
-		listIterEnd = m_nameToOrderedCaloHitListMap.end(); listIter != listIterEnd; ++listIter)
+	for (NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.begin();
+		listIter != m_nameToOrderedCaloHitListMap.end(); ++listIter)
 	{
 		delete listIter->second;
 		m_nameToOrderedCaloHitListMap.erase(listIter);

@@ -116,7 +116,10 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const Pseu
 	for (CaloHitList::iterator caloHitIter = range.first, caloHitIterEnd = range.second; caloHitIter != caloHitIterEnd; ++caloHitIter)
 	{
 		if (pCaloHit == *caloHitIter)
+		{
 			listIter->second->erase(caloHitIter);
+			break;
+		}
 	}
 	
 	if (listIter->second->empty())

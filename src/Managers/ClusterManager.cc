@@ -131,8 +131,8 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
 	if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(temporaryListName))
 		return STATUS_CODE_FAILURE;
 
-	for (ClusterList::iterator clusterIter = originalClusterListIter->second->begin(),
-		clusterIterEnd = originalClusterListIter->second->end(); clusterIter != clusterIterEnd; ++clusterIter)
+	for (ClusterList::iterator clusterIter = originalClusterListIter->second->begin();
+		clusterIter != originalClusterListIter->second->end(); ++clusterIter)
 	{
 		if ((NULL == pClusterList) || (pClusterList->end() != pClusterList->find(*clusterIter)))
 		{
@@ -171,8 +171,8 @@ StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorit
 			return STATUS_CODE_FAILURE;
 	}
 
-	for (ClusterList::iterator clusterIter = temporaryClusterListIter->second->begin(),
-		clusterIterEnd = temporaryClusterListIter->second->end(); clusterIter != clusterIterEnd; ++clusterIter)
+	for (ClusterList::iterator clusterIter = temporaryClusterListIter->second->begin(); 
+		clusterIter != temporaryClusterListIter->second->end(); ++clusterIter)
 	{
 		if ((NULL == pClusterList) || (pClusterList->end() != pClusterList->find(*clusterIter)))
 		{
@@ -283,7 +283,7 @@ StatusCode ClusterManager::ResetForNextEvent()
 	m_canMakeNewClusters = false;
 	m_currentListName.clear();
 
-	for (NameToClusterListMap::iterator iter = m_nameToClusterListMap.begin(), iterEnd = m_nameToClusterListMap.end(); iter != iterEnd; ++iter)
+	for (NameToClusterListMap::iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end(); ++iter)
 	{
 		for (ClusterList::iterator clusterIter = iter->second->begin(), clusterIterEnd = iter->second->end(); 
 			clusterIter != clusterIterEnd; ++clusterIter)
