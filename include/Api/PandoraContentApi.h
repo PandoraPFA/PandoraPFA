@@ -10,6 +10,10 @@
 
 #include "Pandora.h"
 
+namespace pandora { class Algorithm; }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *	@brief	PandoraContentApi class
  */
@@ -75,10 +79,21 @@ public:
 	static StatusCode OrderInputCaloHits(const pandora::Pandora &pandora);
 
 	/**
+	 *	@brief	Create an algorithm, via one of the algorithm factories registered with pandora
+	 * 
+	 *	@param	pandora the pandora instance to create the algorithm
+	 *	@param	algorithmType the type of algorithm to create
+	 *	@param	pAlgorithm to receive the address of the algorithm instance
+	 *	@param	algorithmName to receive the name of the algorithm instance
+	 */
+	static StatusCode CreateAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmType, pandora::Algorithm *&pAlgorithm,
+		std::string &algorithmName);
+
+	/**
 	 *	@brief	Run an algorithm registered with pandora
 	 * 
 	 *	@param	pandora the pandora instance with which the algorithm is registered
-	 *	@param	algorithmName the algorithm name
+	 *	@param	algorithmName the name of the algorithm instance to run
 	 */
 	static StatusCode RunAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmName);
 
@@ -86,7 +101,7 @@ public:
 	 *	@brief	Run an algorithm registered with pandora
 	 * 
 	 *	@param	algorithm address of the parent algorithm, now attempting to run a daughter algorithm
-	 *	@param	algorithmName the algorithm name
+	 *	@param	algorithmName the name of the algorithm instance to run
 	 */
 	static StatusCode RunAlgorithm(const pandora::Algorithm &algorithm, const std::string &algorithmName);
 

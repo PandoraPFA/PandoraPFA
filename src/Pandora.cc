@@ -9,16 +9,12 @@
 #include "GeometryHelper.h"
 #include "Pandora.h"
 
-#include "Algorithms/ClusteringAlgorithm.h"
-#include "Algorithms/PrimaryClusteringAlgorithm.h"
-#include "Algorithms/PhotonClusteringAlgorithm.h"
-#include "Algorithms/ReclusteringAlgorithm.h"
-
 #include "Api/PandoraApi.h"
 #include "Api/PandoraApiImpl.h"
 #include "Api/PandoraContentApi.h"
 #include "Api/PandoraContentApiImpl.h"
 
+#include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/ClusterManager.h"
 #include "Managers/MCManager.h"
@@ -29,6 +25,7 @@ namespace pandora
 {
 
 Pandora::Pandora() :
+	m_pAlgorithmManager(new AlgorithmManager(this)),
 	m_pCaloHitManager(new CaloHitManager),
 	m_pClusterManager(new ClusterManager),
 	m_pGeometryHelper(new GeometryHelper),
@@ -38,13 +35,13 @@ Pandora::Pandora() :
 	m_pPandoraApiImpl(new PandoraApiImpl(this)),
 	m_pPandoraContentApiImpl(new PandoraContentApiImpl(this))	
 {
-	PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RegisterInternalAlgorithms());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 Pandora::~Pandora()
 {
+	delete m_pAlgorithmManager;
 	delete m_pCaloHitManager;
 	delete m_pClusterManager;
 	delete m_pGeometryHelper;
@@ -53,15 +50,10 @@ Pandora::~Pandora()
 	delete m_pTrackManager;
 	delete m_pPandoraApiImpl;
 	delete m_pPandoraContentApiImpl;
-	
-	for (AlgorithmMap::iterator iter = m_algorithmMap.begin(), iterEnd = m_algorithmMap.end(); iter != iterEnd; ++iter)
-		delete iter->second;
-
-	m_algorithmMap.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-	
+
 StatusCode Pandora::ProcessEvent()
 {
 	std::cout << "Pandora process event" << std::endl;
@@ -90,18 +82,6 @@ const PandoraApiImpl *const Pandora::GetPandoraApiImpl() const
 const PandoraContentApiImpl *const Pandora::GetPandoraContentApiImpl() const
 {
 	return m_pPandoraContentApiImpl;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode Pandora::RegisterInternalAlgorithms()
-{
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithm(*this, "Clustering", new ClusteringAlgorithm()));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithm(*this, "PrimaryClustering", new PrimaryClusteringAlgorithm()));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithm(*this, "PhotonClustering", new PhotonClusteringAlgorithm()));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterAlgorithm(*this, "Reclustering", new ReclusteringAlgorithm()));	
-
-	return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

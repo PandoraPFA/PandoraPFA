@@ -42,15 +42,18 @@ void PandoraPFANewProcessor::init()
 		std::cout << "PandoraPFANewProcessor - Init" << std::endl;
 		
 		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateGeometry());
-		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RegisterAlgorithms());
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RegisterUserAlgorithmFactories());
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::InitializeAlgorithms(m_pandora));
 	}
 	catch (StatusCodeException &statusCodeException)
 	{
 		std::cout << "Failed to initialize pandora pfa new processor: " << statusCodeException.ToString() << std::endl;
+		throw;
 	}
 	catch (...)
 	{
 		std::cout << "Failed to initialize pandora pfa new processor, unrecognized exception" << std::endl;
+		throw;
 	}
 }
 
@@ -79,10 +82,12 @@ void PandoraPFANewProcessor::processEvent(LCEvent *pLCEvent)
 	catch (StatusCodeException &statusCodeException)
 	{
 		std::cout << "Failed to process event: " << statusCodeException.ToString() << std::endl;
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(m_pandora));
 	}
 	catch (...)
 	{
 		std::cout << "Failed to process event, unrecognized exception" << std::endl;
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Reset(m_pandora));		
 	}	
 }
 
@@ -114,7 +119,7 @@ StatusCode PandoraPFANewProcessor::CreateGeometry()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraPFANewProcessor::RegisterAlgorithms()
+StatusCode PandoraPFANewProcessor::RegisterUserAlgorithmFactories()
 {
 	// Insert user code here ...
 

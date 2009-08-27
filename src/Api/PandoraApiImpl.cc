@@ -11,6 +11,7 @@
 #include "Api/PandoraApi.h"
 #include "Api/PandoraApiImpl.h"
 
+#include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/ClusterManager.h"
 #include "Managers/MCManager.h"
@@ -61,14 +62,16 @@ StatusCode PandoraApiImpl::ProcessEvent() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApiImpl::RegisterAlgorithm(const std::string &algorithmName, Algorithm *const pAlgorithm) const
+StatusCode PandoraApiImpl::InitializeAlgorithms() const
 {
-	if (!m_pPandora->m_algorithmMap.insert(Pandora::AlgorithmMap::value_type(algorithmName, pAlgorithm)).second)
-		return STATUS_CODE_FAILURE;
-	
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pAlgorithm->RegisterPandora(m_pPandora));
-	
-	return STATUS_CODE_SUCCESS;
+	return m_pPandora->m_pAlgorithmManager->InitializeAlgorithms();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraApiImpl::RegisterAlgorithmFactory(const std::string &algorithmType, AlgorithmFactory *const pAlgorithmFactory) const
+{
+	return m_pPandora->m_pAlgorithmManager->RegisterAlgorithmFactory(algorithmType, pAlgorithmFactory);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

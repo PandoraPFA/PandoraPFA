@@ -15,11 +15,25 @@
  */
 class ReclusteringAlgorithm : public pandora::Algorithm
 {
-private:
+public:
 	/**
-	 *	@brief Run the reclustering algorithm
+	 *	@brief	Factory class for instantiating algorithm
 	 */
+	class Factory : public pandora::AlgorithmFactory
+	{
+	public:
+		Algorithm *CreateAlgorithm() const;
+	};	
+	
+private:
 	StatusCode Run();
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline pandora::Algorithm *ReclusteringAlgorithm::Factory::CreateAlgorithm() const
+{
+	return new ReclusteringAlgorithm();
+}
 
 #endif // #ifndef RECLUSTERING_ALGORITHM_H

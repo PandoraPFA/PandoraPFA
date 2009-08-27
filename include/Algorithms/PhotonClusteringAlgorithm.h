@@ -15,11 +15,25 @@
  */
 class PhotonClusteringAlgorithm : public pandora::Algorithm
 {
-private:
+public:
 	/**
-	 *	@brief Run the photon clustering algorithm
+	 *	@brief	Factory class for instantiating algorithm
 	 */
+	class Factory : public pandora::AlgorithmFactory
+	{
+	public:
+		Algorithm *CreateAlgorithm() const;
+	};	
+	
+private:
 	StatusCode Run();
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline pandora::Algorithm *PhotonClusteringAlgorithm::Factory::CreateAlgorithm() const
+{
+	return new PhotonClusteringAlgorithm();
+}
 
 #endif // #ifndef PHOTON_CLUSTERING_ALGORITHM_H

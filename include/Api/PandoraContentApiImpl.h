@@ -39,6 +39,15 @@ public:
 	StatusCode CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) const;
 		
 	/**
+	 *	@brief	Create an algorithm, via one of the algorithm factories registered with pandora
+	 * 
+	 *	@param	algorithmType the type of algorithm to create
+	 *	@param	pAlgorithm to receive the address of the algorithm instance
+	 *	@param	algorithmName to receive the name of the algorithm instance
+	 */
+	StatusCode CreateAlgorithm(const std::string &algorithmType, Algorithm *&pAlgorithm, std::string &algorithmName) const;
+
+	/**
 	 *	@brief	Run an algorithm registered with pandora
 	 * 
 	 *	@param	algorithmName the algorithm name

@@ -25,9 +25,17 @@ StatusCode PandoraApi::ProcessEvent(const pandora::Pandora &pandora)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::RegisterAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmName, pandora::Algorithm *const pAlgorithm)
+StatusCode PandoraApi::InitializeAlgorithms(const pandora::Pandora &pandora)
 {
-	return pandora.GetPandoraApiImpl()->RegisterAlgorithm(algorithmName, pAlgorithm);
+	return pandora.GetPandoraApiImpl()->InitializeAlgorithms();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraApi::RegisterAlgorithmFactory(const pandora::Pandora &pandora, const std::string &algorithmType,
+	pandora::AlgorithmFactory *const pAlgorithmFactory)
+{
+	return pandora.GetPandoraApiImpl()->RegisterAlgorithmFactory(algorithmType, pAlgorithmFactory);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,8 +47,8 @@ StatusCode SetMCParentDaughterRelationship(const pandora::Pandora &pandora, cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress, const void *pMCParticleParentAddress,
-	const float mcParticleWeight)
+StatusCode SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
+	const void *pMCParticleParentAddress, const float mcParticleWeight)
 {
 	return pandora.GetPandoraApiImpl()->SetCaloHitToMCParticleRelationship(pCaloHitParentAddress, pMCParticleParentAddress, mcParticleWeight);
 }

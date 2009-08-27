@@ -19,6 +19,20 @@ namespace pandora
 {
 
 /**
+ *	@brief	Factory class for instantiating algorithms
+ */
+class AlgorithmFactory
+{
+public:
+	/**
+	 *	@brief	Create an instance of an algorithm
+	 * 
+	 *	@return	the address of the algorithm instance
+	 */
+	virtual Algorithm *CreateAlgorithm() const = 0;
+};
+
+/**
  *	@brief	Algorithm class
  */
 class Algorithm
@@ -51,8 +65,8 @@ protected:
 	 */
 	StatusCode RegisterPandora(Pandora *pPandora);
 
-	friend class PandoraApiImpl;
-	friend class PandoraContentApiImpl;	
+	friend class AlgorithmManager;
+	friend class PandoraContentApiImpl; // TODO remove this later
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

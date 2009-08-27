@@ -14,7 +14,7 @@
 namespace pandora
 {
 
-class Algorithm;
+class AlgorithmManager;
 class CaloHitManager;
 class ClusterManager;
 class GeometryHelper;
@@ -43,11 +43,6 @@ public:
 	~Pandora();
 	
 	/**
-	 *	@brief	Process event
-	 */
-	StatusCode ProcessEvent();
-	
-	/**
 	 *	@brief	Get the pandora api impl
 	 * 
 	 *	@return	Address of the pandora api impl
@@ -63,20 +58,17 @@ public:
 
 private:
 	/**
-	 *	@brief	Register pandora internal algorithms
+	 *	@brief	Process event
 	 */
-	StatusCode RegisterInternalAlgorithms();
+	StatusCode ProcessEvent();
 
-	typedef std::map<const std::string, Algorithm *const> AlgorithmMap;
-	
+	AlgorithmManager				*m_pAlgorithmManager;			///< The algorithm manager
 	CaloHitManager					*m_pCaloHitManager;				///< The hit manager
 	ClusterManager					*m_pClusterManager;				///< The cluster manager
 	GeometryHelper					*m_pGeometryHelper;				///< The geometry helper
 	MCManager						*m_pMCManager;					///< The MC manager
 	ParticleFlowObjectManager		*m_pParticleFlowObjectManager;	///< The particle flow object manager
 	TrackManager					*m_pTrackManager;				///< The track manager
-
-	AlgorithmMap					m_algorithmMap;					///< The algorithm map
 
 	PandoraApiImpl					*m_pPandoraApiImpl;				///< The pandora api implementation
 	PandoraContentApiImpl			*m_pPandoraContentApiImpl;		///< The pandora content api implementation

@@ -35,14 +35,19 @@ public:
 	 *	@brief	Process event
 	 */
 	StatusCode ProcessEvent() const;
-	
+
 	/**
-	 *	@brief	Register an algorithm
-	 * 
-	 *	@param	pAlgorithm address of an algorithm instance
-	 *	@param	algorithmName the algorithm name
+	 *	@brief	Initialize pandora algorithms
 	 */
-	StatusCode RegisterAlgorithm(const std::string &algorithmName, Algorithm *const pAlgorithm) const;
+	StatusCode InitializeAlgorithms() const;
+
+	/**
+	 *	@brief	Register an algorithm factory with pandora
+	 * 
+	 *	@param	algorithmType the type of algorithm that the factory will create
+	 *	@param	pAlgorithmFactory the address of an algorithm factory instance
+	 */
+	StatusCode RegisterAlgorithmFactory(const std::string &algorithmType, AlgorithmFactory *const pAlgorithmFactory) const;
 	
 	/**
 	 *	@brief	Set parent-daughter mc particle relationship

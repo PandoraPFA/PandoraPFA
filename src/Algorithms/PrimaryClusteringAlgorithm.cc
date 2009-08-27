@@ -16,8 +16,14 @@ StatusCode PrimaryClusteringAlgorithm::Run()
 	const ClusterList *pClusterList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, "Clustering", pClusterList));
 
-	//Save the clusters and replace current list- clustersToSave argument is optional
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, "newClusterListName"));
+	pClusterList = NULL;
+	std::string clusterListName;
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList, clusterListName));
+	
+	for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+	{
+		std::cout << "Cluster! " << *iter << std::endl;
+	}
 
 	return STATUS_CODE_SUCCESS;
 }

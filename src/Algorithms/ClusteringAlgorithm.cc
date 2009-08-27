@@ -18,9 +18,14 @@ StatusCode ClusteringAlgorithm::Run()
 	const OrderedCaloHitList *pOrderedCaloHitList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
-	// Use tracks and ordered calo hits to create n clusters
-	CaloHit *pCaloHit = NULL; // dummy
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHit));
+	for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+	{
+	
+		for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
+		{
+			PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, *caloHitIter));	
+		}
+	}
 
 	return STATUS_CODE_SUCCESS;
 }

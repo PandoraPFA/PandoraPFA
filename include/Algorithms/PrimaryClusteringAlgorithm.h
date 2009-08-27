@@ -15,11 +15,25 @@
  */
 class PrimaryClusteringAlgorithm : public pandora::Algorithm
 {
-private:
+public:
 	/**
-	 *	@brief Run the initial clustering algorithm
+	 *	@brief	Factory class for instantiating algorithm
 	 */
+	class Factory : public pandora::AlgorithmFactory
+	{
+	public:
+		Algorithm *CreateAlgorithm() const;
+	};	
+	
+private:
 	StatusCode Run();
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline pandora::Algorithm *PrimaryClusteringAlgorithm::Factory::CreateAlgorithm() const
+{
+	return new PrimaryClusteringAlgorithm();
+}
 
 #endif // #ifndef PRIMARY_CLUSTERING_ALGORITHM_H

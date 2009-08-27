@@ -67,9 +67,9 @@ private:
 	StatusCode CreateGeometry();
 
 	/**
-	 *	@brief	Register algorithms, insert user code here
+	 *	@brief	Register user algorithm factories, insert user code here
 	 */
-	StatusCode RegisterAlgorithms();
+	StatusCode RegisterUserAlgorithmFactories();
 
 	/**
 	 *	@brief	Create tracks, insert user code here

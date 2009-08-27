@@ -10,6 +10,7 @@
 
 #include "Api/PandoraContentApiImpl.h"
 
+#include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/ClusterManager.h"
 #include "Managers/MCManager.h"
@@ -35,12 +36,19 @@ StatusCode PandoraContentApiImpl::CreateParticleFlowObject(const PandoraContentA
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
-	
+
+StatusCode PandoraContentApiImpl::CreateAlgorithm(const std::string &algorithmType, Algorithm *&pAlgorithm, std::string &algorithmName) const
+{
+	return m_pPandora->m_pAlgorithmManager->CreateAlgorithm(algorithmType, pAlgorithm, algorithmName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------	
+
 StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName) const
 {
-	Pandora::AlgorithmMap::const_iterator iter = m_pPandora->m_algorithmMap.find(algorithmName);
+	AlgorithmManager::AlgorithmMap::const_iterator iter = m_pPandora->m_pAlgorithmManager->m_algorithmMap.find(algorithmName);
 	
-	if (m_pPandora->m_algorithmMap.end() == iter)
+	if (m_pPandora->m_pAlgorithmManager->m_algorithmMap.end() == iter)
 		return STATUS_CODE_NOT_FOUND;
 
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->RegisterAlgorithm(iter->second));

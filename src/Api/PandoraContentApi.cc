@@ -42,6 +42,14 @@ StatusCode PandoraContentApi::OrderInputCaloHits(const pandora::Pandora &pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::CreateAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmType, pandora::Algorithm *&pAlgorithm,
+	std::string &algorithmName)
+{
+	return pandora.GetPandoraContentApiImpl()->CreateAlgorithm(algorithmType, pAlgorithm, algorithmName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::RunAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmName)
 {
 	return pandora.GetPandoraContentApiImpl()->RunAlgorithm(algorithmName);

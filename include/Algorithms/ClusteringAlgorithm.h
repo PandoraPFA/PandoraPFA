@@ -15,11 +15,25 @@
  */
 class ClusteringAlgorithm : public pandora::Algorithm
 {
-private:
+public:
 	/**
-	 *	@brief Run the clustering algorithm
+	 *	@brief	Factory class for instantiating algorithm
 	 */
+	class Factory : public pandora::AlgorithmFactory
+	{
+	public:
+		Algorithm *CreateAlgorithm() const;
+	};	
+	
+private:
 	StatusCode Run();
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline pandora::Algorithm *ClusteringAlgorithm::Factory::CreateAlgorithm() const
+{
+	return new ClusteringAlgorithm();
+}
 
 #endif // #ifndef CLUSTERING_ALGORITHM_H

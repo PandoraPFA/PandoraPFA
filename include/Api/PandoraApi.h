@@ -10,7 +10,7 @@
 
 #include "Pandora.h"
 
-namespace pandora { class Algorithm; }
+namespace pandora { class Algorithm; class AlgorithmFactory; }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -109,16 +109,23 @@ public:
 	 *	@param	pandora the pandora instance to process event
 	 */
 	static StatusCode ProcessEvent(const pandora::Pandora &pandora);
-	
+
 	/**
-	 *	@brief	Register an algorithm with pandora
+	 *	@brief	Initialize pandora algorithms
 	 * 
-	 *	@param	pandora the pandora instance to register the algorithm with
-	 *	@param	pAlgorithm address of an algorithm instance
-	 *	@param	algorithmName the algorithm name
+	 *	@param	pandora the pandora instance to run the algorithms initialize
 	 */
-	static StatusCode RegisterAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmName,
-		pandora::Algorithm *const pAlgorithm);
+	static StatusCode InitializeAlgorithms(const pandora::Pandora &pandora);
+
+	/**
+	 *	@brief	Register an algorithm factory with pandora
+	 * 
+	 *	@param	pandora the pandora instance to register the algorithm factory with
+	 *	@param	algorithmType the type of algorithm that the factory will create
+	 *	@param	pAlgorithmFactory the address of an algorithm factory instance
+	 */
+	static StatusCode RegisterAlgorithmFactory(const pandora::Pandora &pandora, const std::string &algorithmType,
+		pandora::AlgorithmFactory *const pAlgorithmFactory);
 
 	/**
 	 *	@brief	Set parent-daughter mc particle relationship
