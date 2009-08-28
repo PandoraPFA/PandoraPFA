@@ -43,7 +43,7 @@ void PandoraPFANewProcessor::init()
 		
 		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateGeometry());
 		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RegisterUserAlgorithmFactories());
-		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::InitializeAlgorithms(m_pandora));
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(m_pandora, "PandoraSettings.xml"));
 	}
 	catch (StatusCodeException &statusCodeException)
 	{
@@ -131,8 +131,8 @@ StatusCode PandoraPFANewProcessor::RegisterUserAlgorithmFactories()
 StatusCode PandoraPFANewProcessor::CreateTracks(const LCEvent *const pLCEvent)
 {
 	// Insert user code here ...
-	for (StringVector::const_iterator iter = m_pandoraSettings.m_trackCollections.begin(), 
-		iterEnd = m_pandoraSettings.m_trackCollections.end(); iter != iterEnd; ++iter)
+	for (StringVector::const_iterator iter = m_settings.m_trackCollections.begin(), 
+		iterEnd = m_settings.m_trackCollections.end(); iter != iterEnd; ++iter)
 	{
 		try
 		{
@@ -167,8 +167,8 @@ StatusCode PandoraPFANewProcessor::CreateTracks(const LCEvent *const pLCEvent)
 StatusCode PandoraPFANewProcessor::CreateCaloHits(const LCEvent *const pLCEvent)
 {
 	// Insert user code here ...
-	for (StringVector::const_iterator iter = m_pandoraSettings.m_hCalCollections.begin(), 
-		iterEnd = m_pandoraSettings.m_hCalCollections.end(); iter != iterEnd; ++iter)
+	for (StringVector::const_iterator iter = m_settings.m_hCalCollections.begin(), 
+		iterEnd = m_settings.m_hCalCollections.end(); iter != iterEnd; ++iter)
 	{
 		try
 		{
@@ -233,19 +233,19 @@ void PandoraPFANewProcessor::ProcessSteeringFile()
 	registerInputCollections(LCIO::TRACK,
 							"TrackCollections", 
 							"Names of the Track collections used for clustering",
-							m_pandoraSettings.m_trackCollections,
+							m_settings.m_trackCollections,
 							StringVector(1, std::string("LDCTracks")));
 
 	registerInputCollections(LCIO::VERTEX,
 							"V0VertexCollections", 
 							"Name of external V0 Vertex collections",
-							m_pandoraSettings.m_v0VertexCollections,
+							m_settings.m_v0VertexCollections,
 							StringVector(1, std::string("V0Vertices")));
 
 	registerInputCollections(LCIO::CALORIMETERHIT,
 							"CaloHitcollections", 
 							"Name of the HCAL collection used to form clusters",
-							m_pandoraSettings.m_hCalCollections,
+							m_settings.m_hCalCollections,
 							StringVector(1, std::string("HCAL")));
 }
 

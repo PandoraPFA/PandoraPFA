@@ -37,10 +37,9 @@ StatusCode PandoraContentApiImpl::CreateParticleFlowObject(const PandoraContentA
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::CreateDaughterAlgorithm(TiXmlElement *const pXmlElement, Algorithm *&pDaughterAlgorithm,
-	std::string &daughterAlgorithmName) const
+StatusCode PandoraContentApiImpl::CreateDaughterAlgorithm(TiXmlElement *const pXmlElement, std::string &daughterAlgorithmName) const
 {
-	return m_pPandora->m_pAlgorithmManager->CreateAlgorithm(pXmlElement, pDaughterAlgorithm, daughterAlgorithmName);
+	return m_pPandora->m_pAlgorithmManager->CreateAlgorithm(pXmlElement, daughterAlgorithmName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
@@ -96,6 +95,14 @@ StatusCode PandoraContentApiImpl::OrderInputCaloHits() const
 {
 	return m_pPandora->m_pCaloHitManager->OrderInputCaloHits();
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::InitializeAlgorithms(const TiXmlHandle *const pXmlHandle) const
+{
+	return m_pPandora->m_pAlgorithmManager->InitializeAlgorithms(pXmlHandle);
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 

@@ -11,6 +11,8 @@
 #include "Pandora.h"
 
 class TiXmlElement;
+class TiXmlHandle;
+
 namespace pandora { class Algorithm; }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,16 +82,23 @@ public:
 	static StatusCode OrderInputCaloHits(const pandora::Pandora &pandora);
 
 	/**
+	 *	@brief	Initialize pandora algorithms
+	 * 
+	 *	@param	pandora the pandora instance to own and run the algorithms
+	 *	@param	pXmlHandle address of the relevant xml handle
+	 */
+	static StatusCode InitializeAlgorithms(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle);
+
+	/**
 	 *	@brief	Create an algorithm instance, via one of the algorithm factories registered with pandora.
 	 * 			This function is expected to be called whilst reading the settings for a parent algorithm.
 	 * 
 	 *	@param	parentAlgorithm address of the parent algorithm, which will later run this daughter algorithm
 	 *	@param	pXmlElement address of the xml element describing the daughter algorithm type and settings
-	 *	@param	pDaughterAlgorithm to receive the address of the daughter algorithm instance
 	 *	@param	daughterAlgorithmName to receive the name of the daughter algorithm instance
 	 */
 	static StatusCode CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
-		pandora::Algorithm *&pDaughterAlgorithm, std::string &daughterAlgorithmName);
+		std::string &daughterAlgorithmName);
 
 	/**
 	 *	@brief	Run an algorithm registered with pandora

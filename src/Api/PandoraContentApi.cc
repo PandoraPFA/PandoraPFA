@@ -42,10 +42,17 @@ StatusCode PandoraContentApi::OrderInputCaloHits(const pandora::Pandora &pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
-	pandora::Algorithm *&pDaughterAlgorithm, std::string &daughterAlgorithmName)
+StatusCode PandoraContentApi::InitializeAlgorithms(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle)
 {
-	return parentAlgorithm.GetPandoraContentApiImpl()->CreateDaughterAlgorithm(pXmlElement, pDaughterAlgorithm, daughterAlgorithmName);
+	return pandora.GetPandoraContentApiImpl()->InitializeAlgorithms(pXmlHandle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
+	std::string &daughterAlgorithmName)
+{
+	return parentAlgorithm.GetPandoraContentApiImpl()->CreateDaughterAlgorithm(pXmlElement, daughterAlgorithmName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

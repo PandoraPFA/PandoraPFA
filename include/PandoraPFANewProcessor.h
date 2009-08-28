@@ -11,7 +11,6 @@
 #include "marlin/Processor.h"
 
 #include "Pandora.h"
-#include "PandoraSettings.h"
 
 /**
  *	@brief	PandoraPFANewProcessor class
@@ -19,6 +18,20 @@
 class PandoraPFANewProcessor : public marlin::Processor
 {
 public:
+	typedef std::vector<std::string> StringVector;
+
+	/**
+	 *	@brief Settings class
+	 */
+	class Settings
+	{
+	  public:
+		StringVector	m_trackCollections;		///< The reconstructed track collections
+		StringVector	m_v0VertexCollections;	///< The v0 vertex collections
+		StringVector	m_hCalCollections;		///< The hcal calorimeter hit collections
+		StringVector	m_eCalCollections;		///< The ecal calorimeter hit collections	
+	};		
+
 	/**
 	 *	@brief	Default constructor
 	 */
@@ -105,7 +118,7 @@ private:
 	void ProcessSteeringFile();
 
 	pandora::Pandora	m_pandora;			///< The pandora instance
-	PandoraSettings		m_pandoraSettings;	///< The settings for pandora
+	Settings			m_settings;			///< The settings for the pandora pfa new processor
 	std::string			m_detectorName;		///< The detector name
 	unsigned int		m_nRun;				///< The run number
 	unsigned int		m_nEvent;			///< The event number

@@ -43,11 +43,9 @@ public:
 	 * 			This function is expected to be called whilst reading the settings for a parent algorithm.
 	 * 
 	 *	@param	pXmlElement address of the xml element describing the daughter algorithm type and settings
-	 *	@param	pDaughterAlgorithm to receive the address of the daughter algorithm instance
 	 *	@param	daughterAlgorithmName to receive the name of the daughter algorithm instance
 	 */
-	StatusCode CreateDaughterAlgorithm(TiXmlElement *const pXmlElement, Algorithm *&pDaughterAlgorithm,
-		std::string &daughterAlgorithmName) const;
+	StatusCode CreateDaughterAlgorithm(TiXmlElement *const pXmlElement, std::string &daughterAlgorithmName) const;
 
 	/**
 	 *	@brief	Run an algorithm registered with pandora
@@ -66,6 +64,13 @@ public:
 	 */
 	StatusCode OrderInputCaloHits() const;
 
+	/**
+	 *	@brief	Initialize pandora algorithms
+	 * 
+	 *	@param	pXmlHandle address of the relevant xml handle
+	 */
+	StatusCode InitializeAlgorithms(const TiXmlHandle *const pXmlHandle) const;
+	
 	/**
 	 *	@brief	Get the current cluster list
 	 * 

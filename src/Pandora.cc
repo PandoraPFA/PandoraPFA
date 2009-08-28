@@ -6,9 +6,6 @@
  *	$Log: $
  */
 
-#include "GeometryHelper.h"
-#include "Pandora.h"
-
 #include "Api/PandoraApi.h"
 #include "Api/PandoraApiImpl.h"
 #include "Api/PandoraContentApi.h"
@@ -21,6 +18,12 @@
 #include "Managers/ParticleFlowObjectManager.h"
 #include "Managers/TrackManager.h"
 
+#include "Xml/tinyxml.h"
+
+#include "GeometryHelper.h"
+#include "Pandora.h"
+#include "PandoraSettings.h"
+
 namespace pandora
 {
 
@@ -32,6 +35,7 @@ Pandora::Pandora() :
 	m_pMCManager(new MCManager),
 	m_pParticleFlowObjectManager(new ParticleFlowObjectManager),
 	m_pTrackManager(new TrackManager),
+	m_pPandoraSettings(new PandoraSettings),
 	m_pPandoraApiImpl(new PandoraApiImpl(this)),
 	m_pPandoraContentApiImpl(new PandoraContentApiImpl(this))	
 {
@@ -48,6 +52,7 @@ Pandora::~Pandora()
 	delete m_pMCManager;
 	delete m_pParticleFlowObjectManager;
 	delete m_pTrackManager;
+	delete m_pPandoraSettings;
 	delete m_pPandoraApiImpl;
 	delete m_pPandoraContentApiImpl;
 }
@@ -67,6 +72,28 @@ StatusCode Pandora::ProcessEvent()
 
 	for (StringVector::const_iterator iter = pPandoraAlgorithms->begin(), iterEnd = pPandoraAlgorithms->end(); iter != iterEnd; ++iter)
 		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, *iter));
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
+{
+	TiXmlDocument xmlDocument(xmlFileName);
+
+	if (!xmlDocument.LoadFile())
+	{
+		std::cout << "Pandora::ReadSettings - Invalid xml file." << std::endl;
+		return STATUS_CODE_FAILURE;
+	}
+
+	const TiXmlHandle xmlDocumentHandle(&xmlDocument);
+	const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
+
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeAlgorithms(*this, &xmlHandle));
+
+	// TODO will read in pandora parameters here
 
 	return STATUS_CODE_SUCCESS;
 }

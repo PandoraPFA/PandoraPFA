@@ -32,11 +32,7 @@ StatusCode PrimaryClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 	if (NULL == pXmlElement)
 		return STATUS_CODE_NOT_FOUND;
 
-	Algorithm *pAlgorithm = NULL;
-	std::string algorithmName;
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(*this, pXmlElement, pAlgorithm, algorithmName));
-
-	m_clusteringAlgorithmName = algorithmName;
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(*this, pXmlElement, m_clusteringAlgorithmName));
 
 	return STATUS_CODE_SUCCESS;
 }

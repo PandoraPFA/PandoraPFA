@@ -62,9 +62,9 @@ StatusCode PandoraApiImpl::ProcessEvent() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApiImpl::InitializeAlgorithms() const
+StatusCode PandoraApiImpl::ReadSettings(const std::string &xmlFileName) const
 {
-	return m_pPandora->m_pAlgorithmManager->InitializeAlgorithms();
+	return m_pPandora->ReadSettings(xmlFileName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

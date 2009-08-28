@@ -14,15 +14,14 @@ StatusCode PhotonClusteringAlgorithm::Run()
 {
 	// Run initial clustering algorithm
 	const ClusterList *pClusterList = NULL;
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, "Clustering", pClusterList));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
 
-	// Select some clusters (a subset of those in pClusterList) to save
-	ClusterList clustersToSave;
+	// Could select some clusters here (a subset of those in pClusterList) to save. Would then pass this list when calling SaveClusterList.
+	// ClusterList clustersToSave;
 
 	//Save the clusters and remove the hits - clustersToSave argument is optional
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, "newClusterListName",
-		clustersToSave));
-
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_photonClusterListName));
+	
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -30,5 +29,19 @@ StatusCode PhotonClusteringAlgorithm::Run()
 
 StatusCode PhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
+	TiXmlElement *pXmlElement = xmlHandle.FirstChild("algorithm").Element();
+
+	if (NULL == pXmlElement)
+		return STATUS_CODE_NOT_FOUND;
+
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(*this, pXmlElement, m_clusteringAlgorithmName));
+
+	pXmlElement = xmlHandle.FirstChild("photonClusterListName").Element();
+
+	if (NULL == pXmlElement)
+		return STATUS_CODE_NOT_FOUND;
+
+	m_photonClusterListName = pXmlElement->Value();
+
 	return STATUS_CODE_SUCCESS;
 }

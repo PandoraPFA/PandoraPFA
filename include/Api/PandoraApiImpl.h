@@ -37,9 +37,11 @@ public:
 	StatusCode ProcessEvent() const;
 
 	/**
-	 *	@brief	Initialize pandora algorithms
+	 *	@brief	Read pandora settings
+	 * 
+	 *	@param	xmlFileName the name of the xml file containing the settings
 	 */
-	StatusCode InitializeAlgorithms() const;
+	StatusCode ReadSettings(const std::string &xmlFileName) const;
 
 	/**
 	 *	@brief	Register an algorithm factory with pandora

@@ -73,7 +73,7 @@ protected:
 	/**
 	 *	@brief	Read the algorithm settings
 	 * 
-	 *	@param	xmlHandle the relevant xmlHandle
+	 *	@param	xmlHandle the relevant xml handle
 	 */
 	virtual StatusCode ReadSettings(TiXmlHandle xmlHandle) = 0;
 

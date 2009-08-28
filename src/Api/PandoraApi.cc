@@ -25,9 +25,9 @@ StatusCode PandoraApi::ProcessEvent(const pandora::Pandora &pandora)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::InitializeAlgorithms(const pandora::Pandora &pandora)
+StatusCode PandoraApi::ReadSettings(const pandora::Pandora &pandora, const std::string &xmlFileName)
 {
-	return pandora.GetPandoraApiImpl()->InitializeAlgorithms();
+	return pandora.GetPandoraApiImpl()->ReadSettings(xmlFileName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

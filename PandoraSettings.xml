@@ -7,5 +7,12 @@
 		<algorithm type = "Clustering">
 		</algorithm>
 	</algorithm>
-	
+
+	<algorithm type = "PhotonClustering">
+		<algorithm type = "Clustering">
+		</algorithm>
+		
+		<photonClusterListName> PhotonClusterList </photonClusterListName>
+	</algorithm>
+
 </pandora>

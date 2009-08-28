@@ -111,11 +111,12 @@ public:
 	static StatusCode ProcessEvent(const pandora::Pandora &pandora);
 
 	/**
-	 *	@brief	Initialize pandora algorithms
+	 *	@brief	Read pandora settings
 	 * 
 	 *	@param	pandora the pandora instance to run the algorithms initialize
+	 *	@param	xmlFileName the name of the xml file containing the settings
 	 */
-	static StatusCode InitializeAlgorithms(const pandora::Pandora &pandora);
+	static StatusCode ReadSettings(const pandora::Pandora &pandora, const std::string &xmlFileName);
 
 	/**
 	 *	@brief	Register an algorithm factory with pandora
