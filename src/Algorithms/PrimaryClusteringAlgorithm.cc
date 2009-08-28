@@ -14,16 +14,29 @@ StatusCode PrimaryClusteringAlgorithm::Run()
 {
 	// Run initial clustering algorithm
 	const ClusterList *pClusterList = NULL;
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, "Clustering", pClusterList));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
 
 	pClusterList = NULL;
 	std::string clusterListName;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList, clusterListName));
-	
-	for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
-	{
-		std::cout << "Cluster! " << *iter << std::endl;
-	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PrimaryClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+{
+	TiXmlElement *pXmlElement = xmlHandle.FirstChild("algorithm").Element();
+
+	if (NULL == pXmlElement)
+		return STATUS_CODE_NOT_FOUND;
+
+	Algorithm *pAlgorithm = NULL;
+	std::string algorithmName;
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(*this, pXmlElement, pAlgorithm, algorithmName));
+
+	m_clusteringAlgorithmName = algorithmName;
 
 	return STATUS_CODE_SUCCESS;
 }

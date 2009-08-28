@@ -37,9 +37,10 @@ StatusCode PandoraContentApiImpl::CreateParticleFlowObject(const PandoraContentA
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 
-StatusCode PandoraContentApiImpl::CreateAlgorithm(const std::string &algorithmType, Algorithm *&pAlgorithm, std::string &algorithmName) const
+StatusCode PandoraContentApiImpl::CreateDaughterAlgorithm(TiXmlElement *const pXmlElement, Algorithm *&pDaughterAlgorithm,
+	std::string &daughterAlgorithmName) const
 {
-	return m_pPandora->m_pAlgorithmManager->CreateAlgorithm(algorithmType, pAlgorithm, algorithmName);
+	return m_pPandora->m_pAlgorithmManager->CreateAlgorithm(pXmlElement, pDaughterAlgorithm, daughterAlgorithmName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
@@ -57,16 +58,16 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 	
 	try
 	{
-		std::cout << "Running Algorithm: " << iter->first << std::endl;
+		std::cout << "Running Algorithm: " << iter->first << ", " << iter->second->GetAlgorithmType() << std::endl;
 		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, iter->second->Run());
 	}
 	catch (StatusCodeException &statusCodeException)
 	{
-		std::cout << "Failure in algorithm " << iter->first << ", " << statusCodeException.ToString() << std::endl;
+		std::cout << "Failure in algorithm " << iter->first << ", " << iter->second->GetAlgorithmType() << ", " << statusCodeException.ToString() << std::endl;
 	}
 	catch (...)
 	{
-		std::cout << "Failure in algorithm " << iter->first << ", unrecognized exception" << std::endl;
+		std::cout << "Failure in algorithm " << iter->first << ", " << iter->second->GetAlgorithmType() << ", unrecognized exception" << std::endl;
 	}
 
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ResetAfterAlgorithmCompletion(iter->second));

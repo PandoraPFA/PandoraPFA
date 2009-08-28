@@ -1,0 +1,11 @@
+<!-- Pandora settings xml file -->
+
+<pandora>
+
+	<!-- Primary clustering algorithm runs Clustering algorithm -->
+	<algorithm type = "PrimaryClustering">
+		<algorithm type = "Clustering">
+		</algorithm>
+	</algorithm>
+	
+</pandora>

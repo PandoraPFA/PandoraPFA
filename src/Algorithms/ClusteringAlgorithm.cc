@@ -18,6 +18,7 @@ StatusCode ClusteringAlgorithm::Run()
 	const OrderedCaloHitList *pOrderedCaloHitList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
+	// Test - create a cluster from every calo hit
 	for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
 	{
 	
@@ -27,5 +28,12 @@ StatusCode ClusteringAlgorithm::Run()
 		}
 	}
 
+	return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+{
 	return STATUS_CODE_SUCCESS;
 }

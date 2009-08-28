@@ -10,6 +10,7 @@
 
 #include "Pandora.h"
 
+class TiXmlElement;
 namespace pandora { class Algorithm; }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -79,15 +80,16 @@ public:
 	static StatusCode OrderInputCaloHits(const pandora::Pandora &pandora);
 
 	/**
-	 *	@brief	Create an algorithm, via one of the algorithm factories registered with pandora
+	 *	@brief	Create an algorithm instance, via one of the algorithm factories registered with pandora.
+	 * 			This function is expected to be called whilst reading the settings for a parent algorithm.
 	 * 
-	 *	@param	pandora the pandora instance to create the algorithm
-	 *	@param	algorithmType the type of algorithm to create
-	 *	@param	pAlgorithm to receive the address of the algorithm instance
-	 *	@param	algorithmName to receive the name of the algorithm instance
+	 *	@param	parentAlgorithm address of the parent algorithm, which will later run this daughter algorithm
+	 *	@param	pXmlElement address of the xml element describing the daughter algorithm type and settings
+	 *	@param	pDaughterAlgorithm to receive the address of the daughter algorithm instance
+	 *	@param	daughterAlgorithmName to receive the name of the daughter algorithm instance
 	 */
-	static StatusCode CreateAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmType, pandora::Algorithm *&pAlgorithm,
-		std::string &algorithmName);
+	static StatusCode CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
+		pandora::Algorithm *&pDaughterAlgorithm, std::string &daughterAlgorithmName);
 
 	/**
 	 *	@brief	Run an algorithm registered with pandora
@@ -98,12 +100,12 @@ public:
 	static StatusCode RunAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmName);
 
 	/**
-	 *	@brief	Run an algorithm registered with pandora
+	 *	@brief	Run an algorithm registered with pandora, from within a parent algorithm
 	 * 
-	 *	@param	algorithm address of the parent algorithm, now attempting to run a daughter algorithm
-	 *	@param	algorithmName the name of the algorithm instance to run
+	 *	@param	parentAlgorithm address of the parent algorithm, now attempting to run a daughter algorithm
+	 *	@param	daughterAlgorithmName the name of the daughter algorithm instance to run
 	 */
-	static StatusCode RunAlgorithm(const pandora::Algorithm &algorithm, const std::string &algorithmName);
+	static StatusCode RunDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, const std::string &daughterAlgorithmName);
 
 	/**
 	 *	@brief	Get the current cluster list

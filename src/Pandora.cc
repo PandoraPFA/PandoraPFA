@@ -58,14 +58,15 @@ StatusCode Pandora::ProcessEvent()
 {
 	std::cout << "Pandora process event" << std::endl;
 
-	// May call prepare event method here eventually
+	// Prepare event
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MatchCaloHitsToMCPfoTargets(*this));
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::OrderInputCaloHits(*this));
 
-	// Will loop over algorithms here eventually
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "PrimaryClustering"));
-//	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "PhotonClustering"));
-//	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, "Reclustering"));
+	// Loop over algorithms
+	const StringVector *const pPandoraAlgorithms = m_pAlgorithmManager->GetPandoraAlgorithms();
+
+	for (StringVector::const_iterator iter = pPandoraAlgorithms->begin(), iterEnd = pPandoraAlgorithms->end(); iter != iterEnd; ++iter)
+		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, *iter));
 
 	return STATUS_CODE_SUCCESS;
 }

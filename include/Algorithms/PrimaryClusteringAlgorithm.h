@@ -24,9 +24,12 @@ public:
 	public:
 		Algorithm *CreateAlgorithm() const;
 	};	
-	
+
 private:
 	StatusCode Run();
+	StatusCode ReadSettings(TiXmlHandle xmlHandle);
+	
+	std::string		m_clusteringAlgorithmName;		///< The name of the clustering algorithm to run
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

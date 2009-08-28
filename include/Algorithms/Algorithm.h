@@ -15,6 +15,8 @@
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
 
+#include "Xml/tinyxml.h"
+
 namespace pandora
 {
 
@@ -44,19 +46,36 @@ public:
 	Algorithm();
 
 	/**
+	 *	@brief	Default constructor
+	 */
+	virtual ~Algorithm();
+	
+	/**
 	 *	@brief	Get the pandora content api impl
 	 * 
 	 *	@return	Address of the pandora content api impl
 	 */
 	const PandoraContentApiImpl *const GetPandoraContentApiImpl() const;
 
-	Pandora		*m_pPandora;		///< The pandora object that will run the algorithm
-
+	/**
+	 *	@brief	Get the algorithm type
+	 * 
+	 *	@return	The algorithm type name
+	 */
+	const std::string GetAlgorithmType() const;
+	
 protected:
 	/**
 	 *	@brief	Run the algorithm
 	 */
 	virtual StatusCode Run() = 0;
+
+	/**
+	 *	@brief	Read the algorithm settings
+	 * 
+	 *	@param	xmlHandle the relevant xmlHandle
+	 */
+	virtual StatusCode ReadSettings(TiXmlHandle xmlHandle) = 0;
 
 	/**
 	 *	@brief	Register the pandora object that will run the algorithm
@@ -65,8 +84,11 @@ protected:
 	 */
 	StatusCode RegisterPandora(Pandora *pPandora);
 
+	Pandora			*m_pPandora;			///< The pandora object that will run the algorithm
+	std::string		m_algorithmType;		///< The type of algorithm
+
 	friend class AlgorithmManager;
-	friend class PandoraContentApiImpl; // TODO remove this later
+	friend class PandoraContentApiImpl;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,12 +100,25 @@ inline 	Algorithm::Algorithm() :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline 	Algorithm::~Algorithm()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const PandoraContentApiImpl *const Algorithm::GetPandoraContentApiImpl() const
 {
 	if (NULL == m_pPandora)
 		throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 	
 	return m_pPandora->GetPandoraContentApiImpl();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const std::string Algorithm::GetAlgorithmType() const
+{
+	return m_algorithmType;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

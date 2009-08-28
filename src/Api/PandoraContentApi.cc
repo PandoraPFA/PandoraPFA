@@ -42,10 +42,10 @@ StatusCode PandoraContentApi::OrderInputCaloHits(const pandora::Pandora &pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::CreateAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmType, pandora::Algorithm *&pAlgorithm,
-	std::string &algorithmName)
+StatusCode PandoraContentApi::CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
+	pandora::Algorithm *&pDaughterAlgorithm, std::string &daughterAlgorithmName)
 {
-	return pandora.GetPandoraContentApiImpl()->CreateAlgorithm(algorithmType, pAlgorithm, algorithmName);
+	return parentAlgorithm.GetPandoraContentApiImpl()->CreateDaughterAlgorithm(pXmlElement, pDaughterAlgorithm, daughterAlgorithmName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,9 +57,9 @@ StatusCode PandoraContentApi::RunAlgorithm(const pandora::Pandora &pandora, cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::RunAlgorithm(const pandora::Algorithm &algorithm, const std::string &algorithmName)
+StatusCode PandoraContentApi::RunDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, const std::string &daughterAlgorithmName)
 {
-	return algorithm.GetPandoraContentApiImpl()->RunAlgorithm(algorithmName);
+	return parentAlgorithm.GetPandoraContentApiImpl()->RunAlgorithm(daughterAlgorithmName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ StatusCode PandoraContentApi::InitializeReclustering(const pandora::Algorithm &a
 
 StatusCode PandoraContentApi::EndReclustering(const pandora::Algorithm &algorithm, const std::string &selectedClusterListName)
 {
-	return algorithm.m_pPandora->GetPandoraContentApiImpl()->EndReclustering(algorithm, selectedClusterListName);
+	return algorithm.GetPandoraContentApiImpl()->EndReclustering(algorithm, selectedClusterListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

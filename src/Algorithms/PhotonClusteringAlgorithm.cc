@@ -25,3 +25,10 @@ StatusCode PhotonClusteringAlgorithm::Run()
 
 	return STATUS_CODE_SUCCESS;
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+{
+	return STATUS_CODE_SUCCESS;
+}

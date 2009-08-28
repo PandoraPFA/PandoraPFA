@@ -48,3 +48,10 @@ StatusCode ReclusteringAlgorithm::Run()
 
 	return STATUS_CODE_SUCCESS;
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ReclusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+{
+	return STATUS_CODE_SUCCESS;
+}

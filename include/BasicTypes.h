@@ -58,6 +58,7 @@ typedef std::vector<CaloHitAddressVector> ClusterAddressVector;
 
 typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;
+typedef std::vector<std::string> StringVector;
 
 typedef const void * Uid;
 typedef std::map<Uid, MCParticle *> UidToMCParticleMap;

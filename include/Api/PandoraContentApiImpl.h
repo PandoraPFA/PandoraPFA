@@ -39,13 +39,15 @@ public:
 	StatusCode CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) const;
 		
 	/**
-	 *	@brief	Create an algorithm, via one of the algorithm factories registered with pandora
+	 *	@brief	Create an algorithm instance, via one of the algorithm factories registered with pandora.
+	 * 			This function is expected to be called whilst reading the settings for a parent algorithm.
 	 * 
-	 *	@param	algorithmType the type of algorithm to create
-	 *	@param	pAlgorithm to receive the address of the algorithm instance
-	 *	@param	algorithmName to receive the name of the algorithm instance
+	 *	@param	pXmlElement address of the xml element describing the daughter algorithm type and settings
+	 *	@param	pDaughterAlgorithm to receive the address of the daughter algorithm instance
+	 *	@param	daughterAlgorithmName to receive the name of the daughter algorithm instance
 	 */
-	StatusCode CreateAlgorithm(const std::string &algorithmType, Algorithm *&pAlgorithm, std::string &algorithmName) const;
+	StatusCode CreateDaughterAlgorithm(TiXmlElement *const pXmlElement, Algorithm *&pDaughterAlgorithm,
+		std::string &daughterAlgorithmName) const;
 
 	/**
 	 *	@brief	Run an algorithm registered with pandora
