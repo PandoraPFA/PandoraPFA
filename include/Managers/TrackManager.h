@@ -86,6 +86,13 @@ private:
 	StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &trackListName);
 
 	/**
+	 *	@brief	Reset the current list to the algorithm input list
+	 *
+	 *	@param	pAlgorithm address of the algorithm changing the current track list
+	 */	
+	StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+
+	/**
 	 *	@brief	Change the current track list to a specified temporary list of tracks
 	 *
 	 *	@param	pAlgorithm address of the algorithm changing the current track list
@@ -200,6 +207,13 @@ inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAl
 	}
 	
 	return this->GetList(trackListName, pTrackList);	
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode TrackManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
+{
+	return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
 }
 
 } // namespace pandora

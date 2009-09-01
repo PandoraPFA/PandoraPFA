@@ -15,20 +15,24 @@ StatusCode ReclusteringAlgorithm::Run()
 	const TrackList *pInputTrackList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pInputTrackList));
 
-	const ClusterList *pInputClusterList = NULL;
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList));
-
-	for (ClusterList::const_iterator clusterIter = pInputClusterList->begin(); clusterIter != pInputClusterList->end(); ++clusterIter)
+	for (TrackList::const_iterator trackIter = pInputTrackList->begin(); trackIter != pInputTrackList->end(); ++trackIter)
 	{
 		// Select clusters and tracks to use for reclustering
 		TrackList reclusterTrackList;
+		reclusterTrackList.insert(*trackIter);
+
 		ClusterList reclusterClusterList;
-		
-		// For now, by way of example, just pair the first track with each cluster
-		reclusterTrackList.insert(*pInputTrackList->begin());
-		reclusterClusterList.insert(*clusterIter);
-Cluster *pTempCluster = *clusterIter; //HACK doesn't work unless restoring original clusters
-	
+
+		const ClusterList *pInputClusterList = NULL;
+		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList));
+
+		for (ClusterList::const_iterator clusterIter = pInputClusterList->begin(); clusterIter != pInputClusterList->end(); ++clusterIter)
+		{
+			// For now, by way of example, just pair each track with the first cluster
+			reclusterClusterList.insert(*clusterIter);
+			break;
+		}
+
 		// Initialize reclustering with these local lists
 		std::string originalClustersListName;
 		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeReclustering(*this, reclusterTrackList, 
@@ -49,8 +53,6 @@ Cluster *pTempCluster = *clusterIter; //HACK doesn't work unless restoring origi
 
 		// Choose best clusters, which may be the originals
 		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndReclustering(*this, bestReclusterCandidateListName));
-
-clusterIter = pInputClusterList->find(pTempCluster); //HACK doesn't work unless restoring original clusters
 	}
 
 	return STATUS_CODE_SUCCESS;

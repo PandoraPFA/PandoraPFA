@@ -89,7 +89,14 @@ private:
 	 *	@param	clusterListName the name of the new current (and algorithm input) cluster list
 	 */	
 	StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &clusterListName);
-	
+
+	/**
+	 *	@brief	Reset the current list to the algorithm input list
+	 *
+	 *	@param	pAlgorithm address of the algorithm changing the cluster lists
+	 */	
+	StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+
 	/**
 	 *	@brief	Make a temporary cluster list and set it to be the current cluster list
 	 * 
@@ -251,6 +258,13 @@ inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const p
 	}
 	
 	return this->GetList(clusterListName, pClusterList);	
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
+{
+	return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
 }
 
 } // namespace pandora

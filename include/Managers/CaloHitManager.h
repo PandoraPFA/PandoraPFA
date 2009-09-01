@@ -91,6 +91,13 @@ private:
 	StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &orderedCaloHitListName);
 
 	/**
+	 *	@brief	Reset the current list to the algorithm input list
+	 *
+	 *	@param	pAlgorithm address of the algorithm changing the current ordered calo hit list
+	 */	
+	StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+	
+	/**
 	 *	@brief	Change the current ordered calo hit list to a specified ordered calo hit list
 	 *
  	 *	@param	pAlgorithm address of the algorithm changing the current ordered calo hit list
@@ -259,6 +266,13 @@ inline StatusCode CaloHitManager::GetAlgorithmInputList(const Algorithm *const p
 	}
 	
 	return this->GetList(orderedCaloHitListName, pOrderedCaloHitList);	
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode CaloHitManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
+{
+	return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
 }
 
 } // namespace pandora
