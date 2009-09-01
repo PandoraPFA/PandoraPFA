@@ -11,6 +11,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <sstream>
 #include <vector>
 
 namespace pandora
@@ -21,6 +22,28 @@ class Cluster;
 class OrderedCaloHitList;
 class Track;
 class MCParticle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <class T>
+inline bool StringToType(const std::string &s, T &t)
+{
+	std::istringstream iss(s);
+	return !(iss >> t).fail();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <class T>
+inline std::string TypeToString(const T &t)
+{
+	std::ostringstream oss;
+
+	if ((oss << t).fail())
+		throw;	
+
+	return oss.str();
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

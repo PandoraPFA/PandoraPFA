@@ -41,7 +41,7 @@ StatusCode PhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 	if (NULL == pXmlElement)
 		return STATUS_CODE_NOT_FOUND;
 
-	m_photonClusterListName = pXmlElement->Value();
+	m_photonClusterListName = pXmlElement->GetText();
 
 	return STATUS_CODE_SUCCESS;
 }

@@ -11,8 +11,6 @@
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 
-#include <sstream>
-
 namespace pandora
 {
 
@@ -107,10 +105,7 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
 	if (m_algorithmInfoMap.end() == iter)
 		return STATUS_CODE_NOT_FOUND;
 
-	std::ostringstream temporaryListNameStream;
-	temporaryListNameStream << pAlgorithm << "_" << iter->second.m_temporaryListNames.size();
-
-	temporaryListName = temporaryListNameStream.str();
+	temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_temporaryListNames.size());
 	iter->second.m_temporaryListNames.insert(temporaryListName);
 
 	m_nameToOrderedCaloHitListMap[temporaryListName] = new OrderedCaloHitList(orderedCaloHitList);
