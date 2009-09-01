@@ -42,6 +42,13 @@ StatusCode PandoraContentApi::OrderInputCaloHits(const pandora::Pandora &pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::ReadPandoraSettings(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle)
+{
+	return pandora.GetPandoraContentApiImpl()->ReadPandoraSettings(pXmlHandle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::InitializeAlgorithms(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle)
 {
 	return pandora.GetPandoraContentApiImpl()->InitializeAlgorithms(pXmlHandle);

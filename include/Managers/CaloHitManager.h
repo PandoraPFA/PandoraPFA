@@ -184,6 +184,7 @@ private:
 	public:
 		std::string					m_parentListName;				///< The current ordered calo hit list when algorithm was initialized
 		StringSet					m_temporaryListNames;			///< The temporary ordered calo hit list names
+		unsigned int				m_numberOfListsCreated;			///< The number of ordered calo hit lists created by the algorithm
 	};
 	
 	typedef std::map<std::string, OrderedCaloHitList *> NameToOrderedCaloHitListMap;

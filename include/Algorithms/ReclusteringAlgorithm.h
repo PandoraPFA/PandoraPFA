@@ -28,6 +28,8 @@ public:
 private:
 	StatusCode Run();
 	StatusCode ReadSettings(TiXmlHandle xmlHandle);
+	
+	pandora::StringVector	m_clusteringAlgorithms;		///< The ordered list of clustering algorithms to be used
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

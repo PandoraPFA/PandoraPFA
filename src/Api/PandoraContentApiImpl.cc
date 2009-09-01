@@ -18,6 +18,7 @@
 #include "Managers/ParticleFlowObjectManager.h"
 
 #include "Pandora.h"
+#include "PandoraSettings.h"
 
 namespace pandora
 {
@@ -98,11 +99,17 @@ StatusCode PandoraContentApiImpl::OrderInputCaloHits() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::ReadPandoraSettings(const TiXmlHandle *const pXmlHandle) const
+{
+	return m_pPandora->m_pPandoraSettings->Read(pXmlHandle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::InitializeAlgorithms(const TiXmlHandle *const pXmlHandle) const
 {
 	return m_pPandora->m_pAlgorithmManager->InitializeAlgorithms(pXmlHandle);
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------	
 

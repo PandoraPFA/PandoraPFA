@@ -2,17 +2,35 @@
 
 <pandora>
 
+	<!-- Photon clustering algorithm runs Clustering algorithm and saves a photon cluster list under a specified name-->
+	<algorithm type = "PhotonClustering">
+		<algorithm type = "Clustering">
+		</algorithm>
+		<photonClusterListName> PhotonClusterList </photonClusterListName>
+	</algorithm>
+
 	<!-- Primary clustering algorithm runs Clustering algorithm -->
 	<algorithm type = "PrimaryClustering">
 		<algorithm type = "Clustering">
 		</algorithm>
+		<clusterListName> PrimaryClusterList </clusterListName>		
 	</algorithm>
 
-	<algorithm type = "PhotonClustering">
-		<algorithm type = "Clustering">
-		</algorithm>
-		
-		<photonClusterListName> PhotonClusterList </photonClusterListName>
+	<!-- Reclustering algorithm runs multiple Clustering algorithms -->
+	<algorithm type = "Reclustering">
+		<clusteringAlgorithms>
+			<algorithm type = "Clustering">
+			</algorithm>
+
+			<algorithm type = "Clustering">
+			</algorithm>
+
+			<algorithm type = "Clustering">
+			</algorithm>
+
+			<algorithm type = "Clustering">
+			</algorithm>
+		</clusteringAlgorithms>
 	</algorithm>
 
 </pandora>

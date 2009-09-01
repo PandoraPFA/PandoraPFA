@@ -130,6 +130,7 @@ private:
 	public:
 		std::string					m_parentListName;				///< The current track list when algorithm was initialized
 		StringSet					m_temporaryListNames;			///< The temporary track list names		
+		unsigned int				m_numberOfListsCreated;			///< The number of track lists created by the algorithm
 	};
 
 	typedef std::map<std::string, TrackList *> NameToTrackListMap;

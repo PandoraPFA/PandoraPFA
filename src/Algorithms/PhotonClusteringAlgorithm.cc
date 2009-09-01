@@ -29,6 +29,7 @@ StatusCode PhotonClusteringAlgorithm::Run()
 
 StatusCode PhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
+	// Daughter clustering algorithm
 	TiXmlElement *pXmlElement = xmlHandle.FirstChild("algorithm").Element();
 
 	if (NULL == pXmlElement)
@@ -36,6 +37,7 @@ StatusCode PhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(*this, pXmlElement, m_clusteringAlgorithmName));
 
+	// Photon cluster list name
 	pXmlElement = xmlHandle.FirstChild("photonClusterListName").Element();
 
 	if (NULL == pXmlElement)

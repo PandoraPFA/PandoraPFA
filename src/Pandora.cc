@@ -92,8 +92,7 @@ StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
 	const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeAlgorithms(*this, &xmlHandle));
-
-	// TODO will read in pandora parameters here
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReadPandoraSettings(*this, &xmlHandle));
 
 	return STATUS_CODE_SUCCESS;
 }

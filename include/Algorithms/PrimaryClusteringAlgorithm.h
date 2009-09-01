@@ -30,6 +30,7 @@ private:
 	StatusCode ReadSettings(TiXmlHandle xmlHandle);
 	
 	std::string		m_clusteringAlgorithmName;		///< The name of the clustering algorithm to run
+	std::string		m_clusterListName;				///< The name under which to save the new cluster list
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

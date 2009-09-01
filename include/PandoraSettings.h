@@ -8,6 +8,12 @@
 #ifndef PANDORA_SETTINGS_H
 #define PANDORA_SETTINGS_H 1
 
+#include "StatusCodes.h"
+
+class TiXmlHandle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 namespace pandora
 {
 
@@ -18,6 +24,15 @@ class PandoraSettings
 {
 public:
 
+private:
+	/**
+	 *	@brief	Read pandora settings
+	 * 
+	 *	@param	pXmlHandle address of the relevant xml handle
+	 */
+	StatusCode Read(const TiXmlHandle *const pXmlHandle);	
+
+	friend class PandoraContentApiImpl;
 };
 
 } // namespace pandora

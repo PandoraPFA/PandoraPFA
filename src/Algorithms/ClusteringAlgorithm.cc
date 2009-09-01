@@ -18,13 +18,14 @@ StatusCode ClusteringAlgorithm::Run()
 	const OrderedCaloHitList *pOrderedCaloHitList = NULL;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
-	// Test - create a cluster from every calo hit
 	for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
 	{
-	
 		for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
 		{
-			PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, *caloHitIter));	
+			double randomNumber = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX);
+
+			if (randomNumber < 0.25) // TODO write a real clustering algorithm
+				PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, *caloHitIter));	
 		}
 	}
 

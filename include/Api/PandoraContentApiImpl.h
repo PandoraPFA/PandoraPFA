@@ -65,6 +65,13 @@ public:
 	StatusCode OrderInputCaloHits() const;
 
 	/**
+	 *	@brief	Read pandora settings
+	 * 
+	 *	@param	pXmlHandle address of the relevant xml handle
+	 */
+	StatusCode ReadPandoraSettings(const TiXmlHandle *const pXmlHandle) const;
+	
+	/**
 	 *	@brief	Initialize pandora algorithms
 	 * 
 	 *	@param	pXmlHandle address of the relevant xml handle

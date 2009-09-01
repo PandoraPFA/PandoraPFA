@@ -82,6 +82,14 @@ public:
 	static StatusCode OrderInputCaloHits(const pandora::Pandora &pandora);
 
 	/**
+	 *	@brief	Read pandora settings
+	 * 
+	 *	@param	pandora the pandora instance to be configured
+	 *	@param	pXmlHandle address of the relevant xml handle
+	 */
+	static StatusCode ReadPandoraSettings(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle);
+
+	/**
 	 *	@brief	Initialize pandora algorithms
 	 * 
 	 *	@param	pandora the pandora instance to own and run the algorithms

@@ -105,7 +105,7 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
 	if (m_algorithmInfoMap.end() == iter)
 		return STATUS_CODE_NOT_FOUND;
 
-	temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_temporaryListNames.size());
+	temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_numberOfListsCreated++);
 	iter->second.m_temporaryListNames.insert(temporaryListName);
 
 	m_nameToTrackListMap[temporaryListName] = new TrackList(trackList);
@@ -139,6 +139,7 @@ StatusCode TrackManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 	
 	AlgorithmInfo algorithmInfo;
 	algorithmInfo.m_parentListName = m_currentListName;
+	algorithmInfo.m_numberOfListsCreated = 0;
 
 	if (!m_algorithmInfoMap.insert(AlgorithmInfoMap::value_type(pAlgorithm, algorithmInfo)).second)
 		return STATUS_CODE_FAILURE;

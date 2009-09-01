@@ -182,6 +182,7 @@ private:
 	public:
 		std::string					m_parentListName;				///< The current cluster list when algorithm was initialized
 		StringSet					m_temporaryListNames;			///< The temporary cluster list names
+		unsigned int				m_numberOfListsCreated;			///< The number of cluster lists created by the algorithm
 	};
 
 	typedef std::map<std::string, ClusterList *> NameToClusterListMap;
