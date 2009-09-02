@@ -38,9 +38,10 @@ private:
      *  @brief  Create cluster
      * 
      *  @param  clusterParameters the cluster parameters
+     *  @param  pCluster to receive the address of the cluster created
      */
     template <typename CLUSTER_PARAMETERS>
-    StatusCode CreateCluster(CLUSTER_PARAMETERS *pClusterParameters);
+    StatusCode CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster);
 
     /**
      *  @brief  Get the current cluster list name

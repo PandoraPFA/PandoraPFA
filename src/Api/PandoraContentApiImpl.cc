@@ -24,9 +24,9 @@ namespace pandora
 {
 
 template <typename CLUSTER_PARAMETERS>
-StatusCode PandoraContentApiImpl::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters) const
+StatusCode PandoraContentApiImpl::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster) const
 {
-    return m_pPandora->m_pClusterManager->CreateCluster(pClusterParameters);
+    return m_pPandora->m_pClusterManager->CreateCluster(pClusterParameters, pCluster);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------    
@@ -313,8 +313,8 @@ PandoraContentApiImpl::PandoraContentApiImpl(Pandora *pPandora) :
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template StatusCode PandoraContentApiImpl::CreateCluster<CaloHit>(CaloHit *pCaloHit) const;
-template StatusCode PandoraContentApiImpl::CreateCluster<InputCaloHitList>(InputCaloHitList *pInputCaloHitList) const;
-template StatusCode PandoraContentApiImpl::CreateCluster<Track>(pandora::Track *pTrack) const;
+template StatusCode PandoraContentApiImpl::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster) const;
+template StatusCode PandoraContentApiImpl::CreateCluster<InputCaloHitList>(InputCaloHitList *pInputCaloHitList, Cluster *&pCluster) const;
+template StatusCode PandoraContentApiImpl::CreateCluster<Track>(pandora::Track *pTrack, Cluster *&pCluster) const;
 
 } // namespace pandora

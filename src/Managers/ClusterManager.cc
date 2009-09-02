@@ -28,7 +28,7 @@ ClusterManager::~ClusterManager()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename CLUSTER_PARAMETERS>
-StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters)
+StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster)
 {
     if (!m_canMakeNewClusters)
         return STATUS_CODE_NOT_ALLOWED;
@@ -38,7 +38,7 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters)
     if (m_nameToClusterListMap.end() == iter)
         return STATUS_CODE_NOT_INITIALIZED;
 
-    Cluster *pCluster = NULL;
+    pCluster = NULL;
     pCluster = new Cluster(pClusterParameters);
     
     if (NULL == pCluster)
@@ -323,8 +323,8 @@ StatusCode ClusterManager::RemoveTemporaryList(const Algorithm *const pAlgorithm
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template StatusCode ClusterManager::CreateCluster<CaloHit>(CaloHit *pCaloHit);
-template StatusCode ClusterManager::CreateCluster<InputCaloHitList>(InputCaloHitList *pCaloHitList);
-template StatusCode ClusterManager::CreateCluster<Track>(Track *pTrack);
+template StatusCode ClusterManager::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster);
+template StatusCode ClusterManager::CreateCluster<InputCaloHitList>(InputCaloHitList *pCaloHitList, Cluster *&pCluster);
+template StatusCode ClusterManager::CreateCluster<Track>(Track *pTrack, Cluster *&pCluster);
 
 } // namespace pandora
