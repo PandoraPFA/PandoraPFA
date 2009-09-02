@@ -1,18 +1,18 @@
 /**
- *	@file	PandoraPFANew/src/GeometryHelper.cc
+ *  @file   PandoraPFANew/src/GeometryHelper.cc
  * 
- *	@brief	Implementation of the geometry helper class.
+ *  @brief  Implementation of the geometry helper class.
  * 
- *	$Log: $
+ *  $Log: $
  */
  
 #include "GeometryHelper.h"
 
 namespace pandora
 {
-	
+
 GeometryHelper::GeometryHelper() :
-	m_isInitialized(false)
+    m_isInitialized(false)
 {
 }
 
@@ -20,14 +20,14 @@ GeometryHelper::GeometryHelper() :
 
 StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geometryParameters)
 {
-	if (m_isInitialized)
-		return STATUS_CODE_ALREADY_INITIALIZED;
-	
-	m_tpcInnerRadius = geometryParameters.m_tpcInnerRadius;
+    if (m_isInitialized)
+        return STATUS_CODE_ALREADY_INITIALIZED;
 
-	m_isInitialized = true;
-	
-	return STATUS_CODE_SUCCESS;
+    m_tpcInnerRadius = geometryParameters.m_tpcInnerRadius;
+
+    m_isInitialized = true;
+
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

@@ -1,9 +1,9 @@
 /**
- *	@file PandoraPFANew/src/PandoraSettings.cc
+ *    @file PandoraPFANew/src/PandoraSettings.cc
  * 
- *	@brief Implementation of the pandora settings class.
+ *    @brief Implementation of the pandora settings class.
  * 
- *	$Log: $
+ *  $Log: $
  */
 
 #include "Xml/tinyxml.h"
@@ -15,9 +15,9 @@ namespace pandora
 
 StatusCode PandoraSettings::Read(const TiXmlHandle *const pXmlHandle)
 {
-	// TODO read in pandora parameters here
+    // TODO read in pandora parameters here
 
-	return STATUS_CODE_SUCCESS;
+    return STATUS_CODE_SUCCESS;
 }
-	
+
 } // namespace pandora

@@ -1,9 +1,9 @@
 /**
- *	@file	PandoraPFANew/include/Objects/Cluster.h
+ *  @file   PandoraPFANew/include/Objects/Cluster.h
  * 
- *	@brief	Header file for the cluster class.
+ *  @brief  Header file for the cluster class.
  * 
- *	$Log: $
+ *  $Log: $
  */
 #ifndef CLUSTER_H
 #define CLUSTER_H 1
@@ -20,93 +20,93 @@ namespace pandora
 class CaloHit;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-	
+    
 /**
- *	@brief	Cluster class
+ *  @brief  Cluster class
  */
 class Cluster
 {
 public:
-	/**
-	 *	@brief	Get the ordered calo hit list
-	 * 
-	 *	@return	Address of the ordered calo hit list
-	 */	
-	const OrderedCaloHitList *const GetOrderedCaloHitList() const;
+    /**
+     *  @brief  Get the ordered calo hit list
+     * 
+     *  @return Address of the ordered calo hit list
+     */    
+    const OrderedCaloHitList *const GetOrderedCaloHitList() const;
 
-	/**
-	 *	@brief	Get calo hits in specified pseudo layer
-	 * 
-	 *	@param	pseudoLayer the pseudo layer
-	 *	@param	pCaloHitList to receive the address of the relevant calo hit list
-	 */
-	StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
-	
+    /**
+     *  @brief  Get calo hits in specified pseudo layer
+     * 
+     *  @param  pseudoLayer the pseudo layer
+     *  @param  pCaloHitList to receive the address of the relevant calo hit list
+     */
+    StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
+
 private:
-	/**
-	 *	@brief	Constructor
-	 * 
-	 *	@param	pCaloHit address of calo hit with which initialize cluster
-	 */
-	Cluster(CaloHit *pCaloHit);
+    /**
+     *  @brief  Constructor
+     * 
+     *  @param  pCaloHit address of calo hit with which initialize cluster
+     */
+    Cluster(CaloHit *pCaloHit);
 
-	/**
-	 *	@brief	Constructor
-	 * 
-	 *	@param	pCaloHitList calo hits with which to create cluster
-	 */
-	Cluster(InputCaloHitList *pCaloHitList);
+    /**
+     *  @brief  Constructor
+     * 
+     *  @param  pCaloHitList calo hits with which to create cluster
+     */
+    Cluster(InputCaloHitList *pCaloHitList);
 
-	/**
-	 *	@brief	Constructor
-	 * 
-	 *	@param	pTrack address of track with which to seed cluster
-	 */
-	Cluster(Track *pTrack);
+    /**
+     *  @brief  Constructor
+     * 
+     *  @param  pTrack address of track with which to seed cluster
+     */
+    Cluster(Track *pTrack);
 
-	/**
-	 *	@brief	Destructor
-	 */
-	~Cluster();
-	
-	/**
-	 *	@brief	Add a calo hit to the cluster
-	 * 
-	 *	@param	pCaloHit the address of the calo hit
-	 */
-	StatusCode AddCaloHit(CaloHit *const pCaloHit);
+    /**
+     *  @brief  Destructor
+     */
+    ~Cluster();
 
-	/**
-	 *	@brief	Add the calo hits from a second cluster to this
-	 * 
-	 *	@param	pCluster the address of the second cluster
-	 */
-	StatusCode AddHitsFromSecondCluster(Cluster *const pCluster);
+    /**
+     *  @brief  Add a calo hit to the cluster
+     * 
+     *  @param  pCaloHit the address of the calo hit
+     */
+    StatusCode AddCaloHit(CaloHit *const pCaloHit);
 
-	OrderedCaloHitList		m_orderedCaloHitList;	///< The ordered calo hit list
+    /**
+     *  @brief  Add the calo hits from a second cluster to this
+     * 
+     *  @param  pCluster the address of the second cluster
+     */
+    StatusCode AddHitsFromSecondCluster(Cluster *const pCluster);
 
-	friend class ClusterManager;
+    OrderedCaloHitList      m_orderedCaloHitList;       ///< The ordered calo hit list
+
+    friend class ClusterManager;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline const OrderedCaloHitList *const Cluster::GetOrderedCaloHitList() const
 {
-	return &m_orderedCaloHitList;
+    return &m_orderedCaloHitList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
-	return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
+    return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 {
-	return m_orderedCaloHitList.AddCaloHit(pCaloHit);
+    return m_orderedCaloHitList.AddCaloHit(pCaloHit);
 }
 
 } // namespace pandora

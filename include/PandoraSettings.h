@@ -1,9 +1,9 @@
 /**
- *	@file	PandoraPFANew/include/PandoraSettings.h
+ *  @file   PandoraPFANew/include/PandoraSettings.h
  * 
- *	@brief	Header file for the pandora settings class.
+ *  @brief  Header file for the pandora settings class.
  * 
- *	$Log: $
+ *  $Log: $
  */
 #ifndef PANDORA_SETTINGS_H
 #define PANDORA_SETTINGS_H 1
@@ -18,21 +18,21 @@ namespace pandora
 {
 
 /**
- *	@brief PandoraSettings class
+ *  @brief  PandoraSettings class
  */
 class PandoraSettings
 {
 public:
 
 private:
-	/**
-	 *	@brief	Read pandora settings
-	 * 
-	 *	@param	pXmlHandle address of the relevant xml handle
-	 */
-	StatusCode Read(const TiXmlHandle *const pXmlHandle);	
+    /**
+     *  @brief  Read pandora settings
+     * 
+     *  @param  pXmlHandle address of the relevant xml handle
+     */
+    StatusCode Read(const TiXmlHandle *const pXmlHandle);    
 
-	friend class PandoraContentApiImpl;
+    friend class PandoraContentApiImpl;
 };
 
 } // namespace pandora

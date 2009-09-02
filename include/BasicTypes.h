@@ -1,9 +1,9 @@
 /**
- *	@file	PandoraPFANew/include/BasicTypes.h
+ *  @file   PandoraPFANew/include/BasicTypes.h
  * 
- *	@brief	Header file defining relevant typedefs, sort functions, etc
+ *  @brief  Header file defining relevant typedefs, sort functions, etc
  * 
- *	$Log: $
+ *  $Log: $
  */
 #ifndef BASIC_TYPES_H
 #define BASIC_TYPES_H 1
@@ -28,8 +28,8 @@ class MCParticle;
 template <class T>
 inline bool StringToType(const std::string &s, T &t)
 {
-	std::istringstream iss(s);
-	return !(iss >> t).fail();
+    std::istringstream iss(s);
+    return !(iss >> t).fail();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,24 +37,24 @@ inline bool StringToType(const std::string &s, T &t)
 template <class T>
 inline std::string TypeToString(const T &t)
 {
-	std::ostringstream oss;
+    std::ostringstream oss;
 
-	if ((oss << t).fail())
-		throw;	
+    if ((oss << t).fail())
+        throw;
 
-	return oss.str();
+    return oss.str();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *	@brief	Enable ordering of pointers based on properties of target objects
+ *  @brief  Enable ordering of pointers based on properties of target objects
  */
 template <typename T>
 class PointerLess
 {
 public:
-	bool operator()(const T *lhs, const T *rhs) const;
+    bool operator()(const T *lhs, const T *rhs) const;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ public:
 template <typename T>
 inline bool PointerLess<T>::operator()(const T *lhs, const T *rhs) const
 {
-	return (*lhs < *rhs);
+    return (*lhs < *rhs);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

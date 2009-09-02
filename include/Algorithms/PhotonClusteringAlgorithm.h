@@ -1,9 +1,9 @@
 /**
- *	@file	PandoraPFANew/include/Algorithms/PhotonClusteringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/PhotonClusteringAlgorithm.h
  * 
- *	@brief	Header file for the photon clustering algorithm class.
+ *  @brief  Header file for the photon clustering algorithm class.
  * 
- *	$Log: $
+ *  $Log: $
  */
 #ifndef PHOTON_CLUSTERING_ALGORITHM_H
 #define PHOTON_CLUSTERING_ALGORITHM_H 1
@@ -11,33 +11,33 @@
 #include "Algorithms/Algorithm.h"
 
 /**
- *	@brief PhotonClusteringAlgorithm class
+ *  @brief  PhotonClusteringAlgorithm class
  */
 class PhotonClusteringAlgorithm : public pandora::Algorithm
 {
 public:
-	/**
-	 *	@brief	Factory class for instantiating algorithm
-	 */
-	class Factory : public pandora::AlgorithmFactory
-	{
-	public:
-		Algorithm *CreateAlgorithm() const;
-	};	
+    /**
+     *  @brief  Factory class for instantiating algorithm
+     */
+    class Factory : public pandora::AlgorithmFactory
+    {
+    public:
+        Algorithm *CreateAlgorithm() const;
+    };
 
 private:
-	StatusCode Run();
-	StatusCode ReadSettings(TiXmlHandle xmlHandle);
+    StatusCode Run();
+    StatusCode ReadSettings(TiXmlHandle xmlHandle);
 
-	std::string		m_clusteringAlgorithmName;		///< The name of the clustering algorithm to run
-	std::string		m_photonClusterListName;		///< The name under which to save the new photon cluster list
+    std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
+    std::string     m_photonClusterListName;        ///< The name under which to save the new photon cluster list
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline pandora::Algorithm *PhotonClusteringAlgorithm::Factory::CreateAlgorithm() const
 {
-	return new PhotonClusteringAlgorithm();
+    return new PhotonClusteringAlgorithm();
 }
 
 #endif // #ifndef PHOTON_CLUSTERING_ALGORITHM_H

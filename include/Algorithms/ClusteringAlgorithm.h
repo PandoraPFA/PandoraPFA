@@ -1,9 +1,9 @@
 /**
- *	@file	PandoraPFANew/include/Algorithms/ClusteringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/ClusteringAlgorithm.h
  * 
- *	@brief	Header file for the clustering algorithm class.
+ *  @brief  Header file for the clustering algorithm class.
  * 
- *	$Log: $
+ *  $Log: $
  */
 #ifndef CLUSTERING_ALGORITHM_H
 #define CLUSTERING_ALGORITHM_H 1
@@ -11,30 +11,30 @@
 #include "Algorithms/Algorithm.h"
 
 /**
- *	@brief ClusteringAlgorithm class
+ *  @brief  ClusteringAlgorithm class
  */
 class ClusteringAlgorithm : public pandora::Algorithm
 {
 public:
-	/**
-	 *	@brief	Factory class for instantiating algorithm
-	 */
-	class Factory : public pandora::AlgorithmFactory
-	{
-	public:
-		Algorithm *CreateAlgorithm() const;
-	};	
+    /**
+     *  @brief  Factory class for instantiating algorithm
+     */
+    class Factory : public pandora::AlgorithmFactory
+    {
+    public:
+        Algorithm *CreateAlgorithm() const;
+    };
 
 private:
-	StatusCode Run();
-	StatusCode ReadSettings(TiXmlHandle xmlHandle);
+    StatusCode Run();
+    StatusCode ReadSettings(TiXmlHandle xmlHandle);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline pandora::Algorithm *ClusteringAlgorithm::Factory::CreateAlgorithm() const
 {
-	return new ClusteringAlgorithm();
+    return new ClusteringAlgorithm();
 }
 
 #endif // #ifndef CLUSTERING_ALGORITHM_H
