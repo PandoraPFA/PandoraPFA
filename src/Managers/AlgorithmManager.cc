@@ -70,6 +70,9 @@ StatusCode AlgorithmManager::InitializeAlgorithms(const TiXmlHandle *const pXmlH
 
 StatusCode AlgorithmManager::CreateAlgorithm(TiXmlElement *const pXmlElement, std::string &algorithmName)
 {
+	std::string instanceLabel;
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_NOT_FOUND, !=, FindSpecificAlgorithmInstance(pXmlElement, algorithmName, instanceLabel));
+
 	AlgorithmFactoryMap::const_iterator iter = m_algorithmFactoryMap.find(pXmlElement->Attribute("type"));
 
 	if (m_algorithmFactoryMap.end() == iter)
@@ -91,7 +94,37 @@ StatusCode AlgorithmManager::CreateAlgorithm(TiXmlElement *const pXmlElement, st
 	if (!m_algorithmMap.insert(AlgorithmMap::value_type(algorithmName, pAlgorithm)).second)
 		return STATUS_CODE_FAILURE;
 
+	if (!instanceLabel.empty() && !m_specificAlgorithmInstanceMap.insert(SpecificAlgorithmInstanceMap::value_type(instanceLabel, algorithmName)).second)
+			return STATUS_CODE_FAILURE;
+
 	return STATUS_CODE_SUCCESS;	
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode AlgorithmManager::FindSpecificAlgorithmInstance(TiXmlElement *const pXmlElement, std::string &algorithmName, std::string &instanceLabel) const
+{
+	try 
+	{
+		instanceLabel = std::string(pXmlElement->Attribute("instance"));
+		SpecificAlgorithmInstanceMap::const_iterator iter = m_specificAlgorithmInstanceMap.find(instanceLabel);
+
+		if (m_specificAlgorithmInstanceMap.end() == iter)
+			return STATUS_CODE_NOT_FOUND;
+
+		algorithmName = iter->second;
+
+		AlgorithmMap::const_iterator targetIter = m_algorithmMap.find(algorithmName);
+
+		if ((m_algorithmMap.end() == targetIter) || (targetIter->second->m_algorithmType != std::string(pXmlElement->Attribute("type"))))
+			return STATUS_CODE_FAILURE;		
+
+		return STATUS_CODE_SUCCESS;	
+	}
+	catch (...)
+	{
+		return STATUS_CODE_NOT_FOUND;
+	}
 }
 
 } // namespace pandora
