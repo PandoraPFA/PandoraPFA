@@ -43,7 +43,7 @@ void PandoraPFANewProcessor::init()
 		
 		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateGeometry());
 		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RegisterUserAlgorithmFactories());
-		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(m_pandora, "PandoraSettings.xml"));
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::ReadSettings(m_pandora, m_settings.m_pandoraSettingsXmlFile));
 	}
 	catch (StatusCodeException &statusCodeException)
 	{
@@ -158,7 +158,7 @@ StatusCode PandoraPFANewProcessor::CreateTracks(const LCEvent *const pLCEvent)
 			std::cout << "Failed to extract a track, unrecognised exception" << std::endl;
 		}
 	}
-	
+
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -198,7 +198,7 @@ StatusCode PandoraPFANewProcessor::CreateCaloHits(const LCEvent *const pLCEvent)
 			std::cout << "Failed to extract a calo hit, unrecognised exception" << std::endl;
 		}
 	}
-	
+
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -210,7 +210,7 @@ StatusCode PandoraPFANewProcessor::ProcessParticleFlowObjects(const LCEvent *con
 	PandoraApi::ParticleFlowObjectList particleFlowObjectList;
 	PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=,
 		PandoraApi::GetParticleFlowObjects(m_pandora, particleFlowObjectList));
-	
+
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -219,7 +219,7 @@ StatusCode PandoraPFANewProcessor::ProcessParticleFlowObjects(const LCEvent *con
 StatusCode PandoraPFANewProcessor::CreateMCTrees(const LCEvent *const pLCEvent)
 {
 	// Insert user code here ...
-	
+
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -228,8 +228,18 @@ StatusCode PandoraPFANewProcessor::CreateMCTrees(const LCEvent *const pLCEvent)
 void PandoraPFANewProcessor::ProcessSteeringFile()
 {
 	// Insert user code here ...
-		
+	registerProcessorParameter("PandoraSettingsXmlFile",
+							"The pandora settings xml file",
+							m_settings.m_pandoraSettingsXmlFile,
+							std::string());
+
 	// Input collections
+	registerInputCollections(LCIO::TRACK,
+							"TrackCollections", 
+							"Names of the Track collections used for clustering",
+							m_settings.m_trackCollections,
+							StringVector(1, std::string("LDCTracks")));	
+	
 	registerInputCollections(LCIO::TRACK,
 							"TrackCollections", 
 							"Names of the Track collections used for clustering",

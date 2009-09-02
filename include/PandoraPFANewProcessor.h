@@ -26,10 +26,12 @@ public:
 	class Settings
 	{
 	  public:
-		StringVector	m_trackCollections;		///< The reconstructed track collections
-		StringVector	m_v0VertexCollections;	///< The v0 vertex collections
-		StringVector	m_hCalCollections;		///< The hcal calorimeter hit collections
-		StringVector	m_eCalCollections;		///< The ecal calorimeter hit collections	
+		std::string		m_pandoraSettingsXmlFile;	///< The pandora settings xml file
+		
+		StringVector	m_trackCollections;			///< The reconstructed track collections
+		StringVector	m_v0VertexCollections;		///< The v0 vertex collections
+		StringVector	m_hCalCollections;			///< The hcal calorimeter hit collections
+		StringVector	m_eCalCollections;			///< The ecal calorimeter hit collections	
 	};		
 
 	/**

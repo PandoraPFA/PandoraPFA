@@ -232,7 +232,7 @@ StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, co
 
 	std::string inputOrderedCaloHitListName;
 	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->GetAlgorithmInputListName(&algorithm, inputOrderedCaloHitListName));
-	//PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->RemoveCaloHitsFromList(inputOrderedCaloHitListName, *pNewClusterList));
+	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->RemoveCaloHitsFromList(inputOrderedCaloHitListName, *pNewClusterList));
 
 	return STATUS_CODE_SUCCESS;
 }

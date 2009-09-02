@@ -13,7 +13,7 @@
 	<algorithm type = "PrimaryClustering">
 		<algorithm type = "Clustering">
 		</algorithm>
-		<clusterListName> PrimaryClusterList </clusterListName>		
+		<clusterListName> PrimaryClusterList </clusterListName>
 	</algorithm>
 
 	<!-- Reclustering algorithm runs multiple Clustering algorithms -->

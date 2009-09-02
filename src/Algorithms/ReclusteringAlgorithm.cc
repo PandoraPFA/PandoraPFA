@@ -38,8 +38,8 @@ StatusCode ReclusteringAlgorithm::Run()
 		PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeReclustering(*this, reclusterTrackList, 
 			reclusterClusterList, originalClustersListName));
 
-		// Repeat for many clustering algorithms, using pReclusterCandidates to calculate a figure of merit and
-		// identify the best recluster candidates. For now, just put things back as they were.
+		// Run multiple clustering algorithms, using returned cluster candidate list to calculate a figure of merit and 
+		// identify the best recluster candidates.
 		std::string bestReclusterCandidateListName = originalClustersListName;
 
 		for (StringVector::const_iterator clusteringIter = m_clusteringAlgorithms.begin(),
@@ -49,6 +49,11 @@ StatusCode ReclusteringAlgorithm::Run()
 			const ClusterList *pReclusterCandidatesList = NULL;
 			PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, *clusteringIter, 
 				pReclusterCandidatesList, reclusterCandidatesListName));
+			
+			// Calculate figure of merit for recluster candidates here. Label as best recluster candidates if applicable.
+			// For now, just take the last populated list.
+			if (!pReclusterCandidatesList->empty())
+				bestReclusterCandidateListName = reclusterCandidatesListName;
 		}
 
 		// Choose best clusters, which may be the originals

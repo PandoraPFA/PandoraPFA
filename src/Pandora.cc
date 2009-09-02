@@ -80,19 +80,32 @@ StatusCode Pandora::ProcessEvent()
 
 StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
 {
-	TiXmlDocument xmlDocument(xmlFileName);
-
-	if (!xmlDocument.LoadFile())
+	try
 	{
-		std::cout << "Pandora::ReadSettings - Invalid xml file." << std::endl;
+		TiXmlDocument xmlDocument(xmlFileName);
+
+		if (!xmlDocument.LoadFile())
+		{
+			std::cout << "Pandora::ReadSettings - Invalid xml file." << std::endl;
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+		}
+
+		const TiXmlHandle xmlDocumentHandle(&xmlDocument);
+		const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
+
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeAlgorithms(*this, &xmlHandle));
+		PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReadPandoraSettings(*this, &xmlHandle));
+	}
+	catch (StatusCodeException &statusCodeException)
+	{
+		std::cout << "Failure in reading pandora settings, " << statusCodeException.ToString() << std::endl;
 		return STATUS_CODE_FAILURE;
 	}
-
-	const TiXmlHandle xmlDocumentHandle(&xmlDocument);
-	const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
-
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeAlgorithms(*this, &xmlHandle));
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReadPandoraSettings(*this, &xmlHandle));
+	catch (...)
+	{
+		std::cout << "Failure in reading pandora settings, unrecognized exception" << std::endl;
+		return STATUS_CODE_FAILURE;
+	}
 
 	return STATUS_CODE_SUCCESS;
 }
