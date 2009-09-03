@@ -29,7 +29,6 @@ public:
     */
    virtual StatusCode ApplySelectionRules(MCParticle *const mcRootParticle) const;
    
-   friend class MCManager;
 };
 
 

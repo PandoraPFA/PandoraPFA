@@ -136,6 +136,8 @@ private:
      *  @brief  Set pfo target for a mc tree
      * 
      *  @param  mcParticle particle in the mc tree
+     *  @param  onlyDaughters if "true" go through daughters only, if false
+     *          go through parents as well
      */
     StatusCode SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters = false );
 
