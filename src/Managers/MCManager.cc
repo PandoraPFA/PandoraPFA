@@ -20,7 +20,7 @@ MCManager::MCManager() :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-MCManager::MCManager(const MCManager::MCPfoSelection* mcPfoSelection) :
+MCManager::MCManager(const MCPfoSelection* mcPfoSelection) :
     m_pMCPfoSelection(mcPfoSelection)
 {
 }
@@ -186,9 +186,29 @@ StatusCode MCManager::ResetForNextEvent()
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCManager::MCPfoSelection::ApplySelectionRules(MCParticle *const mcRootParticle) const
+StatusCode MCPfoSelection::ApplySelectionRules(MCParticle *const mcParticle) const
 {
     // TODO : write the default selection rules here. Care with non-initialized mc particles. Must check whether initialized.
+
+    double boundary = 3.0; // TODO: make this a parameter if the MCPfoSelection
+
+    // check if particle crosses (virtual) spherical boundary
+    if( mcParticle->GetOuterRadius() > boundary && mcParticle->GetInnerRadius() <= boundary )
+    {
+	mcParticle->SetPfoTargetInTree( mcParticle, true ); // set mcParticle to be the Pfo-target in the daughter-tree
+    }
+    else
+    {
+	// mcParticle has not yet crossed the boundary. 
+        // It should not make any hit, but in case it would: set the Pfo-target to be the mcparticle self
+	mcParticle->SetPfoTarget( mcParticle );
+
+	// walk through the daughter particles
+	for( MCParticleList::iterator itPtcl = mcParticle->m_daughterList.begin(), itPtclEnd = mcParticle->m_daughterList.end(); itPtcl != itPtclEnd; itPtcl++ )
+	{
+	    this->ApplySelectionRules( mcParticle );
+	}
+    }
 
     return STATUS_CODE_SUCCESS;
 }

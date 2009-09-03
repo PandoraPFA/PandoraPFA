@@ -137,7 +137,7 @@ private:
      * 
      *  @param  mcParticle particle in the mc tree
      */
-    StatusCode SetPfoTargetInTree(MCParticle* mcParticle);
+    StatusCode SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters = false );
 
     Uid                 m_uid;              ///< Unique ID of the particle
 
@@ -154,6 +154,8 @@ private:
     bool                m_isInitialized;    ///< Whether particle information has been initialized
 
     friend class MCManager;
+    friend class MCPfoSelection;
+
     friend class TestMCManager;
     friend class TestCaloHitManager;
 };

@@ -14,6 +14,25 @@
 
 namespace pandora
 {
+
+
+/**
+ *  @brief  MCPfoSelection class
+ */
+class MCPfoSelection
+{
+public:
+   /**
+    *  @brief  Apply mc pfo selection rules 
+    *
+    *  @params mcRootParticle address of the mc root particle
+    */
+   virtual StatusCode ApplySelectionRules(MCParticle *const mcRootParticle) const;
+   
+   friend class MCManager;
+};
+
+
     
 /**
  *    @brief MCManager class
@@ -21,19 +40,6 @@ namespace pandora
 class MCManager
 {
 public:
-    /**
-     *  @brief  MCPfoSelection class
-     */
-    class MCPfoSelection
-    {
-    public:
-        /**
-         *  @brief  Apply mc pfo selection rules 
-         *
-         *  @params mcRootParticle address of the mc root particle
-         */
-        virtual StatusCode ApplySelectionRules(MCParticle *const mcRootParticle) const;
-    };
 
     /**
      *  @brief  Constructor
@@ -134,6 +140,9 @@ private:
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
+
+    friend class MCPfoSelection;
+
     friend class TestMCManager;
     friend class TestCaloHitManager;
 };

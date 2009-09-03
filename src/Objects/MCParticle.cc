@@ -54,7 +54,7 @@ void MCParticle::SetProperties(const PandoraApi::MCParticleParameters &mcParticl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCParticle::SetPfoTargetInTree(MCParticle* mcParticle)
+StatusCode MCParticle::SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters )
 {
     if (this->IsPfoTargetSet())
         return STATUS_CODE_SUCCESS;
@@ -66,9 +66,11 @@ StatusCode MCParticle::SetPfoTargetInTree(MCParticle* mcParticle)
        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPfoTargetInTree(mcParticle));
     }
 
-    for (MCParticleList::iterator iter = m_parentList.begin(), iterEnd = m_parentList.end(); iter != iterEnd; ++iter)
-    {
-       PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPfoTargetInTree(mcParticle));
+    if( !onlyDaughters ){
+       for (MCParticleList::iterator iter = m_parentList.begin(), iterEnd = m_parentList.end(); iter != iterEnd; ++iter)
+       {
+	  PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPfoTargetInTree(mcParticle));
+       }
     }
 
     return STATUS_CODE_SUCCESS;
