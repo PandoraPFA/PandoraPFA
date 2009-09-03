@@ -41,6 +41,30 @@ public:
     bool IsPfoTarget() const;
 
     /**
+     *	@brief	Get energy of mc particle
+     * 
+     */	
+    float GetEnergy() const;
+
+    /**
+     *	@brief	Get momentum of mc particle
+     * 
+     */	
+    float GetMomentum() const;
+
+    /**
+     *	@brief	Get inner radius of mc particle
+     * 
+     */	
+    float GetInnerRadius() const;
+
+    /**
+     *	@brief	Get outer radius of mc particle
+     * 
+     */	
+    float GetOuterRadius() const;
+
+    /**
      *  @brief  Whether the pfo target been set
      * 
      */
@@ -212,6 +236,34 @@ inline StatusCode MCParticle::SetPfoTarget(MCParticle *mcParticle)
     m_pPfoTarget = mcParticle;
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float MCParticle::GetEnergy() const
+{
+    return m_energy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float MCParticle::GetMomentum() const
+{
+    return m_momentum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float MCParticle::GetInnerRadius() const
+{
+    return m_innerRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float MCParticle::GetOuterRadius() const
+{
+    return m_outerRadius;
 }
 
 } // namespace pandora
