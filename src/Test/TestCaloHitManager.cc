@@ -147,19 +147,46 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)102, isolated );
 
 
+        std::cout << "        create MCParticleParameters" << std::endl;
+	// give all the MCParticles the same parameters (except the parent address)
+	// just to make it easier
+	PandoraApi::MCParticleParameters mcParticleParameters;
+	mcParticleParameters.m_energy = 10;
+	mcParticleParameters.m_momentum = 8;
+	mcParticleParameters.m_innerRadius = 0.1;
+	mcParticleParameters.m_outerRadius = 30.0;
+	mcParticleParameters.m_pParentAddress = (void*)200;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)300;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)301;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)400;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)401;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)210;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)101;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)211;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)310;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)311;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
 
 
 
 
 
-        std::cout << "            now the real testing for the CaloHitManager" << std::endl;
-        std::cout << "            create the CaloHitManager" << std::endl;
+        std::cout << "        now the real testing for the CaloHitManager" << std::endl;
+        std::cout << "        create the CaloHitManager" << std::endl;
         CaloHitManager* pCaloHitManager = new CaloHitManager();
 	assert( pCaloHitManager != 0 ); // problem at creating a CaloHitManager
 
 	
-        std::cout << "            create the CaloHits" << std::endl;
-//	pCaloHitManager->CreateCaloHit( 
+        std::cout << "        create the CaloHits" << std::endl;
 
         std::cout << "        create CaloHitParameters" << std::endl;
 	PandoraApi::CaloHitParameters caloHitParameters;
