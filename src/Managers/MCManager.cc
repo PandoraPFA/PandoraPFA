@@ -206,7 +206,7 @@ StatusCode MCPfoSelection::ApplySelectionRules(MCParticle *const mcParticle) con
 	// walk through the daughter particles
 	for( MCParticleList::iterator itPtcl = mcParticle->m_daughterList.begin(), itPtclEnd = mcParticle->m_daughterList.end(); itPtcl != itPtclEnd; itPtcl++ )
 	{
-	    this->ApplySelectionRules( mcParticle );
+	    this->ApplySelectionRules( (*itPtcl) );
 	}
     }
 
