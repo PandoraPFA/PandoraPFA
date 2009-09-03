@@ -194,19 +194,19 @@ StatusCode MCPfoSelection::ApplySelectionRules(MCParticle *const mcParticle) con
     // check if particle crosses (virtual) spherical boundary
     if( mcParticle->GetOuterRadius() > boundary && mcParticle->GetInnerRadius() <= boundary )
     {
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree( mcParticle, true ) ); // set mcParticle to be the Pfo-target in the daughter-tree
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree( mcParticle, true ) ); // set mcParticle to be the Pfo-target in the daughter-tree
     }
     else
     {
-	// mcParticle has not yet crossed the boundary. 
+        // mcParticle has not yet crossed the boundary. 
         // It should not make any hit, but in case it would: set the Pfo-target to be the mcparticle self
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget( mcParticle ));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget( mcParticle ));
 
-	// walk through the daughter particles
-	for( MCParticleList::iterator itPtcl = mcParticle->m_daughterList.begin(), itPtclEnd = mcParticle->m_daughterList.end(); itPtcl != itPtclEnd; itPtcl++ )
-	{
-	    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplySelectionRules( (*itPtcl) ) );
-	}
+        // walk through the daughter particles
+        for( MCParticleList::iterator itPtcl = mcParticle->m_daughterList.begin(), itPtclEnd = mcParticle->m_daughterList.end(); itPtcl != itPtclEnd; itPtcl++ )
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplySelectionRules( (*itPtcl) ) );
+        }
     }
 
     return STATUS_CODE_SUCCESS;

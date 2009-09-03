@@ -41,27 +41,27 @@ public:
     bool IsPfoTarget() const;
 
     /**
-     *	@brief	Get energy of mc particle
+     *  @brief  Get energy of mc particle
      * 
-     */	
+     */
     float GetEnergy() const;
 
     /**
-     *	@brief	Get momentum of mc particle
+     *  @brief  Get momentum of mc particle
      * 
-     */	
+     */
     float GetMomentum() const;
 
     /**
-     *	@brief	Get inner radius of mc particle
+     *  @brief Get inner radius of mc particle
      * 
-     */	
+     */
     float GetInnerRadius() const;
 
     /**
-     *	@brief	Get outer radius of mc particle
+     *  @brief  Get outer radius of mc particle
      * 
-     */	
+     */
     float GetOuterRadius() const;
 
     /**
