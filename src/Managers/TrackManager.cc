@@ -33,27 +33,35 @@ TrackManager::~TrackManager()
 
 StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackParameters)
 {
-    Track *pTrack = NULL;
-    pTrack = new Track(trackParameters);
-
-    if (NULL == pTrack)
-        return STATUS_CODE_FAILURE;
-
-    NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
-
-    if (m_nameToTrackListMap.end() == iter)
+    try
     {
-        m_nameToTrackListMap[INPUT_LIST_NAME] = new TrackList;
-        m_savedLists.insert(INPUT_LIST_NAME);
-        iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+        Track *pTrack = NULL;
+        pTrack = new Track(trackParameters);
+
+        if (NULL == pTrack)
+            return STATUS_CODE_FAILURE;
+
+        NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
 
         if (m_nameToTrackListMap.end() == iter)
-            return STATUS_CODE_FAILURE;
+        {
+            m_nameToTrackListMap[INPUT_LIST_NAME] = new TrackList;
+            m_savedLists.insert(INPUT_LIST_NAME);
+            iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+            if (m_nameToTrackListMap.end() == iter)
+                return STATUS_CODE_FAILURE;
+        }
+
+        iter->second->insert(pTrack);
+
+        return STATUS_CODE_SUCCESS;
     }
-
-    iter->second->insert(pTrack);
-
-    return STATUS_CODE_SUCCESS;
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create track: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

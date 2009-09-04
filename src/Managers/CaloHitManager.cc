@@ -27,15 +27,23 @@ CaloHitManager::~CaloHitManager()
 
 StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::CaloHitParameters &caloHitParameters)
 {
-    CaloHit *pCaloHit = NULL;
-    pCaloHit = new CaloHit(caloHitParameters);
+    try
+    {
+        CaloHit *pCaloHit = NULL;
+        pCaloHit = new CaloHit(caloHitParameters);
 
-    if (NULL == pCaloHit)
-        return STATUS_CODE_FAILURE;
+        if (NULL == pCaloHit)
+            return STATUS_CODE_FAILURE;
 
-    m_inputCaloHitList.push_back(pCaloHit);
+        m_inputCaloHitList.push_back(pCaloHit);
 
-    return STATUS_CODE_SUCCESS;
+        return STATUS_CODE_SUCCESS;
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create calo hit: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

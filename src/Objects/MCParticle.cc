@@ -12,12 +12,12 @@ namespace pandora
 {
 
 MCParticle::MCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters) :
-    m_uid(mcParticleParameters.m_pParentAddress),
-    m_energy(mcParticleParameters.m_energy),
-    m_momentum(mcParticleParameters.m_momentum),
-    m_innerRadius(mcParticleParameters.m_innerRadius),
-    m_outerRadius(mcParticleParameters.m_outerRadius),
-    m_particleId(mcParticleParameters.m_particleId),
+    m_uid(mcParticleParameters.m_pParentAddress.Get()),
+    m_energy(mcParticleParameters.m_energy.Get()),
+    m_momentum(mcParticleParameters.m_momentum.Get()),
+    m_innerRadius(mcParticleParameters.m_innerRadius.Get()),
+    m_outerRadius(mcParticleParameters.m_outerRadius.Get()),
+    m_particleId(mcParticleParameters.m_particleId.Get()),
     m_pPfoTarget(NULL),
     m_isInitialized(true)
 {
@@ -43,18 +43,18 @@ MCParticle::~MCParticle()
 
 void MCParticle::SetProperties(const PandoraApi::MCParticleParameters &mcParticleParameters)
 {
-    m_energy = mcParticleParameters.m_energy;
-    m_momentum = mcParticleParameters.m_momentum;
-    m_innerRadius = mcParticleParameters.m_innerRadius;
-    m_outerRadius = mcParticleParameters.m_outerRadius;
-    m_particleId = mcParticleParameters.m_particleId;
+    m_energy = mcParticleParameters.m_energy.Get();
+    m_momentum = mcParticleParameters.m_momentum.Get();
+    m_innerRadius = mcParticleParameters.m_innerRadius.Get();
+    m_outerRadius = mcParticleParameters.m_outerRadius.Get();
+    m_particleId = mcParticleParameters.m_particleId.Get();
 
     m_isInitialized = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCParticle::SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters )
+StatusCode MCParticle::SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters)
 {
     if (this->IsPfoTargetSet())
         return STATUS_CODE_SUCCESS;
@@ -66,11 +66,12 @@ StatusCode MCParticle::SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaugh
        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPfoTargetInTree(mcParticle));
     }
 
-    if( !onlyDaughters ){
-       for (MCParticleList::iterator iter = m_parentList.begin(), iterEnd = m_parentList.end(); iter != iterEnd; ++iter)
-       {
-	  PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPfoTargetInTree(mcParticle));
-       }
+    if(!onlyDaughters)
+    {
+        for (MCParticleList::iterator iter = m_parentList.begin(), iterEnd = m_parentList.end(); iter != iterEnd; ++iter)
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPfoTargetInTree(mcParticle));
+        }
     }
 
     return STATUS_CODE_SUCCESS;

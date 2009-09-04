@@ -15,7 +15,7 @@
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
 
-#include "Xml/tinyxml.h"
+#include "Xml/XmlHelper.h"
 
 namespace pandora
 {
@@ -93,14 +93,14 @@ protected:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline     Algorithm::Algorithm() :
+inline Algorithm::Algorithm() :
     m_pPandora(NULL)
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline     Algorithm::~Algorithm()
+inline Algorithm::~Algorithm()
 {
 }
 

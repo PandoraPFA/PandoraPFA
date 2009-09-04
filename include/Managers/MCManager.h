@@ -14,44 +14,12 @@
 
 namespace pandora
 {
-
-
-/**
- *  @brief  MCPfoSelection class
- */
-class MCPfoSelection
-{
-public:
-   /**
-    *  @brief  Apply mc pfo selection rules 
-    *
-    *  @params mcRootParticle address of the mc root particle
-    */
-   virtual StatusCode ApplySelectionRules(MCParticle *const mcRootParticle) const;
-   
-};
-
-
-    
 /**
  *    @brief MCManager class
  */
 class MCManager
 {
 public:
-
-    /**
-     *  @brief  Constructor
-     */
-    MCManager();
-
-    /**
-     *  @brief  Constructor 
-     *
-     *  @params mcPfoSelection the mc pfo selection instance
-     */
-    MCManager(const MCPfoSelection* mcPfoSelection);
-
     /**
      *  @brief  Destructor
      */
@@ -95,7 +63,14 @@ private:
      */
     StatusCode SelectPfoTargets();
 
-    /**
+   /**
+    *  @brief  Apply mc pfo selection rules 
+    *
+    *  @params mcRootParticle address of the mc root particle
+    */
+   StatusCode ApplyPfoSelectionRules(MCParticle *const mcRootParticle) const;
+   
+   /**
      *  @brief  Create a map relating calo hit uid to mc pfo target
      * 
      *  @param  caloHitToPfoTargetMap to receive the calo hit uid to mc pfo target map
@@ -135,12 +110,8 @@ private:
     UidToMCParticleMap      m_uidToMCParticleMap;       ///< The uid to mc particle map
     UidRelationMap          m_caloHitToMCParticleMap;   ///< The calo hit to mc particle relation map
 
-    const MCPfoSelection    *m_pMCPfoSelection;         ///< The mc pfo selection instance
-
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
-
-    friend class MCPfoSelection;
 
     friend class TestMCManager;
     friend class TestCaloHitManager;

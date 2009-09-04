@@ -13,23 +13,8 @@
 namespace pandora
 {
 
-MCManager::MCManager() :
-    m_pMCPfoSelection(new MCPfoSelection)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-MCManager::MCManager(const MCPfoSelection* mcPfoSelection) :
-    m_pMCPfoSelection(mcPfoSelection)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 MCManager::~MCManager()
 {
-    delete m_pMCPfoSelection;
     (void) this->ResetForNextEvent();
 }
 
@@ -37,21 +22,29 @@ MCManager::~MCManager()
 
 StatusCode MCManager::CreateMCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters)
 {
-    UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.find(mcParticleParameters.m_pParentAddress);
-
-    if (m_uidToMCParticleMap.end() != iter)
+    try
     {
-        iter->second->SetProperties(mcParticleParameters);
+        UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.find(mcParticleParameters.m_pParentAddress.Get());
+
+        if (m_uidToMCParticleMap.end() != iter)
+        {
+            iter->second->SetProperties(mcParticleParameters);
+        }
+        else
+        {
+            MCParticle *pMCParticle = new MCParticle(mcParticleParameters);
+
+            if (!m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(mcParticleParameters.m_pParentAddress.Get(), pMCParticle)).second)
+                return STATUS_CODE_FAILURE;
+        }
+
+        return STATUS_CODE_SUCCESS;
     }
-    else
+    catch (StatusCodeException &statusCodeException)
     {
-        MCParticle *pMCParticle = new MCParticle(mcParticleParameters);
-
-        if (!m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(mcParticleParameters.m_pParentAddress, pMCParticle)).second)
-            return STATUS_CODE_FAILURE;
+        std::cout << "Failed to create mc particle: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
     }
-
-    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +115,36 @@ StatusCode MCManager::SelectPfoTargets()
     {
         if (iter->second->IsRootParticle())
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMCPfoSelection->ApplySelectionRules(iter->second));
+            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, this->ApplyPfoSelectionRules(iter->second));
+        }
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
+{
+    if (!mcParticle->IsInitialized())
+        return STATUS_CODE_NOT_INITIALIZED;
+    
+    // TODO Make boundary a parameter.
+    float boundary = 3.0;
+
+    if((mcParticle->GetOuterRadius() > boundary) && (mcParticle->GetInnerRadius() <= boundary))
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree(mcParticle, true));
+    }
+    else
+    {
+        // MC particle has not yet crossed boundary - set it as its own pfo target
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget(mcParticle));
+
+        for( MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
+            iter != iterEnd; ++iter)
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplyPfoSelectionRules(*iter));
         }
     }
 
@@ -179,35 +201,6 @@ StatusCode MCManager::ResetForNextEvent()
 
     if (!m_uidToMCParticleMap.empty() || !m_caloHitToMCParticleMap.empty())
         return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode MCPfoSelection::ApplySelectionRules(MCParticle *const mcParticle) const
-{
-    // TODO : write the default selection rules here. Care with non-initialized mc particles. Must check whether initialized.
-
-    double boundary = 3.0; // TODO: make this a parameter if the MCPfoSelection
-
-    // check if particle crosses (virtual) spherical boundary
-    if( mcParticle->GetOuterRadius() > boundary && mcParticle->GetInnerRadius() <= boundary )
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree( mcParticle, true ) ); // set mcParticle to be the Pfo-target in the daughter-tree
-    }
-    else
-    {
-        // mcParticle has not yet crossed the boundary. 
-        // It should not make any hit, but in case it would: set the Pfo-target to be the mcparticle self
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget( mcParticle ));
-
-        // walk through the daughter particles
-        for( MCParticleList::iterator itPtcl = mcParticle->m_daughterList.begin(), itPtclEnd = mcParticle->m_daughterList.end(); itPtcl != itPtclEnd; itPtcl++ )
-        {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplySelectionRules( (*itPtcl) ) );
-        }
-    }
 
     return STATUS_CODE_SUCCESS;
 }

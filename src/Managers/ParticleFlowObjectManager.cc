@@ -24,43 +24,51 @@ ParticleFlowObjectManager::~ParticleFlowObjectManager()
 
 StatusCode ParticleFlowObjectManager::CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters)
 {
-    PandoraApi::ParticleFlowObject *pParticleFlowObject = NULL;
-    pParticleFlowObject = new PandoraApi::ParticleFlowObject;
-
-    if (NULL == pParticleFlowObject)
-        return STATUS_CODE_FAILURE;
-
-    pParticleFlowObject->m_energy = particleFlowObjectParameters.m_energy;
-
-    // Store pointers to constituent tracks
-    for (TrackList::const_iterator iter = particleFlowObjectParameters.m_trackList.begin(),
-        iterEnd = particleFlowObjectParameters.m_trackList.end(); iter != iterEnd; ++iter)
+    try
     {
-        pParticleFlowObject->m_trackAddressVector.push_back((*iter)->GetParentTrackAddress());
-    }
+        PandoraApi::ParticleFlowObject *pParticleFlowObject = NULL;
+        pParticleFlowObject = new PandoraApi::ParticleFlowObject;
 
-    // Store pointers to constituent hits (organized into clusters)
-    for (ClusterList::const_iterator clusterIter = particleFlowObjectParameters.m_clusterList.begin(),
-        clusterIterEnd = particleFlowObjectParameters.m_clusterList.end(); clusterIter != clusterIterEnd; ++clusterIter)
-    {
-        CaloHitAddressVector caloHitAddressVector;
+        if (NULL == pParticleFlowObject)
+            return STATUS_CODE_FAILURE;
 
-        for (OrderedCaloHitList::const_iterator orderedListIter = (*clusterIter)->GetOrderedCaloHitList()->begin(),
-            orderedListIterEnd = (*clusterIter)->GetOrderedCaloHitList()->end(); orderedListIter != orderedListIterEnd; ++orderedListIter)
+        pParticleFlowObject->m_energy = particleFlowObjectParameters.m_energy.Get();
+
+        // Store pointers to constituent tracks
+        for (TrackList::const_iterator iter = particleFlowObjectParameters.m_trackList.begin(),
+            iterEnd = particleFlowObjectParameters.m_trackList.end(); iter != iterEnd; ++iter)
         {
-            for (CaloHitList::const_iterator caloHitIter = orderedListIter->second->begin(),
-                caloHitIterEnd = orderedListIter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
-            {
-                caloHitAddressVector.push_back((*caloHitIter)->GetParentCaloHitAddress());
-            }
+            pParticleFlowObject->m_trackAddressVector.push_back((*iter)->GetParentTrackAddress());
         }
 
-        pParticleFlowObject->m_clusterAddressVector.push_back(caloHitAddressVector);
+        // Store pointers to constituent hits (organized into clusters)
+        for (ClusterList::const_iterator clusterIter = particleFlowObjectParameters.m_clusterList.begin(),
+            clusterIterEnd = particleFlowObjectParameters.m_clusterList.end(); clusterIter != clusterIterEnd; ++clusterIter)
+        {
+            CaloHitAddressVector caloHitAddressVector;
+
+            for (OrderedCaloHitList::const_iterator orderedListIter = (*clusterIter)->GetOrderedCaloHitList()->begin(),
+                orderedListIterEnd = (*clusterIter)->GetOrderedCaloHitList()->end(); orderedListIter != orderedListIterEnd; ++orderedListIter)
+            {
+                for (CaloHitList::const_iterator caloHitIter = orderedListIter->second->begin(),
+                    caloHitIterEnd = orderedListIter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
+                {
+                    caloHitAddressVector.push_back((*caloHitIter)->GetParentCaloHitAddress());
+                }
+            }
+
+            pParticleFlowObject->m_clusterAddressVector.push_back(caloHitAddressVector);
+        }
+
+        m_particleFlowObjectList.push_back(pParticleFlowObject);
+
+        return STATUS_CODE_SUCCESS;
     }
-    
-    m_particleFlowObjectList.push_back(pParticleFlowObject);
-    
-    return STATUS_CODE_SUCCESS;
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create particle flow object: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
+    }    
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

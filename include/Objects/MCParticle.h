@@ -42,31 +42,36 @@ public:
 
     /**
      *  @brief  Get energy of mc particle
-     * 
+     *
+     *  @return the mc particle energy
      */
     float GetEnergy() const;
 
     /**
      *  @brief  Get momentum of mc particle
-     * 
+     *
+     *  @return the mc particle momentum
      */
     float GetMomentum() const;
 
     /**
      *  @brief Get inner radius of mc particle
      * 
-     */
+     *  @return the mc particle inner radius
+     */	
     float GetInnerRadius() const;
 
     /**
      *  @brief  Get outer radius of mc particle
-     * 
+     *
+     *  @return the mc particle outer radius
      */
     float GetOuterRadius() const;
 
     /**
      *  @brief  Whether the pfo target been set
-     * 
+     *
+     *  @return boolean
      */
     bool IsPfoTargetSet() const;
 
@@ -78,9 +83,9 @@ public:
     StatusCode GetPfoTarget(MCParticle*& pMCParticle) const;
 
     /**
-     *  @brief  Get pfo target particle
+     *  @brief  Get the mc particle unique identifier
      * 
-     *  @param  pMCParticle to receive the address of the pfo target
+     *  @return the mc particle unique identifier
      */
     Uid GetUid() const;
 
@@ -139,7 +144,7 @@ private:
      *  @param  onlyDaughters if "true" go through daughters only, if false
      *          go through parents as well
      */
-    StatusCode SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters = false );
+    StatusCode SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters = false);
 
     Uid                 m_uid;              ///< Unique ID of the particle
 

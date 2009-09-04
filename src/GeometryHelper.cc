@@ -23,7 +23,7 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
     if (m_isInitialized)
         return STATUS_CODE_ALREADY_INITIALIZED;
 
-    m_tpcInnerRadius = geometryParameters.m_tpcInnerRadius;
+    m_tpcInnerRadius = geometryParameters.m_tpcInnerRadius.Get();
 
     m_isInitialized = true;
 

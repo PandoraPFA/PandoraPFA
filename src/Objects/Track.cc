@@ -19,8 +19,8 @@ bool Track::operator< (const Track &rhs) const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 Track::Track(const PandoraApi::TrackParameters &trackParameters) :
-    m_momentum(trackParameters.m_momentum),
-    m_pParentAddress(trackParameters.m_pParentAddress)
+    m_momentum(trackParameters.m_momentum.Get()),
+    m_pParentAddress(trackParameters.m_pParentAddress.Get())
 {
 }
 
