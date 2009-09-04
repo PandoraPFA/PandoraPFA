@@ -29,7 +29,6 @@ public:
 private:
     StatusCode Run();
     StatusCode ReadSettings(TiXmlHandle xmlHandle);
-
 };
 
 

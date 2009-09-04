@@ -26,27 +26,20 @@ StatusCode FullCheatingAlgorithm::Run()
     // Could select some clusters here (a subset of those in pClusterList) to save. Would then pass this list when calling SaveClusterList.
     // ClusterList clustersToSave;
 
-				 
-	// create PFOs
-	
-	PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, 
-												   pClusterList));
+    // create PFOs
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
 
- 	for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ ){
- 	   PandoraContentApi::ParticleFlowObject::Parameters pfo;
-// 	   pfo.m_clusterList = pClusterList;
-// 	   pfo.m_energy = (*itCluster)->GetEnergy();
-	   PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, 
- 													    pfo ));
- 	}
+    for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ )
+    {
+        PandoraContentApi::ParticleFlowObject::Parameters pfo;
+//      pfo.m_clusterList = pClusterList;
+//      pfo.m_energy = (*itCluster)->GetEnergy();
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
+    }
 
-
-
-	return STATUS_CODE_SUCCESS;
+    return STATUS_CODE_SUCCESS;
 }
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
