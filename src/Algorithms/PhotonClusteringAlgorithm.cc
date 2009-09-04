@@ -29,21 +29,10 @@ StatusCode PhotonClusteringAlgorithm::Run()
 
 StatusCode PhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
-    // Daughter clustering algorithm
-    TiXmlElement *pXmlElement = xmlHandle.FirstChild("algorithm").Element();
-
-    if (NULL == pXmlElement)
-        return STATUS_CODE_NOT_FOUND;
-
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(*this, pXmlElement, m_clusteringAlgorithmName));
-
-    // Photon cluster list name
-    pXmlElement = xmlHandle.FirstChild("photonClusterListName").Element();
-
-    if (NULL == pXmlElement)
-        return STATUS_CODE_NOT_FOUND;
-
-    m_photonClusterListName = pXmlElement->GetText();
-
+std::cout << "TEST0" << std::endl;
+PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName));
+std::cout << "TEST1" << std::endl;
+PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusterListName", m_photonClusterListName));
+std::cout << "TEST2" << std::endl;
     return STATUS_CODE_SUCCESS;
 }

@@ -67,16 +67,8 @@ StatusCode ReclusteringAlgorithm::Run()
 
 StatusCode ReclusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
-    // Daughter clustering algorithm
-    TiXmlHandle algorithmListHandle = TiXmlHandle(xmlHandle.FirstChild("clusteringAlgorithms").Element());
-
-    for (TiXmlElement *pXmlElement = algorithmListHandle.FirstChild("algorithm").Element(); NULL != pXmlElement;
-        pXmlElement = pXmlElement->NextSiblingElement("algorithm"))
-    {
-        std::string algorithmName;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(*this, pXmlElement, algorithmName));
-        m_clusteringAlgorithms.push_back(algorithmName);
-    }    
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "clusteringAlgorithms",
+        m_clusteringAlgorithms));
 
     return STATUS_CODE_SUCCESS;
 }
