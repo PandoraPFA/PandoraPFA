@@ -29,10 +29,8 @@ StatusCode PhotonClusteringAlgorithm::Run()
 
 StatusCode PhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
-std::cout << "TEST0" << std::endl;
-PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName));
-std::cout << "TEST1" << std::endl;
-PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusterListName", m_photonClusterListName));
-std::cout << "TEST2" << std::endl;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusterListName", m_photonClusterListName));
+
     return STATUS_CODE_SUCCESS;
 }

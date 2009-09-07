@@ -105,11 +105,8 @@ StatusCode XmlHelper::ProcessAlgorithm(const Algorithm &algorithm, const TiXmlHa
     {
         try
         {
-            if (description == pXmlElement->Attribute("description"))
-            {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateDaughterAlgorithm(algorithm, pXmlElement, algorithmName));
-                return STATUS_CODE_SUCCESS;
-            }
+            if (description == std::string(pXmlElement->Attribute("description")))
+                return PandoraContentApi::CreateDaughterAlgorithm(algorithm, pXmlElement, algorithmName);
         }
         catch (...)
         {
