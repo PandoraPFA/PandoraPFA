@@ -23,12 +23,8 @@ StatusCode FullCheatingAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
 
-    // Could select some clusters here (a subset of those in pClusterList) to save. Would then pass this list when calling SaveClusterList.
-    // ClusterList clustersToSave;
-
     // create PFOs
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
-
 
     for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ )
     {
