@@ -32,6 +32,7 @@ public:
         StringVector    m_v0VertexCollections;        ///< The v0 vertex collections
         StringVector    m_hCalCollections;            ///< The hcal calorimeter hit collections
         StringVector    m_eCalCollections;            ///< The ecal calorimeter hit collections    
+        StringVector    m_mcParticleCollections;      ///< The mc particle collections    
     };        
 
     /**
@@ -92,6 +93,13 @@ private:
      *  @param  pLCEvent the lcio event
      */    
     StatusCode CreateTracks(const LCEvent *const pLCEvent);
+
+    /**
+     *  @brief  Create MCParticles, insert user code here
+     * 
+     *  @param  pLCEvent the lcio event
+     */    
+    StatusCode CreateMCParticles(const LCEvent *const pLCEvent);
     
     /**
      *  @brief  Create calo hits, insert user code here

@@ -88,7 +88,7 @@ public:
     typedef ObjectCreationHelper<CaloHitParameters> CaloHit;
     typedef ObjectCreationHelper<TrackParameters> Track;
     typedef ObjectCreationHelper<GeometryParameters> Geometry;    
-    typedef ObjectCreationHelper<GeometryParameters> MCParticle;    
+    typedef ObjectCreationHelper<MCParticleParameters> MCParticle;    
 
     /**
      *  @brief  ParticleFlowObject class

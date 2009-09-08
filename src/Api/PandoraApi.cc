@@ -40,14 +40,14 @@ StatusCode PandoraApi::RegisterAlgorithmFactory(const pandora::Pandora &pandora,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode SetMCParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress, const void *pDaughterAddress)
+StatusCode PandoraApi::SetMCParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress, const void *pDaughterAddress)
 {
     return pandora.GetPandoraApiImpl()->SetMCParentDaughterRelationship(pParentAddress, pDaughterAddress);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
+StatusCode PandoraApi::SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
     const void *pMCParticleParentAddress, const float mcParticleWeight)
 {
     return pandora.GetPandoraApiImpl()->SetCaloHitToMCParticleRelationship(pCaloHitParentAddress, pMCParticleParentAddress, mcParticleWeight);

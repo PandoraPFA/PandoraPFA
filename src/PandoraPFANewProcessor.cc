@@ -6,9 +6,12 @@
  *  $Log: $
  */
 
+#include <math.h>
+
 #include "EVENT/CalorimeterHit.h"
 #include "EVENT/LCCollection.h"
 #include "EVENT/Track.h"
+#include "EVENT/MCParticle.h"
 
 #include "UTIL/CellIDDecoder.h"
 
@@ -122,6 +125,84 @@ StatusCode PandoraPFANewProcessor::CreateGeometry()
 StatusCode PandoraPFANewProcessor::RegisterUserAlgorithmFactories()
 {
     // Insert user code here ...
+
+    return STATUS_CODE_SUCCESS;
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+    
+StatusCode PandoraPFANewProcessor::CreateMCParticles(const LCEvent *const pLCEvent)
+{
+
+    // Insert user code here ...
+    for (StringVector::const_iterator iter = m_settings.m_trackCollections.begin(), 
+             iterEnd = m_settings.m_trackCollections.end(); iter != iterEnd; ++iter)
+    {
+        try
+        {
+            const LCCollection *pMCParticleCollection = pLCEvent->getCollection(*iter);
+
+            double innerRadius = 0.0;
+            double outerRadius = 0.0;
+            double momentum    = 0.0;
+
+            int numberMCParticles;
+            if( pMCParticleCollection != 0 ) {
+                numberMCParticles = pMCParticleCollection->getNumberOfElements()  ;
+                for(int i=0; i< numberMCParticles ; i++) {
+                    MCParticle* pMcParticle = dynamic_cast<MCParticle*>( pMCParticleCollection->getElementAt( i ) ) ;
+
+                    innerRadius = 0.0;
+                    outerRadius = 0.0;
+                    momentum = 0.0;
+
+                    for( int i=0; i<3; i++ ){
+                        innerRadius += pow(pMcParticle->getVertex()[i],2);
+                        outerRadius += pow(pMcParticle->getEndpoint()[i],2);
+                        momentum    += pow(pMcParticle->getMomentum()[i],2);
+                    }
+                    innerRadius = sqrt( innerRadius );
+                    outerRadius = sqrt( outerRadius );
+                    momentum    = sqrt( momentum );
+     
+//             std::cout << "p " << p << " energy: " << pMcParticle->getEnergy() << " momentum: " << momentum 
+//                       << " end: " << pMcParticle->getEndpoint()[0]  << "  " << pMcParticle->getEndpoint()[1]  << "  " << pMcParticle->getEndpoint()[2] 
+//                       << " vertex: " << pMcParticle->getVertex()[0]  << "  " << pMcParticle->getVertex()[1]  << "  " << pMcParticle->getVertex()[2]
+//                       << " inner " << innerRadius << " outer " << outerRadius << std::endl;
+         
+                    PandoraApi::MCParticle::Parameters mcParticleParameters;
+                    mcParticleParameters.m_energy = pMcParticle->getEnergy();
+                    mcParticleParameters.m_momentum = momentum;
+                    mcParticleParameters.m_innerRadius = innerRadius;
+                    mcParticleParameters.m_outerRadius = outerRadius;
+                    mcParticleParameters.m_pParentAddress = (void*)pMcParticle;
+
+
+                    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(m_pandora, mcParticleParameters));
+
+                    // create parent-daughter relationships
+                    MCParticleVec daughters = pMcParticle->getDaughters();
+                    for( MCParticleVec::iterator itDaughter = daughters.begin(), itDaughterEnd = daughters.end(); itDaughter != itDaughterEnd; itDaughter++ ){
+//                std::cout << "   daughter: " << (*itDaughter) << std::endl;
+                        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::SetMCParentDaughterRelationship(m_pandora, 
+                                                                                                                     (void*)pMcParticle,
+                                                                                                                     (void*)(*itDaughter) ));
+                    }
+
+                }
+            }// Col MC condition
+        }
+        catch (StatusCodeException &statusCodeException)
+        {
+            std::cout << "Failed to extract MCParticles: " << statusCodeException.ToString() << std::endl;
+        }
+        catch (...)
+        {
+            std::cout << "Failed to extract MCParticles, unrecognised exception" << std::endl;
+        }
+    }
 
     return STATUS_CODE_SUCCESS;
 }
