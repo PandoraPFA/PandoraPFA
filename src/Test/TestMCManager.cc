@@ -400,8 +400,8 @@ void TestMCManager::PrintMCParticleTrees( MCManager* mcManager, std::ostream & o
         if (iter->second->IsRootParticle())
         {
 	   TestMCManager::PrintMCParticle( iter->second, o, 0, maxDepthAfterPFOTarget );
+	   o << std::endl;
         }
-	o << std::endl;
     }
 }
 
@@ -441,7 +441,7 @@ void TestMCManager::PrintMCParticle( MCParticle* mcParticle, std::ostream & o )
    }
    if( mcParticle->IsPfoTarget() )
    {
-      o << red_bg << darkgreen << "|PFO|";
+      o << red_bg << darkgreen << "|PFO| ";
    }
    o << "[" << mcParticle << "]"
      << " E=" << mcParticle->m_energy 
@@ -450,9 +450,19 @@ void TestMCManager::PrintMCParticle( MCParticle* mcParticle, std::ostream & o )
      << " r_i=" << mcParticle->m_innerRadius
      << " r_o=" << mcParticle->m_outerRadius
      << " uid=" << mcParticle->GetUid();
+   MCParticle* pfoTarget = NULL;
+   mcParticle->GetPfoTarget( pfoTarget );
+   if( pfoTarget == NULL )
+   {
+      o << " PFOTarget-uid=UNDEFINED";
+   }
+   else
+   {
+      o << " PFOTarget-uid=" << pfoTarget->GetUid();
+   }
    if( mcParticle->IsPfoTarget() )
    {
-      o << "|PFO|" << reset;
+      o << " |PFO|" << reset;
    }
 }
 
