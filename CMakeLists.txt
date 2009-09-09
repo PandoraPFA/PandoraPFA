@@ -36,10 +36,6 @@ OPTION( BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON )
 OPTION( BUILD_32BIT_COMPATIBLE "Set to ON to build in 32 bit compatibility mode" ON )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 
-# project dependencies
-# e.g. SET( ${PROJECT_NAME}_DEPENDS "Marlin MarlinUtil LCIO GEAR CLHEP GSL RAIDA ROOT" )
-SET( ${PROJECT_NAME}_DEPENDS "Marlin LCIO GEAR" )
-
 IF( APPLE )
     LIST(APPEND ${PROJECT_NAME}_DEPENDS "streamlog")
 ENDIF() 
@@ -114,9 +110,6 @@ AUX_SOURCE_DIRECTORY( src/Objects library_sources )
 AUX_SOURCE_DIRECTORY( src/Api library_sources )
 AUX_SOURCE_DIRECTORY( src/Test library_sources )
 AUX_SOURCE_DIRECTORY( src/Xml library_sources )
-
-ADD_EXECUTABLE( testPandora test/TestPandora.cc )
-TARGET_LINK_LIBRARIES( testPandora lib_${PROJECT_NAME} )
 
 ### DOCUMENTATION ############################################################
 
