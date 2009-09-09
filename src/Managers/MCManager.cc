@@ -202,19 +202,6 @@ StatusCode MCManager::ResetForNextEvent()
     return STATUS_CODE_SUCCESS;
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void MCManager::Print( std::ostream & o, int maxDepthAfterPFOParticle ) const
-{
-    for (UidToMCParticleMap::const_iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
-    {
-        if (iter->second->IsRootParticle())
-        {
-	    iter->second->Print( o, 0, maxDepthAfterPFOParticle );
-        }
-	o << std::endl;
-    }
-}
 
 } // namespace pandora
 
