@@ -8,10 +8,13 @@
 
 #include <assert.h>
 #include <iostream>
+#include <iomanip>
 
 #include "Test/TestCaloHitManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/MCManager.h"
+
+#include "Test/TestMCManager.h"
 
 
 namespace pandora
@@ -160,8 +163,8 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 	mcParticleParameters.m_pParentAddress = (void*)200;
 	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
 	mcParticleParameters.m_pParentAddress = (void*)300;
-	mcParticleParameters.m_innerRadius = 2.0;
-	mcParticleParameters.m_outerRadius = 31.0;
+	mcParticleParameters.m_innerRadius = 27.0;
+	mcParticleParameters.m_outerRadius = 35.0;
 	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
 	mcParticleParameters.m_pParentAddress = (void*)301;
 	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
@@ -188,6 +191,10 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 	mcParticleParameters.m_outerRadius = 52.0;
 	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
 	mcParticleParameters.m_pParentAddress = (void*)311;
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+	mcParticleParameters.m_pParentAddress = (void*)201;
+	mcParticleParameters.m_innerRadius = 2.0;
+	mcParticleParameters.m_outerRadius = 200.0;
 	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
 
 
@@ -236,8 +243,10 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 	pMcManager->SetCaloHitToMCParticleRelationship( (void*)9004, (void*)401, 1.0 );
 
 
+        std::cout << "        let the MCManager select the PFO targets" << std::endl;
 	pMcManager->SelectPfoTargets();
 
+        std::cout << "        create the connection between CaloHit and Pfo-targets" << std::endl;
 	UidToMCParticleMap caloHitToPfoTargetMap;
 	pMcManager->CreateCaloHitToPfoTargetMap(caloHitToPfoTargetMap);
 
@@ -248,7 +257,7 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 
 	std::cout << "MCParticle trees" << std::endl;
 	std::cout << "================" << std::endl;
-	pMcManager->Print( std::cout, 100 );
+	TestMCManager::PrintMCParticleTrees( pMcManager, std::cout, 100 );
 
 	
 	for ( UidToMCParticleMap::iterator it = caloHitToPfoTargetMap.begin(), itEnd = caloHitToPfoTargetMap.end(); it != itEnd; it++ )

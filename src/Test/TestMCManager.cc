@@ -343,7 +343,7 @@ StatusCode TestMCManager::Test_SelectPfoTargets()
 
 	std::cout << "MCParticle trees" << std::endl;
 	std::cout << "================" << std::endl;
-	pMcManager->Print( std::cout, 100 );
+	TestMCManager::PrintMCParticleTrees( pMcManager, std::cout, 100 );
 
         std::cout << "        delete MCManager" << std::endl;
 	delete pMcManager;
@@ -385,6 +385,123 @@ StatusCode TestMCManager::Test_All()
         std::cout << "--- --- ALL | END ------------------------------" << std::endl;
 	return STATUS_CODE_SUCCESS;
 }
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TestMCManager::PrintMCParticleTrees( MCManager* mcManager, std::ostream & o, int maxDepthAfterPFOTarget )
+{
+    for (UidToMCParticleMap::const_iterator iter = mcManager->m_uidToMCParticleMap.begin(), iterEnd = mcManager->m_uidToMCParticleMap.end(); 
+	 iter != iterEnd; ++iter)
+    {
+        if (iter->second->IsRootParticle())
+        {
+	   TestMCManager::PrintMCParticle( iter->second, o, 0, maxDepthAfterPFOTarget );
+        }
+	o << std::endl;
+    }
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TestMCManager::PrintMCParticle( MCParticle* mcParticle, std::ostream & o )
+{
+//    static const char* none         = "" ;
+//    static const char* white        = "\033[1;37m";  // white
+//    static const char* black        = "\033[30m";    // black
+//    static const char* blue         = "\033[34m";    // blue
+//    static const char* red          = "\033[1;31m" ; // red
+//    static const char* yellow       = "\033[1;33m";  // yellow
+//    static const char* darkred      = "\033[31m";    // dark red
+   static const char* darkgreen    = "\033[32m";    // dark green
+//    static const char* darkyellow   = "\033[33m";    // dark yellow
+                                    
+//    static const char* bold         = "\033[1m"    ; // bold 
+//    static const char* black_b      = "\033[30m"   ; // bold black
+//    static const char* lblue_b      = "\033[1;34m" ; // bold light blue
+//    static const char* cyan_b       = "\033[0;36m" ; // bold cyan
+//    static const char* lgreen_b     = "\033[1;32m";  // bold light green
+                                    
+//    static const char* blue_bg      = "\033[44m";    // blue background
+   static const char* red_bg       = "\033[1;41m";  // white on red background
+//    static const char* whiteonblue  = "\033[1;44m";  // white on blue background
+    static const char* whiteongreen = "\033[1;42m";  // white on green background
+//    static const char* grey_bg      = "\033[47m";    // grey background
+
+   static const char* reset  = "\033[0m";     // reset
+
+   if( mcParticle->IsRootParticle() )
+   {
+      o << whiteongreen << "/ROOT/" << reset;
+   }
+   if( mcParticle->IsPfoTarget() )
+   {
+      o << red_bg << darkgreen << "|PFO|";
+   }
+   o << "[" << mcParticle << "]"
+     << " E=" << mcParticle->m_energy 
+     << " p=" << mcParticle->m_momentum
+     << " pid=" << mcParticle->m_particleId
+     << " r_i=" << mcParticle->m_innerRadius
+     << " r_o=" << mcParticle->m_outerRadius
+     << " uid=" << mcParticle->GetUid();
+   if( mcParticle->IsPfoTarget() )
+   {
+      o << "|PFO|" << reset;
+   }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TestMCManager::PrintMCParticle( MCParticle* mcParticle, 
+				     std::ostream & o, 
+				     int depth, 
+				     int maxDepthAfterPfoTarget, 
+				     const MCParticle* parent, 
+				     int stepSize )
+{
+   static const char* whiteonblue  = "\033[1;44m";  // white on blue background
+   static const char* reset  = "\033[0m";     // reset
+
+   int printDepth = depth*stepSize + (int)(mcParticle->m_outerRadius/5); // this can be changed if the printout doesn't look good
+   o << std::setw (printDepth) << " ";
+   TestMCManager::PrintMCParticle( mcParticle, o );
+   o << std::endl;
+
+   // if there are other parents than the calling one
+   for( MCParticleList::const_iterator itParent = mcParticle->m_parentList.begin(), itParentEnd = mcParticle->m_parentList.end(); 
+	itParent != itParentEnd; itParent++ )
+   {
+      if( (*itParent) != parent )
+      {
+	 o << std::setw(printDepth) << " " << whiteonblue << "PARENT=" << (*itParent) << reset << std::endl;
+      }
+   }
+
+   if( maxDepthAfterPfoTarget < 0 )
+   {
+      maxDepthAfterPfoTarget++;
+   }
+   if( mcParticle->IsPfoTarget() && (maxDepthAfterPfoTarget >= 0) ){
+      maxDepthAfterPfoTarget = -maxDepthAfterPfoTarget -1;
+   }
+   if( maxDepthAfterPfoTarget != -1 ){
+      // descend into the daughters and let them print themselves
+      for( MCParticleList::const_iterator itDaughter = mcParticle->m_daughterList.begin(), itDaughterEnd = mcParticle->m_daughterList.end(); 
+	   itDaughter != itDaughterEnd; itDaughter++ )
+      {
+	 TestMCManager::PrintMCParticle( (*itDaughter), o, depth+1, maxDepthAfterPfoTarget, mcParticle, stepSize );
+      }
+   }
+}
+
+
 
 
 
