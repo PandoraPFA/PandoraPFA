@@ -16,8 +16,8 @@
 #############################################################################
 
 # Path to Pandora Monitoring
-SET( PANDORA_MONITORING_HOME "path_to_PandoraMonitoring"
-    CACHE PATH "Path to PandoraMonitoring" FORCE )
+#SET( PANDORA_MONITORING_HOME "path_to_PandoraMonitoring"
+#    CACHE PATH "Path to PandoraMonitoring" FORCE )
 
 ###############################################
 # Project Options

@@ -85,7 +85,7 @@ INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Algorithms")
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Managers")
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Test")
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Xml")
-INCLUDE_DIRECTORIES( "${PANDORA_MONITORING_HOME}/include")
+#INCLUDE_DIRECTORIES( "${PANDORA_MONITORING_HOME}/include")
 
 # install include files
 INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/include"
@@ -110,6 +110,9 @@ AUX_SOURCE_DIRECTORY( src/Objects library_sources )
 AUX_SOURCE_DIRECTORY( src/Api library_sources )
 AUX_SOURCE_DIRECTORY( src/Test library_sources )
 AUX_SOURCE_DIRECTORY( src/Xml library_sources )
+
+ADD_EXECUTABLE( testPandora test/TestPandora.cc )
+TARGET_LINK_LIBRARIES( testPandora lib_${PROJECT_NAME} )
 
 ### DOCUMENTATION ############################################################
 
