@@ -272,10 +272,27 @@ StatusCode TestMCManager::Test_SelectPfoTargets()
 	assert( pfo != NULL );
 	assert( pfo == pfoTarget ); // check if pfo target is set right in parent
 	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)201, mcP );
+
+	PandoraApi::MCParticleParameters mcParticleParameters;
+	mcParticleParameters.m_energy = 10;
+	mcParticleParameters.m_momentum = 8;
+	mcParticleParameters.m_innerRadius = 0.1;
+	mcParticleParameters.m_outerRadius = 35.0;
+	mcParticleParameters.m_pParentAddress = (void*)200;
+
+	try{
+	   assert( mcParticleParameters.m_pParentAddress.Get() == (void*)200 );
+	   std::cout << "        mc particle parameters initialized " << std::endl;
+	}catch(...){
+	   std::cout << "        exception thrown at initialization of mcParticleParameters" << std::endl;
+	}
+	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
+
 	pfo = NULL;
 	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
 	assert( pfo == pfoTarget ); // check if pfo target is set right in sister
 	pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)200, mcP );
+
 	pfo = NULL;
 	assert( mcP->GetPfoTarget(pfo) == STATUS_CODE_SUCCESS );
 	assert( pfo == pfoTarget ); // check if pfo target is set right in self
@@ -322,6 +339,10 @@ StatusCode TestMCManager::Test_SelectPfoTargets()
 	assert( pfo == NULL );
 	assert( pfo != pfoTarget ); // check if pfo target NOT set in isolated MCParticle
 
+
+// 	std::cout << "MCParticle trees" << std::endl;
+// 	std::cout << "================" << std::endl;
+// 	pMcManager->Print( std::cout, 100 );
 
         std::cout << "        delete MCManager" << std::endl;
 	delete pMcManager;
