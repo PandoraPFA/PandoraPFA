@@ -36,6 +36,11 @@ OPTION( BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON )
 OPTION( BUILD_32BIT_COMPATIBLE "Set to ON to build in 32 bit compatibility mode" ON )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 
+# project dependencies; only link against pandora monitoring if its path has been specified in BuildSetup.cmake
+IF( DEFINED PandoraMonitoring_HOME )
+    SET( LINK_WITH "PandoraMonitoring" )
+ENDIF()
+
 IF( APPLE )
     LIST(APPEND ${PROJECT_NAME}_DEPENDS "streamlog")
 ENDIF() 
@@ -85,7 +90,9 @@ INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Algorithms")
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Managers")
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Test")
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Xml")
-#INCLUDE_DIRECTORIES( "${PANDORA_MONITORING_HOME}/include")
+IF( DEFINED PandoraMonitoring_HOME )
+    INCLUDE_DIRECTORIES( "${PandoraMonitoring_HOME}/include")
+ENDIF()
 
 # install include files
 INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/include"
