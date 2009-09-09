@@ -278,6 +278,7 @@ StatusCode TestMCManager::Test_SelectPfoTargets()
 	mcParticleParameters.m_momentum = 8;
 	mcParticleParameters.m_innerRadius = 0.1;
 	mcParticleParameters.m_outerRadius = 35.0;
+	mcParticleParameters.m_particleId = 11;
 	mcParticleParameters.m_pParentAddress = (void*)200;
 
 	try{
@@ -340,9 +341,9 @@ StatusCode TestMCManager::Test_SelectPfoTargets()
 	assert( pfo != pfoTarget ); // check if pfo target NOT set in isolated MCParticle
 
 
-// 	std::cout << "MCParticle trees" << std::endl;
-// 	std::cout << "================" << std::endl;
-// 	pMcManager->Print( std::cout, 100 );
+	std::cout << "MCParticle trees" << std::endl;
+	std::cout << "================" << std::endl;
+	pMcManager->Print( std::cout, 100 );
 
         std::cout << "        delete MCManager" << std::endl;
 	delete pMcManager;

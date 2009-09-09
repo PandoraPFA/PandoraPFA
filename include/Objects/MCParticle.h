@@ -8,6 +8,8 @@
 #ifndef MC_PARTICLE_H
 #define MC_PARTICLE_H 1
 
+#include <iosfwd>
+
 #include "Api/PandoraApi.h"
 
 namespace pandora
@@ -88,6 +90,24 @@ public:
      *  @return the mc particle unique identifier
      */
     Uid GetUid() const;
+
+    /**
+     *  @brief  Print the MCParticle's parameters
+     * 
+     *  @param o output-stream where the information is written to
+     */
+    void Print( std::ostream & o ) const;
+
+    /**
+     *  @brief  Print the MCParticle-tree
+     * 
+     *  @param o output-stream where the information is written to
+     *  @param depth current depth of the tree
+     *  @param parent parent MCParticle (NULL if no parent)
+     *  @param stepSize change the step-size for the display of the tree
+     */
+    void Print( std::ostream & o, int depth, int maxDepthAfterPfoTarget = 100000, const MCParticle* parent = NULL, int stepSize = 2 ) const;
+
 
 private:
     /**

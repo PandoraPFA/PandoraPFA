@@ -8,6 +8,8 @@
 #ifndef MC_MANAGER_H
 #define MC_MANAGER_H 1
 
+#include <iosfwd>
+
 #include "Api/PandoraApi.h"
 
 #include "Objects/MCParticle.h"
@@ -24,6 +26,14 @@ public:
      *  @brief  Destructor
      */
     ~MCManager();
+
+    /**
+     *  @brief  Print MCParticle trees
+     * 
+     *  @param  o output stream to write the mc particle trees to
+     */
+    void Print( std::ostream & o, int maxDepthAfterPFOParticle = 10000000 ) const;
+
 
 private:
     /**

@@ -75,6 +75,9 @@ void PandoraPFANewProcessor::processEvent(LCEvent *pLCEvent)
     try
     {
         std::cout << "Run " << m_nRun << ", Event " << ++m_nEvent << std::endl;
+        
+        // .. if MC information is available/wished
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateMCParticles(pLCEvent));
 
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateTracks(pLCEvent));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateCaloHits(pLCEvent));

@@ -25,7 +25,6 @@ StatusCode MCManager::CreateMCParticle(const PandoraApi::MCParticleParameters &m
     try
     {
         UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.find(mcParticleParameters.m_pParentAddress.Get());
-
         if (m_uidToMCParticleMap.end() != iter)
         {
             iter->second->SetProperties(mcParticleParameters);
@@ -33,11 +32,9 @@ StatusCode MCManager::CreateMCParticle(const PandoraApi::MCParticleParameters &m
         else
         {
             MCParticle *pMCParticle = new MCParticle(mcParticleParameters);
-
             if (!m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(mcParticleParameters.m_pParentAddress.Get(), pMCParticle)).second)
                 return STATUS_CODE_FAILURE;
         }
-
         return STATUS_CODE_SUCCESS;
     }
     catch (StatusCodeException &statusCodeException)
@@ -130,7 +127,7 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
         return STATUS_CODE_NOT_INITIALIZED;
     
     // TODO Make boundary a parameter.
-    float boundary = 3.0;
+    float boundary = 30.0;
 
     if((mcParticle->GetOuterRadius() > boundary) && (mcParticle->GetInnerRadius() <= boundary))
     {
@@ -203,6 +200,20 @@ StatusCode MCManager::ResetForNextEvent()
         return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void MCManager::Print( std::ostream & o, int maxDepthAfterPFOParticle ) const
+{
+    for (UidToMCParticleMap::const_iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
+    {
+        if (iter->second->IsRootParticle())
+        {
+	    iter->second->Print( o, 0, maxDepthAfterPFOParticle );
+        }
+	o << std::endl;
+    }
 }
 
 } // namespace pandora

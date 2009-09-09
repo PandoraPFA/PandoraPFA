@@ -32,6 +32,7 @@ StatusCode TestCaloHitManager::Test_CreateCaloHit()
         std::cout << "        create CaloHitParameters" << std::endl;
 	PandoraApi::CaloHitParameters caloHitParameters;
 	caloHitParameters.m_energy = 10;
+	caloHitParameters.m_layer = 3;
 	caloHitParameters.m_pParentAddress = (void*)100;
 	
         std::cout << "        create CaloHit with parameters" << std::endl;
@@ -155,6 +156,7 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 	mcParticleParameters.m_momentum = 8;
 	mcParticleParameters.m_innerRadius = 0.1;
 	mcParticleParameters.m_outerRadius = 30.0;
+	mcParticleParameters.m_particleId = 11;
 	mcParticleParameters.m_pParentAddress = (void*)200;
 	assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
 	mcParticleParameters.m_pParentAddress = (void*)300;
@@ -191,6 +193,7 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
         std::cout << "        create CaloHitParameters" << std::endl;
 	PandoraApi::CaloHitParameters caloHitParameters;
 	caloHitParameters.m_energy = 10;
+	caloHitParameters.m_layer = 10;
 	caloHitParameters.m_pParentAddress = (void*)9000;
 	
         std::cout << "        create CaloHit with parameters" << std::endl;
@@ -230,6 +233,11 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
 //	assert( caloHitToPfoTargetMap.size() == );
 
 	pCaloHitManager->MatchCaloHitsToMCPfoTargets(caloHitToPfoTargetMap);
+
+	std::cout << "MCParticle trees" << std::endl;
+	std::cout << "================" << std::endl;
+	pMcManager->Print( std::cout, 100 );
+
 	
 	for ( UidToMCParticleMap::iterator it = caloHitToPfoTargetMap.begin(), itEnd = caloHitToPfoTargetMap.end(); it != itEnd; it++ )
 	{

@@ -97,6 +97,7 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/include"
         PATTERN "*~" EXCLUDE
         PATTERN ".svn*" EXCLUDE
         PATTERN "*#*" EXCLUDE
+        PATTERN ".#*" EXCLUDE
         PATTERN "*CVS*" EXCLUDE )
 
 ### SOURCES ##################################################################
