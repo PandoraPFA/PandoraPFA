@@ -1,7 +1,7 @@
 /**
- *    @file PandoraPFANew/src/Managers/ClusterManager.cc
+ *  @file PandoraPFANew/src/Managers/ClusterManager.cc
  * 
- *    @brief Implementation of the cluster manager class.
+ *  @brief Implementation of the cluster manager class.
  * 
  *  $Log: $
  */

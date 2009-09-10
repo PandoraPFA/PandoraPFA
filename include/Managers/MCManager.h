@@ -25,7 +25,6 @@ public:
      */
     ~MCManager();
 
-
 private:
     /**
      *  @brief  Create a mc particle
@@ -70,7 +69,7 @@ private:
     *  @params mcRootParticle address of the mc root particle
     */
    StatusCode ApplyPfoSelectionRules(MCParticle *const mcRootParticle) const;
-   
+
    /**
      *  @brief  Create a map relating calo hit uid to mc pfo target
      * 
@@ -85,12 +84,12 @@ private:
 
     /**
      *  @brief  Reset the mc manager
-     */    
+     */
     StatusCode ResetForNextEvent();
 
     /**
      *  @brief  UidAndWeight class
-     */    
+     */
     class UidAndWeight
     {
     public:

@@ -207,7 +207,6 @@ inline StatusCode MCParticle::GetPfoTarget(MCParticle*& pMCParticle) const
     return STATUS_CODE_SUCCESS;
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline Uid MCParticle::GetUid() const

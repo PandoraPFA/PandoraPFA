@@ -6,7 +6,6 @@
  *  $Log: $
  */
 
-//#include <iomanip.h>
 #include <iostream>
 
 #include "Objects/MCParticle.h"
@@ -34,7 +33,6 @@ MCParticle::MCParticle(const Uid uid) :
     m_isInitialized(false)
 {
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -79,7 +77,5 @@ StatusCode MCParticle::SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaugh
 
     return STATUS_CODE_SUCCESS;
 }
-
-
 
 } // namespace pandora
