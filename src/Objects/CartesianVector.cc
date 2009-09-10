@@ -13,28 +13,16 @@
 namespace pandora
 {
 
+CartesianVector::CartesianVector()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 CartesianVector::CartesianVector(float x, float y, float z) :
     m_x(x),
     m_y(y),
     m_z(z)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector::CartesianVector(const CartesianSpacePoint &cartesianSpacePoint) :
-    m_x(cartesianSpacePoint.GetX()),
-    m_y(cartesianSpacePoint.GetY()),
-    m_z(cartesianSpacePoint.GetZ())
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector::CartesianVector(const CartesianSpacePoint &spacePoint1, const CartesianSpacePoint &spacePoint2) :
-    m_x(spacePoint2.GetX() - spacePoint1.GetX()),
-    m_y(spacePoint2.GetY() - spacePoint1.GetY()),
-    m_z(spacePoint2.GetZ() - spacePoint1.GetZ())
 {
 }
 

@@ -8,7 +8,6 @@
 #ifndef TRACK_STATE_H
 #define TRACK_STATE_H 1
 
-#include "Objects/CartesianSpacePoint.h"
 #include "Objects/CartesianVector.h"
 
 namespace pandora
@@ -21,10 +20,13 @@ class TrackState
 {
 public:
     /**
-     *  @brief  Constructor, from position coordinates and momentum components
+     *  @brief  Default constructor
+     */
+    TrackState();
+
+    /**
+     *  @brief  Constructor, from position and momentum components
      *
-     *  @param  pathLength the path length
-     *  @param  time the time
      *  @param  x the x position coordinate
      *  @param  y the y position coordinate
      *  @param  z the z position coordinate
@@ -32,62 +34,22 @@ public:
      *  @param  py the momentum y component
      *  @param  pz the momentum z component
      */
-    TrackState(float pathLength, float time, float x, float y, float z, float px, float py, float pz);
+    TrackState(float x, float y, float z, float px, float py, float pz);
 
     /**
-     *  @brief  Constructor, from position space point and momentum components
+     *  @brief  Constructor, from position and momentum vectors
      *
-     *  @param  pathLength the path length
-     *  @param  time the time
-     *  @param  position the track position space point
-     *  @param  px the momentum x component
-     *  @param  py the momentum y component
-     *  @param  pz the momentum z component
-     */
-    TrackState(float pathLength, float time, const CartesianSpacePoint &position, float px, float py, float pz);
-
-    /**
-     *  @brief  Constructor, from position coordinates and momentum vector
-     *
-     *  @param  pathLength the path length
-     *  @param  time the time
-     *  @param  x the x position coordinate
-     *  @param  y the y position coordinate
-     *  @param  z the z position coordinate
-     *  @param  momentum the momentum vector
-     */
-    TrackState(float pathLength, float time, float x, float y, float z, const CartesianVector &momentum);
-
-    /**
-     *  @brief  Constructor, from position space point and momentum vector
-     *
-     *  @param  pathLength the path length
-     *  @param  time the time
      *  @param  position the track position space pointe
      *  @param  momentum the momentum vector
      */
-    TrackState(float pathLength, float time, const CartesianSpacePoint &position, const CartesianVector &momentum);
+    TrackState(const CartesianVector &position, const CartesianVector &momentum);
 
     /**
-     *  @brief  Get the path length
+     *  @brief  Get the track position vector
      * 
-     *  @return the path length
+     *  @return the track position vector
      */
-    float GetPathLength() const;
-
-    /**
-     *  @brief  Get the time
-     * 
-     *  @return the time
-     */
-    float GetTime() const;
-
-    /**
-     *  @brief  Get the track position space point
-     * 
-     *  @return the track position space point
-     */
-    const CartesianSpacePoint &GetPosition() const;
+    const CartesianVector &GetPosition() const;
 
     /**
      *  @brief  Get the track momentum vector
@@ -97,10 +59,8 @@ public:
     const CartesianVector &GetMomentum() const;
 
 private:
-    const float                 m_pathLength;   ///< The path length
-    const float                 m_time;         ///< The time
-    const CartesianSpacePoint   m_position;     ///< The position space point
-    const CartesianVector       m_momentum;     ///< The momentum vector
+    CartesianVector   m_position;     ///< The position space point
+    CartesianVector   m_momentum;     ///< The momentum vector
 };
 
 /**
@@ -113,21 +73,7 @@ std::ostream &operator<<(std::ostream &stream, const TrackState &trackState);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float TrackState::GetPathLength() const
-{
-    return m_pathLength;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TrackState::GetTime() const
-{
-    return m_time;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline const CartesianSpacePoint &TrackState::GetPosition() const
+inline const CartesianVector &TrackState::GetPosition() const
 {
     return m_position;
 }

@@ -8,8 +8,6 @@
 #ifndef CARTESIAN_VECTOR_H
 #define CARTESIAN_VECTOR_H 1
 
-#include "Objects/CartesianSpacePoint.h"
-
 #include <iostream>
 
 namespace pandora
@@ -22,6 +20,11 @@ class CartesianVector
 {
 public:
     /**
+     *  @brief  Default constructor
+     */
+    CartesianVector();
+
+    /**
      *  @brief  Constructor, create a vector from the cartesian coordinates of the end point,
      *          origin at (0,0,0,)
      * 
@@ -30,22 +33,6 @@ public:
      *  @param  z the end point z coordinate
      */
     CartesianVector(float x, float y, float z);
-
-    /**
-     *  @brief  Constructor, create a vector from a cartesian space point, origin at (0,0,0)
-     * 
-     *  @param  cartesianSpacePoint the cartesian space point
-     */
-    CartesianVector(const CartesianSpacePoint &cartesianSpacePoint);
-
-    /**
-     *  @brief  Constructor, create a vector from two cartesian space points. The result points
-     *          from spacePoint1 to spacePoint2, origin at (0,0,0).
-     * 
-     *  @param  spacePoint1 cartesian space point 1
-     *  @param  spacePoint2 cartesian space point 2
-     */
-    CartesianVector(const CartesianSpacePoint &spacePoint1, const CartesianSpacePoint &spacePoint2);
 
     /**
      *  @brief  Get the cartesian x coordinate
@@ -110,9 +97,9 @@ public:
     float GetOpeningAngle(const CartesianVector &rhs) const;
 
 private:
-    const float   m_x;    ///< The x coordinate
-    const float   m_y;    ///< The y coordinate
-    const float   m_z;    ///< The z coordinate
+    float   m_x;    ///< The x coordinate
+    float   m_y;    ///< The y coordinate
+    float   m_z;    ///< The z coordinate
 };
 
 /**
