@@ -13,12 +13,6 @@
 namespace pandora
 {
 
-CartesianVector::CartesianVector()
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 CartesianVector::CartesianVector(float x, float y, float z) :
     m_x(x),
     m_y(y),

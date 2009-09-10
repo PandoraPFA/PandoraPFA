@@ -11,12 +11,6 @@
 namespace pandora
 {
 
-TrackState::TrackState()
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 TrackState::TrackState(float x, float y, float z, float px, float py, float pz) :
     m_position(CartesianVector(x, y, z)),
     m_momentum(CartesianVector(px, py, pz))

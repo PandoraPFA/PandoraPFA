@@ -29,6 +29,11 @@ public:
     PandoraType();
 
     /**
+     *  @brief  Destructor
+     */
+    ~PandoraType();
+
+    /**
      *  @brief  Constructor
      *
      *  @param  t the initial value 
@@ -47,7 +52,7 @@ public:
      *
      *  @return the value
      */
-    T Get() const;
+    const T &Get() const;
 
     /**
      *  @brief  Reset the pandora type
@@ -69,7 +74,7 @@ public:
     bool operator= (const T &rhs); 
 
 private:
-    T       m_value;            ///< The actual value being held by the pandora type
+    T       *m_pValue;          ///< Address of the actual value being held by the pandora type
     bool    m_isInitialized;    ///< Whether the pandora type is initialized
 };
 
@@ -84,6 +89,7 @@ typedef PandoraType<TrackState> InputTrackState;
 
 template <typename T>
 PandoraType<T>::PandoraType() :
+    m_pValue(NULL),
     m_isInitialized(false)
 {
 }
@@ -91,8 +97,17 @@ PandoraType<T>::PandoraType() :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
+PandoraType<T>::~PandoraType()
+{
+    if (NULL != m_pValue)
+        delete m_pValue;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
 PandoraType<T>::PandoraType(const T &t) :
-    m_value(t),
+    m_pValue(new T(t)),
     m_isInitialized(true)
 {
 }
@@ -102,19 +117,19 @@ PandoraType<T>::PandoraType(const T &t) :
 template <typename T>
 void PandoraType<T>::Set(const T &t)
 {
-    m_value = t;
+    m_pValue = new T(t);
     m_isInitialized = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-T PandoraType<T>::Get() const
+const T &PandoraType<T>::Get() const
 {
     if (!m_isInitialized)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    return m_value;
+    return *m_pValue;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +137,11 @@ T PandoraType<T>::Get() const
 template <typename T>
 void PandoraType<T>::Reset()
 {
+    if (NULL != m_pValue)
+        delete m_pValue;
+
     m_isInitialized = false;
+    m_pValue = NULL;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

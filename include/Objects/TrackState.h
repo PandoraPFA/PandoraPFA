@@ -20,11 +20,6 @@ class TrackState
 {
 public:
     /**
-     *  @brief  Default constructor
-     */
-    TrackState();
-
-    /**
      *  @brief  Constructor, from position and momentum components
      *
      *  @param  x the x position coordinate
@@ -59,8 +54,8 @@ public:
     const CartesianVector &GetMomentum() const;
 
 private:
-    CartesianVector   m_position;     ///< The position space point
-    CartesianVector   m_momentum;     ///< The momentum vector
+    const CartesianVector   m_position;     ///< The position space point
+    const CartesianVector   m_momentum;     ///< The momentum vector
 };
 
 /**
