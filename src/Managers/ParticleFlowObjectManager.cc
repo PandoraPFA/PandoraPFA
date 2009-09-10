@@ -38,14 +38,14 @@ StatusCode ParticleFlowObjectManager::CreateParticleFlowObject(const PandoraCont
         for (TrackList::const_iterator iter = particleFlowObjectParameters.m_trackList.begin(),
             iterEnd = particleFlowObjectParameters.m_trackList.end(); iter != iterEnd; ++iter)
         {
-            pParticleFlowObject->m_trackAddressVector.push_back((*iter)->GetParentTrackAddress());
+            pParticleFlowObject->m_trackAddressList.push_back((*iter)->GetParentTrackAddress());
         }
 
         // Store pointers to constituent hits (organized into clusters)
         for (ClusterList::const_iterator clusterIter = particleFlowObjectParameters.m_clusterList.begin(),
             clusterIterEnd = particleFlowObjectParameters.m_clusterList.end(); clusterIter != clusterIterEnd; ++clusterIter)
         {
-            CaloHitAddressVector caloHitAddressVector;
+            CaloHitAddressList caloHitAddressList;
 
             for (OrderedCaloHitList::const_iterator orderedListIter = (*clusterIter)->GetOrderedCaloHitList()->begin(),
                 orderedListIterEnd = (*clusterIter)->GetOrderedCaloHitList()->end(); orderedListIter != orderedListIterEnd; ++orderedListIter)
@@ -53,11 +53,11 @@ StatusCode ParticleFlowObjectManager::CreateParticleFlowObject(const PandoraCont
                 for (CaloHitList::const_iterator caloHitIter = orderedListIter->second->begin(),
                     caloHitIterEnd = orderedListIter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
                 {
-                    caloHitAddressVector.push_back((*caloHitIter)->GetParentCaloHitAddress());
+                    caloHitAddressList.push_back((*caloHitIter)->GetParentCaloHitAddress());
                 }
             }
 
-            pParticleFlowObject->m_clusterAddressVector.push_back(caloHitAddressVector);
+            pParticleFlowObject->m_clusterAddressList.push_back(caloHitAddressList);
         }
 
         m_particleFlowObjectList.push_back(pParticleFlowObject);

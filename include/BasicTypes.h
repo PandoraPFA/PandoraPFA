@@ -191,18 +191,16 @@ inline bool PointerLess<T>::operator()(const T *lhs, const T *rhs) const
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-// Containers exposed via content api - name as lists
+// Container typedefs
 typedef std::multiset<CaloHit *, PointerLess<CaloHit> > CaloHitList;
 typedef std::multiset<Track *, PointerLess<Track> > TrackList;
 typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<CaloHit *> InputCaloHitList;
+typedef std::vector<void *> CaloHitAddressList, TrackAddressList;
+typedef std::vector<CaloHitAddressList> ClusterAddressList;
 
-// Containers exposed via standard api - make container type explicit
-typedef std::vector<void *> CaloHitAddressVector, TrackAddressVector;
-typedef std::vector<CaloHitAddressVector> ClusterAddressVector;
-
-// Types used in standard api
+// Types used in api parameter classes
 typedef PandoraType<unsigned int> UInt;
 typedef PandoraType<int> Int;
 typedef PandoraType<float> Float;

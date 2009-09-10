@@ -16,7 +16,7 @@ namespace pandora
 class MCParticle;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 /**
  *  @brief  CaloHit class
  */
@@ -24,11 +24,30 @@ class CaloHit
 {
 public:
     /**
-     *  @brief  Operator< now orders by calo hit raw energy
+     *  @brief  Calorimeter hit type enum
+     */
+    enum HitType
+    {
+        ECAL,
+        HCAL,
+        MUON
+    };
+
+    /**
+     *  @brief  DetectorRegion enum
+     */
+    enum DetectorRegion
+    {
+        BARREL,
+        ENDCAP
+    };
+
+    /**
+     *  @brief  Operator< now orders by calo hit energy
      * 
      *  @param  rhs calo hit to compare with
      */
-    bool operator< (const CaloHit &rhs) const;    
+    bool operator< (const CaloHit &rhs) const;
 
     /**
      *  @brief  Get the calo hit energy
@@ -81,14 +100,14 @@ private:
      */
     StatusCode SetPseudoLayer(const PseudoLayer &pseudoLayer);
 
-    bool            m_isSortedIntoPseudoLayer;  ///< Whether the calo hit has been sorted into a pseudo layer
+    bool                m_isSortedIntoPseudoLayer;  ///< Whether the calo hit has been sorted into a pseudo layer
+
+    const float         m_energy;                   ///< The calo hit energy
+    const unsigned int  m_layer;                    ///< The layer in which the calo hit is located
+    PseudoLayer         m_pseudoLayer;              ///< The pseudo layer
     
-    float           m_energy;                   ///< The calo hit energy
-    unsigned int    m_layer;                    ///< The layer in which the calo hit is located
-    PseudoLayer     m_pseudoLayer;              ///< The pseudo layer
-    
-    MCParticle      *m_pMCParticle;             ///< The associated MC particle
-    void            *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
+    MCParticle          *m_pMCParticle;             ///< The associated MC particle
+    void                *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
 
     friend class CaloHitManager;
 };

@@ -87,8 +87,8 @@ public:
     // Objects available for construction by pandora
     typedef ObjectCreationHelper<CaloHitParameters> CaloHit;
     typedef ObjectCreationHelper<TrackParameters> Track;
-    typedef ObjectCreationHelper<GeometryParameters> Geometry;    
-    typedef ObjectCreationHelper<MCParticleParameters> MCParticle;    
+    typedef ObjectCreationHelper<GeometryParameters> Geometry;
+    typedef ObjectCreationHelper<MCParticleParameters> MCParticle;
 
     /**
      *  @brief  ParticleFlowObject class
@@ -97,8 +97,8 @@ public:
     {
     public:
         float                           m_energy;                   ///< The particle flow object energy
-        pandora::TrackAddressVector     m_trackAddressVector;       ///< The track address vector
-        pandora::ClusterAddressVector   m_clusterAddressVector;     ///< The cluster address vector
+        pandora::TrackAddressList       m_trackAddressList;         ///< The track address list
+        pandora::ClusterAddressList     m_clusterAddressList;       ///< The cluster address list
     };
 
     typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
