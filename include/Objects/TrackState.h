@@ -69,11 +69,6 @@ public:
     TrackState(float pathLength, float time, const CartesianSpacePoint &position, const CartesianVector &momentum);
 
     /**
-     *  @brief  Destructor
-     */
-    TrackState();
-
-    /**
      *  @brief  Get the path length
      * 
      *  @return the path length
@@ -102,10 +97,10 @@ public:
     const CartesianVector &GetMomentum() const;
 
 private:
-    float                   m_pathLength;   ///< The path length
-    float                   m_time;         ///< The time
-    CartesianSpacePoint     m_position;     ///< The position space point
-    CartesianVector         m_momentum;     ///< The momentum vector
+    const float                 m_pathLength;   ///< The path length
+    const float                 m_time;         ///< The time
+    const CartesianSpacePoint   m_position;     ///< The position space point
+    const CartesianVector       m_momentum;     ///< The momentum vector
 };
 
 /**
@@ -115,6 +110,34 @@ private:
  *  @param  trackState the track state
  */
 std::ostream &operator<<(std::ostream &stream, const TrackState &trackState);
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float TrackState::GetPathLength() const
+{
+    return m_pathLength;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float TrackState::GetTime() const
+{
+    return m_time;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianSpacePoint &TrackState::GetPosition() const
+{
+    return m_position;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &TrackState::GetMomentum() const
+{
+    return m_momentum;
+}
 
 } // namespace pandora
 

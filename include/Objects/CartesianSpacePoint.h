@@ -59,9 +59,9 @@ public:
     float GetDistanceToSpacePoint(const CartesianSpacePoint &rhs);
 
 private:
-    float   m_x;    ///< The x coordinate
-    float   m_y;    ///< The y coordinate
-    float   m_z;    ///< The z coordinate
+    const float   m_x;    ///< The x coordinate
+    const float   m_y;    ///< The y coordinate
+    const float   m_z;    ///< The z coordinate
 };
 
 /**
