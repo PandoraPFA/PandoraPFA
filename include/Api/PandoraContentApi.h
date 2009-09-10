@@ -61,7 +61,7 @@ public:
         class Parameters
         {
         public:
-            pandora::Float          m_energy;           ///< The particle flow object energy
+            pandora::InputFloat     m_energy;           ///< The particle flow object energy
             pandora::ClusterList    m_clusterList;      ///< The clusters in the particle flow object
             pandora::TrackList      m_trackList;        ///< The tracks in the particle flow object
         };

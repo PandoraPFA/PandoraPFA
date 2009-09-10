@@ -46,9 +46,9 @@ public:
     class CaloHitParameters
     {
     public:
-        pandora::Float      m_energy;               ///< The calo hit energy
-        pandora::UInt       m_layer;                ///< The layer in which the calo hit is located
-        pandora::Address    m_pParentAddress;       ///< The address of the parent calo hit in the user framework
+        pandora::InputFloat      m_energy;               ///< The calo hit energy
+        pandora::InputUInt       m_layer;                ///< The layer in which the calo hit is located
+        pandora::InputAddress    m_pParentAddress;       ///< The address of the parent calo hit in the user framework
     };
 
     /**
@@ -57,8 +57,8 @@ public:
     class TrackParameters
     {
     public:
-        pandora::Float      m_momentum;             ///< The track momentum
-        pandora::Address    m_pParentAddress;       ///< The address of the parent track in the user framework
+        pandora::InputFloat      m_momentum;             ///< The track momentum
+        pandora::InputAddress    m_pParentAddress;       ///< The address of the parent track in the user framework
     };
 
     /**
@@ -67,7 +67,7 @@ public:
     class GeometryParameters
     {
     public:
-        pandora::Float      m_tpcInnerRadius;       ///< The inner tpc radius
+        pandora::InputFloat      m_tpcInnerRadius;       ///< The inner tpc radius
     };
 
     /**
@@ -76,12 +76,12 @@ public:
     class MCParticleParameters
     {
     public:
-        pandora::Float      m_energy;               ///< The MC particle's energy
-        pandora::Float      m_momentum;             ///< The MC particle's momentum
-        pandora::Float      m_innerRadius;          ///< The MC particle's path's inner radius
-        pandora::Float      m_outerRadius;          ///< The MC particle's path's outer radius
-        pandora::Int        m_particleId;           ///< The MC particle's ID (PDG code)
-        pandora::Address    m_pParentAddress;       ///< The address of the parent MC particle in the user framework
+        pandora::InputFloat      m_energy;               ///< The MC particle's energy
+        pandora::InputFloat      m_momentum;             ///< The MC particle's momentum
+        pandora::InputFloat      m_innerRadius;          ///< The MC particle's path's inner radius
+        pandora::InputFloat      m_outerRadius;          ///< The MC particle's path's outer radius
+        pandora::InputInt        m_particleId;           ///< The MC particle's ID (PDG code)
+        pandora::InputAddress    m_pParentAddress;       ///< The address of the parent MC particle in the user framework
     };
 
     // Objects available for construction by pandora

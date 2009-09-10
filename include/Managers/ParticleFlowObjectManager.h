@@ -16,7 +16,7 @@ namespace pandora
 
 class Cluster;
 class Track;
-    
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -37,7 +37,25 @@ private:
      *  @param  particleFlowObjectParameters the particle flow object parameters
      */
     StatusCode CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters);
-    
+
+    /**
+     *  @brief  Extract tracks from parameters and store in the particle flow object
+     * 
+     *  @param  pParticleFlowObject address of the particle flow object
+     *  @param  particleFlowObjectParameters the particle flow object parameters
+     */
+    void ExtractAndStoreTracks(PandoraApi::ParticleFlowObject *const pParticleFlowObject,
+        const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) const;
+
+    /**
+     *  @brief  Extract calo hits from parameters and store (grouped into clusters) in the particle flow object
+     * 
+     *  @param  pParticleFlowObject address of the particle flow object
+     *  @param  particleFlowObjectParameters the particle flow object parameters
+     */
+    void ExtractAndStoreCaloHits(PandoraApi::ParticleFlowObject *const pParticleFlowObject,
+        const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) const;
+
     /**
      *  @brief  Get the particle flow objects
      * 

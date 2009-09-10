@@ -1,12 +1,15 @@
 /**
  *  @file   PandoraPFANew/include/PandoraType.h
  * 
- *  @brief  Header file for the pandora types class and functions such as TypeToString and StringToType
+ *  @brief  Header file for the pandora type class and functions such as StringToType and TypeToString
  * 
  *  $Log: $
  */
 #ifndef PANDORA_TYPES_H
 #define PANDORA_TYPES_H 1
+
+#include "Objects/CartesianVector.h"
+#include "Objects/TrackState.h"
 
 #include "StatusCodes.h"
 
@@ -70,10 +73,12 @@ private:
     bool    m_isInitialized;    ///< Whether the pandora type is initialized
 };
 
-typedef PandoraType<unsigned int> UInt;
-typedef PandoraType<int> Int;
-typedef PandoraType<float> Float;
-typedef PandoraType<void *> Address;
+typedef PandoraType<unsigned int> InputUInt;
+typedef PandoraType<int> InputInt;
+typedef PandoraType<float> InputFloat;
+typedef PandoraType<void *> InputAddress;
+typedef PandoraType<CartesianVector> InputCartesianVector;
+typedef PandoraType<TrackState> InputTrackState;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
