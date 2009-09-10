@@ -8,8 +8,8 @@
 #ifndef PANDORA_MAIN_H
 #define PANDORA_MAIN_H 1
 
-#include "BasicTypes.h"
 #include "StatusCodes.h"
+#include "Typedefs.h"
 
 namespace pandora
 {

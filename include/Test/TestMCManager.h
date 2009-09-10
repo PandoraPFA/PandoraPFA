@@ -12,15 +12,14 @@
 #include <iostream>
 #include <iomanip>
 
-#include "BasicTypes.h"
 #include "StatusCodes.h"
+#include "Typedefs.h"
 
 #include "Managers/MCManager.h"
 
-
 namespace pandora
 {
-	
+
 /**
  *	@brief TestMCManager class
  */
@@ -28,60 +27,57 @@ class TestMCManager
 {
 public:
     /**
-     *	@brief	test the GetMCParticle method
+     *  @brief  test the GetMCParticle method
      */
     StatusCode Test_RetrieveExistingOrCreateEmptyMCParticle();
    
     /**
-     *	@brief	test the GetMCParticle method
+     *  @brief  test the GetMCParticle method
      */
     StatusCode Test_CreateMCParticle();
    
     /**
-     *	@brief	test the GetMCParticle method
+     *  @brief  test the GetMCParticle method
      */
     StatusCode Test_SetMCParentDaughterRelationship();
 
     /**
-     *	@brief	test the AssociateCaloHitWithMCParticle method
+     *  @brief  test the AssociateCaloHitWithMCParticle method
      */
     StatusCode Test_SetCaloHitToMCParticleRelationship();
 
     /**
-     *	@brief	test the y method
+     *  @brief  test the SelectPfoTargets method
      */
     StatusCode Test_SelectPfoTargets();
 
-
     /**
-     *	@brief	combined tests
+     *  @brief  combined tests
      */
     StatusCode Test_Combined();
 
     /**
-     *	@brief	Run all tests
+     *  @brief  Run all tests
      */
     StatusCode Test_All();
-   
-
 
     // helper functions for debugging
 
     /**
-     *	@brief	print the MCParticle trees
-     *	@param	mcManager MCManager of which the mc particle trees are printed
-     *	@param	o the output stream to which everything is printed
-     *	@param	maxDepthAfterPFOTarget constrains the tree-depth after the PFO-targets
+     *  @brief  print the MCParticle trees
+     *  @param  mcManager MCManager of which the mc particle trees are printed
+     *  @param  o the output stream to which everything is printed
+     *  @param  maxDepthAfterPFOTarget constrains the tree-depth after the PFO-targets
      */
-    static void PrintMCParticleTrees( MCManager* mcManager, std::ostream & o, int maxDepthAfterPFOTarget = 10000000 );
-	 
+    static void PrintMCParticleTrees(MCManager* mcManager, std::ostream & o, int maxDepthAfterPFOTarget = 10000000);
+
     /**
      *  @brief  Print the MCParticle's parameters
      * 
      *  @param mcParticle mcparticle of which the information is printed
      *  @param o output-stream where the information is written to
      */
-    static void PrintMCParticle( MCParticle* mcParticle, std::ostream & o );
+    static void PrintMCParticle(MCParticle* mcParticle, std::ostream & o );
 
     /**
      *  @brief  Print the MCParticle-tree
@@ -92,16 +88,10 @@ public:
      *  @param parent parent MCParticle (NULL if no parent)
      *  @param stepSize change the step-size for the display of the tree
      */
-    static void PrintMCParticle( MCParticle* mcParticle, 
-                                 std::ostream & o, 
-                                 int depth, 
-                                 int maxDepthAfterPfoTarget = 100000, 
-                                 const MCParticle* parent = NULL, 
-                                 int stepSize = 2 );
-
-
+    static void PrintMCParticle(MCParticle* mcParticle, std::ostream & o, int depth, int maxDepthAfterPfoTarget = 100000, 
+        const MCParticle* parent = NULL, int stepSize = 2);
 };
 
 } // namespace pandora
 
-#endif
+#endif // #ifndef TEST_MC_MANAGER_H
