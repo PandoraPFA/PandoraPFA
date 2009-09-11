@@ -55,6 +55,14 @@ StatusCode PandoraApi::SetCaloHitToMCParticleRelationship(const pandora::Pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApi::SetTrackToMCParticleRelationship(const pandora::Pandora &pandora, const void *pTrackParentAddress,
+    const void *pMCParticleParentAddress, const float mcParticleWeight)
+{
+    return pandora.GetPandoraApiImpl()->SetTrackToMCParticleRelationship(pTrackParentAddress, pMCParticleParentAddress, mcParticleWeight);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, PandoraApi::ParticleFlowObjectList &particleFlowObjectList)
 {
     return pandora.GetPandoraApiImpl()->GetParticleFlowObjects(particleFlowObjectList);

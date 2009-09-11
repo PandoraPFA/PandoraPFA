@@ -111,6 +111,13 @@ private:
     StatusCode SaveList(const TrackList &trackList, const std::string &newListName);
 
     /**
+     *  @brief  Match tracks to their correct mc particles for particle flow
+     *
+     *  @param  trackToPfoTargetMap the track uid to mc pfo target map
+     */
+    StatusCode MatchTracksToMCPfoTargets(const UidToMCParticleMap &trackToPfoTargetMap);
+
+    /**
      *  @brief  Register an algorithm with the track manager
      * 
      *  @param  pAlgorithm address of the algorithm

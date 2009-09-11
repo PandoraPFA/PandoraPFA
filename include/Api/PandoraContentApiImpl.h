@@ -56,9 +56,9 @@ public:
     StatusCode RunAlgorithm(const std::string &algorithmName) const;
 
     /**
-     *  @brief  Match calo hits to their correct mc particles for particle flow
+     *  @brief  Match tracks calo hits to their correct mc particles for particle flow
      */
-    StatusCode MatchCaloHitsToMCPfoTargets() const;
+    StatusCode MatchObjectsToMCPfoTargets() const;
 
     /**
      *  @brief  Order input calo hits by pseudo layer

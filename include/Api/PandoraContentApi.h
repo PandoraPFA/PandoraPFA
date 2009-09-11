@@ -78,11 +78,11 @@ public:
     typedef ParticleFlowObject::Parameters ParticleFlowObjectParameters;
 
     /**
-     *  @brief  Match calo hits to their correct mc particles for particle flow
+     *  @brief  Match tracks and calo hits to their correct mc particles for particle flow
      * 
-     *  @param  pandora the pandora instance containing the calo hits and mc particles
+     *  @param  pandora the pandora instance containing the calo hits, tracks and mc particles
      */
-    static StatusCode MatchCaloHitsToMCPfoTargets(const pandora::Pandora &pandora);
+    static StatusCode MatchObjectsToMCPfoTargets(const pandora::Pandora &pandora);
     
     /**
      *  @brief  Order input calo hits by pseudo layer

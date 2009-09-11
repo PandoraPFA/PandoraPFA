@@ -38,9 +38,9 @@ StatusCode PandoraContentApi::ParticleFlowObject::Create(const pandora::Algorith
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::MatchCaloHitsToMCPfoTargets(const pandora::Pandora &pandora)
+StatusCode PandoraContentApi::MatchObjectsToMCPfoTargets(const pandora::Pandora &pandora)
 {
-    return pandora.GetPandoraContentApiImpl()->MatchCaloHitsToMCPfoTargets();
+    return pandora.GetPandoraContentApiImpl()->MatchObjectsToMCPfoTargets();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

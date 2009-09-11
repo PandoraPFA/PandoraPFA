@@ -79,12 +79,18 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 
 //------------------------------------------------------------------------------------------------------------------------------------------    
 
-StatusCode PandoraContentApiImpl::MatchCaloHitsToMCPfoTargets() const
+StatusCode PandoraContentApiImpl::MatchObjectsToMCPfoTargets() const
 {
-    UidToMCParticleMap caloHitToPfoTargetMap;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->SelectPfoTargets());
+
+    UidToMCParticleMap caloHitToPfoTargetMap;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->CreateCaloHitToPfoTargetMap(caloHitToPfoTargetMap));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->MatchCaloHitsToMCPfoTargets(caloHitToPfoTargetMap));
+
+    UidToMCParticleMap trackToPfoTargetMap;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->CreateTrackToPfoTargetMap(trackToPfoTargetMap));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->MatchTracksToMCPfoTargets(trackToPfoTargetMap));
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->DeleteNonPfoTargets());
 
     return STATUS_CODE_SUCCESS;

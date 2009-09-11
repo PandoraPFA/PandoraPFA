@@ -162,7 +162,7 @@ private:
      *
      *  @param  caloHitToPfoTargetMap the calo hit uid to mc pfo target map
      */
-    StatusCode MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap &caloHitToPfoTargetMap); 
+    StatusCode MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap &caloHitToPfoTargetMap);
 
     /**
      *  @brief  Register an algorithm with the calo hit manager

@@ -64,7 +64,7 @@ StatusCode Pandora::ProcessEvent()
     std::cout << "Pandora process event" << std::endl;
 
     // Prepare event
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MatchCaloHitsToMCPfoTargets(*this));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MatchObjectsToMCPfoTargets(*this));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::OrderInputCaloHits(*this));
 
     // Loop over algorithms

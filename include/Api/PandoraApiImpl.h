@@ -70,6 +70,16 @@ public:
         const float mcParticleWeight) const;
 
     /**
+     *  @brief  Set track to mc particle relationship
+     * 
+     *  @param  pTrackParentAddress address of track in the user framework
+     *  @param  pMCParticleParentAddress address of mc particle in the user framework
+     *  @param  mcParticleWeight weighting to assign to the mc particle
+     */
+    StatusCode SetTrackToMCParticleRelationship(const void *pTrackParentAddress, const void *pMCParticleParentAddress,
+        const float mcParticleWeight) const;
+
+    /**
      *  @brief  Get the particle flow objects
      * 
      *   @param  particleFlowObjectList container to receive the particle flow objects

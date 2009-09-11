@@ -140,6 +140,26 @@ StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode TrackManager::MatchTracksToMCPfoTargets(const UidToMCParticleMap &trackToPfoTargetMap)
+{
+    NameToTrackListMap::iterator listIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() == listIter)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    for (TrackList::iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
+    {
+        UidToMCParticleMap::const_iterator pfoTargetIter = trackToPfoTargetMap.find((*iter)->GetParentTrackAddress());
+
+        if (trackToPfoTargetMap.end() != pfoTargetIter)
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetMCParticle(pfoTargetIter->second));
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode TrackManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))

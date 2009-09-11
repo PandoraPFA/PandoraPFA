@@ -146,7 +146,7 @@ public:
         const void *pDaughterAddress);
 
     /**
-     *  @brief  Set calo hit to mc particle relationshipip
+     *  @brief  Set calo hit to mc particle relationship
      * 
      *  @param  pandora the pandora instance to register the relationship with
      *  @param  pCaloHitParentAddress address of calo hit in the user framework
@@ -154,6 +154,17 @@ public:
      *  @param  mcParticleWeight weighting to assign to the mc particle
      */
     static StatusCode SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
+        const void *pMCParticleParentAddress, const float mcParticleWeight = 1);
+
+    /**
+     *  @brief  Set track to mc particle relationship
+     * 
+     *  @param  pandora the pandora instance to register the relationship with
+     *  @param  pTrackParentAddress address of track in the user framework
+     *  @param  pMCParticleParentAddress address of mc particle in the user framework
+     *  @param  mcParticleWeight weighting to assign to the mc particle
+     */
+    static StatusCode SetTrackToMCParticleRelationship(const pandora::Pandora &pandora, const void *pTrackParentAddress,
         const void *pMCParticleParentAddress, const float mcParticleWeight = 1);
 
     /**

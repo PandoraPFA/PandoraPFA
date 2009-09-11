@@ -86,18 +86,19 @@ StatusCode MCManager::SetMCParentDaughterRelationship(const Uid parentUid, const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCManager::SetCaloHitToMCParticleRelationship(const Uid caloHitUid, const Uid mcParticleUid, const float mcParticleWeight)
+StatusCode MCManager::SetUidToMCParticleRelationship(const Uid objectUid, const Uid mcParticleUid, const float mcParticleWeight,
+    UidRelationMap &uidRelationMap)
 {
-    UidRelationMap::iterator iter = m_caloHitToMCParticleMap.find(caloHitUid);
-    
-    if (m_caloHitToMCParticleMap.end() != iter)
+    UidRelationMap::iterator iter = uidRelationMap.find(objectUid);
+
+    if (uidRelationMap.end() != iter)
     {
         if (mcParticleWeight > iter->second.m_weight)
             iter->second = UidAndWeight(mcParticleUid, mcParticleWeight);
     }
     else
     {
-        if (!m_caloHitToMCParticleMap.insert(UidRelationMap::value_type(caloHitUid, UidAndWeight(mcParticleUid, mcParticleWeight))).second)
+        if (!uidRelationMap.insert(UidRelationMap::value_type(objectUid, UidAndWeight(mcParticleUid, mcParticleWeight))).second)
             return STATUS_CODE_FAILURE;
     }
 
@@ -138,7 +139,7 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
         // MC particle has not yet crossed boundary - set it as its own pfo target
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget(mcParticle));
 
-        for( MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
+        for(MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
             iter != iterEnd; ++iter)
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplyPfoSelectionRules(*iter));
@@ -150,9 +151,9 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCManager::CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToPfoTargetMap) const
+StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTargetMap, const UidRelationMap &uidRelationMap) const
 {
-    for (UidRelationMap::const_iterator relationIter = m_caloHitToMCParticleMap.begin(), relationIterEnd = m_caloHitToMCParticleMap.end();
+    for (UidRelationMap::const_iterator relationIter = uidRelationMap.begin(), relationIterEnd = uidRelationMap.end();
         relationIter != relationIterEnd; ++relationIter)
     {
         UidToMCParticleMap::const_iterator mcParticleIter = m_uidToMCParticleMap.find(relationIter->second.m_uid);
@@ -163,10 +164,10 @@ StatusCode MCManager::CreateCaloHitToPfoTargetMap(UidToMCParticleMap &caloHitToP
         MCParticle *pMCParticle = NULL;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticleIter->second->GetPfoTarget(pMCParticle));
 
-        if (!caloHitToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
+        if (!uidToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
             return STATUS_CODE_FAILURE;
     }
-    
+
     return STATUS_CODE_SUCCESS;
 }
 
