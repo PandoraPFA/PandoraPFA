@@ -37,9 +37,16 @@ public:
     /**
      *  @brief  Constructor
      *
-     *  @param  t the initial value 
+     *  @param  t the initial value
      */
     PandoraType(const T &t);
+
+    /**
+     *  @brief  Copy constructor (EXPENSIVE WITH LARGE OBJECTS)
+     * 
+     *  @param  rhs the initial pandora type
+     */
+    PandoraType(const PandoraType<T> &rhs);
 
     /**
      *  @brief  Set the value held by the pandora type
@@ -71,8 +78,15 @@ public:
      *  @brief  Assignment operator for the pandora type
      * 
      *  @return whether assignment succeeded
-     */   
+     */
     bool operator= (const T &rhs); 
+
+    /**
+     *  @brief  Assignment operator for parent pandora type (EXPENSIVE WITH LARGE OBJECTS)
+     * 
+     *  @throw  status code exception
+     */   
+    bool operator= (const PandoraType<T> &rhs);
 
 private:
     T       *m_pValue;          ///< Address of the actual value being held by the pandora type
@@ -87,7 +101,7 @@ typedef PandoraType<bool> InputBool;
 
 typedef PandoraType<CartesianVector> InputCartesianVector;
 typedef PandoraType<TrackState> InputTrackState;
-typedef std::vector<InputTrackState> InputTrackStateList;
+typedef std::vector<TrackState> InputTrackStateList;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -114,6 +128,17 @@ inline PandoraType<T>::PandoraType(const T &t) :
     m_pValue(new T(t)),
     m_isInitialized(true)
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline PandoraType<T>::PandoraType(const PandoraType<T> &rhs) :
+    m_pValue(NULL),
+    m_isInitialized(rhs.m_isInitialized)
+{
+    if (rhs.m_isInitialized)
+        m_pValue = new T(*rhs.m_pValue);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -165,6 +190,26 @@ template <typename T>
 inline bool PandoraType<T>::operator= (const T &rhs)
 {
     this->Set(rhs);
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+bool PandoraType<T>::operator= (const PandoraType<T> &rhs)
+{
+    if (this == &rhs)
+        return m_isInitialized;
+
+    if (rhs.m_isInitialized)
+    {
+        this->Set(*rhs.m_pValue);
+    }
+    else
+    {
+        this->Reset();
+    }
+
     return m_isInitialized;
 }
 

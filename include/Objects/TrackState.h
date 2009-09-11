@@ -54,8 +54,8 @@ public:
     const CartesianVector &GetMomentum() const;
 
 private:
-    const CartesianVector   m_position;     ///< The position space point
-    const CartesianVector   m_momentum;     ///< The momentum vector
+    CartesianVector   m_position;     ///< The position space point
+    CartesianVector   m_momentum;     ///< The momentum vector
 };
 
 /**

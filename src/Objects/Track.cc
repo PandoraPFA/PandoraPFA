@@ -34,7 +34,7 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     for (InputTrackStateList::const_iterator iter = trackParameters.m_calorimeterProjections.begin(),
         iterEnd = trackParameters.m_calorimeterProjections.end(); iter != iterEnd; ++iter)
     {
-        m_calorimeterProjections.push_back(new TrackState(iter->Get()));
+        m_calorimeterProjections.push_back(new TrackState(*iter));
     }
 }
 
