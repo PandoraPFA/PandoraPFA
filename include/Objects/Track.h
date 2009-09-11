@@ -12,7 +12,7 @@
 
 namespace pandora
 {
-    
+
 /**
  *  @brief  Track class
  */
@@ -27,11 +27,74 @@ public:
     bool operator< (const Track &rhs) const;
 
     /**
+     *  @brief  Get the 2D impact parameter wrt (0,0)
+     * 
+     *  @return the 2D impact parameter wrt (0,0)
+     */
+    float GetD0() const;
+
+    /**
+     *  @brief  Get the z coordinate at the 2D distance of closest approach
+     * 
+     *  @return the z coordinate at the 2D distance of closest approach
+     */
+    float GetZ0() const;
+
+    /**
      *  @brief  Get the track momentum at the 2D distance of closest approach
      * 
      *  @return the track momentum at the 2D distance of closest approach
      */
     const CartesianVector &GetMomentum() const;
+
+    /**
+     *  @brief  Get the track state at the start of the track
+     * 
+     *  @return the track state at the start of the track
+     */
+    const TrackState &GetStartTrackState() const;
+
+    /**
+     *  @brief  Get the track state at the end of the track
+     * 
+     *  @return the track state at the end of the track
+     */
+    const TrackState &GetEndTrackState() const;
+
+    /**
+     *  @brief  Get the (sometimes projected) track state at the ecal
+     * 
+     *  @return the track state at the ecal
+     */
+    const TrackState &GetECalTrackState() const;
+
+    /**
+     *  @brief  Whether the track reaches the ecal
+     * 
+     *  @return boolean
+     */
+    bool ReachesECal() const;
+
+    /**
+     *  @brief  Get the list of calorimeter track state projections
+     * 
+     *  @return address of the list of calorimeter track state projections
+     */
+    const TrackStateList &GetCalorimeterProjections() const;
+
+    /**
+     *  @brief  Get address of the cluster associated with the track
+     * 
+     *  @param  pCluster to receive the address of the cluster
+     */
+    StatusCode GetAssociatedCluster(Cluster *pCluster) const;
+
+    /**
+     *  @brief  Get address of the mc particle associated with the track
+     * 
+     *  @param  pMCParticle to receive the address of the mc particle
+     */
+    StatusCode GetMCParticle(MCParticle *pMCParticle) const;    
 
     /**
      *  @brief  Get the address of the parent track in the user framework
@@ -52,6 +115,13 @@ private:
      *  @brief  Destructor
      */
     ~Track();
+
+    /**
+     *  @brief  Set the mc particle associated with the track
+     * 
+     *  @param  pMCParticle to receive the address of the mc particle
+     */
+    StatusCode SetMCParticle(MCParticle *const pMCParticle);
 
     const float             m_d0;                       ///< The 2D impact parameter wrt (0,0)
     const float             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
@@ -82,9 +152,58 @@ std::ostream &operator<<(std::ostream &stream, const Track &track);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline float Track::GetD0() const
+{
+    return m_d0;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Track::GetZ0() const
+{
+    return m_z0;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const CartesianVector &Track::GetMomentum() const
 {
     return m_momentum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackState &Track::GetStartTrackState() const
+{
+    return m_startTrackState;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackState &Track::GetEndTrackState() const
+{
+    return m_endTrackState;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackState &Track::GetECalTrackState() const
+{
+    return m_eCalTrackState;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::ReachesECal() const
+{
+    return m_reachesECal;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackStateList &Track::GetCalorimeterProjections() const
+{
+    return m_calorimeterProjections;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

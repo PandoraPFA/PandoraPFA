@@ -51,6 +51,8 @@ public:
 
     /**
      *  @brief  Get the calo hit energy
+     * 
+     *  @return the calo hit energy
      */
     float GetEnergy() const;
 
@@ -85,11 +87,11 @@ private:
      *  @brief  Destructor
      */
     ~CaloHit();
-    
+
     /**
      *  @brief  Set the mc particle associated with the calo hit
      * 
-     *  @param  pMCParticle to receive the address of the mc particle
+     *  @param  pMCParticle address of the mc particle
      */
     StatusCode SetMCParticle(MCParticle *const pMCParticle);
 
