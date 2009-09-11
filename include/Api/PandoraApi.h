@@ -46,9 +46,9 @@ public:
     class CaloHitParameters
     {
     public:
-        pandora::InputFloat      m_energy;               ///< The calo hit energy
-        pandora::InputUInt       m_layer;                ///< The layer in which the calo hit is located
-        pandora::InputAddress    m_pParentAddress;       ///< The address of the parent calo hit in the user framework
+        pandora::InputFloat             m_energy;                   ///< The calo hit energy
+        pandora::InputUInt              m_layer;                    ///< The layer in which the calo hit is located
+        pandora::InputAddress           m_pParentAddress;           ///< The address of the parent calo hit in the user framework
     };
 
     /**
@@ -57,8 +57,15 @@ public:
     class TrackParameters
     {
     public:
-        pandora::InputFloat      m_momentum;             ///< The track momentum
-        pandora::InputAddress    m_pParentAddress;       ///< The address of the parent track in the user framework
+        pandora::InputFloat             m_d0;                       ///< The 2D impact parameter wrt (0,0)
+        pandora::InputFloat             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
+        pandora::InputCartesianVector   m_momentum;                 ///< The track momentum at the 2D distance of closest approach
+        pandora::InputTrackState        m_startTrackState;          ///< The track state at the start of the track
+        pandora::InputTrackState        m_endTrackState;            ///< The track state at the end of the track
+        pandora::InputTrackState        m_eCalTrackState;           ///< The (sometimes projected) track state at the ecal
+        pandora::InputBool              m_reachesECal;              ///< Whether the track has reaches the ecal
+        pandora::InputTrackStateList    m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
+        pandora::InputAddress           m_pParentAddress;           ///< The address of the parent track in the user framework
     };
 
     /**
@@ -67,7 +74,7 @@ public:
     class GeometryParameters
     {
     public:
-        pandora::InputFloat      m_tpcInnerRadius;       ///< The inner tpc radius
+        pandora::InputFloat             m_tpcInnerRadius;           ///< The inner tpc radius
     };
 
     /**
@@ -76,12 +83,12 @@ public:
     class MCParticleParameters
     {
     public:
-        pandora::InputFloat      m_energy;               ///< The MC particle's energy
-        pandora::InputFloat      m_momentum;             ///< The MC particle's momentum
-        pandora::InputFloat      m_innerRadius;          ///< The MC particle's path's inner radius
-        pandora::InputFloat      m_outerRadius;          ///< The MC particle's path's outer radius
-        pandora::InputInt        m_particleId;           ///< The MC particle's ID (PDG code)
-        pandora::InputAddress    m_pParentAddress;       ///< The address of the parent MC particle in the user framework
+        pandora::InputFloat             m_energy;                   ///< The MC particle's energy
+        pandora::InputFloat             m_momentum;                 ///< The MC particle's momentum
+        pandora::InputFloat             m_innerRadius;              ///< The MC particle's path's inner radius
+        pandora::InputFloat             m_outerRadius;              ///< The MC particle's path's outer radius
+        pandora::InputInt               m_particleId;               ///< The MC particle's ID (PDG code)
+        pandora::InputAddress           m_pParentAddress;           ///< The address of the parent MC particle in the user framework
     };
 
     // Objects available for construction by pandora

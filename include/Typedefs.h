@@ -22,6 +22,7 @@ class Cluster;
 class OrderedCaloHitList;
 class MCParticle;
 class Track;
+class TrackState;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -50,8 +51,9 @@ typedef std::multiset<Track *, PointerLess<Track> > TrackList;
 typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<CaloHit *> InputCaloHitList;
+typedef std::vector<TrackState *> TrackStateList;
 
-typedef std::vector<void *> CaloHitAddressList, TrackAddressList;
+typedef std::vector<const void *> CaloHitAddressList, TrackAddressList;
 typedef std::vector<CaloHitAddressList> ClusterAddressList;
 
 typedef unsigned int PseudoLayer;

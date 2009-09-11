@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 namespace pandora
 {
@@ -82,13 +83,16 @@ typedef PandoraType<unsigned int> InputUInt;
 typedef PandoraType<int> InputInt;
 typedef PandoraType<float> InputFloat;
 typedef PandoraType<void *> InputAddress;
+typedef PandoraType<bool> InputBool;
+
 typedef PandoraType<CartesianVector> InputCartesianVector;
 typedef PandoraType<TrackState> InputTrackState;
+typedef std::vector<InputTrackState> InputTrackStateList;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-PandoraType<T>::PandoraType() :
+inline PandoraType<T>::PandoraType() :
     m_pValue(NULL),
     m_isInitialized(false)
 {
@@ -97,7 +101,7 @@ PandoraType<T>::PandoraType() :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-PandoraType<T>::~PandoraType()
+inline PandoraType<T>::~PandoraType()
 {
     if (NULL != m_pValue)
         delete m_pValue;
@@ -106,7 +110,7 @@ PandoraType<T>::~PandoraType()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-PandoraType<T>::PandoraType(const T &t) :
+inline PandoraType<T>::PandoraType(const T &t) :
     m_pValue(new T(t)),
     m_isInitialized(true)
 {
@@ -115,8 +119,11 @@ PandoraType<T>::PandoraType(const T &t) :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-void PandoraType<T>::Set(const T &t)
+inline void PandoraType<T>::Set(const T &t)
 {
+    if (m_isInitialized)
+        delete m_pValue;
+
     m_pValue = new T(t);
     m_isInitialized = true;
 }
@@ -124,7 +131,7 @@ void PandoraType<T>::Set(const T &t)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-const T &PandoraType<T>::Get() const
+inline const T &PandoraType<T>::Get() const
 {
     if (!m_isInitialized)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -135,7 +142,7 @@ const T &PandoraType<T>::Get() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-void PandoraType<T>::Reset()
+inline void PandoraType<T>::Reset()
 {
     if (NULL != m_pValue)
         delete m_pValue;
@@ -147,7 +154,7 @@ void PandoraType<T>::Reset()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-bool PandoraType<T>::IsInitialized() const
+inline bool PandoraType<T>::IsInitialized() const
 {
     return m_isInitialized;
 }
@@ -155,7 +162,7 @@ bool PandoraType<T>::IsInitialized() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-bool PandoraType<T>::operator= (const T &rhs)
+inline bool PandoraType<T>::operator= (const T &rhs)
 {
     this->Set(rhs);
     return m_isInitialized;

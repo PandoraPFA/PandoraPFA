@@ -71,7 +71,7 @@ public:
     /**
      *  @brief  Get the address of the parent calo hit in the user framework
      */
-     void *GetParentCaloHitAddress() const;
+     const void *GetParentCaloHitAddress() const;
 
 private:
     /**
@@ -107,14 +107,14 @@ private:
     PseudoLayer         m_pseudoLayer;              ///< The pseudo layer
     
     MCParticle          *m_pMCParticle;             ///< The associated MC particle
-    void                *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
+    const void          *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
 
     friend class CaloHitManager;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void *CaloHit::GetParentCaloHitAddress() const
+inline const void *CaloHit::GetParentCaloHitAddress() const
 {
     return m_pParentAddress;
 }
