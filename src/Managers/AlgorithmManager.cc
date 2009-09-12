@@ -71,7 +71,10 @@ StatusCode AlgorithmManager::InitializeAlgorithms(const TiXmlHandle *const pXmlH
 StatusCode AlgorithmManager::CreateAlgorithm(TiXmlElement *const pXmlElement, std::string &algorithmName)
 {
     std::string instanceLabel;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_NOT_FOUND, !=, FindSpecificAlgorithmInstance(pXmlElement, algorithmName, instanceLabel));
+    const StatusCode statusCode = FindSpecificAlgorithmInstance(pXmlElement, algorithmName, instanceLabel);
+
+    if (STATUS_CODE_NOT_FOUND != statusCode)
+        return statusCode;
 
     AlgorithmFactoryMap::const_iterator iter = m_algorithmFactoryMap.find(pXmlElement->Attribute("type"));
 
