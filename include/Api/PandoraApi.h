@@ -9,7 +9,7 @@
 #define PANDORA_API_H 1
 
 #include "Pandora.h"
-#include "PandoraTypes.h"
+#include "PandoraInputTypes.h"
 
 namespace pandora { class Algorithm; class AlgorithmFactory; }
 

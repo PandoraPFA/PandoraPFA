@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/include/PandoraType.h
+ *  @file   PandoraPFANew/include/PandoraInputTypes.h
  * 
- *  @brief  Header file for the pandora type class and functions such as StringToType and TypeToString
+ *  @brief  Header file for the pandora input type class and associated external typedefs
  * 
  *  $Log: $
  */
-#ifndef PANDORA_TYPES_H
-#define PANDORA_TYPES_H 1
+#ifndef PANDORA_INPUT_TYPES_H
+#define PANDORA_INPUT_TYPES_H 1
 
 #include "Objects/CartesianVector.h"
 #include "Objects/TrackState.h"
@@ -19,32 +19,32 @@ namespace pandora
 {
 
 template <typename T>
-class PandoraType
+class PandoraInputType
 {
 public:
     /**
      *  @brief  Default constructor
      */
-    PandoraType();
+    PandoraInputType();
 
     /**
      *  @brief  Destructor
      */
-    ~PandoraType();
+    ~PandoraInputType();
 
     /**
      *  @brief  Constructor
      *
      *  @param  t the initial value
      */
-    PandoraType(const T &t);
+    PandoraInputType(const T &t);
 
     /**
      *  @brief  Copy constructor (EXPENSIVE WITH LARGE OBJECTS)
      * 
      *  @param  rhs the initial pandora type
      */
-    PandoraType(const PandoraType<T> &rhs);
+    PandoraInputType(const PandoraInputType<T> &rhs);
 
     /**
      *  @brief  Set the value held by the pandora type
@@ -84,21 +84,21 @@ public:
      * 
      *  @throw  status code exception
      */   
-    bool operator= (const PandoraType<T> &rhs);
+    bool operator= (const PandoraInputType<T> &rhs);
 
 private:
     T       *m_pValue;          ///< Address of the actual value being held by the pandora type
     bool    m_isInitialized;    ///< Whether the pandora type is initialized
 };
 
-typedef PandoraType<unsigned int> InputUInt;
-typedef PandoraType<int> InputInt;
-typedef PandoraType<float> InputFloat;
-typedef PandoraType<void *> InputAddress;
-typedef PandoraType<bool> InputBool;
+typedef PandoraInputType<unsigned int> InputUInt;
+typedef PandoraInputType<int> InputInt;
+typedef PandoraInputType<float> InputFloat;
+typedef PandoraInputType<void *> InputAddress;
+typedef PandoraInputType<bool> InputBool;
 
-typedef PandoraType<CartesianVector> InputCartesianVector;
-typedef PandoraType<TrackState> InputTrackState;
+typedef PandoraInputType<CartesianVector> InputCartesianVector;
+typedef PandoraInputType<TrackState> InputTrackState;
 typedef std::vector<TrackState> InputTrackStateList;
 
 typedef std::vector<const void *> CaloHitAddressList, TrackAddressList;
@@ -107,7 +107,7 @@ typedef std::vector<CaloHitAddressList> ClusterAddressList;
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline PandoraType<T>::PandoraType() :
+inline PandoraInputType<T>::PandoraInputType() :
     m_pValue(NULL),
     m_isInitialized(false)
 {
@@ -116,7 +116,7 @@ inline PandoraType<T>::PandoraType() :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline PandoraType<T>::~PandoraType()
+inline PandoraInputType<T>::~PandoraInputType()
 {
     if (NULL != m_pValue)
         delete m_pValue;
@@ -125,7 +125,7 @@ inline PandoraType<T>::~PandoraType()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline PandoraType<T>::PandoraType(const T &t) :
+inline PandoraInputType<T>::PandoraInputType(const T &t) :
     m_pValue(new T(t)),
     m_isInitialized(true)
 {
@@ -134,7 +134,7 @@ inline PandoraType<T>::PandoraType(const T &t) :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline PandoraType<T>::PandoraType(const PandoraType<T> &rhs) :
+inline PandoraInputType<T>::PandoraInputType(const PandoraInputType<T> &rhs) :
     m_pValue(NULL),
     m_isInitialized(rhs.m_isInitialized)
 {
@@ -145,7 +145,7 @@ inline PandoraType<T>::PandoraType(const PandoraType<T> &rhs) :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline void PandoraType<T>::Set(const T &t)
+inline void PandoraInputType<T>::Set(const T &t)
 {
     if (m_isInitialized)
         delete m_pValue;
@@ -157,7 +157,7 @@ inline void PandoraType<T>::Set(const T &t)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline const T &PandoraType<T>::Get() const
+inline const T &PandoraInputType<T>::Get() const
 {
     if (!m_isInitialized)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -168,7 +168,7 @@ inline const T &PandoraType<T>::Get() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline void PandoraType<T>::Reset()
+inline void PandoraInputType<T>::Reset()
 {
     if (NULL != m_pValue)
         delete m_pValue;
@@ -180,7 +180,7 @@ inline void PandoraType<T>::Reset()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline bool PandoraType<T>::IsInitialized() const
+inline bool PandoraInputType<T>::IsInitialized() const
 {
     return m_isInitialized;
 }
@@ -188,7 +188,7 @@ inline bool PandoraType<T>::IsInitialized() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline bool PandoraType<T>::operator= (const T &rhs)
+inline bool PandoraInputType<T>::operator= (const T &rhs)
 {
     this->Set(rhs);
     return m_isInitialized;
@@ -197,7 +197,7 @@ inline bool PandoraType<T>::operator= (const T &rhs)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-bool PandoraType<T>::operator= (const PandoraType<T> &rhs)
+bool PandoraInputType<T>::operator= (const PandoraInputType<T> &rhs)
 {
     if (this == &rhs)
         return m_isInitialized;
@@ -216,4 +216,4 @@ bool PandoraType<T>::operator= (const PandoraType<T> &rhs)
 
 } // namespace pandora
 
-#endif // #ifndef PANDORA_TYPES_H
+#endif // #ifndef PANDORA_INPUT_TYPES_H

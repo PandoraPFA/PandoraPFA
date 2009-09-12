@@ -8,8 +8,8 @@
 #ifndef ORDERED_CALO_HIT_LIST_H
 #define ORDERED_CALO_HIT_LIST_H 1
 
+#include "Internal.h"
 #include "StatusCodes.h"
-#include "Typedefs.h"
 
 #include <map>
 

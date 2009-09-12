@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/include/Typedefs.h
+ *  @file   PandoraPFANew/include/Internal.h
  * 
- *  @brief  Header file defining relevant typedefs, sort functions, etc
+ *  @brief  Header file defining relevant internal typedefs, sort and string conversion functions
  * 
  *  $Log: $
  */
-#ifndef BASIC_TYPEDEFS_H
-#define BASIC_TYPEDEFS_H 1
+#ifndef PANDORA_INTERNAL_H
+#define PANDORA_INTERNAL_H 1
 
 #include <iostream>
 #include <map>
@@ -87,4 +87,4 @@ typedef std::map<Uid, Uid> UidRelationMap;
 
 } // namespace pandora
 
-#endif // #ifndef BASIC_TYPEDEFS_H
+#endif // #ifndef PANDORA_INTERNAL_H

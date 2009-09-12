@@ -10,11 +10,9 @@
 
 #include "Api/PandoraContentApi.h"
 
-#include "Managers/ClusterManager.h"
-
 #include "Objects/OrderedCaloHitList.h"
 
-#include "Typedefs.h"
+#include "Internal.h"
 
 namespace pandora
 {

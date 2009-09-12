@@ -8,14 +8,14 @@
 #ifndef TEST_MC_MANAGER_H
 #define TEST_MC_MANAGER_H 1
 
+#include "Managers/MCManager.h"
+
+#include "Internal.h"
+#include "StatusCodes.h"
+
 #include <assert.h>
 #include <iostream>
 #include <iomanip>
-
-#include "StatusCodes.h"
-#include "Typedefs.h"
-
-#include "Managers/MCManager.h"
 
 namespace pandora
 {

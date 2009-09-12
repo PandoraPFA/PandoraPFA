@@ -10,7 +10,7 @@
 
 #include "Xml/tinyxml.h"
 
-#include "Typedefs.h"
+#include "Internal.h"
 
 namespace pandora
 {
