@@ -14,6 +14,8 @@
 
 #include "Objects/OrderedCaloHitList.h"
 
+#include "Typedefs.h"
+
 namespace pandora
 {
 

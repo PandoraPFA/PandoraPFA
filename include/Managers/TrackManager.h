@@ -10,6 +10,8 @@
 
 #include "Api/PandoraApi.h"
 
+#include "Typedefs.h"
+
 namespace pandora
 {
 

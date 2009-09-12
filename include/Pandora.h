@@ -9,7 +9,6 @@
 #define PANDORA_MAIN_H 1
 
 #include "StatusCodes.h"
-#include "Typedefs.h"
 
 namespace pandora
 {

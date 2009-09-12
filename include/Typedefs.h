@@ -8,10 +8,10 @@
 #ifndef BASIC_TYPEDEFS_H
 #define BASIC_TYPEDEFS_H 1
 
-#include "PandoraTypes.h"
-
+#include <iostream>
 #include <map>
 #include <set>
+#include <sstream>
 #include <vector>
 
 namespace pandora
@@ -24,6 +24,30 @@ class MCParticle;
 class Track;
 class TrackState;
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <class T>
+inline bool StringToType(const std::string &s, T &t)
+{
+    std::istringstream iss(s);
+    return !(iss >> t).fail();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <class T>
+inline std::string TypeToString(const T &t)
+{
+    std::ostringstream oss;
+
+    if ((oss << t).fail())
+        throw;
+
+    return oss.str();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -52,9 +76,6 @@ typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<CaloHit *> InputCaloHitList;
 typedef std::vector<TrackState *> TrackStateList;
-
-typedef std::vector<const void *> CaloHitAddressList, TrackAddressList;
-typedef std::vector<CaloHitAddressList> ClusterAddressList;
 
 typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;

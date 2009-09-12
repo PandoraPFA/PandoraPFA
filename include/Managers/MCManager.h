@@ -10,10 +10,14 @@
 
 #include "Api/PandoraApi.h"
 
-#include "Objects/MCParticle.h"
+#include "Typedefs.h"
 
 namespace pandora
 {
+
+class MCParticle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *    @brief MCManager class

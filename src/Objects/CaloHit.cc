@@ -20,9 +20,9 @@ bool CaloHit::operator< (const CaloHit &rhs) const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
-    m_isSortedIntoPseudoLayer(false),
     m_energy(caloHitParameters.m_energy.Get()),
     m_layer(caloHitParameters.m_layer.Get()),
+    m_isSortedIntoPseudoLayer(false),
     m_pMCParticle(NULL),
     m_pParentAddress(caloHitParameters.m_pParentAddress.Get())
 {

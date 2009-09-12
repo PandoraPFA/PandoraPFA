@@ -11,7 +11,9 @@
 #include <exception>
 #include <string>
 
-
+/**
+ *  @brief  The StatusCode enum
+ */
 enum StatusCode
 {
     STATUS_CODE_SUCCESS,
@@ -23,46 +25,44 @@ enum StatusCode
     STATUS_CODE_NOT_ALLOWED
 };
 
-#define PANDORA_RETURN_IF(StatusCode1, Operator, Command)                               \
-    {                                                                                   \
-        StatusCode statusCode = Command;                                                \
-        if (statusCode Operator StatusCode1)                                            \
-            return;                                                                     \
+#define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                \
+    {                                                                                           \
+        StatusCode statusCode = Command;                                                        \
+        if (statusCode Operator StatusCode1)                                                    \
+        {                                                                                       \
+            std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl; \
+            return statusCode;                                                                  \
+        }                                                                                       \
     }
 
-#define PANDORA_RETURN_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)           \
-    {                                                                                   \
-        StatusCode statusCode = Command;                                                \
-        if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))     \
-            return;                                                                     \
+#define PANDORA_RETURN_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)            \
+    {                                                                                           \
+        StatusCode statusCode = Command;                                                        \
+        if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))             \
+        {                                                                                       \
+            std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl; \
+            return statusCode;                                                                  \
+        }                                                                                       \
     }
 
-#define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                        \
-    {                                                                                   \
-        StatusCode statusCode = Command;                                                \
-        if (statusCode Operator StatusCode1)                                            \
-            return statusCode;                                                          \
-    }
-        
-#define PANDORA_RETURN_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)    \
-    {                                                                                   \
-        StatusCode statusCode = Command;                                                \
-        if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))     \
-            return statusCode;                                                          \
+#define PANDORA_THROW_RESULT_IF(StatusCode1, Operator, Command)                                 \
+    {                                                                                           \
+        StatusCode statusCode = Command;                                                        \
+        if (statusCode Operator StatusCode1)                                                    \
+        {                                                                                       \
+            std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;  \
+            throw StatusCodeException(statusCode);                                              \
+        }                                                                                       \
     }
 
-#define PANDORA_THROW_RESULT_IF(StatusCode1, Operator, Command)                         \
-    {                                                                                   \
-        StatusCode statusCode = Command;                                                \
-        if (statusCode Operator StatusCode1)                                            \
-            throw StatusCodeException(statusCode);                                      \
-    }
-        
-#define PANDORA_THROW_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)     \
-    {                                                                                   \
-        StatusCode statusCode = Command;                                                \
-        if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))     \
-            throw StatusCodeException(statusCode);                                      \
+#define PANDORA_THROW_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)             \
+    {                                                                                           \
+        StatusCode statusCode = Command;                                                        \
+        if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))             \
+        {                                                                                       \
+            std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;  \
+            throw StatusCodeException(statusCode);                                              \
+        }                                                                                       \
     }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -79,24 +79,31 @@ class StatusCodeException : public std::exception
      *  @param  statusCode the status code
      */
     StatusCodeException(const StatusCode statusCode);
-    
+
     /**
      *  @brief  Get status code
      * 
      *  @return the status code
      */
     StatusCode GetStatusCode() const;
-    
+
     /**
      *  @brief  Get status code as a string
      * 
      *  @return The status code string
      */
-    std::string ToString();
-    
+    std::string ToString() const;
+
   private:
     StatusCode    m_statusCode;    ///< The status code
 };
+
+/**
+ *  @brief  Get status code as a string
+ * 
+ *  @return The status code string
+ */
+std::string StatusCodeToString(const StatusCode statusCode);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -114,9 +121,17 @@ inline StatusCode StatusCodeException::GetStatusCode() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline std::string StatusCodeException::ToString()
+inline std::string StatusCodeException::ToString() const
 {
-    switch (m_statusCode)
+    return StatusCodeToString(m_statusCode);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline std::string StatusCodeToString(const StatusCode statusCode)
+{
+    switch (statusCode)
     {
     case STATUS_CODE_SUCCESS:
         return "STATUS_CODE_SUCCESS";

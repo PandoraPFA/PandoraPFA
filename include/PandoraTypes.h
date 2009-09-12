@@ -13,8 +13,6 @@
 
 #include "StatusCodes.h"
 
-#include <iostream>
-#include <sstream>
 #include <vector>
 
 namespace pandora
@@ -102,6 +100,9 @@ typedef PandoraType<bool> InputBool;
 typedef PandoraType<CartesianVector> InputCartesianVector;
 typedef PandoraType<TrackState> InputTrackState;
 typedef std::vector<TrackState> InputTrackStateList;
+
+typedef std::vector<const void *> CaloHitAddressList, TrackAddressList;
+typedef std::vector<CaloHitAddressList> ClusterAddressList;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -211,30 +212,6 @@ bool PandoraType<T>::operator= (const PandoraType<T> &rhs)
     }
 
     return m_isInitialized;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template <class T>
-inline bool StringToType(const std::string &s, T &t)
-{
-    std::istringstream iss(s);
-    return !(iss >> t).fail();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template <class T>
-inline std::string TypeToString(const T &t)
-{
-    std::ostringstream oss;
-
-    if ((oss << t).fail())
-        throw;
-
-    return oss.str();
 }
 
 } // namespace pandora

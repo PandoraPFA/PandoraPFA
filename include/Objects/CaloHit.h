@@ -10,6 +10,8 @@
 
 #include "Api/PandoraApi.h"
 
+#include "Typedefs.h"
+
 namespace pandora
 {
 
@@ -102,17 +104,40 @@ private:
      */
     StatusCode SetPseudoLayer(const PseudoLayer &pseudoLayer);
 
-    bool                m_isSortedIntoPseudoLayer;  ///< Whether the calo hit has been sorted into a pseudo layer
+//    const CartesianVector   m_position;                 ///< Position vector of center of calorimeter cell, units mm
+//    const CartesianVector   m_normalVector;             ///< Unit normal to the sampling layer, pointing outwards from the origin
+//
+//    const float             m_du;                       ///< Dimension of readout cell (u = x in ENDCAP, u = r in BARREL), units mm
+//    const float             m_dv;                       ///< Dimension of readout cell (v = y in ENDCAP, v = r*phi in BARREL), units mm
+//    const float             m_dz;                       ///< Dimension of readout cell, z-coordinate, units mm
+//
+//    const float             m_nRadiationLengths;        ///< Absorber material in front of this cell in fraction of a radiation length
+//    const float             m_nInteractionLengths;      ///< Absorber material in front of this cell in fraction of an interaction length
+//
+    const float             m_energy;                   ///< Corrected energy of the calorimeter cell, units GeV
+//    const float             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
+//
+//    const bool              m_isDigital;                ///< Whether cell should be treated as digital (implies constant cell energy)
+//    const HitType           m_hitType;                  ///< The type of calorimeter hit
+//    const Region            m_region;                   ///< Region of the detector in which the calo hit is located
 
-    const float         m_energy;                   ///< The calo hit energy
-    const unsigned int  m_layer;                    ///< The layer in which the calo hit is located
-    PseudoLayer         m_pseudoLayer;              ///< The pseudo layer
-    
-    MCParticle          *m_pMCParticle;             ///< The associated MC particle
-    const void          *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
+    const unsigned int      m_layer;                    ///< The actual subdetector readout layer number
+    PseudoLayer             m_pseudoLayer;              ///< The pseudo layer to which the calo hit has been assigned
+    bool                    m_isSortedIntoPseudoLayer;  ///< Whether the calo hit has been sorted into a pseudo layer
+
+    MCParticle              *m_pMCParticle;             ///< The associated MC particle
+    const void              *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
 
     friend class CaloHitManager;
 };
+
+/**
+ *  @brief  Operator to dump calo hit properties to an ostream
+ *
+ *  @param  stream the target ostream
+ *  @param  caloHit the calo hit
+ */
+std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

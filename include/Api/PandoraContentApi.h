@@ -9,6 +9,8 @@
 #define PANDORA_CONTENT_API_H 1
 
 #include "Pandora.h"
+#include "PandoraTypes.h"
+#include "Typedefs.h"
 
 class TiXmlElement;
 class TiXmlHandle;
