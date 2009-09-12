@@ -47,8 +47,19 @@ public:
     class CaloHitParameters
     {
     public:
-        pandora::InputFloat             m_energy;                   ///< The calo hit energy
-        pandora::InputUInt              m_layer;                    ///< The layer in which the calo hit is located
+        pandora::InputCartesianVector   m_position;                 ///< Position vector of center of calorimeter cell, units mm
+        pandora::InputCartesianVector   m_normalVector;             ///< Unit normal to sampling layer, pointing outwards from the origin
+        pandora::InputFloat             m_du;                       ///< Dimension of cell (u = x in ENDCAP, u = r in BARREL), units mm
+        pandora::InputFloat             m_dv;                       ///< Dimension of cell (v = y in ENDCAP, v = r*phi in BARREL), units mm
+        pandora::InputFloat             m_dz;                       ///< Dimension of cell, z-coordinate, units mm
+        pandora::InputFloat             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
+        pandora::InputFloat             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
+        pandora::InputFloat             m_energy;                   ///< Corrected energy of the calorimeter cell, units GeV
+        pandora::InputFloat             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
+        pandora::InputBool              m_isDigital;                ///< Whether cell should be treated as digital
+        pandora::InputHitType           m_hitType;                  ///< The type of calorimeter hit
+        pandora::InputDetectorRegion    m_detectorRegion;           ///< Region of the detector in which the calo hit is located
+        pandora::InputUInt              m_layer;                    ///< The subdetector readout layer number
         pandora::InputAddress           m_pParentAddress;           ///< The address of the parent calo hit in the user framework
     };
 

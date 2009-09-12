@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/include/PandoraInputTypes.h
  * 
- *  @brief  Header file for the pandora input type class and associated external typedefs
+ *  @brief  Header file for pandora input types and associated external typedefs exposed via the PandoraApi
  * 
  *  $Log: $
  */
@@ -18,6 +18,32 @@
 namespace pandora
 {
 
+/**
+ *  @brief  Calorimeter hit type enum
+ */
+enum HitType
+{
+    ECAL,
+    HCAL,
+    MUON
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ *  @brief  DetectorRegion enum
+ */
+enum DetectorRegion
+{
+    BARREL,
+    ENDCAP
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ *  @brief  PandoraInputType template class
+ */
 template <typename T>
 class PandoraInputType
 {
@@ -91,11 +117,15 @@ private:
     bool    m_isInitialized;    ///< Whether the pandora type is initialized
 };
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 typedef PandoraInputType<unsigned int> InputUInt;
 typedef PandoraInputType<int> InputInt;
 typedef PandoraInputType<float> InputFloat;
 typedef PandoraInputType<void *> InputAddress;
 typedef PandoraInputType<bool> InputBool;
+typedef PandoraInputType<HitType> InputHitType;
+typedef PandoraInputType<DetectorRegion> InputDetectorRegion;
 
 typedef PandoraInputType<CartesianVector> InputCartesianVector;
 typedef PandoraInputType<TrackState> InputTrackState;
@@ -104,6 +134,7 @@ typedef std::vector<TrackState> InputTrackStateList;
 typedef std::vector<const void *> CaloHitAddressList, TrackAddressList;
 typedef std::vector<CaloHitAddressList> ClusterAddressList;
 
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
