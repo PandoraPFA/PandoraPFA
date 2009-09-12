@@ -80,36 +80,6 @@ public:
     typedef ParticleFlowObject::Parameters ParticleFlowObjectParameters;
 
     /**
-     *  @brief  Match tracks and calo hits to their correct mc particles for particle flow
-     * 
-     *  @param  pandora the pandora instance containing the calo hits, tracks and mc particles
-     */
-    static StatusCode MatchObjectsToMCPfoTargets(const pandora::Pandora &pandora);
-    
-    /**
-     *  @brief  Order input calo hits by pseudo layer
-     * 
-     *  @param  pandora the pandora instance containing the calo hits
-     */
-    static StatusCode OrderInputCaloHits(const pandora::Pandora &pandora);
-
-    /**
-     *  @brief  Read pandora settings
-     * 
-     *  @param  pandora the pandora instance to be configured
-     *  @param  pXmlHandle address of the relevant xml handle
-     */
-    static StatusCode ReadPandoraSettings(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle);
-
-    /**
-     *  @brief  Initialize pandora algorithms
-     * 
-     *  @param  pandora the pandora instance to own and run the algorithms
-     *  @param  pXmlHandle address of the relevant xml handle
-     */
-    static StatusCode InitializeAlgorithms(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle);
-
-    /**
      *  @brief  Create an algorithm instance, via one of the algorithm factories registered with pandora.
      *          This function is expected to be called whilst reading the settings for a parent algorithm.
      * 
@@ -119,14 +89,6 @@ public:
      */
     static StatusCode CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
         std::string &daughterAlgorithmName);
-
-    /**
-     *  @brief  Run an algorithm registered with pandora
-     * 
-     *  @param  pandora the pandora instance with which the algorithm is registered
-     *  @param  algorithmName the name of the algorithm instance to run
-     */
-    static StatusCode RunAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmName);
 
     /**
      *  @brief  Run an algorithm registered with pandora, from within a parent algorithm

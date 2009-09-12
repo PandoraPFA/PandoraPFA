@@ -38,45 +38,10 @@ StatusCode PandoraContentApi::ParticleFlowObject::Create(const pandora::Algorith
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::MatchObjectsToMCPfoTargets(const pandora::Pandora &pandora)
-{
-    return pandora.GetPandoraContentApiImpl()->MatchObjectsToMCPfoTargets();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApi::OrderInputCaloHits(const pandora::Pandora &pandora)
-{
-    return pandora.GetPandoraContentApiImpl()->OrderInputCaloHits();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApi::ReadPandoraSettings(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle)
-{
-    return pandora.GetPandoraContentApiImpl()->ReadPandoraSettings(pXmlHandle);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApi::InitializeAlgorithms(const pandora::Pandora &pandora, const TiXmlHandle *const pXmlHandle)
-{
-    return pandora.GetPandoraContentApiImpl()->InitializeAlgorithms(pXmlHandle);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode PandoraContentApi::CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
     std::string &daughterAlgorithmName)
 {
     return parentAlgorithm.GetPandoraContentApiImpl()->CreateDaughterAlgorithm(pXmlElement, daughterAlgorithmName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApi::RunAlgorithm(const pandora::Pandora &pandora, const std::string &algorithmName)
-{
-    return pandora.GetPandoraContentApiImpl()->RunAlgorithm(algorithmName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

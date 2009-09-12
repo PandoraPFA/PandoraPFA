@@ -13,6 +13,10 @@
 namespace pandora
 {
 
+class AlgorithmFactory;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *    @brief AlgorithmManager class
  */
@@ -85,6 +89,7 @@ private:
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
+    friend class PandoraImpl;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -20,6 +20,7 @@ class GeometryHelper;
 class MCManager;
 class PandoraApiImpl;
 class PandoraContentApiImpl;
+class PandoraImpl;
 class ParticleFlowObjectManager;
 class PandoraSettings;
 class TrackManager;
@@ -81,9 +82,11 @@ private:
 
     PandoraApiImpl              *m_pPandoraApiImpl;             ///< The pandora api implementation
     PandoraContentApiImpl       *m_pPandoraContentApiImpl;      ///< The pandora content api implementation
+    PandoraImpl                 *m_pPandoraImpl;                ///< The pandora implementation
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
+    friend class PandoraImpl;
 };
 
 } // namespace pandora

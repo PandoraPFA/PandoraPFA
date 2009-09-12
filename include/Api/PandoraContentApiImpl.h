@@ -8,6 +8,8 @@
 #ifndef PANDORA_CONTENT_API_IMPL_H
 #define PANDORA_CONTENT_API_IMPL_H 1
 
+#include "Api/PandoraContentApi.h"
+
 #include "StatusCodes.h"
 
 namespace pandora
@@ -54,30 +56,6 @@ public:
      *  @param  algorithmName the algorithm name
      */
     StatusCode RunAlgorithm(const std::string &algorithmName) const;
-
-    /**
-     *  @brief  Match tracks calo hits to their correct mc particles for particle flow
-     */
-    StatusCode MatchObjectsToMCPfoTargets() const;
-
-    /**
-     *  @brief  Order input calo hits by pseudo layer
-     */
-    StatusCode OrderInputCaloHits() const;
-
-    /**
-     *  @brief  Read pandora settings
-     * 
-     *  @param  pXmlHandle address of the relevant xml handle
-     */
-    StatusCode ReadPandoraSettings(const TiXmlHandle *const pXmlHandle) const;
-
-    /**
-     *  @brief  Initialize pandora algorithms
-     * 
-     *  @param  pXmlHandle address of the relevant xml handle
-     */
-    StatusCode InitializeAlgorithms(const TiXmlHandle *const pXmlHandle) const;
 
     /**
      *  @brief  Get the current cluster list

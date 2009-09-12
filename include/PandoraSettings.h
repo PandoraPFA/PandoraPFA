@@ -32,7 +32,7 @@ private:
      */
     StatusCode Read(const TiXmlHandle *const pXmlHandle);    
 
-    friend class PandoraContentApiImpl;
+    friend class PandoraImpl;
 };
 
 } // namespace pandora

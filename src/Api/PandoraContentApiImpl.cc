@@ -79,46 +79,6 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 
 //------------------------------------------------------------------------------------------------------------------------------------------    
 
-StatusCode PandoraContentApiImpl::MatchObjectsToMCPfoTargets() const
-{
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->SelectPfoTargets());
-
-    UidToMCParticleMap caloHitToPfoTargetMap;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->CreateCaloHitToPfoTargetMap(caloHitToPfoTargetMap));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->MatchCaloHitsToMCPfoTargets(caloHitToPfoTargetMap));
-
-    UidToMCParticleMap trackToPfoTargetMap;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->CreateTrackToPfoTargetMap(trackToPfoTargetMap));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->MatchTracksToMCPfoTargets(trackToPfoTargetMap));
-
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->DeleteNonPfoTargets());
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------    
-
-StatusCode PandoraContentApiImpl::OrderInputCaloHits() const
-{
-    return m_pPandora->m_pCaloHitManager->OrderInputCaloHits();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApiImpl::ReadPandoraSettings(const TiXmlHandle *const pXmlHandle) const
-{
-    return m_pPandora->m_pPandoraSettings->Read(pXmlHandle);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApiImpl::InitializeAlgorithms(const TiXmlHandle *const pXmlHandle) const
-{
-    return m_pPandora->m_pAlgorithmManager->InitializeAlgorithms(pXmlHandle);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------    
-
 StatusCode PandoraContentApiImpl::GetCurrentClusterList(const ClusterList *&pClusterList, std::string &clusterListName) const
 {
     return m_pPandora->m_pClusterManager->GetCurrentList(pClusterList, clusterListName);

@@ -152,7 +152,7 @@ private:
     UidRelationMap          m_trackToMCParticleMap;     ///< The track to mc particle relation map
 
     friend class PandoraApiImpl;
-    friend class PandoraContentApiImpl;
+    friend class PandoraImpl;
 
     friend class TestMCManager;
     friend class TestCaloHitManager;

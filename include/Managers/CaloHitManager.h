@@ -211,6 +211,7 @@ private:
     
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;    
+    friend class PandoraImpl;
 
     friend class TestCaloHitManager;
 };

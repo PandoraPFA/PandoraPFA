@@ -22,6 +22,7 @@
 
 #include "GeometryHelper.h"
 #include "Pandora.h"
+#include "PandoraImpl.h"
 #include "PandoraSettings.h"
 
 namespace pandora
@@ -37,7 +38,8 @@ Pandora::Pandora() :
     m_pTrackManager(new TrackManager),
     m_pPandoraSettings(new PandoraSettings),
     m_pPandoraApiImpl(new PandoraApiImpl(this)),
-    m_pPandoraContentApiImpl(new PandoraContentApiImpl(this))    
+    m_pPandoraContentApiImpl(new PandoraContentApiImpl(this)),
+    m_pPandoraImpl(new PandoraImpl(this))
 {
 }
 
@@ -55,6 +57,7 @@ Pandora::~Pandora()
     delete m_pPandoraSettings;
     delete m_pPandoraApiImpl;
     delete m_pPandoraContentApiImpl;
+    delete m_pPandoraImpl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,14 +67,14 @@ StatusCode Pandora::ProcessEvent()
     std::cout << "Pandora process event" << std::endl;
 
     // Prepare event
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MatchObjectsToMCPfoTargets(*this));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::OrderInputCaloHits(*this));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->MatchObjectsToMCPfoTargets());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->OrderInputCaloHits());
 
     // Loop over algorithms
     const StringVector *const pPandoraAlgorithms = m_pAlgorithmManager->GetPandoraAlgorithms();
 
     for (StringVector::const_iterator iter = pPandoraAlgorithms->begin(), iterEnd = pPandoraAlgorithms->end(); iter != iterEnd; ++iter)
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunAlgorithm(*this, *iter));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->RunAlgorithm(*iter));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -93,8 +96,8 @@ StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
         const TiXmlHandle xmlDocumentHandle(&xmlDocument);
         const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeAlgorithms(*this, &xmlHandle));
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReadPandoraSettings(*this, &xmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializeAlgorithms(&xmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->ReadPandoraSettings(&xmlHandle));
     }
     catch (StatusCodeException &statusCodeException)
     {
