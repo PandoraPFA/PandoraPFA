@@ -8,7 +8,7 @@
 #ifndef ALGORITHM_MANAGER_H
 #define ALGORITHM_MANAGER_H 1
 
-#include "PandoraInternal.h"
+#include "Pandora/PandoraInternal.h"
 
 namespace pandora
 {

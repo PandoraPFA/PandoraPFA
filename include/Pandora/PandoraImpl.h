@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/PandoraImpl.h
+ *  @file   PandoraPFANew/include/Pandora/PandoraImpl.h
  * 
  *  @brief  Header file for the pandora impl class.
  * 
@@ -12,7 +12,7 @@ namespace pandora
 {
 
 /**
- *    @brief PandoraImpl class
+ *  @brief  PandoraImpl class
  */
 class PandoraImpl
 {

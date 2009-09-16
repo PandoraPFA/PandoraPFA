@@ -12,7 +12,7 @@
 
 #include "Objects/OrderedCaloHitList.h"
 
-#include "PandoraInternal.h"
+#include "Pandora/PandoraInternal.h"
 
 namespace pandora
 {

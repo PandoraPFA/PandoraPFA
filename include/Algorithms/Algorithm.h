@@ -10,12 +10,12 @@
 
 #include "Api/PandoraContentApi.h"
 
+#include "Helpers/XmlHelper.h"
+
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
-
-#include "Xml/XmlHelper.h"
 
 namespace pandora
 {

@@ -6,8 +6,6 @@
  *  $Log: $
  */
 
-#include <iostream>
-
 #include "Objects/MCParticle.h"
 
 namespace pandora

@@ -6,10 +6,11 @@
  *	$Log: $
  */
 
-#include "Test/TestMCManager.h"
 #include "Managers/MCManager.h"
 
 #include "Objects/MCParticle.h"
+
+#include "Test/TestMCManager.h"
 
 #include <assert.h>
 #include <iostream>

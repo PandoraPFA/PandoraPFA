@@ -17,8 +17,8 @@
 #include "Managers/TrackManager.h"
 #include "Managers/ParticleFlowObjectManager.h"
 
-#include "Pandora.h"
-#include "PandoraSettings.h"
+#include "Pandora/Pandora.h"
+#include "Pandora/PandoraSettings.h"
 
 namespace pandora
 {

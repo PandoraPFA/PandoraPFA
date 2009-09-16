@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/src/Xml/XmlHelper.cc
+ *  @file   PandoraPFANew/src/Helpers/XmlHelper.cc
  * 
  *  @brief  Implementation of the xml helper class.
  * 
@@ -8,7 +8,7 @@
 
 #include "Api/PandoraContentApi.h"
 
-#include "Xml/XmlHelper.h"
+#include "Helpers/XmlHelper.h"
 
 namespace pandora
 {

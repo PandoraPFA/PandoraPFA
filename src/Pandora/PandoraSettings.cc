@@ -1,14 +1,14 @@
 /**
- *    @file PandoraPFANew/src/PandoraSettings.cc
+ *    @file PandoraPFANew/src/Pandora/PandoraSettings.cc
  * 
  *    @brief Implementation of the pandora settings class.
  * 
  *  $Log: $
  */
 
-#include "Xml/tinyxml.h"
+#include "Pandora/PandoraSettings.h"
 
-#include "PandoraSettings.h"
+#include "Xml/tinyxml.h"
 
 namespace pandora
 {

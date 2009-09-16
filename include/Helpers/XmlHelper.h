@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/Xml/XmlHelper.h
+ *  @file   PandoraPFANew/include/Helpers/XmlHelper.h
  * 
  *  @brief  Header file for the xml helper class.
  * 
@@ -10,7 +10,7 @@
 
 #include "Xml/tinyxml.h"
 
-#include "PandoraInternal.h"
+#include "Pandora/PandoraInternal.h"
 
 namespace pandora
 {

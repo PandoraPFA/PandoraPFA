@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/src/PandoraImpl.cc
+ *  @file   PandoraPFANew/src/Pandora/PandoraImpl.cc
  * 
  *  @brief  Implementation of the pandora impl class.
  * 
@@ -13,9 +13,9 @@
 #include "Managers/MCManager.h"
 #include "Managers/TrackManager.h"
 
-#include "Pandora.h"
-#include "PandoraImpl.h"
-#include "PandoraSettings.h"
+#include "Pandora/Pandora.h"
+#include "Pandora/PandoraImpl.h"
+#include "Pandora/PandoraSettings.h"
 
 namespace pandora
 {

@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/GeometryHelper.cc
+ *  @file   PandoraPFANew/src/Helpers/GeometryHelper.cc
  * 
  *  @brief  Implementation of the geometry helper class.
  * 
  *  $Log: $
  */
  
-#include "GeometryHelper.h"
+#include "Helpers/GeometryHelper.h"
 
 namespace pandora
 {

@@ -85,11 +85,7 @@ ENDIF()
 
 #include directories
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include")
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Objects")
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Algorithms")
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Managers")
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Test")
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include/Xml")
+
 IF( DEFINED PandoraMonitoring_HOME )
     INCLUDE_DIRECTORIES( "${PandoraMonitoring_HOME}/include")
 ENDIF()
@@ -112,9 +108,11 @@ ADD_DEFINITIONS( "-Wall -ansi" )
 # get list of all source files
 AUX_SOURCE_DIRECTORY( src library_sources )
 AUX_SOURCE_DIRECTORY( src/Algorithms library_sources )
+AUX_SOURCE_DIRECTORY( src/Api library_sources )
+AUX_SOURCE_DIRECTORY( src/Helpers library_sources )
 AUX_SOURCE_DIRECTORY( src/Managers library_sources )
 AUX_SOURCE_DIRECTORY( src/Objects library_sources )
-AUX_SOURCE_DIRECTORY( src/Api library_sources )
+AUX_SOURCE_DIRECTORY( src/Pandora library_sources )
 AUX_SOURCE_DIRECTORY( src/Test library_sources )
 AUX_SOURCE_DIRECTORY( src/Xml library_sources )
 

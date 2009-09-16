@@ -8,7 +8,7 @@
 #ifndef PANDORA_API_IMPL_H
 #define PANDORA_API_IMPL_H 1
 
-#include "PandoraApi.h"
+#include "Api/PandoraApi.h"
 
 namespace pandora
 {

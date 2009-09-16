@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/PandoraSettings.h
+ *  @file   PandoraPFANew/include/Pandora/PandoraSettings.h
  * 
  *  @brief  Header file for the pandora settings class.
  * 

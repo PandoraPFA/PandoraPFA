@@ -11,14 +11,14 @@
 #include "Api/PandoraApi.h"
 #include "Api/PandoraApiImpl.h"
 
+#include "Helpers/GeometryHelper.h"
+
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/ClusterManager.h"
 #include "Managers/MCManager.h"
 #include "Managers/ParticleFlowObjectManager.h"
 #include "Managers/TrackManager.h"
-
-#include "GeometryHelper.h"
 
 namespace pandora
 {

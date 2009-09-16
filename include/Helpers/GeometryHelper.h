@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/GeometryHelper.h
+ *  @file   PandoraPFANew/include/Helpers/GeometryHelper.h
  * 
  *  @brief  Header file for the geometry helper class.
  * 

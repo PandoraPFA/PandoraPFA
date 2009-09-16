@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/src/Pandora.cc
+ *  @file   PandoraPFANew/src/Pandora/Pandora.cc
  * 
  *  @brief  Implementation of the pandora class.
  * 
@@ -11,6 +11,8 @@
 #include "Api/PandoraContentApi.h"
 #include "Api/PandoraContentApiImpl.h"
 
+#include "Helpers/GeometryHelper.h"
+
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/ClusterManager.h"
@@ -18,12 +20,11 @@
 #include "Managers/ParticleFlowObjectManager.h"
 #include "Managers/TrackManager.h"
 
-#include "Xml/tinyxml.h"
+#include "Pandora/Pandora.h"
+#include "Pandora/PandoraImpl.h"
+#include "Pandora/PandoraSettings.h"
 
-#include "GeometryHelper.h"
-#include "Pandora.h"
-#include "PandoraImpl.h"
-#include "PandoraSettings.h"
+#include "Xml/tinyxml.h"
 
 namespace pandora
 {

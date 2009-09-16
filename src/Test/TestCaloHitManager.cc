@@ -9,10 +9,10 @@
 #include "Managers/CaloHitManager.h"
 #include "Managers/MCManager.h"
 
+#include "Objects/MCParticle.h"
+
 #include "Test/TestCaloHitManager.h"
 #include "Test/TestMCManager.h"
-
-#include "Objects/MCParticle.h"
 
 #include <assert.h>
 #include <iostream>

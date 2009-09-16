@@ -1,9 +1,9 @@
 /**
- *	@file	PandoraPFANew/src/Algorithms/FullCheatingAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/FullCheatingAlgorithm.cc
  * 
- *	@brief	Implementation of the clustering algorithm class.
+ *  @brief  Implementation of the clustering algorithm class.
  * 
- *	$Log: $
+ *  $Log: $
  */
 
 #include "Algorithms/FullCheatingAlgorithm.h"

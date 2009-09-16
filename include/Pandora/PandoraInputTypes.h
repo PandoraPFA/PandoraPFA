@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/PandoraInputTypes.h
+ *  @file   PandoraPFANew/include/Pandora/PandoraInputTypes.h
  * 
  *  @brief  Header file for pandora input types and associated external typedefs exposed via the PandoraApi
  * 
