@@ -47,11 +47,11 @@ public:
     class CaloHitParameters
     {
     public:
-        pandora::InputCartesianVector   m_position;                 ///< Position vector of center of calorimeter cell, units mm
+        pandora::InputCartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
         pandora::InputCartesianVector   m_normalVector;             ///< Unit normal to sampling layer, pointing outwards from the origin
-        pandora::InputFloat             m_du;                       ///< Dimension of cell (u = x in ENDCAP, u = r in BARREL), units mm
-        pandora::InputFloat             m_dv;                       ///< Dimension of cell (v = y in ENDCAP, v = r*phi in BARREL), units mm
-        pandora::InputFloat             m_dz;                       ///< Dimension of cell, z-coordinate, units mm
+        pandora::InputFloat             m_cellSizeU;                ///< Dimension of cell (u = x in ENDCAP, u = r in BARREL), units mm
+        pandora::InputFloat             m_cellSizeV;                ///< Dimension of cell (v = y in ENDCAP, v = r*phi in BARREL), units mm
+        pandora::InputFloat             m_cellSizeZ;                ///< Dimension of cell, z-coordinate, units mm
         pandora::InputFloat             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
         pandora::InputFloat             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
         pandora::InputFloat             m_energy;                   ///< Corrected energy of the calorimeter cell, units GeV
@@ -71,10 +71,10 @@ public:
     public:
         pandora::InputFloat             m_d0;                       ///< The 2D impact parameter wrt (0,0)
         pandora::InputFloat             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
-        pandora::InputCartesianVector   m_momentum;                 ///< The track momentum at the 2D distance of closest approach
-        pandora::InputTrackState        m_startTrackState;          ///< The track state at the start of the track
-        pandora::InputTrackState        m_endTrackState;            ///< The track state at the end of the track
-        pandora::InputTrackState        m_eCalTrackState;           ///< The (sometimes projected) track state at the ecal
+        pandora::InputCartesianVector   m_momentumAtDca;            ///< The track momentum at the 2D distance of closest approach
+        pandora::InputTrackState        m_trackStateAtStart;        ///< The track state at the start of the track
+        pandora::InputTrackState        m_trackStateAtEnd;          ///< The track state at the end of the track
+        pandora::InputTrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
         pandora::InputBool              m_reachesECal;              ///< Whether the track has reaches the ecal
         pandora::InputTrackStateList    m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
         pandora::InputAddress           m_pParentAddress;           ///< The address of the parent track in the user framework

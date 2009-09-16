@@ -47,28 +47,28 @@ public:
      * 
      *  @return the track momentum at the 2D distance of closest approach
      */
-    const CartesianVector &GetMomentum() const;
+    const CartesianVector &GetMomentumAtDca() const;
 
     /**
      *  @brief  Get the track state at the start of the track
      * 
      *  @return the track state at the start of the track
      */
-    const TrackState &GetStartTrackState() const;
+    const TrackState &GetTrackStateAtStart() const;
 
     /**
      *  @brief  Get the track state at the end of the track
      * 
      *  @return the track state at the end of the track
      */
-    const TrackState &GetEndTrackState() const;
+    const TrackState &GetTrackStateAtEnd() const;
 
     /**
      *  @brief  Get the (sometimes projected) track state at the ecal
      * 
      *  @return the track state at the ecal
      */
-    const TrackState &GetECalTrackState() const;
+    const TrackState &GetTrackStateAtECal() const;
 
     /**
      *  @brief  Whether the track reaches the ecal
@@ -127,12 +127,12 @@ private:
 
     const float             m_d0;                       ///< The 2D impact parameter wrt (0,0)
     const float             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
-    const CartesianVector   m_momentum;                 ///< The momentum vector at the 2D distance of closest approach
-    const float             m_momentumMagnitude;        ///< The magnitude of the momentum at the 2D distance of closest approach
+    const CartesianVector   m_momentumAtDca;            ///< The momentum vector at the 2D distance of closest approach
+    const float             m_momentumMagnitudeAtDca;   ///< The magnitude of the momentum at the 2D distance of closest approach
 
-    const TrackState        m_startTrackState;          ///< The track state at the start of the track
-    const TrackState        m_endTrackState;            ///< The track state at the end of the track
-    const TrackState        m_eCalTrackState;           ///< The (sometimes projected) track state at the ecal
+    const TrackState        m_trackStateAtStart;        ///< The track state at the start of the track
+    const TrackState        m_trackStateAtEnd;          ///< The track state at the end of the track
+    const TrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
 
     const bool              m_reachesECal;              ///< Whether the track reaches the ecal
     TrackStateList          m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
@@ -168,30 +168,30 @@ inline float Track::GetZ0() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const CartesianVector &Track::GetMomentum() const
+inline const CartesianVector &Track::GetMomentumAtDca() const
 {
-    return m_momentum;
+    return m_momentumAtDca;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackState &Track::GetStartTrackState() const
+inline const TrackState &Track::GetTrackStateAtStart() const
 {
-    return m_startTrackState;
+    return m_trackStateAtStart;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackState &Track::GetEndTrackState() const
+inline const TrackState &Track::GetTrackStateAtEnd() const
 {
-    return m_endTrackState;
+    return m_trackStateAtEnd;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackState &Track::GetECalTrackState() const
+inline const TrackState &Track::GetTrackStateAtECal() const
 {
-    return m_eCalTrackState;
+    return m_trackStateAtECal;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -206,6 +206,30 @@ inline bool Track::ReachesECal() const
 inline const TrackStateList &Track::GetCalorimeterProjections() const
 {
     return m_calorimeterProjections;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Track::GetAssociatedCluster(Cluster *pCluster) const
+{
+    if (NULL == m_pAssociatedCluster)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    pCluster = m_pAssociatedCluster;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Track::GetMCParticle(MCParticle *pMCParticle) const
+{
+    if (NULL == m_pMCParticle)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    pMCParticle = m_pMCParticle;
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -20,11 +20,11 @@ bool CaloHit::operator< (const CaloHit &rhs) const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
-    m_position(caloHitParameters.m_position.Get()),
+    m_positionVector(caloHitParameters.m_positionVector.Get()),
     m_normalVector(caloHitParameters.m_normalVector.Get()),
-    m_du(caloHitParameters.m_du.Get()),
-    m_dv(caloHitParameters.m_dv.Get()),
-    m_dz(caloHitParameters.m_dz.Get()),
+    m_cellSizeU(caloHitParameters.m_cellSizeU.Get()),
+    m_cellSizeV(caloHitParameters.m_cellSizeV.Get()),
+    m_cellSizeZ(caloHitParameters.m_cellSizeZ.Get()),
     m_nRadiationLengths(caloHitParameters.m_nRadiationLengths.Get()),
     m_nInteractionLengths(caloHitParameters.m_nInteractionLengths.Get()),
     m_energy(caloHitParameters.m_energy.Get()),
@@ -43,6 +43,30 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
 
 CaloHit::~CaloHit()
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHit::SetMCParticle(MCParticle *const pMCParticle)
+{
+    if (NULL == pMCParticle)
+        return STATUS_CODE_FAILURE;
+
+    m_pMCParticle = pMCParticle;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit)
+{
+    stream  << " CaloHit: " << std::endl
+            << " position " << caloHit.GetPositionVector()
+            << " energy   " << caloHit.GetEnergy() << std::endl;
+
+    return stream;
 }
 
 } // namespace pandora
