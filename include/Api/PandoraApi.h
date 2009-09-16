@@ -158,6 +158,26 @@ public:
         const void *pDaughterAddress);
 
     /**
+     *  @brief  Set parent-daughter track relationship
+     * 
+     *  @param  pandora the pandora instance to register the relationship with
+     *  @param  pParentAddress address of parent track in the user framework
+     *  @param  pDaughterAddress address of daughter track in the user framework
+     */
+    static StatusCode SetTrackParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress,
+        const void *pDaughterAddress);
+
+    /**
+     *  @brief  Set sibling track relationship
+     * 
+     *  @param  pandora the pandora instance to register the relationship with
+     *  @param  pFirstSiblingAddress address of first sibling track in the user framework
+     *  @param  pSecondSiblingAddress address of second sibling track in the user framework
+     */
+    static StatusCode SetTrackSiblingRelationship(const pandora::Pandora &pandora, const void *pFirstSiblingAddress,
+        const void *pSecondSiblingAddress);
+
+    /**
      *  @brief  Set calo hit to mc particle relationship
      * 
      *  @param  pandora the pandora instance to register the relationship with

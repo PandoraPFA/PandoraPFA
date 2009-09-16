@@ -47,6 +47,10 @@ Track::~Track()
     {
         delete *iter;
     }
+
+    m_parentTrackList.clear();
+    m_siblingTrackList.clear();
+    m_daughterTrackList.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,6 +61,42 @@ StatusCode Track::SetMCParticle(MCParticle *const pMCParticle)
         return STATUS_CODE_FAILURE;
 
     m_pMCParticle = pMCParticle;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Track::AddParent(Track *const pTrack)
+{
+    if (NULL == pTrack)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_parentTrackList.insert(pTrack);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Track::AddDaughter(Track *const pTrack)
+{
+    if (NULL == pTrack)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_daughterTrackList.insert(pTrack);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Track::AddSibling(Track *const pTrack)
+{
+    if (NULL == pTrack)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_siblingTrackList.insert(pTrack);
 
     return STATUS_CODE_SUCCESS;
 }

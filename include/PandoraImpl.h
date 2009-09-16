@@ -21,7 +21,12 @@ private:
      *  @brief  Match tracks and calo hits to their correct mc particles for particle flow
      */
     StatusCode MatchObjectsToMCPfoTargets() const;
-    
+
+    /**
+     *  @brief  Add track associations (parent-daughter and sibling)
+     */
+    StatusCode AssociateTracks() const;
+
     /**
      *  @brief  Order input calo hits by pseudo layer
      */

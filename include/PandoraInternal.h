@@ -83,7 +83,6 @@ typedef std::vector<std::string> StringVector;
 
 typedef const void * Uid;
 typedef std::map<Uid, MCParticle *> UidToMCParticleMap;
-typedef std::map<Uid, Uid> UidRelationMap;
 
 } // namespace pandora
 

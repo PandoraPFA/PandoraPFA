@@ -139,6 +139,37 @@ private:
     StatusCode ResetForNextEvent();
 
     /**
+     *  @brief  Set a track parent-daughter relationship
+     * 
+     *  @param  parentUid the parent track unique identifier
+     *  @param  daughterUid the daughter track unique identifier
+     */
+    StatusCode SetTrackParentDaughterRelationship(const Uid parentUid, const Uid daughterUid);
+
+    /**
+     *  @brief  Set a track sibling relationship
+     * 
+     *  @param  firstSiblingUid the first sibling track unique identifier
+     *  @param  secondSiblingUid the second sibling track unique identifier
+     */
+    StatusCode SetTrackSiblingRelationship(const Uid firstSiblingUid, const Uid secondSiblingUid);
+
+    /**
+     *  @brief  Apply track associations (parent-daughter and sibling) that have been registered with the track manager
+     */
+    StatusCode AssociateTracks();
+
+    /**
+     *  @brief  Add parent-daughter associations to tracks
+     */
+    StatusCode AddParentDaughterAssociations();
+
+    /**
+     *  @brief  Add sibling associations to tracks
+     */
+    StatusCode AddSiblingAssociations();
+
+    /**
      *  @brief  AlgorithmInfo class
      */    
     class AlgorithmInfo
@@ -159,6 +190,13 @@ private:
     StringSet                       m_savedLists;                   ///< The set of saved track lists
 
     static const std::string        INPUT_LIST_NAME;                ///< The name of the input track list
+
+    typedef std::map<Uid, Track *> UidToTrackMap;
+    typedef std::multimap<Uid, Uid> TrackRelationMap;
+
+    UidToTrackMap                   m_uidToTrackMap;                ///< The uid to track map
+    TrackRelationMap                m_parentDaughterRelationMap;    ///< The track parent-daughter relation map
+    TrackRelationMap                m_siblingRelationMap;           ///< The track sibling relation map
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;

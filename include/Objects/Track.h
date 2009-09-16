@@ -105,6 +105,27 @@ public:
      */
     const void *GetParentTrackAddress() const;
 
+    /**
+     *  @brief  Get the parent track list
+     * 
+     *  @return the parent track list
+     */
+    const TrackList &GetParentTrackList() const;
+
+    /**
+     *  @brief  Get the sibling track list
+     * 
+     *  @return the sibling track list
+     */
+    const TrackList &GetSiblingTrackList() const;
+
+    /**
+     *  @brief  Get the daughter track list
+     * 
+     *  @return the daughter track list
+     */
+    const TrackList &GetDaughterTrackList() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -125,6 +146,27 @@ private:
      */
     StatusCode SetMCParticle(MCParticle *const pMCParticle);
 
+    /**
+     *  @brief  Add a parent track to the parent track list
+     * 
+     *  @param  pTrack the address of the parent track
+     */
+    StatusCode AddParent(Track *const pTrack);
+
+    /**
+     *  @brief  Add a daughter track to the daughter track list
+     * 
+     *  @param  pTrack the address of the daughter track
+     */
+    StatusCode AddDaughter(Track *const pTrack);
+
+    /**
+     *  @brief  Add a sibling track to the sibling track list
+     * 
+     *  @param  pTrack the address of the sibling track
+     */
+    StatusCode AddSibling(Track *const pTrack);
+
     const float             m_d0;                       ///< The 2D impact parameter wrt (0,0)
     const float             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
     const CartesianVector   m_momentumAtDca;            ///< The momentum vector at the 2D distance of closest approach
@@ -140,6 +182,10 @@ private:
     Cluster                 *m_pAssociatedCluster;      ///< The address of an associated cluster
     MCParticle              *m_pMCParticle;             ///< The address of the associated MC particle
     const void              *m_pParentAddress;          ///< The address of the parent track in the user framework
+
+    TrackList               m_parentTrackList;          ///< The list of parent track addresses
+    TrackList               m_siblingTrackList;         ///< The list of sibling track addresses
+    TrackList               m_daughterTrackList;        ///< The list of daughter track addresses
 
     friend class TrackManager;
 };
@@ -237,6 +283,27 @@ inline StatusCode Track::GetMCParticle(MCParticle *pMCParticle) const
 inline const void *Track::GetParentTrackAddress() const
 {
     return m_pParentAddress;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackList &Track::GetParentTrackList() const
+{
+    return m_parentTrackList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackList &Track::GetSiblingTrackList() const
+{
+    return m_siblingTrackList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackList &Track::GetDaughterTrackList() const
+{
+    return m_daughterTrackList;
 }
 
 } // namespace pandora

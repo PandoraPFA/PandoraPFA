@@ -36,8 +36,14 @@ StatusCode PandoraImpl::MatchObjectsToMCPfoTargets() const
 
     return STATUS_CODE_SUCCESS;
 }
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------------------------------------------------------------------    
+StatusCode PandoraImpl::AssociateTracks() const
+{
+    return m_pPandora->m_pTrackManager->AssociateTracks();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraImpl::OrderInputCaloHits() const
 {

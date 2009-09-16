@@ -68,6 +68,7 @@ StatusCode Pandora::ProcessEvent()
 
     // Prepare event
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->MatchObjectsToMCPfoTargets());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->AssociateTracks());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->OrderInputCaloHits());
 
     // Loop over algorithms

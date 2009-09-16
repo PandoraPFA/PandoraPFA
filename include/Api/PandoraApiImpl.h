@@ -60,6 +60,22 @@ public:
     StatusCode SetMCParentDaughterRelationship(const void *pParentAddress, const void *pDaughterAddress) const;
 
     /**
+     *  @brief  Set parent-daughter track relationship
+     * 
+     *  @param  pParentAddress address of parent track in the user framework
+     *  @param  pDaughterAddress address of daughter track in the user framework
+     */
+    StatusCode SetTrackParentDaughterRelationship(const void *pParentAddress, const void *pDaughterAddress) const;
+
+    /**
+     *  @brief  Set sibling track relationship
+     * 
+     *  @param  pFirstSiblingAddress address of first sibling track in the user framework
+     *  @param  pSecondSiblingAddress address of second sibling track in the user framework
+     */
+    StatusCode SetTrackSiblingRelationship(const void *pFirstSiblingAddress, const void *pSecondSiblingAddress) const;
+
+    /**
      *  @brief  Set calo hit to mc particle relationship
      * 
      *  @param  pCaloHitParentAddress address of calo hit in the user framework
