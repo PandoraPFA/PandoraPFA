@@ -8,7 +8,7 @@
 #ifndef TEST_CALO_HIT_MANAGER_H
 #define TEST_CALO_HIT_MANAGER_H 1
 
-#include "Internal.h"
+#include "PandoraInternal.h"
 #include "StatusCodes.h"
 
 #include <assert.h>

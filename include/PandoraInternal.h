@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/Internal.h
+ *  @file   PandoraPFANew/include/PandoraInternal.h
  * 
  *  @brief  Header file defining relevant internal typedefs, sort and string conversion functions
  * 

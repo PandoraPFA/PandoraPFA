@@ -8,7 +8,7 @@
 #ifndef ORDERED_CALO_HIT_LIST_H
 #define ORDERED_CALO_HIT_LIST_H 1
 
-#include "Internal.h"
+#include "PandoraInternal.h"
 #include "StatusCodes.h"
 
 #include <map>

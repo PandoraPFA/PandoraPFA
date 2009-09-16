@@ -10,7 +10,7 @@
 
 #include "Managers/MCManager.h"
 
-#include "Internal.h"
+#include "PandoraInternal.h"
 #include "StatusCodes.h"
 
 #include <assert.h>
