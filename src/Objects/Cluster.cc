@@ -7,6 +7,7 @@
  */
 
 #include "Objects/Cluster.h"
+#include "Objects/Track.h"
 
 namespace pandora
 {
@@ -51,13 +52,47 @@ Cluster::~Cluster()
     }
 
     m_orderedCaloHitList.clear();
+    m_associatedTrackList.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
 {
-    return m_orderedCaloHitList.Add(*(pCluster->GetOrderedCaloHitList()));
+    return m_orderedCaloHitList.Add(pCluster->GetOrderedCaloHitList());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Cluster::AddTrackAssociation(Track *const pTrack)
+{
+    if (NULL == pTrack)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_associatedTrackList.insert(pTrack);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Cluster::RemoveTrackAssociation(Track *const pTrack)
+{
+    std::pair<TrackList::const_iterator, TrackList::const_iterator> range = m_associatedTrackList.equal_range(pTrack);
+
+    if (m_associatedTrackList.end() == range.first)
+        return STATUS_CODE_NOT_FOUND;
+
+    for (TrackList::iterator iter = range.first, iterEnd = range.second; iter != iterEnd; ++iter)
+    {
+        if (pTrack == *iter)
+        {
+            m_associatedTrackList.erase(iter);
+            break;
+        }
+    }
+
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

@@ -142,9 +142,23 @@ private:
     /**
      *  @brief  Set the mc particle associated with the track
      * 
-     *  @param  pMCParticle to receive the address of the mc particle
+     *  @param  pMCParticle the address of the mc particle
      */
     StatusCode SetMCParticle(MCParticle *const pMCParticle);
+
+    /**
+     *  @brief  Set the cluster associated with the track
+     * 
+     *  @param  pCluster the address of the associated cluster
+     */
+    StatusCode SetAssociatedCluster(Cluster *const pCluster);
+
+    /**
+     *  @brief  Remove the association with a cluster
+     *
+     *  @param  pCluster the address of the cluster with which the track is no longer associated
+     */
+    StatusCode RemoveAssociatedCluster(Cluster *const pCluster);
 
     /**
      *  @brief  Add a parent track to the parent track list
@@ -187,6 +201,7 @@ private:
     TrackList               m_siblingTrackList;         ///< The list of sibling track addresses
     TrackList               m_daughterTrackList;        ///< The list of daughter track addresses
 
+    friend class PandoraContentApiImpl;
     friend class TrackManager;
 };
 

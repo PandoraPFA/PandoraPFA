@@ -155,7 +155,23 @@ public:
      *  @param  pClusterRhs address of the second cluster
      */
     StatusCode MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs) const;
-        
+
+    /**
+     *  @brief  Add an association between a track and a cluster
+     * 
+     *  @param  pTrack address of the track
+     *  @param  pCluster address of the cluster
+     */
+    StatusCode AddTrackClusterAssociation(Track *const pTrack, Cluster *const pCluster) const;
+
+    /**
+     *  @brief  Remove an association between a track and a cluster
+     * 
+     *  @param  pTrack address of the track
+     *  @param  pCluster address of the cluster
+     */
+    StatusCode RemoveTrackClusterAssociation(Track *const pTrack, Cluster *const pCluster) const;
+
     /**
      *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
      * 

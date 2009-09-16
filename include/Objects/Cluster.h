@@ -32,7 +32,14 @@ public:
      * 
      *  @return Address of the ordered calo hit list
      */    
-    const OrderedCaloHitList *const GetOrderedCaloHitList() const;
+    const OrderedCaloHitList &GetOrderedCaloHitList() const;
+
+    /**
+     *  @brief  Get the list of tracks associated with the cluster
+     * 
+     *  @return Address of the list of associated tracks
+     */
+    const TrackList &GetAssociatedTrackList() const;
 
     /**
      *  @brief  Get calo hits in specified pseudo layer
@@ -83,16 +90,40 @@ private:
      */
     StatusCode AddHitsFromSecondCluster(Cluster *const pCluster);
 
+    /**
+     *  @brief  Add an association between the cluster and a track
+     * 
+     *  @param  pTrack the address of the track with which the cluster is associated
+     */
+    StatusCode AddTrackAssociation(Track *const pTrack);
+
+    /**
+     *  @brief  Remove an association between the cluster and a track
+     * 
+     *  @param  pTrack the address of the track with which the cluster is no longer associated
+     */
+    StatusCode RemoveTrackAssociation(Track *const pTrack);
+
     OrderedCaloHitList      m_orderedCaloHitList;       ///< The ordered calo hit list
 
+    TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
+
+    friend class PandoraContentApiImpl;
     friend class ClusterManager;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const OrderedCaloHitList *const Cluster::GetOrderedCaloHitList() const
+inline const OrderedCaloHitList &Cluster::GetOrderedCaloHitList() const
 {
-    return &m_orderedCaloHitList;
+    return m_orderedCaloHitList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackList &Cluster::GetAssociatedTrackList() const
+{
+    return m_associatedTrackList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

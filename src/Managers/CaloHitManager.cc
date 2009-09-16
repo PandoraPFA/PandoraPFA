@@ -130,13 +130,12 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
     if (clusterList.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    const OrderedCaloHitList *const pOrderedCaloHitList = (*clusterList.begin())->GetOrderedCaloHitList();
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CreateTemporaryListAndSetCurrent(pAlgorithm, *pOrderedCaloHitList, temporaryListName));
+    const OrderedCaloHitList orderedCaloHitList = (*clusterList.begin())->GetOrderedCaloHitList();
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CreateTemporaryListAndSetCurrent(pAlgorithm, orderedCaloHitList, temporaryListName));
 
     for (ClusterList::const_iterator iter = ++(clusterList.begin()), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
     {
-        const OrderedCaloHitList *const pOrderedCaloHitList = (*iter)->GetOrderedCaloHitList();
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_nameToOrderedCaloHitListMap[temporaryListName]->Add(*pOrderedCaloHitList));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_nameToOrderedCaloHitListMap[temporaryListName]->Add((*iter)->GetOrderedCaloHitList()));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -186,8 +185,7 @@ StatusCode CaloHitManager::AddCaloHitsToList(const std::string &listName, const 
 
     for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
     {
-        const OrderedCaloHitList *const pOrderedCaloHitList = (*iter)->GetOrderedCaloHitList();
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Add(*pOrderedCaloHitList));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Add((*iter)->GetOrderedCaloHitList()));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -221,8 +219,7 @@ StatusCode CaloHitManager::RemoveCaloHitsFromList(const std::string &listName, c
 
     for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
     {
-        const OrderedCaloHitList *const pOrderedCaloHitList = (*iter)->GetOrderedCaloHitList();
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Remove(*pOrderedCaloHitList));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Remove((*iter)->GetOrderedCaloHitList()));
     }
 
     return STATUS_CODE_SUCCESS;

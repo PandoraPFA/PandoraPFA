@@ -86,13 +86,13 @@ StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit, const PseudoL
     {
         CaloHitList *pCaloHitList = new CaloHitList;
         pCaloHitList->insert(pCaloHit);
-        
+
         if (!(this->insert(OrderedCaloHitList::value_type(pseudoLayer, pCaloHitList)).second))
             return STATUS_CODE_FAILURE;
     }
     else
     {
-        iter->second->insert(pCaloHit);    
+        iter->second->insert(pCaloHit);
     }
 
     return STATUS_CODE_SUCCESS;
@@ -107,8 +107,7 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const Pseu
     if (this->end() == listIter)
         return STATUS_CODE_NOT_FOUND;
 
-    std::pair<CaloHitList::const_iterator, CaloHitList::const_iterator> range;
-    range = listIter->second->equal_range(pCaloHit);
+    std::pair<CaloHitList::const_iterator, CaloHitList::const_iterator> range = listIter->second->equal_range(pCaloHit);
 
     if (listIter->second->end() == range.first)
         return STATUS_CODE_NOT_FOUND;

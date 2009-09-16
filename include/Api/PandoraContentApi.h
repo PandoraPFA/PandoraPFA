@@ -244,6 +244,26 @@ public:
         pandora::Cluster *pClusterRhs);
 
     /**
+     *  @brief  Add an association between a track and a cluster
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pTrack address of the track
+     *  @param  pCluster address of the cluster
+     */
+    static StatusCode AddTrackClusterAssociation(const pandora::Algorithm &algorithm, pandora::Track *const pTrack,
+        pandora::Cluster *const pCluster);
+
+    /**
+     *  @brief  Remove an association between a track and a cluster
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pTrack address of the track
+     *  @param  pCluster address of the cluster
+     */
+    static StatusCode RemoveTrackClusterAssociation(const pandora::Algorithm &algorithm, pandora::Track *const pTrack,
+        pandora::Cluster *const pCluster);
+
+    /**
      *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
      * 
      *  @param  algorithm the algorithm calling this function

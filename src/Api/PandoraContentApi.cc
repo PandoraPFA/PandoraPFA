@@ -177,6 +177,22 @@ StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &a
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::AddTrackClusterAssociation(const pandora::Algorithm &algorithm, pandora::Track *const pTrack,
+    pandora::Cluster *const pCluster)
+{
+    return algorithm.GetPandoraContentApiImpl()->AddTrackClusterAssociation(pTrack, pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::RemoveTrackClusterAssociation(const pandora::Algorithm &algorithm, pandora::Track *const pTrack,
+    pandora::Cluster *const pCluster)
+{
+    return algorithm.GetPandoraContentApiImpl()->RemoveTrackClusterAssociation(pTrack, pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string newClusterListName)
 {
     return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName);

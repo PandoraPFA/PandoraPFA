@@ -67,6 +67,33 @@ StatusCode Track::SetMCParticle(MCParticle *const pMCParticle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode Track::SetAssociatedCluster(Cluster *const pCluster)
+{
+    if (NULL == pCluster)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    if (NULL != m_pAssociatedCluster)
+        return STATUS_CODE_ALREADY_INITIALIZED;
+
+    m_pAssociatedCluster = pCluster;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Track::RemoveAssociatedCluster(Cluster *const pCluster)
+{
+    if (pCluster != m_pAssociatedCluster)
+        return STATUS_CODE_NOT_FOUND;
+
+    m_pAssociatedCluster = NULL;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode Track::AddParent(Track *const pTrack)
 {
     if (NULL == pTrack)

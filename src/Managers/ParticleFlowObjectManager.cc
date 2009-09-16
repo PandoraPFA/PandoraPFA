@@ -73,8 +73,8 @@ void ParticleFlowObjectManager::ExtractAndStoreCaloHits(PandoraApi::ParticleFlow
     {
         CaloHitAddressList caloHitAddressList;
 
-        for (OrderedCaloHitList::const_iterator orderedListIter = (*clusterIter)->GetOrderedCaloHitList()->begin(),
-            orderedListIterEnd = (*clusterIter)->GetOrderedCaloHitList()->end(); orderedListIter != orderedListIterEnd; ++orderedListIter)
+        for (OrderedCaloHitList::const_iterator orderedListIter = (*clusterIter)->GetOrderedCaloHitList().begin(),
+            orderedListIterEnd = (*clusterIter)->GetOrderedCaloHitList().end(); orderedListIter != orderedListIterEnd; ++orderedListIter)
         {
             for (CaloHitList::const_iterator caloHitIter = orderedListIter->second->begin(),
                 caloHitIterEnd = orderedListIter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
