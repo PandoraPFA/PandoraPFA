@@ -119,7 +119,7 @@ private:
      *          - an empty cluster vector will be rejected
      */
     StatusCode MoveClustersToTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const std::string &originalListName,
-        std::string &temporaryListName,    const ClusterList *const pClusterList = NULL);
+        std::string &temporaryListName, const ClusterList *const pClusterList = NULL);
 
     /**
      *  @brief  Save a list of temporary clusters

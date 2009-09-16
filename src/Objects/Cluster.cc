@@ -88,11 +88,11 @@ StatusCode Cluster::RemoveTrackAssociation(Track *const pTrack)
         if (pTrack == *iter)
         {
             m_associatedTrackList.erase(iter);
-            break;
+            return STATUS_CODE_SUCCESS;
         }
     }
 
-    return STATUS_CODE_SUCCESS;
+    return STATUS_CODE_NOT_FOUND;
 }
 
 } // namespace pandora

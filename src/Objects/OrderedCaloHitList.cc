@@ -117,14 +117,15 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const Pseu
         if (pCaloHit == *caloHitIter)
         {
             listIter->second->erase(caloHitIter);
-            break;
+
+            if (listIter->second->empty())
+                this->erase(listIter);
+
+            return STATUS_CODE_SUCCESS;
         }
     }
 
-    if (listIter->second->empty())
-        this->erase(listIter);
-
-    return STATUS_CODE_SUCCESS;
+    return STATUS_CODE_NOT_FOUND;
 }
 
 } // namespace pandora

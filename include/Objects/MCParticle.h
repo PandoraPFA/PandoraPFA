@@ -82,7 +82,7 @@ public:
      * 
      *  @param  pMCParticle to receive the address of the pfo target
      */
-    StatusCode GetPfoTarget(MCParticle*& pMCParticle) const;
+    StatusCode GetPfoTarget(MCParticle *&pMCParticle) const;
 
     /**
      *  @brief  Get the mc particle unique identifier

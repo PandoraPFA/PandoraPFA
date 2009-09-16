@@ -135,7 +135,7 @@ public:
      * 
      *  @param  pMCParticle to receive the address of the mc particle
      */
-    StatusCode GetMCParticle(MCParticle *pMCParticle) const;
+    StatusCode GetMCParticle(MCParticle *&pMCParticle) const;
 
     /**
      *  @brief  Get the address of the parent calo hit in the user framework
@@ -309,7 +309,7 @@ inline StatusCode CaloHit::GetPseudoLayer(PseudoLayer &pseudoLayer) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode CaloHit::GetMCParticle(MCParticle *pMCParticle) const
+inline StatusCode CaloHit::GetMCParticle(MCParticle *&pMCParticle) const
 {
     if (NULL == m_pMCParticle)
         return STATUS_CODE_NOT_INITIALIZED;

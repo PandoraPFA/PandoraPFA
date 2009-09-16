@@ -113,9 +113,9 @@ private:
      *  @brief  Change the current ordered calo hit list to the constituent hits of a cluster list
      *
      *  @param  pAlgorithm address of the algorithm changing the current ordered calo hit list
-     *   @param  clusterList the cluster list containing the hits
-     *   @param  temporaryListName to receive the name of the temporary list
-     */    
+     *  @param  clusterList the cluster list containing the hits
+     *  @param  temporaryListName to receive the name of the temporary list
+     */
     StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const ClusterList &clusterList,
         std::string &temporaryListName);
 
@@ -124,7 +124,7 @@ private:
      * 
      *  @param  orderedCaloHitList the ordered calo hit list
      *  @param  newListName the new list name
-     */    
+     */
     StatusCode SaveList(const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName);
 
     /**

@@ -89,14 +89,14 @@ public:
      * 
      *  @param  pCluster to receive the address of the cluster
      */
-    StatusCode GetAssociatedCluster(Cluster *pCluster) const;
+    StatusCode GetAssociatedCluster(Cluster *&pCluster) const;
 
     /**
      *  @brief  Get address of the mc particle associated with the track
      * 
      *  @param  pMCParticle to receive the address of the mc particle
      */
-    StatusCode GetMCParticle(MCParticle *pMCParticle) const;    
+    StatusCode GetMCParticle(MCParticle *&pMCParticle) const;
 
     /**
      *  @brief  Get the address of the parent track in the user framework
@@ -271,7 +271,7 @@ inline const TrackStateList &Track::GetCalorimeterProjections() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Track::GetAssociatedCluster(Cluster *pCluster) const
+inline StatusCode Track::GetAssociatedCluster(Cluster *&pCluster) const
 {
     if (NULL == m_pAssociatedCluster)
         return STATUS_CODE_NOT_INITIALIZED;
@@ -283,7 +283,7 @@ inline StatusCode Track::GetAssociatedCluster(Cluster *pCluster) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Track::GetMCParticle(MCParticle *pMCParticle) const
+inline StatusCode Track::GetMCParticle(MCParticle *&pMCParticle) const
 {
     if (NULL == m_pMCParticle)
         return STATUS_CODE_NOT_INITIALIZED;
