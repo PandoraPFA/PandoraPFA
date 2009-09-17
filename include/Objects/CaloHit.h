@@ -126,9 +126,51 @@ public:
     /**
      *  @brief  Get pseudo layer for the calo hit
      * 
-     *  @param  pseudoLayer to receive the pseudo layer
+     *  @return the pseudo layer
      */
-    StatusCode GetPseudoLayer(PseudoLayer &pseudoLayer) const;
+    PseudoLayer GetPseudoLayer() const;
+
+    /**
+     *  @brief  Get the mip equivalent energy
+     * 
+     *  @return the mip equivalent energy
+     */
+    float GetMipEquivalentEnergy() const;
+
+    /**
+     *  @brief  Get the electromagnetic energy measure
+     * 
+     *  @return the electromagnetic energy
+     */
+    float GetElectromagneticEnergy() const;
+
+    /**
+     *  @brief  Get the hadronic energy measure
+     * 
+     *  @return the hadronic energy
+     */
+    float GetHadronicEnergy() const;
+
+    /**
+     *  @brief  Get the surrounding energy
+     * 
+     *  @return the surrounding energy
+     */
+    float GetSurroundingEnergy() const;
+
+    /**
+     *  @brief  Get the mip track flag
+     * 
+     *  @return the mip track flag
+     */
+    bool GetMipTrackFlag() const;
+
+    /**
+     *  @brief  Get the isolated hit flag
+     * 
+     *  @return the isolated hit flag
+     */
+    bool GetIsolatedFlag() const;
 
     /**
      *  @brief  Get address of the mc particle associated with the calo hit
@@ -156,18 +198,60 @@ private:
     ~CaloHit();
 
     /**
+     *  @brief  Set the mc pseudo layer for the calo hit
+     * 
+     *  @param  pseudoLayer the pseudo layer
+     */
+    StatusCode SetPseudoLayer(PseudoLayer pseudoLayer);
+
+    /**
+     *  @brief  Set the mip equivalent energy
+     * 
+     *  @param  mipEquivalentEnergy the mip equivalent energy
+     */
+    StatusCode SetMipEquivalentEnergy(float mipEquivalentEnergy);
+
+    /**
+     *  @brief  Set the electromagnetic energy measure
+     * 
+     *  @param  electromagneticEnergy the electromagnetic energy
+     */
+    StatusCode SetElectromagneticEnergy(float electromagneticEnergy);
+
+    /**
+     *  @brief  Set the hadronic energy measure
+     * 
+     *  @param  hadronicEnergy the hadronic energy
+     */
+    StatusCode SetHadronicEnergy(float hadronicEnergy);
+
+    /**
+     *  @brief  Set the surrounding energy
+     * 
+     *  @param  surroundingEnergy the surrounding energy
+     */
+    StatusCode SetSurroundingEnergy(float surroundingEnergy);
+
+    /**
+     *  @brief  Set the mip track flag
+     * 
+     *  @param  mipTrackFlag the mip track flag
+     */
+    void SetMipTrackFlag(bool mipTrackFlag);
+
+    /**
+     *  @brief  Set the isolated hit flag
+     * 
+     *  @param  isolatedFlag the isolated hit flag
+     */
+    void SetIsolatedFlag(bool isolatedFlag);
+
+    /**
      *  @brief  Set the mc particle associated with the calo hit
      * 
      *  @param  pMCParticle address of the mc particle
      */
     StatusCode SetMCParticle(MCParticle *const pMCParticle);
-
-    /**
-     *  @brief  Set the mc pseudo layer for the calo hit
-     * 
-     *  @param  pseudoLayer the pseudo layer
-     */
-    StatusCode SetPseudoLayer(const PseudoLayer &pseudoLayer);
 
     const CartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
     const CartesianVector   m_normalVector;             ///< Unit normal to the sampling layer, pointing outwards from the origin
@@ -187,8 +271,15 @@ private:
     const DetectorRegion    m_detectorRegion;           ///< Region of the detector in which the calo hit is located
 
     const unsigned int      m_layer;                    ///< The subdetector readout layer number
-    PseudoLayer             m_pseudoLayer;              ///< The pseudo layer to which the calo hit has been assigned
-    bool                    m_isSortedIntoPseudoLayer;  ///< Whether the calo hit has been sorted into a pseudo layer
+    InputPseudoLayer        m_pseudoLayer;              ///< The pseudo layer to which the calo hit has been assigned
+
+    InputFloat              m_mipEquivalentEnergy;      ///< The mip equivalent energy, units mip
+    InputFloat              m_electromagneticEnergy;    ///< The electromagnetic energy measure, units GeV
+    InputFloat              m_hadronicEnergy;           ///< The hadronic energy measure, units GeV
+    InputFloat              m_surroundingEnergy;        ///< The surrounding energy, units GeV
+
+    bool                    m_isMipTrack;               ///< Whether the calo hit is part of a mip track
+    bool                    m_isIsolated;               ///< Whether the calo hit is isolated
 
     MCParticle              *m_pMCParticle;             ///< The associated MC particle
     const void              *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
@@ -297,14 +388,51 @@ inline unsigned int CaloHit::GetLayer() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode CaloHit::GetPseudoLayer(PseudoLayer &pseudoLayer) const
+inline PseudoLayer CaloHit::GetPseudoLayer() const
 {
-    if (!m_isSortedIntoPseudoLayer)
-        return STATUS_CODE_NOT_INITIALIZED;
+    return m_pseudoLayer.Get();
+}
 
-    pseudoLayer = m_pseudoLayer;
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-    return STATUS_CODE_SUCCESS;
+inline float CaloHit::GetMipEquivalentEnergy() const
+{
+    return m_mipEquivalentEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetElectromagneticEnergy() const
+{
+    return m_electromagneticEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetHadronicEnergy() const
+{
+    return m_hadronicEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetSurroundingEnergy() const
+{
+    return m_surroundingEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CaloHit::GetMipTrackFlag() const
+{
+    return m_isMipTrack;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CaloHit::GetIsolatedFlag() const
+{
+    return m_isIsolated;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -324,16 +452,6 @@ inline StatusCode CaloHit::GetMCParticle(MCParticle *&pMCParticle) const
 inline const void *CaloHit::GetParentCaloHitAddress() const
 {
     return m_pParentAddress;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode CaloHit::SetPseudoLayer(const PseudoLayer &pseudoLayer)
-{
-    m_pseudoLayer = pseudoLayer;
-    m_isSortedIntoPseudoLayer = true;
-
-    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

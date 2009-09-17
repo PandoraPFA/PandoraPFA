@@ -33,7 +33,8 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_hitType(caloHitParameters.m_hitType.Get()),
     m_detectorRegion(caloHitParameters.m_detectorRegion.Get()),
     m_layer(caloHitParameters.m_layer.Get()),
-    m_isSortedIntoPseudoLayer(false),
+    m_isMipTrack(false),
+    m_isIsolated(false),
     m_pMCParticle(NULL),
     m_pParentAddress(caloHitParameters.m_pParentAddress.Get())
 {
@@ -43,6 +44,70 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
 
 CaloHit::~CaloHit()
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHit::SetPseudoLayer(PseudoLayer pseudoLayer)
+{
+    if (!(m_pseudoLayer = pseudoLayer))
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHit::SetMipEquivalentEnergy(float mipEquivalentEnergy)
+{
+    if (!(m_mipEquivalentEnergy = mipEquivalentEnergy))
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHit::SetElectromagneticEnergy(float electromagneticEnergy)
+{
+    if (!(m_electromagneticEnergy = electromagneticEnergy))
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHit::SetHadronicEnergy(float hadronicEnergy)
+{
+    if (!(m_hadronicEnergy = hadronicEnergy))
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHit::SetSurroundingEnergy(float surroundingEnergy)
+{
+    if (!(m_surroundingEnergy = surroundingEnergy))
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void CaloHit::SetMipTrackFlag(bool mipTrackFlag)
+{
+    m_isMipTrack = mipTrackFlag;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void CaloHit::SetIsolatedFlag(bool isolatedFlag)
+{
+    m_isIsolated = isolatedFlag;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

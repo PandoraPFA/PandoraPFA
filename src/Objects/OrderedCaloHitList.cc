@@ -46,20 +46,14 @@ StatusCode OrderedCaloHitList::Remove(const OrderedCaloHitList &rhs)
 
 StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit)
 {
-    PseudoLayer pseudoLayer;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->GetPseudoLayer(pseudoLayer));
-
-    return this->AddCaloHit(pCaloHit, pseudoLayer);
+    return this->AddCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit)
 {
-    PseudoLayer pseudoLayer;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->GetPseudoLayer(pseudoLayer));
-
-    return this->RemoveCaloHit(pCaloHit, pseudoLayer);
+    return this->RemoveCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

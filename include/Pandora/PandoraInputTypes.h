@@ -126,6 +126,7 @@ typedef PandoraInputType<void *> InputAddress;
 typedef PandoraInputType<bool> InputBool;
 typedef PandoraInputType<HitType> InputHitType;
 typedef PandoraInputType<DetectorRegion> InputDetectorRegion;
+typedef PandoraInputType<unsigned int> InputPseudoLayer;
 
 typedef PandoraInputType<CartesianVector> InputCartesianVector;
 typedef PandoraInputType<TrackState> InputTrackState;
