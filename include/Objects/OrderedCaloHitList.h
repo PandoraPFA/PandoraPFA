@@ -28,6 +28,23 @@ class OrderedCaloHitList : public std::map<PseudoLayer, CaloHitList *>
 {
 public:
     /**
+     *  @brief  Default constructor
+     */
+    OrderedCaloHitList();
+
+    /**
+     *  @brief  Copy constructor
+     * 
+     *  @param  rhs the ordered calo hit list to copy
+     */
+    OrderedCaloHitList(const OrderedCaloHitList &rhs);
+
+    /**
+     *  @brief  Destructor
+     */
+    ~OrderedCaloHitList();
+
+    /**
      *  @brief  Add the hits from a second ordered calo hit list to this list
      * 
      *  @param  rhs the source ordered calo hit list
@@ -62,6 +79,13 @@ public:
      *  @param  pCaloHitList to receive the address of the relevant calo hit list
      */
     StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
+
+    /**
+     *  @brief  Assignment operator
+     * 
+     *  @param  rhs the ordered calo hit list to assign
+     */   
+    bool operator= (const OrderedCaloHitList &rhs);
 
 private:
     /**

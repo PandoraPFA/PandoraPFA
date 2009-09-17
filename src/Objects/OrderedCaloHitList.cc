@@ -12,6 +12,29 @@
 namespace pandora
 {
 
+OrderedCaloHitList::OrderedCaloHitList()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+OrderedCaloHitList::OrderedCaloHitList(const OrderedCaloHitList &rhs)
+{
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->Add(rhs));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+OrderedCaloHitList::~OrderedCaloHitList()
+{
+    for (OrderedCaloHitList::iterator iter = this->begin(), iterEnd = this->end(); iter != iterEnd; ++iter)
+    {
+        delete iter->second;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode OrderedCaloHitList::Add(const OrderedCaloHitList &rhs)
 {
     for (OrderedCaloHitList::const_iterator iter = rhs.begin(), iterEnd = rhs.end(); iter != iterEnd; ++iter)
@@ -72,6 +95,16 @@ StatusCode OrderedCaloHitList::GetCaloHitsInPseudoLayer(const PseudoLayer pseudo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool OrderedCaloHitList::operator= (const OrderedCaloHitList &rhs)
+{
+    if (this == &rhs)
+        return true;
+
+    return (STATUS_CODE_SUCCESS == this->Add(rhs));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer)
 {
     OrderedCaloHitList::iterator iter = this->find(pseudoLayer);
@@ -113,7 +146,10 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const Pseu
             listIter->second->erase(caloHitIter);
 
             if (listIter->second->empty())
+            {
+                delete listIter->second;
                 this->erase(listIter);
+            }
 
             return STATUS_CODE_SUCCESS;
         }

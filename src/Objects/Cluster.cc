@@ -43,16 +43,23 @@ Cluster::Cluster(Track *pTrack)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Cluster::~Cluster()
+StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 {
-    for (OrderedCaloHitList::iterator iter = m_orderedCaloHitList.begin(), iterEnd = m_orderedCaloHitList.end(); iter != iterEnd; ++iter)
-    {
-        iter->second->clear();
-        delete iter->second;
-    }
+    return m_orderedCaloHitList.AddCaloHit(pCaloHit);
+}
 
-    m_orderedCaloHitList.clear();
-    m_associatedTrackList.clear();
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
+{
+    return m_orderedCaloHitList.RemoveCaloHit(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Cluster::UpdateProperties()
+{
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

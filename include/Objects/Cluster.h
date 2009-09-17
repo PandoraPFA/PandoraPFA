@@ -20,7 +20,7 @@ namespace pandora
 class CaloHit;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 /**
  *  @brief  Cluster class
  */
@@ -72,16 +72,23 @@ private:
     Cluster(Track *pTrack);
 
     /**
-     *  @brief  Destructor
-     */
-    ~Cluster();
-
-    /**
      *  @brief  Add a calo hit to the cluster
      * 
      *  @param  pCaloHit the address of the calo hit
      */
     StatusCode AddCaloHit(CaloHit *const pCaloHit);
+
+    /**
+     *  @brief  Remove a calo hit from the cluster
+     * 
+     *  @param  pCaloHit the address of the calo hit
+     */
+    StatusCode RemoveCaloHit(CaloHit *const pCaloHit);
+
+    /**
+     *  @brief  Update the cluster properties
+     */
+    StatusCode UpdateProperties();
 
     /**
      *  @brief  Add the calo hits from a second cluster to this
@@ -104,9 +111,47 @@ private:
      */
     StatusCode RemoveTrackAssociation(Track *const pTrack);
 
+    typedef std::map<PseudoLayer, float> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
+
     OrderedCaloHitList      m_orderedCaloHitList;       ///< The ordered calo hit list
 
+    unsigned int            m_nCaloHits;                ///< The number of calo hits
+    unsigned int            m_nMipLikeCaloHits;         ///< The number of calo hits that have been flagged as mip-like
+
+    InputFloat              m_electromagneticEnergy;    ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
+    InputFloat              m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
+    InputFloat              m_bestEnergy;               ///< The best estimate of the cluster energy, units GeV
+
+    bool                    m_isPhoton;                 ///< Whether the cluster has been flagged as a photon cluster
+
+    float                   m_sumX;                     ///< The sum of the x coordinates of the constituent calo hits
+    float                   m_sumY;                     ///< The sum of the y coordinates of the constituent calo hits
+    float                   m_sumZ;                     ///< The sum of the z coordinates of the constituent calo hits
+
+    float                   m_sumXX;                    ///< The sum of the coordinates x*x for the constituent calo hits
+    float                   m_sumYY;                    ///< The sum of the coordinates y*y for the constituent calo hits
+    float                   m_sumZZ;                    ///< The sum of the coordinates z*z for the constituent calo hits
+
+    float                   m_sumXY;                    ///< The sum of the coordinates x*y for the constituent calo hits
+    float                   m_sumXZ;                    ///< The sum of the coordinates x*z for the constituent calo hits
+    float                   m_sumYZ;                    ///< The sum of the coordinates y*z for the constituent calo hits
+
+    ValueByPseudoLayerMap   m_sumXByPseudoLayer;        ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap   m_sumYByPseudoLayer;        ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap   m_sumZByPseudoLayer;        ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
+
+    InputCartesianVector    m_energyWeightedCentroid;   ///< The energy weighted centroid
+    InputCartesianVector    m_initialDirection;         ///< The initial direction of the cluster
+    InputCartesianVector    m_currentDirection;         ///< The current direction of the cluster
+
+    InputFloat              m_radialDirectionCosine;    ///< The direction cosine (of a straight-line fit) wrt to the radial direction
+    InputFloat              m_clusterRMS;               ///< The cluster rms wrt to a straight-line fit to the cluster
+
+    InputPseudoLayer        m_showerMax;                ///< The pseudo layer at which the cluster energy deposition is greatest
+
     TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
+
+    // TODO add track segment properties
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
@@ -131,13 +176,6 @@ inline const TrackList &Cluster::GetAssociatedTrackList() const
 inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
     return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
-{
-    return m_orderedCaloHitList.AddCaloHit(pCaloHit);
 }
 
 } // namespace pandora
