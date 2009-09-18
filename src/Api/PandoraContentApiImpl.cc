@@ -29,6 +29,15 @@ StatusCode PandoraContentApiImpl::CreateCluster(CLUSTER_PARAMETERS *pClusterPara
     return m_pPandora->m_pClusterManager->CreateCluster(pClusterParameters, pCluster);
 }
 
+template <>
+StatusCode PandoraContentApiImpl::CreateCluster(Track *pTrack, Cluster *&pCluster) const
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateCluster(pTrack, pCluster));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTrack->SetAssociatedCluster(pCluster));
+
+    return STATUS_CODE_SUCCESS;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------    
     
 StatusCode PandoraContentApiImpl::CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) const

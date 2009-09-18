@@ -67,20 +67,6 @@ StatusCode OrderedCaloHitList::Remove(const OrderedCaloHitList &rhs)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit)
-{
-    return this->AddCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit)
-{
-    return this->RemoveCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode OrderedCaloHitList::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
     OrderedCaloHitList::const_iterator iter = this->find(pseudoLayer);
@@ -89,6 +75,21 @@ StatusCode OrderedCaloHitList::GetCaloHitsInPseudoLayer(const PseudoLayer pseudo
         return STATUS_CODE_NOT_FOUND;
 
     pCaloHitList = iter->second;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode OrderedCaloHitList::Reset()
+{
+    for (OrderedCaloHitList::iterator iter = this->begin(), iterEnd = this->end(); iter != iterEnd; ++iter)
+        delete iter->second;
+
+    this->clear();
+
+    if (!this->empty())
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }

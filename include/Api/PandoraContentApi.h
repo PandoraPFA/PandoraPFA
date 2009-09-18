@@ -344,7 +344,7 @@ public:
      *  @brief  Save the current track list under a new name
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new ordered calo hit list name
+     *  @param  newListName the new track list name
      */
     static StatusCode SaveTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList, const std::string &newListName);
 

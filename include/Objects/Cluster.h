@@ -91,6 +91,11 @@ private:
     StatusCode UpdateProperties();
 
     /**
+     *  @brief  Reset the cluster properties
+     */
+    StatusCode ResetProperties();
+
+    /**
      *  @brief  Add the calo hits from a second cluster to this
      * 
      *  @param  pCluster the address of the second cluster
@@ -116,11 +121,10 @@ private:
     OrderedCaloHitList      m_orderedCaloHitList;       ///< The ordered calo hit list
 
     unsigned int            m_nCaloHits;                ///< The number of calo hits
-    unsigned int            m_nMipLikeCaloHits;         ///< The number of calo hits that have been flagged as mip-like
+    unsigned int            m_nMipTrackHits;            ///< The number of calo hits that have been flagged as part of a mip track
 
-    InputFloat              m_electromagneticEnergy;    ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
-    InputFloat              m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
-    InputFloat              m_bestEnergy;               ///< The best estimate of the cluster energy, units GeV
+    float                   m_electromagneticEnergy;    ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
+    float                   m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
 
     bool                    m_isPhoton;                 ///< Whether the cluster has been flagged as a photon cluster
 
@@ -140,16 +144,21 @@ private:
     ValueByPseudoLayerMap   m_sumYByPseudoLayer;        ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumZByPseudoLayer;        ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
 
-    InputCartesianVector    m_energyWeightedCentroid;   ///< The energy weighted centroid
     InputCartesianVector    m_initialDirection;         ///< The initial direction of the cluster
     InputCartesianVector    m_currentDirection;         ///< The current direction of the cluster
+    InputCartesianVector    m_energyWeightedCentroid;   ///< The energy weighted centroid
 
+    InputFloat              m_bestEnergy;               ///< The best estimate of the cluster energy, units GeV
     InputFloat              m_radialDirectionCosine;    ///< The direction cosine (of a straight-line fit) wrt to the radial direction
     InputFloat              m_clusterRMS;               ///< The cluster rms wrt to a straight-line fit to the cluster
 
     InputPseudoLayer        m_showerMax;                ///< The pseudo layer at which the cluster energy deposition is greatest
+    InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
+    InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
 
     TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
+
+    bool                    m_isUpToDate;               ///< Whether the cluster properties are up to date
 
     // TODO add track segment properties
 

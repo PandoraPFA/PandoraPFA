@@ -30,23 +30,31 @@ ClusterManager::~ClusterManager()
 template <typename CLUSTER_PARAMETERS>
 StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster)
 {
-    if (!m_canMakeNewClusters)
-        return STATUS_CODE_NOT_ALLOWED;
+    try
+    {
+        if (!m_canMakeNewClusters)
+            return STATUS_CODE_NOT_ALLOWED;
 
-    NameToClusterListMap::iterator iter = m_nameToClusterListMap.find(m_currentListName);
+        NameToClusterListMap::iterator iter = m_nameToClusterListMap.find(m_currentListName);
 
-    if (m_nameToClusterListMap.end() == iter)
-        return STATUS_CODE_NOT_INITIALIZED;
+        if (m_nameToClusterListMap.end() == iter)
+            return STATUS_CODE_NOT_INITIALIZED;
 
-    pCluster = NULL;
-    pCluster = new Cluster(pClusterParameters);
-    
-    if (NULL == pCluster)
-        return STATUS_CODE_FAILURE;
+        pCluster = NULL;
+        pCluster = new Cluster(pClusterParameters);
+        
+        if (NULL == pCluster)
+            return STATUS_CODE_FAILURE;
 
-    iter->second->insert(pCluster);
+        iter->second->insert(pCluster);
 
-    return STATUS_CODE_SUCCESS;
+        return STATUS_CODE_SUCCESS;
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create cluster: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -10,16 +10,14 @@
 
 #include "Pandora/PandoraInternal.h"
 
+#include "Objects/CaloHit.h"
+
 #include "StatusCodes.h"
 
 #include <map>
 
 namespace pandora
 {
-
-class CaloHit;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  Calo hit lists arranged by pseudo layer
@@ -81,6 +79,11 @@ public:
     StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
 
     /**
+     *  @brief  Reset the ordered calo hit list, emptying its contents
+     */
+    StatusCode Reset();
+
+    /**
      *  @brief  Assignment operator
      * 
      *  @param  rhs the ordered calo hit list to assign
@@ -104,6 +107,20 @@ private:
      */
     StatusCode RemoveCaloHit(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer);
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit)
+{
+    return this->AddCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit)
+{
+    return this->RemoveCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
+}
 
 } // namespace pandora
 

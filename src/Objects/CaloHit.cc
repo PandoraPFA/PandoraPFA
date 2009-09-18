@@ -14,7 +14,7 @@ namespace pandora
 
 bool CaloHit::operator< (const CaloHit &rhs) const
 {
-    return m_energy > rhs.m_energy;
+    return m_inputEnergy > rhs.m_inputEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_cellSizeZ(caloHitParameters.m_cellSizeZ.Get()),
     m_nRadiationLengths(caloHitParameters.m_nRadiationLengths.Get()),
     m_nInteractionLengths(caloHitParameters.m_nInteractionLengths.Get()),
-    m_energy(caloHitParameters.m_energy.Get()),
+    m_inputEnergy(caloHitParameters.m_energy.Get()),
     m_time(caloHitParameters.m_time.Get()),
     m_isDigital(caloHitParameters.m_isDigital.Get()),
     m_hitType(caloHitParameters.m_hitType.Get()),
@@ -129,7 +129,7 @@ std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit)
 {
     stream  << " CaloHit: " << std::endl
             << " position " << caloHit.GetPositionVector()
-            << " energy   " << caloHit.GetEnergy() << std::endl;
+            << " energy   " << caloHit.GetInputEnergy() << std::endl;
 
     return stream;
 }

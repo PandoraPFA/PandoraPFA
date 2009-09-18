@@ -82,11 +82,11 @@ public:
     float GetNInteractionLengths() const;
 
     /**
-     *  @brief  Get the corrected energy of the calorimeter cell, units GeV
+     *  @brief  Get the corrected energy of the calorimeter cell, units GeV, as supplied by the user
      * 
      *  @return the corrected energy of the calorimeter cell
      */
-    float GetEnergy() const;
+    float GetInputEnergy() const;
 
     /**
      *  @brief  Get the time of (earliest) energy deposition in this cell, units ns
@@ -159,18 +159,18 @@ public:
     float GetSurroundingEnergy() const;
 
     /**
-     *  @brief  Get the mip track flag
+     *  @brief  Whether the hit is flagged as part of a mip track
      * 
-     *  @return the mip track flag
+     *  @return boolean
      */
-    bool GetMipTrackFlag() const;
+    bool IsMipTrack() const;
 
     /**
-     *  @brief  Get the isolated hit flag
+     *  @brief  Whether the hit is flagged as isolated
      * 
-     *  @return the isolated hit flag
+     *  @return boolean
      */
-    bool GetIsolatedFlag() const;
+    bool IsIsolated() const;
 
     /**
      *  @brief  Get address of the mc particle associated with the calo hit
@@ -263,7 +263,7 @@ private:
     const float             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
     const float             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
 
-    const float             m_energy;                   ///< Corrected energy of the calorimeter cell, units GeV
+    const float             m_inputEnergy;              ///< Corrected energy of the calorimeter cell, units GeV, supplied by user
     const float             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
 
     const bool              m_isDigital;                ///< Whether cell should be treated as digital (implies constant cell energy)
@@ -346,9 +346,9 @@ inline float CaloHit::GetNInteractionLengths() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float CaloHit::GetEnergy() const
+inline float CaloHit::GetInputEnergy() const
 {
-    return m_energy;
+    return m_inputEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -423,14 +423,14 @@ inline float CaloHit::GetSurroundingEnergy() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool CaloHit::GetMipTrackFlag() const
+inline bool CaloHit::IsMipTrack() const
 {
     return m_isMipTrack;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool CaloHit::GetIsolatedFlag() const
+inline bool CaloHit::IsIsolated() const
 {
     return m_isIsolated;
 }
