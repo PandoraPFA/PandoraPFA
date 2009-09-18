@@ -232,7 +232,8 @@ StatusCode Cluster::AddTrackAssociation(Track *const pTrack)
     if (NULL == pTrack)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    m_associatedTrackList.insert(pTrack);
+    if (!m_associatedTrackList.insert(pTrack).second)
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -241,21 +242,14 @@ StatusCode Cluster::AddTrackAssociation(Track *const pTrack)
 
 StatusCode Cluster::RemoveTrackAssociation(Track *const pTrack)
 {
-    std::pair<TrackList::const_iterator, TrackList::const_iterator> range = m_associatedTrackList.equal_range(pTrack);
+    TrackList::iterator iter = m_associatedTrackList.find(pTrack);
 
-    if (m_associatedTrackList.end() == range.first)
+    if (m_associatedTrackList.end() == iter)
         return STATUS_CODE_NOT_FOUND;
 
-    for (TrackList::iterator iter = range.first, iterEnd = range.second; iter != iterEnd; ++iter)
-    {
-        if (pTrack == *iter)
-        {
-            m_associatedTrackList.erase(iter);
-            return STATUS_CODE_SUCCESS;
-        }
-    }
+    m_associatedTrackList.erase(iter);
 
-    return STATUS_CODE_NOT_FOUND;
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

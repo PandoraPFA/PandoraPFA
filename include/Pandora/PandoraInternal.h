@@ -70,8 +70,8 @@ inline bool PointerLess<T>::operator()(const T *lhs, const T *rhs) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-typedef std::multiset<CaloHit *, PointerLess<CaloHit> > CaloHitList;
-typedef std::multiset<Track *, PointerLess<Track> > TrackList;
+typedef std::set<CaloHit *> CaloHitList;
+typedef std::set<Track *> TrackList;
 typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<CaloHit *> InputCaloHitList;

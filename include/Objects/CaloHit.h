@@ -297,6 +297,13 @@ std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline bool CaloHit::operator< (const CaloHit &rhs) const
+{
+    return (!(m_inputEnergy > rhs.m_inputEnergy) && !(rhs.m_inputEnergy > m_inputEnergy) ? (this > &rhs) : (m_inputEnergy > rhs.m_inputEnergy));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const CartesianVector &CaloHit::GetPositionVector() const
 {
     return m_positionVector;

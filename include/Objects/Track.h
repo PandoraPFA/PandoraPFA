@@ -215,6 +215,14 @@ std::ostream &operator<<(std::ostream &stream, const Track &track);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline bool Track::operator< (const Track &rhs) const
+{
+    return (!(m_momentumMagnitudeAtDca > rhs.m_momentumMagnitudeAtDca) && !(rhs.m_momentumMagnitudeAtDca > m_momentumMagnitudeAtDca) ?
+        (this > &rhs) : (m_momentumMagnitudeAtDca > rhs.m_momentumMagnitudeAtDca));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline float Track::GetD0() const
 {
     return m_d0;

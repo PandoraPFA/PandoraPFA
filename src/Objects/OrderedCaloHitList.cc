@@ -135,28 +135,20 @@ StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const Pseu
     if (this->end() == listIter)
         return STATUS_CODE_NOT_FOUND;
 
-    std::pair<CaloHitList::const_iterator, CaloHitList::const_iterator> range = listIter->second->equal_range(pCaloHit);
+    CaloHitList::iterator caloHitIter = listIter->second->find(pCaloHit);
 
-    if (listIter->second->end() == range.first)
+    if (listIter->second->end() == caloHitIter)
         return STATUS_CODE_NOT_FOUND;
 
-    for (CaloHitList::iterator caloHitIter = range.first, caloHitIterEnd = range.second; caloHitIter != caloHitIterEnd; ++caloHitIter)
+    listIter->second->erase(caloHitIter);
+
+    if (listIter->second->empty())
     {
-        if (pCaloHit == *caloHitIter)
-        {
-            listIter->second->erase(caloHitIter);
-
-            if (listIter->second->empty())
-            {
-                delete listIter->second;
-                this->erase(listIter);
-            }
-
-            return STATUS_CODE_SUCCESS;
-        }
+        delete listIter->second;
+        this->erase(listIter);
     }
 
-    return STATUS_CODE_NOT_FOUND;
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

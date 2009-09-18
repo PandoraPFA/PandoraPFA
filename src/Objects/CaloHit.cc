@@ -12,13 +12,6 @@
 namespace pandora
 {
 
-bool CaloHit::operator< (const CaloHit &rhs) const
-{
-    return m_inputEnergy > rhs.m_inputEnergy;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_positionVector(caloHitParameters.m_positionVector.Get()),
     m_normalVector(caloHitParameters.m_normalVector.Get()),

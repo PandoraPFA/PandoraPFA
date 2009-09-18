@@ -11,13 +11,6 @@
 namespace pandora
 {
 
-bool Track::operator< (const Track &rhs) const
-{
-    return m_momentumMagnitudeAtDca > rhs.m_momentumMagnitudeAtDca;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_d0(trackParameters.m_d0.Get()),
     m_z0(trackParameters.m_z0.Get()),
@@ -99,7 +92,8 @@ StatusCode Track::AddParent(Track *const pTrack)
     if (NULL == pTrack)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    m_parentTrackList.insert(pTrack);
+    if (!m_parentTrackList.insert(pTrack).second)
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -111,7 +105,8 @@ StatusCode Track::AddDaughter(Track *const pTrack)
     if (NULL == pTrack)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    m_daughterTrackList.insert(pTrack);
+    if (!m_daughterTrackList.insert(pTrack).second)
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -123,7 +118,8 @@ StatusCode Track::AddSibling(Track *const pTrack)
     if (NULL == pTrack)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    m_siblingTrackList.insert(pTrack);
+    if (!m_siblingTrackList.insert(pTrack).second)
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }
