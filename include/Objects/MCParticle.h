@@ -221,7 +221,7 @@ inline Uid MCParticle::GetUid() const
 inline StatusCode MCParticle::AddDaughter(MCParticle* mcParticle)
 {
     if (!m_daughterList.insert(mcParticle).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -231,7 +231,7 @@ inline StatusCode MCParticle::AddDaughter(MCParticle* mcParticle)
 inline StatusCode MCParticle::AddParent(MCParticle *mcParticle)
 {
     if (!m_parentList.insert(mcParticle).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }

@@ -127,4 +127,17 @@ std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit)
     return stream;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode SortByEnergy(const CaloHitList &caloHitList, EnergySortedCaloHitList &energySortedCaloHitList)
+{
+    for (CaloHitList::const_iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
+    {
+        if (!energySortedCaloHitList.insert(*iter).second)
+            return STATUS_CODE_ALREADY_PRESENT;
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
 } // namespace pandora

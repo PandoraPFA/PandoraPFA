@@ -46,7 +46,7 @@ AlgorithmManager::~AlgorithmManager()
 StatusCode AlgorithmManager::RegisterAlgorithmFactory(const std::string &algorithmType, AlgorithmFactory *const pAlgorithmFactory)
 {
     if (!m_algorithmFactoryMap.insert(AlgorithmFactoryMap::value_type(algorithmType, pAlgorithmFactory)).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }

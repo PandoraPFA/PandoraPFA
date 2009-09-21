@@ -53,7 +53,8 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
                 return STATUS_CODE_FAILURE;
         }
 
-        iter->second->insert(pTrack);
+        if (!iter->second->insert(pTrack).second)
+            return STATUS_CODE_FAILURE;
 
         if (!m_uidToTrackMap.insert(UidToTrackMap::value_type(pTrack->GetParentTrackAddress(), pTrack)).second)
             return STATUS_CODE_FAILURE;
@@ -117,10 +118,12 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
         return STATUS_CODE_NOT_FOUND;
 
     temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_numberOfListsCreated++);
-    iter->second.m_temporaryListNames.insert(temporaryListName);
+
+    if (!iter->second.m_temporaryListNames.insert(temporaryListName).second)
+        return STATUS_CODE_ALREADY_PRESENT;
 
     m_nameToTrackListMap[temporaryListName] = new TrackList(trackList);
-    m_currentListName = temporaryListName;    
+    m_currentListName = temporaryListName;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -130,10 +133,10 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
 StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string &newListName)
 {
     if (m_nameToTrackListMap.end() != m_nameToTrackListMap.find(newListName))
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, new TrackList)).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     *(m_nameToTrackListMap[newListName]) = trackList;
     m_savedLists.insert(newListName);
@@ -166,14 +169,14 @@ StatusCode TrackManager::MatchTracksToMCPfoTargets(const UidToMCParticleMap &tra
 StatusCode TrackManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
-        return STATUS_CODE_ALREADY_INITIALIZED;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     AlgorithmInfo algorithmInfo;
     algorithmInfo.m_parentListName = m_currentListName;
     algorithmInfo.m_numberOfListsCreated = 0;
 
     if (!m_algorithmInfoMap.insert(AlgorithmInfoMap::value_type(pAlgorithm, algorithmInfo)).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }

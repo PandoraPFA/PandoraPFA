@@ -54,7 +54,7 @@ inline std::string TypeToString(const T &t)
  *  @brief  Enable ordering of pointers based on properties of target objects
  */
 template <typename T>
-class PointerLess
+class PointerLessThan
 {
 public:
     bool operator()(const T *lhs, const T *rhs) const;
@@ -63,7 +63,7 @@ public:
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline bool PointerLess<T>::operator()(const T *lhs, const T *rhs) const
+inline bool PointerLessThan<T>::operator()(const T *lhs, const T *rhs) const
 {
     return (*lhs < *rhs);
 }
@@ -76,6 +76,9 @@ typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<CaloHit *> InputCaloHitList;
 typedef std::vector<TrackState *> TrackStateList;
+
+typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;
+typedef std::set<Track *, PointerLessThan<Track> > MomentumSortedTrackList;
 
 typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;

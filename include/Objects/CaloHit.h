@@ -295,6 +295,14 @@ private:
  */
 std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit);
 
+/**
+ *  @brief  Sort a calo hit list by calo hit energy
+ *
+ *  @param  caloHitList the calo hit list to be sorted by energy
+ *  @param  energySortedCaloHitList to receive the energy sorted calo hit list
+ */
+StatusCode SortByEnergy(const CaloHitList &caloHitList, EnergySortedCaloHitList &energySortedCaloHitList);
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline bool CaloHit::operator< (const CaloHit &rhs) const

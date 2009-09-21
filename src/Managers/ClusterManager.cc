@@ -46,7 +46,8 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
         if (NULL == pCluster)
             return STATUS_CODE_FAILURE;
 
-        iter->second->insert(pCluster);
+        if (!iter->second->insert(pCluster).second)
+            return STATUS_CODE_FAILURE;
 
         return STATUS_CODE_SUCCESS;
     }
@@ -104,7 +105,9 @@ StatusCode ClusterManager::MakeTemporaryListAndSetCurrent(const Algorithm *const
         return STATUS_CODE_NOT_FOUND;
 
     temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_numberOfListsCreated++);
-    iter->second.m_temporaryListNames.insert(temporaryListName);
+
+    if (!iter->second.m_temporaryListNames.insert(temporaryListName).second)
+        return STATUS_CODE_ALREADY_PRESENT;
 
     m_nameToClusterListMap[temporaryListName] = new ClusterList;
     m_currentListName = temporaryListName;
@@ -139,7 +142,9 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
     {
         if ((NULL == pClusterList) || (pClusterList->end() != pClusterList->find(*clusterIter)))
         {
-            m_nameToClusterListMap[m_currentListName]->insert(*clusterIter);            
+            if (!m_nameToClusterListMap[m_currentListName]->insert(*clusterIter).second)
+                return STATUS_CODE_ALREADY_PRESENT;
+
             originalClusterListIter->second->erase(clusterIter);
         }
     }
@@ -179,7 +184,9 @@ StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorit
     {
         if ((NULL == pClusterList) || (pClusterList->end() != pClusterList->find(*clusterIter)))
         {
-            newClusterListIter->second->insert(*clusterIter);
+            if (!newClusterListIter->second->insert(*clusterIter).second)
+                return STATUS_CODE_ALREADY_PRESENT;
+
             temporaryClusterListIter->second->erase(clusterIter);
         }
     }
@@ -234,14 +241,14 @@ StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster 
 StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
-        return STATUS_CODE_ALREADY_INITIALIZED;
+        return STATUS_CODE_ALREADY_PRESENT;
     
     AlgorithmInfo algorithmInfo;
     algorithmInfo.m_parentListName = m_currentListName;
     algorithmInfo.m_numberOfListsCreated = 0;
 
     if (!m_algorithmInfoMap.insert(AlgorithmInfoMap::value_type(pAlgorithm, algorithmInfo)).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }

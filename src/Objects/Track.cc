@@ -93,7 +93,7 @@ StatusCode Track::AddParent(Track *const pTrack)
         return STATUS_CODE_INVALID_PARAMETER;
 
     if (!m_parentTrackList.insert(pTrack).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -106,7 +106,7 @@ StatusCode Track::AddDaughter(Track *const pTrack)
         return STATUS_CODE_INVALID_PARAMETER;
 
     if (!m_daughterTrackList.insert(pTrack).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -119,7 +119,7 @@ StatusCode Track::AddSibling(Track *const pTrack)
         return STATUS_CODE_INVALID_PARAMETER;
 
     if (!m_siblingTrackList.insert(pTrack).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -135,6 +135,19 @@ std::ostream &operator<<(std::ostream &stream, const Track &track)
             << " p0     " << track.GetMomentumAtDca() << std::endl;
 
     return stream;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode SortByMomentum(const TrackList &trackList, MomentumSortedTrackList &momentumSortedTrackList)
+{
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+    {
+        if (!momentumSortedTrackList.insert(*iter).second)
+            return STATUS_CODE_ALREADY_PRESENT;
+    }
+
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

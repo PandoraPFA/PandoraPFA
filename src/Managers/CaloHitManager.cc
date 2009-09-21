@@ -114,7 +114,9 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
         return STATUS_CODE_NOT_FOUND;
 
     temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_numberOfListsCreated++);
-    iter->second.m_temporaryListNames.insert(temporaryListName);
+
+    if (!iter->second.m_temporaryListNames.insert(temporaryListName).second)
+        return STATUS_CODE_ALREADY_PRESENT;
 
     m_nameToOrderedCaloHitListMap[temporaryListName] = new OrderedCaloHitList(orderedCaloHitList);
     m_currentListName = temporaryListName;
@@ -146,10 +148,10 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
 StatusCode CaloHitManager::SaveList(const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
 {
     if (m_nameToOrderedCaloHitListMap.end() != m_nameToOrderedCaloHitListMap.find(newListName))
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     if (!m_nameToOrderedCaloHitListMap.insert(NameToOrderedCaloHitListMap::value_type(newListName, new OrderedCaloHitList)).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     *(m_nameToOrderedCaloHitListMap[newListName]) = orderedCaloHitList;
     m_savedLists.insert(newListName);
@@ -245,14 +247,14 @@ StatusCode CaloHitManager::MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap 
 StatusCode CaloHitManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
-        return STATUS_CODE_ALREADY_INITIALIZED;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     AlgorithmInfo algorithmInfo;
     algorithmInfo.m_parentListName = m_currentListName;
     algorithmInfo.m_numberOfListsCreated = 0;
 
     if (!m_algorithmInfoMap.insert(AlgorithmInfoMap::value_type(pAlgorithm, algorithmInfo)).second)
-        return STATUS_CODE_FAILURE;
+        return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
 }

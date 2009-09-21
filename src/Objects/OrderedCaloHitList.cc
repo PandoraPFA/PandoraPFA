@@ -113,14 +113,16 @@ StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit, const PseudoL
     if (this->end() == iter)
     {
         CaloHitList *pCaloHitList = new CaloHitList;
-        pCaloHitList->insert(pCaloHit);
+        if (!pCaloHitList->insert(pCaloHit).second)
+            return STATUS_CODE_FAILURE;
 
         if (!(this->insert(OrderedCaloHitList::value_type(pseudoLayer, pCaloHitList)).second))
             return STATUS_CODE_FAILURE;
     }
     else
     {
-        iter->second->insert(pCaloHit);
+        if (!iter->second->insert(pCaloHit).second)
+            return STATUS_CODE_ALREADY_PRESENT;
     }
 
     return STATUS_CODE_SUCCESS;

@@ -165,7 +165,7 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticleIter->second->GetPfoTarget(pMCParticle));
 
         if (!uidToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
-            return STATUS_CODE_FAILURE;
+            return STATUS_CODE_ALREADY_PRESENT;
     }
 
     return STATUS_CODE_SUCCESS;

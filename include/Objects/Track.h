@@ -213,6 +213,14 @@ private:
  */
 std::ostream &operator<<(std::ostream &stream, const Track &track);
 
+/**
+ *  @brief  Sort a track list by track momentum at the distance of closest approach
+ *
+ *  @param  trackList the track list to be sorted by momentum
+ *  @param  momentumSortedTrackList to receive the momentum sorted track list
+ */
+StatusCode SortByMomentum(const TrackList &trackList, MomentumSortedTrackList &momentumSortedTrackList);
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline bool Track::operator< (const Track &rhs) const
