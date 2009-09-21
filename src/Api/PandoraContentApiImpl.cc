@@ -181,13 +181,6 @@ StatusCode PandoraContentApiImpl::AddCaloHitToCluster(Cluster *pCluster, CaloHit
 
 //------------------------------------------------------------------------------------------------------------------------------------------    
 
-StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster) const
-{
-    return m_pPandora->m_pClusterManager->DeleteCluster(pCluster);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------    
-
 StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs) const
 {
     return m_pPandora->m_pClusterManager->MergeAndDeleteClusters(pClusterLhs, pClusterRhs);

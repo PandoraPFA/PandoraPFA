@@ -140,13 +140,6 @@ public:
      *  @param  pCaloHit address of the hit to add
      */
     StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const;
-    
-    /**
-     *  @brief  Delete a cluster and remove it from the current cluster list
-     * 
-     *  @param  pCluster address of the cluster to delete
-     */
-    StatusCode DeleteCluster(Cluster *pCluster) const;
 
     /**
      *  @brief  Merge two clusters, deleting the original clusters and removing them from the current cluster list

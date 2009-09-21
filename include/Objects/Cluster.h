@@ -35,19 +35,117 @@ public:
     const OrderedCaloHitList &GetOrderedCaloHitList() const;
 
     /**
-     *  @brief  Get the list of tracks associated with the cluster
-     * 
-     *  @return Address of the list of associated tracks
-     */
-    const TrackList &GetAssociatedTrackList() const;
-
-    /**
      *  @brief  Get calo hits in specified pseudo layer
      * 
      *  @param  pseudoLayer the pseudo layer
      *  @param  pCaloHitList to receive the address of the relevant calo hit list
      */
     StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
+
+    /**
+     *  @brief  Get the number of calo hits in the cluster
+     * 
+     *  @return The number of calo hits
+     */
+    unsigned int GetNCaloHits() const;
+
+    /**
+     *  @brief  Get fraction of constituent calo hits that have been flagged as part of a mip track
+     * 
+     *  @return The mip fraction
+     */
+    float GetMipFraction() const;
+
+    /**
+     *  @brief  Get the sum of electromagnetic energy measures of constituent calo hits, units GeV
+     * 
+     *  @return The electromagnetic energy measure
+     */
+    float GetElectromagneticEnergy() const;
+
+    /**
+     *  @brief  Get the sum of hadronic energy measures of constituent calo hits, units GeV
+     * 
+     *  @return The hadronic energy measure
+     */
+    float GetHadronicEnergy() const;
+
+    /**
+     *  @brief  Whether the cluster has been flagged as a photon cluster
+     * 
+     *  @return boolean 
+     */
+    bool IsPhoton() const;
+
+    /**
+     *  @brief  Get the initial direction of the cluster
+     * 
+     *  @return The initial direction of the cluster
+     */
+    const CartesianVector &GetInitialDirection() const;
+
+    /**
+     *  @brief  Get the current direction of the cluster
+     * 
+     *  @return The current direction of the cluster
+     */
+    const CartesianVector &GetCurrentDirection() const;
+
+    /**
+     *  @brief  Get the energy weighted centroid for the cluster
+     * 
+     *  @return The energy weighted centroid
+     */
+    const CartesianVector &GetEnergyWeightedCentroid() const;
+
+    /**
+     *  @brief  Get the best estimate of the cluster energy, units GeV
+     * 
+     *  @return The best energy estimate
+     */
+    float GetBestEnergyEstimate() const;
+
+    /**
+     *  @brief  Get the direction cosine (of a straight-line fit) wrt to the radial direction
+     * 
+     *  @return The direction cosine wrt to the radial direction
+     */
+    float GetRadialDirectionCosine() const;
+
+    /**
+     *  @brief  Get cluster rms wrt to a straight-line fit to the cluster
+     * 
+     *  @return The cluster rms 
+     */
+    float GetRMS() const;
+
+    /**
+     *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
+     * 
+     *  @return The pseudo layer at which the cluster energy deposition is greatest
+     */
+    PseudoLayer GetShowerMax() const;
+
+    /**
+     *  @brief  Get the innermost pseudo layer in the cluster
+     * 
+     *  @return The innermost pseudo layer in the cluster
+     */
+    PseudoLayer GetInnerPseudoLayer() const;
+
+    /**
+     *  @brief  Get the outermost pseudo layer in the cluster
+     * 
+     *  @return The outermost pseudo layer in the cluster
+     */
+    PseudoLayer GetOuterPseudoLayer() const;
+
+    /**
+     *  @brief  Get the list of tracks associated with the cluster
+     * 
+     *  @return Address of the list of associated tracks
+     */
+    const TrackList &GetAssociatedTrackList() const;
 
 private:
     /**
@@ -175,16 +273,119 @@ inline const OrderedCaloHitList &Cluster::GetOrderedCaloHitList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackList &Cluster::GetAssociatedTrackList() const
+inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
-    return m_associatedTrackList;
+    return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
+inline unsigned int Cluster::GetNCaloHits() const
 {
-    return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
+    return m_nCaloHits;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetMipFraction() const
+{
+    float mipFraction = 0;
+
+    if (0 != m_nMipTrackHits)
+        mipFraction = float (m_nCaloHits) / float (m_nMipTrackHits);
+
+    return mipFraction;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetElectromagneticEnergy() const
+{
+    return m_electromagneticEnergy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetHadronicEnergy() const
+{
+    return m_hadronicEnergy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Cluster::IsPhoton() const
+{
+    return m_isPhoton;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &Cluster::GetInitialDirection() const
+{
+    return m_initialDirection.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &Cluster::GetCurrentDirection() const
+{
+    return m_currentDirection.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &Cluster::GetEnergyWeightedCentroid() const
+{
+    return m_energyWeightedCentroid.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetBestEnergyEstimate() const
+{
+    return m_bestEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetRadialDirectionCosine() const
+{
+    return m_radialDirectionCosine.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetRMS() const
+{
+    return m_clusterRMS.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline PseudoLayer Cluster::GetShowerMax() const
+{
+    return m_showerMax.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline PseudoLayer Cluster::GetInnerPseudoLayer() const
+{
+    return m_innerPseudoLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline PseudoLayer Cluster::GetOuterPseudoLayer() const
+{
+    return m_outerPseudoLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackList &Cluster::GetAssociatedTrackList() const
+{
+    return m_associatedTrackList;
 }
 
 } // namespace pandora
