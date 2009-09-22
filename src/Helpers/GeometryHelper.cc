@@ -11,6 +11,25 @@
 namespace pandora
 {
 
+bool GeometryHelper::m_instanceFlag = false;
+
+GeometryHelper* GeometryHelper::m_pGeometryHelper = NULL;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+GeometryHelper *GeometryHelper::GetInstance()
+{
+    if(!m_instanceFlag)
+    {
+        m_pGeometryHelper = new GeometryHelper();
+        m_instanceFlag = true;
+    }
+
+    return m_pGeometryHelper;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 GeometryHelper::GeometryHelper() :
     m_isInitialized(false)
 {

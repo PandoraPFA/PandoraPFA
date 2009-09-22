@@ -20,11 +20,16 @@ class GeometryHelper
 {
 public:
     /**
+     *  @brief  Get the geometry helper singleton
+     */
+    static GeometryHelper *GetInstance();
+
+private:
+    /**
      *  @brief  Constructor
      */
     GeometryHelper();
 
-private:
     /**
      *  @brief  LayerParameters class
      */
@@ -86,7 +91,9 @@ private:
     float                       m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
     float                       m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
 
-    friend class PandoraImpl;
+    static bool                 m_instanceFlag;             ///< The geometry helper instance flag
+    static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance
+
     friend class PandoraApiImpl;
 };
 

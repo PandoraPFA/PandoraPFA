@@ -54,12 +54,21 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 
     for (InputCaloHitList::iterator iter = m_inputCaloHitList.begin(), iterEnd = m_inputCaloHitList.end(); iter != iterEnd; ++iter)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer((*iter)->m_layer)); // TODO don't just use input layer
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignToPseudoLayer(*iter));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.AddCaloHit(*iter));
     }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(orderedCaloHitList, INPUT_LIST_NAME));
     m_currentListName = INPUT_LIST_NAME;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetPseudoLayer(pCaloHit->GetLayer())); // TODO don't just use input layer
 
     return STATUS_CODE_SUCCESS;
 }

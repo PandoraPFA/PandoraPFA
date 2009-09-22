@@ -33,7 +33,7 @@ Pandora::Pandora() :
     m_pAlgorithmManager(new AlgorithmManager(this)),
     m_pCaloHitManager(new CaloHitManager),
     m_pClusterManager(new ClusterManager),
-    m_pGeometryHelper(new GeometryHelper),
+    m_pGeometryHelper(GeometryHelper::GetInstance()),
     m_pMCManager(new MCManager),
     m_pParticleFlowObjectManager(new ParticleFlowObjectManager),
     m_pTrackManager(new TrackManager),

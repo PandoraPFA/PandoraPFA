@@ -44,6 +44,13 @@ private:
     StatusCode OrderInputCaloHits();
 
     /**
+     *  @brief  Assign a calo hit to a pseudo layer
+     * 
+     *  @param  pCaloHit address of the calo hit to assign to a pseudo layer
+     */
+    StatusCode AssignToPseudoLayer(CaloHit *const pCaloHit) const;
+
+    /**
      *  @brief  Get the current ordered calo hit list name
      * 
      *  @param  orderedCaloHitListName to receive the current ordered calo hit list name
