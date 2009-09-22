@@ -37,6 +37,12 @@ GeometryHelper::GeometryHelper() :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+GeometryHelper::~GeometryHelper()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geometryParameters)
 {
     try
@@ -56,7 +62,7 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_eCalBarrelParameters.Initialize(geometryParameters.m_eCalBarrelParameters);
         m_hCalBarrelParameters.Initialize(geometryParameters.m_hCalBarrelParameters);
         m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters);
-        m_hCalEndCapParameters.Initialize(geometryParameters.m_eCalBarrelParameters);
+        m_hCalEndCapParameters.Initialize(geometryParameters.m_hCalEndCapParameters);
 
         m_isInitialized = true;
 
@@ -81,6 +87,12 @@ void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::Geometr
     m_outerSymmetry       = inputParameters.m_outerSymmetry.Get();
     m_outerAngle          = inputParameters.m_outerAngle.Get();
     m_nLayers             = inputParameters.m_nLayers.Get();
+
+    if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
+    {
+        std::cout << "Invalid number of layers specified in subdetector." << std::endl;
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    }
 
     for (PandoraApi::GeometryParameters::LayerParametersList::const_iterator iter = inputParameters.m_layerParametersList.begin();
         iter != inputParameters.m_layerParametersList.end(); ++iter)

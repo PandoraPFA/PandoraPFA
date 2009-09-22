@@ -201,6 +201,11 @@ private:
     GeometryHelper();
 
     /**
+     *  @brief  Destructor
+     */
+    ~GeometryHelper();
+
+    /**
      *  @brief  Initialize the geometry helper
      * 
      *  @param  geometryParameters the geometry parameters
@@ -226,6 +231,7 @@ private:
     static bool                 m_instanceFlag;             ///< The geometry helper instance flag
     static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance
 
+    friend class Pandora;
     friend class PandoraApiImpl;
 };
 

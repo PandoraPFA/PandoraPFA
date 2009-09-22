@@ -6,10 +6,14 @@
  *  $Log: $
  */
 
+#include "Helpers/GeometryHelper.h"
+
 #include "Managers/CaloHitManager.h"
 
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
+
+#include <cmath>
 
 namespace pandora
 {
@@ -68,9 +72,7 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 
 StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetPseudoLayer(pCaloHit->GetLayer())); // TODO don't just use input layer
-
-    return STATUS_CODE_SUCCESS;
+    return pCaloHit->SetPseudoLayer(pCaloHit->GetLayer()); // TODO don't just use input layer
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
