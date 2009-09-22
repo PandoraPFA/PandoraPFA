@@ -53,10 +53,10 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_nRadLengthsInRadialGap = geometryParameters.m_nRadLengthsInRadialGap.Get();
         m_nIntLengthsInRadialGap = geometryParameters.m_nIntLengthsInRadialGap.Get();
 
-        this->InitializeSubDetectorParameters(geometryParameters.m_eCalBarrelParameters, m_eCalBarrelParameters);
-        this->InitializeSubDetectorParameters(geometryParameters.m_hCalBarrelParameters, m_hCalBarrelParameters);
-        this->InitializeSubDetectorParameters(geometryParameters.m_eCalEndCapParameters, m_eCalEndCapParameters);
-        this->InitializeSubDetectorParameters(geometryParameters.m_hCalEndCapParameters, m_hCalEndCapParameters);
+        m_eCalBarrelParameters.Initialize(geometryParameters.m_eCalBarrelParameters);
+        m_hCalBarrelParameters.Initialize(geometryParameters.m_hCalBarrelParameters);
+        m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters);
+        m_hCalEndCapParameters.Initialize(geometryParameters.m_eCalBarrelParameters);
 
         m_isInitialized = true;
 
@@ -70,17 +70,17 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-void GeometryHelper::InitializeSubDetectorParameters(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters,
-    SubDetectorParameters &subDetectorParameters)
+void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters)
 {
-    subDetectorParameters.m_innerDistanceFromIp = inputParameters.m_innerDistanceFromIp.Get();
-    subDetectorParameters.m_innerSymmetry       = inputParameters.m_innerSymmetry.Get();
-    subDetectorParameters.m_innerAngle          = inputParameters.m_innerAngle.Get();
-    subDetectorParameters.m_outerDistanceFromIp = inputParameters.m_outerDistanceFromIp.Get();
-    subDetectorParameters.m_outerSymmetry       = inputParameters.m_outerSymmetry.Get();
-    subDetectorParameters.m_outerAngle          = inputParameters.m_outerAngle.Get();
-    subDetectorParameters.m_nLayers             = inputParameters.m_nLayers.Get();
+    m_innerDistanceFromIp = inputParameters.m_innerDistanceFromIp.Get();
+    m_innerSymmetry       = inputParameters.m_innerSymmetry.Get();
+    m_innerAngle          = inputParameters.m_innerAngle.Get();
+    m_outerDistanceFromIp = inputParameters.m_outerDistanceFromIp.Get();
+    m_outerSymmetry       = inputParameters.m_outerSymmetry.Get();
+    m_outerAngle          = inputParameters.m_outerAngle.Get();
+    m_nLayers             = inputParameters.m_nLayers.Get();
 
     for (PandoraApi::GeometryParameters::LayerParametersList::const_iterator iter = inputParameters.m_layerParametersList.begin();
         iter != inputParameters.m_layerParametersList.end(); ++iter)
@@ -90,7 +90,7 @@ void GeometryHelper::InitializeSubDetectorParameters(const PandoraApi::GeometryP
         layerParameters.m_nRadiationLengths     = iter->m_nRadiationLengths.Get();
         layerParameters.m_nInteractionLengths   = iter->m_nInteractionLengths.Get();
 
-        subDetectorParameters.m_layerParametersList.push_back(layerParameters);
+        m_layerParametersList.push_back(layerParameters);
     }
 }
 
