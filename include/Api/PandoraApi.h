@@ -31,7 +31,7 @@ public:
     {
     public:
         typedef PARAMETERS Parameters;
-        
+
         /**
          *  @brief  Create a new object
          * 
@@ -60,7 +60,7 @@ public:
         pandora::InputHitType           m_hitType;                  ///< The type of calorimeter hit
         pandora::InputDetectorRegion    m_detectorRegion;           ///< Region of the detector in which the calo hit is located
         pandora::InputUInt              m_layer;                    ///< The subdetector readout layer number
-        pandora::InputAddress           m_pParentAddress;           ///< The address of the parent calo hit in the user framework
+        pandora::InputAddress           m_pParentAddress;           ///< Address of the parent calo hit in the user framework
     };
 
     /**
@@ -71,26 +71,17 @@ public:
     public:
         pandora::InputFloat             m_d0;                       ///< The 2D impact parameter wrt (0,0)
         pandora::InputFloat             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
-        pandora::InputCartesianVector   m_momentumAtDca;            ///< The track momentum at the 2D distance of closest approach
-        pandora::InputTrackState        m_trackStateAtStart;        ///< The track state at the start of the track
-        pandora::InputTrackState        m_trackStateAtEnd;          ///< The track state at the end of the track
+        pandora::InputCartesianVector   m_momentumAtDca;            ///< Track momentum at the 2D distance of closest approach
+        pandora::InputTrackState        m_trackStateAtStart;        ///< Track state at the start of the track
+        pandora::InputTrackState        m_trackStateAtEnd;          ///< Track state at the end of the track
         pandora::InputTrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
         pandora::InputBool              m_reachesECal;              ///< Whether the track has reaches the ecal
         pandora::InputTrackStateList    m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
-        pandora::InputAddress           m_pParentAddress;           ///< The address of the parent track in the user framework
+        pandora::InputAddress           m_pParentAddress;           ///< Address of the parent track in the user framework
     };
 
     /**
-     *  @brief  Geometry parameters
-     */
-    class GeometryParameters
-    {
-    public:
-        pandora::InputFloat             m_tpcInnerRadius;           ///< The inner tpc radius
-    };
-
-    /**
-     *  @brief  Monte Carlo particle parameters
+     *  @brief  MCParticleParameters class
      */
     class MCParticleParameters
     {
@@ -100,14 +91,64 @@ public:
         pandora::InputFloat             m_innerRadius;              ///< The MC particle's path's inner radius
         pandora::InputFloat             m_outerRadius;              ///< The MC particle's path's outer radius
         pandora::InputInt               m_particleId;               ///< The MC particle's ID (PDG code)
-        pandora::InputAddress           m_pParentAddress;           ///< The address of the parent MC particle in the user framework
+        pandora::InputAddress           m_pParentAddress;           ///< Address of the parent MC particle in the user framework
+    };
+
+    /**
+     *  @brief  GeometryParameters class
+     */
+    class GeometryParameters
+    {
+    public:
+        /**
+         *  @brief  LayerParameters class
+         */
+        class LayerParameters
+        {
+        public:
+            pandora::InputFloat         m_distanceFromIp;           ///< The distance of the layer from the interaction point, units mm
+            pandora::InputFloat         m_nRadiationLengths;        ///< Absorber material in front of layer, units radiation lengths
+            pandora::InputFloat         m_nInteractionLengths;      ///< Absorber material in front of layer, units interaction lengths
+        };
+
+        typedef std::vector<LayerParameters> LayerParametersList;
+
+        /**
+         *  @brief  SubDetectorParameters class
+         */
+        class SubDetectorParameters
+        {
+        public:
+            pandora::InputFloat         m_innerDistanceFromIp;      ///< Distance of the innermost layer from interaction point, units mm
+            pandora::InputUInt          m_innerSymmetry;            ///< Order of symmetry of the innermost layer
+            pandora::InputFloat         m_innerAngle;               ///< Orientation of the innermost layer wrt the vertical
+            pandora::InputFloat         m_outerDistanceFromIp;      ///< Distance of the outermost layer from interaction point, units mm
+            pandora::InputUInt          m_outerSymmetry;            ///< Order of symmetry of the outermost layer
+            pandora::InputFloat         m_outerAngle;               ///< Orientation of the outermost layer wrt the vertical
+            pandora::InputUInt          m_nLayers;                  ///< The number of layers in the detector section
+            LayerParametersList         m_layerParametersList;      ///< The list of layer parameters for the detector section
+        };
+
+        SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
+        SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
+        SubDetectorParameters           m_eCalEndCapParameters;     ///< the ecal end cap parameters
+        SubDetectorParameters           m_hCalEndCapParameters;     ///< The hcal end cap parameter
+
+        pandora::InputFloat             m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
+        pandora::InputFloat             m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
+        pandora::InputFloat             m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
+
+        pandora::InputFloat             m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
+        pandora::InputFloat             m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
+        pandora::InputFloat             m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
+        pandora::InputFloat             m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
     };
 
     // Objects available for construction by pandora
     typedef ObjectCreationHelper<CaloHitParameters> CaloHit;
     typedef ObjectCreationHelper<TrackParameters> Track;
-    typedef ObjectCreationHelper<GeometryParameters> Geometry;
     typedef ObjectCreationHelper<MCParticleParameters> MCParticle;
+    typedef ObjectCreationHelper<GeometryParameters> Geometry;
 
     /**
      *  @brief  ParticleFlowObject class

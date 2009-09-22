@@ -89,42 +89,42 @@ public:
      * 
      *  @return The current direction of the cluster
      */
-    const CartesianVector &GetCurrentDirection() const;
+    const CartesianVector &GetCurrentDirection();
 
     /**
      *  @brief  Get the energy weighted centroid for the cluster
      * 
      *  @return The energy weighted centroid
      */
-    const CartesianVector &GetEnergyWeightedCentroid() const;
+    const CartesianVector &GetEnergyWeightedCentroid();
 
     /**
      *  @brief  Get the best estimate of the cluster energy, units GeV
      * 
      *  @return The best energy estimate
      */
-    float GetBestEnergyEstimate() const;
+    float GetBestEnergyEstimate();
 
     /**
      *  @brief  Get the direction cosine (of a straight-line fit) wrt to the radial direction
      * 
      *  @return The direction cosine wrt to the radial direction
      */
-    float GetRadialDirectionCosine() const;
+    float GetRadialDirectionCosine();
 
     /**
      *  @brief  Get cluster rms wrt to a straight-line fit to the cluster
      * 
      *  @return The cluster rms 
      */
-    float GetRMS() const;
+    float GetRMS();
 
     /**
      *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
      * 
      *  @return The pseudo layer at which the cluster energy deposition is greatest
      */
-    PseudoLayer GetShowerMax() const;
+    PseudoLayer GetShowerMax();
 
     /**
      *  @brief  Get the innermost pseudo layer in the cluster
@@ -327,43 +327,61 @@ inline const CartesianVector &Cluster::GetInitialDirection() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const CartesianVector &Cluster::GetCurrentDirection() const
+inline const CartesianVector &Cluster::GetCurrentDirection()
 {
+    if (!m_isUpToDate)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
+
     return m_currentDirection.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const CartesianVector &Cluster::GetEnergyWeightedCentroid() const
+inline const CartesianVector &Cluster::GetEnergyWeightedCentroid()
 {
+    if (!m_isUpToDate)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
+
     return m_energyWeightedCentroid.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetBestEnergyEstimate() const
+inline float Cluster::GetBestEnergyEstimate()
 {
+    if (!m_isUpToDate)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
+
     return m_bestEnergy.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetRadialDirectionCosine() const
+inline float Cluster::GetRadialDirectionCosine()
 {
+    if (!m_isUpToDate)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
+
     return m_radialDirectionCosine.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetRMS() const
+inline float Cluster::GetRMS()
 {
+    if (!m_isUpToDate)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
+
     return m_clusterRMS.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline PseudoLayer Cluster::GetShowerMax() const
+inline PseudoLayer Cluster::GetShowerMax()
 {
+    if (!m_isUpToDate)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
+
     return m_showerMax.Get();
 }
 
