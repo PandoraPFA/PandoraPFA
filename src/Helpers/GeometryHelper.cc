@@ -90,7 +90,7 @@ void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::Geometr
 
     if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
     {
-        std::cout << "Invalid number of layers specified in subdetector." << std::endl;
+        std::cout << "GeometryHelper: Invalid number of entries in layer parameters list." << std::endl;
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
     }
 

@@ -23,16 +23,35 @@ namespace pandora
 class PandoraSettings
 {
 public:
+    /**
+     *  @brief  Get the pandora settings singleton
+     */
+    static PandoraSettings *GetInstance();
 
 private:
     /**
-     *  @brief  Read pandora settings
+     *  @brief  Constructor
+     */
+    PandoraSettings();
+
+    /**
+     *  @brief  Destructor
+     */
+    ~PandoraSettings();
+
+    /**
+     *  @brief  Initialize pandora settings
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
-    StatusCode Read(const TiXmlHandle *const pXmlHandle);    
+    StatusCode Initialize(const TiXmlHandle *const pXmlHandle);
 
-    friend class PandoraImpl;
+    bool                        m_isInitialized;            ///< Whether the pandora settings have been initialized
+
+    static bool                 m_instanceFlag;             ///< The geometry helper instance flag
+    static PandoraSettings     *m_pPandoraSettings;        ///< The geometry helper instance
+
+    friend class Pandora;
 };
 
 } // namespace pandora

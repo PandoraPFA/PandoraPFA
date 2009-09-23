@@ -40,13 +40,6 @@ private:
     StatusCode InitializeAlgorithms(const TiXmlHandle *const pXmlHandle) const;
 
     /**
-     *  @brief  Read pandora settings
-     * 
-     *  @param  pXmlHandle address of the relevant xml handle
-     */
-    StatusCode ReadPandoraSettings(const TiXmlHandle *const pXmlHandle) const;
-
-    /**
      *  @brief  Run an algorithm registered with pandora
      * 
      *  @param  algorithmName the name of the algorithm instance to run

@@ -37,7 +37,7 @@ Pandora::Pandora() :
     m_pMCManager(new MCManager),
     m_pParticleFlowObjectManager(new ParticleFlowObjectManager),
     m_pTrackManager(new TrackManager),
-    m_pPandoraSettings(new PandoraSettings),
+    m_pPandoraSettings(PandoraSettings::GetInstance()),
     m_pPandoraApiImpl(new PandoraApiImpl(this)),
     m_pPandoraContentApiImpl(new PandoraContentApiImpl(this)),
     m_pPandoraImpl(new PandoraImpl(this))
@@ -99,7 +99,7 @@ StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
         const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializeAlgorithms(&xmlHandle));
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->ReadPandoraSettings(&xmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraSettings->Initialize(&xmlHandle));
     }
     catch (StatusCodeException &statusCodeException)
     {

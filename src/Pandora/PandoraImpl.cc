@@ -59,13 +59,6 @@ StatusCode PandoraImpl::InitializeAlgorithms(const TiXmlHandle *const pXmlHandle
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraImpl::ReadPandoraSettings(const TiXmlHandle *const pXmlHandle) const
-{
-    return m_pPandora->m_pPandoraSettings->Read(pXmlHandle);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode PandoraImpl::RunAlgorithm(const std::string &algorithmName) const
 {
     return m_pPandora->m_pPandoraContentApiImpl->RunAlgorithm(algorithmName);
