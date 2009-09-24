@@ -64,6 +64,14 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters);
         m_hCalEndCapParameters.Initialize(geometryParameters.m_hCalEndCapParameters);
 
+        for (PandoraApi::GeometryParameters::SubDetectorParametersList::const_iterator iter = geometryParameters.m_additionalSubDetectors.begin(),
+            iterEnd = geometryParameters.m_additionalSubDetectors.end(); iter != iterEnd; ++iter)
+        {
+            SubDetectorParameters subDetectorParameters;
+            subDetectorParameters.Initialize(*iter);
+            m_additionalSubDetectors.push_back(subDetectorParameters);
+        }
+
         m_isInitialized = true;
 
         return STATUS_CODE_SUCCESS;
@@ -80,13 +88,15 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
 
 void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters)
 {
-    m_innerDistanceFromIp = inputParameters.m_innerDistanceFromIp.Get();
-    m_innerSymmetry       = inputParameters.m_innerSymmetry.Get();
-    m_innerAngle          = inputParameters.m_innerAngle.Get();
-    m_outerDistanceFromIp = inputParameters.m_outerDistanceFromIp.Get();
-    m_outerSymmetry       = inputParameters.m_outerSymmetry.Get();
-    m_outerAngle          = inputParameters.m_outerAngle.Get();
-    m_nLayers             = inputParameters.m_nLayers.Get();
+    m_innerRCoordinate      = inputParameters.m_innerRCoordinate.Get();
+    m_innerZCoordinate      = inputParameters.m_innerZCoordinate.Get();
+    m_innerPhiCoordinate    = inputParameters.m_innerPhiCoordinate.Get();
+    m_innerSymmetryOrder    = inputParameters.m_innerSymmetryOrder.Get();
+    m_outerRCoordinate      = inputParameters.m_outerRCoordinate.Get();
+    m_outerZCoordinate      = inputParameters.m_outerZCoordinate.Get();
+    m_outerPhiCoordinate    = inputParameters.m_outerPhiCoordinate.Get();
+    m_outerSymmetryOrder    = inputParameters.m_outerSymmetryOrder.Get();
+    m_nLayers               = inputParameters.m_nLayers.Get();
 
     if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
     {
@@ -98,7 +108,7 @@ void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::Geometr
         iter != inputParameters.m_layerParametersList.end(); ++iter)
     {
         LayerParameters layerParameters;
-        layerParameters.m_distanceFromIp        = iter->m_distanceFromIp.Get();
+        layerParameters.m_closestDistanceToIp   = iter->m_closestDistanceToIp.Get();
         layerParameters.m_nRadiationLengths     = iter->m_nRadiationLengths.Get();
         layerParameters.m_nInteractionLengths   = iter->m_nInteractionLengths.Get();
 

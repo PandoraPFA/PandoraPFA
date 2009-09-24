@@ -25,7 +25,7 @@ public:
     class LayerParameters
     {
     public:
-        float                   m_distanceFromIp;           ///< The distance of the layer from the interaction point, units mm
+        float                   m_closestDistanceToIp;      ///< Closest distance of the layer from the interaction point, units mm
         float                   m_nRadiationLengths;        ///< Absorber material in front of layer, units radiation lengths
         float                   m_nInteractionLengths;      ///< Absorber material in front of layer, units interaction lengths
     };
@@ -46,46 +46,60 @@ public:
         void Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters);
 
         /**
-         *  @brief  Get the distance of the innermost layer from interaction point, units mm
+         *  @brief  Get the inner cylindrical polar r coordinate, origin interaction point, units mm
          * 
-         *  @return The distance of the innermost layer from interaction point
+         *  @return The inner cylindrical polar r coordinate
          */
-        float GetInnerDistanceFromIp() const;
+        float GetInnerRCoordinate() const;
 
         /**
-         *  @brief  Get the order of symmetry of the innermost layer
+         *  @brief  Get the inner cylindrical polar z coordinate, origin interaction point, units mm
          * 
-         *  @return The order of symmetry of the innermost layer
+         *  @return The inner cylindrical polar z coordinate
          */
-        unsigned int GetInnerSymmetry() const;
+        float GetInnerZCoordinate() const;
 
         /**
-         *  @brief  Get the orientation of the innermost layer wrt the vertical
+         *  @brief  Get the inner cylindrical polar phi coordinate (angle wrt cartesian x axis)
          * 
-         *  @return The orientation of the innermost layer wrt the vertical
+         *  @return The inner cylindrical polar phi coordinate
          */
-        float GetInnerAngle() const;
+        float GetInnerPhiCoordinate() const;
 
         /**
-         *  @brief  Get the distance of the outermost layer from interaction point, units mm
+         *  @brief  Get the order of symmetry of the innermost edge of subdetector
          * 
-         *  @return The distance of the outermost layer from interaction point
+         *  @return The order of symmetry of the innermost edge of subdetector
          */
-        float GetOuterDistanceFromIp() const;
+        unsigned int GetInnerSymmetryOrder() const;
 
         /**
-         *  @brief  Get the order of symmetry of the outermost layer
+         *  @brief  Get the outer cylindrical polar r coordinate, origin interaction point, units mm
          * 
-         *  @return The order of symmetry of the outermost layer
+         *  @return The outer cylindrical polar r coordinate
          */
-        unsigned int GetOuterSymmetry() const;
+        float GetOuterRCoordinate() const;
 
         /**
-         *  @brief  Get orientation of the outermost layer wrt the vertical
+         *  @brief  Get the outer cylindrical polar z coordinate, origin interaction point, units mm
          * 
-         *  @return The orientation of the outermost layer wrt the vertical
+         *  @return The outer cylindrical polar z coordinate
          */
-        float GetOuterAngle() const;
+        float GetOuterZCoordinate() const;
+
+        /**
+         *  @brief  Get the outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
+         * 
+         *  @return The outer cylindrical polar phi coordinate
+         */
+        float GetOuterPhiCoordinate() const;
+
+        /**
+         *  @brief  Get the order of symmetry of the outermost edge of subdetector
+         * 
+         *  @return The order of symmetry of the outermost edge of subdetector
+         */
+        unsigned int GetOuterSymmetryOrder() const;
 
         /**
          *  @brief  Get the number of layers in the detector section
@@ -102,15 +116,19 @@ public:
         const LayerParametersList &GetLayerParametersList() const;
 
     private:
-        float                   m_innerDistanceFromIp;      ///< Distance of the innermost layer from interaction point, units mm
-        unsigned int            m_innerSymmetry;            ///< Order of symmetry of the innermost layer
-        float                   m_innerAngle;               ///< Orientation of the innermost layer wrt the vertical
-        float                   m_outerDistanceFromIp;      ///< Distance of the outermost layer from interaction point, units mm
-        unsigned int            m_outerSymmetry;            ///< Order of symmetry of the outermost layer
-        float                   m_outerAngle;               ///< Orientation of the outermost layer wrt the vertical
-        unsigned int            m_nLayers;                  ///< The number of layers in the detector section
-        LayerParametersList     m_layerParametersList;      ///< The list of layer parameters for the detector section
+        float                   m_innerRCoordinate;     ///< Inner cylindrical polar r coordinate, origin interaction point, units mm
+        float                   m_innerZCoordinate;     ///< Inner cylindrical polar z coordinate, origin interaction point, units mm
+        float                   m_innerPhiCoordinate;   ///< Inner cylindrical polar phi coordinate (angle wrt cartesian x axis)
+        unsigned int            m_innerSymmetryOrder;   ///< Order of symmetry of the innermost edge of subdetector
+        float                   m_outerRCoordinate;     ///< Outer cylindrical polar r coordinate, origin interaction point, units mm
+        float                   m_outerZCoordinate;     ///< Outer cylindrical polar z coordinate, origin interaction point, units mm
+        float                   m_outerPhiCoordinate;   ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
+        unsigned int            m_outerSymmetryOrder;   ///< Order of symmetry of the outermost edge of subdetector
+        unsigned int            m_nLayers;              ///< The number of layers in the detector section
+        LayerParametersList     m_layerParametersList;  ///< The list of layer parameters for the detector section
     };
+
+    typedef std::vector<SubDetectorParameters> SubDetectorParametersList;
 
     /**
      *  @brief  Get the geometry helper singleton
@@ -194,6 +212,13 @@ public:
      */
     float GetNInteractionLengthsInRadialGap() const;
 
+    /**
+     *  @brief  Get the list of parameters for any additional sub detectors specified
+     * 
+     *  @return The list of additional sub detector parameters
+     */
+    const SubDetectorParametersList &GetAdditionalSubDetectors() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -227,6 +252,8 @@ private:
     float                       m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
     float                       m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
     float                       m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
+
+    SubDetectorParametersList   m_additionalSubDetectors;   ///< Parameters for any additional subdetectors
 
     static bool                 m_instanceFlag;             ///< The geometry helper instance flag
     static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance
@@ -346,46 +373,67 @@ inline float GeometryHelper::GetNInteractionLengthsInRadialGap() const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const GeometryHelper::SubDetectorParametersList &GeometryHelper::GetAdditionalSubDetectors() const
+{
+    return m_additionalSubDetectors;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::SubDetectorParameters::GetInnerDistanceFromIp() const
+inline float GeometryHelper::SubDetectorParameters::GetInnerRCoordinate() const
 {
-    return m_innerDistanceFromIp;
+    return m_innerRCoordinate;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline unsigned int GeometryHelper::SubDetectorParameters::GetInnerSymmetry() const
+inline float GeometryHelper::SubDetectorParameters::GetInnerZCoordinate() const
 {
-    return m_innerSymmetry;
+    return m_innerZCoordinate;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::SubDetectorParameters::GetInnerAngle() const
+inline float GeometryHelper::SubDetectorParameters::GetInnerPhiCoordinate() const
 {
-    return m_innerAngle;
+    return m_innerPhiCoordinate;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::SubDetectorParameters::GetOuterDistanceFromIp() const
+inline unsigned int GeometryHelper::SubDetectorParameters::GetInnerSymmetryOrder() const
 {
-    return m_outerDistanceFromIp;
+    return m_innerSymmetryOrder;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline unsigned int GeometryHelper::SubDetectorParameters::GetOuterSymmetry() const
+inline float GeometryHelper::SubDetectorParameters::GetOuterRCoordinate() const
 {
-    return m_outerSymmetry;
+    return m_outerRCoordinate;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::SubDetectorParameters::GetOuterAngle() const
+inline float GeometryHelper::SubDetectorParameters::GetOuterZCoordinate() const
 {
-    return m_outerAngle;
+    return m_outerZCoordinate;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::SubDetectorParameters::GetOuterPhiCoordinate() const
+{
+    return m_outerPhiCoordinate;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int GeometryHelper::SubDetectorParameters::GetOuterSymmetryOrder() const
+{
+    return m_outerSymmetryOrder;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

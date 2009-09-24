@@ -6,6 +6,8 @@
  *  $Log: $
  */
 
+#include "PandoraMonitoringApi.h"
+
 #include "Algorithms/PhotonClusteringAlgorithm.h"
 
 using namespace pandora;

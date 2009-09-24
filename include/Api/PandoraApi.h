@@ -106,7 +106,7 @@ public:
         class LayerParameters
         {
         public:
-            pandora::InputFloat         m_distanceFromIp;           ///< The distance of the layer from the interaction point, units mm
+            pandora::InputFloat         m_closestDistanceToIp;      ///< Closest distance of the layer from the interaction point, units mm
             pandora::InputFloat         m_nRadiationLengths;        ///< Absorber material in front of layer, units radiation lengths
             pandora::InputFloat         m_nInteractionLengths;      ///< Absorber material in front of layer, units interaction lengths
         };
@@ -119,15 +119,19 @@ public:
         class SubDetectorParameters
         {
         public:
-            pandora::InputFloat         m_innerDistanceFromIp;      ///< Distance of the innermost layer from interaction point, units mm
-            pandora::InputUInt          m_innerSymmetry;            ///< Order of symmetry of the innermost layer
-            pandora::InputFloat         m_innerAngle;               ///< Orientation of the innermost layer wrt the vertical
-            pandora::InputFloat         m_outerDistanceFromIp;      ///< Distance of the outermost layer from interaction point, units mm
-            pandora::InputUInt          m_outerSymmetry;            ///< Order of symmetry of the outermost layer
-            pandora::InputFloat         m_outerAngle;               ///< Orientation of the outermost layer wrt the vertical
+            pandora::InputFloat         m_innerRCoordinate;         ///< Inner cylindrical polar r coordinate, origin interaction point, units mm
+            pandora::InputFloat         m_innerZCoordinate;         ///< Inner cylindrical polar z coordinate, origin interaction point, units mm
+            pandora::InputFloat         m_innerPhiCoordinate;       ///< Inner cylindrical polar phi coordinate (angle wrt cartesian x axis)
+            pandora::InputUInt          m_innerSymmetryOrder;       ///< Order of symmetry of the innermost edge of subdetector
+            pandora::InputFloat         m_outerRCoordinate;         ///< Outer cylindrical polar r coordinate, origin interaction point, units mm
+            pandora::InputFloat         m_outerZCoordinate;         ///< Outer cylindrical polar z coordinate, origin interaction point, units mm
+            pandora::InputFloat         m_outerPhiCoordinate;       ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
+            pandora::InputUInt          m_outerSymmetryOrder;       ///< Order of symmetry of the outermost edge of subdetector
             pandora::InputUInt          m_nLayers;                  ///< The number of layers in the detector section
             LayerParametersList         m_layerParametersList;      ///< The list of layer parameters for the detector section
         };
+
+        typedef std::vector<SubDetectorParameters> SubDetectorParametersList;
 
         SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
         SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
@@ -142,6 +146,8 @@ public:
         pandora::InputFloat             m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
         pandora::InputFloat             m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
         pandora::InputFloat             m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
+
+        SubDetectorParametersList       m_additionalSubDetectors;   ///< Parameters for any additional subdetectors
     };
 
     // Objects available for construction by pandora
