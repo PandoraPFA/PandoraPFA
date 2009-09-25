@@ -147,6 +147,13 @@ public:
      */
     const TrackList &GetAssociatedTrackList() const;
 
+    /**
+     *  @brief  Set the best estimate of the cluster energy, units GeV
+     * 
+     *  @param  bestEnergyEstimate the best energy estimate
+     */
+    StatusCode SetBestEnergyEstimate(float bestEnergyEstimate);
+
 private:
     /**
      *  @brief  Constructor
@@ -349,9 +356,6 @@ inline const CartesianVector &Cluster::GetEnergyWeightedCentroid()
 
 inline float Cluster::GetBestEnergyEstimate()
 {
-    if (!m_isUpToDate)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
-
     return m_bestEnergy.Get();
 }
 
@@ -404,6 +408,16 @@ inline PseudoLayer Cluster::GetOuterPseudoLayer() const
 inline const TrackList &Cluster::GetAssociatedTrackList() const
 {
     return m_associatedTrackList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Cluster::SetBestEnergyEstimate(float bestEnergyEstimate)
+{
+    if (!(m_bestEnergy = bestEnergyEstimate))
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora
