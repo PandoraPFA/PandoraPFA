@@ -7,6 +7,7 @@
  */
 
 #include "Algorithms/ClusteringAlgorithm.h"
+#include "Algorithms/FragmentRemovalAlgorithm.h"
 #include "Algorithms/FullCheatingAlgorithm.h"
 #include "Algorithms/FullCheatingClusteringAlgorithm.h"
 #include "Algorithms/PfoConstructionAlgorithm.h"
@@ -27,6 +28,7 @@ AlgorithmManager::AlgorithmManager(Pandora *pPandora) :
     m_pPandora(pPandora)
 {
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Clustering", new ClusteringAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FragmentRemoval", new FragmentRemovalAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FullCheating", new FullCheatingAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FullCheatingClustering", new FullCheatingClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PfoConstruction", new PfoConstructionAlgorithm::Factory));

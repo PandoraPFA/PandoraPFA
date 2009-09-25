@@ -44,6 +44,10 @@
         </algorithm>
     </algorithm>
 
+    <!-- Perform fragment removal -->
+    <algorithm type = "FragmentRemoval">
+    </algorithm>
+
     <!-- Create the final particle flow objects -->
     <algorithm type = "PfoConstruction">
     </algorithm>
