@@ -67,7 +67,10 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 
     try
     {
-        std::cout << "Running Algorithm: " << iter->first << ", " << iter->second->GetAlgorithmType() << std::endl;
+        for (unsigned int i = 1; i < m_pPandora->m_pCaloHitManager->m_algorithmInfoMap.size(); ++i)
+            std::cout << "----";
+
+        std::cout << "> Running Algorithm: " << iter->first << ", " << iter->second->GetAlgorithmType() << std::endl;
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, iter->second->Run());
     }
     catch (StatusCodeException &statusCodeException)

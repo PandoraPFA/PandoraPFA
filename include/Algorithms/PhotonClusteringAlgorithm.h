@@ -30,6 +30,7 @@ private:
     StatusCode ReadSettings(TiXmlHandle xmlHandle);
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
+    std::string     m_associationAlgorithmName;     ///< The name of the topological association algorithm to run
     std::string     m_photonClusterListName;        ///< The name under which to save the new photon cluster list
 };
 

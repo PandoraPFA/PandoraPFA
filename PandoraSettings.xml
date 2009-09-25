@@ -2,16 +2,24 @@
 
 <pandora>
 
+    <!-- Select the tracks to use for clustering -->
+    <algorithm type = "TrackSelection">
+    </algorithm>
+
     <!-- Photon clustering algorithm runs Clustering algorithm and saves a photon cluster list under a specified name-->
     <algorithm type = "PhotonClustering">
-        <algorithm type = "Clustering">
+        <algorithm type = "Clustering" description = "ClusterFormation">
+        </algorithm>
+        <algorithm type = "TopologicalAssociation" description = "ClusterAssociation">
         </algorithm>
         <photonClusterListName> PhotonClusterList </photonClusterListName>
     </algorithm>
 
     <!-- Primary clustering algorithm runs Clustering algorithm -->
     <algorithm type = "PrimaryClustering">
-        <algorithm type = "Clustering">
+        <algorithm type = "Clustering" description = "ClusterFormation">
+        </algorithm>
+        <algorithm type = "TopologicalAssociation" description = "ClusterAssociation">
         </algorithm>
         <clusterListName> PrimaryClusterList </clusterListName>
     </algorithm>
@@ -31,6 +39,13 @@
             <algorithm type = "Clustering">
             </algorithm>
         </clusteringAlgorithms>
+
+        <algorithm type = "TopologicalAssociation" description = "ClusterAssociation">
+        </algorithm>
+    </algorithm>
+
+    <!-- Create the final particle flow objects -->
+    <algorithm type = "PfoConstruction">
     </algorithm>
 
 </pandora>

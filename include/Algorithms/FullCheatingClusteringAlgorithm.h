@@ -1,12 +1,12 @@
 /**
  *  @file   PandoraPFANew/include/Algorithms/FullCheatingClusteringAlgorithm.h
  * 
- *  @brief  Header file for the clustering algorithm class.
+ *  @brief  Header file for the full cheating clustering algorithm class.
  * 
  *  $Log: $
  */
-#ifndef FULL_CHEATING_ALGORITHM_H
-#define FULL_CHEATING_ALGORITHM_H 1
+#ifndef FULL_CHEATING_CLUSTERING_ALGORITHM_H
+#define FULL_CHEATING_CLUSTERING_ALGORITHM_H 1
 
 #include "Algorithms/Algorithm.h"
 
@@ -39,4 +39,4 @@ inline pandora::Algorithm *FullCheatingClusteringAlgorithm::Factory::CreateAlgor
     return new FullCheatingClusteringAlgorithm();
 }
 
-#endif // #ifndef CLUSTERING_ALGORITHM_H
+#endif // #ifndef FULL_CHEATING_CLUSTERING_ALGORITHM_H

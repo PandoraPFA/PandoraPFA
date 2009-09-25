@@ -7,9 +7,14 @@
  */
 
 #include "Algorithms/ClusteringAlgorithm.h"
-#include "Algorithms/PrimaryClusteringAlgorithm.h"
+#include "Algorithms/FullCheatingAlgorithm.h"
+#include "Algorithms/FullCheatingClusteringAlgorithm.h"
+#include "Algorithms/PfoConstructionAlgorithm.h"
 #include "Algorithms/PhotonClusteringAlgorithm.h"
+#include "Algorithms/PrimaryClusteringAlgorithm.h"
 #include "Algorithms/ReclusteringAlgorithm.h"
+#include "Algorithms/TopologicalAssociationAlgorithm.h"
+#include "Algorithms/TrackSelectionAlgorithm.h"
 
 #include "Managers/AlgorithmManager.h"
 
@@ -22,9 +27,14 @@ AlgorithmManager::AlgorithmManager(Pandora *pPandora) :
     m_pPandora(pPandora)
 {
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Clustering", new ClusteringAlgorithm::Factory));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PrimaryClustering", new PrimaryClusteringAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FullCheating", new FullCheatingAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FullCheatingClustering", new FullCheatingClusteringAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PfoConstruction", new PfoConstructionAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PhotonClustering", new PhotonClusteringAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PrimaryClustering", new PrimaryClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Reclustering", new ReclusteringAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("TopologicalAssociation", new TopologicalAssociationAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("TrackSelection", new TrackSelectionAlgorithm::Factory));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

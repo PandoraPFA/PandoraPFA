@@ -49,7 +49,10 @@ StatusCode ReclusteringAlgorithm::Run()
             const ClusterList *pReclusterCandidatesList = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, *clusteringIter, 
                 pReclusterCandidatesList, reclusterCandidatesListName));
-            
+
+            // Run topological association algorithm
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
+
             // Calculate figure of merit for recluster candidates here. Label as best recluster candidates if applicable.
             // For now, just take the last populated list.
             if (!pReclusterCandidatesList->empty())
@@ -69,6 +72,7 @@ StatusCode ReclusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "clusteringAlgorithms",
         m_clusteringAlgorithms));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "ClusterAssociation", m_associationAlgorithmName));
 
     return STATUS_CODE_SUCCESS;
 }
