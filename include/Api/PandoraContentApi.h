@@ -357,7 +357,7 @@ public:
      *  @param  newListName the new track list name
      */
     static StatusCode SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
-        const std::string &newListName);        
+        const std::string &newListName);
 };
 
 #endif // #ifndef PANDORA_CONTENT_API_H

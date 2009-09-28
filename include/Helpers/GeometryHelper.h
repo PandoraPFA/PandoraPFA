@@ -185,6 +185,27 @@ public:
     float GetMainTrackerZExtent() const;
 
     /**
+     *  @brief  Get the coil inner radius, units mm
+     * 
+     *  @return The coil inner radius
+     */
+    float GetCoilInnerRadius() const;
+
+    /**
+     *  @brief  Get the coil outer radius, units mm
+     * 
+     *  @return The coil outer radius
+     */
+    float GetCoilOuterRadius() const;
+
+    /**
+     *  @brief  Get the coil z extent, units mm
+     * 
+     *  @return The coil z extent
+     */
+    float GetCoilZExtent() const;
+
+    /**
      *  @brief  Get the absorber material in barrel/endcap z gap, units radiation lengths
      * 
      *  @return The absorber material in barrel/endcap z gap
@@ -247,6 +268,10 @@ private:
     float                       m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
     float                       m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
     float                       m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
+
+    float                       m_coilInnerRadius;          ///< The coil inner radius, units mm
+    float                       m_coilOuterRadius;          ///< The coil outer radius, units mm
+    float                       m_coilZExtent;              ///< The coil z extent, units mm
 
     float                       m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
     float                       m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
@@ -330,6 +355,36 @@ inline float GeometryHelper::GetMainTrackerZExtent() const
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_mainTrackerZExtent;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::GetCoilInnerRadius() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_coilInnerRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::GetCoilOuterRadius() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_coilOuterRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::GetCoilZExtent() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_coilZExtent;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

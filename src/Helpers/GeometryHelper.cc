@@ -54,6 +54,10 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_mainTrackerOuterRadius = geometryParameters.m_mainTrackerOuterRadius.Get();
         m_mainTrackerZExtent     = geometryParameters.m_mainTrackerZExtent.Get();
 
+        m_coilInnerRadius        = geometryParameters.m_coilInnerRadius.Get();
+        m_coilOuterRadius        = geometryParameters.m_coilOuterRadius.Get();
+        m_coilZExtent            = geometryParameters.m_coilZExtent.Get();
+
         m_nRadLengthsInZGap      = geometryParameters.m_nRadLengthsInZGap.Get();
         m_nIntLengthsInZGap      = geometryParameters.m_nIntLengthsInZGap.Get();
         m_nRadLengthsInRadialGap = geometryParameters.m_nRadLengthsInRadialGap.Get();

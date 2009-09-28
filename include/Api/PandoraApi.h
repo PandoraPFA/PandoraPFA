@@ -142,6 +142,10 @@ public:
         pandora::InputFloat             m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
         pandora::InputFloat             m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
 
+        pandora::InputFloat             m_coilInnerRadius;          ///< The coil inner radius, units mm
+        pandora::InputFloat             m_coilOuterRadius;          ///< The coil outer radius, units mm
+        pandora::InputFloat             m_coilZExtent;              ///< The coil z extent, units mm
+
         pandora::InputFloat             m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
         pandora::InputFloat             m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
         pandora::InputFloat             m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
