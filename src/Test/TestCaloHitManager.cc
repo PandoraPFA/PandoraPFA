@@ -32,8 +32,21 @@ StatusCode TestCaloHitManager::Test_CreateCaloHit()
     std::cout << "        create CaloHitParameters" << std::endl;
     PandoraApi::CaloHitParameters caloHitParameters;
     caloHitParameters.m_energy = 10;
+    caloHitParameters.m_time = 9.3;
+    caloHitParameters.m_isDigital = false;
+    caloHitParameters.m_hitType = HCAL;
+    caloHitParameters.m_detectorRegion = BARREL;
     caloHitParameters.m_layer = 3;
+    caloHitParameters.m_positionVector = CartesianVector( 0.0, 1.1, 2.2 );
+    caloHitParameters.m_normalVector   = CartesianVector( 0.0, 1.1, 2.2 );
+    caloHitParameters.m_cellSizeU = 1.1;
+    caloHitParameters.m_cellSizeV = 1.1;
+    caloHitParameters.m_cellSizeZ = 1.1;
+    caloHitParameters.m_nRadiationLengths = 10.0;
+    caloHitParameters.m_nInteractionLengths = 2.0;
     caloHitParameters.m_pParentAddress = (void*)100;
+
+
 
     std::cout << "        create CaloHit with parameters" << std::endl;
     assert( pCaloHitManager->CreateCaloHit( caloHitParameters ) == STATUS_CODE_SUCCESS ); 
@@ -201,6 +214,17 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
     PandoraApi::CaloHitParameters caloHitParameters;
     caloHitParameters.m_energy = 10;
     caloHitParameters.m_layer = 10;
+    caloHitParameters.m_time = 9.3;
+    caloHitParameters.m_isDigital = false;
+    caloHitParameters.m_hitType = HCAL;
+    caloHitParameters.m_detectorRegion = BARREL;
+    caloHitParameters.m_positionVector = CartesianVector( 0.0, 1.1, 2.2 );
+    caloHitParameters.m_normalVector   = CartesianVector( 0.0, 1.1, 2.2 );
+    caloHitParameters.m_cellSizeU = 1.1;
+    caloHitParameters.m_cellSizeV = 1.1;
+    caloHitParameters.m_cellSizeZ = 1.1;
+    caloHitParameters.m_nRadiationLengths = 10.0;
+    caloHitParameters.m_nInteractionLengths = 2.0;
     caloHitParameters.m_pParentAddress = (void*)9000;
 
     std::cout << "        create CaloHit with parameters" << std::endl;
