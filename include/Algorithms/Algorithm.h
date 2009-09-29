@@ -32,6 +32,11 @@ public:
      *  @return the address of the algorithm instance
      */
     virtual Algorithm *CreateAlgorithm() const = 0;
+
+    /**
+     *  @brief  Destructor
+     */
+    virtual ~AlgorithmFactory();
 };
 
 /**
@@ -46,7 +51,7 @@ public:
     Algorithm();
 
     /**
-     *  @brief  Default constructor
+     *  @brief  Destructor
      */
     virtual ~Algorithm();
 
@@ -91,6 +96,13 @@ protected:
     friend class PandoraContentApiImpl;
 };
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline AlgorithmFactory::~AlgorithmFactory()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline Algorithm::Algorithm() :
