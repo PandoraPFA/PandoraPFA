@@ -163,7 +163,6 @@ private:
     bool                m_isInitialized;    ///< Whether particle information has been initialized
 
     friend class MCManager;
-    friend class MCPfoSelection;
 
     friend class TestMCManager;
     friend class TestCaloHitManager;

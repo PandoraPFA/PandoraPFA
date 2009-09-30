@@ -9,6 +9,7 @@
 #define PANDORA_CONTENT_API_IMPL_H 1
 
 #include "Api/PandoraContentApi.h"
+
 #include "Test/TestPandora.h"
 
 #include "StatusCodes.h"

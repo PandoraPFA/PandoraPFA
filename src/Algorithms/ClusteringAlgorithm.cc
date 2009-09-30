@@ -24,8 +24,10 @@ StatusCode ClusteringAlgorithm::Run()
         {
             double randomNumber = static_cast<double>(std::rand()) / static_cast<double>(RAND_MAX);
 
-            if (randomNumber < 0.25) // TODO write a real clustering algorithm
+            if (CaloHitHelper::IsCaloHitAvailable(*caloHitIter) && randomNumber < 0.25) // TODO write a real clustering algorithm
+            {
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, *caloHitIter));
+            }
         }
     }
 

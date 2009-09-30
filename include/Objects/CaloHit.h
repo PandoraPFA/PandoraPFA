@@ -281,9 +281,12 @@ private:
     bool                    m_isMipTrack;               ///< Whether the calo hit is part of a mip track
     bool                    m_isIsolated;               ///< Whether the calo hit is isolated
 
+    bool                    m_isAvailable;              ///< Whether the calo hit is available to be added to a cluster
+
     MCParticle              *m_pMCParticle;             ///< The associated MC particle
     const void              *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
 
+    friend class CaloHitHelper;
     friend class CaloHitManager;
 };
 

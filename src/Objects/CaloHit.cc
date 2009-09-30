@@ -28,6 +28,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_layer(caloHitParameters.m_layer.Get()),
     m_isMipTrack(false),
     m_isIsolated(false),
+    m_isAvailable(true),
     m_pMCParticle(NULL),
     m_pParentAddress(caloHitParameters.m_pParentAddress.Get())
 {

@@ -10,6 +10,8 @@
 
 #include "Api/PandoraContentApi.h"
 
+#include "Helpers/CaloHitHelper.h"
+#include "Helpers/GeometryHelper.h"
 #include "Helpers/XmlHelper.h"
 
 #include "Objects/CaloHit.h"

@@ -148,6 +148,9 @@ StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string 
 
 StatusCode TrackManager::MatchTracksToMCPfoTargets(const UidToMCParticleMap &trackToPfoTargetMap)
 {
+    if (trackToPfoTargetMap.empty())
+        return STATUS_CODE_SUCCESS;
+
     NameToTrackListMap::iterator listIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
 
     if (m_nameToTrackListMap.end() == listIter)
