@@ -208,30 +208,22 @@ StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCalo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::DeleteCluster(Cluster *pCluster)
+StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete)
 {
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterToEnlarge->AddHitsFromSecondCluster(pClusterToDelete));
+
     NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
 
     if (m_nameToClusterListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;
 
-    ClusterList::iterator clusterIter = listIter->second->find(pCluster);
+    ClusterList::iterator clusterIter = listIter->second->find(pClusterToDelete);
 
     if (listIter->second->end() == clusterIter)
         return STATUS_CODE_NOT_FOUND;
 
     delete *clusterIter;
     listIter->second->erase(clusterIter);
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs)
-{
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterLhs->AddHitsFromSecondCluster(pClusterRhs));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->DeleteCluster(pClusterRhs));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -255,12 +247,12 @@ StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm)
+StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished)
 {
     m_canMakeNewClusters = false;
-    
+
     AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
-    
+
     if (m_algorithmInfoMap.end() == algorithmListIter)
         return STATUS_CODE_NOT_FOUND;
 
@@ -271,18 +263,21 @@ StatusCode ClusterManager::ResetAfterAlgorithmCompletion(const Algorithm *const 
         
         if (m_nameToClusterListMap.end() == clusterListIter)
             return STATUS_CODE_FAILURE;
-        
+
         for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
             clusterIter != clusterIterEnd; ++clusterIter)
         {
             delete (*clusterIter);
         }
-    
+
         m_nameToClusterListMap.erase(clusterListIter);
     }
 
+    algorithmListIter->second.m_temporaryListNames.clear();
     m_currentListName = algorithmListIter->second.m_parentListName;
-    m_algorithmInfoMap.erase(algorithmListIter);
+
+    if (isAlgorithmFinished)
+        m_algorithmInfoMap.erase(algorithmListIter);
 
     return STATUS_CODE_SUCCESS;
 }

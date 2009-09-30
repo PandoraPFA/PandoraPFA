@@ -179,14 +179,15 @@ private:
      *  @param  pAlgorithm address of the algorithm
      */
     StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
-    
+
     /**
      *  @brief  Remove temporary lists and reset the current ordered calo hit list to that when algorithm was initialized
      * 
      *  @param  pAlgorithm address of the algorithm altering the lists
+     *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
      */
-    StatusCode ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm);
-    
+    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
+
     /**
      *  @brief  Reset the calo hit manager
      */    
@@ -194,7 +195,7 @@ private:
 
     /**
      *  @brief  AlgorithmInfo class
-     */    
+     */
     class AlgorithmInfo
     {
     public:
@@ -202,7 +203,7 @@ private:
         StringSet                   m_temporaryListNames;               ///< The temporary ordered calo hit list names
         unsigned int                m_numberOfListsCreated;             ///< The number of ordered calo hit lists created by the algorithm
     };
-    
+
     typedef std::map<std::string, OrderedCaloHitList *> NameToOrderedCaloHitListMap;
     typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
     
@@ -213,11 +214,11 @@ private:
 
     std::string                     m_currentListName;                  ///< The name of the current ordered calo hit list
     StringSet                       m_savedLists;                       ///< The set of saved ordered calo hit lists
-    
+
     static const std::string        INPUT_LIST_NAME;                    ///< The name of the input ordered calo hit list
-    
+
     friend class PandoraApiImpl;
-    friend class PandoraContentApiImpl;    
+    friend class PandoraContentApiImpl;
     friend class PandoraImpl;
 
     friend class TestCaloHitManager;

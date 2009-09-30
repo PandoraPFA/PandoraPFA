@@ -217,23 +217,23 @@ public:
         const pandora::ClusterList *&pNewClusterList, std::string &newClusterListName);
 
     /**
-     *    @brief  Add a calo hit to a cluster
+     *  @brief  Add a calo hit to a cluster
      *
-     *    @param  algorithm the algorithm calling this function       
-     *    @param  pCluster address of the cluster to modify
-     *    @param  pCaloHit address of the hit to add
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the hit to add
      */
     static StatusCode AddCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
 
     /**
-     *  @brief  Merge two clusters, deleting the original clusters and removing them from the current cluster list
+     *  @brief  Merge two clusters, enlarging one cluster and deleting the second
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  pClusterLhs address of the first cluster
-     *  @param  pClusterRhs address of the second cluster
+     *  @param  pClusterToEnlarge address of the cluster to enlarge
+     *  @param  pClusterToDelete address of the cluster to delete
      */
-    static StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterLhs,
-        pandora::Cluster *pClusterRhs);
+    StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
+        pandora::Cluster *pClusterToDelete);
 
     /**
      *  @brief  Add an association between a track and a cluster

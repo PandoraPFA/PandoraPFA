@@ -141,21 +141,14 @@ private:
      *  @param  pCaloHit address of the hit to add
      */
     StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit);
-    
-    /**
-     *  @brief  Delete a cluster and remove it from the current cluster list
-     * 
-     *  @param  pCluster address of the cluster to delete
-     */
-    StatusCode DeleteCluster(Cluster *pCluster);
 
     /**
-     *  @brief  Merge two clusters, deleting the original clusters and removing them from the current cluster list
+     *  @brief  Merge two clusters, enlarging one cluster and deleting the second
      * 
-     *  @param  pClusterLhs address of the first cluster
-     *  @param  pClusterRhs address of the second cluster
+     *  @param  pClusterToEnlarge address of the cluster to enlarge
+     *  @param  pClusterToDelete address of the cluster to delete
      */
-    StatusCode MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs);
+    StatusCode MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete);
 
     /**
      *  @brief  Register an algorithm with the cluster manager
@@ -168,8 +161,9 @@ private:
      *  @brief  Remove temporary lists and reset the current cluster list to that when algorithm was initialized
      * 
      *  @param  pAlgorithm the algorithm associated with the temporary clusters
+     *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
      */
-    StatusCode ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm);
+    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
 
     /**
      *  @brief  Reset the cluster manager
@@ -249,7 +243,7 @@ inline StatusCode ClusterManager::GetCurrentList(const ClusterList *&pClusterLis
 inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *&pClusterList,
     std::string &clusterListName) const
 {
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() != iter)
     {
@@ -259,8 +253,8 @@ inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const p
     {
         clusterListName = m_currentListName;
     }
-    
-    return this->GetList(clusterListName, pClusterList);    
+
+    return this->GetList(clusterListName, pClusterList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

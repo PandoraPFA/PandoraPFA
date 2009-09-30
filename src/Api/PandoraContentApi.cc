@@ -162,10 +162,10 @@ StatusCode PandoraContentApi::AddCaloHitToCluster(const pandora::Algorithm &algo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterLhs,
-    pandora::Cluster *pClusterRhs)
+StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
+    pandora::Cluster *pClusterToDelete)
 {
-    return algorithm.GetPandoraContentApiImpl()->MergeAndDeleteClusters(pClusterLhs, pClusterRhs);
+    return algorithm.GetPandoraContentApiImpl()->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

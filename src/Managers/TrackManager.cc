@@ -183,7 +183,7 @@ StatusCode TrackManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm)
+StatusCode TrackManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished)
 {
     AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
 
@@ -201,8 +201,11 @@ StatusCode TrackManager::ResetAfterAlgorithmCompletion(const Algorithm *const pA
         m_nameToTrackListMap.erase(iter);
     }
 
+    algorithmListIter->second.m_temporaryListNames.clear();
     m_currentListName = algorithmListIter->second.m_parentListName;
-    m_algorithmInfoMap.erase(algorithmListIter);
+
+    if (isAlgorithmFinished)
+        m_algorithmInfoMap.erase(algorithmListIter);
 
     return STATUS_CODE_SUCCESS;
 }

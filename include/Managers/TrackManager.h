@@ -130,8 +130,9 @@ private:
      *  @brief  Remove temporary lists and reset the current track list to that when algorithm was initialized
      * 
      *  @param  pAlgorithm address of the algorithm altering the lists
+     *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
      */
-    StatusCode ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm);
+    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
 
     /**
      *  @brief  Reset the track manager

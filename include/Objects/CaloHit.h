@@ -159,14 +159,14 @@ public:
     float GetSurroundingEnergy() const;
 
     /**
-     *  @brief  Whether the hit is flagged as part of a mip track
+     *  @brief  Whether the calo hit is flagged as part of a mip track
      * 
      *  @return boolean
      */
     bool IsMipTrack() const;
 
     /**
-     *  @brief  Whether the hit is flagged as isolated
+     *  @brief  Whether the calo hit is flagged as isolated
      * 
      *  @return boolean
      */

@@ -272,7 +272,7 @@ StatusCode CaloHitManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::ResetAfterAlgorithmCompletion(const Algorithm *const pAlgorithm)
+StatusCode CaloHitManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished)
 {
     AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
     
@@ -290,8 +290,11 @@ StatusCode CaloHitManager::ResetAfterAlgorithmCompletion(const Algorithm *const 
         m_nameToOrderedCaloHitListMap.erase(iter);
     }
 
+    algorithmListIter->second.m_temporaryListNames.clear();
     m_currentListName = algorithmListIter->second.m_parentListName;
-    m_algorithmInfoMap.erase(algorithmListIter);
+
+    if (isAlgorithmFinished)
+        m_algorithmInfoMap.erase(algorithmListIter);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -312,7 +315,7 @@ StatusCode CaloHitManager::ResetForNextEvent()
         m_nameToOrderedCaloHitListMap.erase(listIter);
     }
 
-    m_nameToOrderedCaloHitListMap.clear();    
+    m_nameToOrderedCaloHitListMap.clear();
     m_savedLists.clear();
     m_currentListName.clear();
 

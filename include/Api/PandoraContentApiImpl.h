@@ -142,12 +142,12 @@ public:
     StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const;
 
     /**
-     *  @brief  Merge two clusters, deleting the original clusters and removing them from the current cluster list
+     *  @brief  Merge two clusters, enlarging one cluster and deleting the second
      * 
-     *  @param  pClusterLhs address of the first cluster
-     *  @param  pClusterRhs address of the second cluster
+     *  @param  pClusterToEnlarge address of the cluster to enlarge
+     *  @param  pClusterToDelete address of the cluster to delete
      */
-    StatusCode MergeAndDeleteClusters(Cluster *pClusterLhs, Cluster *pClusterRhs) const;
+    StatusCode MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete) const;
 
     /**
      *  @brief  Add an association between a track and a cluster
