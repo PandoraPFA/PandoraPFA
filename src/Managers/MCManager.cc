@@ -6,7 +6,7 @@
  *  $Log: $
  */
 
-//#define DEBUG_MCMANAGER 1
+#define DEBUG_MCMANAGER
 
 
 #include "Managers/MCManager.h"
