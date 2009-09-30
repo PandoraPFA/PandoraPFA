@@ -12,6 +12,8 @@
 
 #include "Test/TestMCManager.h"
 
+#include "Pandora/Pandora.h"
+
 #include <assert.h>
 #include <iostream>
 
@@ -385,17 +387,26 @@ StatusCode TestMCManager::Test_All()
     return STATUS_CODE_SUCCESS;
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TestMCManager::PrintMCParticleTrees( const Pandora &pPandora, std::ostream & o, int maxDepthAfterPFOTarget )
+{
+    TestMCManager::PrintMCParticleTrees( pPandora.m_pMCManager, o, maxDepthAfterPFOTarget );
+}
+
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void TestMCManager::PrintMCParticleTrees( MCManager* mcManager, std::ostream & o, int maxDepthAfterPFOTarget )
 {
     for (UidToMCParticleMap::const_iterator iter = mcManager->m_uidToMCParticleMap.begin(), iterEnd = mcManager->m_uidToMCParticleMap.end(); 
-     iter != iterEnd; ++iter)
+         iter != iterEnd; ++iter)
     {
         if (iter->second->IsRootParticle())
         {
-       TestMCManager::PrintMCParticle( iter->second, o, 0, maxDepthAfterPFOTarget );
-       o << std::endl;
+            TestMCManager::PrintMCParticle( iter->second, o, 0, maxDepthAfterPFOTarget );
+            o << std::endl;
         }
     }
 }
@@ -436,8 +447,8 @@ void TestMCManager::PrintMCParticle( MCParticle* mcParticle, std::ostream & o )
    {
       o << red_bg << darkgreen << "|PFO| ";
    }
-   o << "[" << mcParticle << "]"
-     << " E=" << mcParticle->m_energy 
+//   o << "[" << mcParticle << "]"
+   o << " E=" << mcParticle->m_energy 
      << " p=" << mcParticle->m_momentum
      << " pid=" << mcParticle->m_particleId
      << " r_i=" << mcParticle->m_innerRadius
@@ -463,40 +474,37 @@ void TestMCManager::PrintMCParticle( MCParticle* mcParticle, std::ostream & o )
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void TestMCManager::PrintMCParticle( MCParticle* mcParticle, std::ostream & o, int depth, int maxDepthAfterPfoTarget, 
-    const MCParticle* parent, int stepSize )
+                                     const MCParticle* parent, int stepSize )
 {
     static const char* whiteonblue  = "\033[1;44m";  // white on blue background
     static const char* reset  = "\033[0m";     // reset
 
-    int printDepth = depth*stepSize + (int)(mcParticle->m_outerRadius/5); // this can be changed if the printout doesn't look good
-    o << std::setw (printDepth) << " ";
-    TestMCManager::PrintMCParticle( mcParticle, o );
-    o << std::endl;
-
-    // if there are other parents than the calling one
-    for( MCParticleList::const_iterator itParent = mcParticle->m_parentList.begin(), itParentEnd = mcParticle->m_parentList.end(); 
-    itParent != itParentEnd; itParent++ )
-    {
-      if( (*itParent) != parent )
-      {
-     o << std::setw(printDepth) << " " << whiteonblue << "PARENT=" << (*itParent) << reset << std::endl;
-      }
+    if( !mcParticle->IsPfoTarget() ) {
+        maxDepthAfterPfoTarget--;
     }
 
-    if( maxDepthAfterPfoTarget < 0 )
-    {
-      maxDepthAfterPfoTarget++;
-    }
-    if( mcParticle->IsPfoTarget() && (maxDepthAfterPfoTarget >= 0) ){
-      maxDepthAfterPfoTarget = -maxDepthAfterPfoTarget -1;
-    }
-    if( maxDepthAfterPfoTarget != -1 ){
-      // descend into the daughters and let them print themselves
-      for( MCParticleList::const_iterator itDaughter = mcParticle->m_daughterList.begin(), itDaughterEnd = mcParticle->m_daughterList.end(); 
-       itDaughter != itDaughterEnd; itDaughter++ )
-      {
-     TestMCManager::PrintMCParticle( (*itDaughter), o, depth+1, maxDepthAfterPfoTarget, mcParticle, stepSize );
-      }
+    if( maxDepthAfterPfoTarget >= 0 ){
+        int printDepth = depth*stepSize + (int)(mcParticle->m_outerRadius/100); // this can be changed if the printout doesn't look good
+        o << std::setw (printDepth) << " ";
+        TestMCManager::PrintMCParticle( mcParticle, o );
+        o << std::endl;
+
+        // if there are other parents than the calling one
+        for( MCParticleList::const_iterator itParent = mcParticle->m_parentList.begin(), itParentEnd = mcParticle->m_parentList.end(); 
+             itParent != itParentEnd; itParent++ )
+        {
+            if( (*itParent) != parent )
+            {
+                o << std::setw(printDepth) << " " << whiteonblue << "PARENT=" << (*itParent) << reset << std::endl;
+            }
+        }
+
+        // descend into the daughters and let them print themselves
+        for( MCParticleList::const_iterator itDaughter = mcParticle->m_daughterList.begin(), itDaughterEnd = mcParticle->m_daughterList.end(); 
+             itDaughter != itDaughterEnd; itDaughter++ )
+        {
+            TestMCManager::PrintMCParticle( (*itDaughter), o, depth+1, maxDepthAfterPfoTarget, mcParticle, stepSize );
+        }
     }
 }
 

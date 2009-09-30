@@ -9,6 +9,7 @@
 #define PANDORA_CONTENT_API_IMPL_H 1
 
 #include "Api/PandoraContentApi.h"
+#include "Test/TestPandora.h"
 
 #include "StatusCodes.h"
 
@@ -262,6 +263,9 @@ private:
     Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
     
     friend class Pandora;
+
+    // FOR DEBUGGING
+    friend class TestPandora;
 };
 
 } // namespace pandora

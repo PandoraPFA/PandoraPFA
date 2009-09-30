@@ -11,6 +11,7 @@
 #include "Managers/MCManager.h"
 
 #include "Pandora/PandoraInternal.h"
+#include "Pandora/Pandora.h"
 
 #include "StatusCodes.h"
 
@@ -63,6 +64,14 @@ public:
     StatusCode Test_All();
 
     // helper functions for debugging
+
+    /**
+     *  @brief  print the MCParticle trees
+     *  @param  pPandora Pandora object of which the mc particle trees are printed
+     *  @param  o the output stream to which everything is printed
+     *  @param  maxDepthAfterPFOTarget constrains the tree-depth after the PFO-targets
+     */
+    static void PrintMCParticleTrees(const Pandora &pPandora, std::ostream & o, int maxDepthAfterPFOTarget = 10000000);
 
     /**
      *  @brief  print the MCParticle trees

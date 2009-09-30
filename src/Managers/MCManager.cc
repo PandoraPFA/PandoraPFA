@@ -6,9 +6,17 @@
  *  $Log: $
  */
 
+//#define DEBUG_MCMANAGER 1
+
+
 #include "Managers/MCManager.h"
 
 #include "Objects/MCParticle.h"
+
+#ifdef DEBUG_MCMANAGER
+#include "Test/TestMCManager.h"
+#endif
+
 
 namespace pandora
 {
@@ -117,6 +125,10 @@ StatusCode MCManager::SelectPfoTargets()
         }
     }
 
+    #ifdef DEBUG_MCMANAGER
+    TestMCManager::PrintMCParticleTrees( this, std::cout, 0 );
+    #endif
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -128,7 +140,7 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
         return STATUS_CODE_NOT_INITIALIZED;
     
     // TODO Make boundary a parameter.
-    float boundary = 30.0;
+    float boundary = 300.0;
 
     if((mcParticle->GetOuterRadius() > boundary) && (mcParticle->GetInnerRadius() <= boundary))
     {

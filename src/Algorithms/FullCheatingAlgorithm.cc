@@ -29,8 +29,8 @@ StatusCode FullCheatingAlgorithm::Run()
     for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ )
     {
         PandoraContentApi::ParticleFlowObject::Parameters pfo;
-//      pfo.m_clusterList = pClusterList;
-//      pfo.m_energy = (*itCluster)->GetEnergy();
+//        pfo.m_clusterList = pClusterList;
+        pfo.m_energy = (*itCluster)->GetBestEnergyEstimate();
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
     }
 

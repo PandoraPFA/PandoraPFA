@@ -10,6 +10,8 @@
 
 #include "StatusCodes.h"
 
+#include "Test/TestPandora.h"
+
 namespace pandora
 {
 
@@ -87,6 +89,10 @@ private:
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
     friend class PandoraImpl;
+
+    // FOR DEBUGGING
+    friend class TestPandora;
+    friend class TestMCManager;
 };
 
 } // namespace pandora
