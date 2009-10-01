@@ -6,17 +6,9 @@
  *  $Log: $
  */
 
-#define DEBUG_MCMANAGER
-
-
 #include "Managers/MCManager.h"
 
 #include "Objects/MCParticle.h"
-
-#ifdef DEBUG_MCMANAGER
-#include "Test/TestMCManager.h"
-#endif
-
 
 namespace pandora
 {
@@ -124,10 +116,6 @@ StatusCode MCManager::SelectPfoTargets()
             PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, this->ApplyPfoSelectionRules(iter->second));
         }
     }
-
-    #ifdef DEBUG_MCMANAGER
-    TestMCManager::PrintMCParticleTrees( this, std::cout, 0 );
-    #endif
 
     return STATUS_CODE_SUCCESS;
 }

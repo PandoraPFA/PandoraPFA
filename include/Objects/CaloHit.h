@@ -288,6 +288,8 @@ private:
 
     friend class CaloHitHelper;
     friend class CaloHitManager;
+
+    ADD_TEST_CLASS_FRIENDS;
 };
 
 /**

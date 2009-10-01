@@ -269,6 +269,8 @@ private:
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
+
+    ADD_TEST_CLASS_FRIENDS;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

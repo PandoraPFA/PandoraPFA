@@ -74,8 +74,10 @@ private:
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
+
+    ADD_TEST_CLASS_FRIENDS;
 };
-    
+
 } // namespace pandora
 
 #endif // #ifndef PARTICLE_FLOW_OBJECT_MANAGER_H

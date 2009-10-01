@@ -203,7 +203,9 @@ private:
     StringSet                       m_savedLists;                   ///< The set of saved cluster lists
 
     friend class PandoraApiImpl;
-    friend class PandoraContentApiImpl;    
+    friend class PandoraContentApiImpl;
+
+    ADD_TEST_CLASS_FRIENDS;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -10,8 +10,6 @@
 
 #include "Api/PandoraContentApi.h"
 
-#include "Test/TestPandora.h"
-
 #include "StatusCodes.h"
 
 namespace pandora
@@ -264,9 +262,6 @@ private:
     Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
     
     friend class Pandora;
-
-    // FOR DEBUGGING
-    friend class TestPandora;
 };
 
 } // namespace pandora

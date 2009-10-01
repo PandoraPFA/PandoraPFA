@@ -154,8 +154,7 @@ private:
     friend class PandoraApiImpl;
     friend class PandoraImpl;
 
-    friend class TestMCManager;
-    friend class TestCaloHitManager;
+    ADD_TEST_CLASS_FRIENDS;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

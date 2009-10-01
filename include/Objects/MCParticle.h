@@ -164,8 +164,7 @@ private:
 
     friend class MCManager;
 
-    friend class TestMCManager;
-    friend class TestCaloHitManager;
+    ADD_TEST_CLASS_FRIENDS;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

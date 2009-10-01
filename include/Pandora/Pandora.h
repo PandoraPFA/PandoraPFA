@@ -8,9 +8,8 @@
 #ifndef PANDORA_MAIN_H
 #define PANDORA_MAIN_H 1
 
+#include "PandoraInternal.h"
 #include "StatusCodes.h"
-
-#include "Test/TestPandora.h"
 
 namespace pandora
 {
@@ -90,9 +89,7 @@ private:
     friend class PandoraContentApiImpl;
     friend class PandoraImpl;
 
-    // FOR DEBUGGING
-    friend class TestPandora;
-    friend class TestMCManager;
+    ADD_TEST_CLASS_FRIENDS;
 };
 
 } // namespace pandora

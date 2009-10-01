@@ -203,6 +203,8 @@ private:
 
     friend class PandoraContentApiImpl;
     friend class TrackManager;
+
+    ADD_TEST_CLASS_FRIENDS;
 };
 
 /**
