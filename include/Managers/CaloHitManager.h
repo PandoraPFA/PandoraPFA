@@ -96,14 +96,14 @@ private:
      *
      *  @param  pAlgorithm address of the algorithm changing the current ordered calo hit list
      *  @param  orderedCaloHitListName the name of the new current (and algorithm input) ordered calo hit list
-     */    
+     */
     StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &orderedCaloHitListName);
 
     /**
      *  @brief  Reset the current list to the algorithm input list
      *
      *  @param  pAlgorithm address of the algorithm changing the current ordered calo hit list
-     */    
+     */
     StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
 
     /**
@@ -112,7 +112,7 @@ private:
      *  @param  pAlgorithm address of the algorithm changing the current ordered calo hit list
      *   @param  orderedCaloHitList the specified ordered calo hit list
      *   @param  temporaryListName to receive the name of the temporary list
-     */    
+     */
     StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const OrderedCaloHitList &orderedCaloHitList, 
         std::string &temporaryListName);
 
@@ -190,7 +190,7 @@ private:
 
     /**
      *  @brief  Reset the calo hit manager
-     */    
+     */
     StatusCode ResetForNextEvent();
 
     /**
@@ -206,11 +206,11 @@ private:
 
     typedef std::map<std::string, OrderedCaloHitList *> NameToOrderedCaloHitListMap;
     typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
-    
+
     CaloHitVector                   m_inputCaloHitVector;               ///< The input calo hit vector
 
     NameToOrderedCaloHitListMap     m_nameToOrderedCaloHitListMap;      ///< The name to ordered calo hit list map
-    AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map    
+    AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map
 
     std::string                     m_currentListName;                  ///< The name of the current ordered calo hit list
     StringSet                       m_savedLists;                       ///< The set of saved ordered calo hit lists
@@ -241,7 +241,7 @@ inline StatusCode CaloHitManager::GetCurrentListName(std::string &orderedCaloHit
 
 inline StatusCode CaloHitManager::GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &orderedCaloHitListName) const
 {
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return this->GetCurrentListName(orderedCaloHitListName);
@@ -265,7 +265,7 @@ inline StatusCode CaloHitManager::GetCurrentList(const OrderedCaloHitList *&pOrd
 inline StatusCode CaloHitManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const OrderedCaloHitList *&pOrderedCaloHitList,
     std::string &orderedCaloHitListName) const
 {
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() != iter)
     {
@@ -275,8 +275,8 @@ inline StatusCode CaloHitManager::GetAlgorithmInputList(const Algorithm *const p
     {
         orderedCaloHitListName = m_currentListName;
     }
-    
-    return this->GetList(orderedCaloHitListName, pOrderedCaloHitList);    
+
+    return this->GetList(orderedCaloHitListName, pOrderedCaloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

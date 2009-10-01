@@ -76,11 +76,11 @@ StatusCode MCManager::SetMCParentDaughterRelationship(const Uid parentUid, const
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RetrieveExistingOrCreateEmptyMCParticle(parentUid, pParent));
 
     MCParticle* pDaughter = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RetrieveExistingOrCreateEmptyMCParticle(daughterUid, pDaughter));    
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RetrieveExistingOrCreateEmptyMCParticle(daughterUid, pDaughter));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pParent->AddDaughter(pDaughter));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDaughter->AddParent(pParent));
-    
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -126,7 +126,7 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
 {
     if (!mcParticle->IsInitialized())
         return STATUS_CODE_NOT_INITIALIZED;
-    
+
     // TODO Make boundary a parameter.
     float boundary = 300.0;
 
@@ -157,7 +157,7 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
         relationIter != relationIterEnd; ++relationIter)
     {
         UidToMCParticleMap::const_iterator mcParticleIter = m_uidToMCParticleMap.find(relationIter->second.m_uid);
-    
+
         if ((m_uidToMCParticleMap.end() == mcParticleIter) || (!mcParticleIter->second->IsInitialized()))
             continue;
 

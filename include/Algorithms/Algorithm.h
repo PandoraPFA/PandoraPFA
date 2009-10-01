@@ -124,7 +124,7 @@ inline const PandoraContentApiImpl *const Algorithm::GetPandoraContentApiImpl() 
 {
     if (NULL == m_pPandora)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-    
+
     return m_pPandora->GetPandoraContentApiImpl();
 }
 
@@ -143,7 +143,7 @@ inline StatusCode Algorithm::RegisterPandora(Pandora *pPandora)
         return STATUS_CODE_FAILURE;
 
     m_pPandora = pPandora;
-    
+
     return STATUS_CODE_SUCCESS;
 }
 

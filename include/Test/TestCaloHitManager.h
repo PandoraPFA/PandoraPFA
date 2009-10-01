@@ -41,7 +41,7 @@ public:
     /**
      *  @brief  Test to get the current ordered calo hit vector
      */
-    StatusCode Test_GetCurrentOrderedCaloHitVector();    
+    StatusCode Test_GetCurrentOrderedCaloHitVector();
 
     /**
      *  @brief  Reset the calo hit manager

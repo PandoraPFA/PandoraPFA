@@ -18,7 +18,7 @@ namespace pandora
 class Algorithm;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 /**
  *    @brief ClusterManager class
  */
@@ -90,7 +90,7 @@ private:
      *
      *  @param  pAlgorithm address of the algorithm changing the cluster lists
      *  @param  clusterListName the name of the new current (and algorithm input) cluster list
-     */    
+     */
     StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &clusterListName);
 
     /**
@@ -156,7 +156,7 @@ private:
      *  @param  pAlgorithm address of the algorithm
      */
     StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
-    
+
     /**
      *  @brief  Remove temporary lists and reset the current cluster list to that when algorithm was initialized
      * 
@@ -183,7 +183,7 @@ private:
 
     /**
      *  @brief  AlgorithmInfo class
-     */    
+     */
     class AlgorithmInfo
     {
     public:
@@ -216,7 +216,7 @@ inline StatusCode ClusterManager::GetCurrentListName(std::string &clusterListNam
         return STATUS_CODE_NOT_INITIALIZED;
 
     clusterListName = m_currentListName;
-    
+
     return STATUS_CODE_SUCCESS;
 }
 

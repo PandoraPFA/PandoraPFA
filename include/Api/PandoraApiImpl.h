@@ -116,7 +116,7 @@ private:
     PandoraApiImpl(Pandora *pPandora);
 
     Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
-    
+
     friend class Pandora;
 };
 

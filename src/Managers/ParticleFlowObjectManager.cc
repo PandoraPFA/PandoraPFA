@@ -48,7 +48,7 @@ StatusCode ParticleFlowObjectManager::CreateParticleFlowObject(const PandoraCont
     {
         std::cout << "Failed to create particle flow object: " << statusCodeException.ToString() << std::endl;
         return statusCodeException.GetStatusCode();
-    }    
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ StatusCode ParticleFlowObjectManager::ResetForNextEvent()
     m_particleFlowObjectList.clear();
 
     if (!m_particleFlowObjectList.empty())
-        return STATUS_CODE_FAILURE;    
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }

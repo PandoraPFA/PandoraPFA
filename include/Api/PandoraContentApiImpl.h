@@ -182,9 +182,9 @@ public:
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the name of the replacement cluster list
-     */        
+     */
     StatusCode ReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName) const;
-    
+
     /**
      *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
      *          list (will persist outside the current algorithm)
@@ -214,7 +214,7 @@ public:
      *  @param  newListName the name of the replacement ordered calo hit list
      */
     StatusCode ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName) const;
-    
+
     /**
      *  @brief  Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
      *          current list (will persist outside the current algorithm)
@@ -241,7 +241,7 @@ public:
      *  @param  newListName the name of the replacement track list
      */
     StatusCode ReplaceCurrentTrackList(const pandora::Algorithm &algorithm, const std::string &newListName) const;
-    
+
     /**
      *  @brief  Save the current track list under a new name; use this new list as a permanent replacement for the current
      *          list (will persist outside the current algorithm)
@@ -260,7 +260,7 @@ private:
     PandoraContentApiImpl(Pandora *pPandora);
 
     Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
-    
+
     friend class Pandora;
 };
 

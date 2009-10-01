@@ -80,7 +80,7 @@ StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
 StatusCode CaloHitManager::GetList(const std::string &listName, const OrderedCaloHitList *&pOrderedCaloHitList) const
 {
     NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);
-    
+
     if (m_nameToOrderedCaloHitListMap.end() == iter)
         return STATUS_CODE_NOT_INITIALIZED;
 
@@ -101,7 +101,7 @@ StatusCode CaloHitManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm 
 
     m_currentListName = orderedCaloHitListName;
 
-    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -119,7 +119,7 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
     if (orderedCaloHitList.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -185,7 +185,7 @@ StatusCode CaloHitManager::AddCaloHitsToList(const std::string &listName, const 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-    
+
 StatusCode CaloHitManager::AddCaloHitsToList(const std::string &listName, const ClusterList &clusterList)
 {
     if (clusterList.empty())
@@ -275,7 +275,7 @@ StatusCode CaloHitManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 StatusCode CaloHitManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished)
 {
     AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
-    
+
     if (m_algorithmInfoMap.end() == algorithmListIter)
         return STATUS_CODE_NOT_FOUND;
 
@@ -283,7 +283,7 @@ StatusCode CaloHitManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
         listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
     {
         NameToOrderedCaloHitListMap::iterator iter = m_nameToOrderedCaloHitListMap.find(*listNameIter);
-        
+
         if (m_nameToOrderedCaloHitListMap.end() == iter)
             return STATUS_CODE_FAILURE;
 

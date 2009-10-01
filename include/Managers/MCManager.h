@@ -42,7 +42,7 @@ private:
          * 
          *  @param  uid the unique identifier
          *  @param  weight the weight
-         */    
+         */
         UidAndWeight(const Uid uid, const float weight);
 
         Uid                 m_uid;                      ///< The unique identifier
@@ -65,7 +65,7 @@ private:
      *  @param  pMCParticle to receive the address of the mc particle
      */
     StatusCode RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle *&pMCParticle);
-    
+
     /**
      *  @brief  Set mc particle relationship
      * 

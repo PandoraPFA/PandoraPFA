@@ -70,7 +70,7 @@ private:
      *  @param  trackListName to receive the name of the algorithm input track list
      */
     StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *&pTrackList, std::string &trackListName) const;
-    
+
     /**
      *  @brief  Get a track list
      * 
@@ -78,20 +78,20 @@ private:
      *  @param  pTrackList to receive the track list
      */
     StatusCode GetList(const std::string &listName, const TrackList *&pTrackList) const;
-    
+
     /**
      *  @brief  Replace the current and algorithm input lists with a pre-existing list
      *
      *  @param  pAlgorithm address of the algorithm changing the current track list
      *  @param  trackListName the name of the new current (and algorithm input) track list
-     */    
+     */
     StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &trackListName);
 
     /**
      *  @brief  Reset the current list to the algorithm input list
      *
      *  @param  pAlgorithm address of the algorithm changing the current track list
-     */    
+     */
     StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
 
     /**
@@ -100,7 +100,7 @@ private:
      *  @param  pAlgorithm address of the algorithm changing the current track list
      *  @param  trackList the specified temporary list of tracks
      *  @param  temporaryListName to receive the name of the temporary list
-     */    
+     */
     StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const TrackList &trackList, 
         std::string &temporaryListName);
 
@@ -109,7 +109,7 @@ private:
      * 
      *  @param  pTrackList the list of tracks
      *  @param  newListName the new list name
-     */    
+     */
     StatusCode SaveList(const TrackList &trackList, const std::string &newListName);
 
     /**
@@ -136,7 +136,7 @@ private:
 
     /**
      *  @brief  Reset the track manager
-     */    
+     */
     StatusCode ResetForNextEvent();
 
     /**
@@ -172,12 +172,12 @@ private:
 
     /**
      *  @brief  AlgorithmInfo class
-     */    
+     */
     class AlgorithmInfo
     {
     public:
         std::string                 m_parentListName;               ///< The current track list when algorithm was initialized
-        StringSet                   m_temporaryListNames;           ///< The temporary track list names        
+        StringSet                   m_temporaryListNames;           ///< The temporary track list names
         unsigned int                m_numberOfListsCreated;         ///< The number of track lists created by the algorithm
     };
 
@@ -222,7 +222,7 @@ inline StatusCode TrackManager::GetCurrentListName(std::string &trackListName) c
 
 inline StatusCode TrackManager::GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &trackListName) const
 {
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return this->GetCurrentListName(trackListName);
@@ -246,7 +246,7 @@ inline StatusCode TrackManager::GetCurrentList(const TrackList *&pTrackList, std
 inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const TrackList *&pTrackList,
     std::string &trackListName) const
 {
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() != iter)
     {
@@ -256,8 +256,8 @@ inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAl
     {
         trackListName = m_currentListName;
     }
-    
-    return this->GetList(trackListName, pTrackList);    
+
+    return this->GetList(trackListName, pTrackList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

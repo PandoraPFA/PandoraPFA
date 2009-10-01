@@ -94,7 +94,7 @@ StatusCode TrackManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *c
 
     m_currentListName = trackListName;
 
-    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -112,7 +112,7 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
     if (trackList.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -197,10 +197,10 @@ StatusCode TrackManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, b
         listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
     {
         NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(*listNameIter);
-        
+
         if (m_nameToTrackListMap.end() == iter)
             return STATUS_CODE_FAILURE;
-        
+
         m_nameToTrackListMap.erase(iter);
     }
 

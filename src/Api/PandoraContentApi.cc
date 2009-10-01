@@ -190,7 +190,7 @@ StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorith
 {
     return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName);
 }
-        
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
@@ -221,7 +221,7 @@ StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Al
     return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, &clustersToSave);
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------    
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::SaveOrderedCaloHitList(const pandora::Algorithm &algorithm,
     const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
@@ -236,7 +236,7 @@ StatusCode PandoraContentApi::ReplaceCurrentOrderedCaloHitList(const pandora::Al
     return algorithm.GetPandoraContentApiImpl()->ReplaceCurrentOrderedCaloHitList(algorithm, newListName);
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------    
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(const pandora::Algorithm &algorithm,
     const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
@@ -244,7 +244,7 @@ StatusCode PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(const pand
     return algorithm.GetPandoraContentApiImpl()->SaveOrderedCaloHitListAndReplaceCurrent(algorithm, orderedCaloHitList, newListName);
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------    
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::SaveTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
     const std::string &newListName)
@@ -259,7 +259,7 @@ StatusCode PandoraContentApi::ReplaceCurrentTrackList(const pandora::Algorithm &
     return algorithm.GetPandoraContentApiImpl()->ReplaceCurrentTrackList(algorithm, newListName);
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------    
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
     const std::string &newListName)

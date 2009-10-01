@@ -42,7 +42,7 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
 
         pCluster = NULL;
         pCluster = new Cluster(pClusterParameters);
-        
+
         if (NULL == pCluster)
             return STATUS_CODE_FAILURE;
 
@@ -85,7 +85,7 @@ StatusCode ClusterManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm 
     m_canMakeNewClusters = false;
     m_currentListName = clusterListName;
 
-    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -99,7 +99,7 @@ StatusCode ClusterManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm 
 
 StatusCode ClusterManager::MakeTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName)
 {
-    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -130,7 +130,7 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
         return STATUS_CODE_NOT_FOUND;
 
     if (originalClusterListIter->second->empty())
-        return STATUS_CODE_NOT_INITIALIZED;    
+        return STATUS_CODE_NOT_INITIALIZED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MakeTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
 
@@ -159,7 +159,7 @@ StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorit
 {
     if ((NULL != pClusterList) && pClusterList->empty())
         return STATUS_CODE_NOT_INITIALIZED;
-    
+
     NameToClusterListMap::iterator temporaryClusterListIter = m_nameToClusterListMap.find(temporaryListName);
 
     if (m_nameToClusterListMap.end() == temporaryClusterListIter)
@@ -234,7 +234,7 @@ StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
         return STATUS_CODE_ALREADY_PRESENT;
-    
+
     AlgorithmInfo algorithmInfo;
     algorithmInfo.m_parentListName = m_currentListName;
     algorithmInfo.m_numberOfListsCreated = 0;
@@ -318,7 +318,7 @@ StatusCode ClusterManager::RemoveTemporaryList(const Algorithm *const pAlgorithm
 {
     m_nameToClusterListMap.erase(m_nameToClusterListMap.find(temporaryListName));
 
-    AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);    
+    AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == algorithmListIter)
         return STATUS_CODE_NOT_FOUND;

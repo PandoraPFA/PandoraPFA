@@ -78,7 +78,7 @@ public:
      *  @param  t the value
      */
     void Set(const T &t);
-    
+
     /**
      *  @brief  Get the value held by the pandora type
      *

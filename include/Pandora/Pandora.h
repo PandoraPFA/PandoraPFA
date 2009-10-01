@@ -43,7 +43,7 @@ public:
      *  @brief  Destructor
      */
     ~Pandora();
-    
+
     /**
      *  @brief  Get the pandora api impl
      * 

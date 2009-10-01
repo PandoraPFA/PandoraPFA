@@ -56,7 +56,7 @@ private:
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
-    StatusCode InitializeAlgorithms(const TiXmlHandle *const pXmlHandle);    
+    StatusCode InitializeAlgorithms(const TiXmlHandle *const pXmlHandle);
 
     /**
      *  @brief  Create an algorithm, via one of the algorithm factories registered with pandora

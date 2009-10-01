@@ -64,7 +64,7 @@ private:
      *  @param  particleFlowObjectList container to receive the particle flow objects
      */
     StatusCode GetParticleFlowObjects(PandoraApi::ParticleFlowObjectList &particleFlowObjectList) const;
-    
+
     /**
      *  @brief  Reset the particle flow object manager
      */

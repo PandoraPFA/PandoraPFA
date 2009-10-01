@@ -240,7 +240,7 @@ inline StatusCode MCParticle::SetPfoTarget(MCParticle *mcParticle)
 {
     if (NULL == mcParticle)
         return STATUS_CODE_FAILURE;
-    
+
     m_pPfoTarget = mcParticle;
 
     return STATUS_CODE_SUCCESS;

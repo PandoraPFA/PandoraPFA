@@ -53,7 +53,7 @@ public:
 
     /**
      *  @brief  Particle flow object creation class
-     */    
+     */
     class ParticleFlowObject
     {
     public:
@@ -67,7 +67,7 @@ public:
             pandora::ClusterList    m_clusterList;      ///< The clusters in the particle flow object
             pandora::TrackList      m_trackList;        ///< The tracks in the particle flow object
         };
-        
+
         /**
          *  @brief  Create a particle flow object
          * 
@@ -204,7 +204,7 @@ public:
      */
     static StatusCode RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName, 
         const pandora::ClusterList *&pNewClusterList);
-        
+
     /**
      *  @brief  Run a clustering algorithm (an algorithm that will create new cluster objects)
      * 
@@ -270,7 +270,7 @@ public:
      *  @param  newClusterListName the new cluster list name
      *  @param  clustersToSave a subset of the current cluster list - only clusters in both this and the current
      *          cluster list will be saved
-     */        
+     */
     static StatusCode SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
         const pandora::ClusterList &clustersToSave);
 
@@ -280,7 +280,7 @@ public:
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the name of the replacement cluster list
-     */        
+     */
     static StatusCode ReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName);
 
     /**
@@ -321,7 +321,7 @@ public:
      *  @param  newListName the name of the replacement ordered calo hit list
      */
     static StatusCode ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName);
-    
+
     /**
      *  @brief  Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
      *          current list (will persist outside the current algorithm)

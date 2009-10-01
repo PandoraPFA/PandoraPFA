@@ -46,7 +46,7 @@ StatusCode OrderedCaloHitList::Add(const OrderedCaloHitList &rhs)
         }
     }
 
-    return STATUS_CODE_SUCCESS;    
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ StatusCode OrderedCaloHitList::Remove(const OrderedCaloHitList &rhs)
         }
     }
 
-    return STATUS_CODE_SUCCESS;        
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -25,7 +25,7 @@ StatusCode FullCheatingClusteringAlgorithm::Run()
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
-    
+
     std::map< MCParticle*, CaloHitVector* > hitsPerMCParticle;
     std::map< MCParticle*, CaloHitVector* >::iterator itHitsPerMCParticle;
 

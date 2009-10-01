@@ -31,7 +31,7 @@ public:
      *  @brief  Get the ordered calo hit list
      * 
      *  @return Address of the ordered calo hit list
-     */    
+     */
     const OrderedCaloHitList &GetOrderedCaloHitList() const;
 
     /**
