@@ -318,7 +318,13 @@ StatusCode ClusterManager::ResetForNextEvent()
 
 StatusCode ClusterManager::RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName)
 {
-    m_nameToClusterListMap.erase(m_nameToClusterListMap.find(temporaryListName));
+    NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(temporaryListName);
+
+    if (m_nameToClusterListMap.end() == clusterListIter)
+        return STATUS_CODE_NOT_FOUND;
+
+    delete clusterListIter->second;
+    m_nameToClusterListMap.erase(clusterListIter);
 
     AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
 
