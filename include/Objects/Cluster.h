@@ -165,9 +165,9 @@ private:
     /**
      *  @brief  Constructor
      * 
-     *  @param  pCaloHitList calo hits with which to create cluster
+     *  @param  pCaloHitVector calo hits with which to create cluster
      */
-    Cluster(InputCaloHitList *pCaloHitList);
+    Cluster(CaloHitVector *pCaloHitVector);
 
     /**
      *  @brief  Constructor

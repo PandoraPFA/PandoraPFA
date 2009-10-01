@@ -84,10 +84,17 @@ public:
     StatusCode Reset();
 
     /**
+     *  @brief  Get a simple vector of all the calo hits in the ordered calo hit list (no ordering by pseudolayer)
+     * 
+     *  @param  caloHitVector to receive the simple vector of calo hits
+     */
+    void GetCaloHitVector(CaloHitVector &caloHitVector) const;
+
+    /**
      *  @brief  Assignment operator
      * 
      *  @param  rhs the ordered calo hit list to assign
-     */   
+     */
     bool operator= (const OrderedCaloHitList &rhs);
 
 private:

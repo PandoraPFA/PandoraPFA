@@ -32,7 +32,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Cluster::Cluster(InputCaloHitList *pCaloHitList) :
+Cluster::Cluster(CaloHitVector *pCaloHitVector) :
     m_nCaloHits(0),
     m_nMipTrackHits(0),
     m_electromagneticEnergy(0),
@@ -43,10 +43,10 @@ Cluster::Cluster(InputCaloHitList *pCaloHitList) :
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
     m_isUpToDate(false)
 {
-    if (NULL == pCaloHitList)
+    if (NULL == pCaloHitVector)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    for (InputCaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    for (CaloHitVector::const_iterator iter = pCaloHitVector->begin(), iterEnd = pCaloHitVector->end(); iter != iterEnd; ++iter)
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(*iter));
 }
 

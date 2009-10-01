@@ -207,7 +207,7 @@ private:
     typedef std::map<std::string, OrderedCaloHitList *> NameToOrderedCaloHitListMap;
     typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
     
-    InputCaloHitList                m_inputCaloHitList;                 ///< The input calo hit list
+    CaloHitVector                   m_inputCaloHitVector;               ///< The input calo hit vector
 
     NameToOrderedCaloHitListMap     m_nameToOrderedCaloHitListMap;      ///< The name to ordered calo hit list map
     AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map    

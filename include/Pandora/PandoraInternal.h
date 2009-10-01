@@ -74,8 +74,8 @@ typedef std::set<CaloHit *> CaloHitList;
 typedef std::set<Track *> TrackList;
 typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
-typedef std::vector<CaloHit *> InputCaloHitList;
 typedef std::vector<TrackState *> TrackStateList;
+typedef std::vector<CaloHit *> CaloHitVector;
 
 typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;
 typedef std::set<Track *, PointerLessThan<Track> > MomentumSortedTrackList;

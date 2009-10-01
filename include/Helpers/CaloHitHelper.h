@@ -33,11 +33,11 @@ public:
     /**
      *  @brief  Are all calo hits in list available to add to a cluster
      * 
-     *  @param  pInputCaloHitList address of the calo hit list
+     *  @param  caloHitVector the vector of calo hits
      * 
      *  @return boolean
      */
-    static bool AreCaloHitsAvailable(InputCaloHitList *const pInputCaloHitList);
+    static bool AreCaloHitsAvailable(const CaloHitVector &caloHitVector);
 
 private:
     /**
@@ -51,10 +51,10 @@ private:
     /**
      *  @brief  Set availability of all calo hits in list
      * 
-     *  @param  pInputCaloHitList the address of the calo hit list
+     *  @param  caloHitVector the vector of calo hits
      *  @param  isAvailable the calo hit availability
      */
-    static StatusCode SetCaloHitAvailability(InputCaloHitList *const pInputCaloHitList, bool isAvailable);
+    static StatusCode SetCaloHitAvailability(CaloHitVector &caloHitVector, bool isAvailable);
 
     /**
      *  @brief  Create a calo hit usage map containing an entry for each calo hit in the ordered calo hit list

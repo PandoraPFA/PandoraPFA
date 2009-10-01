@@ -162,8 +162,11 @@ private:
      * 
      *  @param  pAlgorithm the algorithm associated with the temporary clusters
      *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
+     *  @param  pCaloHitsInDeletedClusters if specified, this container will be populated with the addresses of the calo hits in any
+     *          deleted clusters
      */
-    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
+    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished,
+        CaloHitVector *pCaloHitsInDeletedClusters = NULL);
 
     /**
      *  @brief  Reset the cluster manager

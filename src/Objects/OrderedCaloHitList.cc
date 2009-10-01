@@ -96,6 +96,20 @@ StatusCode OrderedCaloHitList::Reset()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void OrderedCaloHitList::GetCaloHitVector(CaloHitVector &caloHitVector) const
+{
+    for (OrderedCaloHitList::const_iterator iter = this->begin(), iterEnd = this->end(); iter != iterEnd; ++iter)
+    {
+        for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
+            caloHitIter != caloHitIterEnd; ++caloHitIter)
+        {
+            caloHitVector.push_back(*caloHitIter);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 bool OrderedCaloHitList::operator= (const OrderedCaloHitList &rhs)
 {
     if (this == &rhs)

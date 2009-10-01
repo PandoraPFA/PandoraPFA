@@ -39,7 +39,7 @@ StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::CaloHitParameters &ca
         if (NULL == pCaloHit)
             return STATUS_CODE_FAILURE;
 
-        m_inputCaloHitList.push_back(pCaloHit);
+        m_inputCaloHitVector.push_back(pCaloHit);
 
         return STATUS_CODE_SUCCESS;
     }
@@ -56,7 +56,7 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 {
     OrderedCaloHitList orderedCaloHitList;
 
-    for (InputCaloHitList::iterator iter = m_inputCaloHitList.begin(), iterEnd = m_inputCaloHitList.end(); iter != iterEnd; ++iter)
+    for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignToPseudoLayer(*iter));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.AddCaloHit(*iter));
@@ -242,7 +242,7 @@ StatusCode CaloHitManager::RemoveCaloHitsFromList(const std::string &listName, c
 
 StatusCode CaloHitManager::MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap &caloHitToPfoTargetMap)
 {
-    for (InputCaloHitList::iterator iter = m_inputCaloHitList.begin(), iterEnd = m_inputCaloHitList.end(); iter != iterEnd; ++iter)
+    for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
         UidToMCParticleMap::const_iterator pfoTargetIter = caloHitToPfoTargetMap.find((*iter)->GetParentCaloHitAddress());
 
@@ -303,10 +303,10 @@ StatusCode CaloHitManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
 
 StatusCode CaloHitManager::ResetForNextEvent()
 {
-    for (InputCaloHitList::iterator iter = m_inputCaloHitList.begin(), iterEnd = m_inputCaloHitList.end(); iter != iterEnd; ++iter)
+    for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
         delete *iter;
 
-    m_inputCaloHitList.clear();
+    m_inputCaloHitVector.clear();
 
     for (NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.begin();
         listIter != m_nameToOrderedCaloHitListMap.end(); ++listIter)

@@ -35,7 +35,7 @@ public:
          *  @brief  Create a cluster
          *
          *  @param  algorithm the algorithm creating the cluster
-         *  @param  pClusterParameters address of either 1) a single calo hit, 2) an input calo hit list, or 3) a track
+         *  @param  pClusterParameters address of either 1) a single calo hit, 2) a calo hit vector, or 3) a track
          */
         template <typename CLUSTER_PARAMETERS>
         static StatusCode Create(const pandora::Algorithm &algorithm, CLUSTER_PARAMETERS *pClusterParameters);
@@ -44,7 +44,7 @@ public:
          *  @brief  Create a cluster
          *
          *  @param  algorithm the algorithm creating the cluster
-         *  @param  pClusterParameters address of either 1) a single calo hit, 2) an input calo hit list, or 3) a track
+         *  @param  pClusterParameters address of either 1) a single calo hit, 2) a calo hit vector, or 3) a track
          *  @param  pCluster to receive the address of the cluster created
          */
         template <typename CLUSTER_PARAMETERS>

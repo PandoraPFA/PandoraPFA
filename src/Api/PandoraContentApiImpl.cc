@@ -44,13 +44,13 @@ StatusCode PandoraContentApiImpl::CreateCluster(CaloHit *pCaloHit, Cluster *&pCl
 }
 
 template <>
-StatusCode PandoraContentApiImpl::CreateCluster(InputCaloHitList *pInputCaloHitList, Cluster *&pCluster) const
+StatusCode PandoraContentApiImpl::CreateCluster(CaloHitVector *pCaloHitVector, Cluster *&pCluster) const
 {
-    if (!CaloHitHelper::AreCaloHitsAvailable(pInputCaloHitList))
+    if (!CaloHitHelper::AreCaloHitsAvailable(*pCaloHitVector))
         return STATUS_CODE_NOT_ALLOWED;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateCluster(pInputCaloHitList, pCluster));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pInputCaloHitList, false));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateCluster(pCaloHitVector, pCluster));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(*pCaloHitVector, false));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -108,10 +108,12 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
         std::cout << "Failure in algorithm " << iter->first << ", " << iter->second->GetAlgorithmType() << ", unrecognized exception" << std::endl;
     }
 
-    //TODO flag calo hits in deleted clusters as available.
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ResetAlgorithmInfo(iter->second, true));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetAlgorithmInfo(iter->second, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetAlgorithmInfo(iter->second, true));
+
+    CaloHitVector caloHitsInDeletedClusters;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetAlgorithmInfo(iter->second, true, &caloHitsInDeletedClusters));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitsInDeletedClusters, true));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -349,7 +351,7 @@ PandoraContentApiImpl::PandoraContentApiImpl(Pandora *pPandora) :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template StatusCode PandoraContentApiImpl::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster) const;
-template StatusCode PandoraContentApiImpl::CreateCluster<InputCaloHitList>(InputCaloHitList *pInputCaloHitList, Cluster *&pCluster) const;
+template StatusCode PandoraContentApiImpl::CreateCluster<CaloHitVector>(CaloHitVector *pCaloHitVector, Cluster *&pCluster) const;
 template StatusCode PandoraContentApiImpl::CreateCluster<Track>(pandora::Track *pTrack, Cluster *&pCluster) const;
 
 } // namespace pandora

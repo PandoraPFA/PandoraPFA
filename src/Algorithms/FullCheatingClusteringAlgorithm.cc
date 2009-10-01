@@ -26,8 +26,8 @@ StatusCode FullCheatingClusteringAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
     
-    std::map< MCParticle*, InputCaloHitList* > hitsPerMCParticle;
-    std::map< MCParticle*, InputCaloHitList* >::iterator itHitsPerMCParticle;
+    std::map< MCParticle*, CaloHitVector* > hitsPerMCParticle;
+    std::map< MCParticle*, CaloHitVector* >::iterator itHitsPerMCParticle;
 
     for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; itLyr++ )
     {
@@ -35,7 +35,7 @@ StatusCode FullCheatingClusteringAlgorithm::Run()
         CaloHitList::iterator itCaloHit    = itLyr->second->begin();
         CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
 
-        InputCaloHitList* currentHits = NULL;
+        CaloHitVector* currentHits = NULL;
         for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
         {
             MCParticle* mc = NULL; 
@@ -43,7 +43,7 @@ StatusCode FullCheatingClusteringAlgorithm::Run()
             itHitsPerMCParticle = hitsPerMCParticle.find( mc );
             if( itHitsPerMCParticle == hitsPerMCParticle.end() )
             {
-                currentHits = new InputCaloHitList();
+                currentHits = new CaloHitVector();
                 hitsPerMCParticle.insert( std::make_pair( mc, currentHits ) );
             }
             else
@@ -58,7 +58,7 @@ StatusCode FullCheatingClusteringAlgorithm::Run()
     pandora::Cluster *pCluster;
 
     // write out clusters
-    for( std::map< MCParticle*, InputCaloHitList* >::iterator itCHList = hitsPerMCParticle.begin(), itCHListEnd = hitsPerMCParticle.end(); 
+    for( std::map< MCParticle*, CaloHitVector* >::iterator itCHList = hitsPerMCParticle.begin(), itCHListEnd = hitsPerMCParticle.end(); 
          itCHList != itCHListEnd; itCHList++ )
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, itCHList->second, pCluster ));

@@ -247,7 +247,8 @@ StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished)
+StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished,
+    CaloHitVector *pCaloHitsInDeletedClusters)
 {
     m_canMakeNewClusters = false;
 
@@ -260,13 +261,17 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
         listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
     {
         NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(*listNameIter);
-        
+
         if (m_nameToClusterListMap.end() == clusterListIter)
             return STATUS_CODE_FAILURE;
 
         for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
             clusterIter != clusterIterEnd; ++clusterIter)
         {
+
+            if (NULL != pCaloHitsInDeletedClusters)
+                (*clusterIter)->GetOrderedCaloHitList().GetCaloHitVector(*pCaloHitsInDeletedClusters);
+
             delete (*clusterIter);
         }
 
@@ -334,7 +339,7 @@ StatusCode ClusterManager::RemoveTemporaryList(const Algorithm *const pAlgorithm
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template StatusCode ClusterManager::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster);
-template StatusCode ClusterManager::CreateCluster<InputCaloHitList>(InputCaloHitList *pCaloHitList, Cluster *&pCluster);
+template StatusCode ClusterManager::CreateCluster<CaloHitVector>(CaloHitVector *pCaloHitVector, Cluster *&pCluster);
 template StatusCode ClusterManager::CreateCluster<Track>(Track *pTrack, Cluster *&pCluster);
 
 } // namespace pandora
