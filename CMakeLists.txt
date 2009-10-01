@@ -113,11 +113,17 @@ AUX_SOURCE_DIRECTORY( src/Helpers library_sources )
 AUX_SOURCE_DIRECTORY( src/Managers library_sources )
 AUX_SOURCE_DIRECTORY( src/Objects library_sources )
 AUX_SOURCE_DIRECTORY( src/Pandora library_sources )
-AUX_SOURCE_DIRECTORY( src/Test library_sources )
 AUX_SOURCE_DIRECTORY( src/Xml library_sources )
 
-ADD_EXECUTABLE( testPandora test/TestPandora.cc )
-TARGET_LINK_LIBRARIES( testPandora lib_${PROJECT_NAME} )
+
+IF( MAKE_UNITTESTS )
+  ADD_DEFINITIONS( -DUNITTESTS )
+
+  AUX_SOURCE_DIRECTORY( src/Test library_sources )
+  ADD_EXECUTABLE( testPandora test/TestPandora.cc )
+
+  TARGET_LINK_LIBRARIES( testPandora lib_${PROJECT_NAME} )
+ENDIF()
 
 ### DOCUMENTATION ############################################################
 
@@ -238,6 +244,7 @@ MESSAGE( STATUS "BUILD_SHARED_LIBS = ${BUILD_SHARED_LIBS}" )
 MESSAGE( STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
 MESSAGE( STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}" )
 MESSAGE( STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}" )
+MESSAGE( STATUS "MAKE_UNITTESTS = ${MAKE_UNITTESTS}" )
 IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     MESSAGE( STATUS "BUILD_32BIT_COMPATIBLE = ${BUILD_32BIT_COMPATIBLE}" )
 ENDIF()
