@@ -275,6 +275,7 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
             delete (*clusterIter);
         }
 
+        delete clusterListIter->second;
         m_nameToClusterListMap.erase(clusterListIter);
     }
 
@@ -302,6 +303,7 @@ StatusCode ClusterManager::ResetForNextEvent()
             delete (*clusterIter);
         }
 
+        delete iter->second;
         m_nameToClusterListMap.erase(iter);
     }
 

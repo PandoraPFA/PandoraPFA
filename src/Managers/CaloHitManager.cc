@@ -161,8 +161,13 @@ StatusCode CaloHitManager::SaveList(const OrderedCaloHitList &orderedCaloHitList
     if (m_nameToOrderedCaloHitListMap.end() != m_nameToOrderedCaloHitListMap.find(newListName))
         return STATUS_CODE_ALREADY_PRESENT;
 
-    if (!m_nameToOrderedCaloHitListMap.insert(NameToOrderedCaloHitListMap::value_type(newListName, new OrderedCaloHitList)).second)
+    OrderedCaloHitList *pOrderedCaloHitList = new OrderedCaloHitList;
+
+    if (!m_nameToOrderedCaloHitListMap.insert(NameToOrderedCaloHitListMap::value_type(newListName, pOrderedCaloHitList)).second)
+    {
+        delete pOrderedCaloHitList;
         return STATUS_CODE_ALREADY_PRESENT;
+    }
 
     *(m_nameToOrderedCaloHitListMap[newListName]) = orderedCaloHitList;
     m_savedLists.insert(newListName);
@@ -287,6 +292,7 @@ StatusCode CaloHitManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
         if (m_nameToOrderedCaloHitListMap.end() == iter)
             return STATUS_CODE_FAILURE;
 
+        delete iter->second;
         m_nameToOrderedCaloHitListMap.erase(iter);
     }
 

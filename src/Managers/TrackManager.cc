@@ -135,8 +135,13 @@ StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string 
     if (m_nameToTrackListMap.end() != m_nameToTrackListMap.find(newListName))
         return STATUS_CODE_ALREADY_PRESENT;
 
-    if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, new TrackList)).second)
+    TrackList *pTrackList = new TrackList;
+
+    if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, pTrackList)).second)
+    {
+        delete pTrackList;
         return STATUS_CODE_ALREADY_PRESENT;
+    }
 
     *(m_nameToTrackListMap[newListName]) = trackList;
     m_savedLists.insert(newListName);
@@ -201,6 +206,7 @@ StatusCode TrackManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, b
         if (m_nameToTrackListMap.end() == iter)
             return STATUS_CODE_FAILURE;
 
+        delete iter->second;
         m_nameToTrackListMap.erase(iter);
     }
 
