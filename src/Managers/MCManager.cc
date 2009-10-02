@@ -205,8 +205,9 @@ StatusCode MCManager::ResetForNextEvent()
 
     m_uidToMCParticleMap.clear();
     m_caloHitToMCParticleMap.clear();
+    m_trackToMCParticleMap.clear();
 
-    if (!m_uidToMCParticleMap.empty() || !m_caloHitToMCParticleMap.empty())
+    if (!m_uidToMCParticleMap.empty() || !m_caloHitToMCParticleMap.empty() || !m_trackToMCParticleMap.empty())
         return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
