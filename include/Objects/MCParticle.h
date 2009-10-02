@@ -71,6 +71,13 @@ public:
     float GetOuterRadius() const;
 
     /**
+     *  @brief  Get outer radius of mc particle
+     *
+     *  @return the mc particle outer radius
+     */
+    int GetParticleId() const;
+
+    /**
      *  @brief  Whether the pfo target been set
      *
      *  @return boolean
@@ -272,6 +279,13 @@ inline float MCParticle::GetInnerRadius() const
 inline float MCParticle::GetOuterRadius() const
 {
     return m_outerRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline int MCParticle::GetParticleId() const
+{
+    return m_particleId;
 }
 
 } // namespace pandora
