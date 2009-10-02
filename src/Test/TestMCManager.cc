@@ -80,10 +80,16 @@ StatusCode TestMCManager::Test_CreateMCParticle()
     std::cout << "        get the created MCParticle" << std::endl;
     MCParticle* mcParticle = NULL;
     pMcManager->RetrieveExistingOrCreateEmptyMCParticle( (void*)100, mcParticle ); 
+    double epsilon = 1e-8;
     assert( mcParticle != 0 ); // MCParticle has not been created
     assert( mcParticle->GetUid() == (void*)100 ); // check if the Uid of the created MCParticle coincides with the one asked for
     assert( mcParticle->IsRootParticle() == true ); // after creation, it MCParticle should be a root-particle (of a MC-tree with exactly one node)
     assert( mcParticle->IsPfoTarget() == false ); // after creation, the pfo-target should be NULL (not set)
+    assert( mcParticle->GetEnergy() - 10 < epsilon );
+    assert( mcParticle->GetMomentum() - 12 < epsilon );
+    assert( mcParticle->GetInnerRadius() - 0.1 < epsilon );
+    assert( mcParticle->GetOuterRadius() - 40.5 < epsilon );
+    assert( mcParticle->GetParticleId() == 13 );
     MCParticle *pfo = NULL;
     mcParticle->GetPfoTarget( pfo );
     assert( pfo == NULL ); // pfo-target should be NULL
@@ -192,6 +198,70 @@ StatusCode TestMCManager::Test_SetCaloHitToMCParticleRelationship()
     std::cout << "--- --- AssociateCaloHitWithMCParticle | END ------------------------------" << std::endl;
     return STATUS_CODE_SUCCESS;
 }
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TestMCManager::Test_CreateUidToPfoTargetMap()
+{
+    std::cout << "--- --- CreateUidToPfoTargetMap | START ------------------------------" << std::endl;
+    std::cout << "        new MCManager object" << std::endl;
+    MCManager* pMcManager = new MCManager();
+    assert( pMcManager != 0 ); // problem at creating a MCManager
+
+    MCManager::UidRelationMap uidRelationMap;
+    UidToMCParticleMap uidToPfoTargetMap;
+
+    std::cout << "        prepare relations between CaloHits and MCParticles" << std::endl;
+    std::cout << "        create MCParticleParameters" << std::endl;
+    PandoraApi::MCParticleParameters mcParticleParameters;
+    mcParticleParameters.m_energy = 10;
+    mcParticleParameters.m_momentum = 12;
+    mcParticleParameters.m_innerRadius = 0.1;
+    mcParticleParameters.m_outerRadius = 40.5;
+    mcParticleParameters.m_particleId = 13;
+
+
+    // calohits : 100 - 
+    // mcparticles : 1000 - 
+    int caloHitNumber = 100;
+    int mcParticleNumber = 1000;
+    double weight = 1.0;
+    for( int iCaloHit = 0; iCaloHit < 5; ++iCaloHit )
+    {
+        weight = 1.0;
+        for( int iMc = 0; iMc < 10; ++iMc )
+        {
+//            std::cout << "            create MCParticle with parameters" << std::endl;
+            mcParticleParameters.m_pParentAddress = (void*)mcParticleNumber;
+            assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS ); 
+
+            uidRelationMap.insert(MCManager::UidRelationMap::value_type( (void*)caloHitNumber, MCManager::UidAndWeight( (void*)mcParticleNumber, weight)));
+            ++mcParticleNumber;
+            weight -= 0.02;
+        }
+        ++caloHitNumber;
+    }
+                 
+    std::cout << "        call SelectPfoTargets" << std::endl;
+    pMcManager->SelectPfoTargets();
+
+    std::cout << "        call CreateUidToPfoTargetMap" << std::endl;
+    assert( STATUS_CODE_SUCCESS == pMcManager->CreateUidToPfoTargetMap(uidToPfoTargetMap, uidRelationMap) );
+
+    std::cout << "        size of uidRelationMap   : " << uidRelationMap.size() << std::endl;
+    std::cout << "        size of uidToPfoTargetMap: " << uidToPfoTargetMap.size() << std::endl;
+    assert( uidToPfoTargetMap.size() == uidRelationMap.size() );
+
+    std::cout << "        delete MCManager object" << std::endl;
+    delete pMcManager;
+
+    std::cout << "--- --- CreateUidToPfoTargetMap | END   ------------------------------" << std::endl;
+    return STATUS_CODE_SUCCESS;
+}
+
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -381,11 +451,46 @@ StatusCode TestMCManager::Test_All()
     assert( Test_SetMCParentDaughterRelationship() == STATUS_CODE_SUCCESS );
     assert( Test_SetCaloHitToMCParticleRelationship() == STATUS_CODE_SUCCESS );
     assert( Test_SelectPfoTargets() == STATUS_CODE_SUCCESS );
+    assert( Test_CreateUidToPfoTargetMap() == STATUS_CODE_SUCCESS );
     assert( Test_Combined() == STATUS_CODE_SUCCESS );
 
     std::cout << "--- --- ALL | END ------------------------------" << std::endl;
     return STATUS_CODE_SUCCESS;
 }
+
+
+//-- Helper functions for debugging --------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TestMCManager::PrintMCManagerData(const Pandora &pPandora, std::ostream & o)
+{
+    MCManager* mcM = pPandora.m_pMCManager;
+    std::cout << std::endl;
+    std::cout << "================================================" << std::endl;
+    std::cout << "m_uidToMCParticleMap   ";
+    std::cout << "size : " << mcM->m_uidToMCParticleMap.size();
+    int initialized = 0;
+    for( UidToMCParticleMap::iterator it = mcM->m_uidToMCParticleMap.begin(), itEnd = mcM->m_uidToMCParticleMap.end(); it != itEnd; ++it )
+    {
+        if( (*it).second->IsInitialized() ) ++initialized;
+    }
+    std::cout << "   initialized : " << initialized << std::endl;
+
+    std::cout << "m_caloHitToMCParticleMap   ";
+    std::cout << "size : " << mcM->m_caloHitToMCParticleMap.size();
+    int haveMCParticle = 0;
+    for( MCManager::UidRelationMap::iterator it = mcM->m_caloHitToMCParticleMap.begin(), itEnd = mcM->m_caloHitToMCParticleMap.end(); it != itEnd; ++it )
+    {
+        if( mcM->m_uidToMCParticleMap.end() != mcM->m_uidToMCParticleMap.find( (*it).second.m_uid ) ) ++haveMCParticle;
+    }
+    std::cout << "   have valid mcparticle : " << haveMCParticle << std::endl;
+    
+    std::cout << "m_trackToMCParticleMap   ";
+    std::cout << "size : " << mcM->m_trackToMCParticleMap.size() << std::endl;
+    std::cout << "================================================" << std::endl;
+    std::cout << std::endl;
+}
+
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------

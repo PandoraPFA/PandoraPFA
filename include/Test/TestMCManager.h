@@ -49,6 +49,11 @@ public:
     StatusCode Test_SetCaloHitToMCParticleRelationship();
 
     /**
+     *  @brief  test the CreateUidToPfoTargetMap method
+     */
+    StatusCode Test_CreateUidToPfoTargetMap();
+
+    /**
      *  @brief  test the SelectPfoTargets method
      */
     StatusCode Test_SelectPfoTargets();
@@ -64,6 +69,14 @@ public:
     StatusCode Test_All();
 
     // helper functions for debugging
+
+    /**
+     *  @brief  prints the datea members of the MCManager (sizes, initialization state, ...)
+     *
+     *  @param  pPandora Pandora object of which the mc particle trees are printed
+     *  @param  o the output stream to which everything is printed
+     */
+    static void PrintMCManagerData(const Pandora &pPandora, std::ostream & o);
 
     /**
      *  @brief  print the MCParticle trees

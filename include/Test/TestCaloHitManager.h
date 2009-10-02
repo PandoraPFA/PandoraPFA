@@ -57,6 +57,18 @@ public:
      *  @brief  Run all tests
      */
      StatusCode Test_All();
+
+
+    // helper functions for debugging
+
+    /**
+     *  @brief  prints the data members of the CaloHitManager (sizes, initialization state, ...)
+     *
+     *  @param  pPandora Pandora object of which the mc particle trees are printed
+     *  @param  o the output stream to which everything is printed
+     */
+    static void PrintCaloHitManagerData(const Pandora &pPandora, std::ostream & o);
+
 };
 
 } // namespace pandora

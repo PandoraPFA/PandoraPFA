@@ -10,6 +10,7 @@
 #include "Managers/MCManager.h"
 
 #include "Objects/MCParticle.h"
+#include "Objects/CaloHit.h"
 
 #include "Test/TestCaloHitManager.h"
 #include "Test/TestMCManager.h"
@@ -164,43 +165,43 @@ StatusCode TestCaloHitManager::Test_MatchCaloHitsToMCPfoTargets()
     mcParticleParameters.m_energy = 10;
     mcParticleParameters.m_momentum = 8;
     mcParticleParameters.m_innerRadius = 0.1;
-    mcParticleParameters.m_outerRadius = 2.0;
+    mcParticleParameters.m_outerRadius = 20.0;
     mcParticleParameters.m_particleId = 11;
     mcParticleParameters.m_pParentAddress = (void*)200;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)300;
-    mcParticleParameters.m_innerRadius = 27.0;
-    mcParticleParameters.m_outerRadius = 35.0;
+    mcParticleParameters.m_innerRadius = 270.0;
+    mcParticleParameters.m_outerRadius = 350.0;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)301;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
-    mcParticleParameters.m_innerRadius = 31.0;
-    mcParticleParameters.m_outerRadius = 40.0;
+    mcParticleParameters.m_innerRadius = 310.0;
+    mcParticleParameters.m_outerRadius = 400.0;
     mcParticleParameters.m_pParentAddress = (void*)400;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)401;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)210;
-    mcParticleParameters.m_innerRadius = 23.0;
-    mcParticleParameters.m_outerRadius = 27.4;
+    mcParticleParameters.m_innerRadius = 230.0;
+    mcParticleParameters.m_outerRadius = 270.4;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)101;
-    mcParticleParameters.m_innerRadius = 10.0;
-    mcParticleParameters.m_outerRadius = 23.0;
+    mcParticleParameters.m_innerRadius = 100.0;
+    mcParticleParameters.m_outerRadius = 230.0;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)211;
-    mcParticleParameters.m_innerRadius = 23.0;
-    mcParticleParameters.m_outerRadius = 120.1;
+    mcParticleParameters.m_innerRadius = 230.0;
+    mcParticleParameters.m_outerRadius = 1200.1;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)310;
-    mcParticleParameters.m_innerRadius = 2.0;
-    mcParticleParameters.m_outerRadius = 52.0;
+    mcParticleParameters.m_innerRadius = 20.0;
+    mcParticleParameters.m_outerRadius = 520.0;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)311;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
     mcParticleParameters.m_pParentAddress = (void*)201;
-    mcParticleParameters.m_innerRadius = 2.0;
-    mcParticleParameters.m_outerRadius = 200.0;
+    mcParticleParameters.m_innerRadius = 20.0;
+    mcParticleParameters.m_outerRadius = 2000.0;
     assert( pMcManager->CreateMCParticle( mcParticleParameters ) == STATUS_CODE_SUCCESS );
 
     std::cout << "        now the real testing for the CaloHitManager" << std::endl;
@@ -389,5 +390,29 @@ StatusCode TestCaloHitManager::Test_All()
     std::cout << "--- --- ALL | END ------------------------------" << std::endl;
     return STATUS_CODE_SUCCESS;
 }
+
+
+
+//-- Helper functions for debugging --------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TestCaloHitManager::PrintCaloHitManagerData(const Pandora &pPandora, std::ostream & o)
+{
+    CaloHitManager* chM = pPandora.m_pCaloHitManager;
+    std::cout << std::endl;
+    std::cout << "================================================" << std::endl;
+    std::cout << "m_inputCaloHitVector   ";
+    std::cout << "size : " << chM->m_inputCaloHitVector.size();
+    int haveMCParticle = 0;
+    for( CaloHitVector::iterator it = chM->m_inputCaloHitVector.begin(), itEnd = chM->m_inputCaloHitVector.end(); it != itEnd; ++it )
+    {
+        if( (*it)->m_pMCParticle != NULL ) ++haveMCParticle;
+    }
+    std::cout << "   have mc particle : " << haveMCParticle << std::endl;
+    std::cout << "================================================" << std::endl;
+    std::cout << std::endl;
+}
+
+
 
 } // namespace pandora
