@@ -71,9 +71,9 @@ public:
     float GetOuterRadius() const;
 
     /**
-     *  @brief  Get outer radius of mc particle
+     *  @brief  Get the mc particle id (particle type)
      *
-     *  @return the mc particle outer radius
+     *  @return the mc particle id
      */
     int GetParticleId() const;
 
