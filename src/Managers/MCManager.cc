@@ -153,6 +153,9 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
 
 StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTargetMap, const UidRelationMap &uidRelationMap) const
 {
+    if( m_uidToMCParticleMap.empty() ) // no MCParticles in the list --> none will be found
+        return STATUS_CODE_NOT_INITIALIZED;
+
     for (UidRelationMap::const_iterator relationIter = uidRelationMap.begin(), relationIterEnd = uidRelationMap.end();
         relationIter != relationIterEnd; ++relationIter)
     {
