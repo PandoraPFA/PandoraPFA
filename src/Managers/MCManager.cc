@@ -153,14 +153,8 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
 
 StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTargetMap, const UidRelationMap &uidRelationMap) const
 {
-    if (m_uidToMCParticleMap.empty() || uidRelationMap.empty())
-    {
-        if (m_uidToMCParticleMap.empty() && uidRelationMap.empty())
-            return STATUS_CODE_SUCCESS;
-
-        std::cout << "MCManager: Error, to use MC information, both MC particles and MC relationships are required." << std::endl;
-        return STATUS_CODE_NOT_INITIALIZED;
-    }
+    if (m_uidToMCParticleMap.empty())
+        return STATUS_CODE_SUCCESS;
 
     for (UidRelationMap::const_iterator relationIter = uidRelationMap.begin(), relationIterEnd = uidRelationMap.end();
         relationIter != relationIterEnd; ++relationIter)
