@@ -162,6 +162,13 @@ StatusCode PandoraContentApi::AddCaloHitToCluster(const pandora::Algorithm &algo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::DeleteCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster)
+{
+    return algorithm.GetPandoraContentApiImpl()->DeleteCluster(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
     pandora::Cluster *pClusterToDelete)
 {
@@ -196,7 +203,7 @@ StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorith
 StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
     const pandora::ClusterList &clustersToSave)
 {
-    return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName, &clustersToSave);
+    return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName, clustersToSave);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -218,7 +225,7 @@ StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Al
 StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
     const pandora::ClusterList &clustersToSave)
 {
-    return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, &clustersToSave);
+    return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, clustersToSave);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

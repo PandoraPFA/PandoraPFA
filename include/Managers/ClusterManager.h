@@ -114,25 +114,34 @@ private:
      *  @param  pAlgorithm address of the algorithm requesting a temporary list
      *  @param  originalListName the list in which the clusters currently exist
      *  @param  temporaryListName to receive the name of the temporary list
-     *  @param  pClusterList optional: only clusters in both this and the current list will be moved
+     *  @param  clustersToMove only clusters in both this and the current list will be moved
      *          - other clusters in the current list will remain in original list
      *          - an empty cluster vector will be rejected
      */
     StatusCode MoveClustersToTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const std::string &originalListName,
-        std::string &temporaryListName, const ClusterList *const pClusterList = NULL);
+        std::string &temporaryListName, const ClusterList &clustersToMove);
 
     /**
-     *  @brief  Save a list of temporary clusters
+     *  @brief  Save a list of clusters
      * 
      *  @param  pAlgorithm the algorithm associated with the temporary clusters
-     *  @param  newListName the name of the new cluster list to be created
-     *  @param  temporaryListName the name of the temporary cluster list to save
-     *  @param  pClusterList optional: only clusters in both this and the temporary list will be stored
-     *          - other clusters in the temporary list will be deleted
+     *  @param  targetListName the name of the target cluster list, which will be created if it doesn't currently exist
+     *  @param  sourceListName the name of the (typically temporary) cluster list to save
+     */
+    StatusCode SaveClusters(const Algorithm *const pAlgorithm, const std::string &targetListName, const std::string &sourceListName);
+
+    /**
+     *  @brief  Save a list of clusters
+     * 
+     *  @param  pAlgorithm the algorithm associated with the temporary clusters
+     *  @param  targetListName the name of the target cluster list, which will be created if it doesn't currently exist
+     *  @param  sourceListName the name of the (typically temporary) cluster list containing clusters to save
+     *  @param  clustersToSave only clusters in both this and the temporary list will be stored
+     *          - other clusters will remain in the temporary list and will be deleted when the parent algorithm exits
      *          - an empty cluster vector will be rejected
      */
-    StatusCode SaveTemporaryClusters(const Algorithm *const pAlgorithm, const std::string &newListName,
-        const std::string &temporaryListName, const ClusterList *const pClusterList = NULL);
+    StatusCode SaveClusters(const Algorithm *const pAlgorithm, const std::string &targetListName, const std::string &sourceListName,
+        const ClusterList &clustersToSave);
 
     /**
      *  @brief  Add a calo hit to a cluster
@@ -143,7 +152,14 @@ private:
     StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit);
 
     /**
-     *  @brief  Merge two clusters, enlarging one cluster and deleting the second
+     *  @brief  Delete a cluster from the current list
+     * 
+     *  @param  pCluster address of the cluster to delete
+     */
+    StatusCode DeleteCluster(Cluster *pCluster);
+
+    /**
+     *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
      * 
      *  @param  pClusterToEnlarge address of the cluster to enlarge
      *  @param  pClusterToDelete address of the cluster to delete
@@ -174,12 +190,12 @@ private:
     StatusCode ResetForNextEvent();
 
     /**
-     *  @brief  Remove a temporary cluster list
+     *  @brief  Remove an empty cluster list
      * 
-     *  @param  pAlgorithm the algorithm associated with the temporary clusters
-     *  @param  temporaryListName the name of the temporary cluster list
+     *  @param  pAlgorithm the algorithm manipulating the cluster lists
+     *  @param  clusterListName the name of the empty cluster list to be removed
      */
-    StatusCode RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
+    StatusCode RemoveEmptyClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName);
 
     /**
      *  @brief  AlgorithmInfo class

@@ -119,9 +119,9 @@ StatusCode ClusterManager::MakeTemporaryListAndSetCurrent(const Algorithm *const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const std::string &originalListName,
-    std::string &temporaryListName, const ClusterList *const pClusterList)
+    std::string &temporaryListName, const ClusterList &clustersToMove)
 {
-    if ((NULL != pClusterList) && pClusterList->empty())
+    if (clustersToMove.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
     NameToClusterListMap::iterator originalClusterListIter = m_nameToClusterListMap.find(originalListName);
@@ -133,20 +133,23 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
         return STATUS_CODE_NOT_INITIALIZED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MakeTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
+    NameToClusterListMap::iterator temporaryClusterListIter = m_nameToClusterListMap.find(temporaryListName);
 
-    if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(temporaryListName))
+    if (m_nameToClusterListMap.end() == temporaryClusterListIter)
         return STATUS_CODE_FAILURE;
 
-    for (ClusterList::iterator clusterIter = originalClusterListIter->second->begin();
-        clusterIter != originalClusterListIter->second->end(); ++clusterIter)
+    for (ClusterList::const_iterator clusterIter = clustersToMove.begin(), clusterIterEnd = clustersToMove.end();
+        clusterIter != clusterIterEnd; ++clusterIter)
     {
-        if ((NULL == pClusterList) || (pClusterList->end() != pClusterList->find(*clusterIter)))
-        {
-            if (!m_nameToClusterListMap[m_currentListName]->insert(*clusterIter).second)
-                return STATUS_CODE_ALREADY_PRESENT;
+        ClusterList::iterator originalClusterIter = originalClusterListIter->second->find(*clusterIter);
 
-            originalClusterListIter->second->erase(clusterIter);
-        }
+        if (originalClusterListIter->second->end() == originalClusterIter)
+            return STATUS_CODE_NOT_FOUND;
+
+        if (!temporaryClusterListIter->second->insert(*originalClusterIter).second)
+            return STATUS_CODE_ALREADY_PRESENT;
+
+        originalClusterListIter->second->erase(originalClusterIter);
     }
 
     return STATUS_CODE_SUCCESS;
@@ -154,47 +157,88 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::SaveTemporaryClusters(const Algorithm *const pAlgorithm, const std::string &newListName,
-    const std::string &temporaryListName, const ClusterList *const pClusterList)
+StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const std::string &targetListName,
+    const std::string &sourceListName)
 {
-    if ((NULL != pClusterList) && pClusterList->empty())
-        return STATUS_CODE_NOT_INITIALIZED;
+    NameToClusterListMap::iterator sourceClusterListIter = m_nameToClusterListMap.find(sourceListName);
 
-    NameToClusterListMap::iterator temporaryClusterListIter = m_nameToClusterListMap.find(temporaryListName);
-
-    if (m_nameToClusterListMap.end() == temporaryClusterListIter)
+    if (m_nameToClusterListMap.end() == sourceClusterListIter)
         return STATUS_CODE_NOT_FOUND;
 
-    if (temporaryClusterListIter->second->empty())
+    if (sourceClusterListIter->second->empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    NameToClusterListMap::iterator newClusterListIter = m_nameToClusterListMap.find(newListName);
+    NameToClusterListMap::iterator targetClusterListIter = m_nameToClusterListMap.find(targetListName);
 
-    if (m_nameToClusterListMap.end() == newClusterListIter)
+    if (m_nameToClusterListMap.end() == targetClusterListIter)
     {
-        m_nameToClusterListMap[newListName] = new ClusterList;
-        newClusterListIter = m_nameToClusterListMap.find(newListName);
+        m_nameToClusterListMap[targetListName] = new ClusterList;
+        targetClusterListIter = m_nameToClusterListMap.find(targetListName);
 
-        if (m_nameToClusterListMap.end() == newClusterListIter)
+        if (m_nameToClusterListMap.end() == targetClusterListIter)
             return STATUS_CODE_FAILURE;
     }
 
-    for (ClusterList::iterator clusterIter = temporaryClusterListIter->second->begin(); 
-        clusterIter != temporaryClusterListIter->second->end(); ++clusterIter)
+    for (ClusterList::iterator clusterIter = sourceClusterListIter->second->begin(), clusterIterEnd = sourceClusterListIter->second->end();
+        clusterIter != clusterIterEnd; ++clusterIter)
     {
-        if ((NULL == pClusterList) || (pClusterList->end() != pClusterList->find(*clusterIter)))
-        {
-            if (!newClusterListIter->second->insert(*clusterIter).second)
-                return STATUS_CODE_ALREADY_PRESENT;
-
-            temporaryClusterListIter->second->erase(clusterIter);
-        }
+        if (!targetClusterListIter->second->insert(*clusterIter).second)
+            return STATUS_CODE_ALREADY_PRESENT;
     }
 
-    m_savedLists.insert(newListName);
+    m_savedLists.insert(targetListName);
 
-    if (temporaryClusterListIter->second->empty())
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveTemporaryList(pAlgorithm, temporaryListName));
+    sourceClusterListIter->second->clear();
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const std::string &targetListName,
+    const std::string &sourceListName, const ClusterList &clustersToSave)
+{
+    if (clustersToSave.empty())
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    NameToClusterListMap::iterator sourceClusterListIter = m_nameToClusterListMap.find(sourceListName);
+
+    if (m_nameToClusterListMap.end() == sourceClusterListIter)
+        return STATUS_CODE_NOT_FOUND;
+
+    if (sourceClusterListIter->second->empty())
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    NameToClusterListMap::iterator targetClusterListIter = m_nameToClusterListMap.find(targetListName);
+
+    if (m_nameToClusterListMap.end() == targetClusterListIter)
+    {
+        m_nameToClusterListMap[targetListName] = new ClusterList;
+        targetClusterListIter = m_nameToClusterListMap.find(targetListName);
+
+        if (m_nameToClusterListMap.end() == targetClusterListIter)
+            return STATUS_CODE_FAILURE;
+    }
+
+    for (ClusterList::const_iterator clusterIter = clustersToSave.begin(), clusterIterEnd = clustersToSave.end();
+        clusterIter != clusterIterEnd; ++clusterIter)
+    {
+        ClusterList::iterator sourceClusterIter = sourceClusterListIter->second->find(*clusterIter);
+
+        if (sourceClusterListIter->second->end() == sourceClusterIter)
+            return STATUS_CODE_NOT_FOUND;
+
+        if (!targetClusterListIter->second->insert(*sourceClusterIter).second)
+            return STATUS_CODE_ALREADY_PRESENT;
+
+        sourceClusterListIter->second->erase(sourceClusterIter);
+    }
+
+    m_savedLists.insert(targetListName);
+
+    if (sourceClusterListIter->second->empty())
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -208,22 +252,43 @@ StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCalo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete)
+StatusCode ClusterManager::DeleteCluster(Cluster *pCluster)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterToEnlarge->AddHitsFromSecondCluster(pClusterToDelete));
-
     NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
 
     if (m_nameToClusterListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;
 
-    ClusterList::iterator clusterIter = listIter->second->find(pClusterToDelete);
+    ClusterList::iterator clusterIter = listIter->second->find(pCluster);
 
     if (listIter->second->end() == clusterIter)
         return STATUS_CODE_NOT_FOUND;
 
-    delete *clusterIter;
+    delete pCluster;
     listIter->second->erase(clusterIter);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete)
+{
+    NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
+
+    if (m_nameToClusterListMap.end() == listIter)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    ClusterList::iterator clusterToEnlargeIter = listIter->second->find(pClusterToEnlarge);
+    ClusterList::iterator clusterToDeleteIter = listIter->second->find(pClusterToDelete);
+
+    if ((listIter->second->end() == clusterToEnlargeIter) || (listIter->second->end() == clusterToDeleteIter))
+        return STATUS_CODE_NOT_FOUND;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterToEnlarge->AddHitsFromSecondCluster(pClusterToDelete));
+
+    delete pClusterToDelete;
+    listIter->second->erase(clusterToDeleteIter);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -316,12 +381,15 @@ StatusCode ClusterManager::ResetForNextEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::RemoveTemporaryList(const Algorithm *const pAlgorithm, const std::string &temporaryListName)
+StatusCode ClusterManager::RemoveEmptyClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName)
 {
-    NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(temporaryListName);
+    NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(clusterListName);
 
     if (m_nameToClusterListMap.end() == clusterListIter)
         return STATUS_CODE_NOT_FOUND;
+
+    if (!clusterListIter->second->empty())
+        return STATUS_CODE_NOT_ALLOWED;
 
     delete clusterListIter->second;
     m_nameToClusterListMap.erase(clusterListIter);
@@ -331,14 +399,18 @@ StatusCode ClusterManager::RemoveTemporaryList(const Algorithm *const pAlgorithm
     if (m_algorithmInfoMap.end() == algorithmListIter)
         return STATUS_CODE_NOT_FOUND;
 
-    StringSet *pStringSet = &(algorithmListIter->second.m_temporaryListNames);
-    pStringSet->erase(pStringSet->find(temporaryListName));
-
-    if (temporaryListName == m_currentListName)
+    if (clusterListName == m_currentListName)
     {
         m_canMakeNewClusters = false;
         m_currentListName = algorithmListIter->second.m_parentListName;
     }
+
+    // Remove record from algorithm info if cluster list was a temporary list
+    StringSet *pStringSet = &(algorithmListIter->second.m_temporaryListNames);
+    StringSet::iterator temporaryListNameIter = pStringSet->find(clusterListName);
+
+    if (pStringSet->end() != temporaryListNameIter)
+        pStringSet->erase(temporaryListNameIter);
 
     return STATUS_CODE_SUCCESS;
 }
