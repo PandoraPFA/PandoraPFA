@@ -242,6 +242,9 @@ StatusCode CaloHitManager::RemoveCaloHitsFromList(const std::string &listName, c
 
 StatusCode CaloHitManager::MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap &caloHitToPfoTargetMap)
 {
+    if (caloHitToPfoTargetMap.empty())
+        return STATUS_CODE_SUCCESS;
+
     for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
         UidToMCParticleMap::const_iterator pfoTargetIter = caloHitToPfoTargetMap.find((*iter)->GetParentCaloHitAddress());
