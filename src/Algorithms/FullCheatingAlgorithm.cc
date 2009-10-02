@@ -30,9 +30,9 @@ StatusCode FullCheatingAlgorithm::Run()
     {
         PandoraContentApi::ParticleFlowObject::Parameters pfo;
         pfo.m_clusterList.insert( (*itCluster) );
-        pfo.m_trackList.insert( (Track*)123 );
+//        pfo.m_trackList.insert( (Track*)0 );
         pfo.m_energy = (*itCluster)->GetBestEnergyEstimate();
-//        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
     }
 
     return STATUS_CODE_SUCCESS;
