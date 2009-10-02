@@ -161,13 +161,8 @@ StatusCode CaloHitManager::SaveList(const OrderedCaloHitList &orderedCaloHitList
     if (m_nameToOrderedCaloHitListMap.end() != m_nameToOrderedCaloHitListMap.find(newListName))
         return STATUS_CODE_ALREADY_PRESENT;
 
-    OrderedCaloHitList *pOrderedCaloHitList = new OrderedCaloHitList;
-
-    if (!m_nameToOrderedCaloHitListMap.insert(NameToOrderedCaloHitListMap::value_type(newListName, pOrderedCaloHitList)).second)
-    {
-        delete pOrderedCaloHitList;
+    if (!m_nameToOrderedCaloHitListMap.insert(NameToOrderedCaloHitListMap::value_type(newListName, new OrderedCaloHitList)).second)
         return STATUS_CODE_ALREADY_PRESENT;
-    }
 
     *(m_nameToOrderedCaloHitListMap[newListName]) = orderedCaloHitList;
     m_savedLists.insert(newListName);

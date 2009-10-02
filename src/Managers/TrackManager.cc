@@ -135,13 +135,8 @@ StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string 
     if (m_nameToTrackListMap.end() != m_nameToTrackListMap.find(newListName))
         return STATUS_CODE_ALREADY_PRESENT;
 
-    TrackList *pTrackList = new TrackList;
-
-    if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, pTrackList)).second)
-    {
-        delete pTrackList;
+    if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, new TrackList)).second)
         return STATUS_CODE_ALREADY_PRESENT;
-    }
 
     *(m_nameToTrackListMap[newListName]) = trackList;
     m_savedLists.insert(newListName);
