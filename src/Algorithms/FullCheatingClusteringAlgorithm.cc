@@ -40,6 +40,11 @@ StatusCode FullCheatingClusteringAlgorithm::Run()
         {
             MCParticle* mc = NULL; 
             (*itCaloHit)->GetMCParticle( mc );
+            if( mc == NULL )
+//               std::cout << "mcparticle " << mc << std::endl;
+//            if( mc == NULL ) return STATUS_CODE_NOT_INITIALIZED;
+               if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle
+
             itHitsPerMCParticle = hitsPerMCParticle.find( mc );
             if( itHitsPerMCParticle == hitsPerMCParticle.end() )
             {
@@ -61,9 +66,10 @@ StatusCode FullCheatingClusteringAlgorithm::Run()
     for( std::map< MCParticle*, CaloHitVector* >::iterator itCHList = hitsPerMCParticle.begin(), itCHListEnd = hitsPerMCParticle.end(); 
          itCHList != itCHListEnd; itCHList++ )
     {
+        if( itCHList->first == NULL ) continue;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, itCHList->second, pCluster ));
-//      float energy = itCHList->first->GetEnergy();
-//      pCluster->SetEnergy( energy );
+        float energy = itCHList->first->GetEnergy();
+        pCluster->SetBestEnergyEstimate( energy );
     }
 
     return STATUS_CODE_SUCCESS;

@@ -29,9 +29,10 @@ StatusCode FullCheatingAlgorithm::Run()
     for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ )
     {
         PandoraContentApi::ParticleFlowObject::Parameters pfo;
-//        pfo.m_clusterList = pClusterList;
+        pfo.m_clusterList.insert( (*itCluster) );
+        pfo.m_trackList.insert( (Track*)123 );
         pfo.m_energy = (*itCluster)->GetBestEnergyEstimate();
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
+//        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -42,7 +43,7 @@ StatusCode FullCheatingAlgorithm::Run()
 StatusCode FullCheatingAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "fullCheatingListName", m_fullCheatingListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterListName", m_fullCheatingListName));
 
     return STATUS_CODE_SUCCESS;
 }
