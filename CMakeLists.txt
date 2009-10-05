@@ -116,11 +116,12 @@ AUX_SOURCE_DIRECTORY( src/Pandora library_sources )
 AUX_SOURCE_DIRECTORY( src/Xml library_sources )
 
 
-IF( MAKE_UNIT_TESTS )
+IF( DEFINED UNIT_TEST_DIRECTORY )
   ADD_DEFINITIONS( -DUNIT_TESTS )
 
-  AUX_SOURCE_DIRECTORY( src/Test library_sources )
-  ADD_EXECUTABLE( testPandora test/TestPandora.cc )
+  AUX_SOURCE_DIRECTORY( ${UNIT_TEST_DIRECTORY}/src library_sources )
+  ADD_EXECUTABLE( testPandora ${UNIT_TEST_DIRECTORY}/src/TestPandora.cc )
+  INCLUDE_DIRECTORIES( "${UNIT_TEST_DIRECTORY}/include")
 
   TARGET_LINK_LIBRARIES( testPandora lib_${PROJECT_NAME} )
 ENDIF()
