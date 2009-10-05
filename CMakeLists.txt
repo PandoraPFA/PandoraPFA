@@ -267,6 +267,8 @@ SET( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" CACHE PATH
     "Path to custom CMake Modules" FORCE )
 SET( INSTALL_DOC "${INSTALL_DOC}" CACHE BOOL
     "Set to OFF to skip build/install Documentation" FORCE )
+SET( MAKE_UNIT_TESTS "${MAKE_UNIT_TESTS}" CACHE BOOL
+    "Set to ON to build unit tests" FORCE )
 
 # export build settings
 INCLUDE( CMakeExportBuildSettings )
