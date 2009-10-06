@@ -28,6 +28,7 @@ class TrackState;
     #define ADD_TEST_CLASS_FRIENDS      \
     friend class TestCaloHitManager;    \
     friend class TestMCManager;         \
+    friend class TestTrackManager;         \
     friend class TestPandora;
 #else
     #define ADD_TEST_CLASS_FRIENDS

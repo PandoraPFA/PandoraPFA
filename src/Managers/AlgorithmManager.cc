@@ -8,8 +8,8 @@
 
 #include "Algorithms/ClusteringAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
-#include "Algorithms/FullCheatingAlgorithm.h"
-#include "Algorithms/FullCheatingClusteringAlgorithm.h"
+#include "Algorithms/CheatingAlgorithm.h"
+#include "Algorithms/PerfectClusteringAlgorithm.h"
 #include "Algorithms/PfoConstructionAlgorithm.h"
 #include "Algorithms/PhotonClusteringAlgorithm.h"
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
@@ -29,8 +29,8 @@ AlgorithmManager::AlgorithmManager(Pandora *pPandora) :
 {
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Clustering", new ClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FragmentRemoval", new FragmentRemovalAlgorithm::Factory));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FullCheating", new FullCheatingAlgorithm::Factory));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FullCheatingClustering", new FullCheatingClusteringAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Cheating", new CheatingAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PerfectClustering", new PerfectClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PfoConstruction", new PfoConstructionAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PhotonClustering", new PhotonClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PrimaryClustering", new PrimaryClusteringAlgorithm::Factory));
