@@ -31,6 +31,7 @@ public:
     };
 
     typedef std::vector<LayerParameters> LayerParametersList;
+    typedef std::vector<float> LayerPositionList;
 
     /**
      *  @brief  SubDetectorParameters class
@@ -42,8 +43,10 @@ public:
          *  @brief  Initialize sub detector parameters
          * 
          *  @param  inputParameters the input sub detector parameters
+         *  @param  pLayerPositionsList optional list to receive the distances of the layers from the interaction point
          */
-        void Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters);
+        void Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters,
+            LayerPositionList *const pLayerPositionList = NULL);
 
         /**
          *  @brief  Get the inner cylindrical polar r coordinate, origin interaction point, units mm
@@ -240,6 +243,32 @@ public:
      */
     const SubDetectorParametersList &GetAdditionalSubDetectors() const;
 
+    /**
+     *  @brief  Find the layer number corresponding to a specified radial position in the barrel
+     * 
+     *  @param  radius the radial distance to the ip
+     *  @param  layer to receive the layer number
+     */
+    StatusCode FindBarrelLayer(float radius, unsigned int &layer) const;
+
+    /**
+     *  @brief  Find the layer number corresponding to specified z position in the endcap
+     * 
+     *  @param  zCoordinate the z distance to the ip
+     *  @param  layer to receive the layer number
+     */
+    StatusCode FindEndCapLayer(float zCoordinate, unsigned int &layer) const;
+
+    /**
+     *  @brief  Get the maximum radius
+     * 
+     *  @param  x the cartesian x coordinate
+     *  @param  y the cartesian y coordinate
+     * 
+     *  @return the maximum radius
+     */
+    float GetMaximumRadius(float x, float y) const;
+
 private:
     /**
      *  @brief  Constructor
@@ -279,6 +308,9 @@ private:
     float                       m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
 
     SubDetectorParametersList   m_additionalSubDetectors;   ///< Parameters for any additional subdetectors
+
+    LayerPositionList           m_barrelLayerPositions;     ///< The barrel layer positions list
+    LayerPositionList           m_endCapLayerPositions;     ///< The endcap layer positions list
 
     static bool                 m_instanceFlag;             ///< The geometry helper instance flag
     static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance

@@ -8,6 +8,8 @@
  
 #include "Helpers/GeometryHelper.h"
 
+#include <cmath>
+
 namespace pandora
 {
 
@@ -63,10 +65,10 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_nRadLengthsInRadialGap = geometryParameters.m_nRadLengthsInRadialGap.Get();
         m_nIntLengthsInRadialGap = geometryParameters.m_nIntLengthsInRadialGap.Get();
 
-        m_eCalBarrelParameters.Initialize(geometryParameters.m_eCalBarrelParameters);
-        m_hCalBarrelParameters.Initialize(geometryParameters.m_hCalBarrelParameters);
-        m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters);
-        m_hCalEndCapParameters.Initialize(geometryParameters.m_hCalEndCapParameters);
+        m_eCalBarrelParameters.Initialize(geometryParameters.m_eCalBarrelParameters, &m_barrelLayerPositions);
+        m_hCalBarrelParameters.Initialize(geometryParameters.m_hCalBarrelParameters, &m_barrelLayerPositions);
+        m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters, &m_endCapLayerPositions);
+        m_hCalEndCapParameters.Initialize(geometryParameters.m_hCalEndCapParameters, &m_endCapLayerPositions);
 
         for (PandoraApi::GeometryParameters::SubDetectorParametersList::const_iterator iter = geometryParameters.m_additionalSubDetectors.begin(),
             iterEnd = geometryParameters.m_additionalSubDetectors.end(); iter != iterEnd; ++iter)
@@ -90,7 +92,8 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters)
+void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters,
+    LayerPositionList *const pLayerPositionList)
 {
     m_innerRCoordinate      = inputParameters.m_innerRCoordinate.Get();
     m_innerZCoordinate      = inputParameters.m_innerZCoordinate.Get();
@@ -117,7 +120,93 @@ void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::Geometr
         layerParameters.m_nInteractionLengths   = iter->m_nInteractionLengths.Get();
 
         m_layerParametersList.push_back(layerParameters);
+
+        if (NULL != pLayerPositionList)
+            pLayerPositionList->push_back(layerParameters.m_closestDistanceToIp);
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer) const
+{
+    for (unsigned int iLayer = 0, iLayerEnd = m_barrelLayerPositions.size(); iLayer < iLayerEnd; ++iLayer)
+    {
+        const float separation = m_barrelLayerPositions[iLayer] - radius;
+
+        if (separation > 0)
+        {
+            layer = iLayer;
+
+            if ((layer > 0) && ((radius - m_barrelLayerPositions[iLayer - 1]) < separation))
+                layer = iLayer - 1;
+
+            return STATUS_CODE_SUCCESS;
+        }
+    }
+
+    if (m_hCalBarrelParameters.GetOuterRCoordinate() > radius)
+    {
+        layer = m_barrelLayerPositions.size();
+        return STATUS_CODE_SUCCESS;
+    }
+
+    return STATUS_CODE_NOT_FOUND;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &layer) const
+{
+    for (unsigned int iLayer = 0, iLayerEnd = m_endCapLayerPositions.size(); iLayer < iLayerEnd; ++iLayer)
+    {
+        const float separation = m_endCapLayerPositions[iLayer] - zCoordinate;
+
+        if (separation > 0)
+        {
+            layer = iLayer;
+
+            if ((layer > 0) && ((zCoordinate - m_endCapLayerPositions[iLayer - 1]) < separation))
+                layer = iLayer - 1;
+
+            return STATUS_CODE_SUCCESS;
+        }
+    }
+
+    if (m_hCalEndCapParameters.GetOuterZCoordinate() > zCoordinate)
+    {
+        layer = m_endCapLayerPositions.size();
+        return STATUS_CODE_SUCCESS;
+    }
+
+    return STATUS_CODE_NOT_FOUND;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float GeometryHelper::GetMaximumRadius(float x, float y) const
+{
+    static const unsigned int symmetryOrder = m_eCalBarrelParameters.GetInnerSymmetryOrder();
+    static const float phi0 = m_eCalBarrelParameters.GetInnerPhiCoordinate();
+
+    if (symmetryOrder <= 2)
+        return std::sqrt((x * x) + (y * y));
+
+    float maxRadius = 0;
+    static const float twoPi = 2. * std::acos(-1.);
+
+    // TODO shorten/remove these calculations
+    for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)
+    {
+        const float phi = phi0 + ((twoPi * static_cast<float>(iSymmetry)) / static_cast<float>(symmetryOrder));
+        const float radius = (x * std::cos(phi)) + (y * std::sin(phi));
+
+        if(radius > maxRadius)
+            maxRadius = radius;
+    }
+
+    return maxRadius;
 }
 
 } // namespace pandora
