@@ -100,7 +100,7 @@ public:
      * 
      *   @param  particleFlowObjectList container to receive the particle flow objects
      */
-    StatusCode GetParticleFlowObjects(PandoraApi::ParticleFlowObjectList &particleFlowObjectList) const;
+    StatusCode GetParticleFlowObjects(ParticleFlowObjectList &particleFlowObjectList) const;
 
     /**
      *  @brief  Reset pandora to process another event

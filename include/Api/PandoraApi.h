@@ -8,6 +8,8 @@
 #ifndef PANDORA_API_H
 #define PANDORA_API_H 1
 
+#include "Objects/ParticleFlowObject.h"
+
 #include "Pandora/Pandora.h"
 #include "Pandora/PandoraInputTypes.h"
 
@@ -161,19 +163,6 @@ public:
     typedef ObjectCreationHelper<GeometryParameters> Geometry;
 
     /**
-     *  @brief  ParticleFlowObject class
-     */
-    class ParticleFlowObject
-    {
-    public:
-        float                           m_energy;                   ///< The particle flow object energy
-        pandora::TrackAddressList       m_trackAddressList;         ///< The track address list
-        pandora::ClusterAddressList     m_clusterAddressList;       ///< The cluster address list
-    };
-
-    typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
-
-    /**
      *  @brief  Process an event
      * 
      *  @param  pandora the pandora instance to process event
@@ -256,7 +245,7 @@ public:
      *  @param  pandora the pandora instance to get the objects from
      *  @param  pfoVector container to receive the particle flow objects
      */
-    static StatusCode GetParticleFlowObjects(const pandora::Pandora &pandora, ParticleFlowObjectList &particleFlowObjectList);
+    static StatusCode GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList);
 
     /**
      *  @brief  Reset pandora to process another event

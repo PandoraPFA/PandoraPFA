@@ -92,6 +92,16 @@ StatusCode CaloHit::SetSurroundingEnergy(float surroundingEnergy)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode CaloHit::SetDensityWeight(float densityWeight)
+{
+    if (!(m_densityWeight = densityWeight))
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void CaloHit::SetMipTrackFlag(bool mipTrackFlag)
 {
     m_isMipTrack = mipTrackFlag;

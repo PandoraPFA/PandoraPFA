@@ -63,9 +63,13 @@ public:
         class Parameters
         {
         public:
-            pandora::InputFloat     m_energy;           ///< The particle flow object energy
-            pandora::ClusterList    m_clusterList;      ///< The clusters in the particle flow object
-            pandora::TrackList      m_trackList;        ///< The tracks in the particle flow object
+            pandora::InputInt               m_particleId;       ///< The particle flow object id (PDG code)
+            pandora::InputInt               m_chargeSign;       ///< The particle flow object charge sign
+            pandora::InputFloat             m_mass;             ///< The particle flow object mass
+            pandora::InputFloat             m_energy;           ///< The particle flow object energy
+            pandora::InputCartesianVector   m_momentum;         ///< The particle flow object momentum
+            pandora::ClusterList            m_clusterList;      ///< The clusters in the particle flow object
+            pandora::TrackList              m_trackList;        ///< The tracks in the particle flow object
         };
 
         /**

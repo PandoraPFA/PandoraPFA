@@ -159,6 +159,13 @@ public:
     float GetSurroundingEnergy() const;
 
     /**
+     *  @brief  Get the density weight
+     * 
+     *  @return the density weight
+     */
+    float GetDensityWeight() const;
+
+    /**
      *  @brief  Whether the calo hit is flagged as part of a mip track
      * 
      *  @return boolean
@@ -226,6 +233,13 @@ private:
     StatusCode SetHadronicEnergy(float hadronicEnergy);
 
     /**
+     *  @brief  Set the density weight
+     * 
+     *  @param  densityWeight the density weight
+     */
+    StatusCode SetDensityWeight(float densityWeight);
+
+    /**
      *  @brief  Set the surrounding energy
      * 
      *  @param  surroundingEnergy the surrounding energy
@@ -276,6 +290,8 @@ private:
     InputFloat              m_mipEquivalentEnergy;      ///< The mip equivalent energy, units mip
     InputFloat              m_electromagneticEnergy;    ///< The electromagnetic energy measure, units GeV
     InputFloat              m_hadronicEnergy;           ///< The hadronic energy measure, units GeV
+
+    InputFloat              m_densityWeight;            ///< The density weight
     InputFloat              m_surroundingEnergy;        ///< The surrounding energy, units GeV
 
     bool                    m_isMipTrack;               ///< Whether the calo hit is part of a mip track
@@ -439,6 +455,13 @@ inline float CaloHit::GetHadronicEnergy() const
 inline float CaloHit::GetSurroundingEnergy() const
 {
     return m_surroundingEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetDensityWeight() const
+{
+    return m_densityWeight.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

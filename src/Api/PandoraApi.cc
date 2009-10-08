@@ -77,7 +77,7 @@ StatusCode PandoraApi::SetTrackToMCParticleRelationship(const pandora::Pandora &
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, PandoraApi::ParticleFlowObjectList &particleFlowObjectList)
+StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList)
 {
     return pandora.GetPandoraApiImpl()->GetParticleFlowObjects(particleFlowObjectList);
 }

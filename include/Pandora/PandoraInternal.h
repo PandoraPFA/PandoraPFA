@@ -19,8 +19,9 @@ namespace pandora
 
 class CaloHit;
 class Cluster;
-class OrderedCaloHitList;
 class MCParticle;
+class OrderedCaloHitList;
+class ParticleFlowObject;
 class Track;
 class TrackState;
 
@@ -28,7 +29,7 @@ class TrackState;
     #define ADD_TEST_CLASS_FRIENDS      \
     friend class TestCaloHitManager;    \
     friend class TestMCManager;         \
-    friend class TestTrackManager;         \
+    friend class TestTrackManager;      \
     friend class TestPandora;
 #else
     #define ADD_TEST_CLASS_FRIENDS
@@ -86,6 +87,7 @@ typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<TrackState *> TrackStateList;
 typedef std::vector<CaloHit *> CaloHitVector;
+typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
 
 typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;
 typedef std::set<Track *, PointerLessThan<Track> > MomentumSortedTrackList;
