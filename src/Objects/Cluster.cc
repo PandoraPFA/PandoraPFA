@@ -15,7 +15,7 @@ namespace pandora
 
 Cluster::Cluster(CaloHit *pCaloHit) :
     m_nCaloHits(0),
-    m_nMipTrackHits(0),
+    m_nPossibleMipHits(0),
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
@@ -34,7 +34,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
 
 Cluster::Cluster(CaloHitVector *pCaloHitVector) :
     m_nCaloHits(0),
-    m_nMipTrackHits(0),
+    m_nPossibleMipHits(0),
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
@@ -54,7 +54,7 @@ Cluster::Cluster(CaloHitVector *pCaloHitVector) :
 
 Cluster::Cluster(Track *pTrack) :
     m_nCaloHits(0),
-    m_nMipTrackHits(0),
+    m_nPossibleMipHits(0),
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
@@ -78,8 +78,8 @@ StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
     m_isUpToDate = false;
     m_nCaloHits++;
 
-    if (pCaloHit->IsMipTrack())
-        m_nMipTrackHits++;
+    if (pCaloHit->IsPossibleMip())
+        m_nPossibleMipHits++;
 
     const float x(pCaloHit->GetPositionVector().GetX());
     const float y(pCaloHit->GetPositionVector().GetY());
@@ -129,8 +129,8 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
     m_isUpToDate = false;
     m_nCaloHits--;
 
-    if (pCaloHit->IsMipTrack())
-        m_nMipTrackHits--;
+    if (pCaloHit->IsPossibleMip())
+        m_nPossibleMipHits--;
 
     const float x(pCaloHit->GetPositionVector().GetX());
     const float y(pCaloHit->GetPositionVector().GetY());
@@ -188,7 +188,7 @@ StatusCode Cluster::ResetProperties()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.Reset());
 
     m_nCaloHits = 0;
-    m_nMipTrackHits = 0;
+    m_nPossibleMipHits = 0;
 
     m_sumX = m_sumY = m_sumZ = 0;
     m_sumXX = m_sumYY = m_sumZZ = 0;

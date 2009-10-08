@@ -56,8 +56,11 @@ public:
         pandora::InputFloat             m_cellSizeZ;                ///< Dimension of cell, z-coordinate, units mm
         pandora::InputFloat             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
         pandora::InputFloat             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
-        pandora::InputFloat             m_energy;                   ///< Corrected energy of the calorimeter cell, units GeV
         pandora::InputFloat             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
+        pandora::InputFloat             m_inputEnergy;              ///< Corrected energy of calorimeter cell in user framework, units GeV
+        pandora::InputFloat             m_mipEquivalentEnergy;      ///< The calibrated mip equivalent energy, units mip
+        pandora::InputFloat             m_electromagneticEnergy;    ///< The calibrated electromagnetic energy measure, units GeV
+        pandora::InputFloat             m_hadronicEnergy;           ///< The calibrated hadronic energy measure, units GeV
         pandora::InputBool              m_isDigital;                ///< Whether cell should be treated as digital
         pandora::InputHitType           m_hitType;                  ///< The type of calorimeter hit
         pandora::InputDetectorRegion    m_detectorRegion;           ///< Region of the detector in which the calo hit is located

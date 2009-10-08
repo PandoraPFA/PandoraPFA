@@ -131,23 +131,23 @@ public:
     PseudoLayer GetPseudoLayer() const;
 
     /**
-     *  @brief  Get the mip equivalent energy
+     *  @brief  Get the calibrated mip equivalent energy
      * 
-     *  @return the mip equivalent energy
+     *  @return the calibrated mip equivalent energy
      */
     float GetMipEquivalentEnergy() const;
 
     /**
-     *  @brief  Get the electromagnetic energy measure
+     *  @brief  Get the calibrated electromagnetic energy measure
      * 
-     *  @return the electromagnetic energy
+     *  @return the calibrated electromagnetic energy
      */
     float GetElectromagneticEnergy() const;
 
     /**
-     *  @brief  Get the hadronic energy measure
+     *  @brief  Get the calibrated hadronic energy measure
      * 
-     *  @return the hadronic energy
+     *  @return the calibrated hadronic energy
      */
     float GetHadronicEnergy() const;
 
@@ -166,11 +166,11 @@ public:
     float GetDensityWeight() const;
 
     /**
-     *  @brief  Whether the calo hit is flagged as part of a mip track
+     *  @brief  Whether the calo hit is flagged as a possible mip hit
      * 
      *  @return boolean
      */
-    bool IsMipTrack() const;
+    bool IsPossibleMip() const;
 
     /**
      *  @brief  Whether the calo hit is flagged as isolated
@@ -212,27 +212,6 @@ private:
     StatusCode SetPseudoLayer(PseudoLayer pseudoLayer);
 
     /**
-     *  @brief  Set the mip equivalent energy
-     * 
-     *  @param  mipEquivalentEnergy the mip equivalent energy
-     */
-    StatusCode SetMipEquivalentEnergy(float mipEquivalentEnergy);
-
-    /**
-     *  @brief  Set the electromagnetic energy measure
-     * 
-     *  @param  electromagneticEnergy the electromagnetic energy
-     */
-    StatusCode SetElectromagneticEnergy(float electromagneticEnergy);
-
-    /**
-     *  @brief  Set the hadronic energy measure
-     * 
-     *  @param  hadronicEnergy the hadronic energy
-     */
-    StatusCode SetHadronicEnergy(float hadronicEnergy);
-
-    /**
      *  @brief  Set the density weight
      * 
      *  @param  densityWeight the density weight
@@ -247,11 +226,11 @@ private:
     StatusCode SetSurroundingEnergy(float surroundingEnergy);
 
     /**
-     *  @brief  Set the mip track flag
+     *  @brief  Set the possible mip flag
      * 
-     *  @param  mipTrackFlag the mip track flag
+     *  @param  possibleMipFlag the possible mip flag
      */
-    void SetMipTrackFlag(bool mipTrackFlag);
+    void SetPossibleMipFlag(bool possibleMipFlag);
 
     /**
      *  @brief  Set the isolated hit flag
@@ -277,8 +256,12 @@ private:
     const float             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
     const float             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
 
-    const float             m_inputEnergy;              ///< Corrected energy of the calorimeter cell, units GeV, supplied by user
     const float             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
+    const float             m_inputEnergy;              ///< Corrected energy of calorimeter cell in user framework, units GeV
+
+    const float             m_mipEquivalentEnergy;      ///< The calibrated mip equivalent energy, units mip
+    const float             m_electromagneticEnergy;    ///< The calibrated electromagnetic energy measure, units GeV
+    const float             m_hadronicEnergy;           ///< The calibrated hadronic energy measure, units GeV
 
     const bool              m_isDigital;                ///< Whether cell should be treated as digital (implies constant cell energy)
     const HitType           m_hitType;                  ///< The type of calorimeter hit
@@ -287,14 +270,10 @@ private:
     const unsigned int      m_layer;                    ///< The subdetector readout layer number
     InputPseudoLayer        m_pseudoLayer;              ///< The pseudo layer to which the calo hit has been assigned
 
-    InputFloat              m_mipEquivalentEnergy;      ///< The mip equivalent energy, units mip
-    InputFloat              m_electromagneticEnergy;    ///< The electromagnetic energy measure, units GeV
-    InputFloat              m_hadronicEnergy;           ///< The hadronic energy measure, units GeV
-
     InputFloat              m_densityWeight;            ///< The density weight
     InputFloat              m_surroundingEnergy;        ///< The surrounding energy, units GeV
 
-    bool                    m_isMipTrack;               ///< Whether the calo hit is part of a mip track
+    bool                    m_isPossibleMip;            ///< Whether the calo hit is a possible mip hit
     bool                    m_isIsolated;               ///< Whether the calo hit is isolated
 
     bool                    m_isAvailable;              ///< Whether the calo hit is available to be added to a cluster
@@ -433,21 +412,21 @@ inline PseudoLayer CaloHit::GetPseudoLayer() const
 
 inline float CaloHit::GetMipEquivalentEnergy() const
 {
-    return m_mipEquivalentEnergy.Get();
+    return m_mipEquivalentEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float CaloHit::GetElectromagneticEnergy() const
 {
-    return m_electromagneticEnergy.Get();
+    return m_electromagneticEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float CaloHit::GetHadronicEnergy() const
 {
-    return m_hadronicEnergy.Get();
+    return m_hadronicEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -466,9 +445,9 @@ inline float CaloHit::GetDensityWeight() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool CaloHit::IsMipTrack() const
+inline bool CaloHit::IsPossibleMip() const
 {
-    return m_isMipTrack;
+    return m_isPossibleMip;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

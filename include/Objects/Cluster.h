@@ -50,7 +50,7 @@ public:
     unsigned int GetNCaloHits() const;
 
     /**
-     *  @brief  Get fraction of constituent calo hits that have been flagged as part of a mip track
+     *  @brief  Get fraction of constituent calo hits that have been flagged as possible mip hits
      * 
      *  @return The mip fraction
      */
@@ -226,7 +226,7 @@ private:
     OrderedCaloHitList      m_orderedCaloHitList;       ///< The ordered calo hit list
 
     unsigned int            m_nCaloHits;                ///< The number of calo hits
-    unsigned int            m_nMipTrackHits;            ///< The number of calo hits that have been flagged as part of a mip track
+    unsigned int            m_nPossibleMipHits;         ///< The number of calo hits that have been flagged as possible mip hits
 
     float                   m_electromagneticEnergy;    ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
     float                   m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
@@ -300,8 +300,8 @@ inline float Cluster::GetMipFraction() const
 {
     float mipFraction = 0;
 
-    if (0 != m_nMipTrackHits)
-        mipFraction = float (m_nCaloHits) / float (m_nMipTrackHits);
+    if (0 != m_nCaloHits)
+        mipFraction = float (m_nPossibleMipHits) / float (m_nCaloHits);
 
     return mipFraction;
 }

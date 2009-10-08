@@ -20,13 +20,16 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_cellSizeZ(caloHitParameters.m_cellSizeZ.Get()),
     m_nRadiationLengths(caloHitParameters.m_nRadiationLengths.Get()),
     m_nInteractionLengths(caloHitParameters.m_nInteractionLengths.Get()),
-    m_inputEnergy(caloHitParameters.m_energy.Get()),
     m_time(caloHitParameters.m_time.Get()),
+    m_inputEnergy(caloHitParameters.m_inputEnergy.Get()),
+    m_mipEquivalentEnergy(caloHitParameters.m_mipEquivalentEnergy.Get()),
+    m_electromagneticEnergy(caloHitParameters.m_electromagneticEnergy.Get()),
+    m_hadronicEnergy(caloHitParameters.m_hadronicEnergy.Get()),
     m_isDigital(caloHitParameters.m_isDigital.Get()),
     m_hitType(caloHitParameters.m_hitType.Get()),
     m_detectorRegion(caloHitParameters.m_detectorRegion.Get()),
     m_layer(caloHitParameters.m_layer.Get()),
-    m_isMipTrack(false),
+    m_isPossibleMip(false),
     m_isIsolated(false),
     m_isAvailable(true),
     m_pMCParticle(NULL),
@@ -45,36 +48,6 @@ CaloHit::~CaloHit()
 StatusCode CaloHit::SetPseudoLayer(PseudoLayer pseudoLayer)
 {
     if (!(m_pseudoLayer = pseudoLayer))
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode CaloHit::SetMipEquivalentEnergy(float mipEquivalentEnergy)
-{
-    if (!(m_mipEquivalentEnergy = mipEquivalentEnergy))
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode CaloHit::SetElectromagneticEnergy(float electromagneticEnergy)
-{
-    if (!(m_electromagneticEnergy = electromagneticEnergy))
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode CaloHit::SetHadronicEnergy(float hadronicEnergy)
-{
-    if (!(m_hadronicEnergy = hadronicEnergy))
         return STATUS_CODE_NOT_INITIALIZED;
 
     return STATUS_CODE_SUCCESS;
@@ -102,9 +75,9 @@ StatusCode CaloHit::SetDensityWeight(float densityWeight)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CaloHit::SetMipTrackFlag(bool mipTrackFlag)
+void CaloHit::SetPossibleMipFlag(bool possibleMipFlag)
 {
-    m_isMipTrack = mipTrackFlag;
+    m_isPossibleMip = possibleMipFlag;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
