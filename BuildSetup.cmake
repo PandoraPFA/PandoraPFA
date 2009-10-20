@@ -15,18 +15,8 @@
 # Setup path variables
 #############################################################################
 
-# The three path variables below are only required if you wish to use the pandora monitoring package
-
-# PANDORA_HOME
-#SET( PANDORA_HOME "path_to_pandora_home"
-#    CACHE PATH "Path to pandora Software" FORCE )
-
-# Path to PandoraMonitoring
-#SET( PandoraMonitoring_HOME "${PANDORA_HOME}/PandoraMonitoring"
-#    CACHE PATH "Path to PandoraMonitoring" FORCE )
-
-# CMake Modules Path
-#SET( CMAKE_MODULE_PATH "${PANDORA_HOME}/CMakeModules/v01-08"
+# CMake Modules Path, only required if you wish to use the pandora monitoring package
+#SET( CMAKE_MODULE_PATH "${HOME}/CMakeModules/v01-08"
 #    CACHE PATH "Path to CMake Modules" FORCE )
 
 ###############################################

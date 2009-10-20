@@ -6,9 +6,9 @@
  *  $Log: $
  */
 
-#include "Pandora/PandoraSettings.h"
+#include "Algorithms/Algorithm.h"
 
-#include "Xml/tinyxml.h"
+#include "Pandora/PandoraSettings.h"
 
 namespace pandora
 {
@@ -52,7 +52,9 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         if (m_isInitialized)
             return STATUS_CODE_ALREADY_INITIALIZED;
 
-        // TODO read in pandora parameters here
+        m_isMonitoringEnabled = false;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "IsMonitoringEnabled", m_isMonitoringEnabled));
 
         m_isInitialized = true;
 

@@ -28,6 +28,13 @@ public:
      */
     static PandoraSettings *GetInstance();
 
+    /**
+     *  @brief  Whether monitoring is enabled
+     * 
+     *  @return boolean
+     */
+    bool IsMonitoringEnabled() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -49,10 +56,19 @@ private:
     bool                        m_isInitialized;            ///< Whether the pandora settings have been initialized
 
     static bool                 m_instanceFlag;             ///< The geometry helper instance flag
-    static PandoraSettings     *m_pPandoraSettings;        ///< The geometry helper instance
+    static PandoraSettings     *m_pPandoraSettings;         ///< The geometry helper instance
+
+    bool                        m_isMonitoringEnabled;      ///< Whether monitoring is enabled
 
     friend class Pandora;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool PandoraSettings::IsMonitoringEnabled() const
+{
+    return m_isMonitoringEnabled;
+}
 
 } // namespace pandora
 

@@ -36,11 +36,6 @@ OPTION( BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON )
 OPTION( BUILD_32BIT_COMPATIBLE "Set to ON to build in 32 bit compatibility mode" ON )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 
-# project dependencies; only link against pandora monitoring if its path has been specified in BuildSetup.cmake
-IF( DEFINED PandoraMonitoring_HOME )
-    SET( LINK_WITH "PandoraMonitoring" )
-ENDIF()
-
 IF( APPLE )
     LIST(APPEND ${PROJECT_NAME}_DEPENDS "streamlog")
 ENDIF() 
@@ -86,8 +81,15 @@ ENDIF()
 #include directories
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include")
 
-IF( DEFINED PandoraMonitoring_HOME )
-    INCLUDE_DIRECTORIES( "${PandoraMonitoring_HOME}/include")
+IF( DEFINED MONITORING_DIRECTORY )
+    ADD_DEFINITIONS( -DMONITORING )
+
+    INCLUDE_DIRECTORIES( "${MONITORING_DIRECTORY}/include")
+
+    SET( PandoraMonitoring_HOME "${MONITORING_DIRECTORY}"
+        CACHE PATH "Path to PandoraMonitoring" FORCE )
+
+    SET( LINK_WITH "PandoraMonitoring" )
 ENDIF()
 
 # install include files
@@ -117,13 +119,13 @@ AUX_SOURCE_DIRECTORY( src/Xml library_sources )
 
 
 IF( DEFINED UNIT_TEST_DIRECTORY )
-  ADD_DEFINITIONS( -DUNIT_TESTS )
+    ADD_DEFINITIONS( -DUNIT_TESTS )
 
-  AUX_SOURCE_DIRECTORY( ${UNIT_TEST_DIRECTORY}/src library_sources )
-  ADD_EXECUTABLE( unitTests ${UNIT_TEST_DIRECTORY}/src/RunUnitTests.cc )
-  INCLUDE_DIRECTORIES( "${UNIT_TEST_DIRECTORY}/include")
+    AUX_SOURCE_DIRECTORY( ${UNIT_TEST_DIRECTORY}/src library_sources )
+    ADD_EXECUTABLE( unitTests ${UNIT_TEST_DIRECTORY}/src/RunUnitTests.cc )
+    INCLUDE_DIRECTORIES( "${UNIT_TEST_DIRECTORY}/include")
 
-  TARGET_LINK_LIBRARIES( unitTests lib_${PROJECT_NAME} )
+    TARGET_LINK_LIBRARIES( unitTests lib_${PROJECT_NAME} )
 ENDIF()
 
 ### DOCUMENTATION ############################################################
@@ -246,6 +248,7 @@ MESSAGE( STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
 MESSAGE( STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}" )
 MESSAGE( STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}" )
 MESSAGE( STATUS "UNIT_TEST_DIRECTORY = ${UNIT_TEST_DIRECTORY}" )
+MESSAGE( STATUS "MONITORING_DIRECTORY = ${MONITORING_DIRECTORY}" )
 IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     MESSAGE( STATUS "BUILD_32BIT_COMPATIBLE = ${BUILD_32BIT_COMPATIBLE}" )
 ENDIF()
@@ -268,8 +271,10 @@ SET( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" CACHE PATH
     "Path to custom CMake Modules" FORCE )
 SET( INSTALL_DOC "${INSTALL_DOC}" CACHE BOOL
     "Set to OFF to skip build/install Documentation" FORCE )
-SET( UNIT_TEST_DIRECTORY "${UNIT_TEST_DIRECTORY}" CACHE BOOL
-    "Set to location of unit tests sources" FORCE )
+SET( UNIT_TEST_DIRECTORY "${UNIT_TEST_DIRECTORY}" CACHE PATH
+    "Set to location of unit tests source" FORCE )
+SET( MONITORING_DIRECTORY "${MONITORING_DIRECTORY}" CACHE PATH
+    "Set to location of pandora monitoring package" FORCE )
 
 # export build settings
 INCLUDE( CMakeExportBuildSettings )

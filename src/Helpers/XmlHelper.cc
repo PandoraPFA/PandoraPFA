@@ -27,6 +27,32 @@ StatusCode XmlHelper::ReadValue(const TiXmlHandle &xmlHandle, const std::string 
     return STATUS_CODE_SUCCESS;
 }
 
+template <>
+StatusCode XmlHelper::ReadValue<bool>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, bool &t)
+{
+    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
+
+    if (NULL == pXmlElement)
+        return STATUS_CODE_NOT_FOUND;
+
+    const std::string xmlElementString = pXmlElement->GetText();
+
+    if ((xmlElementString == "1") || (xmlElementString == "true"))
+    {
+        t = true;
+    }
+    else if ((xmlElementString == "0") || (xmlElementString == "false"))
+    {
+        t = false;
+    }
+    else
+    {
+        return STATUS_CODE_FAILURE;
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
@@ -139,6 +165,7 @@ template StatusCode XmlHelper::XmlHelper::ReadValue<int>(const TiXmlHandle &xmlH
 template StatusCode XmlHelper::XmlHelper::ReadValue<unsigned int>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, unsigned int &u);
 template StatusCode XmlHelper::XmlHelper::ReadValue<float>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, float &f);
 template StatusCode XmlHelper::XmlHelper::ReadValue<double>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, double &d);
+template StatusCode XmlHelper::XmlHelper::ReadValue<bool>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, bool &b);
 
 template StatusCode XmlHelper::XmlHelper::ReadVectorOfValues<std::string>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<std::string> &vector);
 template StatusCode XmlHelper::XmlHelper::ReadVectorOfValues<int>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<int> &vector);

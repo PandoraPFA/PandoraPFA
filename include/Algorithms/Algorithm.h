@@ -19,6 +19,13 @@
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
 
+#include "Pandora/PandoraInternal.h"
+#include "Pandora/PandoraSettings.h"
+
+#ifdef MONITORING
+#include "PandoraMonitoringApi.h"
+#endif
+
 namespace pandora
 {
 

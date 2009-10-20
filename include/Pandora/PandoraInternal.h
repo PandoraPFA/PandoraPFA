@@ -25,6 +25,18 @@ class ParticleFlowObject;
 class Track;
 class TrackState;
 
+#ifdef MONITORING
+    #define PANDORA_MONITORING_API(command)                         \
+    if (PandoraSettings::GetInstance()->IsMonitoringEnabled())      \
+    {                                                               \
+        PandoraMonitoringApi::command;                              \
+    }
+#else
+    #define PANDORA_MONITORING_API(command)
+#endif
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 #ifdef UNIT_TESTS 
     #define ADD_TEST_CLASS_FRIENDS      \
     friend class TestCaloHitManager;    \
