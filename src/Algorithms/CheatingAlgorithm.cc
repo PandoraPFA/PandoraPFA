@@ -69,7 +69,11 @@ StatusCode CheatingAlgorithm::Run()
             return STATUS_CODE_FAILURE; // unknown parameter
         }
 //        std::cout << "energy " << energy << std::endl;
-        pfo.m_energy = energy;
+        pfo.m_energy = energy; 
+        pfo.m_chargeSign = 0;
+        pfo.m_mass = 10;
+        pfo.m_momentum = CartesianVector( 10, 20, 30);
+        pfo.m_particleId = 211;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
         energySum += energy;
     }
