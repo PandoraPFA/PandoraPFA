@@ -107,6 +107,34 @@ StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode CaloHitManager::CalculateDensityWeights() const
+{
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitManager::IdentifyIsolatedHits() const
+{
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitManager::IdentifyPossibleMipHits() const
+{
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitManager::CalculateSurroundingEnergy() const
+{
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode CaloHitManager::GetList(const std::string &listName, const OrderedCaloHitList *&pOrderedCaloHitList) const
 {
     NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);

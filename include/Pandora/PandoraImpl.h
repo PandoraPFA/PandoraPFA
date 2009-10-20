@@ -18,19 +18,21 @@ class PandoraImpl
 {
 private:
     /**
-     *  @brief  Match tracks and calo hits to their correct mc particles for particle flow
+     *  @brief  Prepare mc particles: select mc pfo targets, match tracks and calo hits to the correct mc
+     *          particles for particle flow
      */
-    StatusCode MatchObjectsToMCPfoTargets() const;
+    StatusCode PrepareMCParticles() const;
 
     /**
-     *  @brief  Add track associations (parent-daughter and sibling)
+     *  @brief  Prepare tracks: add track associations (parent-daughter and sibling)
      */
-    StatusCode AssociateTracks() const;
+    StatusCode PrepareTracks() const;
 
     /**
-     *  @brief  Order input calo hits by pseudo layer
+     *  @brief  Prepare calo hits: order the hits by pseudo layer, calculate density weights, identify
+     *          isolated hits, identify possible mip hits and calculate surrounding energy values.
      */
-    StatusCode OrderInputCaloHits() const;
+    StatusCode PrepareCaloHits() const;
 
     /**
      *  @brief  Initialize pandora algorithms

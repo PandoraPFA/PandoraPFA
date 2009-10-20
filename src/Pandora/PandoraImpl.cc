@@ -20,7 +20,7 @@
 namespace pandora
 {
 
-StatusCode PandoraImpl::MatchObjectsToMCPfoTargets() const
+StatusCode PandoraImpl::PrepareMCParticles() const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->SelectPfoTargets());
 
@@ -38,16 +38,22 @@ StatusCode PandoraImpl::MatchObjectsToMCPfoTargets() const
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraImpl::AssociateTracks() const
+StatusCode PandoraImpl::PrepareTracks() const
 {
     return m_pPandora->m_pTrackManager->AssociateTracks();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraImpl::OrderInputCaloHits() const
+StatusCode PandoraImpl::PrepareCaloHits() const
 {
-    return m_pPandora->m_pCaloHitManager->OrderInputCaloHits();
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->OrderInputCaloHits());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CalculateDensityWeights());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->IdentifyIsolatedHits());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->IdentifyPossibleMipHits());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CalculateSurroundingEnergy());
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

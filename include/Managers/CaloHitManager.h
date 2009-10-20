@@ -51,6 +51,26 @@ private:
     StatusCode AssignToPseudoLayer(CaloHit *const pCaloHit) const;
 
     /**
+     *  @brief  Calculate hit density weights for all input calo hits
+     */
+    StatusCode CalculateDensityWeights() const;
+
+    /**
+     *  @brief  Identify any isolated hits in the input calo hit list
+     */
+    StatusCode IdentifyIsolatedHits() const;
+
+    /**
+     *  @brief  Identify any possible mips in the input calo hit list
+     */
+    StatusCode IdentifyPossibleMipHits() const;
+
+    /**
+     *  @brief  Calculate surrounding energy for all input calo hits
+     */
+    StatusCode CalculateSurroundingEnergy() const;
+
+    /**
      *  @brief  Get the current ordered calo hit list name
      * 
      *  @param  orderedCaloHitListName to receive the current ordered calo hit list name
