@@ -6,9 +6,10 @@
  *  $Log: $
  */
 
+#include "Algorithms/CheatingAlgorithm.h"
 #include "Algorithms/ClusteringAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
-#include "Algorithms/CheatingAlgorithm.h"
+#include "Algorithms/MonitoringAlgorithm.h"
 #include "Algorithms/PerfectClusteringAlgorithm.h"
 #include "Algorithms/PfoConstructionAlgorithm.h"
 #include "Algorithms/PhotonClusteringAlgorithm.h"
@@ -27,9 +28,10 @@ namespace pandora
 AlgorithmManager::AlgorithmManager(Pandora *pPandora) :
     m_pPandora(pPandora)
 {
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Cheating", new CheatingAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Clustering", new ClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FragmentRemoval", new FragmentRemovalAlgorithm::Factory));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Cheating", new CheatingAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Monitoring", new MonitoringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PerfectClustering", new PerfectClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PfoConstruction", new PfoConstructionAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PhotonClustering", new PhotonClusteringAlgorithm::Factory));

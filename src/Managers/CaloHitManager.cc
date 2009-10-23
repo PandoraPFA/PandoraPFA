@@ -150,10 +150,10 @@ StatusCode CaloHitManager::CalculateCaloHitProperties() const
 
                 CaloHitList *pCaloHitList = adjacentPseudoLayerIter->second;
 
-                if ((densityWeightMinLayer < iPseudoLayer) && (densityWeightMaxLayer > iPseudoLayer))
+                if ((densityWeightMinLayer <= iPseudoLayer) && (densityWeightMaxLayer >= iPseudoLayer))
                     this->CalculateDensityWeight(pCaloHit, pCaloHitList, densityWeight);
 
-                if (!shouldUseSimpleIsolationScheme && isIsolated && (isolationMinLayer < iPseudoLayer) && (isolationMaxLayer > iPseudoLayer))
+                if (!shouldUseSimpleIsolationScheme && isIsolated && (isolationMinLayer <= iPseudoLayer) && (isolationMaxLayer >= iPseudoLayer))
                     this->IdentifyIsolatedHits(pCaloHit, pCaloHitList, isIsolated);
 
                 if (pseudoLayer == iPseudoLayer)
@@ -164,7 +164,9 @@ StatusCode CaloHitManager::CalculateCaloHitProperties() const
             }
 
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetDensityWeight(densityWeight));
-            pCaloHit->SetIsolatedFlag(isIsolated);
+
+            if (!shouldUseSimpleIsolationScheme && isIsolated)
+                pCaloHit->SetIsolatedFlag(true);
         }
     }
 
@@ -200,7 +202,7 @@ void CaloHitManager::CalculateDensityWeight(CaloHit *const pCaloHit, CaloHitList
         if (0 == rN)
             throw StatusCodeException(STATUS_CODE_FAILURE);
 
-        densityWeight += (1. / rN);
+        densityWeight += (100. / rN);
     }
 }
 
@@ -255,7 +257,7 @@ void CaloHitManager::IdentifyIsolatedHits() const
         const float isolationDensityWeightCut((pCaloHit->GetHitType() == ECAL) ? isolationDensityWeightCutECal : isolationDensityWeightCutHCal);
 
         if (pCaloHit->GetDensityWeight() < isolationDensityWeightCut)
-           pCaloHit->SetIsolatedFlag(true);
+            pCaloHit->SetIsolatedFlag(true);
     }
 }
 
