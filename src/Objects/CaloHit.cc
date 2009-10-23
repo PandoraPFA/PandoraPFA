@@ -29,6 +29,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_hitType(caloHitParameters.m_hitType.Get()),
     m_detectorRegion(caloHitParameters.m_detectorRegion.Get()),
     m_layer(caloHitParameters.m_layer.Get()),
+    m_surroundingEnergy(0),
     m_isPossibleMip(false),
     m_isIsolated(false),
     m_isAvailable(true),
@@ -55,9 +56,9 @@ StatusCode CaloHit::SetPseudoLayer(PseudoLayer pseudoLayer)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHit::SetSurroundingEnergy(float surroundingEnergy)
+StatusCode CaloHit::SetDensityWeight(float densityWeight)
 {
-    if (!(m_surroundingEnergy = surroundingEnergy))
+    if (!(m_densityWeight = densityWeight))
         return STATUS_CODE_NOT_INITIALIZED;
 
     return STATUS_CODE_SUCCESS;
@@ -65,12 +66,9 @@ StatusCode CaloHit::SetSurroundingEnergy(float surroundingEnergy)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHit::SetDensityWeight(float densityWeight)
+void CaloHit::AddSurroundingEnergy(float surroundingEnergy)
 {
-    if (!(m_densityWeight = densityWeight))
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    return STATUS_CODE_SUCCESS;
+    m_surroundingEnergy += surroundingEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

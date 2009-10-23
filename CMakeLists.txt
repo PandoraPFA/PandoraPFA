@@ -271,10 +271,16 @@ SET( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" CACHE PATH
     "Path to custom CMake Modules" FORCE )
 SET( INSTALL_DOC "${INSTALL_DOC}" CACHE BOOL
     "Set to OFF to skip build/install Documentation" FORCE )
-SET( UNIT_TEST_DIRECTORY "${UNIT_TEST_DIRECTORY}" CACHE PATH
-    "Set to location of unit tests source" FORCE )
-SET( MONITORING_DIRECTORY "${MONITORING_DIRECTORY}" CACHE PATH
-    "Set to location of pandora monitoring package" FORCE )
+
+IF( DEFINED UNIT_TEST_DIRECTORY )
+    SET( UNIT_TEST_DIRECTORY "${UNIT_TEST_DIRECTORY}" CACHE PATH
+	 "Set to location of unit tests source" FORCE )
+ENDIF()
+
+IF( DEFINED MONITORING_DIRECTORY )
+    SET( MONITORING_DIRECTORY "${MONITORING_DIRECTORY}" CACHE PATH
+	 "Set to location of pandora monitoring package" FORCE )
+ENDIF()
 
 # export build settings
 INCLUDE( CMakeExportBuildSettings )

@@ -219,11 +219,11 @@ private:
     StatusCode SetDensityWeight(float densityWeight);
 
     /**
-     *  @brief  Set the surrounding energy
+     *  @brief  Add contribution to the calo hit surrounding energy measure
      * 
-     *  @param  surroundingEnergy the surrounding energy
+     *  @param  surroundingEnergy the surrounding energy contribution
      */
-    StatusCode SetSurroundingEnergy(float surroundingEnergy);
+    void AddSurroundingEnergy(float surroundingEnergy);
 
     /**
      *  @brief  Set the possible mip flag
@@ -271,7 +271,7 @@ private:
     InputPseudoLayer        m_pseudoLayer;              ///< The pseudo layer to which the calo hit has been assigned
 
     InputFloat              m_densityWeight;            ///< The density weight
-    InputFloat              m_surroundingEnergy;        ///< The surrounding energy, units GeV
+    float                   m_surroundingEnergy;        ///< The surrounding energy, units GeV
 
     bool                    m_isPossibleMip;            ///< Whether the calo hit is a possible mip hit
     bool                    m_isIsolated;               ///< Whether the calo hit is isolated
@@ -433,7 +433,7 @@ inline float CaloHit::GetHadronicEnergy() const
 
 inline float CaloHit::GetSurroundingEnergy() const
 {
-    return m_surroundingEnergy.Get();
+    return m_surroundingEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

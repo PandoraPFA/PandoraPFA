@@ -51,24 +51,49 @@ private:
     StatusCode AssignToPseudoLayer(CaloHit *const pCaloHit) const;
 
     /**
-     *  @brief  Calculate hit density weights for all input calo hits
+     *  @brief  Calculate calo hit properties, including density weights, isolation flags, possible mip flags
+     *          and surrounding energy
      */
-    StatusCode CalculateDensityWeights() const;
+    StatusCode CalculateCaloHitProperties() const;
 
     /**
-     *  @brief  Identify any isolated hits in the input calo hit list
+     *  @brief  Calculate contribution to a hit's density weight from a list of other hits
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  CaloHitList the calo hit list
+     *  @param  densityWeight to receive the conbtributions to the density weight
      */
-    StatusCode IdentifyIsolatedHits() const;
+    void CalculateDensityWeight(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList, float &densityWeight) const;
 
     /**
-     *  @brief  Identify any possible mips in the input calo hit list
+     *  @brief  Identify whether a hit is isolated from a list of other hits
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  pCaloHitList the calo hit list
+     *  @param  isIsolated to receive the isolated hit flag
      */
-    StatusCode IdentifyPossibleMipHits() const;
+    void IdentifyIsolatedHits(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList, bool &isIsolated) const;
 
     /**
-     *  @brief  Calculate surrounding energy for all input calo hits
+     *  @brief  Simple scheme to identify all isolated hits, applying a density weight cut
      */
-    StatusCode CalculateSurroundingEnergy() const;
+    void IdentifyIsolatedHits() const;
+
+    /**
+     *  @brief  Identify whether a hit is a possible mip, via comparison with a list of other hits
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  pCaloHitList the calo hit list
+     */
+    void IdentifyPossibleMipHits(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList) const;
+
+    /**
+     *  @brief  Calculate surrounding energy for a hit, via comparison with a list of other hits
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  pCaloHitList the calo hit list
+     */
+    void CalculateSurroundingEnergy(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList) const;
 
     /**
      *  @brief  Get the current ordered calo hit list name
