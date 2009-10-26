@@ -168,6 +168,7 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
         if (!uidToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
             return STATUS_CODE_ALREADY_PRESENT;
     }
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -175,14 +176,17 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
 
 StatusCode MCManager::DeleteNonPfoTargets()
 {
-    for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(); iter != m_uidToMCParticleMap.end(); )
+    for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(); iter != m_uidToMCParticleMap.end();)
     {
         if (!iter->second->IsPfoTarget())
         {
             delete iter->second;
             m_uidToMCParticleMap.erase(iter++);
-        }else
+        }
+        else
+        {
             ++iter;
+        }
     }
 
     return STATUS_CODE_SUCCESS;

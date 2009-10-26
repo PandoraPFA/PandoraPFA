@@ -30,9 +30,8 @@ TrackState::TrackState(const CartesianVector &position, const CartesianVector &m
 
 std::ostream &operator<<(std::ostream &stream, const TrackState &trackState)
 {
-    stream  << " TrackState: " << std::endl
-            << " Position:   " << trackState.GetPosition() << std::endl
-            << " Momentum:   " << trackState.GetMomentum() << std::endl;
+    stream  << " Position:   " << trackState.GetPosition() << std::endl
+            << " Momentum:   " << trackState.GetMomentum();
 
     return stream;
 }

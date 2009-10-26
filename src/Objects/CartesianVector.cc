@@ -96,11 +96,10 @@ CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs
 
 std::ostream &operator<<(std::ostream & stream, const CartesianVector& cartesianVector)
 {
-    stream  << " CartesianVector: " << std::endl
-            << "    x:   " << cartesianVector.GetX() << std::endl
-            << "    y:   " << cartesianVector.GetY() << std::endl
-            << "    z:   " << cartesianVector.GetZ() << std::endl
-            << " length: " << cartesianVector.GetMagnitude() << std::endl;
+    stream  << "  x: " << cartesianVector.GetX()
+            << "  y: " << cartesianVector.GetY()
+            << "  z: " << cartesianVector.GetZ()
+            << " length: " << cartesianVector.GetMagnitude();
 
     return stream;
 }
