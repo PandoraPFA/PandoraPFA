@@ -112,9 +112,7 @@ StatusCode MCManager::SelectPfoTargets()
     for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
     {
         if (iter->second->IsRootParticle())
-        {
             PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, this->ApplyPfoSelectionRules(iter->second));
-        }
     }
 
     return STATUS_CODE_SUCCESS;
@@ -170,7 +168,6 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
         if (!uidToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
             return STATUS_CODE_ALREADY_PRESENT;
     }
-
     return STATUS_CODE_SUCCESS;
 }
 
@@ -178,13 +175,14 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
 
 StatusCode MCManager::DeleteNonPfoTargets()
 {
-    for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(); iter != m_uidToMCParticleMap.end(); ++iter)
+    for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(); iter != m_uidToMCParticleMap.end(); )
     {
         if (!iter->second->IsPfoTarget())
         {
             delete iter->second;
-            m_uidToMCParticleMap.erase(iter);
-        }
+            m_uidToMCParticleMap.erase(iter++);
+        }else
+            ++iter;
     }
 
     return STATUS_CODE_SUCCESS;
