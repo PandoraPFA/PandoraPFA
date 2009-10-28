@@ -57,45 +57,6 @@ private:
     StatusCode CalculateCaloHitProperties() const;
 
     /**
-     *  @brief  Calculate contribution to a hit's density weight from a list of other hits
-     * 
-     *  @param  pCaloHit the calo hit
-     *  @param  CaloHitList the calo hit list
-     *  @param  densityWeight to receive the conbtributions to the density weight
-     */
-    void CalculateDensityWeight(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList, float &densityWeight) const;
-
-    /**
-     *  @brief  Identify whether a hit is isolated from a list of other hits
-     * 
-     *  @param  pCaloHit the calo hit
-     *  @param  pCaloHitList the calo hit list
-     *  @param  isIsolated to receive the isolated hit flag
-     */
-    void IdentifyIsolatedHits(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList, bool &isIsolated) const;
-
-    /**
-     *  @brief  Simple scheme to identify all isolated hits, applying a density weight cut
-     */
-    void IdentifyIsolatedHits() const;
-
-    /**
-     *  @brief  Identify whether a hit is a possible mip, via comparison with a list of other hits
-     * 
-     *  @param  pCaloHit the calo hit
-     *  @param  pCaloHitList the calo hit list
-     */
-    void IdentifyPossibleMipHits(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList) const;
-
-    /**
-     *  @brief  Calculate surrounding energy for a hit, via comparison with a list of other hits
-     * 
-     *  @param  pCaloHit the calo hit
-     *  @param  pCaloHitList the calo hit list
-     */
-    void CalculateSurroundingEnergy(CaloHit *const pCaloHit, CaloHitList *const pCaloHitList) const;
-
-    /**
      *  @brief  Get the current ordered calo hit list name
      * 
      *  @param  orderedCaloHitListName to receive the current ordered calo hit list name

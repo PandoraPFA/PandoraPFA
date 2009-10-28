@@ -82,7 +82,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
 
         m_isolationNLayers = 2;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "isolationNLayers", m_isolationNLayers));
+            "IsolationNLayers", m_isolationNLayers));
 
         m_isolationCutDistanceECal = 50;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
@@ -92,7 +92,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationCutDistanceHCal", m_isolationCutDistanceHCal));
 
-        m_isolationMaxNearbyHits = 3;
+        m_isolationMaxNearbyHits = 2;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationMaxNearbyHits", m_isolationMaxNearbyHits));
 

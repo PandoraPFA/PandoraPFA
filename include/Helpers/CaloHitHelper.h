@@ -39,6 +39,46 @@ public:
      */
     static bool AreCaloHitsAvailable(const CaloHitVector &caloHitVector);
 
+    /**
+     *  @brief  Get contribution to a hit's density weight from a list of other hits
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  CaloHitList the calo hit list
+     * 
+     *  @return the density weight contribution
+     */
+    static float GetDensityWeightContribution(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList);
+
+    /**
+     *  @brief  Get contribution to a hit's surrounding energy measure from a list of other hits
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  pCaloHitList the calo hit list
+     * 
+     *  @return the surrounding energy contribution
+     */
+    static float GetSurroundingEnergyContribution(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList);
+
+    /**
+     *  @brief  Count number of "nearby" hits using the isolation scheme
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  pCaloHitList the calo hit list
+     * 
+     *  @return the number of nearby hits
+     */
+    static unsigned int IsolationCountNearbyHits(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList);
+
+    /**
+     *  @brief  Count number of "nearby" hits using the mip identification scheme
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  pCaloHitList the calo hit list
+     * 
+     *  @return the number of nearby hits
+     */
+    static unsigned int MipCountNearbyHits(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList);
+
 private:
     /**
      *  @brief  Set availability of a calo hit to be added to a cluster
@@ -85,6 +125,22 @@ private:
      */
     static StatusCode ClearCaloHitUsageMaps();
 
+    /**
+     *  @brief  Calculate calo hit properties for a particular calo hit, through comparison with an ordered list of other hits.
+     *          Calculates density weights, isolation flags, possible mip flags and surrounding energy
+     * 
+     *  @param  pCaloHit the calo hit
+     *  @param  pOrderedCaloHitList the ordered calo hit list
+     */
+    static void CalculateCaloHitProperties(CaloHit *const pCaloHit, const OrderedCaloHitList *const pOrderedCaloHitList);
+
+    /**
+     *  @brief  Identify isolated hits by applying a simple density weight cut to all hits in a calo hit vector
+     *
+     *  @param  caloHitVector the calo hit vector
+     */
+    static void ApplySimpleIsolationScheme(const CaloHitVector &caloHitVector);
+
     typedef std::map<CaloHit *, bool> CaloHitUsageMap;
     typedef std::map<std::string, CaloHitUsageMap *> NameToCaloHitUsageMap;
 
@@ -92,6 +148,7 @@ private:
     static CaloHitUsageMap             *m_pCurrentUsageMap;         ///< Address of the current calo hit usage map
     static NameToCaloHitUsageMap        m_nameToCaloHitUsageMap;    ///< The name to calo hit availability map
 
+    friend class CaloHitManager;
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
 

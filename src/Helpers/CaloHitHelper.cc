@@ -11,6 +11,10 @@
 #include "Objects/CaloHit.h"
 #include "Objects/OrderedCaloHitList.h"
 
+#include "Pandora/PandoraSettings.h"
+
+#include <cmath>
+
 namespace pandora
 {
 
@@ -59,6 +63,154 @@ bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitVector &caloHitVector)
     }
 
     return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
+{
+    static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
+    static const unsigned int densityWeightPower(PandoraSettings::GetInstance()->GetDensityWeightPower());
+
+    float densityWeightContribution = 0.;
+    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const float positionMagnitude(positionVector.GetMagnitude());
+
+    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    {
+        if (pCaloHit == *iter)
+            continue;
+
+        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
+        const CartesianVector crossProduct = positionVector.GetCrossProduct(positionDifference);
+
+        if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
+            continue;
+
+        const float rN(pow(crossProduct.GetMagnitude() / positionMagnitude, densityWeightPower));
+
+        if (0 == rN)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
+
+        densityWeightContribution += (100. / rN);
+    }
+
+    return densityWeightContribution;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
+{
+    static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
+
+    float surroundingEnergyContribution = 0;
+    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const bool isHitInBarrelRegion(pCaloHit->GetDetectorRegion() == BARREL);
+
+    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    {
+        if (pCaloHit == *iter)
+            continue;
+
+        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
+
+        if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
+            continue;
+
+        if(isHitInBarrelRegion)
+        {
+            const float dZ(fabs(positionDifference.GetZ()));
+            const float dPhi(std::sqrt(pow(positionDifference.GetX(), 2) + pow(positionDifference.GetY(), 2)));
+
+            if( (dZ < (1.5 * pCaloHit->GetCellSizeZ())) && (dPhi < (1.5 * pCaloHit->GetCellSizeV())) )
+                surroundingEnergyContribution += (*iter)->GetHadronicEnergy();
+        }
+        else
+        {
+            const float dX(fabs(positionDifference.GetX()));
+            const float dY(fabs(positionDifference.GetY()));
+
+            if( (dX < (1.5 * pCaloHit->GetCellSizeU())) && (dY < (1.5 * pCaloHit->GetCellSizeV())) )
+                surroundingEnergyContribution += (*iter)->GetHadronicEnergy();
+        }
+    }
+
+    return surroundingEnergyContribution;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+unsigned int CaloHitHelper::IsolationCountNearbyHits(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
+{
+    static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
+    static const float isolationCutDistanceECal(PandoraSettings::GetInstance()->GetIsolationCutDistanceECal());
+    static const float isolationCutDistanceHCal(PandoraSettings::GetInstance()->GetIsolationCutDistanceHCal());
+
+    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const float positionMagnitude(positionVector.GetMagnitude());
+    const float isolationCutDistance((pCaloHit->GetHitType() == ECAL) ? isolationCutDistanceECal : isolationCutDistanceHCal);
+
+    unsigned int nearbyHitsFound = 0;
+
+    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    {
+        if (pCaloHit == *iter)
+            continue;
+
+        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
+        const CartesianVector crossProduct = positionVector.GetCrossProduct(positionDifference);
+
+        if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
+            continue;
+
+        if((crossProduct.GetMagnitude() / positionMagnitude) < isolationCutDistance)
+            ++nearbyHitsFound;
+    }
+
+    return nearbyHitsFound;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
+{
+    static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
+    static const float mipNCellsForNearbyHit(PandoraSettings::GetInstance()->GetMipNCellsForNearbyHit() + 0.5);
+
+    unsigned int nearbyHitsFound = 0;
+    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const bool isHitInBarrelRegion(pCaloHit->GetDetectorRegion() == BARREL);
+
+    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    {
+        if (pCaloHit == *iter)
+            continue;
+
+        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
+
+        if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
+            continue;
+
+        if(isHitInBarrelRegion)
+        {
+            const float dZ(fabs(positionDifference.GetZ()));
+            const float dPhi(std::sqrt(pow(positionDifference.GetX(), 2) + pow(positionDifference.GetY(), 2)));
+
+            if( (dZ < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeZ())) && (dPhi < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeV())) )
+                ++nearbyHitsFound;
+        }
+        else
+        {
+            const float dX(fabs(positionDifference.GetX()));
+            const float dY(fabs(positionDifference.GetY()));
+
+            if( (dX < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeU())) && (dY < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeV())) )
+                ++nearbyHitsFound;
+        }
+    }
+
+    return nearbyHitsFound;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -192,5 +344,92 @@ StatusCode CaloHitHelper::ClearCaloHitUsageMaps()
     return STATUS_CODE_SUCCESS;
 }
 
-} // namespace pandora
+//------------------------------------------------------------------------------------------------------------------------------------------
 
+void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const OrderedCaloHitList *const pOrderedCaloHitList)
+{
+    // Read settings
+    static const bool useSimpleIsolationScheme(PandoraSettings::GetInstance()->ShouldUseSimpleIsolationScheme());
+    static const float isolationMaxNearbyHits(PandoraSettings::GetInstance()->GetIsolationMaxNearbyHits());
+    static const float mipLikeMipCut(PandoraSettings::GetInstance()->GetMipLikeMipCut());
+    static const unsigned int mipMaxNearbyHits(PandoraSettings::GetInstance()->GetMipMaxNearbyHits());
+    static const PseudoLayer densityWeightNLayers(PandoraSettings::GetInstance()->GetDensityWeightNLayers());
+    static const PseudoLayer isolationNLayers(PandoraSettings::GetInstance()->GetIsolationNLayers());
+
+    // Calculate number of adjacent pseudolayers to examine
+    const PseudoLayer pseudoLayer(pCaloHit->GetPseudoLayer());
+    const PseudoLayer densityWeightMaxLayer(pseudoLayer + densityWeightNLayers);
+    const PseudoLayer densityWeightMinLayer((pseudoLayer < densityWeightNLayers) ? 0 : pseudoLayer - densityWeightNLayers);
+    const PseudoLayer isolationMaxLayer(pseudoLayer + isolationNLayers);
+    const PseudoLayer isolationMinLayer((pseudoLayer < isolationNLayers) ? 0 : pseudoLayer - isolationNLayers);
+
+    // Initialize variables
+    float densityWeight = 0;
+    unsigned int isolationNearbyHits = 0;
+    bool isIsolated = true;
+
+    // Loop over adjacent pseudolayers
+    for(PseudoLayer iPseudoLayer = std::min(densityWeightMinLayer, isolationMinLayer);
+        iPseudoLayer <= std::max(densityWeightMaxLayer, isolationMaxLayer); ++iPseudoLayer)
+    {
+        OrderedCaloHitList::const_iterator adjacentPseudoLayerIter = pOrderedCaloHitList->find(iPseudoLayer);
+
+        if (pOrderedCaloHitList->end() == adjacentPseudoLayerIter)
+            continue;
+
+        CaloHitList *pCaloHitList = adjacentPseudoLayerIter->second;
+
+        // Density weight
+        if ((densityWeightMinLayer <= iPseudoLayer) && (densityWeightMaxLayer >= iPseudoLayer))
+            densityWeight += CaloHitHelper::GetDensityWeightContribution(pCaloHit, pCaloHitList);
+
+        // IsIsolated flag
+        if (!useSimpleIsolationScheme && isIsolated && (isolationMinLayer <= iPseudoLayer) && (isolationMaxLayer >= iPseudoLayer))
+        {
+            isolationNearbyHits += CaloHitHelper::IsolationCountNearbyHits(pCaloHit, pCaloHitList);
+            isIsolated = isolationNearbyHits < isolationMaxNearbyHits;
+        }
+
+        // Surrounding energy and possible mip flag
+        if (pseudoLayer == iPseudoLayer)
+        {
+            pCaloHit->AddSurroundingEnergy(CaloHitHelper::GetSurroundingEnergyContribution(pCaloHit, pCaloHitList));
+
+            const CartesianVector positionVector(pCaloHit->GetPositionVector());
+
+            const float angularCorrection( (BARREL == pCaloHit->GetDetectorRegion()) ?
+                positionVector.GetMagnitude() / std::sqrt(pow(positionVector.GetX(), 2) + pow(positionVector.GetY(), 2)) :
+                positionVector.GetMagnitude() / std::fabs(positionVector.GetZ()) );
+
+            if (pCaloHit->GetMipEquivalentEnergy() <= (mipLikeMipCut * angularCorrection) &&
+                (mipMaxNearbyHits >= CaloHitHelper::MipCountNearbyHits(pCaloHit, pCaloHitList)))
+            {
+                pCaloHit->SetPossibleMipFlag(true);
+            }
+        }
+    }
+
+    if (!useSimpleIsolationScheme && isIsolated)
+        pCaloHit->SetIsolatedFlag(true);
+
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetDensityWeight(densityWeight));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void CaloHitHelper::ApplySimpleIsolationScheme(const CaloHitVector &caloHitVector)
+{
+    static const float isolationDensityWeightCutECal(PandoraSettings::GetInstance()->GetIsolationDensityWeightCutECal());
+    static const float isolationDensityWeightCutHCal(PandoraSettings::GetInstance()->GetIsolationDensityWeightCutHCal());
+
+    for (CaloHitVector::const_iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
+    {
+        CaloHit *pCaloHit = *iter;
+        const float isolationDensityWeightCut((ECAL == pCaloHit->GetHitType()) ? isolationDensityWeightCutECal : isolationDensityWeightCutHCal);
+
+        if (pCaloHit->GetDensityWeight() < isolationDensityWeightCut)
+            pCaloHit->SetIsolatedFlag(true);
+    }
+}
+
+} // namespace pandora

@@ -24,7 +24,7 @@ StatusCode MonitoringAlgorithm::Run()
 
     PANDORA_MONITORING_API(Create1DHistogram(PseudoLayerHistName, PseudoLayerHistName, 101, -0.5, 100.5));
     PANDORA_MONITORING_API(Create1DHistogram(DensityWeightHistName, DensityWeightHistName, 101, -0.5, 100.5));
-    PANDORA_MONITORING_API(Create1DHistogram(SurroundingEnergyHistName, SurroundingEnergyHistName, 101, -0.5, 100.5));
+    PANDORA_MONITORING_API(Create1DHistogram(SurroundingEnergyHistName, SurroundingEnergyHistName, 101, -0.95, 10.05));
     PANDORA_MONITORING_API(Create1DHistogram(PossibleMipFlagHistName, PossibleMipFlagHistName, 2, -0.5, 1.5));
     PANDORA_MONITORING_API(Create1DHistogram(IsIsolatedFlagHistName, IsIsolatedFlagHistName, 2, -0.5, 1.5));
 
