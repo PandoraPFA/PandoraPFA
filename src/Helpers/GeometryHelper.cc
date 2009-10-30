@@ -78,6 +78,19 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
             m_additionalSubDetectors.push_back(subDetectorParameters);
         }
 
+        if (0 == geometryParameters.m_eCalBarrelParameters.m_outerZCoordinate.Get())
+        {
+            m_geometryType = TEST_BEAM;
+        }
+        else if (geometryParameters.m_eCalEndCapParameters.m_outerRCoordinate.Get() > geometryParameters.m_eCalBarrelParameters.m_innerRCoordinate.Get())
+        {
+            m_geometryType = ENCLOSING_ENDCAP;
+        }
+        else
+        {
+            m_geometryType = ENCLOSING_BARREL;
+        }
+
         m_isInitialized = true;
 
         return STATUS_CODE_SUCCESS;
@@ -129,8 +142,14 @@ void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::Geometr
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer) const
+StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer, bool shouldApplyOverlapCorrection) const
 {
+    static const float overlapCorrection(GetECalBarrelParameters().GetInnerRCoordinate() *
+        ((GetECalEndCapParameters().GetInnerZCoordinate() / GetECalBarrelParameters().GetOuterZCoordinate()) - 1.));
+
+    if (shouldApplyOverlapCorrection && (ENCLOSING_ENDCAP == GetGeometryType()))
+        radius -= overlapCorrection;
+
     for (unsigned int iLayer = 0, iLayerEnd = m_barrelLayerPositions.size(); iLayer < iLayerEnd; ++iLayer)
     {
         const float separation = m_barrelLayerPositions[iLayer] - radius;
@@ -157,8 +176,14 @@ StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer) co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &layer) const
+StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection) const
 {
+    static const float overlapCorrection(GetECalEndCapParameters().GetInnerZCoordinate() *
+        ((GetECalBarrelParameters().GetInnerRCoordinate() / GetECalEndCapParameters().GetOuterRCoordinate()) - 1.));
+
+    if (shouldApplyOverlapCorrection && (ENCLOSING_BARREL == GetGeometryType()))
+        zCoordinate -= overlapCorrection;
+
     for (unsigned int iLayer = 0, iLayerEnd = m_endCapLayerPositions.size(); iLayer < iLayerEnd; ++iLayer)
     {
         const float separation = m_endCapLayerPositions[iLayer] - zCoordinate;

@@ -14,6 +14,18 @@ namespace pandora
 {
 
 /**
+ *  @brief  Geometry type enum
+ */
+enum GeometryType
+{
+    ENCLOSING_ENDCAP,
+    ENCLOSING_BARREL,
+    TEST_BEAM
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
  *  @brief  GeometryHelper class
  */
 class GeometryHelper
@@ -139,6 +151,13 @@ public:
     static GeometryHelper *GetInstance();
 
     /**
+     *  @brief  Get the geometry type
+     * 
+     *  @return the geometry type
+     */
+    GeometryType GetGeometryType() const;
+
+    /**
      *  @brief  Get the ecal barrel parameters
      * 
      *  @return The ecal barrel parameters
@@ -248,16 +267,18 @@ public:
      * 
      *  @param  radius the radial distance to the ip
      *  @param  layer to receive the layer number
+     *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
      */
-    StatusCode FindBarrelLayer(float radius, unsigned int &layer) const;
+    StatusCode FindBarrelLayer(float radius, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
 
     /**
      *  @brief  Find the layer number corresponding to specified z position in the endcap
      * 
      *  @param  zCoordinate the z distance to the ip
      *  @param  layer to receive the layer number
+     *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
      */
-    StatusCode FindEndCapLayer(float zCoordinate, unsigned int &layer) const;
+    StatusCode FindEndCapLayer(float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
 
     /**
      *  @brief  Get the maximum radius
@@ -288,6 +309,8 @@ private:
     StatusCode Initialize(const PandoraApi::GeometryParameters &geometryParameters);
 
     bool                        m_isInitialized;            ///< Whether the geometry helper is initialized
+
+    GeometryType                m_geometryType;             ///< The geometry type
 
     SubDetectorParameters       m_eCalBarrelParameters;     ///< The ecal barrel parameters
     SubDetectorParameters       m_hCalBarrelParameters;     ///< The hcal barrel parameters
@@ -320,6 +343,16 @@ private:
 
     ADD_TEST_CLASS_FRIENDS;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline GeometryType GeometryHelper::GetGeometryType() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_geometryType;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -96,10 +96,10 @@ StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
     else
     {
         PseudoLayer bestBarrelLayer;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindBarrelLayer(radius, bestBarrelLayer));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindBarrelLayer(radius, bestBarrelLayer, true));
 
         PseudoLayer bestEndCapLayer;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindEndCapLayer(zCoordinate, bestEndCapLayer));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindEndCapLayer(zCoordinate, bestEndCapLayer, true));
 
         pseudoLayer = std::max(bestBarrelLayer, bestEndCapLayer);
     }
