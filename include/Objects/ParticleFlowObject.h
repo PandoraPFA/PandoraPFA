@@ -55,6 +55,20 @@ public:
     const CartesianVector &GetMomentum() const;
 
     /**
+     *  @brief  Get the track list
+     * 
+     *  @return The track list
+     */
+    const TrackList &GetTrackList() const;
+
+    /**
+     *  @brief  Get the cluster list
+     * 
+     *  @return The cluster list
+     */
+    const ClusterList &GetClusterList() const;
+
+    /**
      *  @brief  Get track address list
      * 
      *  @return The track address list
@@ -88,11 +102,15 @@ private:
      */
     void ExtractAndStoreCaloHits(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters);
 
-    int                     m_particleId;               ///< The particle flow object id (PDG code)
-    int                     m_chargeSign;               ///< The particle flow object charge sign
-    float                   m_mass;                     ///< The particle flow object mass
-    float                   m_energy;                   ///< The particle flow object energy
-    CartesianVector         m_momentum;                 ///< The particle flow object momentum
+    const int               m_particleId;               ///< The particle flow object id (PDG code)
+    const int               m_chargeSign;               ///< The particle flow object charge sign
+    const float             m_mass;                     ///< The particle flow object mass
+    const float             m_energy;                   ///< The particle flow object energy
+    const CartesianVector   m_momentum;                 ///< The particle flow object momentum
+
+    const TrackList         m_trackList;                ///< The track list
+    const ClusterList       m_clusterList;              ///< The cluster list
+
     TrackAddressList        m_trackAddressList;         ///< The track address list
     ClusterAddressList      m_clusterAddressList;       ///< The cluster address list
 
@@ -134,6 +152,20 @@ inline float ParticleFlowObject::GetEnergy() const
 inline const CartesianVector &ParticleFlowObject::GetMomentum() const
 {
     return m_momentum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const TrackList &ParticleFlowObject::GetTrackList() const
+{
+    return m_trackList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const ClusterList &ParticleFlowObject::GetClusterList() const
+{
+    return m_clusterList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
