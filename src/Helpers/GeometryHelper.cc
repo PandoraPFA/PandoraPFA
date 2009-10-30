@@ -212,8 +212,8 @@ StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &laye
 
 float GeometryHelper::GetMaximumRadius(float x, float y) const
 {
-    static const unsigned int symmetryOrder = m_eCalBarrelParameters.GetInnerSymmetryOrder();
-    static const float phi0 = m_eCalBarrelParameters.GetInnerPhiCoordinate();
+    static const unsigned int symmetryOrder = GetECalBarrelParameters().GetInnerSymmetryOrder();
+    static const float phi0 = GetECalBarrelParameters().GetInnerPhiCoordinate();
 
     if (symmetryOrder <= 2)
         return std::sqrt((x * x) + (y * y));
