@@ -104,7 +104,8 @@ StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
         pseudoLayer = std::max(bestBarrelLayer, bestEndCapLayer);
     }
 
-    return pCaloHit->SetPseudoLayer(pseudoLayer);
+    // Reserve pseudo layer(s) for track projections
+    return pCaloHit->SetPseudoLayer(1 + TRACK_PROJECTION_LAYER + pseudoLayer);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

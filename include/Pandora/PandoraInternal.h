@@ -99,6 +99,7 @@ typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<TrackState *> TrackStateList;
 typedef std::vector<CaloHit *> CaloHitVector;
+typedef std::vector<Cluster *> ClusterVector;
 typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
 
 typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;
@@ -110,6 +111,8 @@ typedef std::vector<std::string> StringVector;
 
 typedef const void * Uid;
 typedef std::map<Uid, MCParticle *> UidToMCParticleMap;
+
+static const unsigned int TRACK_PROJECTION_LAYER = 0;
 
 } // namespace pandora
 

@@ -78,6 +78,20 @@ public:
     bool IsPhoton() const;
 
     /**
+     *  @brief  Whether the cluster is track seeded
+     * 
+     *  @return boolean 
+     */
+    bool IsTrackSeeded() const;
+
+    /**
+     *  @brief  Get the address of the track with which the cluster is seeded
+     * 
+     *  @return address of the track seed
+     */
+    const Track *const GetTrackSeed() const;
+
+    /**
      *  @brief  Get the initial direction of the cluster
      * 
      *  @return The initial direction of the cluster
@@ -89,14 +103,16 @@ public:
      * 
      *  @return The current direction of the cluster
      */
-    const CartesianVector &GetCurrentDirection();
+    const CartesianVector &GetCurrentDirection() const;
 
     /**
-     *  @brief  Get the energy weighted centroid for the cluster
+     *  @brief  Get the centroid for the cluster at a particular pseudo layer
      * 
-     *  @return The energy weighted centroid
+     *  @param  pseudoLayer the pseudo layer of interest
+     * 
+     *  @return The centroid, returned by value
      */
-    const CartesianVector &GetEnergyWeightedCentroid();
+    const CartesianVector GetCentroid(PseudoLayer pseudoLayer);
 
     /**
      *  @brief  Get the best estimate of the cluster energy, units GeV
@@ -148,11 +164,25 @@ public:
     const TrackList &GetAssociatedTrackList() const;
 
     /**
+     *  @brief  Set the is photon flag for the cluster
+     * 
+     *  @param  isPhotonFlag the is photon flag
+     */
+    void SetIsPhotonFlag(bool isPhotonFlag);
+
+    /**
      *  @brief  Set the best estimate of the cluster energy, units GeV
      * 
      *  @param  bestEnergyEstimate the best energy estimate
      */
     StatusCode SetBestEnergyEstimate(float bestEnergyEstimate);
+
+    /**
+     *  @brief  Set the current cluster direction
+     * 
+     *  @param  currentDirection the current cluster direction
+     */
+    StatusCode SetCurrentDirection(const CartesianVector &currentDirection);
 
 private:
     /**
@@ -232,6 +262,7 @@ private:
     float                   m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
 
     bool                    m_isPhoton;                 ///< Whether the cluster has been flagged as a photon cluster
+    const Track *const      m_pTrackSeed;               ///< Address of the track with which the cluster is seeded
 
     float                   m_sumX;                     ///< The sum of the x coordinates of the constituent calo hits
     float                   m_sumY;                     ///< The sum of the y coordinates of the constituent calo hits
@@ -249,23 +280,22 @@ private:
     ValueByPseudoLayerMap   m_sumYByPseudoLayer;        ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumZByPseudoLayer;        ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
 
-    InputCartesianVector    m_initialDirection;         ///< The initial direction of the cluster
-    InputCartesianVector    m_currentDirection;         ///< The current direction of the cluster
-    InputCartesianVector    m_energyWeightedCentroid;   ///< The energy weighted centroid
+    ValueByPseudoLayerMap   m_emEnergyByPseudoLayer;    ///< The electromagnetic energy of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap   m_hadEnergyByPseudoLayer;   ///< The hadronic energy of the calo hits, stored by pseudo layer
 
-    InputFloat              m_bestEnergy;               ///< The best estimate of the cluster energy, units GeV
+    CartesianVector         m_initialDirection;         ///< The initial direction of the cluster
+    InputCartesianVector    m_currentDirection;         ///< The current direction of the cluster
+
+    InputFloat              m_bestEnergyEstimate;       ///< The best estimate of the cluster energy, units GeV
     InputFloat              m_radialDirectionCosine;    ///< The direction cosine (of a straight-line fit) wrt to the radial direction
     InputFloat              m_clusterRMS;               ///< The cluster rms wrt to a straight-line fit to the cluster
 
-    InputPseudoLayer        m_showerMax;                ///< The pseudo layer at which the cluster energy deposition is greatest
     InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
     InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
 
     TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
 
     bool                    m_isUpToDate;               ///< Whether the cluster properties are up to date
-
-    // TODO add track segment properties
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
@@ -301,7 +331,7 @@ inline float Cluster::GetMipFraction() const
     float mipFraction = 0;
 
     if (0 != m_nCaloHits)
-        mipFraction = float (m_nPossibleMipHits) / float (m_nCaloHits);
+        mipFraction = static_cast<float> (m_nPossibleMipHits) / static_cast<float> (m_nCaloHits);
 
     return mipFraction;
 }
@@ -329,36 +359,40 @@ inline bool Cluster::IsPhoton() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline bool Cluster::IsTrackSeeded() const
+{
+    return (NULL != m_pTrackSeed);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const Track *const Cluster::GetTrackSeed() const
+{
+    if (NULL == m_pTrackSeed)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_pTrackSeed;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const CartesianVector &Cluster::GetInitialDirection() const
 {
-    return m_initialDirection.Get();
+    return m_initialDirection;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const CartesianVector &Cluster::GetCurrentDirection()
+inline const CartesianVector &Cluster::GetCurrentDirection() const
 {
-    if (!m_isUpToDate)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
-
     return m_currentDirection.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline const CartesianVector &Cluster::GetEnergyWeightedCentroid()
-{
-    if (!m_isUpToDate)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
-
-    return m_energyWeightedCentroid.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float Cluster::GetBestEnergyEstimate()
 {
-    return m_bestEnergy.Get();
+    return m_bestEnergyEstimate.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -379,16 +413,6 @@ inline float Cluster::GetRMS()
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
 
     return m_clusterRMS.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline PseudoLayer Cluster::GetShowerMax()
-{
-    if (!m_isUpToDate)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
-
-    return m_showerMax.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -414,9 +438,26 @@ inline const TrackList &Cluster::GetAssociatedTrackList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline void Cluster::SetIsPhotonFlag(bool isPhotonFlag)
+{
+    m_isPhoton = isPhotonFlag;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline StatusCode Cluster::SetBestEnergyEstimate(float bestEnergyEstimate)
 {
-    if (!(m_bestEnergy = bestEnergyEstimate))
+    if (!(m_bestEnergyEstimate = bestEnergyEstimate))
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Cluster::SetCurrentDirection(const CartesianVector &currentDirection)
+{
+    if (!(m_currentDirection = currentDirection))
         return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;

@@ -24,7 +24,8 @@ enum StatusCode
     STATUS_CODE_ALREADY_PRESENT,
     STATUS_CODE_OUT_OF_RANGE,
     STATUS_CODE_NOT_ALLOWED,
-    STATUS_CODE_INVALID_PARAMETER
+    STATUS_CODE_INVALID_PARAMETER,
+    STATUS_CODE_UNCHANGED
 };
 
 #define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                \
@@ -161,6 +162,9 @@ inline std::string StatusCodeToString(const StatusCode statusCode)
 
     case STATUS_CODE_INVALID_PARAMETER:
         return "STATUS_CODE_INVALID_PARAMETER";
+
+    case STATUS_CODE_UNCHANGED:
+        return "STATUS_CODE_UNCHANGED";
 
     default:
         return "STATUS_CODE_UNRECOGNIZED";

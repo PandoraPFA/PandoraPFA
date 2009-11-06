@@ -47,25 +47,25 @@ public:
     const CartesianVector &GetNormalVector() const;
 
     /**
-     *  @brief  Get the u dimension of cell (u = x in ENDCAP, u = r in BARREL), units mm
+     *  @brief  Get the u dimension of cell (up in ENDCAP, along beam in BARREL), units mm
      * 
      *  @return the u dimension of cell
      */
     float GetCellSizeU() const;
 
     /**
-     *  @brief  Get the v dimension of cell (v = y in ENDCAP, v = r*phi in BARREL), units mm
+     *  @brief  Get the v dimension of cell (perpendicular to u and thickness), units mm
      * 
      *  @return the v dimension of cell
      */
     float GetCellSizeV() const;
 
     /**
-     *  @brief  Get the z dimension of cell
+     *  @brief  Get the thickness of cell, units mm
      * 
-     *  @return the z dimension of cell
+     *  @return the thickness of cell
      */
-    float GetCellSizeZ() const;
+    float GetCellThickness() const;
 
     /**
      *  @brief  Get the absorber material in front of cell, units radiation lengths
@@ -249,9 +249,9 @@ private:
     const CartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
     const CartesianVector   m_normalVector;             ///< Unit normal to the sampling layer, pointing outwards from the origin
 
-    const float             m_cellSizeU;                ///< Dimension of cell (u = x in ENDCAP, u = r in BARREL), units mm
-    const float             m_cellSizeV;                ///< Dimension of cell (v = y in ENDCAP, v = r*phi in BARREL), units mm
-    const float             m_cellSizeZ;                ///< Dimension of cell, z-coordinate, units mm
+    const float             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
+    const float             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
+    const float             m_cellThickness;            ///< Thickness of cell, units mm
 
     const float             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
     const float             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
@@ -340,9 +340,9 @@ inline float CaloHit::GetCellSizeV() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float CaloHit::GetCellSizeZ() const
+inline float CaloHit::GetCellThickness() const
 {
-    return m_cellSizeZ;
+    return m_cellThickness;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

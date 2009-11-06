@@ -17,7 +17,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_normalVector(caloHitParameters.m_normalVector.Get()),
     m_cellSizeU(caloHitParameters.m_cellSizeU.Get()),
     m_cellSizeV(caloHitParameters.m_cellSizeV.Get()),
-    m_cellSizeZ(caloHitParameters.m_cellSizeZ.Get()),
+    m_cellThickness(caloHitParameters.m_cellThickness.Get()),
     m_nRadiationLengths(caloHitParameters.m_nRadiationLengths.Get()),
     m_nInteractionLengths(caloHitParameters.m_nInteractionLengths.Get()),
     m_time(caloHitParameters.m_time.Get()),

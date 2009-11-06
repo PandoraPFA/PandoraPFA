@@ -51,9 +51,9 @@ public:
     public:
         pandora::InputCartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
         pandora::InputCartesianVector   m_normalVector;             ///< Unit normal to sampling layer, pointing outwards from the origin
-        pandora::InputFloat             m_cellSizeU;                ///< Dimension of cell (u = x in ENDCAP, u = r in BARREL), units mm
-        pandora::InputFloat             m_cellSizeV;                ///< Dimension of cell (v = y in ENDCAP, v = r*phi in BARREL), units mm
-        pandora::InputFloat             m_cellSizeZ;                ///< Dimension of cell, z-coordinate, units mm
+        pandora::InputFloat             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
+        pandora::InputFloat             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
+        pandora::InputFloat             m_cellThickness;            ///< Thickness of cell, units mm
         pandora::InputFloat             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
         pandora::InputFloat             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
         pandora::InputFloat             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns

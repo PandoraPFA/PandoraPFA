@@ -20,6 +20,11 @@ class CartesianVector
 {
 public:
     /**
+     *  @brief  Default constructor
+     */
+    CartesianVector();
+
+    /**
      *  @brief  Constructor, create a vector from the cartesian coordinates of the end point,
      *          origin at (0,0,0,)
      * 
@@ -28,6 +33,34 @@ public:
      *  @param  z the end point z coordinate
      */
     CartesianVector(float x, float y, float z);
+
+    /**
+     *  @brief  Copy constructor
+     * 
+     *  @param  rhs the cartesian vector to copy
+     */
+    CartesianVector(const CartesianVector &rhs);
+
+    /**
+     *  @brief  Query whether the cartesian vector has been initialized
+     * 
+     *  @return boolean
+     */
+    bool IsInitialized() const;
+
+    /**
+     *  @brief  Reset the cartesian vector
+     */
+    void Reset();
+
+    /**
+     *  @brief  Set the values of cartesian vector components
+     * 
+     *  @param  x the x coordinate
+     *  @param  y the y coordinate
+     *  @param  z the z coordinate
+     */
+    void SetValues(float x, float y, float z);
 
     /**
      *  @brief  Get the cartesian x coordinate
@@ -91,10 +124,40 @@ public:
      */
     float GetOpeningAngle(const CartesianVector &rhs) const;
 
+    /**
+     *  @brief  Get a unit vector in the direction of the cartesian vector
+     * 
+     *  @return The unit vector
+     */
+    CartesianVector GetUnitVector() const;
+
+    /**
+     *  @brief  Cartesian vector assignment operator
+     * 
+     *  @param  rhs the cartesian vector to assign
+     */
+    bool operator=(const CartesianVector &rhs);
+
+    /**
+     *  @brief  Cartesian vector += operator
+     * 
+     *  @param  rhs the cartesian vector to add
+     */
+    bool operator+=(const CartesianVector &rhs);
+
+    /**
+     *  @brief  Cartesian vector -= operator
+     * 
+     *  @param  rhs the cartesian vector to subtract
+     */
+    bool operator-=(const CartesianVector &rhs);
+
 private:
-    float   m_x;    ///< The x coordinate
-    float   m_y;    ///< The y coordinate
-    float   m_z;    ///< The z coordinate
+    float   m_x;                ///< The x coordinate
+    float   m_y;                ///< The y coordinate
+    float   m_z;                ///< The z coordinate
+
+    bool    m_isInitialized;    ///< Whether the cartesian vector has been initialized
 };
 
 /**
@@ -120,6 +183,20 @@ CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs
  *  @param  cartesianVector the cartesian vector
  */
 std::ostream &operator<<(std::ostream & stream, const CartesianVector& cartesianVector);
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CartesianVector::IsInitialized() const
+{
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void CartesianVector::Reset()
+{
+    m_isInitialized = false;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

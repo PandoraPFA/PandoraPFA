@@ -81,8 +81,8 @@ float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit,
         if (pCaloHit == *iter)
             continue;
 
-        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
-        const CartesianVector crossProduct = positionVector.GetCrossProduct(positionDifference);
+        const CartesianVector positionDifference(positionVector - (*iter)->GetPositionVector());
+        const CartesianVector crossProduct(positionVector.GetCrossProduct(positionDifference));
 
         if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
             continue;
@@ -113,7 +113,7 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
         if (pCaloHit == *iter)
             continue;
 
-        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
+        const CartesianVector positionDifference(positionVector - (*iter)->GetPositionVector());
 
         if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
             continue;
@@ -123,7 +123,7 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
             const float dZ(fabs(positionDifference.GetZ()));
             const float dPhi(std::sqrt(pow(positionDifference.GetX(), 2) + pow(positionDifference.GetY(), 2)));
 
-            if( (dZ < (1.5 * pCaloHit->GetCellSizeZ())) && (dPhi < (1.5 * pCaloHit->GetCellSizeV())) )
+            if( (dZ < (1.5 * pCaloHit->GetCellSizeU())) && (dPhi < (1.5 * pCaloHit->GetCellSizeV())) )
                 surroundingEnergyContribution += (*iter)->GetHadronicEnergy();
         }
         else
@@ -158,8 +158,8 @@ unsigned int CaloHitHelper::IsolationCountNearbyHits(const CaloHit *const pCaloH
         if (pCaloHit == *iter)
             continue;
 
-        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
-        const CartesianVector crossProduct = positionVector.GetCrossProduct(positionDifference);
+        const CartesianVector positionDifference(positionVector - (*iter)->GetPositionVector());
+        const CartesianVector crossProduct(positionVector.GetCrossProduct(positionDifference));
 
         if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
             continue;
@@ -187,7 +187,7 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
         if (pCaloHit == *iter)
             continue;
 
-        const CartesianVector positionDifference = positionVector - (*iter)->GetPositionVector();
+        const CartesianVector positionDifference(positionVector - (*iter)->GetPositionVector());
 
         if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
             continue;
@@ -197,7 +197,7 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
             const float dZ(fabs(positionDifference.GetZ()));
             const float dPhi(std::sqrt(pow(positionDifference.GetX(), 2) + pow(positionDifference.GetY(), 2)));
 
-            if( (dZ < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeZ())) && (dPhi < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeV())) )
+            if( (dZ < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeU())) && (dPhi < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeV())) )
                 ++nearbyHitsFound;
         }
         else
