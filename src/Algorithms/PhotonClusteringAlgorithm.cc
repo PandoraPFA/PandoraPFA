@@ -22,8 +22,8 @@ StatusCode PhotonClusteringAlgorithm::Run()
     // Could select some clusters here (a subset of those in pClusterList) to save. Would then pass this list when calling SaveClusterList.
     // ClusterList clustersToSave;
 
-    //Save the clusters and remove the hits - clustersToSave argument is optional
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_photonClusterListName));
+    //Save the clusters - clustersToSave argument is optional
+    //PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_photonClusterListName));
 
     return STATUS_CODE_SUCCESS;
 }

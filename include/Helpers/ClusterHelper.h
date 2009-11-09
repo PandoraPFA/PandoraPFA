@@ -64,9 +64,9 @@ public:
         PseudoLayer GetPseudoLayer() const;
 
     private:
-        const CartesianVector   m_position;              ///< The position vector of the fit point
-        const float             m_cellThickness;         ///< The thickness of the cell in which the point was recorded
-        const PseudoLayer       m_pseudoLayer;           ///< The pseudolayer in which the point was recorded
+        CartesianVector         m_position;              ///< The position vector of the fit point
+        float                   m_cellThickness;         ///< The thickness of the cell in which the point was recorded
+        PseudoLayer             m_pseudoLayer;           ///< The pseudolayer in which the point was recorded
     };
 
     typedef std::vector<ClusterFitPoint> ClusterFitPointList;
@@ -183,10 +183,39 @@ public:
     /**
      *  @brief  Perform linear regression of x vs d and y vs d and z vs d (assuming same error on all hits)
      * 
+     *  @param  orderedCaloHitList the ordered list of calo hits to fit
+     *  @param  clusterFitResult to receive the cluster fit result
+     */
+    static StatusCode FitPoints(const OrderedCaloHitList &orderedCaloHitList, ClusterFitResult &clusterFitResult);
+
+    /**
+     *  @brief  Perform linear regression of x vs d and y vs d and z vs d (assuming same error on all hits)
+     * 
      *  @param  clusterFitPointList list of cluster fit points
      *  @param  clusterFitResult to receive the cluster fit result
      */
     static StatusCode FitPoints(const ClusterFitPointList &clusterFitPointList, ClusterFitResult &clusterFitResult);
+
+private:
+    /**
+     *  @brief  Fit points in barrel region
+     * 
+     *  @param  clusterFitPointList list of cluster fit points
+     *  @param  cosTheta cosine of coordinate rotation angle
+     *  @param  sinTheta sine of coordinate rotation angle
+     *  @param  clusterFitResult to receive the cluster fit result
+     */
+    static StatusCode FitBarrelPoints(const ClusterFitPointList &clusterFitPointList, float cosTheta, float sinTheta,
+        ClusterFitResult &clusterFitResult);
+
+    /**
+     *  @brief  Fit points in endcap region
+     * 
+     *  @param  clusterFitPointList list of cluster fit points
+     *  @param  isPositiveZ whether fit is to endcap in region of positive or negative z coordinate
+     *  @param  clusterFitResult to receive the cluster fit result
+     */
+    static StatusCode FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, bool isPositiveZ, ClusterFitResult &clusterFitResult);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -38,6 +38,7 @@ StatusCode ClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInPreviousLayers(pseudoLayer, &energySortedCaloHitList,
             pOrderedCaloHitList, clusterVector));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInSameLayer(pseudoLayer, &energySortedCaloHitList, clusterVector));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -126,6 +127,7 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
             if ((0 == m_clusterFormationStrategy) && (NULL != pBestCluster)) // TODO turn clusterFormationStrategy into a bool
             {
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHit));
+                break;
             }
         }
 
@@ -202,6 +204,15 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Ene
             clusterVector.push_back(pCluster);
         }
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusteringAlgorithm::UpdateClusterProperties(PseudoLayer pseudoLayer, ClusterVector &clusterVector) const
+{
+    // TODO calculate current cluster direction, using ClusterHelper and set cluster isMipTrack flag.
 
     return STATUS_CODE_SUCCESS;
 }

@@ -48,6 +48,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
+    m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_sumX(0), m_sumY(0), m_sumZ(0),
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
@@ -69,6 +70,7 @@ Cluster::Cluster(CaloHitVector *pCaloHitVector) :
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
+    m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_sumX(0), m_sumY(0), m_sumZ(0),
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
@@ -92,6 +94,7 @@ Cluster::Cluster(Track *pTrack) :
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
+    m_isMipTrack(false),
     m_sumX(0), m_sumY(0), m_sumZ(0),
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
@@ -267,6 +270,8 @@ StatusCode Cluster::UpdateProperties()
 {
     if (m_isUpToDate)
         return STATUS_CODE_SUCCESS;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitPoints(m_orderedCaloHitList, m_fitToAllHitsResult));
 
     m_isUpToDate = true;
 

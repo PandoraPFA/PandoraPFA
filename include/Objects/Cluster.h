@@ -75,9 +75,16 @@ public:
     /**
      *  @brief  Whether the cluster has been flagged as a photon cluster
      * 
-     *  @return boolean 
+     *  @return boolean
      */
     bool IsPhoton() const;
+
+    /**
+     *  @brief  Whether the cluster has been flagged as a section of mip track
+     * 
+     *  @return boolean
+     */
+    bool IsMipTrack() const;
 
     /**
      *  @brief  Whether the cluster is track seeded
@@ -112,7 +119,7 @@ public:
      * 
      *  @return The cluster fit result
      */
-    const ClusterHelper::ClusterFitResult &GetFitToAllHitsResult() const;
+    const ClusterHelper::ClusterFitResult &GetFitToAllHitsResult();
 
     /**
      *  @brief  Get the centroid for the cluster at a particular pseudo layer
@@ -164,6 +171,13 @@ public:
      *  @param  isPhotonFlag the is photon flag
      */
     void SetIsPhotonFlag(bool isPhotonFlag);
+
+    /**
+     *  @brief  Set the is mip track for the cluster
+     * 
+     *  @param  isMipTrackFlag the is mip track flag
+     */
+    void SetIsMipTrackFlag(bool isMipTrackFlag);
 
     /**
      *  @brief  Set the best estimate of the cluster energy, units GeV
@@ -273,6 +287,7 @@ private:
     float                   m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
 
     bool                    m_isPhoton;                 ///< Whether the cluster has been flagged as a photon cluster
+    bool                    m_isMipTrack;               ///< Whether the cluster has been flagged as a section of mip track
     const Track            *m_pTrackSeed;               ///< Address of the track with which the cluster is seeded
 
     float                   m_sumX;                     ///< The sum of the x coordinates of the constituent calo hits
@@ -369,6 +384,13 @@ inline bool Cluster::IsPhoton() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline bool Cluster::IsMipTrack() const
+{
+    return m_isMipTrack;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline bool Cluster::IsTrackSeeded() const
 {
     return (NULL != m_pTrackSeed);
@@ -400,8 +422,11 @@ inline const ClusterHelper::ClusterFitResult &Cluster::GetCurrentFitResult() con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult() const
+inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult()
 {
+    if (!m_isUpToDate)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties()); 
+
     return m_fitToAllHitsResult;
 }
 
@@ -438,6 +463,13 @@ inline const TrackList &Cluster::GetAssociatedTrackList() const
 inline void Cluster::SetIsPhotonFlag(bool isPhotonFlag)
 {
     m_isPhoton = isPhotonFlag;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void Cluster::SetIsMipTrackFlag(bool isMipTrackFlag)
+{
+    m_isMipTrack = isMipTrackFlag;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
