@@ -73,7 +73,7 @@ float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit,
     static const unsigned int densityWeightPower(PandoraSettings::GetInstance()->GetDensityWeightPower());
 
     float densityWeightContribution = 0.;
-    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const float positionMagnitude(positionVector.GetMagnitude());
 
     for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
@@ -105,7 +105,7 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
     static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
 
     float surroundingEnergyContribution = 0;
-    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const bool isHitInBarrelRegion(pCaloHit->GetDetectorRegion() == BARREL);
 
     for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
@@ -147,7 +147,7 @@ unsigned int CaloHitHelper::IsolationCountNearbyHits(const CaloHit *const pCaloH
     static const float isolationCutDistanceECal(PandoraSettings::GetInstance()->GetIsolationCutDistanceECal());
     static const float isolationCutDistanceHCal(PandoraSettings::GetInstance()->GetIsolationCutDistanceHCal());
 
-    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const float positionMagnitude(positionVector.GetMagnitude());
     const float isolationCutDistance((pCaloHit->GetHitType() == ECAL) ? isolationCutDistanceECal : isolationCutDistanceHCal);
 
@@ -179,7 +179,7 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
     static const float mipNCellsForNearbyHit(PandoraSettings::GetInstance()->GetMipNCellsForNearbyHit() + 0.5);
 
     unsigned int nearbyHitsFound = 0;
-    const CartesianVector positionVector(pCaloHit->GetPositionVector());
+    const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const bool isHitInBarrelRegion(pCaloHit->GetDetectorRegion() == BARREL);
 
     for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
@@ -395,7 +395,7 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
         {
             pCaloHit->AddSurroundingEnergy(CaloHitHelper::GetSurroundingEnergyContribution(pCaloHit, pCaloHitList));
 
-            const CartesianVector positionVector(pCaloHit->GetPositionVector());
+            const CartesianVector &positionVector(pCaloHit->GetPositionVector());
 
             const float angularCorrection( (BARREL == pCaloHit->GetDetectorRegion()) ?
                 positionVector.GetMagnitude() / std::sqrt(pow(positionVector.GetX(), 2) + pow(positionVector.GetY(), 2)) :

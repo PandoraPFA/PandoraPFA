@@ -13,6 +13,35 @@
 namespace pandora
 {
 
+StatusCode Cluster::SetTrackSeed(Track *const pTrack)
+{
+    if (m_associatedTrackList.end() == m_associatedTrackList.find(pTrack))
+        return STATUS_CODE_NOT_ALLOWED;
+
+    m_pTrackSeed = pTrack;
+    m_initialDirection = pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector();
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Cluster::RemoveTrackSeed()
+{
+    m_pTrackSeed = NULL;
+
+    if (!m_orderedCaloHitList.empty())
+    {
+        m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
+    }
+    else
+    {
+        m_initialDirection.Reset();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 Cluster::Cluster(CaloHit *pCaloHit) :
     m_nCaloHits(0),
     m_nPossibleMipHits(0),
@@ -46,24 +75,13 @@ Cluster::Cluster(CaloHitVector *pCaloHitVector) :
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
     m_isUpToDate(false)
 {
-    // Add the list of hits
     if (NULL == pCaloHitVector)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     for (CaloHitVector::const_iterator iter = pCaloHitVector->begin(), iterEnd = pCaloHitVector->end(); iter != iterEnd; ++iter)
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(*iter));
 
-    // Calculate initial direction
-    OrderedCaloHitList::const_iterator listIter = m_orderedCaloHitList.find(this->GetInnerPseudoLayer());
-
-    if (m_orderedCaloHitList.end() == listIter)
-        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
-
-    CartesianVector initialDirection;
-    for (CaloHitList::const_iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
-        initialDirection += (*iter)->GetPositionVector();
-
-    m_initialDirection = initialDirection.GetUnitVector();
+    m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,17 +92,16 @@ Cluster::Cluster(Track *pTrack) :
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
-    m_pTrackSeed(pTrack),
     m_sumX(0), m_sumY(0), m_sumZ(0),
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
-    m_initialDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector()),
     m_isUpToDate(false)
 {
     if (NULL == pTrack)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddTrackAssociation(pTrack));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SetTrackSeed(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -221,9 +238,9 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer Cluster::GetShowerMax()
+PseudoLayer Cluster::GetShowerMaxLayer()
 {
-    PseudoLayer showerMax(0);
+    PseudoLayer showerMaxLayer(0);
     float maxEnergyInLayer(0);
     bool showerMaxFound(false);
 
@@ -233,7 +250,7 @@ PseudoLayer Cluster::GetShowerMax()
         if (iter->second > maxEnergyInLayer)
         {
             maxEnergyInLayer = iter->second;
-            showerMax = iter->first;
+            showerMaxLayer = iter->first;
             showerMaxFound = true;
         }
     }
@@ -241,7 +258,7 @@ PseudoLayer Cluster::GetShowerMax()
     if (!showerMaxFound)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    return showerMax;
+    return showerMaxLayer;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -277,14 +294,12 @@ StatusCode Cluster::ResetProperties()
     m_electromagneticEnergy = 0;
     m_hadronicEnergy = 0;
 
+    m_bestEnergyEstimate.Reset();
     m_innerPseudoLayer.Reset();
     m_outerPseudoLayer.Reset();
 
-    m_currentDirection.Reset();
-
-    m_bestEnergyEstimate.Reset();
-    m_radialDirectionCosine.Reset();
-    m_clusterRMS.Reset();
+    m_currentFitResult.Reset();
+    m_fitToAllHitsResult.Reset();
 
     m_isUpToDate = true;
 

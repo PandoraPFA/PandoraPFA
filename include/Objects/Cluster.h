@@ -10,6 +10,8 @@
 
 #include "Api/PandoraContentApi.h"
 
+#include "Helpers/ClusterHelper.h"
+
 #include "Objects/OrderedCaloHitList.h"
 
 #include "Pandora/PandoraInternal.h"
@@ -99,11 +101,18 @@ public:
     const CartesianVector &GetInitialDirection() const;
 
     /**
-     *  @brief  Get the current direction of the cluster
+     *  @brief  Get the current linear fit result, usually set by a clustering algorithm, as cluster grows
      * 
-     *  @return The current direction of the cluster
+     *  @return The cluster fit result
      */
-    const CartesianVector &GetCurrentDirection() const;
+    const ClusterHelper::ClusterFitResult &GetCurrentFitResult() const;
+
+    /**
+     *  @brief  Get the result of a linear fit to all calo hits in the cluster
+     * 
+     *  @return The cluster fit result
+     */
+    const ClusterHelper::ClusterFitResult &GetFitToAllHitsResult() const;
 
     /**
      *  @brief  Get the centroid for the cluster at a particular pseudo layer
@@ -122,25 +131,11 @@ public:
     float GetBestEnergyEstimate();
 
     /**
-     *  @brief  Get the direction cosine (of a straight-line fit) wrt to the radial direction
-     * 
-     *  @return The direction cosine wrt to the radial direction
-     */
-    float GetRadialDirectionCosine();
-
-    /**
-     *  @brief  Get cluster rms wrt to a straight-line fit to the cluster
-     * 
-     *  @return The cluster rms 
-     */
-    float GetRMS();
-
-    /**
      *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
      * 
      *  @return The pseudo layer at which the cluster energy deposition is greatest
      */
-    PseudoLayer GetShowerMax();
+    PseudoLayer GetShowerMaxLayer();
 
     /**
      *  @brief  Get the innermost pseudo layer in the cluster
@@ -178,11 +173,26 @@ public:
     StatusCode SetBestEnergyEstimate(float bestEnergyEstimate);
 
     /**
-     *  @brief  Set the current cluster direction
+     *  @brief  Set the result of the current linear fit to the cluster. This function is usually called by a clustering
+     *          algorithm, as the cluster grows
      * 
-     *  @param  currentDirection the current cluster direction
+     *  @param  currentFitResult the current fit result
      */
-    StatusCode SetCurrentDirection(const CartesianVector &currentDirection);
+    void SetCurrentFitResult(const ClusterHelper::ClusterFitResult &currentFitResult);
+
+    /**
+     *  @brief  Set the track with which the cluster is seeded, updating the initial direction measurement.
+     *          NOTE the track seed must be a track with which the cluster is associated
+     * 
+     *  @param  pTrack address of the track seed
+     */
+    StatusCode SetTrackSeed(Track *const pTrack);
+
+    /**
+     *  @brief  Remove the track seed, changing the initial direction measurement.
+     *          NOTE this will not remove the association between the seed track and the cluster
+     */
+    void RemoveTrackSeed();
 
 private:
     /**
@@ -252,6 +262,7 @@ private:
     StatusCode RemoveTrackAssociation(Track *const pTrack);
 
     typedef std::map<PseudoLayer, float> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
+    typedef ClusterHelper::ClusterFitResult ClusterFitResult;   ///< The cluster fit result typedef
 
     OrderedCaloHitList      m_orderedCaloHitList;       ///< The ordered calo hit list
 
@@ -262,7 +273,7 @@ private:
     float                   m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
 
     bool                    m_isPhoton;                 ///< Whether the cluster has been flagged as a photon cluster
-    const Track *const      m_pTrackSeed;               ///< Address of the track with which the cluster is seeded
+    const Track            *m_pTrackSeed;               ///< Address of the track with which the cluster is seeded
 
     float                   m_sumX;                     ///< The sum of the x coordinates of the constituent calo hits
     float                   m_sumY;                     ///< The sum of the y coordinates of the constituent calo hits
@@ -284,12 +295,11 @@ private:
     ValueByPseudoLayerMap   m_hadEnergyByPseudoLayer;   ///< The hadronic energy of the calo hits, stored by pseudo layer
 
     CartesianVector         m_initialDirection;         ///< The initial direction of the cluster
-    InputCartesianVector    m_currentDirection;         ///< The current direction of the cluster
+
+    ClusterFitResult        m_currentFitResult;         ///< The current fit result, usually set by a clustering algorithm, as cluster grows
+    ClusterFitResult        m_fitToAllHitsResult;       ///< The result of a linear fit to all calo hits in the cluster
 
     InputFloat              m_bestEnergyEstimate;       ///< The best estimate of the cluster energy, units GeV
-    InputFloat              m_radialDirectionCosine;    ///< The direction cosine (of a straight-line fit) wrt to the radial direction
-    InputFloat              m_clusterRMS;               ///< The cluster rms wrt to a straight-line fit to the cluster
-
     InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
     InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
 
@@ -383,9 +393,16 @@ inline const CartesianVector &Cluster::GetInitialDirection() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const CartesianVector &Cluster::GetCurrentDirection() const
+inline const ClusterHelper::ClusterFitResult &Cluster::GetCurrentFitResult() const
 {
-    return m_currentDirection.Get();
+    return m_currentFitResult;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult() const
+{
+    return m_fitToAllHitsResult;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -393,26 +410,6 @@ inline const CartesianVector &Cluster::GetCurrentDirection() const
 inline float Cluster::GetBestEnergyEstimate()
 {
     return m_bestEnergyEstimate.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float Cluster::GetRadialDirectionCosine()
-{
-    if (!m_isUpToDate)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
-
-    return m_radialDirectionCosine.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float Cluster::GetRMS()
-{
-    if (!m_isUpToDate)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties());
-
-    return m_clusterRMS.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -455,12 +452,9 @@ inline StatusCode Cluster::SetBestEnergyEstimate(float bestEnergyEstimate)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Cluster::SetCurrentDirection(const CartesianVector &currentDirection)
+inline void Cluster::SetCurrentFitResult(const ClusterHelper::ClusterFitResult &currentFitResult)
 {
-    if (!(m_currentDirection = currentDirection))
-        return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
+    m_currentFitResult = currentFitResult;
 }
 
 } // namespace pandora

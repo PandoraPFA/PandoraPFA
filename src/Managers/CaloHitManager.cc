@@ -79,7 +79,7 @@ StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
     static const GeometryHelper::SubDetectorParameters eCalBarrelParameters = pGeometryHelper->GetECalBarrelParameters();
     static const GeometryHelper::SubDetectorParameters eCalEndCapParameters = pGeometryHelper->GetECalEndCapParameters();
 
-    const CartesianVector positionVector = pCaloHit->GetPositionVector();
+    const CartesianVector &positionVector = pCaloHit->GetPositionVector();
     const float zCoordinate = std::fabs(positionVector.GetZ());
     const float radius = pGeometryHelper->GetMaximumRadius(positionVector.GetX(), positionVector.GetY());
 
@@ -203,7 +203,7 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
     if (clusterList.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    const OrderedCaloHitList orderedCaloHitList = (*clusterList.begin())->GetOrderedCaloHitList();
+    const OrderedCaloHitList &orderedCaloHitList = (*clusterList.begin())->GetOrderedCaloHitList();
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CreateTemporaryListAndSetCurrent(pAlgorithm, orderedCaloHitList, temporaryListName));
 
     for (ClusterList::const_iterator iter = ++(clusterList.begin()), iterEnd = clusterList.end(); iter != iterEnd; ++iter)

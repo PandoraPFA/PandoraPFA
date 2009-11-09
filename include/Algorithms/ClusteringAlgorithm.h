@@ -127,7 +127,7 @@ private:
 
     static const float FLOAT_MAX;
 
-    unsigned int    m_seedClustersWithTracks;       ///< Flag determining if and how clusters should be seeded with tracks
+    unsigned int    m_clusterSeedStrategy;          ///< Flag determining if and how clusters should be seeded with tracks
     float           m_trackSeedMaxCosTheta;         ///< Cut off for seeding clusters with tracks (unless all tracks requested)
 
     unsigned int    m_layersToStepBackECal;         ///< Number of layers to step back when associating an ecal hit to clusters
