@@ -94,7 +94,7 @@ Cluster::Cluster(Track *pTrack) :
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
     m_isPhoton(false),
-    m_isMipTrack(false),
+    m_isMipTrack(true),
     m_sumX(0), m_sumY(0), m_sumZ(0),
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),

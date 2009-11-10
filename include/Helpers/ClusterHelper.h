@@ -50,11 +50,11 @@ public:
         const CartesianVector &GetPosition() const;
 
         /**
-         *  @brief  Get the thickness of the cell in which the point was recorded
+         *  @brief  Get the size of the cell in which the point was recorded
          * 
-         *  @return the thickness of the cell in which the point was recorded
+         *  @return the size of the cell in which the point was recorded
          */
-        float GetCellThickness() const;
+        float GetCellSize() const;
 
         /**
          *  @brief  Get the pseudolayer in which the point was recorded
@@ -65,7 +65,7 @@ public:
 
     private:
         CartesianVector         m_position;              ///< The position vector of the fit point
-        float                   m_cellThickness;         ///< The thickness of the cell in which the point was recorded
+        float                   m_cellSize;              ///< The size of the cell in which the point was recorded
         PseudoLayer             m_pseudoLayer;           ///< The pseudolayer in which the point was recorded
     };
 
@@ -228,9 +228,9 @@ inline const CartesianVector &ClusterHelper::ClusterFitPoint::GetPosition() cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float ClusterHelper::ClusterFitPoint::GetCellThickness() const
+inline float ClusterHelper::ClusterFitPoint::GetCellSize() const
 {
-    return m_cellThickness;
+    return m_cellSize;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

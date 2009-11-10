@@ -19,13 +19,6 @@ StatusCode PrimaryClusteringAlgorithm::Run()
     // Run topological association algorithm
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
 
-    for (ClusterList::const_iterator iter = pClusterList->begin(); iter != pClusterList->end(); ++iter)
-    {
-        std::cout << "Cluster " << *iter << " hits " << (*iter)->GetNCaloHits() << std::endl;
-    }
-
-    PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XY, pClusterList));
-
     //Save the clusters and replace current list
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_clusterListName));
 

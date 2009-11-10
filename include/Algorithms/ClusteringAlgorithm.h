@@ -139,6 +139,8 @@ private:
     unsigned int    m_clusterSeedStrategy;          ///< Flag determining if and how clusters should be seeded with tracks
     float           m_trackSeedMaxCosTheta;         ///< Cut off for seeding clusters with tracks (unless all tracks requested)
 
+    bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
+
     unsigned int    m_layersToStepBackECal;         ///< Number of layers to step back when associating an ecal hit to clusters
     unsigned int    m_layersToStepBackHCal;         ///< Number of layers to step back when associating an hcal hit to clusters
 
@@ -156,12 +158,26 @@ private:
     float           m_tanConeAngleHCal;             ///< HCal tan cone angle used to calculate cone approach distance
     float           m_additionalPadWidthsECal;      ///< ECal adjacent pad widths used to calculate cone approach distance
     float           m_additionalPadWidthsHCal;      ///< HCal adjacent pad widths used to calculate cone approach distance
+    float           m_maxClusterDirProjection;      ///< Max projection of cluster-hit separation in cluster dir to calculate cone distance
+    float           m_minClusterDirProjection;      ///< Min projection of cluster-hit separation in cluster dir to calculate cone distance
 
     float           m_trackPathWidth;               ///< Track path width, used to determine whether hits are associated with seed track
     float           m_maxTrackSeedSeparation;       ///< Maximum distance between a calo hit and track seed
 
     unsigned int    m_maxLayersToTrackSeed;         ///< Max number of layers to the track seed for trackSeedDistance to be calculated
     unsigned int    m_maxLayersToTrackLikeHit;      ///< Max number of layers to a "track-like" hit for trackSeedDistance to be calculated
+
+    unsigned int    m_nLayersSpannedForFit;         ///< Min number of layers spanned by cluster before current direction fit is performed
+    unsigned int    m_nLayersSpannedForApproxFit;   ///< If current fit fails, but cluster spans enough layers, calculate an approximate fit
+    unsigned int    m_nLayersToFit;                 ///< Number of layers (from outermost layer) to examine in current direction fit
+
+    float           m_fitSuccessDotProductCut1;     ///< 1. Min value of dot product (current fit dir dot initial dir) for fit success
+    float           m_fitSuccessChi2Cut1;           ///< 1. Max value of fit chi2 for fit success
+
+    float           m_fitSuccessDotProductCut2;     ///< 2. Min value of dot product (current fit dir dot initial dir) for fit success
+    float           m_fitSuccessChi2Cut2;           ///< 2. Max value of fit chi2 for fit success
+
+    float           m_mipTrackChi2Cut;              ///< Max value of fit chi2 for track seeded cluster to retain its IsMipTrack status
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

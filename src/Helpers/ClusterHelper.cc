@@ -127,9 +127,12 @@ StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitP
         const float v(cosTheta * iter->GetPosition().GetY() - sinTheta * iter->GetPosition().GetX());
         const float z(iter->GetPosition().GetZ());
 
-        const float error(iter->GetCellThickness() / 3.46);
-        chi2_V += pow(((v - aV * u - bV) / error), 2);
-        chi2_Z += pow(((z - aZ * u - bZ) / error), 2);
+        const float error(iter->GetCellSize() / 3.46);
+        const float chiV((v - aV * u - bV) / error);
+        const float chiZ((z - aZ * u - bZ) / error);
+
+        chi2_V += chiV * chiV;
+        chi2_Z += chiZ * chiZ;
 
         const CartesianVector difference(iter->GetPosition() - intercept);
         rms += (direction.GetCrossProduct(difference)).GetMagnitudeSquared();
@@ -142,7 +145,6 @@ StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitP
     const float denominatorL(sumL * sumL - nPoints * sumLL);
     if ((0 != denominatorL) && (0 > ((sumL * sumA - nPoints * sumAL) / denominatorL)));
     {
-        std::cout << "ClusterHelper::FitBarrelPoints: Flipping fit direction." << std::endl;
         direction = CartesianVector(0, 0, 0) - direction;
     }
 
@@ -209,10 +211,12 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
     for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
         const CartesianVector difference(iter->GetPosition() - intercept);
-        const float error(iter->GetCellThickness() / 3.46);
+        const float error(iter->GetCellSize() / 3.46);
+        const float chiX((difference.GetX() - aX * difference.GetZ()) / error);
+        const float chiY((difference.GetY() - aY * difference.GetZ()) / error);
 
-        chi2_X += pow(((difference.GetX() - aX * difference.GetZ()) / error), 2);
-        chi2_Y += pow(((difference.GetY() - aY * difference.GetZ()) / error), 2);
+        chi2_X += chiX * chiX;
+        chi2_Y += chiY * chiY;
         rms += (direction.GetCrossProduct(difference)).GetMagnitudeSquared();
 
         const float a(direction.GetDotProduct(difference));
@@ -223,7 +227,6 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
     const float denominatorL(sumL * sumL - nPoints * sumLL);
     if ((0 != denominatorL) && (0 > ((sumL * sumA - nPoints * sumAL) / denominatorL)));
     {
-        std::cout << "ClusterHelper::FitEndCapPoints: Flipping fit direction." << std::endl;
         direction = CartesianVector(0, 0, 0) - direction;
     }
 
@@ -245,21 +248,21 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
 
 ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :
     m_position(pCaloHit->GetPositionVector()),
-    m_cellThickness(pCaloHit->GetCellThickness()),
+    m_cellSize(std::sqrt(pCaloHit->GetCellSizeU() * pCaloHit->GetCellSizeV())),
     m_pseudoLayer(pCaloHit->GetPseudoLayer())
 {
-    if (!m_position.IsInitialized() || (0 == m_cellThickness))
+    if (!m_position.IsInitialized() || (0 == m_cellSize))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position, float cellThickness, PseudoLayer pseudoLayer) :
+ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position, float cellSize, PseudoLayer pseudoLayer) :
     m_position(position),
-    m_cellThickness(cellThickness),
+    m_cellSize(cellSize),
     m_pseudoLayer(pseudoLayer)
 {
-    if (!m_position.IsInitialized() || (0 == m_cellThickness))
+    if (!m_position.IsInitialized() || (0 == m_cellSize))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 
