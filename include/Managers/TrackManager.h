@@ -40,6 +40,11 @@ private:
     StatusCode CreateTrack(const PandoraApi::TrackParameters &trackParameters);
 
     /**
+     *  @brief  Create the track input list
+     */
+    StatusCode CreateInputList();
+
+    /**
      *  @brief  Get the current track list name
      * 
      *  @param  trackListName to receive the current track list name

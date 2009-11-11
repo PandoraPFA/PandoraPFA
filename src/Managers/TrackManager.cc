@@ -20,6 +20,7 @@ const std::string TrackManager::INPUT_LIST_NAME = "input";
 TrackManager::TrackManager() :
     m_currentListName(INPUT_LIST_NAME)
 {
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInputList());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,6 +28,17 @@ TrackManager::TrackManager() :
 TrackManager::~TrackManager()
 {
     (void) this->ResetForNextEvent();
+
+    NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() != iter)
+    {
+        delete iter->second;
+        m_nameToTrackListMap.erase(iter);
+    }
+
+    m_nameToTrackListMap.clear();
+    m_savedLists.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,14 +56,7 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
         NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
 
         if (m_nameToTrackListMap.end() == iter)
-        {
-            m_nameToTrackListMap[INPUT_LIST_NAME] = new TrackList;
-            m_savedLists.insert(INPUT_LIST_NAME);
-            iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
-
-            if (m_nameToTrackListMap.end() == iter)
-                return STATUS_CODE_FAILURE;
-        }
+            return STATUS_CODE_FAILURE;
 
         if (!iter->second->insert(pTrack).second)
             return STATUS_CODE_FAILURE;
@@ -66,6 +71,24 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
         std::cout << "Failed to create track: " << statusCodeException.ToString() << std::endl;
         return statusCodeException.GetStatusCode();
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::CreateInputList()
+{
+    if (!m_nameToTrackListMap.empty() || !m_savedLists.empty())
+        return STATUS_CODE_NOT_ALLOWED;
+
+    m_nameToTrackListMap[INPUT_LIST_NAME] = new TrackList;
+    m_savedLists.insert(INPUT_LIST_NAME);
+
+    NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() == iter)
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -242,6 +265,8 @@ StatusCode TrackManager::ResetForNextEvent()
     m_uidToTrackMap.clear();
     m_parentDaughterRelationMap.clear();
     m_siblingRelationMap.clear();
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInputList());
 
     return STATUS_CODE_SUCCESS;
 }
