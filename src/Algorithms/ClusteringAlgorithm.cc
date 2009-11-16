@@ -46,29 +46,6 @@ StatusCode ClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
 
-    std::cout << "****************** DONE"<< std::endl;
-    for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
-    {
-        Cluster *pCluster = *iter;
-        std::cout << "Cluster " << pCluster->GetElectromagneticEnergy() << " nhits " << pCluster->GetNCaloHits();
-        if (pCluster->IsTrackSeeded()) std::cout << ", track seed x dir " << pCluster->GetInitialDirection().GetX();
-        std::cout << std::endl;
-
-    //    for (OrderedCaloHitList::const_iterator iter2 = pCluster->GetOrderedCaloHitList().begin(); iter2 != pCluster->GetOrderedCaloHitList().end(); ++iter2)
-    //    {
-    //        std::cout << "PseudoLayer " << iter2->first << std::endl;
-    //
-    //        CaloHitList *pCaloHitList = iter2->second;
-    //
-    //        for (CaloHitList::const_iterator iter3 = pCaloHitList->begin(); iter3 != pCaloHitList->end(); ++iter3)
-    //        {
-    //            std::cout << "hit " << (*iter3)->GetMipEquivalentEnergy() << std::endl;
-    //        }
-    //    }
-    //
-    //    std::cout << std::endl;
-    }
-
     return STATUS_CODE_SUCCESS;
 }
 
