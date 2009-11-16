@@ -46,6 +46,29 @@ StatusCode ClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
 
+    std::cout << "****************** DONE"<< std::endl;
+    for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
+    {
+        Cluster *pCluster = *iter;
+        std::cout << "Cluster " << pCluster->GetElectromagneticEnergy() << " nhits " << pCluster->GetNCaloHits();
+        if (pCluster->IsTrackSeeded()) std::cout << ", track seed x dir " << pCluster->GetInitialDirection().GetX();
+        std::cout << std::endl;
+
+    //    for (OrderedCaloHitList::const_iterator iter2 = pCluster->GetOrderedCaloHitList().begin(); iter2 != pCluster->GetOrderedCaloHitList().end(); ++iter2)
+    //    {
+    //        std::cout << "PseudoLayer " << iter2->first << std::endl;
+    //
+    //        CaloHitList *pCaloHitList = iter2->second;
+    //
+    //        for (CaloHitList::const_iterator iter3 = pCaloHitList->begin(); iter3 != pCaloHitList->end(); ++iter3)
+    //        {
+    //            std::cout << "hit " << (*iter3)->GetMipEquivalentEnergy() << std::endl;
+    //        }
+    //    }
+    //
+    //    std::cout << std::endl;
+    }
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -62,7 +85,7 @@ StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVec
     for(TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
         Track *pTrack = *iter;
-        bool useTrack = (3 == m_clusterSeedStrategy); // TODO implement enum
+        bool useTrack = (3 == m_clusterSeedStrategy);
 
         if (!useTrack)
         {
@@ -132,7 +155,7 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
             }
 
             // Add best hit found after completing examination of a stepback layer
-            if ((0 == m_clusterFormationStrategy) && (NULL != pBestCluster)) // TODO turn clusterFormationStrategy into a bool
+            if ((0 == m_clusterFormationStrategy) && (NULL != pBestCluster))
             {
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHit));
                 break;
@@ -315,6 +338,7 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
     const CaloHitList *pClusterCaloHitList = clusterHitListIter->second;
 
     const bool useTrackSeed(m_shouldUseTrackSeed && pCluster->IsTrackSeeded());
+    const bool followInitialDirection(m_shouldFollowInitialDirection && pCluster->IsTrackSeeded() && (searchLayer > m_trackSeedCutOffLayer));
     float initialDirectionDistance(FLOAT_MAX), currentDirectionDistance(FLOAT_MAX), trackSeedDistance(FLOAT_MAX);
 
     // Cone approach measurements
@@ -325,19 +349,21 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
             return this->GetDistanceToHitInSameLayer(pCaloHit, pClusterCaloHitList, genericDistance);
         }
 
+        // Measurement using initial cluster direction
         StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList, pCluster->GetInitialDirection(),
             initialDirectionDistance);
 
         if (STATUS_CODE_SUCCESS == statusCode)
         {
-//            if (useTrackSeed) // TODO find a way to put this back in
-//                initialDirectionDistance /= 5.;
+            if (followInitialDirection)
+                initialDirectionDistance /= 5.;
         }
         else if (STATUS_CODE_UNCHANGED != statusCode)
         {
             return statusCode;
         }
 
+        // Measurement using current cluster direction
         if (pCluster->GetCurrentFitResult().IsFitSuccessful())
         {
             StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList,
@@ -356,7 +382,7 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
     }
 
     // Seed track distance measurements
-    if (useTrackSeed) // TODO tracking weight 3 stuff
+    if (useTrackSeed && !followInitialDirection)
     {
         StatusCode statusCode = this->GetDistanceToTrackSeed(pCluster, pCaloHit, searchLayer, trackSeedDistance);
 
@@ -586,6 +612,10 @@ StatusCode ClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     m_trackSeedCutOffLayer = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackSeedCutOffLayer", m_trackSeedCutOffLayer));
+
+    m_shouldFollowInitialDirection = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldFollowInitialDirection", m_shouldFollowInitialDirection));
 
     // Same layer distance parameters
     m_sameLayerPadWidthsECal = 1.8;

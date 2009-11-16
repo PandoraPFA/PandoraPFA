@@ -149,6 +149,7 @@ private:
 
     bool            m_shouldUseTrackSeed;           ///< Whether to use track seed information in clustering
     unsigned int    m_trackSeedCutOffLayer;         ///< Pseudo layer beyond which track seed is no longer considered
+    bool            m_shouldFollowInitialDirection; ///< Whether the cluster should grow preferentially in its initial direction
 
     float           m_sameLayerPadWidthsECal;       ///< ECal adjacent pad widths used to calculate generic distance to same layer hit
     float           m_sameLayerPadWidthsHCal;       ///< HCal adjacent pad widths used to calculate generic distance to same layer hit
