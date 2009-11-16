@@ -192,7 +192,7 @@ CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs
 
 std::ostream &operator<<(std::ostream & stream, const CartesianVector& cartesianVector)
 {
-    if (cartesianVector.IsInitialized())
+    if (!cartesianVector.IsInitialized())
     {
         stream  << "Not initialized.";
     }
