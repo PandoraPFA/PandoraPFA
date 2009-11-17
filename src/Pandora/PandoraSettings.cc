@@ -56,6 +56,10 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsMonitoringEnabled", m_isMonitoringEnabled));
 
+        m_mcPfoSelectionRadius = 300.;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "MCPfoSelectionRadius", m_mcPfoSelectionRadius));
+
         m_caloHitMaxSeparation = 100;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "CaloHitMaxSeparation", m_caloHitMaxSeparation));

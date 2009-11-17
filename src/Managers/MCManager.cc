@@ -10,6 +10,8 @@
 
 #include "Objects/MCParticle.h"
 
+#include "Pandora/PandoraSettings.h"
+
 namespace pandora
 {
 
@@ -125,10 +127,9 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
     if (!mcParticle->IsInitialized())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    // TODO Make boundary a parameter.
-    float boundary = 300.0;
+    static const float selectionRadius(PandoraSettings::GetInstance()->GetMCPfoSelectionRadius());
 
-    if((mcParticle->GetOuterRadius() > boundary) && (mcParticle->GetInnerRadius() <= boundary))
+    if((mcParticle->GetOuterRadius() > selectionRadius) && (mcParticle->GetInnerRadius() <= selectionRadius))
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree(mcParticle, true));
     }

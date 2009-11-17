@@ -36,6 +36,13 @@ public:
     bool IsMonitoringEnabled() const;
 
     /**
+     *  @brief  Get the radius used to select the pfo target from a mc particle decay chain, units mm
+     * 
+     *  @return The pfo selection radius
+     */
+    float GetMCPfoSelectionRadius() const;
+
+    /**
      *  @brief  Get the maximum separation for associations between hits to be considered, units mm
      * 
      *  @return The maximum separation
@@ -146,6 +153,8 @@ private:
 
     bool                    m_isInitialized;                    ///< Whether the pandora settings have been initialized
 
+    float                   m_mcPfoSelectionRadius;             ///< Radius used to select the pfo target from a mc decay chain, units mm
+
     static bool             m_instanceFlag;                     ///< The geometry helper instance flag
     static PandoraSettings *m_pPandoraSettings;                 ///< The geometry helper instance
 
@@ -177,6 +186,13 @@ private:
 inline bool PandoraSettings::IsMonitoringEnabled() const
 {
     return m_isMonitoringEnabled;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetMCPfoSelectionRadius() const
+{
+    return m_mcPfoSelectionRadius;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

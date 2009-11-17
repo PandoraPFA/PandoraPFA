@@ -378,8 +378,10 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
     const float smallestDistance(std::min(trackSeedDistance, std::min(initialDirectionDistance, currentDirectionDistance)));
     if (smallestDistance < genericDistance)
     {
-        genericDistance = smallestDistance; // TODO how to return unchanged
-        return STATUS_CODE_SUCCESS;
+        genericDistance = smallestDistance;
+
+        if (FLOAT_MAX != genericDistance)
+            return STATUS_CODE_SUCCESS;
     }
 
     return STATUS_CODE_UNCHANGED;
