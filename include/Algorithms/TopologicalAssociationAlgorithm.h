@@ -29,7 +29,7 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(TiXmlHandle xmlHandle);
 
-    // Member variables here
+    pandora::StringVector   m_associationAlgorithms;    ///< The ordered list of topological association algorithms to be used
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

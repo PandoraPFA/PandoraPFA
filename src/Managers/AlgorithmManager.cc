@@ -19,6 +19,9 @@
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
 
+#include "Algorithms/TopologicalAssociation/BrokenTracksAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/LoopingTracksAlgorithm.h"
+
 #include "Managers/AlgorithmManager.h"
 
 #include "Xml/tinyxml.h"
@@ -30,16 +33,20 @@ AlgorithmManager::AlgorithmManager(Pandora *pPandora) :
     m_pPandora(pPandora)
 {
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Cheating", new CheatingAlgorithm::Factory));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Clustering", new ClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("FragmentRemoval", new FragmentRemovalAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Monitoring", new MonitoringAlgorithm::Factory));
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PerfectClustering", new PerfectClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PfoConstruction", new PfoConstructionAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PhotonClustering", new PhotonClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PrimaryClustering", new PrimaryClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Reclustering", new ReclusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("TopologicalAssociation", new TopologicalAssociationAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("TrackSelection", new TrackSelectionAlgorithm::Factory));
+
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Clustering", new ClusteringAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PerfectClustering", new PerfectClusteringAlgorithm::Factory));
+
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("BrokenTracks", new BrokenTracksAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("LoopingTracks", new LoopingTracksAlgorithm::Factory));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
