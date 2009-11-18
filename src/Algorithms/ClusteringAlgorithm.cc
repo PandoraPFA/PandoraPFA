@@ -284,8 +284,7 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(PseudoLayer pseudoLayer,
                     pCluster->SetIsMipTrackFlag(false);
             }
         }
-
-        if(!clusterFitResult.IsFitSuccessful() && (nLayersSpanned > m_nLayersSpannedForApproxFit))
+        else if(nLayersSpanned > m_nLayersSpannedForApproxFit)
         {
             const CartesianVector centroidChange(pCluster->GetCentroid(outerLayer) - pCluster->GetCentroid(innerLayer));
             clusterFitResult.Reset();
