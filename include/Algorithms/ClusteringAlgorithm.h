@@ -13,6 +13,54 @@
 using namespace pandora;
 
 /**
+ *  @brief  CustomHitOrder class
+ */
+class CustomHitOrder
+{
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    CustomHitOrder();
+
+    /**
+     *  @brief  Operator () for determining custom calo hit ordering. Operator returns true if lhs hit is to be
+     *          placed at an earlier position than rhs hit.
+     * 
+     *  @param  lhs calo hit for comparison
+     *  @param  rhs calo hit for comparison
+     */
+    bool operator()(const CaloHit *lhs, const CaloHit *rhs) const;
+
+    /**
+     *  @brief  Order calo hits by decreasing input energy
+     * 
+     *  @param  lhs calo hit for comparison
+     *  @param  rhs calo hit for comparison
+     */
+    bool SortByEnergy(const CaloHit *lhs, const CaloHit *rhs) const;
+
+    /**
+     *  @brief  Order calo hits by decreasing density weight
+     * 
+     *  @param  lhs calo hit for comparison
+     *  @param  rhs calo hit for comparison
+     */
+    bool SortByDensityWeight(const CaloHit *lhs, const CaloHit *rhs) const;
+
+    /**
+     *  @brief  Function pointer, specifying the function used to sort the calo hits
+     */
+    bool (CustomHitOrder::*pSortFunction)(const CaloHit *lhs, const CaloHit *rhs) const;
+
+    static unsigned int     m_hitSortingStrategy;   ///< Strategy used to sort the calo hits: 0 - input energy, 1 - density weight, ...
+};
+
+typedef std::set<CaloHit *, CustomHitOrder> CustomSortedCaloHitList;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
  *  @brief  ClusteringAlgorithm class
  */
 class ClusteringAlgorithm : public pandora::Algorithm
@@ -42,21 +90,21 @@ private:
      *  @brief  Match clusters to calo hits in previous pseudo layers
      * 
      *  @param  pseudoLayer the current pseudo layer
-     *  @param  pEnergySortedCaloHitList address of the energy sorted list of calo hits in the current pseudo layer
+     *  @param  pCustomSortedCaloHitList address of the custom sorted list of calo hits in the current pseudo layer
      *  @param  pOrderedCaloHitList address of the current ordered calo hit list
      *  @param  clusterVector vector containing addresses of current clusters
      */
-    StatusCode FindHitsInPreviousLayers(PseudoLayer pseudoLayer, EnergySortedCaloHitList *const pEnergySortedCaloHitList,
+    StatusCode FindHitsInPreviousLayers(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
         const OrderedCaloHitList *const pOrderedCaloHitList, ClusterVector &clusterVector) const;
 
     /**
      *  @brief  Match clusters to calo hits in current pseudo layer
      * 
      *  @param  pseudoLayer the current pseudo layer
-     *  @param  pEnergySortedCaloHitList address of the energy sorted list of calo hits in the current pseudo layer
+     *  @param  pCustomSortedCaloHitList address of the custom sorted list of calo hits in the current pseudo layer
      *  @param  clusterVector vector containing addresses of current clusters
      */
-    StatusCode FindHitsInSameLayer(PseudoLayer pseudoLayer, EnergySortedCaloHitList *const pEnergySortedCaloHitList,
+    StatusCode FindHitsInSameLayer(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
         ClusterVector &clusterVector) const;
 
     /**
@@ -181,6 +229,47 @@ private:
     float           m_mipTrackChi2Cut;              ///< Max value of fit chi2 for track seeded cluster to retain its IsMipTrack status
 };
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CustomHitOrder::CustomHitOrder()
+{
+    if (1 == m_hitSortingStrategy)
+    {
+        pSortFunction = &CustomHitOrder::SortByDensityWeight;
+    }
+    else
+    {
+        pSortFunction = &CustomHitOrder::SortByEnergy;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CustomHitOrder::operator()(const CaloHit *lhs, const CaloHit *rhs) const
+{
+    return (this->*pSortFunction)(lhs, rhs);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CustomHitOrder::SortByEnergy(const CaloHit *lhs, const CaloHit *rhs) const
+{
+    return (!(lhs->GetInputEnergy() > rhs->GetInputEnergy()) && !(rhs->GetInputEnergy() > lhs->GetInputEnergy()) ?
+        (lhs > rhs) :
+        (lhs->GetInputEnergy() > rhs->GetInputEnergy()));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CustomHitOrder::SortByDensityWeight(const CaloHit *lhs, const CaloHit *rhs) const
+{
+    return (!(lhs->GetDensityWeight() > rhs->GetDensityWeight()) && !(rhs->GetDensityWeight() > lhs->GetDensityWeight()) ?
+        (lhs > rhs) :
+        (lhs->GetDensityWeight() > rhs->GetDensityWeight()));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline pandora::Algorithm *ClusteringAlgorithm::Factory::CreateAlgorithm() const

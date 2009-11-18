@@ -12,6 +12,7 @@
 
 using namespace pandora;
 
+unsigned int CustomHitOrder::m_hitSortingStrategy = 0;
 const float ClusteringAlgorithm::FLOAT_MAX = std::numeric_limits<float>::max();
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,19 +31,21 @@ StatusCode ClusteringAlgorithm::Run()
     for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
     {
         const PseudoLayer pseudoLayer(iter->first);
-        EnergySortedCaloHitList energySortedCaloHitList;
+        CustomSortedCaloHitList customSortedCaloHitList;
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
 
             if (CaloHitHelper::IsCaloHitAvailable(pCaloHit) && (m_shouldUseIsolatedHits || !pCaloHit->IsIsolated()))
-                energySortedCaloHitList.insert(pCaloHit);
+            {
+                customSortedCaloHitList.insert(pCaloHit);
+            }
         }
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInPreviousLayers(pseudoLayer, &energySortedCaloHitList,
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInPreviousLayers(pseudoLayer, &customSortedCaloHitList,
             pOrderedCaloHitList, clusterVector));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInSameLayer(pseudoLayer, &energySortedCaloHitList, clusterVector));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInSameLayer(pseudoLayer, &customSortedCaloHitList, clusterVector));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
 
@@ -97,10 +100,10 @@ StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVec
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer, EnergySortedCaloHitList *const pEnergySortedCaloHitList,
+StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
     const OrderedCaloHitList *const pOrderedCaloHitList, ClusterVector &clusterVector) const
 {
-    for (EnergySortedCaloHitList::const_iterator iter = pEnergySortedCaloHitList->begin(), iterEnd = pEnergySortedCaloHitList->end();
+    for (CustomSortedCaloHitList::const_iterator iter = pCustomSortedCaloHitList->begin(), iterEnd = pCustomSortedCaloHitList->end();
         iter != iterEnd;)
     {
         CaloHit *pCaloHit = *iter;
@@ -148,7 +151,7 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
         // Tidy the energy sorted calo hit list
         if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
         {
-            pEnergySortedCaloHitList->erase(iter++);
+            pCustomSortedCaloHitList->erase(iter++);
         }
         else
         {
@@ -161,10 +164,10 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, EnergySortedCaloHitList *const pEnergySortedCaloHitList,
+StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
     ClusterVector &clusterVector) const
 {
-    while (!pEnergySortedCaloHitList->empty())
+    while (!pCustomSortedCaloHitList->empty())
     {
         bool clustersModified = true;
 
@@ -172,7 +175,7 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Ene
         {
             clustersModified = false;
 
-            for (EnergySortedCaloHitList::const_iterator iter = pEnergySortedCaloHitList->begin(), iterEnd = pEnergySortedCaloHitList->end();
+            for (CustomSortedCaloHitList::const_iterator iter = pCustomSortedCaloHitList->begin(), iterEnd = pCustomSortedCaloHitList->end();
                 iter != iterEnd;)
             {
                 CaloHit *pCaloHit = *iter;
@@ -199,7 +202,7 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Ene
                 if (NULL != pBestCluster)
                 {
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHit));
-                    pEnergySortedCaloHitList->erase(iter++);
+                    pCustomSortedCaloHitList->erase(iter++);
                     clustersModified = true;
                 }
                 else
@@ -210,10 +213,10 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Ene
         }
 
         // Seed a new cluster
-        if (!pEnergySortedCaloHitList->empty())
+        if (!pCustomSortedCaloHitList->empty())
         {
-            CaloHit *pCaloHit = *(pEnergySortedCaloHitList->begin());
-            pEnergySortedCaloHitList->erase(pCaloHit);
+            CaloHit *pCaloHit = *(pCustomSortedCaloHitList->begin());
+            pCustomSortedCaloHitList->erase(pCaloHit);
 
             Cluster *pCluster = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHit, pCluster));
@@ -564,6 +567,10 @@ StatusCode ClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
         "TrackSeedMaxCosTheta", m_trackSeedMaxCosTheta));
 
     // High level clustering parameters
+    CustomHitOrder::m_hitSortingStrategy = 0;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HitSortingStrategy", CustomHitOrder::m_hitSortingStrategy));
+
     m_shouldUseIsolatedHits = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShouldUseIsolatedHits", m_shouldUseIsolatedHits));
