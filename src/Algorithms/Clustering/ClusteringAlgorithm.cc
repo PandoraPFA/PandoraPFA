@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/ClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Clustering/ClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the clustering algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/ClusteringAlgorithm.h"
+#include "Algorithms/Clustering/ClusteringAlgorithm.h"
 
 #include <cmath>
 
@@ -48,7 +48,14 @@ StatusCode ClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInSameLayer(pseudoLayer, &customSortedCaloHitList, clusterVector));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
-
+    std::cout << "****************** DONE"<< std::endl;
+    for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
+    {
+        Cluster *pCluster = *iter;
+        std::cout << "Cluster " << pCluster->GetElectromagneticEnergy() << " nhits " << pCluster->GetNCaloHits();
+        if (pCluster->IsTrackSeeded()) std::cout << ", track seed x dir " << pCluster->GetInitialDirection().GetX();
+        std::cout << std::endl;
+    }
     return STATUS_CODE_SUCCESS;
 }
 

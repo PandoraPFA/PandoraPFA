@@ -7,16 +7,17 @@
  */
 
 #include "Algorithms/CheatingAlgorithm.h"
-#include "Algorithms/ClusteringAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
 #include "Algorithms/MonitoringAlgorithm.h"
-#include "Algorithms/PerfectClusteringAlgorithm.h"
 #include "Algorithms/PfoConstructionAlgorithm.h"
 #include "Algorithms/PhotonClusteringAlgorithm.h"
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
 #include "Algorithms/ReclusteringAlgorithm.h"
 #include "Algorithms/TopologicalAssociationAlgorithm.h"
 #include "Algorithms/TrackSelectionAlgorithm.h"
+
+#include "Algorithms/Clustering/ClusteringAlgorithm.h"
+#include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
 
 #include "Managers/AlgorithmManager.h"
 

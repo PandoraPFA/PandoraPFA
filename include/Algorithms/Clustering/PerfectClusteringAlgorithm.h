@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/PerfectClusteringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/Clustering/PerfectClusteringAlgorithm.h
  * 
  *  @brief  Header file for the perfect clustering algorithm class.
  * 

@@ -14,7 +14,7 @@
 #include "Objects/MCParticle.h"
 
 #include <sstream>
-#include <math.h>
+#include <cmath>
 
 using namespace pandora;
 
@@ -66,7 +66,7 @@ StatusCode CheatingAlgorithm::Run()
         }
         else
         {
-            return STATUS_CODE_FAILURE; // unknown parameter
+            return STATUS_CODE_INVALID_PARAMETER;
         }
 //        std::cout << "energy " << energy << std::endl;
         pfo.m_energy = energy; 

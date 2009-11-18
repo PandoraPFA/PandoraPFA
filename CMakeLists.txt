@@ -110,6 +110,8 @@ ADD_DEFINITIONS( "-Wall -ansi" )
 # get list of all source files
 AUX_SOURCE_DIRECTORY( src library_sources )
 AUX_SOURCE_DIRECTORY( src/Algorithms library_sources )
+AUX_SOURCE_DIRECTORY( src/Algorithms/Clustering library_sources )
+AUX_SOURCE_DIRECTORY( src/Algorithms/TopologicalAssociation library_sources )
 AUX_SOURCE_DIRECTORY( src/Api library_sources )
 AUX_SOURCE_DIRECTORY( src/Helpers library_sources )
 AUX_SOURCE_DIRECTORY( src/Managers library_sources )

@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/PerfectClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Clustering/PerfectClusteringAlgorithm.cc
  * 
- *  @brief  Implementation of the clustering algorithm class.
+ *  @brief  Implementation of the perfect clustering algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/PerfectClusteringAlgorithm.h"
+#include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
 
 #include "Api/PandoraContentApi.h"
 
