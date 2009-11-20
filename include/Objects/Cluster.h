@@ -52,6 +52,13 @@ public:
     unsigned int GetNCaloHits() const;
 
     /**
+     *  @brief  Get the number of calo hits in the cluster that have been flagged as possible mip hits
+     * 
+     *  @return The number of possible mip hits
+     */
+    unsigned int GetNPossibleMipHits() const;
+
+    /**
      *  @brief  Get fraction of constituent calo hits that have been flagged as possible mip hits
      * 
      *  @return The mip fraction
@@ -135,14 +142,14 @@ public:
      * 
      *  @return The best energy estimate
      */
-    float GetBestEnergyEstimate();
+    float GetBestEnergyEstimate() const;
 
     /**
      *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
      * 
      *  @return The pseudo layer at which the cluster energy deposition is greatest
      */
-    PseudoLayer GetShowerMaxLayer();
+    PseudoLayer GetShowerMaxLayer() const;
 
     /**
      *  @brief  Get the innermost pseudo layer in the cluster
@@ -351,6 +358,13 @@ inline unsigned int Cluster::GetNCaloHits() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline unsigned int Cluster::GetNPossibleMipHits() const
+{
+    return m_nPossibleMipHits;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline float Cluster::GetMipFraction() const
 {
     float mipFraction = 0;
@@ -432,7 +446,7 @@ inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetBestEnergyEstimate()
+inline float Cluster::GetBestEnergyEstimate() const
 {
     return m_bestEnergyEstimate.Get();
 }

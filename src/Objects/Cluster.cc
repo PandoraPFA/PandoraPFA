@@ -215,7 +215,7 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
         m_innerPseudoLayer = m_orderedCaloHitList.begin()->first;
 
     if (pseudoLayer > m_outerPseudoLayer.Get())
-        m_outerPseudoLayer = m_orderedCaloHitList.end()->first;
+        m_outerPseudoLayer = m_orderedCaloHitList.rbegin()->first;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -246,7 +246,7 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer Cluster::GetShowerMaxLayer()
+PseudoLayer Cluster::GetShowerMaxLayer() const
 {
     PseudoLayer showerMaxLayer(0);
     float maxEnergyInLayer(0);
@@ -320,8 +320,53 @@ StatusCode Cluster::ResetProperties()
 
 StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
 {
-    // TODO sort out cluster merging
-    return m_orderedCaloHitList.Add(pCluster->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.Add(orderedCaloHitList));
+
+    m_isUpToDate = false;
+    m_nCaloHits += pCluster->GetNCaloHits();
+    m_nPossibleMipHits += pCluster->GetNPossibleMipHits();
+
+    m_electromagneticEnergy += pCluster->GetElectromagneticEnergy();
+    m_hadronicEnergy += pCluster->GetHadronicEnergy();
+
+    const float x(pCluster->m_sumX);
+    const float y(pCluster->m_sumY);
+    const float z(pCluster->m_sumZ);
+
+    m_sumX += x; m_sumY += y; m_sumZ += z;
+    m_sumXX += x * x; m_sumYY += y * y; m_sumZZ += z * z;
+    m_sumXY += x * y; m_sumXZ += x * z; m_sumYZ += y * z;
+
+    // Loop over pseudo layers in second cluster
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        const PseudoLayer pseudoLayer(iter->first);
+
+        if (m_orderedCaloHitList[pseudoLayer]->size() > 1)
+        {
+            m_sumXByPseudoLayer[pseudoLayer] += pCluster->m_sumXByPseudoLayer[pseudoLayer];
+            m_sumYByPseudoLayer[pseudoLayer] += pCluster->m_sumYByPseudoLayer[pseudoLayer];
+            m_sumZByPseudoLayer[pseudoLayer] += pCluster->m_sumZByPseudoLayer[pseudoLayer];
+
+            m_emEnergyByPseudoLayer[pseudoLayer] += pCluster->m_emEnergyByPseudoLayer[pseudoLayer];
+            m_hadEnergyByPseudoLayer[pseudoLayer] += pCluster->m_hadEnergyByPseudoLayer[pseudoLayer];
+        }
+        else
+        {
+            m_sumXByPseudoLayer[pseudoLayer] = pCluster->m_sumXByPseudoLayer[pseudoLayer];
+            m_sumYByPseudoLayer[pseudoLayer] = pCluster->m_sumYByPseudoLayer[pseudoLayer];
+            m_sumZByPseudoLayer[pseudoLayer] = pCluster->m_sumZByPseudoLayer[pseudoLayer];
+
+            m_emEnergyByPseudoLayer[pseudoLayer] = pCluster->m_emEnergyByPseudoLayer[pseudoLayer];
+            m_hadEnergyByPseudoLayer[pseudoLayer] = pCluster->m_hadEnergyByPseudoLayer[pseudoLayer];
+        }
+    }
+
+    m_innerPseudoLayer = m_orderedCaloHitList.begin()->first;
+    m_outerPseudoLayer = m_orderedCaloHitList.rbegin()->first;
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
