@@ -222,7 +222,7 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer)
+const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 {
     OrderedCaloHitList::const_iterator iter = m_orderedCaloHitList.find(pseudoLayer);
 
@@ -234,9 +234,14 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer)
     if (0 == nHitsInLayer)
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
-    return CartesianVector(m_sumXByPseudoLayer[pseudoLayer] / nHitsInLayer,
-        m_sumYByPseudoLayer[pseudoLayer] / nHitsInLayer,
-        m_sumZByPseudoLayer[pseudoLayer] / nHitsInLayer);
+    ValueByPseudoLayerMap::const_iterator xValueIter = m_sumXByPseudoLayer.find(pseudoLayer);
+    ValueByPseudoLayerMap::const_iterator yValueIter = m_sumYByPseudoLayer.find(pseudoLayer);
+    ValueByPseudoLayerMap::const_iterator zValueIter = m_sumZByPseudoLayer.find(pseudoLayer);
+
+    if ((m_sumXByPseudoLayer.end() == xValueIter) || (m_sumYByPseudoLayer.end() == yValueIter) || (m_sumZByPseudoLayer.end() == zValueIter))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    return CartesianVector(xValueIter->second / nHitsInLayer, yValueIter->second / nHitsInLayer, zValueIter->second / nHitsInLayer);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -271,7 +276,7 @@ StatusCode Cluster::UpdateProperties()
     if (m_isUpToDate)
         return STATUS_CODE_SUCCESS;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitPoints(m_orderedCaloHitList, m_fitToAllHitsResult));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitPoints(this, m_fitToAllHitsResult));
 
     m_isUpToDate = true;
 

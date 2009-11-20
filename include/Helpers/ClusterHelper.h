@@ -181,12 +181,30 @@ public:
     };
 
     /**
-     *  @brief  Perform linear regression of x vs d and y vs d and z vs d (assuming same error on all hits)
+     *  @brief  Fit points in first n occupied pseudolayers of a cluster
      * 
-     *  @param  orderedCaloHitList the ordered list of calo hits to fit
+     *  @param  pCluster the cluster containing the ordered list of calo hits to fit
+     *  @params nOccupiedLayers the number of occupied pseudo layers to consider
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitPoints(const OrderedCaloHitList &orderedCaloHitList, ClusterFitResult &clusterFitResult);
+    static StatusCode FitStart(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult);
+
+    /**
+     *  @brief  Fit points in last n occupied pseudolayers of a cluster
+     * 
+     *  @param  pCluster the cluster containing the ordered list of calo hits to fit
+     *  @params nOccupiedLayers the number of occupied pseudo layers to consider
+     *  @param  clusterFitResult to receive the cluster fit result
+     */
+    static StatusCode FitEnd(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult);
+
+    /**
+     *  @brief  Fit all points in a cluster
+     * 
+     *  @param  pCluster the cluster containing the ordered list of calo hits to fit
+     *  @param  clusterFitResult to receive the cluster fit result
+     */
+    static StatusCode FitPoints(const Cluster *const pCluster, ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Perform linear regression of x vs d and y vs d and z vs d (assuming same error on all hits)

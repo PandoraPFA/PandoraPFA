@@ -128,7 +128,7 @@ public:
      * 
      *  @return The centroid, returned by value
      */
-    const CartesianVector GetCentroid(PseudoLayer pseudoLayer);
+    const CartesianVector GetCentroid(PseudoLayer pseudoLayer) const;
 
     /**
      *  @brief  Get the best estimate of the cluster energy, units GeV
