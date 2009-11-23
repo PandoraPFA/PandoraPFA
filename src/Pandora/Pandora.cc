@@ -98,8 +98,8 @@ StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
         const TiXmlHandle xmlDocumentHandle(&xmlDocument);
         const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializeAlgorithms(&xmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraSettings->Initialize(&xmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializeAlgorithms(&xmlHandle));
     }
     catch (StatusCodeException &statusCodeException)
     {
