@@ -8,6 +8,8 @@
 
 #include "Algorithms/TopologicalAssociation/LoopingTracksAlgorithm.h"
 
+#include "Helpers/GeometryHelper.h"
+
 #include <cmath>
 
 using namespace pandora;
@@ -28,6 +30,9 @@ StatusCode LoopingTracksAlgorithm::Run()
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(*iter, m_nLayersToFit, clusterFitResult))
             continue;
 
+        if (clusterFitResult.GetChi2() > m_fitChi2Cut)
+            continue;
+
         if (!clusterFitResultMap.insert(ClusterFitResultMap::value_type(*iter, clusterFitResult)).second)
             return STATUS_CODE_FAILURE;
     }
@@ -39,8 +44,10 @@ StatusCode LoopingTracksAlgorithm::Run()
         const ClusterFitResult &clusterFitResultI = iterI->second;
         const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
 
-        if (!this->CanMergeCluster(pClusterI) || (clusterFitResultI.GetChi2() > m_fitChi2Cut))
+        if (!this->CanMergeCluster(pClusterI))
             continue;
+
+        const bool isOutsideECalI(this->IsOutsideECal(pClusterI->GetCentroid(outerLayerI)));
 
         ClusterFitResultMap::const_iterator iterJ = iterI;
         for (++iterJ ; iterJ != clusterFitResultMap.end(); ++iterJ)
@@ -49,10 +56,13 @@ StatusCode LoopingTracksAlgorithm::Run()
             const ClusterFitResult &clusterFitResultJ = iterJ->second;
             const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
 
-            const bool isHCal = false; // TODO set this bool correctly
-
-            if (!this->CanMergeCluster(pClusterJ) || (clusterFitResultJ.GetChi2() > m_fitChi2Cut))
+            if (!this->CanMergeCluster(pClusterJ))
                 continue;
+
+            const bool isOutsideECalJ(this->IsOutsideECal(pClusterJ->GetCentroid(outerLayerJ)));
+
+            // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
+            const bool isOutsideECal(isOutsideECalI && isOutsideECalJ);
 
             // Apply loose cuts to examine suitability of merging clusters before proceeding
             const PseudoLayer outerLayerDifference((outerLayerI > outerLayerJ) ? (outerLayerI - outerLayerJ) : (outerLayerJ - outerLayerI));
@@ -63,28 +73,48 @@ StatusCode LoopingTracksAlgorithm::Run()
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
+            // Check that cluster fit directions are compatible with looping track hypothesis
+            const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
+
             const float fitDirectionDotProduct(clusterFitResultI.GetDirection().GetDotProduct(clusterFitResultJ.GetDirection()));
-            if (fitDirectionDotProduct > m_maxFitDirectionDotProduct)
+            if (fitDirectionDotProduct > fitDirectionDotProductCut)
                 continue;
 
-            // Skip if clusters are not generally pointing towards one another
             if (!(centroidDifference.GetDotProduct(clusterFitResultJ.GetDirection() - clusterFitResultI.GetDirection())) > 0.);
                 continue;
 
-            // Calculate the distance of closest approach between hits in last layers of clusters
-            const float closestHitDistanceCut = (isHCal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
+            // Cut on distance of closest approach between hits in outer layers of the two clusters
+            const float closestHitDistanceCut(isOutsideECal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
 
             if (this->GetClosestDistanceBetweenOuterLayerHits(pClusterI, pClusterJ) > closestHitDistanceCut)
                 continue;
 
-            // Calculate the distance of closest approach between fit extrapolations
-            const float fitResultClosestApproachCut = (isHCal ? m_fitResultClosestApproachCutHCal : m_fitResultClosestApproachCutECal);
+            // Cut on distance of closest approach between fit extrapolations
+            const float fitResultsClosestApproachCut(isOutsideECal ? m_fitResultsClosestApproachCutHCal : m_fitResultsClosestApproachCutECal);
 
-            if (this->GetFitResultsClosestApproach(clusterFitResultI, clusterFitResultJ) > fitResultClosestApproachCut)
+            if (ClusterHelper::GetFitResultsClosestApproach(clusterFitResultI, clusterFitResultJ) > fitResultsClosestApproachCut)
                 continue;
 
-            // If clusters are matched and are within cut distance : join them
-            if(isHCal || this->AreClustersCompatible())
+            // Merge clusters if they are in HCal, otherwise look for "good" features (bit ad hoc) ...
+            unsigned int nGoodFeatures(0);
+
+            if (!isOutsideECal)
+            {
+                if(fitDirectionDotProduct < m_goodFeaturesMaxFitDotProduct)
+                    nGoodFeatures++;
+
+                if(fitResultsClosestApproachCut < m_goodFeaturesMaxFitApproach)
+                    nGoodFeatures++;
+
+                if(outerLayerDifference < m_goodFeaturesMaxLayerDifference)
+                    nGoodFeatures++;
+
+                if((pClusterI->GetMipFraction() > m_goodFeaturesMinMipFraction) && (pClusterJ->GetMipFraction() > m_goodFeaturesMinMipFraction))
+                    nGoodFeatures++;
+            }
+
+            // Now have sufficient information to decide whether to join clusters
+            if(isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
                 // TODO decide which to delete and which to enlarge AND enable option to assimilate at end of algorithm
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
@@ -93,6 +123,37 @@ StatusCode LoopingTracksAlgorithm::Run()
     }
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LoopingTracksAlgorithm::CanMergeCluster(Cluster *const pCluster) const
+{
+    const bool canMerge(!pCluster->IsPhoton() ||
+        (pCluster->GetMipFraction() > m_canMergeMinMipFraction) ||
+        (pCluster->GetFitToAllHitsResult().GetRms() < m_canMergeMaxRms));
+
+    return canMerge;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool LoopingTracksAlgorithm::IsOutsideECal(const CartesianVector &clusterPosition) const
+{
+    static const float eCalBarrelOuterRCoordinate(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetOuterRCoordinate());
+    static const float eCalEndCapOuterZCoordinate(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetOuterZCoordinate());
+
+    if (clusterPosition.GetZ() > eCalEndCapOuterZCoordinate)
+        return true;
+
+    const float x(clusterPosition.GetX());
+    const float y(clusterPosition.GetY());
+    const float r(std::sqrt((x * x) + (y * y)));
+
+    if (r > eCalBarrelOuterRCoordinate)
+        return true;
+
+    return false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,36 +185,8 @@ float LoopingTracksAlgorithm::GetClosestDistanceBetweenOuterLayerHits(const Clus
                 closestDistance = distance;
         }
     }
-
+std::cout << "drMin " << closestDistance << std::endl;
     return closestDistance;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float LoopingTracksAlgorithm::GetFitResultsClosestApproach(const ClusterFitResult &clusterFitResultI, const ClusterFitResult &clusterFitResultJ) const
-{
-    const CartesianVector directionNormal(clusterFitResultI.GetDirection().GetCrossProduct(clusterFitResultJ.GetDirection()).GetUnitVector());
-    const CartesianVector interceptDifference(clusterFitResultI.GetIntercept() - clusterFitResultJ.GetIntercept());
-
-    return std::fabs(directionNormal.GetDotProduct(interceptDifference));
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool LoopingTracksAlgorithm::AreClustersCompatible() const
-{
-    return true; // TODO implement ad hoc "good features" method
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool LoopingTracksAlgorithm::CanMergeCluster(Cluster *const pCluster)
-{
-    const bool canMerge(!pCluster->IsPhoton() ||
-        (pCluster->GetMipFraction() > m_canMergeMinMipFraction) ||
-        (pCluster->GetFitToAllHitsResult().GetRms() < m_canMergeMaxRms));
-
-    return canMerge;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -184,9 +217,13 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxCentroidDifference", m_maxCentroidDifference));
 
-    m_maxFitDirectionDotProduct = 0.;
+    m_fitDirectionDotProductCutECal = -0.1;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxFitDirectionDotProduct", m_maxFitDirectionDotProduct));
+        "FitDirectionDotProductCutECal", m_fitDirectionDotProductCutECal));
+
+    m_fitDirectionDotProductCutHCal = 0.;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "FitDirectionDotProductCutHCal", m_fitDirectionDotProductCutHCal));
 
     m_closestHitDistanceCutECal = 250.;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -196,13 +233,33 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClosestHitDistanceCutHCal", m_closestHitDistanceCutHCal));
 
-    m_fitResultClosestApproachCutECal = 50.;
+    m_fitResultsClosestApproachCutECal = 50.;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "FitResultClosestApproachCutECal", m_fitResultClosestApproachCutECal));
+        "FitResultsClosestApproachCutECal", m_fitResultsClosestApproachCutECal));
 
-    m_fitResultClosestApproachCutHCal = 200.;
+    m_fitResultsClosestApproachCutHCal = 200.;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "FitResultClosestApproachCutHCal", m_fitResultClosestApproachCutHCal));
+        "FitResultsClosestApproachCutHCal", m_fitResultsClosestApproachCutHCal));
+
+    m_nGoodFeaturesForClusterMerge = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NGoodFeaturesForClusterMerge", m_nGoodFeaturesForClusterMerge));
+
+    m_goodFeaturesMaxFitDotProduct = -0.5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NGoodFeaturesForClusterMerge", m_nGoodFeaturesForClusterMerge));
+
+    m_goodFeaturesMaxFitApproach = 50.;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "GoodFeaturesMaxFitApproach", m_goodFeaturesMaxFitApproach));
+
+    m_goodFeaturesMaxLayerDifference = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "GoodFeaturesMaxLayerDifference", m_goodFeaturesMaxLayerDifference));
+
+    m_goodFeaturesMinMipFraction = 0.9;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "GoodFeaturesMinMipFraction", m_goodFeaturesMinMipFraction));
 
     return STATUS_CODE_SUCCESS;
 }

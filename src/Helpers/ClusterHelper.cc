@@ -309,6 +309,19 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+float ClusterHelper::GetFitResultsClosestApproach(const ClusterHelper::ClusterFitResult &lhs, const ClusterHelper::ClusterFitResult &rhs)
+{
+    if (!lhs.IsFitSuccessful() || !rhs.IsFitSuccessful())
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    const CartesianVector directionNormal((lhs.GetDirection().GetCrossProduct(rhs.GetDirection())).GetUnitVector());
+    const CartesianVector interceptDifference(lhs.GetIntercept() - rhs.GetIntercept());
+
+    return std::fabs(directionNormal.GetDotProduct(interceptDifference));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :

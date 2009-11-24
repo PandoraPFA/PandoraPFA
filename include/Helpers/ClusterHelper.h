@@ -214,6 +214,16 @@ public:
      */
     static StatusCode FitPoints(const ClusterFitPointList &clusterFitPointList, ClusterFitResult &clusterFitResult);
 
+    /**
+     *  @brief  Get the closest distance of approach between two cluster fit results
+     * 
+     *  @param  lhs first cluster fit result
+     *  @param  rhs second cluster fit result
+     * 
+     *  @return the distance of closest approach
+     */
+    static float GetFitResultsClosestApproach(const ClusterFitResult &lhs, const ClusterFitResult &rhs);
+
 private:
     /**
      *  @brief  Fit points in barrel region

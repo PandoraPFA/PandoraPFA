@@ -32,6 +32,24 @@ private:
     StatusCode ReadSettings(TiXmlHandle xmlHandle);
 
     /**
+     *  @brief  Whether a cluster can be merged with another (simple criteria)
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    bool CanMergeCluster(pandora::Cluster *const pCluster) const;
+
+    /**
+     *  @brief  Whether a specified cluster position is outside of the ecal region
+     * 
+     *  @param  clusterPosition the specified cluster position
+     * 
+     *  @return boolean
+     */
+    bool IsOutsideECal(const pandora::CartesianVector &clusterPosition) const;
+
+    /**
      *  @brief  Get the closest distance between hits in the outermost pseudolayer of two clusters
      * 
      *  @param  pClusterI address of first cluster
@@ -41,32 +59,6 @@ private:
      */
     float GetClosestDistanceBetweenOuterLayerHits(const pandora::Cluster *const pClusterI, const pandora::Cluster *const pClusterJ) const;
 
-    /**
-     *  @brief  Get closest distance of approach between two cluster fit results
-     * 
-     *  @param  clusterFitResultI first cluster fit result
-     *  @param  clusterFitResultJ second cluster fit result
-     * 
-     *  @return the distance of closest approach
-     */
-    float GetFitResultsClosestApproach(const ClusterFitResult &clusterFitResultI, const ClusterFitResult &clusterFitResultJ) const;
-
-    /**
-     *  @brief  Whether clusters are compatible with the looping track hypothesis (final criteria)
-     * 
-     *  @return boolean
-     */
-    bool AreClustersCompatible() const;
-
-    /**
-     *  @brief  Whether a cluster can be merged with another (simple criteria)
-     * 
-     *  @param  pCluster address of the cluster
-     * 
-     *  @return boolean
-     */
-    bool CanMergeCluster(pandora::Cluster *const pCluster);
-
     unsigned int    m_nLayersToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_fitChi2Cut;                       ///< The chi2 cut to apply to fit results
 
@@ -75,13 +67,22 @@ private:
 
     unsigned int    m_maxOuterLayerDifference;          ///< The maximum difference (for merging) between cluster outer pseudo layers
     float           m_maxCentroidDifference;            ///< The maximum difference (for merging) between cluster outer layer centroids
-    float           m_maxFitDirectionDotProduct;        ///< The maximum value (for merging) of dot product between cluster fit directions
+
+    float           m_fitDirectionDotProductCutECal;    ///< ECal cut on max value of dot product between cluster fit directions
+    float           m_fitDirectionDotProductCutHCal;    ///< HCal cut on max value of dot product between cluster fit directions
 
     float           m_closestHitDistanceCutECal;        ///< ECal cut on distance between cluster hits in outermost pseudolayers
     float           m_closestHitDistanceCutHCal;        ///< HCal cut on distance between cluster hits in outermost pseudolayers
 
-    float           m_fitResultClosestApproachCutECal;  ///< ECal cut on closest distance of approach between two cluster fit results
-    float           m_fitResultClosestApproachCutHCal;  ///< HCal cut on closest distance of approach between two cluster fit results
+    float           m_fitResultsClosestApproachCutECal; ///< ECal cut on closest distance of approach between two cluster fit results
+    float           m_fitResultsClosestApproachCutHCal; ///< HCal cut on closest distance of approach between two cluster fit results
+
+    unsigned int    m_nGoodFeaturesForClusterMerge;     ///< Number of identified "good features" required to merge ecal clusters
+
+    float           m_goodFeaturesMaxFitDotProduct;     ///< Max dot product between cluster fit directions for good feature
+    float           m_goodFeaturesMaxFitApproach;       ///< Max distance of closest approach between cluster fit results for good feature
+    unsigned int    m_goodFeaturesMaxLayerDifference;   ///< Max difference between cluster outer pseudo layers for good feature
+    float           m_goodFeaturesMinMipFraction;       ///< Min cluster mip fraction for good feature
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
