@@ -19,8 +19,14 @@
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
 
+#include "Algorithms/TopologicalAssociation/BackscatteredTracksAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/BrokenTracksAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/ConeBasedMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/LoopingTracksAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/ProximityBasedMergingAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/ShowerMipMergingAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/SoftClusterMergingAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
 #include "Managers/AlgorithmManager.h"
 
@@ -45,8 +51,14 @@ AlgorithmManager::AlgorithmManager(Pandora *pPandora) :
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("Clustering", new ClusteringAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("PerfectClustering", new PerfectClusteringAlgorithm::Factory));
 
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("BackscatteredTracks", new BackscatteredTracksAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("BrokenTracks", new BrokenTracksAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("ConeBasedMerging", new ConeBasedMergingAlgorithm::Factory));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("LoopingTracks", new LoopingTracksAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("ProximityBasedMerging", new ProximityBasedMergingAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("ShowerMipMerging", new ShowerMipMergingAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("SoftClusterMerging", new SoftClusterMergingAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("TrackClusterAssociation", new TrackClusterAssociationAlgorithm::Factory));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

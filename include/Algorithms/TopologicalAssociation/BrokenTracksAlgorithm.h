@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/include/Algorithms/TopologicalAssociation/BrokenTracksAlgorithm.h
  * 
- *  @brief  Header file for the broekn tracks algorithm class.
+ *  @brief  Header file for the broken tracks algorithm class.
  * 
  *  $Log: $
  */
