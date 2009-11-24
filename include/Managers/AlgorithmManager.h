@@ -10,15 +10,22 @@
 
 #include "Pandora/PandoraInternal.h"
 
+#include "StatusCodes.h"
+
+class TiXmlElement;
+class TiXmlHandle;
+
 namespace pandora
 {
 
+class Algorithm;
 class AlgorithmFactory;
+class Pandora;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *    @brief AlgorithmManager class
+ *  @brief AlgorithmManager class
  */
 class AlgorithmManager
 {
