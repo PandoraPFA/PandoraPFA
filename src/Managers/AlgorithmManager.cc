@@ -85,6 +85,7 @@ StatusCode AlgorithmManager::CreateAlgorithm(TiXmlElement *const pXmlElement, st
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pAlgorithm->RegisterPandora(m_pPandora));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pAlgorithm->ReadSettings(TiXmlHandle(pXmlElement)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pAlgorithm->Initialize());
 
     algorithmName = TypeToString(pAlgorithm);
 

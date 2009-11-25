@@ -92,6 +92,11 @@ protected:
     virtual StatusCode ReadSettings(TiXmlHandle xmlHandle) = 0;
 
     /**
+     *  @brief  Perform any operations that must occur after reading settings, but before running the algorithm
+     */
+    virtual StatusCode Initialize();
+
+    /**
      *  @brief  Register the pandora object that will run the algorithm
      *
      *  @param  pPandora address of the pandora object that will run the algorithm
@@ -140,6 +145,13 @@ inline const PandoraContentApiImpl *const Algorithm::GetPandoraContentApiImpl() 
 inline const std::string Algorithm::GetAlgorithmType() const
 {
     return m_algorithmType;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Algorithm::Initialize()
+{
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
