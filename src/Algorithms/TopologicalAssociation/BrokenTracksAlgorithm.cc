@@ -18,7 +18,7 @@ StatusCode BrokenTracksAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     // Fit a straight line to start and end of all clusters in the current list
-    typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
+    typedef ClusterHelper::ClusterFitResult ClusterFitResult;
     typedef std::map<Cluster *, ClusterFitResult> ClusterFitResultMap;
     ClusterFitResultMap startClusterFitResultMap;
     ClusterFitResultMap endClusterFitResultMap;

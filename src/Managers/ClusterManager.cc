@@ -274,6 +274,9 @@ StatusCode ClusterManager::DeleteCluster(Cluster *pCluster)
 
 StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete)
 {
+    if (pClusterToEnlarge == pClusterToDelete)
+        return STATUS_CODE_INVALID_PARAMETER;
+
     NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
 
     if (m_nameToClusterListMap.end() == listIter)

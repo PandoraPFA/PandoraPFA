@@ -28,6 +28,9 @@
 #include "Algorithms/TopologicalAssociation/LoopingTracksAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ProximityBasedMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ShowerMipMergingAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/ShowerMipMerging2Algorithm.h"
+#include "Algorithms/TopologicalAssociation/ShowerMipMerging3Algorithm.h"
+#include "Algorithms/TopologicalAssociation/ShowerMipMerging4Algorithm.h"
 #include "Algorithms/TopologicalAssociation/SoftClusterMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
@@ -50,6 +53,9 @@
     d("LoopingTracks",              LoopingTracksAlgorithm::Factory)                \
     d("ProximityBasedMerging",      ProximityBasedMergingAlgorithm::Factory)        \
     d("ShowerMipMerging",           ShowerMipMergingAlgorithm::Factory)             \
+    d("ShowerMipMerging2",          ShowerMipMerging2Algorithm::Factory)            \
+    d("ShowerMipMerging3",          ShowerMipMerging3Algorithm::Factory)            \
+    d("ShowerMipMerging4",          ShowerMipMerging4Algorithm::Factory)            \
     d("SoftClusterMerging",         SoftClusterMergingAlgorithm::Factory)           \
     d("TrackClusterAssociation",    TrackClusterAssociationAlgorithm::Factory)
 
