@@ -190,6 +190,13 @@ CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+CartesianVector operator*(const CartesianVector &lhs, const double scalar )
+{
+    return CartesianVector(lhs.GetX() * scalar, lhs.GetY() * scalar, lhs.GetZ() * scalar);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 std::ostream &operator<<(std::ostream & stream, const CartesianVector& cartesianVector)
 {
     if (!cartesianVector.IsInitialized())

@@ -177,6 +177,14 @@ CartesianVector operator+(const CartesianVector &lhs, const CartesianVector &rhs
 CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs);
 
 /**
+ *  @brief  Cartesian vector multiplication with scalar operator
+ * 
+ *  @param  cartesian vector, which is multiplied by the scalar
+ *  @param  scalar
+ */
+CartesianVector operator*(const CartesianVector &lhs, const double scalar );
+
+/**
  *  @brief  Operator to dump cartesian vector properties to an ostream
  *
  *  @param  stream the target ostream
