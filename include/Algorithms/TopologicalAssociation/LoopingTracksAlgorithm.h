@@ -26,8 +26,6 @@ public:
     };
 
 private:
-    typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
-
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 

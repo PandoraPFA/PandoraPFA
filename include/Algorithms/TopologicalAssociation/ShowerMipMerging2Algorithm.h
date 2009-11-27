@@ -32,8 +32,10 @@ private:
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
 
-    unsigned int    m_nPointsToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
+    unsigned int    m_minCaloHitsPerCluster;            ///< The min number of calo hits for cluster to be used as a parent cluster
     float           m_fitToAllHitsChi2Cut;              ///< The max all hit fit chi2 for cluster to be used as a parent cluster
+
+    unsigned int    m_nPointsToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
 
     unsigned int    m_maxLayerDifference;               ///< The max difference (for merging) between cluster outer and inner pseudo layers
     float           m_maxCentroidDifference;            ///< The max difference (for merging) between cluster outer and inner centroids

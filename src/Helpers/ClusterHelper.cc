@@ -81,9 +81,13 @@ StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int nOc
 StatusCode ClusterHelper::FitPoints(const Cluster *const pCluster, ClusterFitResult &clusterFitResult)
 {
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
+    const unsigned int listSize(orderedCaloHitList.size());
 
-    if (orderedCaloHitList.empty())
+    if (0 == listSize)
         return STATUS_CODE_NOT_INITIALIZED;
+
+    if (listSize < 2)
+        return STATUS_CODE_OUT_OF_RANGE;
 
     ClusterFitPointList clusterFitPointList;
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
@@ -384,8 +388,8 @@ float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &cluste
 
 bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
 {
-    return (!pCluster->IsPhoton() || (pCluster->GetMipFraction() > minMipFraction) ||
-        (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms));
+    return ( !pCluster->IsPhoton() || (pCluster->GetMipFraction() > minMipFraction) ||
+        (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms)) );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

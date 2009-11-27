@@ -22,12 +22,12 @@ StatusCode LoopingTracksAlgorithm::Run()
     const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     // Fit a straight line to the last n occupied pseudo layers in each cluster and store results
-    typedef std::map<Cluster *, ClusterFitResult> ClusterFitResultMap;
+    typedef std::map<Cluster *, ClusterHelper::ClusterFitResult> ClusterFitResultMap;
     ClusterFitResultMap clusterFitResultMap;
 
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
-        ClusterFitResult clusterFitResult;
+        ClusterHelper::ClusterFitResult clusterFitResult;
 
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(*iter, m_nLayersToFit, clusterFitResult))
             continue;
@@ -43,7 +43,7 @@ StatusCode LoopingTracksAlgorithm::Run()
     for (ClusterFitResultMap::const_iterator iterI = clusterFitResultMap.begin(); iterI != clusterFitResultMap.end(); ++iterI)
     {
         Cluster *pClusterI = iterI->first;
-        const ClusterFitResult &clusterFitResultI = iterI->second;
+        const ClusterHelper::ClusterFitResult &clusterFitResultI = iterI->second;
         const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
 
         if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
@@ -55,7 +55,7 @@ StatusCode LoopingTracksAlgorithm::Run()
         for (++iterJ ; iterJ != clusterFitResultMap.end(); ++iterJ)
         {
             Cluster *pClusterJ = iterJ->first;
-            const ClusterFitResult &clusterFitResultJ = iterJ->second;
+            const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
             const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
 
             if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))

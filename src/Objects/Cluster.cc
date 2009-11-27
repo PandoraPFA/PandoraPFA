@@ -276,7 +276,7 @@ StatusCode Cluster::UpdateProperties()
     if (m_isUpToDate)
         return STATUS_CODE_SUCCESS;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitPoints(this, m_fitToAllHitsResult));
+    (void) ClusterHelper::FitPoints(this, m_fitToAllHitsResult);
 
     m_isUpToDate = true;
 

@@ -32,7 +32,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
         if (!pClusterI->GetFitToAllHitsResult().IsFitSuccessful() || (pClusterI->GetFitToAllHitsResult().GetRms() > m_fitToAllHitsRmsCut))
             continue;
 
-        ClusterFitResult clusterFitResultI;
+        ClusterHelper::ClusterFitResult clusterFitResultI;
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pClusterI, m_nPointsToFit, clusterFitResultI))
             continue;
 

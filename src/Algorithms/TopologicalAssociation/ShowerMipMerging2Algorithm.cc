@@ -23,10 +23,13 @@ StatusCode ShowerMipMerging2Algorithm::Run()
     {
         Cluster *pClusterI = *iterI;
 
-        if (!pClusterI->GetFitToAllHitsResult().IsFitSuccessful() || (pClusterI->GetFitToAllHitsResult().GetChi2() > m_fitToAllHitsChi2Cut))
+        if (pClusterI->GetNCaloHits() < m_minCaloHitsPerCluster)
             continue;
 
         if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            continue;
+
+        if (!pClusterI->GetFitToAllHitsResult().IsFitSuccessful() || (pClusterI->GetFitToAllHitsResult().GetChi2() > m_fitToAllHitsChi2Cut))
             continue;
 
         ClusterHelper::ClusterFitResult clusterFitResultI;
@@ -41,6 +44,9 @@ StatusCode ShowerMipMerging2Algorithm::Run()
             Cluster *pClusterJ = *iterJ;
 
             if (pClusterI == pClusterJ)
+                continue;
+
+            if (pClusterJ->GetNCaloHits() < m_minCaloHitsPerCluster)
                 continue;
 
             if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
@@ -87,6 +93,10 @@ StatusCode ShowerMipMerging2Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
 
     m_canMergeMaxRms = 5.;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CanMergeMaxRms", m_canMergeMaxRms));
+
+    m_minCaloHitsPerCluster = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
