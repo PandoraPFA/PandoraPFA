@@ -19,7 +19,7 @@ StatusCode FragmentRemovalAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FragmentRemovalAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode FragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

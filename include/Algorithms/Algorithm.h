@@ -89,7 +89,7 @@ protected:
      * 
      *  @param  xmlHandle the relevant xml handle
      */
-    virtual StatusCode ReadSettings(TiXmlHandle xmlHandle) = 0;
+    virtual StatusCode ReadSettings(const TiXmlHandle xmlHandle) = 0;
 
     /**
      *  @brief  Perform any operations that must occur after reading settings, but before running the algorithm

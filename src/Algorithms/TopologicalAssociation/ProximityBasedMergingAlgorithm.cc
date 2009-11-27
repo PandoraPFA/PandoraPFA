@@ -19,7 +19,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ProximityBasedMergingAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode ProximityBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

@@ -19,15 +19,21 @@ StatusCode ShowerMipMergingAlgorithm::Run()
     {
         Cluster *pClusterI = *iterI;
 
-        if ((pClusterI->GetNCaloHits() < m_minCaloHitsPerCluster) || !this->CanMergeCluster(pClusterI))
+        if (pClusterI->GetNCaloHits() < m_minCaloHitsPerCluster)
+            continue;
+
+        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
         // Determine whether cluster is a plausible mip candidate
-        if ((pClusterI->GetMipFraction() < m_mipFractionCut) || (pClusterI->GetFitToAllHitsResult().GetRms() > m_fitToAllHitsRmsCut))
+        if (pClusterI->GetMipFraction() < m_mipFractionCut)
             continue;
 
-        ClusterFitResult clusterFitResult;
-        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pClusterI, m_nPointsToFit, clusterFitResult))
+        if (!pClusterI->GetFitToAllHitsResult().IsFitSuccessful() || (pClusterI->GetFitToAllHitsResult().GetRms() > m_fitToAllHitsRmsCut))
+            continue;
+
+        ClusterFitResult clusterFitResultI;
+        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pClusterI, m_nPointsToFit, clusterFitResultI))
             continue;
 
         const PseudoLayer innerLayerI(pClusterI->GetInnerPseudoLayer());
@@ -41,7 +47,10 @@ StatusCode ShowerMipMergingAlgorithm::Run()
             if (pClusterI == pClusterJ)
                 continue;
 
-            if ((pClusterJ->GetNCaloHits() < m_minCaloHitsPerCluster) || !this->CanMergeCluster(pClusterJ))
+            if (pClusterJ->GetNCaloHits() < m_minCaloHitsPerCluster)
+                continue;
+
+            if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
             // Check mip candidate cluster has origin closest to IP
@@ -56,12 +65,12 @@ StatusCode ShowerMipMergingAlgorithm::Run()
                 continue;
 
             // Cut on distance between projected fit result and nearest cluster hit
-            const float distanceToClosestHit(this->GetDistanceToClosestHit(clusterFitResult, pClusterJ, outerLayerI, outerLayerI + m_nFitProjectionLayers));
+            const float distanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(clusterFitResultI, pClusterJ, outerLayerI, outerLayerI + m_nFitProjectionLayers));
             if (distanceToClosestHit > m_maxDistanceToClosestHit)
                 continue;
 
             // Also cut on distance between projected fit result and nearest cluster centroid
-            const float distanceToClosestCentroid(this->GetDistanceToClosestCentroid(clusterFitResult, pClusterJ, outerLayerI, outerLayerI + m_nFitProjectionLayers));
+            const float distanceToClosestCentroid(ClusterHelper::GetDistanceToClosestCentroid(clusterFitResultI, pClusterJ, outerLayerI, outerLayerI + m_nFitProjectionLayers));
             if (distanceToClosestCentroid < m_maxDistanceToClosestCentroid)
             {
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
@@ -74,77 +83,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ShowerMipMergingAlgorithm::CanMergeCluster(Cluster *const pCluster) const
-{
-    const bool canMerge(!pCluster->IsPhoton() ||
-        (pCluster->GetMipFraction() > m_canMergeMinMipFraction) ||
-        (pCluster->GetFitToAllHitsResult().GetRms() < m_canMergeMaxRms));
-
-    return canMerge;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float ShowerMipMergingAlgorithm::GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
-    PseudoLayer startLayer, PseudoLayer endLayer) const
-{
-    float minDistance = std::numeric_limits<float>::max();
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-    for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
-    {
-        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
-
-        if (orderedCaloHitList.end() == iter)
-            continue;
-
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            CaloHit *pCaloHit = *hitIter;
-
-            const CartesianVector interceptDifference(pCaloHit->GetPositionVector() - clusterFitResult.GetIntercept());
-            const float distance(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitude());
-
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-            }
-        }
-    }
-
-    return minDistance;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float ShowerMipMergingAlgorithm::GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
-    PseudoLayer startLayer, PseudoLayer endLayer) const
-{
-    float minDistance = std::numeric_limits<float>::max();
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-    for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
-    {
-        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
-
-        if (orderedCaloHitList.end() == iter)
-            continue;
-
-        const CartesianVector interceptDifference(pCluster->GetCentroid(iLayer) - clusterFitResult.GetIntercept());
-        const float distance(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitude());
-
-        if (distance < minDistance)
-        {
-            minDistance = distance;
-        }
-    }
-
-    return minDistance;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ShowerMipMergingAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode ShowerMipMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     m_canMergeMinMipFraction = 0.7;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

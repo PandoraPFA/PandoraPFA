@@ -19,6 +19,8 @@ StatusCode LoopingTracksAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
+    const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+
     // Fit a straight line to the last n occupied pseudo layers in each cluster and store results
     typedef std::map<Cluster *, ClusterFitResult> ClusterFitResultMap;
     ClusterFitResultMap clusterFitResultMap;
@@ -44,10 +46,10 @@ StatusCode LoopingTracksAlgorithm::Run()
         const ClusterFitResult &clusterFitResultI = iterI->second;
         const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
 
-        if (!this->CanMergeCluster(pClusterI))
+        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
-        const bool isOutsideECalI(this->IsOutsideECal(pClusterI->GetCentroid(outerLayerI)));
+        const bool isOutsideECalI(pGeometryHelper->IsOutsideECal(pClusterI->GetCentroid(outerLayerI)));
 
         ClusterFitResultMap::const_iterator iterJ = iterI;
         for (++iterJ ; iterJ != clusterFitResultMap.end(); ++iterJ)
@@ -56,10 +58,10 @@ StatusCode LoopingTracksAlgorithm::Run()
             const ClusterFitResult &clusterFitResultJ = iterJ->second;
             const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
 
-            if (!this->CanMergeCluster(pClusterJ))
+            if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
-            const bool isOutsideECalJ(this->IsOutsideECal(pClusterJ->GetCentroid(outerLayerJ)));
+            const bool isOutsideECalJ(pGeometryHelper->IsOutsideECal(pClusterJ->GetCentroid(outerLayerJ)));
 
             // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
             const bool isOutsideECal(isOutsideECalI && isOutsideECalJ);
@@ -127,37 +129,6 @@ StatusCode LoopingTracksAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool LoopingTracksAlgorithm::CanMergeCluster(Cluster *const pCluster) const
-{
-    const bool canMerge(!pCluster->IsPhoton() ||
-        (pCluster->GetMipFraction() > m_canMergeMinMipFraction) ||
-        (pCluster->GetFitToAllHitsResult().GetRms() < m_canMergeMaxRms));
-
-    return canMerge;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool LoopingTracksAlgorithm::IsOutsideECal(const CartesianVector &clusterPosition) const
-{
-    static const float eCalBarrelOuterRCoordinate(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetOuterRCoordinate());
-    static const float eCalEndCapOuterZCoordinate(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetOuterZCoordinate());
-
-    if (clusterPosition.GetZ() > eCalEndCapOuterZCoordinate)
-        return true;
-
-    const float x(clusterPosition.GetX());
-    const float y(clusterPosition.GetY());
-    const float r(std::sqrt((x * x) + (y * y)));
-
-    if (r > eCalBarrelOuterRCoordinate)
-        return true;
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 float LoopingTracksAlgorithm::GetClosestDistanceBetweenOuterLayerHits(const Cluster *const pClusterI, const Cluster *const pClusterJ) const
 {
     float closestDistance(std::numeric_limits<float>::max());
@@ -191,7 +162,7 @@ std::cout << "drMin " << closestDistance << std::endl;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode LoopingTracksAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     m_nLayersToFit = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

@@ -322,6 +322,73 @@ float ClusterHelper::GetFitResultsClosestApproach(const ClusterHelper::ClusterFi
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
+    PseudoLayer startLayer, PseudoLayer endLayer)
+{
+    float minDistance = std::numeric_limits<float>::max();
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
+    {
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+
+        if (orderedCaloHitList.end() == iter)
+            continue;
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            CaloHit *pCaloHit = *hitIter;
+
+            const CartesianVector interceptDifference(pCaloHit->GetPositionVector() - clusterFitResult.GetIntercept());
+            const float distance(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitude());
+
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+            }
+        }
+    }
+
+    return minDistance;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
+    PseudoLayer startLayer, PseudoLayer endLayer)
+{
+    float minDistance = std::numeric_limits<float>::max();
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
+    {
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+
+        if (orderedCaloHitList.end() == iter)
+            continue;
+
+        const CartesianVector interceptDifference(pCluster->GetCentroid(iLayer) - clusterFitResult.GetIntercept());
+        const float distance(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitude());
+
+        if (distance < minDistance)
+        {
+            minDistance = distance;
+        }
+    }
+
+    return minDistance;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
+{
+    return (!pCluster->IsPhoton() || (pCluster->GetMipFraction() > minMipFraction) ||
+        (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :

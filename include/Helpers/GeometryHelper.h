@@ -290,6 +290,24 @@ public:
      */
     float GetMaximumRadius(float x, float y) const;
 
+    /**
+     *  @brief  Whether a specified position is outside of the ecal region
+     * 
+     *  @param  position the specified position
+     * 
+     *  @return boolean
+     */
+    bool IsOutsideECal(const CartesianVector &position) const;
+
+    /**
+     *  @brief  Whether a specified position is outside of the hcal region
+     * 
+     *  @param  position the specified position
+     * 
+     *  @return boolean
+     */
+    bool IsOutsideHCal(const CartesianVector &position) const;
+
 private:
     /**
      *  @brief  Constructor

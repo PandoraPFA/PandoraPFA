@@ -28,7 +28,7 @@ public:
 
 private:
     StatusCode Run();
-    StatusCode ReadSettings(TiXmlHandle xmlHandle);
+    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_cheatingListName;             ///< The name under which to save the new cheated cluster list

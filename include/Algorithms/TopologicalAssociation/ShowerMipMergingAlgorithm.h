@@ -29,42 +29,7 @@ private:
     typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
 
     StatusCode Run();
-    StatusCode ReadSettings(TiXmlHandle xmlHandle);
-
-    /**
-     *  @brief  Whether a cluster can be merged with another (simple criteria)
-     * 
-     *  @param  pCluster address of the cluster
-     * 
-     *  @return boolean
-     */
-    bool CanMergeCluster(pandora::Cluster *const pCluster) const;
-
-    /**
-     *  @brief  Get closest distance of approach between projected cluster fit result and hits in a second cluster
-     * 
-     *  @param  clusterFitResult the fit result to the first cluster
-     *  @param  pCluster address of the second cluster
-     *  @param  startLayer first layer to examine
-     *  @param  endLayer last layer to examine
-     * 
-     *  @return 
-     */
-    float GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const pandora::Cluster *const pCluster,
-        pandora::PseudoLayer startLayer, pandora::PseudoLayer endLayer) const;
-
-    /**
-     *  @brief  Get closest distance of approach between projected cluster fit result and layer centroid position of a second cluster
-     * 
-     *  @param  clusterFitResult the fit result to the first cluster
-     *  @param  pCluster address of the second cluster
-     *  @param  startLayer first layer to examine
-     *  @param  endLayer last layer to examine
-     * 
-     *  @return 
-     */
-    float GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const pandora::Cluster *const pCluster,
-        pandora::PseudoLayer startLayer, pandora::PseudoLayer endLayer) const;
+    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged

@@ -19,7 +19,7 @@ StatusCode ConeBasedMergingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ConeBasedMergingAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode ConeBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

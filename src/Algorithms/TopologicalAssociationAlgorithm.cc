@@ -23,7 +23,7 @@ StatusCode TopologicalAssociationAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TopologicalAssociationAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode TopologicalAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "associationAlgorithms",
         m_associationAlgorithms));

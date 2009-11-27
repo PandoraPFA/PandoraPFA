@@ -19,7 +19,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode IsolatedHitMergingAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode IsolatedHitMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

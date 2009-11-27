@@ -27,25 +27,7 @@ public:
 
 private:
     StatusCode Run();
-    StatusCode ReadSettings(TiXmlHandle xmlHandle);
-
-    /**
-     *  @brief  Whether a cluster can be merged with another (simple criteria)
-     * 
-     *  @param  pCluster address of the cluster
-     * 
-     *  @return boolean
-     */
-    bool CanMergeCluster(pandora::Cluster *const pCluster) const;
-
-    /**
-     *  @brief  Whether a specified cluster position is outside of the ecal region
-     * 
-     *  @param  clusterPosition the specified cluster position
-     * 
-     *  @return boolean
-     */
-    bool IsOutsideECal(const pandora::CartesianVector &clusterPosition) const;
+    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     unsigned int    m_nStartLayersToFit;                ///< The number of occupied pseudolayers to use in fit to the start of the cluster
     unsigned int    m_nEndLayersToFit;                  ///< The number of occupied pseudolayers to use in fit to the end of the cluster

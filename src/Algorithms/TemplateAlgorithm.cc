@@ -19,7 +19,7 @@ StatusCode TemplateAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TemplateAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode TemplateAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

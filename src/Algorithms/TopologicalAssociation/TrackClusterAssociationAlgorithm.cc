@@ -19,7 +19,7 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackClusterAssociationAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode TrackClusterAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

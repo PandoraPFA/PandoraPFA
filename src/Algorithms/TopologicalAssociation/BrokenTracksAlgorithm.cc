@@ -17,6 +17,8 @@ StatusCode BrokenTracksAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
+    const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+
     // Fit a straight line to start and end of all clusters in the current list
     typedef ClusterHelper::ClusterFitResult ClusterFitResult;
     typedef std::map<Cluster *, ClusterFitResult> ClusterFitResultMap;
@@ -49,7 +51,7 @@ StatusCode BrokenTracksAlgorithm::Run()
     {
         Cluster *pClusterI = iterI->first;
 
-        if (!this->CanMergeCluster(pClusterI))
+        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
         const ClusterFitResult &clusterFitResultI = iterI->second;
@@ -63,7 +65,7 @@ StatusCode BrokenTracksAlgorithm::Run()
             if (pClusterI == pClusterJ)
                 continue;
 
-            if (!this->CanMergeCluster(pClusterJ))
+            if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
             const ClusterFitResult &clusterFitResultJ = iterJ->second;
@@ -84,7 +86,7 @@ StatusCode BrokenTracksAlgorithm::Run()
                 continue;
 
             // Cut on distance of closest approach between start and end fits
-            const bool isOutsideECalJ(this->IsOutsideECal(pClusterJ->GetCentroid(innerLayerJ)));
+            const bool isOutsideECalJ(pGeometryHelper->IsOutsideECal(pClusterJ->GetCentroid(innerLayerJ)));
             const float trackMergeCut(isOutsideECalJ ? m_trackMergeCutHcal : m_trackMergeCutEcal);
 
             if (ClusterHelper::GetFitResultsClosestApproach(clusterFitResultI, clusterFitResultJ) > trackMergeCut)
@@ -112,38 +114,7 @@ StatusCode BrokenTracksAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool BrokenTracksAlgorithm::CanMergeCluster(Cluster *const pCluster) const
-{
-    const bool canMerge(!pCluster->IsPhoton() ||
-        (pCluster->GetMipFraction() > m_canMergeMinMipFraction) ||
-        (pCluster->GetFitToAllHitsResult().GetRms() < m_canMergeMaxRms));
-
-    return canMerge;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool BrokenTracksAlgorithm::IsOutsideECal(const CartesianVector &clusterPosition) const
-{
-    static const float eCalBarrelOuterRCoordinate(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetOuterRCoordinate());
-    static const float eCalEndCapOuterZCoordinate(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetOuterZCoordinate());
-
-    if (clusterPosition.GetZ() > eCalEndCapOuterZCoordinate)
-        return true;
-
-    const float x(clusterPosition.GetX());
-    const float y(clusterPosition.GetY());
-    const float r(std::sqrt((x * x) + (y * y)));
-
-    if (r > eCalBarrelOuterRCoordinate)
-        return true;
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode BrokenTracksAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     m_nStartLayersToFit = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

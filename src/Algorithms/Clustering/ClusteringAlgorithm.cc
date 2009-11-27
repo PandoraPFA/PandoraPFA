@@ -554,7 +554,7 @@ StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Track seeding parameters
     m_clusterSeedStrategy = 0;

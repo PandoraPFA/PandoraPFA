@@ -83,7 +83,7 @@ StatusCode CheatingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CheatingAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode CheatingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
 //     settings example:
 //

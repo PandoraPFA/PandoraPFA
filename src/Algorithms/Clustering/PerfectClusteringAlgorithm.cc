@@ -124,7 +124,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PerfectClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     return STATUS_CODE_SUCCESS;
 }

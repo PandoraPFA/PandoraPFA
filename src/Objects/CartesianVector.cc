@@ -190,7 +190,7 @@ CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-CartesianVector operator*(const CartesianVector &lhs, double scalar)
+CartesianVector operator*(const CartesianVector &lhs, const double scalar)
 {
     return CartesianVector(lhs.GetX() * scalar, lhs.GetY() * scalar, lhs.GetZ() * scalar);
 }

@@ -19,7 +19,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode SoftClusterMergingAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

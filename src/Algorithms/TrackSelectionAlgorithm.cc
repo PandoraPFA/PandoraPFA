@@ -19,7 +19,7 @@ StatusCode TrackSelectionAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackSelectionAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode TrackSelectionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

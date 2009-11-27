@@ -77,7 +77,7 @@ public:
 
 private:
     StatusCode Run();
-    StatusCode ReadSettings(TiXmlHandle xmlHandle);
+    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Use current track list to make seed clusters

@@ -19,7 +19,7 @@ StatusCode BackscatteredTracksAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode BackscatteredTracksAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode BackscatteredTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

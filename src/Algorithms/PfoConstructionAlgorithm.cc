@@ -19,7 +19,7 @@ StatusCode PfoConstructionAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PfoConstructionAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode PfoConstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

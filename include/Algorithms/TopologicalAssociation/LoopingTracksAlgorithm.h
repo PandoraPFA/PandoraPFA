@@ -29,25 +29,7 @@ private:
     typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
 
     StatusCode Run();
-    StatusCode ReadSettings(TiXmlHandle xmlHandle);
-
-    /**
-     *  @brief  Whether a cluster can be merged with another (simple criteria)
-     * 
-     *  @param  pCluster address of the cluster
-     * 
-     *  @return boolean
-     */
-    bool CanMergeCluster(pandora::Cluster *const pCluster) const;
-
-    /**
-     *  @brief  Whether a specified cluster position is outside of the ecal region
-     * 
-     *  @param  clusterPosition the specified cluster position
-     * 
-     *  @return boolean
-     */
-    bool IsOutsideECal(const pandora::CartesianVector &clusterPosition) const;
+    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get the closest distance between hits in the outermost pseudolayer of two clusters

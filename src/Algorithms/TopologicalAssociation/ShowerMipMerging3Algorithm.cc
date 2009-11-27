@@ -19,7 +19,7 @@ StatusCode ShowerMipMerging3Algorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ShowerMipMerging3Algorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode ShowerMipMerging3Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 

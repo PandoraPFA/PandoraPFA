@@ -224,6 +224,44 @@ public:
      */
     static float GetFitResultsClosestApproach(const ClusterFitResult &lhs, const ClusterFitResult &rhs);
 
+    /**
+     *  @brief  Get closest distance of approach between projected cluster fit result and hits in a second cluster
+     * 
+     *  @param  clusterFitResult the fit result to the first cluster
+     *  @param  pCluster address of the second cluster
+     *  @param  startLayer first layer to examine
+     *  @param  endLayer last layer to examine
+     * 
+     *  @return 
+     */
+    static float GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
+        PseudoLayer startLayer, PseudoLayer endLayer);
+
+    /**
+     *  @brief  Get closest distance of approach between projected cluster fit result and layer centroid position of a second cluster
+     * 
+     *  @param  clusterFitResult the fit result to the first cluster
+     *  @param  pCluster address of the second cluster
+     *  @param  startLayer first layer to examine
+     *  @param  endLayer last layer to examine
+     * 
+     *  @return 
+     */
+    static float GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
+        PseudoLayer startLayer, pandora::PseudoLayer endLayer);
+
+    /**
+     *  @brief  Whether a cluster can be merged with another. Uses simple suggested criteria, including cluster photon id flag
+     *          and supplied cuts on cluster mip fraction and all hits fit rms.
+     * 
+     *  @param  pCluster address of the cluster
+     *  @param  minMipFraction the minimum mip fraction for clusters (flagged as photons) to be merged
+     *  @param  maxAllHitsFitRms the maximum all hit fit rms for clusters (flagged as photons) to be merged
+     * 
+     *  @return boolean
+     */
+    static bool CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms);
+
 private:
     /**
      *  @brief  Fit points in barrel region

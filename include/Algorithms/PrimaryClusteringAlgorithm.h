@@ -27,7 +27,7 @@ public:
 
 private:
     StatusCode Run();
-    StatusCode ReadSettings(TiXmlHandle xmlHandle);
+    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_associationAlgorithmName;     ///< The name of the topological association algorithm to run

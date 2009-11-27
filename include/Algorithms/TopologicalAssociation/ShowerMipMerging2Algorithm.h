@@ -27,9 +27,21 @@ public:
 
 private:
     StatusCode Run();
-    StatusCode ReadSettings(TiXmlHandle xmlHandle);
+    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
+    float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
+
+    unsigned int    m_nPointsToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
+    float           m_fitToAllHitsChi2Cut;              ///< The max all hit fit chi2 for cluster to be used as a parent cluster
+
+    unsigned int    m_maxLayerDifference;               ///< The max difference (for merging) between cluster outer and inner pseudo layers
+    float           m_maxCentroidDifference;            ///< The max difference (for merging) between cluster outer and inner centroids
+
+    float           m_maxFitDirectionDotProduct;        ///< Max dot product between fit direction and centroid difference unit vectors
+
+    float           m_perpendicularDistanceCutEcal;     ///< ECal cut on perp. distance between fit direction and centroid difference
+    float           m_perpendicularDistanceCutHcal;     ///< HCal cut on perp. distance between fit direction and centroid difference
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
