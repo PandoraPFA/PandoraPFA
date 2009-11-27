@@ -29,7 +29,19 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
+    float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
+
+    unsigned int    m_minCaloHitsPerDaughterCluster;    ///< The min number of calo hits for cluster to be used as a daughter cluster
+    unsigned int    m_minCaloHitsPerParentCluster;      ///< The min number of calo hits for cluster to be used as a parent cluster
+
+    unsigned int    m_nPointsToFit;                     ///< The number of occupied pseudolayers to use in fit to end of daughter cluster
+    float           m_maxFitChi2;                       ///< The max chi2 value for cluster to be used as a daughter cluster
+
+    unsigned int    m_nFitProjectionLayers;             ///< The number of layers to project cluster fit for comparison with second cluster
+    float           m_maxFitDistanceToClosestHit;       ///< The max distance between projected cluster fit and hits in second cluster
+
+    float           m_closestClusterApproachCut;        ///< The max value of the closest cluster approach distance
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -232,10 +232,20 @@ public:
      *  @param  startLayer first layer to examine
      *  @param  endLayer last layer to examine
      * 
-     *  @return 
+     *  @return the closest distance of approach
      */
     static float GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
         PseudoLayer startLayer, PseudoLayer endLayer);
+
+    /**
+     *  @brief  Get smallest distance between pairs of hits in two clusters
+     * 
+     *  @param  pClusterI address of the first cluster
+     *  @param  pClusterJ address of the second cluster
+     * 
+     *  @return the smallest distance
+     */
+    static float GetDistanceToClosestHit(const Cluster *const pClusterI, const Cluster *const pClusterJ);
 
     /**
      *  @brief  Get closest distance of approach between projected cluster fit result and layer centroid position of a second cluster
@@ -245,7 +255,7 @@ public:
      *  @param  startLayer first layer to examine
      *  @param  endLayer last layer to examine
      * 
-     *  @return 
+     *  @return the closest distance of approach
      */
     static float GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
         PseudoLayer startLayer, pandora::PseudoLayer endLayer);

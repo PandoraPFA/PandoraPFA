@@ -235,7 +235,6 @@ StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitP
 
 StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, bool isPositiveZ, ClusterFitResult &clusterFitResult)
 {
-//std::cout << "Endcap fit " << std::endl;
     // Extract the data
     double sumX(0.), sumY(0.), sumZ(0.);
     double sumXZ(0.), sumYZ(0.), sumZZ(0.);
@@ -346,6 +345,33 @@ float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitR
 
             const CartesianVector interceptDifference(pCaloHit->GetPositionVector() - clusterFitResult.GetIntercept());
             const float distance(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitude());
+
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+            }
+        }
+    }
+
+    return minDistance;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float ClusterHelper::GetDistanceToClosestHit(const Cluster *const pClusterI, const Cluster *const pClusterJ)
+{
+    float minDistance = std::numeric_limits<float>::max();
+    CaloHitVector caloHitVectorI, caloHitVectorJ;
+    pClusterI->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorI);
+    pClusterJ->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorJ);
+
+    for (CaloHitVector::const_iterator iterI = caloHitVectorI.begin(), iterIEnd = caloHitVectorI.end(); iterI != iterIEnd; ++iterI)
+    {
+        const CartesianVector positionVectorI((*iterI)->GetPositionVector());
+
+        for (CaloHitVector::const_iterator iterJ = caloHitVectorJ.begin(), iterIEnd = caloHitVectorJ.end(); iterJ != iterIEnd; ++iterJ)
+        {
+            const float distance((positionVectorI - (*iterJ)->GetPositionVector()).GetMagnitude());
 
             if (distance < minDistance)
             {
