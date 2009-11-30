@@ -73,6 +73,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
             const float distanceToClosestCentroid(ClusterHelper::GetDistanceToClosestCentroid(clusterFitResultI, pClusterJ, outerLayerI, outerLayerI + m_nFitProjectionLayers));
             if (distanceToClosestCentroid < m_maxDistanceToClosestCentroid)
             {
+                // TODO decide whether to continue loop over daughter cluster candidates after merging
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
             }
         }

@@ -76,6 +76,7 @@ StatusCode ShowerMipMerging2Algorithm::Run()
 
             if (fitIPerpendicularDistance < perpendicularDistanceCut)
             {
+                // TODO decide whether to continue loop over daughter cluster candidates after merging
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
             }
         }
@@ -98,7 +99,7 @@ StatusCode ShowerMipMerging2Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
     m_minCaloHitsPerCluster = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "CanMergeMaxRms", m_canMergeMaxRms));
+        "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
 
     m_fitToAllHitsChi2Cut = 5.;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

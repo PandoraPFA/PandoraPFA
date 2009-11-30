@@ -22,6 +22,7 @@
 #include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
 
 #include "Algorithms/TopologicalAssociation/BackscatteredTracksAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/BackscatteredTracks2Algorithm.h"
 #include "Algorithms/TopologicalAssociation/BrokenTracksAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ConeBasedMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/IsolatedHitMergingAlgorithm.h"
@@ -47,6 +48,7 @@
     d("Clustering",                 ClusteringAlgorithm::Factory)                   \
     d("PerfectClustering",          PerfectClusteringAlgorithm::Factory)            \
     d("BackscatteredTracks",        BackscatteredTracksAlgorithm::Factory)          \
+    d("BackscatteredTracks2",       BackscatteredTracks2Algorithm::Factory)         \
     d("BrokenTracks",               BrokenTracksAlgorithm::Factory)                 \
     d("ConeBasedMerging",           ConeBasedMergingAlgorithm::Factory)             \
     d("IsolatedHitMerging",         IsolatedHitMergingAlgorithm::Factory)           \

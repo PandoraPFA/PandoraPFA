@@ -118,7 +118,8 @@ StatusCode LoopingTracksAlgorithm::Run()
             // Now have sufficient information to decide whether to join clusters
             if(isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
-                // TODO decide which to delete and which to enlarge AND enable option to assimilate at end of algorithm
+                // TODO decide which to delete and which to enlarge
+                // TODO decide whether to continue loop over daughter cluster candidates after merging
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
             }
         }

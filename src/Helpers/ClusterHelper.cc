@@ -20,6 +20,9 @@ namespace pandora
 
 StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult)
 {
+    if (nOccupiedLayers < 2)
+        return STATUS_CODE_INVALID_PARAMETER;
+
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
     const unsigned int listSize(orderedCaloHitList.size());
 
@@ -50,6 +53,9 @@ StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int n
 
 StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult)
 {
+    if (nOccupiedLayers < 2)
+        return STATUS_CODE_INVALID_PARAMETER;
+
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
     const unsigned int listSize(orderedCaloHitList.size());
 
@@ -65,6 +71,42 @@ StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int nOc
     for (OrderedCaloHitList::const_reverse_iterator iter = orderedCaloHitList.rbegin(), iterEnd = orderedCaloHitList.rend(); iter != iterEnd; ++iter)
     {
         if (++occupiedLayerCount > nOccupiedLayers)
+            break;
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            clusterFitPointList.push_back(ClusterFitPoint(*hitIter));
+        }
+    }
+
+    return FitPoints(clusterFitPointList, clusterFitResult);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterHelper::FitLayers(const Cluster *const pCluster, PseudoLayer startLayer, PseudoLayer endLayer, ClusterFitResult &clusterFitResult)
+{
+    if (startLayer >= endLayer)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
+    const unsigned int listSize(orderedCaloHitList.size());
+
+    if (0 == listSize)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    if (listSize < 2)
+        return STATUS_CODE_OUT_OF_RANGE;
+
+    ClusterFitPointList clusterFitPointList;
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        const PseudoLayer pseudoLayer(iter->first);
+
+        if (startLayer > pseudoLayer)
+            continue;
+
+        if (endLayer < pseudoLayer)
             break;
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
@@ -329,6 +371,9 @@ float ClusterHelper::GetFitResultsClosestApproach(const ClusterHelper::ClusterFi
 float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
     PseudoLayer startLayer, PseudoLayer endLayer)
 {
+    if (startLayer > endLayer)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
     float minDistance = std::numeric_limits<float>::max();
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
@@ -388,6 +433,9 @@ float ClusterHelper::GetDistanceToClosestHit(const Cluster *const pClusterI, con
 float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
     PseudoLayer startLayer, PseudoLayer endLayer)
 {
+    if (startLayer > endLayer)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
     float minDistance = std::numeric_limits<float>::max();
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 

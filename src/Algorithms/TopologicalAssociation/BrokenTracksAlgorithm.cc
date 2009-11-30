@@ -103,6 +103,7 @@ StatusCode BrokenTracksAlgorithm::Run()
 
             if ((fitIPerpendicularDistance < trackMergePerpCut) || (fitJPerpendicularDistance < trackMergePerpCut))
             {
+                // TODO decide whether to continue loop over daughter cluster candidates after merging
                 // Cluster to be enlarged is that for which the end fit was used
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
             }
