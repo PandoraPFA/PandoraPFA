@@ -17,63 +17,63 @@ StatusCode ShowerMipMerging3Algorithm::Run()
 
     for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end(); ++iterI)
     {
-        Cluster *pClusterI = *iterI;
+        Cluster *pDaughterCluster = *iterI;
 
         // Identify a possible mip-stub daughter cluster
-        if (pClusterI->GetNCaloHits() < m_minCaloHitsPerDaughterCluster)
+        if (pDaughterCluster->GetNCaloHits() < m_minCaloHitsPerDaughterCluster)
             continue;
 
-        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
+        if (!ClusterHelper::CanMergeCluster(pDaughterCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
-        ClusterHelper::ClusterFitResult clusterFitResultI;
-        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pClusterI, m_nPointsToFit, clusterFitResultI))
+        ClusterHelper::ClusterFitResult daughterClusterFitResult;
+        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pDaughterCluster, m_nPointsToFit, daughterClusterFitResult))
             continue;
 
         // Mip stub cluster must be consistent with a straight line fit
-        if (clusterFitResultI.GetChi2() > m_maxFitChi2)
+        if (daughterClusterFitResult.GetChi2() > m_maxFitChi2)
             continue;
 
         Cluster *pBestParentCluster = NULL;
         float closestClusterApproach = std::numeric_limits<float>::max();
 
-        const PseudoLayer innerLayerI(pClusterI->GetInnerPseudoLayer());
+        const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
         // Find the closest plausible parent cluster, with the smallest cluster approach distance
         for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end(); ++iterJ)
         {
-            Cluster *pClusterJ = *iterJ;
+            Cluster *pParentCluster = *iterJ;
 
-            if (pClusterI == pClusterJ)
+            if (pDaughterCluster == pParentCluster)
                 continue;
 
-            if (pClusterJ->GetNCaloHits() < m_minCaloHitsPerParentCluster)
+            if (pParentCluster->GetNCaloHits() < m_minCaloHitsPerParentCluster)
                 continue;
 
             // We are looking for small mip stub clusters emerging from the parent shower-like cluster
-            const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
+            const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
 
-            if (innerLayerI < outerLayerJ)
+            if (daughterInnerLayer < parentOuterLayer)
                 continue;
 
             // Cut on distance between projected fit result and nearest cluster hit
-            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(clusterFitResultI, pClusterJ, outerLayerJ - m_nFitProjectionLayers, outerLayerJ));
+            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, parentOuterLayer - m_nFitProjectionLayers, parentOuterLayer));
             if (fitDistanceToClosestHit < m_maxFitDistanceToClosestHit)
                 continue;
 
-            // Cluster approach is the smallest distance between a hit in cluster I and a hit in cluster j
-            const float clusterApproach(ClusterHelper::GetDistanceToClosestHit(pClusterI, pClusterJ));
+            // Cluster approach is the smallest distance between a hit in daughter cluster and a hit in parent cluster
+            const float clusterApproach(ClusterHelper::GetDistanceToClosestHit(pDaughterCluster, pParentCluster));
             if (clusterApproach < closestClusterApproach)
             {
                 closestClusterApproach = clusterApproach;
-                pBestParentCluster = pClusterJ;
+                pBestParentCluster = pParentCluster;
             }
         }
 
         // If parent cluster found, within threshold approach distance, merge the clusters
         if ((closestClusterApproach < m_closestClusterApproachCut) && (pBestParentCluster != NULL))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pClusterI));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
         }
     }
 

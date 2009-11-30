@@ -261,6 +261,15 @@ public:
         PseudoLayer startLayer, pandora::PseudoLayer endLayer);
 
     /**
+     *  @brief  Get the closest distance between same layer centroid positions in two overlapping clusters
+     * 
+     *  @param  pClusterI address of the first cluster
+     *  @param  pClusterJ address of the second cluster
+     *  @param  intraLayerDistance to receive the closest intra layer distance
+     */
+    static StatusCode GetClosestIntraLayerDistance(const Cluster *const pClusterI, const Cluster *const pClusterJ, float &intraLayerDistance);
+
+    /**
      *  @brief  Whether a cluster can be merged with another. Uses simple suggested criteria, including cluster photon id flag
      *          and supplied cuts on cluster mip fraction and all hits fit rms.
      * 

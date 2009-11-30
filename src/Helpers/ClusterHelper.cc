@@ -412,6 +412,45 @@ float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &cluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClusterI, const Cluster *const pClusterJ, float &intraLayerDistance)
+{
+    // Return if clusters do not overlap
+    if ((pClusterI->GetOuterPseudoLayer() < pClusterJ->GetInnerPseudoLayer()) || (pClusterJ->GetOuterPseudoLayer() < pClusterI->GetInnerPseudoLayer()))
+        return STATUS_CODE_NOT_FOUND;
+
+    bool distanceFound(false);
+    float minDistance = std::numeric_limits<float>::max();
+    const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
+
+    for (OrderedCaloHitList::const_iterator iterI = orderedCaloHitListI.begin(), iterIEnd = orderedCaloHitListI.end(); iterI != iterIEnd; ++iterI)
+    {
+        const PseudoLayer pseudoLayer(iterI->first);
+        OrderedCaloHitList::const_iterator iterJ = orderedCaloHitListJ.find(pseudoLayer);
+
+        if (orderedCaloHitListJ.end() == iterJ)
+            continue;
+
+        const CartesianVector centroidI(pClusterI->GetCentroid(pseudoLayer));
+        const CartesianVector centroidJ(pClusterJ->GetCentroid(pseudoLayer));
+
+        const float distance((centroidI - centroidJ).GetMagnitude());
+        if (distance < minDistance)
+        {
+            minDistance = distance;
+            distanceFound = true;
+        }
+    }
+
+    if (!distanceFound)
+        return STATUS_CODE_NOT_FOUND;
+
+    intraLayerDistance = minDistance;
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
 {
     return ( !pCluster->IsPhoton() || (pCluster->GetMipFraction() > minMipFraction) ||
