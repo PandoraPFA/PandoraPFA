@@ -24,12 +24,19 @@ StatusCode CheatingAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
 
-    // create PFOs
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+//     // create PFOs
+//     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     double energySum = 0.0;
+    CartesianVector momentumSum(0,0,0);
     for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ )
     {
+	std::cout << " cluster " << std::endl;
+        CartesianVector momentum(0,0,0);
+        double mass = 0.0;
+        int particleId = 211;
+        int charge = 0;
+
         PandoraContentApi::ParticleFlowObject::Parameters pfo;
         pfo.m_clusterList.insert( (*itCluster) );
         
@@ -37,6 +44,7 @@ StatusCode CheatingAlgorithm::Run()
         for( TrackList::iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack )
         {
             pfo.m_trackList.insert( (*itTrack) );
+            momentum = momentum + (*itTrack)->GetMomentumAtDca();
         }
 
         double energy = 0.0;
@@ -46,7 +54,23 @@ StatusCode CheatingAlgorithm::Run()
         }
         else if( m_energyFrom == "calorimeter" )
         {
-            energy = (*itCluster)->GetHadronicEnergy();
+            if( trackList.empty() )
+            {
+                if((*itCluster)->IsPhoton()){
+                    energy = (*itCluster)->GetElectromagneticEnergy();
+                    momentum = (*itCluster)->GetFitToAllHitsResult().GetDirection();
+                    momentum = momentum*energy;
+                    particleId = 22;
+                    mass += 0.0;
+                }
+                else
+                {
+                    energy = (*itCluster)->GetHadronicEnergy();
+                    particleId = 2112;
+                    mass += 0.9396;
+                    momentum = (*itCluster)->GetFitToAllHitsResult().GetDirection() * sqrt( energy*energy - mass*mass );
+                }
+            }
         }
         else if( m_energyFrom == "tracks" )
         {
@@ -56,8 +80,12 @@ StatusCode CheatingAlgorithm::Run()
                 // take the momentum from the track and assume the mass of a pion
                 CartesianVector momentumVec = (*itTrack)->GetMomentumAtDca();
                 double momentum = momentumVec.GetMagnitude();
-                double mass = 0.139;
-                energy += sqrt(momentum*momentum+mass*mass);
+                double trackMass = 0.139;
+                mass += trackMass;
+                energy += sqrt(momentum*momentum+trackMass*trackMass);
+                particleId = 211;
+//                charge <== get charge from track
+
 //                 MCParticle *mc = NULL;
 //                 (*itTrack)->GetMCParticle( mc );
 //                std::cout << "track number " << num << " energy " << sqrt(momentum*momentum+mass*mass) << "  mc->energy " << mc->GetEnergy() << " mc->momentum " << mc->GetMomentum() << " momentum " << momentum << std::endl;
@@ -68,16 +96,18 @@ StatusCode CheatingAlgorithm::Run()
         {
             return STATUS_CODE_INVALID_PARAMETER;
         }
-//        std::cout << "energy " << energy << std::endl;
+//          std::cout << "energy " << energy << std::endl;
         pfo.m_energy = energy; 
-        pfo.m_chargeSign = 0;
-        pfo.m_mass = 10;
-        pfo.m_momentum = CartesianVector( 10, 20, 30);
-        pfo.m_particleId = 211;
+        pfo.m_chargeSign = charge;
+        pfo.m_mass = mass;
+        pfo.m_momentum = momentum;
+        pfo.m_particleId = particleId;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));
         energySum += energy;
+        momentumSum = momentumSum + momentum;
     }
-//    std::cout << "energySum " << energySum << std::endl;
+    double pt = sqrt( momentumSum.GetX()*momentumSum.GetX() + momentumSum.GetY()*momentumSum.GetY() );
+    std::cout << "energySum " << energySum << "  pt " << pt << std::endl;
     return STATUS_CODE_SUCCESS;
 }
 
