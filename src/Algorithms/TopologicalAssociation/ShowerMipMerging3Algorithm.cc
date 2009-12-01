@@ -57,7 +57,8 @@ StatusCode ShowerMipMerging3Algorithm::Run()
                 continue;
 
             // Cut on distance between projected fit result and nearest cluster hit
-            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, parentOuterLayer - m_nFitProjectionLayers, parentOuterLayer));
+            const PseudoLayer fitProjectionInnerLayer((parentOuterLayer > m_nFitProjectionLayers) ? parentOuterLayer - m_nFitProjectionLayers : 0);
+            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, fitProjectionInnerLayer, parentOuterLayer));
             if (fitDistanceToClosestHit < m_maxFitDistanceToClosestHit)
                 continue;
 

@@ -501,8 +501,10 @@ StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClu
 
 bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
 {
-    return ( !pCluster->IsPhoton() || (pCluster->GetMipFraction() > minMipFraction) ||
-        (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms)) );
+    return ( (pCluster->GetNCaloHits() > 0) &&
+        (!pCluster->IsPhoton() ||
+        (pCluster->GetMipFraction() > minMipFraction) ||
+        (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms))) );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
