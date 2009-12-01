@@ -13,35 +13,6 @@
 namespace pandora
 {
 
-StatusCode Cluster::SetTrackSeed(Track *const pTrack)
-{
-    if (m_associatedTrackList.end() == m_associatedTrackList.find(pTrack))
-        return STATUS_CODE_NOT_ALLOWED;
-
-    m_pTrackSeed = pTrack;
-    m_initialDirection = pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector();
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void Cluster::RemoveTrackSeed()
-{
-    m_pTrackSeed = NULL;
-
-    if (!m_orderedCaloHitList.empty())
-    {
-        m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
-    }
-    else
-    {
-        m_initialDirection.Reset();
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 Cluster::Cluster(CaloHit *pCaloHit) :
     m_nCaloHits(0),
     m_nPossibleMipHits(0),
@@ -394,6 +365,32 @@ StatusCode Cluster::RemoveTrackAssociation(Track *const pTrack)
     m_associatedTrackList.erase(iter);
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Cluster::SetTrackSeed(Track *const pTrack)
+{
+    m_pTrackSeed = pTrack;
+    m_initialDirection = pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector();
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Cluster::RemoveTrackSeed()
+{
+    m_pTrackSeed = NULL;
+
+    if (!m_orderedCaloHitList.empty())
+    {
+        m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
+    }
+    else
+    {
+        m_initialDirection.Reset();
+    }
 }
 
 } // namespace pandora

@@ -201,20 +201,6 @@ public:
      */
     void SetCurrentFitResult(const ClusterHelper::ClusterFitResult &currentFitResult);
 
-    /**
-     *  @brief  Set the track with which the cluster is seeded, updating the initial direction measurement.
-     *          NOTE the track seed must be a track with which the cluster is associated
-     * 
-     *  @param  pTrack address of the track seed
-     */
-    StatusCode SetTrackSeed(Track *const pTrack);
-
-    /**
-     *  @brief  Remove the track seed, changing the initial direction measurement.
-     *          NOTE this will not remove the association between the seed track and the cluster
-     */
-    void RemoveTrackSeed();
-
 private:
     /**
      *  @brief  Constructor
@@ -281,6 +267,18 @@ private:
      *  @param  pTrack the address of the track with which the cluster is no longer associated
      */
     StatusCode RemoveTrackAssociation(Track *const pTrack);
+
+    /**
+     *  @brief  Set the track with which the cluster is seeded, updating the initial direction measurement.
+     * 
+     *  @param  pTrack address of the track seed
+     */
+    StatusCode SetTrackSeed(Track *const pTrack);
+
+    /**
+     *  @brief  Remove the track seed, changing the initial direction measurement.
+     */
+    void RemoveTrackSeed();
 
     typedef std::map<PseudoLayer, float> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
     typedef ClusterHelper::ClusterFitResult ClusterFitResult;   ///< The cluster fit result typedef

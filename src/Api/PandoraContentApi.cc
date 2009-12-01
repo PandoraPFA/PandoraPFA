@@ -193,6 +193,13 @@ StatusCode PandoraContentApi::RemoveTrackClusterAssociation(const pandora::Algor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::RemoveAllTrackClusterAssociations(const pandora::Algorithm &algorithm)
+{
+    return algorithm.GetPandoraContentApiImpl()->RemoveAllTrackClusterAssociations();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string newClusterListName)
 {
     return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName);

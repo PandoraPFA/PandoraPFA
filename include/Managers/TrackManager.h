@@ -163,17 +163,22 @@ private:
     /**
      *  @brief  Apply track associations (parent-daughter and sibling) that have been registered with the track manager
      */
-    StatusCode AssociateTracks();
+    StatusCode AssociateTracks() const;
 
     /**
      *  @brief  Add parent-daughter associations to tracks
      */
-    StatusCode AddParentDaughterAssociations();
+    StatusCode AddParentDaughterAssociations() const;
 
     /**
      *  @brief  Add sibling associations to tracks
      */
-    StatusCode AddSiblingAssociations();
+    StatusCode AddSiblingAssociations() const;
+
+    /**
+     *  @brief  Remove all track to cluster associations
+     */
+    StatusCode RemoveAllClusterAssociations() const;
 
     /**
      *  @brief  AlgorithmInfo class

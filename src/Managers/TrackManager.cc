@@ -291,7 +291,7 @@ StatusCode TrackManager::SetTrackSiblingRelationship(const Uid firstSiblingUid, 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::AssociateTracks()
+StatusCode TrackManager::AssociateTracks() const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddParentDaughterAssociations());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddSiblingAssociations());
@@ -301,13 +301,13 @@ StatusCode TrackManager::AssociateTracks()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::AddParentDaughterAssociations()
+StatusCode TrackManager::AddParentDaughterAssociations() const
 {
     for (TrackRelationMap::const_iterator uidIter = m_parentDaughterRelationMap.begin(), uidIterEnd = m_parentDaughterRelationMap.end();
         uidIter != uidIterEnd; ++uidIter)
     {
-        UidToTrackMap::iterator parentIter = m_uidToTrackMap.find(uidIter->first);
-        UidToTrackMap::iterator daughterIter = m_uidToTrackMap.find(uidIter->second);
+        UidToTrackMap::const_iterator parentIter = m_uidToTrackMap.find(uidIter->first);
+        UidToTrackMap::const_iterator daughterIter = m_uidToTrackMap.find(uidIter->second);
 
         if ((m_uidToTrackMap.end() == parentIter) || (m_uidToTrackMap.end() == daughterIter))
             continue;
@@ -321,13 +321,13 @@ StatusCode TrackManager::AddParentDaughterAssociations()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::AddSiblingAssociations()
+StatusCode TrackManager::AddSiblingAssociations() const
 {
     for (TrackRelationMap::const_iterator uidIter = m_siblingRelationMap.begin(), uidIterEnd = m_siblingRelationMap.end();
         uidIter != uidIterEnd; ++uidIter)
     {
-        UidToTrackMap::iterator firstSiblingIter = m_uidToTrackMap.find(uidIter->first);
-        UidToTrackMap::iterator secondSiblingIter = m_uidToTrackMap.find(uidIter->second);
+        UidToTrackMap::const_iterator firstSiblingIter = m_uidToTrackMap.find(uidIter->first);
+        UidToTrackMap::const_iterator secondSiblingIter = m_uidToTrackMap.find(uidIter->second);
 
         if ((m_uidToTrackMap.end() == firstSiblingIter) || (m_uidToTrackMap.end() == secondSiblingIter))
             continue;
@@ -335,6 +335,21 @@ StatusCode TrackManager::AddSiblingAssociations()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, firstSiblingIter->second->AddSibling(secondSiblingIter->second));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, secondSiblingIter->second->AddSibling(firstSiblingIter->second));
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::RemoveAllClusterAssociations() const
+{
+    NameToTrackListMap::const_iterator listIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() == listIter)
+        return STATUS_CODE_FAILURE;
+
+    for (TrackList::iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
+        (*iter)->m_pAssociatedCluster = NULL;
 
     return STATUS_CODE_SUCCESS;
 }

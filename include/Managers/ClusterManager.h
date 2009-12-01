@@ -198,6 +198,11 @@ private:
     StatusCode RemoveEmptyClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName);
 
     /**
+     *  @brief  Remove all cluster to track associations
+     */
+    StatusCode RemoveAllTrackAssociations() const;
+
+    /**
      *  @brief  AlgorithmInfo class
      */
     class AlgorithmInfo

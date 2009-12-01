@@ -419,6 +419,22 @@ StatusCode ClusterManager::RemoveEmptyClusterList(const Algorithm *const pAlgori
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::RemoveAllTrackAssociations() const
+{
+    for (NameToClusterListMap::const_iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end(); ++iter)
+    {
+        for (ClusterList::iterator clusterIter = iter->second->begin(), clusterIterEnd = iter->second->end(); 
+            clusterIter != clusterIterEnd; ++clusterIter)
+        {
+            (*clusterIter)->m_associatedTrackList.clear();
+        }
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template StatusCode ClusterManager::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster);

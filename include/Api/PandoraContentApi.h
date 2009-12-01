@@ -268,6 +268,13 @@ public:
         pandora::Cluster *const pCluster);
 
     /**
+     *  @brief  Remove all associations between tracks and clusters
+     * 
+     *  @param  algorithm the algorithm calling this function
+     */
+    static StatusCode RemoveAllTrackClusterAssociations(const pandora::Algorithm &algorithm);
+
+    /**
      *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
      * 
      *  @param  algorithm the algorithm calling this function
