@@ -412,7 +412,7 @@ float ClusterHelper::GetDistanceToClosestHit(const Cluster *const pClusterI, con
 
     for (CaloHitVector::const_iterator iterI = caloHitVectorI.begin(), iterIEnd = caloHitVectorI.end(); iterI != iterIEnd; ++iterI)
     {
-        const CartesianVector positionVectorI((*iterI)->GetPositionVector());
+        const CartesianVector &positionVectorI((*iterI)->GetPositionVector());
 
         for (CaloHitVector::const_iterator iterJ = caloHitVectorJ.begin(), iterIEnd = caloHitVectorJ.end(); iterJ != iterIEnd; ++iterJ)
         {

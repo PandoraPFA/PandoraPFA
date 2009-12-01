@@ -85,7 +85,7 @@ float ShowerMipMerging4Algorithm::GetDistanceFromInitialProjection(const Cluster
     const OrderedCaloHitList &orderedCaloHitList(pClusterToExamine->GetOrderedCaloHitList());
 
     const CartesianVector innerCentroidI(pClusterToProject->GetCentroid(pClusterToProject->GetInnerPseudoLayer()));
-    const CartesianVector projectedDirection(pClusterToProject->GetInitialDirection());
+    const CartesianVector &projectedDirection(pClusterToProject->GetInitialDirection());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
