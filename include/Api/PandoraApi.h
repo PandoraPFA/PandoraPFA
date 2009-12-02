@@ -136,7 +136,7 @@ public:
             LayerParametersList         m_layerParametersList;      ///< The list of layer parameters for the detector section
         };
 
-        typedef std::vector<SubDetectorParameters> SubDetectorParametersList;
+        typedef std::map<std::string, SubDetectorParameters> SubDetectorParametersMap;
 
         SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
         SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
@@ -156,7 +156,7 @@ public:
         pandora::InputFloat             m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
         pandora::InputFloat             m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
 
-        SubDetectorParametersList       m_additionalSubDetectors;   ///< Parameters for any additional subdetectors
+        SubDetectorParametersMap        m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
     };
 
     // Objects available for construction by pandora

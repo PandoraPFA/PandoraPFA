@@ -70,12 +70,14 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters, &m_endCapLayerPositions);
         m_hCalEndCapParameters.Initialize(geometryParameters.m_hCalEndCapParameters, &m_endCapLayerPositions);
 
-        for (PandoraApi::GeometryParameters::SubDetectorParametersList::const_iterator iter = geometryParameters.m_additionalSubDetectors.begin(),
+        for (PandoraApi::GeometryParameters::SubDetectorParametersMap::const_iterator iter = geometryParameters.m_additionalSubDetectors.begin(),
             iterEnd = geometryParameters.m_additionalSubDetectors.end(); iter != iterEnd; ++iter)
         {
             SubDetectorParameters subDetectorParameters;
-            subDetectorParameters.Initialize(*iter);
-            m_additionalSubDetectors.push_back(subDetectorParameters);
+            subDetectorParameters.Initialize(iter->second);
+
+            if (!m_additionalSubDetectors.insert(SubDetectorParametersMap::value_type(iter->first, subDetectorParameters)).second)
+                return STATUS_CODE_FAILURE;
         }
 
         if (0 == geometryParameters.m_eCalBarrelParameters.m_outerZCoordinate.Get())

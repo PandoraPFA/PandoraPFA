@@ -143,7 +143,7 @@ public:
         LayerParametersList     m_layerParametersList;  ///< The list of layer parameters for the detector section
     };
 
-    typedef std::vector<SubDetectorParameters> SubDetectorParametersList;
+    typedef std::map<std::string, SubDetectorParameters> SubDetectorParametersMap;
 
     /**
      *  @brief  Get the geometry helper singleton
@@ -256,11 +256,11 @@ public:
     float GetNInteractionLengthsInRadialGap() const;
 
     /**
-     *  @brief  Get the list of parameters for any additional sub detectors specified
+     *  @brief  Get the map from name to parameters for any additional sub detectors
      * 
-     *  @return The list of additional sub detector parameters
+     *  @return The map from name to parameters
      */
-    const SubDetectorParametersList &GetAdditionalSubDetectors() const;
+    const SubDetectorParametersMap &GetAdditionalSubDetectors() const;
 
     /**
      *  @brief  Find the layer number corresponding to a specified radial position in the barrel
@@ -348,7 +348,7 @@ private:
     float                       m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
     float                       m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
 
-    SubDetectorParametersList   m_additionalSubDetectors;   ///< Parameters for any additional subdetectors
+    SubDetectorParametersMap    m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
 
     LayerPositionList           m_barrelLayerPositions;     ///< The barrel layer positions list
     LayerPositionList           m_endCapLayerPositions;     ///< The endcap layer positions list
@@ -514,7 +514,7 @@ inline float GeometryHelper::GetNInteractionLengthsInRadialGap() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParametersList &GeometryHelper::GetAdditionalSubDetectors() const
+inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditionalSubDetectors() const
 {
     return m_additionalSubDetectors;
 }
