@@ -280,6 +280,32 @@ public:
     static StatusCode GetClosestIntraLayerDistance(const Cluster *const pClusterI, const Cluster *const pClusterJ, float &intraLayerDistance);
 
     /**
+     *  @brief  Get the distance of closest approach between the projected track direction at ecal the hits within a cluster.
+     *          Note that only a specified number of layers are examined.
+     * 
+     *  @param  pTrack address of the track
+     *  @param  pCluster address of the cluster
+     *  @param  maxSearchLayer the maximum pseudolayer to examine
+     *  @param  parallelDistanceCut maximum allowed projection of track-cluster separation along track direction
+     *  @param  trackClusterDistance to receive the track cluster distance
+     */
+    static StatusCode GetTrackClusterDistance(const pandora::Track *const pTrack, const pandora::Cluster *const pCluster,
+        const pandora::PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance);
+
+    /**
+     *  @brief  Get the distance of closest approach between a specified track state and the hits within a cluster.
+     *          Note that only a specified number of layers are examined.
+     * 
+     *  @param  trackState the specified track state (position and momentum vectors)
+     *  @param  pCluster address of the cluster
+     *  @param  maxSearchLayer the maximum pseudolayer to examine
+     *  @param  parallelDistanceCut maximum allowed projection of track-cluster separation along track direction
+     *  @param  trackClusterDistance to receive the track cluster distance
+     */
+    static StatusCode GetTrackClusterDistance(const pandora::TrackState &trackState, const pandora::Cluster *const pCluster,
+        const pandora::PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance);
+
+    /**
      *  @brief  Whether a cluster can be merged with another. Uses simple suggested criteria, including cluster photon id flag
      *          and supplied cuts on cluster mip fraction and all hits fit rms.
      * 

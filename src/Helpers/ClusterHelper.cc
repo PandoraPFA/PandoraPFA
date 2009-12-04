@@ -12,6 +12,7 @@
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 #include "Objects/OrderedCaloHitList.h"
+#include "Objects/Track.h"
 
 #include <cmath>
 
@@ -374,7 +375,7 @@ float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitR
     if (startLayer > endLayer)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-    float minDistance = std::numeric_limits<float>::max();
+    float minDistance(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
@@ -405,7 +406,7 @@ float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitR
 
 float ClusterHelper::GetDistanceToClosestHit(const Cluster *const pClusterI, const Cluster *const pClusterJ)
 {
-    float minDistance = std::numeric_limits<float>::max();
+    float minDistance(std::numeric_limits<float>::max());
     CaloHitVector caloHitVectorI, caloHitVectorJ;
     pClusterI->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorI);
     pClusterJ->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorJ);
@@ -436,7 +437,7 @@ float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &cluste
     if (startLayer > endLayer)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-    float minDistance = std::numeric_limits<float>::max();
+    float minDistance(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
@@ -467,7 +468,7 @@ StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClu
         return STATUS_CODE_NOT_FOUND;
 
     bool distanceFound(false);
-    float minDistance = std::numeric_limits<float>::max();
+    float minDistance(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
     const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
 
@@ -494,6 +495,81 @@ StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClu
         return STATUS_CODE_NOT_FOUND;
 
     intraLayerDistance = minDistance;
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, const Cluster *const pCluster,
+    const PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance)
+{
+    if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
+        return STATUS_CODE_NOT_FOUND;
+
+    bool distanceFound(false);
+    float minDistance(std::numeric_limits<float>::max());
+
+    if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(pTrack->GetTrackStateAtECal(), pCluster, maxSearchLayer, parallelDistanceCut, minDistance))
+        distanceFound = true;
+
+    const TrackStateList &trackStateList(pTrack->GetCalorimeterProjections());
+    for (TrackStateList::const_iterator iter = trackStateList.begin(), iterEnd = trackStateList.end(); iter != iterEnd; ++iter)
+    {
+        const TrackState *const pTrackState = *iter;
+
+        if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(*pTrackState, pCluster, maxSearchLayer, parallelDistanceCut, minDistance))
+            distanceFound = true;
+    }
+
+    if (!distanceFound)
+        return STATUS_CODE_NOT_FOUND;
+
+    trackClusterDistance = minDistance;
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, const Cluster *const pCluster,
+    const PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance)
+{
+    if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
+        return STATUS_CODE_NOT_FOUND;
+
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    const CartesianVector &trackPosition(trackState.GetPosition());
+    const CartesianVector trackDirection(trackState.GetMomentum().GetUnitVector());
+
+    bool distanceFound(false);
+    float minDistance(std::numeric_limits<float>::max());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        if (iter->first > maxSearchLayer)
+            break;
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            const CartesianVector positionDifference((*hitIter)->GetPositionVector() - trackPosition);
+            const float parallelDistance(trackDirection.GetDotProduct(positionDifference));
+
+            if (std::fabs(parallelDistance) > parallelDistanceCut)
+                continue;
+
+            const float perpendicularDistance((trackDirection.GetCrossProduct(positionDifference)).GetMagnitude());
+
+            if (perpendicularDistance < minDistance)
+            {
+                minDistance = perpendicularDistance;
+                distanceFound = true;
+            }
+        }
+    }
+
+    if (!distanceFound)
+        return STATUS_CODE_NOT_FOUND;
+
+    trackClusterDistance = minDistance;
     return STATUS_CODE_SUCCESS;
 }
 

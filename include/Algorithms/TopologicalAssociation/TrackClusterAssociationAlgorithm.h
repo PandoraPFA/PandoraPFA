@@ -29,20 +29,6 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    /**
-     *  @brief  Get the distance of closest approach between the projected track direction at ecal the hits within a cluster.
-     *          Note that only a specified number of layers are examined.
-     * 
-     *  @param  pTrack address of the track
-     *  @param  pCluster address of the cluster
-     *  @param  maxSearchLayer the maximum pseudolayer to examine
-     *  @param  trackClusterDistance to receive the track cluster distance
-     */
-    StatusCode GetTrackClusterDistance(const pandora::Track *const pTrack, const pandora::Cluster *const pCluster,
-        const pandora::PseudoLayer maxSearchLayer, float &trackClusterDistance) const;
-
-    static const float FLOAT_MAX;
-
     float           m_lowEnergyCut;                     ///< Energy cut (GeV). Algorithm prefers to associate tracks to high-energy clusters
     float           m_maxTrackClusterDistance;          ///< Max distance between track and cluster to allow association
 

@@ -12,10 +12,6 @@
 
 using namespace pandora;
 
-const float TrackClusterAssociationAlgorithm::FLOAT_MAX = std::numeric_limits<float>::max();
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode TrackClusterAssociationAlgorithm::Run()
 {
     const TrackList *pTrackList = NULL;
@@ -36,8 +32,8 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         Cluster *pBestCluster = NULL;
         Cluster *pBestLowEnergyCluster = NULL;
 
-        float minDistance(FLOAT_MAX);
-        float minLowEnergyDistance(FLOAT_MAX);
+        float minDistance(std::numeric_limits<float>::max());
+        float minLowEnergyDistance(std::numeric_limits<float>::max());
 
         // Identify the closest cluster and also the closest cluster below a specified hadronic energy threshold
         for (ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
@@ -45,8 +41,8 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         {
             Cluster *pCluster = *clusterIter;
 
-            float trackClusterDistance(FLOAT_MAX);
-            if (STATUS_CODE_SUCCESS != this->GetTrackClusterDistance(pTrack, pCluster, m_maxSearchLayer, trackClusterDistance))
+            float trackClusterDistance(std::numeric_limits<float>::max());
+            if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack, pCluster, m_maxSearchLayer, m_parallelDistanceCut, trackClusterDistance))
                 continue;
 
             if (pCluster->GetHadronicEnergy() > m_lowEnergyCut)
@@ -86,51 +82,6 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         }
     }
 
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode TrackClusterAssociationAlgorithm::GetTrackClusterDistance(const Track *const pTrack, const Cluster *const pCluster,
-    const PseudoLayer maxSearchLayer, float &trackClusterDistance) const
-{
-    if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
-        return STATUS_CODE_NOT_FOUND;
-
-    const CartesianVector &seedPosition(pTrack->GetTrackStateAtECal().GetPosition());
-    const CartesianVector seedDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector());
-
-    bool distanceFound(false);
-    float minDistance(FLOAT_MAX);
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
-    {
-        if (iter->first > maxSearchLayer)
-            break;
-
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            const CartesianVector positionDifference((*hitIter)->GetPositionVector() - seedPosition);
-            const float parallelDistance(seedDirection.GetDotProduct(positionDifference));
-
-            if (std::fabs(parallelDistance) > m_parallelDistanceCut)
-                continue;
-
-            const float perpendicularDistance((seedDirection.GetCrossProduct(positionDifference)).GetMagnitude());
-
-            if (perpendicularDistance < minDistance)
-            {
-                minDistance = perpendicularDistance;
-                distanceFound = true;
-            }
-        }
-    }
-
-    if (!distanceFound)
-        return STATUS_CODE_NOT_FOUND;
-
-    trackClusterDistance = minDistance;
     return STATUS_CODE_SUCCESS;
 }
 
