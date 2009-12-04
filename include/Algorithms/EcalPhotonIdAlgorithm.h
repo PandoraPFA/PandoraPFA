@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/EcalPhotonIdAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/ECalPhotonIdAlgorithm.h
  * 
  *  @brief  Header file for the photon clustering algorithm class.
  * 
@@ -183,9 +183,9 @@ namespace pandora {
 
 
 /**
- *  @brief  EcalPhotonIdAlgorithm class
+ *  @brief  ECalPhotonIdAlgorithm class
  */
-class EcalPhotonIdAlgorithm : public pandora::Algorithm
+class ECalPhotonIdAlgorithm : public pandora::Algorithm
 {
 
 
@@ -345,9 +345,9 @@ class EcalPhotonIdAlgorithm : public pandora::Algorithm
         Algorithm *CreateAlgorithm() const;
     };
 
-    EcalPhotonIdAlgorithm();
+    ECalPhotonIdAlgorithm();
 
-    ~EcalPhotonIdAlgorithm();
+    ~ECalPhotonIdAlgorithm();
 
     /**
      *  @brief  Perform any operations that must occur after reading settings, but before running the algorithm
@@ -395,9 +395,9 @@ class EcalPhotonIdAlgorithm : public pandora::Algorithm
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *EcalPhotonIdAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *ECalPhotonIdAlgorithm::Factory::CreateAlgorithm() const
 {
-    return new EcalPhotonIdAlgorithm();
+    return new ECalPhotonIdAlgorithm();
 }
 
 #endif // #ifndef ECAL_PHOTON_ID_ALGORITHM_H

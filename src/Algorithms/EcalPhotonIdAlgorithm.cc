@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/EcalPhotonIdAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/ECalPhotonIdAlgorithm.cc
  * 
  *  @brief  Implementation of the photon clustering algorithm class.
  * 
@@ -12,7 +12,7 @@
 #include <iomanip>
 
 
-#include "Algorithms/EcalPhotonIdAlgorithm.h"
+#include "Algorithms/ECalPhotonIdAlgorithm.h"
 #include "Objects/MCParticle.h"
 
 #include <cmath>
@@ -34,7 +34,7 @@ PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance(){
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-EcalPhotonIdAlgorithm::EcalPhotonIdAlgorithm()
+ECalPhotonIdAlgorithm::ECalPhotonIdAlgorithm()
 {
     std::cout << "constructor" << std::endl;
 
@@ -42,7 +42,7 @@ EcalPhotonIdAlgorithm::EcalPhotonIdAlgorithm()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EcalPhotonIdAlgorithm::Initialize()
+StatusCode ECalPhotonIdAlgorithm::Initialize()
 {
     std::cout << "initialize" << std::endl;
     std::cout << "makingphotonid " <<_makingPhotonIDLikelihoodHistograms << std::endl;
@@ -57,7 +57,7 @@ StatusCode EcalPhotonIdAlgorithm::Initialize()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-EcalPhotonIdAlgorithm::~EcalPhotonIdAlgorithm()
+ECalPhotonIdAlgorithm::~ECalPhotonIdAlgorithm()
 {
 
     std::cout << "destructor" << std::endl;
@@ -71,7 +71,7 @@ EcalPhotonIdAlgorithm::~EcalPhotonIdAlgorithm()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EcalPhotonIdAlgorithm::Run()
+StatusCode ECalPhotonIdAlgorithm::Run()
 {
 
 
@@ -124,12 +124,15 @@ StatusCode EcalPhotonIdAlgorithm::Run()
 //     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pTrackList, pClusterList ) );
 //     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pTrackList, &photonClusters ) );
 
+//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pClusterList ) );
+//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &photonClusters ) );
+
     return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EcalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
+StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterCandidatesListName", m_clusterCandidatesListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusters", m_photonClusterListName));
@@ -167,7 +170,7 @@ StatusCode EcalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void EcalPhotonIdAlgorithm::CreateOrSaveLikelihoodHistograms(bool create)
+void ECalPhotonIdAlgorithm::CreateOrSaveLikelihoodHistograms(bool create)
 {
     int nHistograms = 8;
 
@@ -214,6 +217,9 @@ void EcalPhotonIdAlgorithm::CreateOrSaveLikelihoodHistograms(bool create)
     {
         PANDORA_MONITORING_API(SaveAndCloseHistogram("energyVsPhotonE", m_monitoringFileName, "UPDATE" ));
         PANDORA_MONITORING_API(SaveAndCloseHistogram("pidVsPhotonEFraction", m_monitoringFileName, "UPDATE" ));
+
+        PANDORA_MONITORING_API(PrintTree("photonId"));
+        PANDORA_MONITORING_API(SaveTree("photonId", m_monitoringFileName, "UPDATE" ));
     }
 
 }
@@ -223,7 +229,7 @@ void EcalPhotonIdAlgorithm::CreateOrSaveLikelihoodHistograms(bool create)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool EcalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
+bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 {
     if( _printing ) std::cout << "=============== IsPhoton? ===================" << std::endl;
 
@@ -277,7 +283,8 @@ bool EcalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     float showerStart   = photonIdProperties.GetLongProfileShowerStart();
     float gammaFraction = photonIdProperties.GetLongProfileGammaFraction();
     float truePhotonE = GetTruePhotonEnergyContribution(photonCandidateCluster);
-    float fraction = truePhotonE / photonCandidateCluster->GetElectromagneticEnergy();
+    float electromagneticE = photonCandidateCluster->GetElectromagneticEnergy();
+    float fraction = truePhotonE / electromagneticE;
 
     ClusterProperties clusterProperties;
     GetClusterProperties( photonCandidateCluster, clusterProperties );
@@ -340,7 +347,8 @@ bool EcalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     //if(closest>50)pidCut=0.25;
 
     PANDORA_MONITORING_API(Fill2DHistogram("pidVsPhotonEFraction", pid, fraction ));
-
+    
+    
 
 //         float fracE = photonCandidateCluster->GetElectromagneticEnergy()/photonCandidateCluster->GetElectromagneticEnergy();
     if(nhits>=_minimumHitsInCluster && peak.energy>0.2 && pid > pidCut && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
@@ -355,12 +363,27 @@ bool EcalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     }
 
 
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "pid", pid ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "fraction", fraction ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "Etrue", truePhotonE ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "Eem", electromagneticE ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "accept", int(accept) ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakRms", peak.rms ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakE", peak.energy ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakE", peak.energy ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShStart", peak.showerStartDepth ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShDepth", peak.showerDepth90 ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "gammaFraction", gammaFraction ));
+
+    PANDORA_MONITORING_API(FillTree("photonId"));
+
+
     if(_printing>0&& fraction>0.5){
-        std::cout << "fraction " << fraction << " --> should be identified as photon  | true photon E " << truePhotonE << " elm E "  << photonCandidateCluster->GetElectromagneticEnergy()  << std::endl;
+        std::cout << "fraction " << fraction << " --> should be identified as photon  | true photon E " << truePhotonE << " elm E "  << electromagneticE  << std::endl;
     }
 
 
-    PANDORA_MONITORING_API(Fill2DHistogram("energyVsPhotonE", photonCandidateCluster->GetElectromagneticEnergy(), truePhotonE ));
+    PANDORA_MONITORING_API(Fill2DHistogram("energyVsPhotonE", electromagneticE, truePhotonE ));
 
 
     if(_printing>0&& peak.energy>1.0){
@@ -418,7 +441,7 @@ bool EcalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EcalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, protoClusterPeaks_t &peak, int maxLayers){
+StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, protoClusterPeaks_t &peak, int maxLayers){
 
     int nbins   = 41;
     int ioffset = nbins/2; 
@@ -685,7 +708,7 @@ return STATUS_CODE_SUCCESS;
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 
-void EcalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate){
+void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate){
 
     float X0BinSize = 0.5;
     const unsigned int X0Bins = 100;
@@ -873,7 +896,7 @@ void EcalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 
-double EcalPhotonIdAlgorithm::GetTruePhotonEnergyContribution(const Cluster* cluster)
+double ECalPhotonIdAlgorithm::GetTruePhotonEnergyContribution(const Cluster* cluster)
 {
 
     #define PHOTONID 22
@@ -944,7 +967,7 @@ double EcalPhotonIdAlgorithm::GetTruePhotonEnergyContribution(const Cluster* clu
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 
-void EcalPhotonIdAlgorithm::GetClusterProperties(const Cluster* cluster, ClusterProperties& clusterProperties )
+void ECalPhotonIdAlgorithm::GetClusterProperties(const Cluster* cluster, ClusterProperties& clusterProperties )
 {
     RunningMeanRMS hitMean[3];    // [3] for the coordinates x,y and z
     RunningMeanRMS centroid[3];
@@ -1017,7 +1040,7 @@ void EcalPhotonIdAlgorithm::GetClusterProperties(const Cluster* cluster, Cluster
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 
-void EcalPhotonIdAlgorithm::DistanceToPositionAndDirection(const CartesianVector& position, 
+void ECalPhotonIdAlgorithm::DistanceToPositionAndDirection(const CartesianVector& position, 
                                                                      const CartesianVector& referencePosition,
                                                                      const CartesianVector& referenceDirection,
                                                                      float& longitudinalComponent,
