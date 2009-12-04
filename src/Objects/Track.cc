@@ -6,7 +6,12 @@
  *  $Log: $
  */
 
+#include "Helpers/GeometryHelper.h"
+
+#include "Objects/Helix.h"
 #include "Objects/Track.h"
+
+#include <cmath>
 
 namespace pandora
 {
@@ -14,8 +19,10 @@ namespace pandora
 Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_d0(trackParameters.m_d0.Get()),
     m_z0(trackParameters.m_z0.Get()),
+    m_mass(trackParameters.m_mass.Get()),
     m_momentumAtDca(trackParameters.m_momentumAtDca.Get()),
     m_momentumMagnitudeAtDca(m_momentumAtDca.GetMagnitude()),
+    m_energyAtDca(std::sqrt(m_mass * m_mass + m_momentumMagnitudeAtDca * m_momentumMagnitudeAtDca)),
     m_trackStateAtStart(trackParameters.m_trackStateAtStart.Get()),
     m_trackStateAtEnd(trackParameters.m_trackStateAtEnd.Get()),
     m_trackStateAtECal(trackParameters.m_trackStateAtECal.Get()),
@@ -29,6 +36,18 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     {
         m_calorimeterProjections.push_back(new TrackState(*iter));
     }
+
+    // Charge sign must be either +1 or -1
+    const int chargeSign(trackParameters.m_chargeSign.Get());
+
+    if (0 == chargeSign)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    m_chargeSign = (chargeSign / std::abs(chargeSign));
+
+    // Obtain helix fit to track state at ecal
+    static const float bField(GeometryHelper::GetInstance()->GetBField());
+    m_pHelixFitAtECal = new Helix(m_trackStateAtECal.GetPosition(), m_trackStateAtECal.GetMomentum(), m_chargeSign, bField);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,6 +59,8 @@ Track::~Track()
     {
         delete *iter;
     }
+
+    delete m_pHelixFitAtECal;
 
     m_parentTrackList.clear();
     m_siblingTrackList.clear();

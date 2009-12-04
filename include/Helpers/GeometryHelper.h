@@ -228,6 +228,13 @@ public:
     float GetCoilZExtent() const;
 
     /**
+     *  @brief  Get the detector magnetic field (assumed constant), units Tesla
+     * 
+     *  @return The detector magnetic field
+     */
+    float GetBField() const;
+
+    /**
      *  @brief  Get the absorber material in barrel/endcap z gap, units radiation lengths
      * 
      *  @return The absorber material in barrel/endcap z gap
@@ -342,6 +349,7 @@ private:
     float                       m_coilInnerRadius;          ///< The coil inner radius, units mm
     float                       m_coilOuterRadius;          ///< The coil outer radius, units mm
     float                       m_coilZExtent;              ///< The coil z extent, units mm
+    float                       m_bField;                   ///< The detector magnetic field (assumed constant), units Tesla
 
     float                       m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
     float                       m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
@@ -470,6 +478,13 @@ inline float GeometryHelper::GetCoilZExtent() const
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_coilZExtent;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::GetBField() const
+{
+    return m_bField;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

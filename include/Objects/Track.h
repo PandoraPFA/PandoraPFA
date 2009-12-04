@@ -15,6 +15,10 @@
 namespace pandora
 {
 
+class Helix;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  Track class
  */
@@ -43,11 +47,32 @@ public:
     float GetZ0() const;
 
     /**
+     *  @brief  Get the charge sign of the tracked particle, units GeV
+     * 
+     *  @return the charge sign of the tracked particle
+     */
+    int GetChargeSign() const;
+
+    /**
+     *  @brief  Get the mass of the tracked particle, units GeV
+     * 
+     *  @return the mass of the tracked particle
+     */
+    float GetMass() const;
+
+    /**
      *  @brief  Get the track momentum at the 2D distance of closest approach
      * 
      *  @return the track momentum at the 2D distance of closest approach
      */
     const CartesianVector &GetMomentumAtDca() const;
+
+    /**
+     *  @brief  Get the track energy at the 2D distance of closest approach
+     * 
+     *  @return the track energy at the 2D distance of closest approach
+     */
+    float GetEnergyAtDca() const;
 
     /**
      *  @brief  Get the track state at the start of the track
@@ -85,18 +110,25 @@ public:
     const TrackStateList &GetCalorimeterProjections() const;
 
     /**
+     *  @brief  Get the helix fit to the ecal track state
+     * 
+     *  @return address of the helix fit to the ecal track state
+     */
+    const Helix *const GetHelixFitAtECal() const;
+
+    /**
      *  @brief  Get address of the cluster associated with the track
      * 
      *  @param  pCluster to receive the address of the cluster
      */
-    StatusCode GetAssociatedCluster(Cluster *&pCluster) const;
+    StatusCode GetAssociatedCluster(const Cluster *&pCluster) const;
 
     /**
      *  @brief  Get address of the mc particle associated with the track
      * 
      *  @param  pMCParticle to receive the address of the mc particle
      */
-    StatusCode GetMCParticle(MCParticle *&pMCParticle) const;
+    StatusCode GetMCParticle(const MCParticle *&pMCParticle) const;
 
     /**
      *  @brief  Get the address of the parent track in the user framework
@@ -181,20 +213,26 @@ private:
      */
     StatusCode AddSibling(Track *const pTrack);
 
-    const float             m_d0;                       ///< The 2D impact parameter wrt (0,0)
-    const float             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
-    const CartesianVector   m_momentumAtDca;            ///< The momentum vector at the 2D distance of closest approach
-    const float             m_momentumMagnitudeAtDca;   ///< The magnitude of the momentum at the 2D distance of closest approach
+    const float             m_d0;                       ///< The 2D impact parameter wrt (0,0), units mm
+    const float             m_z0;                       ///< The z coordinate at the 2D distance of closest approach, units mm
+    int                     m_chargeSign;               ///< The charge sign of the tracked particle
+    const float             m_mass;                     ///< The mass of the tracked particle, units GeV
 
-    const TrackState        m_trackStateAtStart;        ///< The track state at the start of the track
-    const TrackState        m_trackStateAtEnd;          ///< The track state at the end of the track
+    const CartesianVector   m_momentumAtDca;            ///< The momentum vector at the 2D distance of closest approach, units GeV
+    const float             m_momentumMagnitudeAtDca;   ///< The magnitude of the momentum at the 2D distance of closest approach, units GeV
+    const float             m_energyAtDca;              ///< The track energy at the 2D distance of closest approach, units GeV
+
+    const TrackState        m_trackStateAtStart;        ///< The track state at the start of the track, units mm and GeV
+    const TrackState        m_trackStateAtEnd;          ///< The track state at the end of the track, units mm and GeV
     const TrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
 
     const bool              m_reachesECal;              ///< Whether the track reaches the ecal
     TrackStateList          m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
 
-    Cluster                 *m_pAssociatedCluster;      ///< The address of an associated cluster
-    MCParticle              *m_pMCParticle;             ///< The address of the associated MC particle
+    const Helix             *m_pHelixFitAtECal;         ///< Helix fit to the ecal track state
+
+    const Cluster           *m_pAssociatedCluster;      ///< The address of an associated cluster
+    const MCParticle        *m_pMCParticle;             ///< The address of the associated MC particle
     const void              *m_pParentAddress;          ///< The address of the parent track in the user framework
 
     TrackList               m_parentTrackList;          ///< The list of parent track addresses
@@ -247,10 +285,32 @@ inline float Track::GetZ0() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline int Track::GetChargeSign() const
+{
+    return m_chargeSign;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Track::GetMass() const
+{
+    return m_mass;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const CartesianVector &Track::GetMomentumAtDca() const
 {
     return m_momentumAtDca;
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Track::GetEnergyAtDca() const
+{
+    return m_energyAtDca;
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -289,7 +349,14 @@ inline const TrackStateList &Track::GetCalorimeterProjections() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Track::GetAssociatedCluster(Cluster *&pCluster) const
+inline const Helix *const Track::GetHelixFitAtECal() const
+{
+    return m_pHelixFitAtECal;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Track::GetAssociatedCluster(const Cluster *&pCluster) const
 {
     if (NULL == m_pAssociatedCluster)
         return STATUS_CODE_NOT_INITIALIZED;
@@ -301,7 +368,7 @@ inline StatusCode Track::GetAssociatedCluster(Cluster *&pCluster) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Track::GetMCParticle(MCParticle *&pMCParticle) const
+inline StatusCode Track::GetMCParticle(const MCParticle *&pMCParticle) const
 {
     if (NULL == m_pMCParticle)
         return STATUS_CODE_NOT_INITIALIZED;

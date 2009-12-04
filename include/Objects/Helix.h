@@ -228,7 +228,7 @@ private:
     float               m_omega;                ///< signed curvature in canonical parameterisation
     float               m_tanLambda;            ///< tanLambda 
     float               m_pxy;                  ///< The transverse momentum
-    float               m_charge;               ///< The particle Charge
+    float               m_charge;               ///< The particle charge
     float               m_xCentre;              ///< The circle centre x coordinate
     float               m_yCentre;              ///< The circle centre y coordinate
     float               m_radius;               ///< The radius of circle in XY plane
@@ -239,7 +239,6 @@ private:
     float               m_pxAtPCA;              ///< Momentum x component at point of closest approach
     float               m_pyAtPCA;              ///< Momentum y component at point of closest approach
     float               m_phiMomRefPoint;       ///< Phi of Momentum vector at reference point
-    float               m_bField;               ///< Magnetic field (assumed to point to Z > 0)
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

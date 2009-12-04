@@ -58,12 +58,12 @@ StatusCode PerfectClusteringAlgorithm::Run()
     }
 
     // do the same for the tracks (match the tracks to the mcparticles)
-    std::map< MCParticle*, TrackList* > tracksPerMCParticle;
-    std::map< MCParticle*, TrackList* >::iterator itTracksPerMCParticle;
+    std::map< const MCParticle*, TrackList* > tracksPerMCParticle;
+    std::map< const MCParticle*, TrackList* >::iterator itTracksPerMCParticle;
 
     for( TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
     {
-        MCParticle* mc = NULL;
+        const MCParticle* mc = NULL;
         (*itTrack)->GetMCParticle( mc );
         if( mc == NULL ) continue; // maybe an error should be thrown here?
         
@@ -99,7 +99,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
         {
             for( TrackList::iterator itTrack = itTracksPerMCParticle->second->begin(), itTrackEnd = itTracksPerMCParticle->second->end(); itTrack != itTrackEnd; ++itTrack )
             {
-                MCParticle *mc = NULL;
+                const MCParticle *mc = NULL;
                 (*itTrack)->GetMCParticle( mc );
 //                std::cout << "add track " << (*itTrack) << " energy " << mc->GetEnergy() << "  mc " << mc << std::endl;
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation( *this, (*itTrack), pCluster ) )
@@ -111,7 +111,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
     }
 
     // delete the created TrackLists
-    for( std::map< MCParticle*, TrackList* >::iterator itTrackList = tracksPerMCParticle.begin(), itTrackListEnd = tracksPerMCParticle.end(); 
+    for( std::map< const MCParticle*, TrackList* >::iterator itTrackList = tracksPerMCParticle.begin(), itTrackListEnd = tracksPerMCParticle.end(); 
          itTrackList != itTrackListEnd; ++itTrackList )
     {
         delete (*itTrackList).second;

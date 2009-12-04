@@ -74,12 +74,14 @@ public:
     class TrackParameters
     {
     public:
-        pandora::InputFloat             m_d0;                       ///< The 2D impact parameter wrt (0,0)
-        pandora::InputFloat             m_z0;                       ///< The z coordinate at the 2D distance of closest approach
-        pandora::InputCartesianVector   m_momentumAtDca;            ///< Track momentum at the 2D distance of closest approach
-        pandora::InputTrackState        m_trackStateAtStart;        ///< Track state at the start of the track
-        pandora::InputTrackState        m_trackStateAtEnd;          ///< Track state at the end of the track
-        pandora::InputTrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
+        pandora::InputFloat             m_d0;                       ///< The 2D impact parameter wrt (0,0), units mm
+        pandora::InputFloat             m_z0;                       ///< The z coordinate at the 2D distance of closest approach, units mm
+        pandora::InputInt               m_chargeSign;               ///< The charge sign of the tracked particle
+        pandora::InputFloat             m_mass;                     ///< The mass of the tracked particle, units GeV
+        pandora::InputCartesianVector   m_momentumAtDca;            ///< Track momentum at the 2D distance of closest approach, units GeV
+        pandora::InputTrackState        m_trackStateAtStart;        ///< Track state at the start of the track, units mm and GeV
+        pandora::InputTrackState        m_trackStateAtEnd;          ///< Track state at the end of the track, units mm and GeV
+        pandora::InputTrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal, units mm and GeV
         pandora::InputBool              m_reachesECal;              ///< Whether the track has reaches the ecal
         pandora::InputTrackStateList    m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
         pandora::InputAddress           m_pParentAddress;           ///< Address of the parent track in the user framework
@@ -150,6 +152,7 @@ public:
         pandora::InputFloat             m_coilInnerRadius;          ///< The coil inner radius, units mm
         pandora::InputFloat             m_coilOuterRadius;          ///< The coil outer radius, units mm
         pandora::InputFloat             m_coilZExtent;              ///< The coil z extent, units mm
+        pandora::InputFloat             m_bField;                   ///< The detector magnetic field (assumed constant), units Tesla
 
         pandora::InputFloat             m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
         pandora::InputFloat             m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths

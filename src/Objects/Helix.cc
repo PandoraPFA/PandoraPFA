@@ -22,8 +22,7 @@ Helix::Helix(const float phi0, const float d0, const float z0, const float omega
     m_d0(d0),
     m_z0(z0),
     m_omega(omega),
-    m_tanLambda(tanLambda),
-    m_bField(bField)
+    m_tanLambda(tanLambda)
 {
     if (0. == omega)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -41,8 +40,7 @@ Helix::Helix(const float phi0, const float d0, const float z0, const float omega
     m_xCentre = m_referencePoint.GetX() + m_radius * std::cos(m_phi0 - HALF_PI * m_charge);
     m_yCentre = m_referencePoint.GetY() + m_radius * std::sin(m_phi0 - HALF_PI * m_charge);
     m_phiAtPCA = std::atan2(-m_yCentre, -m_xCentre);
-    m_phiRefPoint = m_phiAtPCA ;
-    m_bField = bField;
+    m_phiRefPoint = m_phiAtPCA;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,14 +48,13 @@ Helix::Helix(const float phi0, const float d0, const float z0, const float omega
 Helix::Helix(const CartesianVector &position, const CartesianVector &momentum, const float charge, const float bField) :
     m_referencePoint(position),
     m_momentum(momentum),
-    m_charge(charge),
-    m_bField(bField)
+    m_charge(charge)
 {
     const double px(momentum.GetX()), py(momentum.GetY());
     const double pxy(std::sqrt(px * px + py * py));
 
     if ((0. == bField) || (0. == pxy))
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);    
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     const double radius(pxy / (FCT * bField));
     m_pxy    = static_cast<float>(pxy);
@@ -124,8 +121,7 @@ Helix::Helix(const float xCentre, const float yCentre, const float radius, const
         const float signPz, const float zBegin) :
     m_xCentre(xCentre),
     m_yCentre(yCentre),
-    m_radius(radius),
-    m_bField(bField)
+    m_radius(radius)
 {
     m_pxy = FCT * bField * m_radius;
 
