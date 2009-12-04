@@ -557,6 +557,7 @@ StatusCode Helix::GetDistanceToHelix(const Helix *const pHelix, CartesianVector 
     const CartesianVector momentum2(pHelix->GetExtrapolatedMomentum(position2));
 
     helixDistance = (position1 - position2).GetMagnitude();
+    positionOfClosestApproach = (position1 + position2) * 0.5;
     v0momentum = momentum1 + momentum2;
 
     return STATUS_CODE_SUCCESS;
