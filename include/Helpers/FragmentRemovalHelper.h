@@ -38,6 +38,16 @@ public:
      *  @param  coneCosineHalfAngle
      */
     static float GetFractionOfHitsInCone(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float coneCosineHalfAngle);
+
+    /**
+     *  @brief  Get the number of pseudo layers crossed by helix in specified range of z coordinates
+     * 
+     *  @param  pHelix address of the helix
+     *  @param  zStart start z coordinate
+     *  @param  zEnd end z coordinate
+     *  @param  nSamplingPoints number of points at which to sample the helix in the z interval
+     */
+    static PseudoLayer GetNLayersCrossed(const Helix *const pHelix, const float zStart, const float zEnd, const unsigned int nSamplingPoints = 100);
 };
 
 } // namespace pandora

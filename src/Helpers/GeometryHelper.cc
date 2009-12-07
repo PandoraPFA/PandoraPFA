@@ -145,6 +145,108 @@ void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::Geometr
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector) const
+{
+    static const GeometryHelper::SubDetectorParameters eCalBarrelParameters = this->GetECalBarrelParameters();
+    static const GeometryHelper::SubDetectorParameters eCalEndCapParameters = this->GetECalEndCapParameters();
+
+    const float zCoordinate = std::fabs(positionVector.GetZ());
+    const float radius = this->GetMaximumRadius(positionVector.GetX(), positionVector.GetY());
+
+    PseudoLayer pseudoLayer;
+
+    if (zCoordinate < eCalEndCapParameters.GetInnerZCoordinate())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindBarrelLayer(radius, pseudoLayer));
+    }
+    else if (radius < eCalBarrelParameters.GetInnerRCoordinate())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindEndCapLayer(zCoordinate, pseudoLayer));
+    }
+    else
+    {
+        PseudoLayer bestBarrelLayer;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindBarrelLayer(radius, bestBarrelLayer, true));
+
+        PseudoLayer bestEndCapLayer;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindEndCapLayer(zCoordinate, bestEndCapLayer, true));
+
+        pseudoLayer = std::max(bestBarrelLayer, bestEndCapLayer);
+    }
+
+    // Reserve pseudo layer(s) for track projections
+    return (1 + TRACK_PROJECTION_LAYER + pseudoLayer);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::IsOutsideECal(const CartesianVector &position) const
+{
+    static const float eCalBarrelOuterRCoordinate(GetECalBarrelParameters().GetOuterRCoordinate());
+    static const float eCalEndCapOuterZCoordinate(GetECalEndCapParameters().GetOuterZCoordinate());
+
+    if (position.GetZ() > eCalEndCapOuterZCoordinate)
+        return true;
+
+    const float x(position.GetX());
+    const float y(position.GetY());
+    const float r(std::sqrt((x * x) + (y * y)));
+
+    if (r > eCalBarrelOuterRCoordinate)
+        return true;
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::IsOutsideHCal(const CartesianVector &position) const
+{
+    static const float hCalBarrelOuterRCoordinate(GetHCalBarrelParameters().GetOuterRCoordinate());
+    static const float hCalEndCapOuterZCoordinate(GetHCalEndCapParameters().GetOuterZCoordinate());
+
+    if (position.GetZ() > hCalEndCapOuterZCoordinate)
+        return true;
+
+    const float x(position.GetX());
+    const float y(position.GetY());
+    const float r(std::sqrt((x * x) + (y * y)));
+
+    if (r > hCalBarrelOuterRCoordinate)
+        return true;
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::IsInECalGapRegion(const CartesianVector &position) const
+{
+    if (ENCLOSING_ENDCAP == m_geometryType)
+    {
+        static const float eCalBarrelOuterZCoordinate(GetECalBarrelParameters().GetOuterZCoordinate());
+        static const float eCalEndCapInnerZCoordinate(GetECalEndCapParameters().GetInnerZCoordinate());
+
+        const float z(std::fabs(position.GetZ()));
+
+        return ((z > eCalBarrelOuterZCoordinate) && (z < eCalEndCapInnerZCoordinate));
+    }
+    else if (ENCLOSING_BARREL == m_geometryType)
+    {
+        static const float eCalEndCapOuterRCoordinate(GetECalEndCapParameters().GetOuterRCoordinate());
+        static const float eCalBarrelInnerZCoordinate(GetECalBarrelParameters().GetInnerRCoordinate());
+
+        const float x(position.GetX()), y(position.GetY());
+        const float r(std::sqrt((x * x) + (y * y)));
+
+        return ((r > eCalEndCapOuterRCoordinate) && (r < eCalBarrelInnerZCoordinate));
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer, bool shouldApplyOverlapCorrection) const
 {
     static const float overlapCorrection(GetECalBarrelParameters().GetInnerRCoordinate() *
@@ -235,46 +337,6 @@ float GeometryHelper::GetMaximumRadius(float x, float y) const
     }
 
     return maxRadius;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool GeometryHelper::IsOutsideECal(const CartesianVector &clusterPosition) const
-{
-    static const float eCalBarrelOuterRCoordinate(GetECalBarrelParameters().GetOuterRCoordinate());
-    static const float eCalEndCapOuterZCoordinate(GetECalEndCapParameters().GetOuterZCoordinate());
-
-    if (clusterPosition.GetZ() > eCalEndCapOuterZCoordinate)
-        return true;
-
-    const float x(clusterPosition.GetX());
-    const float y(clusterPosition.GetY());
-    const float r(std::sqrt((x * x) + (y * y)));
-
-    if (r > eCalBarrelOuterRCoordinate)
-        return true;
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool GeometryHelper::IsOutsideHCal(const CartesianVector &clusterPosition) const
-{
-    static const float hCalBarrelOuterRCoordinate(GetHCalBarrelParameters().GetOuterRCoordinate());
-    static const float hCalEndCapOuterZCoordinate(GetHCalEndCapParameters().GetOuterZCoordinate());
-
-    if (clusterPosition.GetZ() > hCalEndCapOuterZCoordinate)
-        return true;
-
-    const float x(clusterPosition.GetX());
-    const float y(clusterPosition.GetY());
-    const float r(std::sqrt((x * x) + (y * y)));
-
-    if (r > hCalBarrelOuterRCoordinate)
-        return true;
-
-    return false;
 }
 
 } // namespace pandora

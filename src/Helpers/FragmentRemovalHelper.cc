@@ -7,9 +7,11 @@
  */
 
 #include "Helpers/FragmentRemovalHelper.h"
+#include "Helpers/GeometryHelper.h"
 
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
+#include "Objects/Helix.h"
 #include "Objects/Track.h"
 
 namespace pandora
@@ -95,6 +97,44 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
     }
 
     return static_cast<float>(nHitsInCone) / static_cast<float>(nCaloHitsI);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, const float zStart, const float zEnd,
+    const unsigned int nSamplingPoints)
+{
+    if ((0 == nSamplingPoints) || (1000 < nSamplingPoints))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    CartesianVector intersectionPoint;
+    const CartesianVector &referencePoint(pHelix->GetReferencePoint());
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(zStart, referencePoint, intersectionPoint));
+
+    static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
+    const PseudoLayer startLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
+
+    PseudoLayer currentLayer(startLayer);
+    PseudoLayer layerCount(0);
+
+    const float deltaZ((zEnd - zStart) / static_cast<float>(nSamplingPoints));
+
+    for (float z = zStart; std::fabs(z) < std::fabs(zEnd + 0.5 * deltaZ); z += deltaZ)
+    {
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(z, referencePoint, intersectionPoint));
+        const PseudoLayer iLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
+        const bool isInECalGapRegion(pGeometryHelper->IsInECalGapRegion(intersectionPoint));
+
+        if (iLayer != currentLayer)
+        {
+            if (!isInECalGapRegion)
+                layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
+
+            currentLayer = iLayer;
+        }
+    }
+
+    return layerCount;
 }
 
 } // namespace pandora

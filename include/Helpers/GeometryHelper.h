@@ -270,6 +270,43 @@ public:
     const SubDetectorParametersMap &GetAdditionalSubDetectors() const;
 
     /**
+     *  @brief  Get the appropriate pseudolayer for a specified position vector
+     * 
+     *  @param  positionVector the specified position
+     * 
+     *  @return the appropriate pseudolayer
+     */
+    PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
+
+    /**
+     *  @brief  Whether a specified position is outside of the ecal region
+     * 
+     *  @param  position the specified position
+     * 
+     *  @return boolean
+     */
+    bool IsOutsideECal(const CartesianVector &position) const;
+
+    /**
+     *  @brief  Whether a specified position is outside of the hcal region
+     * 
+     *  @param  position the specified position
+     * 
+     *  @return boolean
+     */
+    bool IsOutsideHCal(const CartesianVector &position) const;
+
+    /**
+     *  @brief  Whether a specified position is in the gap region between the ecal barrel and ecal endcap
+     * 
+     *  @param  position the specified position
+     * 
+     *  @return boolean
+     */
+    bool IsInECalGapRegion(const CartesianVector &position) const;
+
+private:
+    /**
      *  @brief  Find the layer number corresponding to a specified radial position in the barrel
      * 
      *  @param  radius the radial distance to the ip
@@ -297,25 +334,6 @@ public:
      */
     float GetMaximumRadius(float x, float y) const;
 
-    /**
-     *  @brief  Whether a specified position is outside of the ecal region
-     * 
-     *  @param  position the specified position
-     * 
-     *  @return boolean
-     */
-    bool IsOutsideECal(const CartesianVector &position) const;
-
-    /**
-     *  @brief  Whether a specified position is outside of the hcal region
-     * 
-     *  @param  position the specified position
-     * 
-     *  @return boolean
-     */
-    bool IsOutsideHCal(const CartesianVector &position) const;
-
-private:
     /**
      *  @brief  Constructor
      */

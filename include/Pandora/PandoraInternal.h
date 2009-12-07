@@ -19,6 +19,7 @@ namespace pandora
 
 class CaloHit;
 class Cluster;
+class Helix;
 class MCParticle;
 class OrderedCaloHitList;
 class ParticleFlowObject;

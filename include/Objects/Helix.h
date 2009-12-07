@@ -71,10 +71,33 @@ public:
      *  @param  ay y component of vector normal to specified plane
      *  @param  referencePoint the reference point of the helix
      *  @param  intersectionPoint to receive the coordinates of the intersection point
+     */
+    StatusCode GetPointInXY(const float x0, const float y0, const float ax, const float ay, const CartesianVector &referencePoint,
+        CartesianVector &intersectionPoint) const;
+
+    /**
+     *  @brief  Get helix intersection point with a plane parallel to z axis. The plane is defined by two coordinates in the
+     *          plane (x0,y0) and a normal vector (ax,ay).
+     * 
+     *  @param  x0 x coordinate in the specified plane
+     *  @param  y0 y coordinate in the specified plane
+     *  @param  ax x component of vector normal to specified plane
+     *  @param  ay y component of vector normal to specified plane
+     *  @param  referencePoint the reference point of the helix
+     *  @param  intersectionPoint to receive the coordinates of the intersection point
      *  @param  time to receive the generic time (the ratio of helix length from reference point to intersection)
      */
     StatusCode GetPointInXY(const float x0, const float y0, const float ax, const float ay, const CartesianVector &referencePoint,
         CartesianVector &intersectionPoint, float &time) const;
+
+    /**
+     *  @brief  Get helix intersection point with a plane perpendicular to z axis.
+     * 
+     *  @param  zPlane the z coordinate for the specified plane
+     *  @param  referencePoint the reference point of the helix
+     *  @param  intersectionPoint to receive the coordinates of the intersection point
+     */
+    StatusCode GetPointInZ(const float zPlane, const CartesianVector &referencePoint, CartesianVector &intersectionPoint) const;
 
     /**
      *  @brief  Get helix intersection point with a plane perpendicular to z axis.
@@ -93,10 +116,30 @@ public:
      *  @param  radius the radius of the cylinder
      *  @param  referencePoint the reference point of the helix
      *  @param  intersectionPoint to receive the coordinates of the intersection point
+     */
+    StatusCode GetPointOnCircle(const float radius, const CartesianVector &referencePoint, CartesianVector &intersectionPoint) const;
+
+    /**
+     *  @brief  Get coordinates of helix intersection with cylinder, aligned along z-axis
+     * 
+     *  @param  radius the radius of the cylinder
+     *  @param  referencePoint the reference point of the helix
+     *  @param  intersectionPoint to receive the coordinates of the intersection point
      *  @param  time to receive the generic time (the ratio of helix length from reference point to intersection)
      */
     StatusCode GetPointOnCircle(const float radius, const CartesianVector &referencePoint, CartesianVector &intersectionPoint,
         float &time) const;
+
+    /**
+     *  @brief  Get distance of the closest approach of helix to an arbitrary point in space
+     * 
+     *  @param  point coordinates of the specified point
+     *  @param  distance to receive a vector of distances from helix to point in the following projections:
+     *          x component: distance in R-Phi plane
+     *          y-component: distance along Z axis
+     *          z-component: 3D distance magnitude
+     */
+    StatusCode GetDistanceToPoint(const CartesianVector &point, CartesianVector &distance) const;
 
     /**
      *  @brief  Get distance of the closest approach of helix to an arbitrary point in space
@@ -240,6 +283,39 @@ private:
     float               m_pyAtPCA;              ///< Momentum y component at point of closest approach
     float               m_phiMomRefPoint;       ///< Phi of Momentum vector at reference point
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Helix::GetPointInXY(const float x0, const float y0, const float ax, const float ay, const CartesianVector &referencePoint,
+    CartesianVector &intersectionPoint) const
+{
+    float time;
+    return this->GetPointInXY(x0, y0, ax, ay, referencePoint, intersectionPoint, time);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Helix::GetPointInZ(const float zPlane, const CartesianVector &referencePoint, CartesianVector &intersectionPoint) const
+{
+    float time;
+    return this->GetPointInZ(zPlane, referencePoint, intersectionPoint, time);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Helix::GetPointOnCircle(const float radius, const CartesianVector &referencePoint, CartesianVector &intersectionPoint) const
+{
+    float time;
+    return this->GetPointOnCircle(radius, referencePoint, intersectionPoint, time);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode Helix::GetDistanceToPoint(const CartesianVector &point, CartesianVector &distance) const
+{
+    float time;
+    return this->GetDistanceToPoint(point, distance, time);
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -448,10 +448,9 @@ StatusCode Helix::GetDistanceToHelix(const Helix *const pHelix, CartesianVector 
         const float ySect2(y02 + rad2 * std::sin(phi2));
         const float r1(std::sqrt(xSect1 * xSect1 + ySect1 * ySect1));
         const float r2(std::sqrt(xSect2 * xSect2 + ySect2 * ySect2));
-        float time1, time2;
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetPointOnCircle(r1, referencePoint1, position1, time1));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointOnCircle(r2, referencePoint2, position2, time2));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetPointOnCircle(r1, referencePoint1, position1));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointOnCircle(r2, referencePoint2, position2));
     }
     else
     {

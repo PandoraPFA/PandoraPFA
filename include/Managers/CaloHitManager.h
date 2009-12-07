@@ -44,13 +44,6 @@ private:
     StatusCode OrderInputCaloHits();
 
     /**
-     *  @brief  Assign a calo hit to a pseudo layer
-     * 
-     *  @param  pCaloHit address of the calo hit to assign to a pseudo layer
-     */
-    StatusCode AssignToPseudoLayer(CaloHit *const pCaloHit) const;
-
-    /**
      *  @brief  Calculate calo hit properties, including density weights, isolation flags, possible mip flags
      *          and surrounding energy
      */

@@ -57,11 +57,14 @@ StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::CaloHitParameters &ca
 
 StatusCode CaloHitManager::OrderInputCaloHits()
 {
+    static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
+
     OrderedCaloHitList orderedCaloHitList;
 
     for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignToPseudoLayer(*iter));
+        PseudoLayer pseudoLayer = pGeometryHelper->GetPseudoLayer((*iter)->GetPositionVector());
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer(pseudoLayer));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.AddCaloHit(*iter));
     }
 
@@ -69,43 +72,6 @@ StatusCode CaloHitManager::OrderInputCaloHits()
     m_currentListName = INPUT_LIST_NAME;
 
     return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode CaloHitManager::AssignToPseudoLayer(CaloHit *const pCaloHit) const
-{
-    static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
-    static const GeometryHelper::SubDetectorParameters eCalBarrelParameters = pGeometryHelper->GetECalBarrelParameters();
-    static const GeometryHelper::SubDetectorParameters eCalEndCapParameters = pGeometryHelper->GetECalEndCapParameters();
-
-    const CartesianVector &positionVector = pCaloHit->GetPositionVector();
-    const float zCoordinate = std::fabs(positionVector.GetZ());
-    const float radius = pGeometryHelper->GetMaximumRadius(positionVector.GetX(), positionVector.GetY());
-
-    PseudoLayer pseudoLayer;
-
-    if (zCoordinate < eCalEndCapParameters.GetInnerZCoordinate())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindBarrelLayer(radius, pseudoLayer));
-    }
-    else if (radius < eCalBarrelParameters.GetInnerRCoordinate())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindEndCapLayer(zCoordinate, pseudoLayer));
-    }
-    else
-    {
-        PseudoLayer bestBarrelLayer;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindBarrelLayer(radius, bestBarrelLayer, true));
-
-        PseudoLayer bestEndCapLayer;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pGeometryHelper->FindEndCapLayer(zCoordinate, bestEndCapLayer, true));
-
-        pseudoLayer = std::max(bestBarrelLayer, bestEndCapLayer);
-    }
-
-    // Reserve pseudo layer(s) for track projections
-    return pCaloHit->SetPseudoLayer(1 + TRACK_PROJECTION_LAYER + pseudoLayer);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
