@@ -75,26 +75,19 @@ StatusCode ECalPhotonIdAlgorithm::Run()
 {
 
 
-    // Set clusterCandidates to be the current cluster list
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi:: ReplaceCurrentClusterList(*this, m_clusterCandidatesListName ) );
-
-    const TrackList *pTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
-
-    // read in the current cluster list (candidates)
+    // Run initial clustering algorithm
     const ClusterList *pClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
 
-
-    // Could select some clusters here (a subset of those in pClusterList) to save. Would then pass this list when calling SaveClusterList.
-    // ClusterList clustersToSave;
-
+    // load the tracks only for event display
+//     const TrackList *pTrackList = NULL;
+//     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
     // set object variables:
     _nEcalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
 
-
     ClusterList photonClusters;
+    ClusterList nonPhotonClusters;
     for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ )
     {
         if( (*itCluster)->GetNCaloHits() < _minimumHitsInCluster )
@@ -108,6 +101,8 @@ StatusCode ECalPhotonIdAlgorithm::Run()
         else
         {
             std::cout << "is photon cluster? --> NO ";
+            nonPhotonClusters.insert( *itCluster );
+	    (*itCluster)->SetIsPhotonFlag( false );
         }
         std::cout << std::endl;
     }    
@@ -124,8 +119,8 @@ StatusCode ECalPhotonIdAlgorithm::Run()
 //     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pTrackList, pClusterList ) );
 //     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pTrackList, &photonClusters ) );
 
-//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pClusterList ) );
-//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &photonClusters ) );
+    PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &nonPhotonClusters ) );
+    PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &photonClusters    ) );
 
     return STATUS_CODE_SUCCESS;
 }
@@ -134,7 +129,9 @@ StatusCode ECalPhotonIdAlgorithm::Run()
 
 StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterCandidatesListName", m_clusterCandidatesListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "ClusterFormation", m_clusteringAlgorithmName));
+
+//    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterCandidatesListName", m_clusterCandidatesListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusters", m_photonClusterListName));
 
     _minimumHitsInCluster = 5;
@@ -240,8 +237,9 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
     // now perform photon ID
     pandora::protoClusterPeaks_t peak;
-//     if(photonCandidateCluster->GetElectromagneticEnergy()<0.2)
-//         return false;
+    if(photonCandidateCluster->GetElectromagneticEnergy()<0.2)
+        return false;
+
     TransverseProfile(photonCandidateCluster, peak,_nEcalLayers); // tweaked: instead of searching for peaks, it only fills the properties of the "peak"(=cluster)
 
     peak.energy = photonCandidateCluster->GetElectromagneticEnergy();
@@ -282,9 +280,10 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
     float showerStart   = photonIdProperties.GetLongProfileShowerStart();
     float gammaFraction = photonIdProperties.GetLongProfileGammaFraction();
-    float truePhotonE = GetTruePhotonEnergyContribution(photonCandidateCluster);
+    float truePhotonE = GetTrueEnergyContribution(photonCandidateCluster, 22); // get true photon energy contribution
+    float trueE       = GetTrueEnergyContribution(photonCandidateCluster);     // get true energy contribution
     float electromagneticE = photonCandidateCluster->GetElectromagneticEnergy();
-    float fraction = truePhotonE / electromagneticE;
+    float fraction = truePhotonE / trueE;
 
     ClusterProperties clusterProperties;
     GetClusterProperties( photonCandidateCluster, clusterProperties );
@@ -365,7 +364,8 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
     PANDORA_MONITORING_API(SetTreeVariable("photonId", "pid", pid ));
     PANDORA_MONITORING_API(SetTreeVariable("photonId", "fraction", fraction ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "Etrue", truePhotonE ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "EtruePhot", truePhotonE ));
+    PANDORA_MONITORING_API(SetTreeVariable("photonId", "Etrue",     trueE ));
     PANDORA_MONITORING_API(SetTreeVariable("photonId", "Eem", electromagneticE ));
     PANDORA_MONITORING_API(SetTreeVariable("photonId", "accept", int(accept) ));
     PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakRms", peak.rms ));
@@ -896,7 +896,7 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 
-double ECalPhotonIdAlgorithm::GetTruePhotonEnergyContribution(const Cluster* cluster)
+double ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, int pid )
 {
 
     #define PHOTONID 22
@@ -947,6 +947,7 @@ double ECalPhotonIdAlgorithm::GetTruePhotonEnergyContribution(const Cluster* clu
         }
     }
 
+    float energySum = 0.0;
     for( ENERGYPIDMAP::iterator it = energyPerMCParticleId.begin(), itEnd = energyPerMCParticleId.end(); it != itEnd; ++it )
     {
         std::cout << "pid " << it->first 
@@ -954,9 +955,14 @@ double ECalPhotonIdAlgorithm::GetTruePhotonEnergyContribution(const Cluster* clu
                   << "  of electromagnetic energy: " << electromagneticEnergy 
                   << "  and input energy: " << inputEnergy 
                   << " true E: " << trueEnergy << std::endl;
+        energySum += it->second;
     }
+    std::cout << "energy-sum : " << energySum << std::endl;
 
-    itEnergyPerMCParticleId = energyPerMCParticleId.find( PHOTONID );
+    if( pid == 0 )
+        return energySum;
+
+    itEnergyPerMCParticleId = energyPerMCParticleId.find( pid );
     if( itEnergyPerMCParticleId == energyPerMCParticleId.end() )
         return 0.0;
     return itEnergyPerMCParticleId->second; // return the energy contribution of photons

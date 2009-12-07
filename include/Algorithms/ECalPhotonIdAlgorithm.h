@@ -155,6 +155,7 @@ namespace pandora {
 	int   showerDepth25;
 	int   showerStartDepth;
 	float rms;
+	float *cost;
     } protoClusterPeaks_t;
 
 
@@ -360,7 +361,7 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
     StatusCode TransverseProfile(const pandora::Cluster* cluster, pandora::protoClusterPeaks_t &peak, int maxLayers);
 //    const pandora::Cluster*   TransverseProfile(const pandora::Cluster* cluster, int peakForProtoCluster, int maxLayers, int extraLayers);
     void       PhotonProfileID(pandora::Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate = false);
-    double     GetTruePhotonEnergyContribution(const pandora::Cluster* cluster);
+    double     GetTrueEnergyContribution(const pandora::Cluster* cluster, int pid = 0 );
     void       GetClusterProperties(const pandora::Cluster* cluster, ClusterProperties& clusterProperties );
     void       DistanceToPositionAndDirection(const pandora::CartesianVector& position, 
 					      const pandora::CartesianVector& referencePosition,
