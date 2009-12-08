@@ -315,8 +315,34 @@ StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished,
-    CaloHitVector *pCaloHitsInDeletedClusters)
+StatusCode ClusterManager::GetClustersToBeDeleted(const Algorithm *const pAlgorithm, ClusterList &clusterList) const
+{
+    AlgorithmInfoMap::const_iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
+
+    if (m_algorithmInfoMap.end() == algorithmListIter)
+        return STATUS_CODE_NOT_FOUND;
+
+    for (StringSet::const_iterator listNameIter = algorithmListIter->second.m_temporaryListNames.begin(),
+        listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
+    {
+        NameToClusterListMap::const_iterator clusterListIter = m_nameToClusterListMap.find(*listNameIter);
+
+        if (m_nameToClusterListMap.end() == clusterListIter)
+            return STATUS_CODE_FAILURE;
+
+        for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
+            clusterIter != clusterIterEnd; ++clusterIter)
+        {
+            clusterList.insert(*clusterIter);
+        }
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished)
 {
     m_canMakeNewClusters = false;
 
@@ -336,10 +362,6 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
         for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
             clusterIter != clusterIterEnd; ++clusterIter)
         {
-
-            if (NULL != pCaloHitsInDeletedClusters)
-                (*clusterIter)->GetOrderedCaloHitList().GetCaloHitVector(*pCaloHitsInDeletedClusters);
-
             delete (*clusterIter);
         }
 

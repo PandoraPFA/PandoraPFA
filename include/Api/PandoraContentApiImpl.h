@@ -288,6 +288,20 @@ private:
      */
     PandoraContentApiImpl(Pandora *pPandora);
 
+    /**
+     *  @brief  Prepare a cluster for deletion, flagging constituent calo hits as available and removing track associations
+     * 
+     *  @param  pCluster address of the cluster to prepare for deletion
+     */
+    StatusCode PrepareClusterForDeletion(const Cluster *const pCluster) const;
+
+    /**
+     *  @brief  Prepare a list of clusters for deletion, flagging constituent calo hits as available and removing track associations
+     * 
+     *  @param  clusterList the list of clusters to prepare for deletion
+     */
+    StatusCode PrepareClustersForDeletion(const ClusterList &clusterList) const;
+
     Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
 
     friend class Pandora;

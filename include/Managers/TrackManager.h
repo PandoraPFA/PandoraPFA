@@ -176,6 +176,13 @@ private:
     StatusCode AddSiblingAssociations() const;
 
     /**
+     *  @brief  Remove all cluster associations from a specified list of tracks
+     * 
+     *  @param  trackList the specified track list
+     */
+    StatusCode RemoveClusterAssociations(const TrackList &trackList) const;
+
+    /**
      *  @brief  Remove all track to cluster associations
      */
     StatusCode RemoveAllClusterAssociations() const;

@@ -174,15 +174,20 @@ private:
     StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
 
     /**
+     *  @brief  Get the list of clusters that will be deleted when the algorithm info is reset
+     * 
+     *  @param  pAlgorithm address of the algorithm
+     *  @param  clusterList to receive the list of clusters that will be deleted when the algorithm info is reset
+     */
+    StatusCode GetClustersToBeDeleted(const Algorithm *const pAlgorithm, ClusterList &clusterList) const;
+
+    /**
      *  @brief  Remove temporary lists and reset the current cluster list to that when algorithm was initialized
      * 
      *  @param  pAlgorithm the algorithm associated with the temporary clusters
      *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
-     *  @param  pCaloHitsInDeletedClusters if specified, this container will be populated with the addresses of the calo hits in any
-     *          deleted clusters
      */
-    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished,
-        CaloHitVector *pCaloHitsInDeletedClusters = NULL);
+    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
 
     /**
      *  @brief  Reset the cluster manager

@@ -341,6 +341,16 @@ StatusCode TrackManager::AddSiblingAssociations() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode TrackManager::RemoveClusterAssociations(const TrackList &trackList) const
+{
+    for (TrackList::iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+        (*iter)->m_pAssociatedCluster = NULL;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode TrackManager::RemoveAllClusterAssociations() const
 {
     NameToTrackListMap::const_iterator listIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);

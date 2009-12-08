@@ -74,7 +74,6 @@ Cluster::Cluster(Track *pTrack) :
     if (NULL == pTrack)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddTrackAssociation(pTrack));
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SetTrackSeed(pTrack));
 }
 
