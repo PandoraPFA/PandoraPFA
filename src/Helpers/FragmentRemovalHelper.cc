@@ -137,4 +137,107 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     return layerCount;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FragmentRemovalHelper::GetClusterHelixDistance(const Cluster *const pCluster, const Helix *const pHelix, const PseudoLayer startLayer,
+    const PseudoLayer endLayer, const unsigned int maxOccupiedLayers, float &closestDistanceToHit, float &meanDistanceToHits)
+{
+    if (startLayer > endLayer)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    unsigned int nHits(0), nOccupiedLayers(0);
+    float sumDistanceToHits(0.), minDistanceToHit(std::numeric_limits<float>::max());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
+    {
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+
+        if (orderedCaloHitList.end() == iter)
+            continue;
+
+        if (++nOccupiedLayers > maxOccupiedLayers)
+            break;
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            CartesianVector distanceVector;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint((*hitIter)->GetPositionVector(), distanceVector));
+
+            const float distance(distanceVector.GetZ());
+
+            if (distance < minDistanceToHit)
+                minDistanceToHit = distance;
+
+            sumDistanceToHits += distance;
+            nHits++;
+        }
+    }
+
+    if (0 != nHits)
+    {
+        meanDistanceToHits = sumDistanceToHits / static_cast<float>(nHits);
+        closestDistanceToHit = minDistanceToHit;
+        return STATUS_CODE_SUCCESS;
+    }
+
+    return STATUS_CODE_NOT_FOUND;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FragmentRemovalHelper::GetClusterContactDetails(const Cluster *const pClusterI, const Cluster *const pClusterJ,
+    const float distanceThreshold, unsigned int &nContactLayers, float &contactFraction)
+{
+    const PseudoLayer startLayer(std::max(pClusterI->GetInnerPseudoLayer(), pClusterJ->GetInnerPseudoLayer()));
+    const PseudoLayer endLayer(std::min(pClusterI->GetOuterPseudoLayer(), pClusterJ->GetOuterPseudoLayer()));
+    const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
+
+    unsigned int nLayersCompared(0), nLayersInContact(0);
+
+    for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
+    {
+        OrderedCaloHitList::const_iterator iterI = orderedCaloHitListI.find(iLayer), iterJ = orderedCaloHitListJ.find(iLayer);
+
+        if ((orderedCaloHitListI.end() == iterI) || (orderedCaloHitListJ.end() == iterJ))
+            continue;
+
+        nLayersCompared++;
+        bool isLayerDone(false);
+
+        for (CaloHitList::const_iterator hitIterI = iterI->second->begin(), hitIterIEnd = iterI->second->end(); hitIterI != hitIterIEnd; ++hitIterI)
+        {
+            const CartesianVector &positionI((*hitIterI)->GetPositionVector());
+            const float separationCut(1.5 * std::sqrt((*hitIterI)->GetCellSizeU() * (*hitIterI)->GetCellSizeV()) * distanceThreshold);
+
+            for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
+            {
+                const CartesianVector &positionJ((*hitIterJ)->GetPositionVector());
+                const CartesianVector positionDifference(positionI - positionJ);
+                const float separation(positionDifference.GetMagnitude());
+
+                if (separation < separationCut)
+                {
+                    nLayersInContact++;
+                    isLayerDone = true;
+                    break;
+                }
+            }
+
+            if (isLayerDone)
+                break;
+        }
+    }
+
+    if (nLayersCompared > 0)
+    {
+        contactFraction = static_cast<float>(nLayersInContact) / static_cast<float>(nLayersCompared);
+        nContactLayers = nLayersInContact;
+        return STATUS_CODE_SUCCESS;
+    }
+
+    return STATUS_CODE_NOT_FOUND;
+}
+
 } // namespace pandora

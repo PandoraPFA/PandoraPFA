@@ -10,6 +10,8 @@
 
 #include "Pandora/PandoraInternal.h"
 
+#include "StatusCodes.h"
+
 namespace pandora
 {
 
@@ -25,6 +27,8 @@ public:
      *  @param  pClusterI address of the cluster for which the fraction is calculated
      *  @param  pClusterJ address of the cluster used in the comparison
      *  @param  distanceThreshold the specified distance threshold
+     * 
+     *  @return The fraction of close calo hits
      */
     static float GetFractionOfCloseHits(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float distanceThreshold);
 
@@ -36,6 +40,8 @@ public:
      *  @param  pClusterI address of the cluster for which the fraction is calculated
      *  @param  pClusterJ address of the cluster used in the comparison
      *  @param  coneCosineHalfAngle
+     * 
+     *  @return The fraction of calo hits in the cone
      */
     static float GetFractionOfHitsInCone(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float coneCosineHalfAngle);
 
@@ -46,8 +52,36 @@ public:
      *  @param  zStart start z coordinate
      *  @param  zEnd end z coordinate
      *  @param  nSamplingPoints number of points at which to sample the helix in the z interval
+     * 
+     *  @return The number of pseudo layers crossed
      */
     static PseudoLayer GetNLayersCrossed(const Helix *const pHelix, const float zStart, const float zEnd, const unsigned int nSamplingPoints = 100);
+
+    /**
+     *  @brief  Get the distance between hits in a cluster and a helix, typically the result of a fit to a track
+     * 
+     *  @param  pCluster address of the cluster
+     *  @param  pHelix address of the helix
+     *  @param  startLayer the first pseudo layer of the cluster to examine
+     *  @param  endLayer the last pseudo layer of the cluster to examine
+     *  @param  maxOccupiedLayers the maximum number of occupied cluster pseudo layers to examine
+     *  @param  closestDistanceToHit to receive the closest distance between the helix and a hit in the speicified range of the cluster
+     *  @param  meanDistanceToHits to receive the mean distance between the helix and hits in the specified range of the cluster
+     */
+    static StatusCode GetClusterHelixDistance(const Cluster *const pCluster, const Helix *const pHelix, const PseudoLayer startLayer,
+        const PseudoLayer endLayer, const unsigned int maxOccupiedLayers, float &closestDistanceToHit, float &meanDistanceToHits);
+
+    /**
+     *  @brief  Get the number of contact layers for two clusters and also the ratio of the number of contact layers to overlap layers
+     * 
+     *  @param  pClusterI address of the first cluster
+     *  @param  pClusterJ address of the second cluster
+     *  @param  distanceThreshold the distance, used alongside the calorimeter cell sizes, to determine whether layers are in contact
+     *  @param  nContactLayers to receive the number of contact layers
+     *  @param  contactFraction to receive the ratio of the number of contact layers to number of overlap layers
+     */
+    static StatusCode GetClusterContactDetails(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float distanceThreshold,
+        unsigned int &nContactLayers, float &contactFraction);
 };
 
 } // namespace pandora
