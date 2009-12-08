@@ -272,7 +272,7 @@ StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer, bo
 
     if (m_hCalBarrelParameters.GetOuterRCoordinate() > radius)
     {
-        layer = m_barrelLayerPositions.size();
+        layer = m_barrelLayerPositions.size() - 1;
         return STATUS_CODE_SUCCESS;
     }
 
@@ -306,7 +306,7 @@ StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &laye
 
     if (m_hCalEndCapParameters.GetOuterZCoordinate() > zCoordinate)
     {
-        layer = m_endCapLayerPositions.size();
+        layer = m_endCapLayerPositions.size() - 1;
         return STATUS_CODE_SUCCESS;
     }
 
