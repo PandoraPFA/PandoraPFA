@@ -6,46 +6,48 @@
  *  $Log: $
  */
 
+#include "Algorithms/ECalPhotonIdAlgorithm.h"
+#include "Objects/MCParticle.h"
+
 #include <functional>
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-
-
-#include "Algorithms/ECalPhotonIdAlgorithm.h"
-#include "Objects/MCParticle.h"
-
 #include <cmath>
 
 using namespace pandora;
 
+PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::_instance = 0;
 
-PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::_instance =0;
+//------------------------------------------------------------------------------------------------------------------------------------------
 
-PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance(){
-    if(_instance==0){
+PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance()
+{
+    if(_instance==0)
+    {
         _instance = new PhotonIDLikelihoodCalculator;
     }
 
     return _instance;
 }
 
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ECalPhotonIdAlgorithm::ECalPhotonIdAlgorithm()
 {
-    std::cout << "constructor" << std::endl;
-
+    if (_printing > 0)
+        std::cout << "constructor" << std::endl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ECalPhotonIdAlgorithm::Initialize()
 {
-    std::cout << "initialize" << std::endl;
-    std::cout << "makingphotonid " <<_makingPhotonIDLikelihoodHistograms << std::endl;
+    if (_printing > 0)
+    {
+        std::cout << "initialize" << std::endl;
+        std::cout << "makingphotonid " <<_makingPhotonIDLikelihoodHistograms << std::endl;
+    }
 
     // create monitoring histograms for likelihood
     if(_makingPhotonIDLikelihoodHistograms)
@@ -54,27 +56,25 @@ StatusCode ECalPhotonIdAlgorithm::Initialize()
     return STATUS_CODE_SUCCESS;
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ECalPhotonIdAlgorithm::~ECalPhotonIdAlgorithm()
 {
+    if (_printing > 0)
+    {
+        std::cout << "destructor" << std::endl;
+        std::cout << "makingphotonid " <<_makingPhotonIDLikelihoodHistograms << std::endl;
+    }
 
-    std::cout << "destructor" << std::endl;
-    std::cout << "makingphotonid " <<_makingPhotonIDLikelihoodHistograms << std::endl;
     // create monitoring histograms for likelihood
     if(_makingPhotonIDLikelihoodHistograms)
         CreateOrSaveLikelihoodHistograms(false);
-
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ECalPhotonIdAlgorithm::Run()
 {
-
-
     // Run initial clustering algorithm
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
@@ -92,20 +92,26 @@ StatusCode ECalPhotonIdAlgorithm::Run()
     {
         if( (*itCluster)->GetNCaloHits() < _minimumHitsInCluster )
             continue;
+
         if( IsPhoton( *itCluster ) )
         {
-            std::cout << "is photon cluster? --> YES ";
+            if (_printing > 0)
+                    std::cout << "is photon cluster? --> YES ";
+
             photonClusters.insert( *itCluster );
-	    (*itCluster)->SetIsPhotonFlag( true );
+            (*itCluster)->SetIsPhotonFlag( true );
         }
         else
         {
-            std::cout << "is photon cluster? --> NO ";
+            if (_printing > 0)
+                std::cout << "is photon cluster? --> NO ";
+
             nonPhotonClusters.insert( *itCluster );
-	    (*itCluster)->SetIsPhotonFlag( false );
         }
-        std::cout << std::endl;
-    }    
+
+        if (_printing > 0)
+            std::cout << std::endl;
+    }
 
 
 
@@ -131,10 +137,10 @@ StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "ClusterFormation", m_clusteringAlgorithmName));
 
-//    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterCandidatesListName", m_clusterCandidatesListName));
+    //    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterCandidatesListName", m_clusterCandidatesListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusters", m_photonClusterListName));
 
-    _minimumHitsInCluster = 5;
+    _minimumHitsInCluster = 5; // TODO adjust member variable names to form m_name for consistency
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinimumHitsInCluster", _minimumHitsInCluster));
 
@@ -148,7 +154,7 @@ StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MakePhotonIDLikelihoodHistograms", _makingPhotonIDLikelihoodHistograms));
 
-    // max. number of layers
+    // max. number of layers - TODO remove this, as we no longer fix number of layers
     MAX_NUMBER_OF_LAYERS = 150;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "maxNumberOfLayers", MAX_NUMBER_OF_LAYERS));
@@ -158,12 +164,8 @@ StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MonitoringFileName", m_monitoringFileName));
 
-
     return STATUS_CODE_SUCCESS;
 }
-
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -218,17 +220,14 @@ void ECalPhotonIdAlgorithm::CreateOrSaveLikelihoodHistograms(bool create)
         PANDORA_MONITORING_API(PrintTree("photonId"));
         PANDORA_MONITORING_API(SaveTree("photonId", m_monitoringFileName, "UPDATE" ));
     }
-
 }
-
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 {
-    if( _printing ) std::cout << "=============== IsPhoton? ===================" << std::endl;
+    if(_printing > 0)
+        std::cout << "=============== IsPhoton? ===================" << std::endl;
 
 //     if(photonCandidateCluster==NULL)
 //         return false;
@@ -378,7 +377,8 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     PANDORA_MONITORING_API(FillTree("photonId"));
 
 
-    if(_printing>0&& fraction>0.5){
+    if(_printing > 0 && fraction > 0.5)
+    {
         std::cout << "fraction " << fraction << " --> should be identified as photon  | true photon E " << truePhotonE << " elm E "  << electromagneticE  << std::endl;
     }
 
@@ -386,7 +386,8 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     PANDORA_MONITORING_API(Fill2DHistogram("energyVsPhotonE", electromagneticE, truePhotonE ));
 
 
-    if(_printing>0&& peak.energy>1.0){
+    if(_printing > 0 && peak.energy > 1.0)
+    {
         std::cout << " PEAK  : " <<  peak.du << "," << peak.dv << "  E = " << peak.energy << " dmin : " << peak.dmin <<  " d25/d90 : " << peak.showerDepth25 << "/" << peak.showerDepth90  << " start : " << peak.showerStartDepth << " rms = " << peak.rms << " PhotonID : " << showerStart << " " << gammaFraction << " TRUE FRACTION = " << fraction << " pid " << pid << " d = " << closest << " c= " << dist;
         if(fraction<0.5 &&  accept)std::cout << " <---A*****************";
         if(fraction>0.5 && !accept) std::cout << " <---B*****************";
@@ -394,7 +395,8 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     }
 
     //********** code to make the likelihood histograms ************
-    if(_makingPhotonIDLikelihoodHistograms){
+    if(_makingPhotonIDLikelihoodHistograms)
+    {
         int ihist = -999;
         if( peak.energy> 0.2 && peak.energy <=  0.5)ihist=0;
         if( peak.energy> 0.5 && peak.energy <=  1.0)ihist=1;
@@ -405,16 +407,20 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
         if( peak.energy>10.0 && peak.energy <= 20.0)ihist=6;
         if( peak.energy>20.0 && peak.energy <= 50.0)ihist=7;
         if( peak.energy>50.0)ihist=8;
-        if(ihist>=0 && gammaFraction<1.0 && showerStart<10. && peak.rms<5.){
+        if(ihist>=0 && gammaFraction<1.0 && showerStart<10. && peak.rms<5.)
+        {
             const std::string iHist(TypeToString(ihist));
-            if(fraction>0.5){
+            if(fraction>0.5)
+            {
                 const std::string hName_sighistrms("sighistrms" + iHist);
                 const std::string hName_sighistfrac("sighistfrac" + iHist);
                 const std::string hName_sighiststart("sighiststart" + iHist);
                 PANDORA_MONITORING_API(Fill1DHistogram(hName_sighistrms, peak.rms));
                 PANDORA_MONITORING_API(Fill1DHistogram(hName_sighistfrac, gammaFraction));
                 PANDORA_MONITORING_API(Fill1DHistogram(hName_sighiststart, showerStart));
-            }else{
+            }
+            else
+            {
                 const std::string hName_backhistrms("backhistrms" + iHist);
                 const std::string hName_backhistfrac("backhistfrac" + iHist);
                 const std::string hName_backhiststart("backhiststart" + iHist);
@@ -425,24 +431,22 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
         }
     }
 
-    if(accept){
+    if(accept)
+    {
+        if (_printing > 0)
+            std::cout << "accepted as photon" << std::endl;
+
         // changed: change returnValue to true
-        std::cout << "accepted as photon" << std::endl;
         returnValue = true;
-
     }
-
-
 
     return returnValue;
 }
 
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, protoClusterPeaks_t &peak, int maxLayers){
-
+StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, protoClusterPeaks_t &peak, int maxLayers)
+{
     int nbins   = 41;
     int ioffset = nbins/2; 
 
@@ -550,7 +554,6 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, prot
 //       }
 //     }
 //   }
-
 
     // mask low ph region
     float threshold = 0.025;
@@ -693,23 +696,13 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, prot
 
 //   }
 
-
-return STATUS_CODE_SUCCESS;
-
+    return STATUS_CODE_SUCCESS;
 }
-
-
-
-
-
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-
-void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate){
-
+void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate)
+{
     float X0BinSize = 0.5;
     const unsigned int X0Bins = 100;
 //    float X0Max     = X0Bins*X0BinSize;
@@ -720,9 +713,9 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
     for(unsigned int i=0;i<X0Bins;i++)X0Profile[i]=0.;
     for(unsigned int i=0;i<X0Bins;i++)expectedX0Profile[i]=0.;
 
-
     // it should be able to make this more general and easier with the new code
-    std::cout << "in photon profile id" << std::endl;
+    if (_printing > 0)
+        std::cout << "in photon profile id" << std::endl;
 
     float radLenLayers[MAX_NUMBER_OF_LAYERS]; // radiation lengths per layer seen by the cluster (in the direction of the cluster
     try
@@ -756,8 +749,11 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 
             if( cosOpeningAngle < 0.3 )
             {
-                std::cout << "Cluster has large angle to pseudo layer normal vector (cos = " << cosOpeningAngle << ", which is an angle of " 
-                          << angleClusterDirectionWrtPseudoLayerNormalVector << ") --> reset cos(angle) to 1.0" << std::endl;
+                if (_printing > 0)
+                {
+                    std::cout << "Cluster has large angle to pseudo layer normal vector (cos = " << cosOpeningAngle << ", which is an angle of " 
+                              << angleClusterDirectionWrtPseudoLayerNormalVector << ") --> reset cos(angle) to 1.0" << std::endl;
+                }
                 cosOpeningAngle = 1.0;
             }
             radLenLayers[pseudoLayer] += (*itCaloHit)->GetNRadiationLengths()/cosOpeningAngle; // gives the radiation lengths per layer in the clusterDirection
@@ -870,7 +866,7 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 //         std::cout << "=== longprofilefraction   " << photonIdProperties._photonLongProfileFraction << std::endl;
 //         std::cout << "=== photonLongShowerStart " << photonIdProperties._photonLongShowerStart << std::endl;
     }
-    else
+    else if (_printing > 0)
     {
         std::cout << "ecalE <= 0 " << std::endl;
     }
@@ -885,20 +881,13 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
         std::cout << "PhotonProfileID/unknown exception" << std::endl;
         throw;
     }
-
 }
-
-
-
-
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-
 double ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, int pid )
 {
-
     #define PHOTONID 22
 
     typedef std::set< MCParticle* > MCPARTICLESET;
@@ -950,14 +939,20 @@ double ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, 
     float energySum = 0.0;
     for( ENERGYPIDMAP::iterator it = energyPerMCParticleId.begin(), itEnd = energyPerMCParticleId.end(); it != itEnd; ++it )
     {
-        std::cout << "pid " << it->first 
-                  << "  e-contrib " << it->second 
-                  << "  of electromagnetic energy: " << electromagneticEnergy 
-                  << "  and input energy: " << inputEnergy 
-                  << " true E: " << trueEnergy << std::endl;
+        if (_printing > 0)
+        {
+            std::cout << "pid " << it->first 
+                      << "  e-contrib " << it->second 
+                      << "  of electromagnetic energy: " << electromagneticEnergy 
+                      << "  and input energy: " << inputEnergy 
+                      << " true E: " << trueEnergy << std::endl;
+        }
+
         energySum += it->second;
     }
-    std::cout << "energy-sum : " << energySum << std::endl;
+
+    if (_printing > 0)
+        std::cout << "energy-sum : " << energySum << std::endl;
 
     if( pid == 0 )
         return energySum;
@@ -965,13 +960,11 @@ double ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, 
     itEnergyPerMCParticleId = energyPerMCParticleId.find( pid );
     if( itEnergyPerMCParticleId == energyPerMCParticleId.end() )
         return 0.0;
+
     return itEnergyPerMCParticleId->second; // return the energy contribution of photons
 }
 
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
-
 
 void ECalPhotonIdAlgorithm::GetClusterProperties(const Cluster* cluster, ClusterProperties& clusterProperties )
 {
@@ -1041,29 +1034,20 @@ void ECalPhotonIdAlgorithm::GetClusterProperties(const Cluster* cluster, Cluster
     clusterProperties.centroid20Energy = centroid20Energy;
 }
 
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-
-void ECalPhotonIdAlgorithm::DistanceToPositionAndDirection(const CartesianVector& position, 
-                                                                     const CartesianVector& referencePosition,
-                                                                     const CartesianVector& referenceDirection,
-                                                                     float& longitudinalComponent,
-                                                                     float& perpendicularComponent )
+void ECalPhotonIdAlgorithm::DistanceToPositionAndDirection(const CartesianVector &position, const CartesianVector &referencePosition,
+    const CartesianVector &referenceDirection, float &longitudinalComponent, float &perpendicularComponent )
 {
     const CartesianVector  relativePosition = position - referencePosition;
     longitudinalComponent  = referenceDirection.GetUnitVector().GetDotProduct( relativePosition );
     perpendicularComponent = (relativePosition - referenceDirection*longitudinalComponent).GetMagnitude();
-    
 }
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float start){
-
+float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float start)
+{
     float pid = 0;
 
     int ien = 0;
@@ -1086,7 +1070,8 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
     if(istartbin<0)istartbin  =  0;
     if(istartbin>21)istartbin = 21;
 
-    if(1==1){
+    if(0) // TODO make _printing from main algorithm (public and) static so can access here
+    {
         std::cout << " E     = " << E     << " -> " << ien       << std::endl;
         std::cout << " rms   = " << rms   << " -> " << irmsbin   << std::endl;
         std::cout << " frac  = " << frac  << " -> " << ifracbin  << std::endl;
@@ -1106,7 +1091,7 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
     float yes = likeSig[ien]*likesrms[ien][irmsbin]*likesfrac[ien][ifracbin]*likesstart[ien][istartbin];
     float no  = likeBack[ien]*likebrms[ien][irmsbin]*likebfrac[ien][ifracbin]*likebstart[ien][istartbin];
     
-    if( 1 == 1 )
+    if(0)
     {
         std::cout << "yes " << yes << std::endl;
         std::cout << "no  " << no << std::endl;
