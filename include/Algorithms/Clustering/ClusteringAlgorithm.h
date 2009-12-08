@@ -187,6 +187,7 @@ private:
     unsigned int    m_clusterSeedStrategy;          ///< Flag determining if and how clusters should be seeded with tracks
     float           m_trackSeedMaxCosTheta;         ///< Cut off for seeding clusters with tracks (unless all tracks requested)
 
+    bool            m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm
     bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
 
     unsigned int    m_layersToStepBackECal;         ///< Number of layers to step back when associating an ecal hit to clusters

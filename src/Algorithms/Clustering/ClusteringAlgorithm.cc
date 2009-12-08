@@ -37,7 +37,8 @@ StatusCode ClusteringAlgorithm::Run()
         {
             CaloHit *pCaloHit = *hitIter;
 
-            if (CaloHitHelper::IsCaloHitAvailable(pCaloHit) && (m_shouldUseIsolatedHits || !pCaloHit->IsIsolated()))
+            if (CaloHitHelper::IsCaloHitAvailable(pCaloHit) && (m_shouldUseIsolatedHits || !pCaloHit->IsIsolated()) &&
+               (!m_shouldUseOnlyECalHits || (ECAL == pCaloHit->GetHitType())) )
             {
                 customSortedCaloHitList.insert(pCaloHit);
             }
@@ -569,6 +570,10 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     CustomHitOrder::m_hitSortingStrategy = 0;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "HitSortingStrategy", CustomHitOrder::m_hitSortingStrategy));
+
+    m_shouldUseOnlyECalHits = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldUseOnlyECalHits", m_shouldUseOnlyECalHits));
 
     m_shouldUseIsolatedHits = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
