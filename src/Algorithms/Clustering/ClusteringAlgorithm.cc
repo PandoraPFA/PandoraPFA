@@ -265,7 +265,7 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(PseudoLayer pseudoLayer,
                 const CaloHit *const pHitInCluster(*(hitListIter->second->begin()));
 
                 clusterFitPointList.push_back(ClusterHelper::ClusterFitPoint(pCluster->GetCentroid(iLayer),
-                    std::sqrt(pHitInCluster->GetCellSizeU() * pHitInCluster->GetCellSizeV()), iLayer - innerLayer));
+                    pHitInCluster->GetCellLengthScale(), iLayer - innerLayer));
             }
 
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitPoints(clusterFitPointList, clusterFitResult));
@@ -396,8 +396,8 @@ StatusCode ClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const pCalo
     float &distance) const
 {
     const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-        (m_sameLayerPadWidthsECal * pCaloHit->GetCellSizeU()) :
-        (m_sameLayerPadWidthsHCal * pCaloHit->GetCellSizeU()) );
+        (m_sameLayerPadWidthsECal * pCaloHit->GetCellLengthScale()) :
+        (m_sameLayerPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
 
     if (0 == dCut)
         return STATUS_CODE_FAILURE;
@@ -473,8 +473,8 @@ StatusCode ClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCal
     const float dAlong(clusterDirection.GetDotProduct(positionDifference));
 
     const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-        (std::fabs(dAlong) * m_tanConeAngleECal) + (m_additionalPadWidthsECal * pCaloHit->GetCellSizeU()) :
-        (std::fabs(dAlong) * m_tanConeAngleHCal) + (m_additionalPadWidthsHCal * pCaloHit->GetCellSizeU()) );
+        (std::fabs(dAlong) * m_tanConeAngleECal) + (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
+        (std::fabs(dAlong) * m_tanConeAngleHCal) + (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
 
     if (0 == dCut)
         return STATUS_CODE_FAILURE;
@@ -540,8 +540,8 @@ StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, 
         const float flexibility(1. + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
 
         const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellSizeU()) :
-            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellSizeU()) );
+            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
+            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
 
         if (0 == dCut)
             return STATUS_CODE_FAILURE;

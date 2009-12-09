@@ -588,7 +588,7 @@ bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFractio
 
 ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :
     m_position(pCaloHit->GetPositionVector()),
-    m_cellSize(std::sqrt(pCaloHit->GetCellSizeU() * pCaloHit->GetCellSizeV())),
+    m_cellSize(pCaloHit->GetCellLengthScale()),
     m_pseudoLayer(pCaloHit->GetPseudoLayer())
 {
     if (!m_position.IsInitialized() || (0 == m_cellSize))

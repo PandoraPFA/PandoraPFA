@@ -68,6 +68,13 @@ public:
     float GetCellThickness() const;
 
     /**
+     *  @brief  Get the typical length scale of cell, std::sqrt(CellSizeU * CellSizeV), units mm
+     * 
+     *  @return the typical length scale of cell
+     */
+    float GetCellLengthScale() const;
+
+    /**
      *  @brief  Get the absorber material in front of cell, units radiation lengths
      * 
      *  @return the absorber material in front of cell in radiation lengths
@@ -252,6 +259,7 @@ private:
     const float             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
     const float             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
     const float             m_cellThickness;            ///< Thickness of cell, units mm
+    const float             m_cellLengthScale;          ///< Typical length scale of cell, std::sqrt(CellSizeU * CellSizeV), units mm
 
     const float             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
     const float             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
@@ -343,6 +351,13 @@ inline float CaloHit::GetCellSizeV() const
 inline float CaloHit::GetCellThickness() const
 {
     return m_cellThickness;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetCellLengthScale() const
+{
+    return m_cellLengthScale;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -51,7 +51,7 @@ float FragmentRemovalHelper::GetFractionOfCloseHits(const Cluster *const pCluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float coneCosineHalfAngle)
+float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClusterI, Cluster *const pClusterJ, const float coneCosineHalfAngle)
 {
     const unsigned int nCaloHitsI(pClusterI->GetNCaloHits());
 
@@ -209,7 +209,7 @@ StatusCode FragmentRemovalHelper::GetClusterContactDetails(const Cluster *const 
         for (CaloHitList::const_iterator hitIterI = iterI->second->begin(), hitIterIEnd = iterI->second->end(); hitIterI != hitIterIEnd; ++hitIterI)
         {
             const CartesianVector &positionI((*hitIterI)->GetPositionVector());
-            const float separationCut(1.5 * std::sqrt((*hitIterI)->GetCellSizeU() * (*hitIterI)->GetCellSizeV()) * distanceThreshold);
+            const float separationCut(1.5 * (*hitIterI)->GetCellLengthScale() * distanceThreshold);
 
             for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
             {

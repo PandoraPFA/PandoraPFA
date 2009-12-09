@@ -43,7 +43,7 @@ public:
      * 
      *  @return The fraction of calo hits in the cone
      */
-    static float GetFractionOfHitsInCone(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float coneCosineHalfAngle);
+    static float GetFractionOfHitsInCone(const Cluster *const pClusterI, Cluster *const pClusterJ, const float coneCosineHalfAngle);
 
     /**
      *  @brief  Get the number of pseudo layers crossed by helix in specified range of z coordinates

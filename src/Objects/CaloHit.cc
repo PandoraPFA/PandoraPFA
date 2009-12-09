@@ -9,6 +9,8 @@
 #include "Objects/CaloHit.h"
 #include "Objects/MCParticle.h"
 
+#include <cmath>
+
 namespace pandora
 {
 
@@ -18,6 +20,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_cellSizeU(caloHitParameters.m_cellSizeU.Get()),
     m_cellSizeV(caloHitParameters.m_cellSizeV.Get()),
     m_cellThickness(caloHitParameters.m_cellThickness.Get()),
+    m_cellLengthScale(std::sqrt(m_cellSizeU * m_cellSizeV)),
     m_nRadiationLengths(caloHitParameters.m_nRadiationLengths.Get()),
     m_nInteractionLengths(caloHitParameters.m_nInteractionLengths.Get()),
     m_time(caloHitParameters.m_time.Get()),

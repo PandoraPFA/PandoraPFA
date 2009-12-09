@@ -145,13 +145,6 @@ public:
     float GetBestEnergyEstimate() const;
 
     /**
-     *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
-     * 
-     *  @return The pseudo layer at which the cluster energy deposition is greatest
-     */
-    PseudoLayer GetShowerMaxLayer() const;
-
-    /**
      *  @brief  Get the innermost pseudo layer in the cluster
      * 
      *  @return The innermost pseudo layer in the cluster
@@ -164,6 +157,13 @@ public:
      *  @return The outermost pseudo layer in the cluster
      */
     PseudoLayer GetOuterPseudoLayer() const;
+
+    /**
+     *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
+     * 
+     *  @return The pseudo layer at which the cluster energy deposition is greatest
+     */
+    PseudoLayer GetShowerMaxLayer();
 
     /**
      *  @brief  Get the list of tracks associated with the cluster
@@ -238,9 +238,14 @@ private:
     StatusCode RemoveCaloHit(CaloHit *const pCaloHit);
 
     /**
-     *  @brief  Update the cluster properties
+     *  @brief  Calculate the pseudo layer at which the cluster energy deposition is greatest
      */
-    StatusCode UpdateProperties();
+    void CalculateShowerMaxLayer();
+
+    /**
+     *  @brief  Calculate result of a linear fit to all calo hits in the cluster
+     */
+    void CalculateFitToAllHitsResult();
 
     /**
      *  @brief  Reset the cluster properties
@@ -318,14 +323,15 @@ private:
 
     ClusterFitResult        m_currentFitResult;         ///< The current fit result, usually set by a clustering algorithm, as cluster grows
     ClusterFitResult        m_fitToAllHitsResult;       ///< The result of a linear fit to all calo hits in the cluster
+    bool                    m_isFitUpToDate;            ///< Whether the fit to all calo hits is up to date
 
     InputFloat              m_bestEnergyEstimate;       ///< The best estimate of the cluster energy, units GeV
+
     InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
     InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
+    InputPseudoLayer        m_showerMaxLayer;           ///< The pseudo layer at which the cluster energy deposition is greatest
 
     TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
-
-    bool                    m_isUpToDate;               ///< Whether the cluster properties are up to date
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
@@ -436,8 +442,8 @@ inline const ClusterHelper::ClusterFitResult &Cluster::GetCurrentFitResult() con
 
 inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult()
 {
-    if (!m_isUpToDate)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateProperties()); 
+    if (!m_isFitUpToDate)
+        this->CalculateFitToAllHitsResult();
 
     return m_fitToAllHitsResult;
 }
@@ -461,6 +467,16 @@ inline PseudoLayer Cluster::GetInnerPseudoLayer() const
 inline PseudoLayer Cluster::GetOuterPseudoLayer() const
 {
     return m_outerPseudoLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline PseudoLayer Cluster::GetShowerMaxLayer()
+{
+    if (!m_showerMaxLayer.IsInitialized())
+        this->CalculateShowerMaxLayer();
+
+    return m_showerMaxLayer.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

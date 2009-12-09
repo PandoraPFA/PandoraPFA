@@ -25,7 +25,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
     m_initialDirection(pCaloHit->GetPositionVector().GetUnitVector()),
-    m_isUpToDate(false)
+    m_isFitUpToDate(false)
 {
     if (NULL == pCaloHit)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -46,7 +46,7 @@ Cluster::Cluster(CaloHitVector *pCaloHitVector) :
     m_sumX(0), m_sumY(0), m_sumZ(0),
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
-    m_isUpToDate(false)
+    m_isFitUpToDate(false)
 {
     if (NULL == pCaloHitVector)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -69,7 +69,7 @@ Cluster::Cluster(Track *pTrack) :
     m_sumX(0), m_sumY(0), m_sumZ(0),
     m_sumXX(0), m_sumYY(0), m_sumZZ(0),
     m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
-    m_isUpToDate(false)
+    m_isFitUpToDate(false)
 {
     if (NULL == pTrack)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -83,7 +83,10 @@ StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.AddCaloHit(pCaloHit));
 
-    m_isUpToDate = false;
+    m_isFitUpToDate = false;
+    m_fitToAllHitsResult.Reset();
+    m_showerMaxLayer.Reset();
+
     m_nCaloHits++;
 
     if (pCaloHit->IsPossibleMip())
@@ -141,7 +144,10 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
     if (m_orderedCaloHitList.empty())
         return this->ResetProperties();
 
-    m_isUpToDate = false;
+    m_isFitUpToDate = false;
+    m_fitToAllHitsResult.Reset();
+    m_showerMaxLayer.Reset();
+
     m_nCaloHits--;
 
     if (pCaloHit->IsPossibleMip())
@@ -216,7 +222,7 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer Cluster::GetShowerMaxLayer() const
+void Cluster::CalculateShowerMaxLayer()
 {
     PseudoLayer showerMaxLayer(0);
     float maxEnergyInLayer(0);
@@ -236,21 +242,16 @@ PseudoLayer Cluster::GetShowerMaxLayer() const
     if (!showerMaxFound)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    return showerMaxLayer;
+    if (!(m_showerMaxLayer = showerMaxLayer))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode Cluster::UpdateProperties()
+void Cluster::CalculateFitToAllHitsResult()
 {
-    if (m_isUpToDate)
-        return STATUS_CODE_SUCCESS;
-
     (void) ClusterHelper::FitPoints(this, m_fitToAllHitsResult);
-
-    m_isUpToDate = true;
-
-    return STATUS_CODE_SUCCESS;
+    m_isFitUpToDate = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -277,11 +278,11 @@ StatusCode Cluster::ResetProperties()
     m_bestEnergyEstimate.Reset();
     m_innerPseudoLayer.Reset();
     m_outerPseudoLayer.Reset();
+    m_showerMaxLayer.Reset();
 
     m_currentFitResult.Reset();
     m_fitToAllHitsResult.Reset();
-
-    m_isUpToDate = true;
+    m_isFitUpToDate = true;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -293,7 +294,10 @@ StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.Add(orderedCaloHitList));
 
-    m_isUpToDate = false;
+    m_isFitUpToDate = false;
+    m_fitToAllHitsResult.Reset();
+    m_showerMaxLayer.Reset();
+
     m_nCaloHits += pCluster->GetNCaloHits();
     m_nPossibleMipHits += pCluster->GetNPossibleMipHits();
 
