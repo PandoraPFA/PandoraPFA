@@ -39,35 +39,40 @@ StatusCode LoopingTracksAlgorithm::Run()
             return STATUS_CODE_FAILURE;
     }
 
+    ClusterList deletedClusterList;
+
     // Loop over cluster combinations, comparing fit results to determine whether clusters should be merged
     for (ClusterFitResultMap::const_iterator iterI = clusterFitResultMap.begin(); iterI != clusterFitResultMap.end(); ++iterI)
     {
         Cluster *pClusterI = iterI->first;
-        const ClusterHelper::ClusterFitResult &clusterFitResultI = iterI->second;
-        const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
+
+        if (deletedClusterList.end() != deletedClusterList.find(pClusterI))
+            continue;
 
         if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
+        const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
         const bool isOutsideECalI(pGeometryHelper->IsOutsideECal(pClusterI->GetCentroid(outerLayerI)));
 
-        ClusterFitResultMap::const_iterator iterJ = iterI;
-        ++iterJ;
+        const ClusterHelper::ClusterFitResult &clusterFitResultI = iterI->second;
 
-        while (iterJ != clusterFitResultMap.end())
+        ClusterFitResultMap::const_iterator iterJ = iterI;
+
+        for (++iterJ; iterJ != clusterFitResultMap.end(); ++iterJ)
         {
             Cluster *pClusterJ = iterJ->first;
-            const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
-            ++iterJ;
 
-            const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
+            if (deletedClusterList.end() != deletedClusterList.find(pClusterJ))
+                continue;
 
             if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
-            const bool isOutsideECalJ(pGeometryHelper->IsOutsideECal(pClusterJ->GetCentroid(outerLayerJ)));
-
             // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
+            const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
+
+            const bool isOutsideECalJ(pGeometryHelper->IsOutsideECal(pClusterJ->GetCentroid(outerLayerJ)));
             const bool isOutsideECal(isOutsideECalI && isOutsideECalJ);
 
             // Apply loose cuts to examine suitability of merging clusters before proceeding
@@ -80,6 +85,7 @@ StatusCode LoopingTracksAlgorithm::Run()
                 continue;
 
             // Check that cluster fit directions are compatible with looping track hypothesis
+            const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
             const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
 
             const float fitDirectionDotProduct(clusterFitResultI.GetDirection().GetDotProduct(clusterFitResultJ.GetDirection()));
@@ -124,8 +130,8 @@ StatusCode LoopingTracksAlgorithm::Run()
             {
                 // TODO decide which to delete and which to enlarge
                 // TODO decide whether to continue loop over daughter cluster candidates after merging
+                deletedClusterList.insert(pClusterJ);
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
-                clusterFitResultMap.erase(pClusterJ);
             }
         }
     }

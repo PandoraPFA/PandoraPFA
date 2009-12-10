@@ -26,24 +26,6 @@ public:
     };
 
 private:
-    /**
-     *  @brief  CustomClusterOrder class
-     */
-    class CustomClusterOrder
-    {
-    public:
-        /**
-         *  @brief  Operator () for determining custom cluster ordering. Operator returns true if lhs cluster is to be
-         *          placed at an earlier position than rhs cluster.
-         * 
-         *  @param  lhs cluster for comparison
-         *  @param  rhs cluster for comparison
-         */
-        bool operator()(const pandora::Cluster *lhs, const pandora::Cluster *rhs) const;
-    };
-
-    typedef std::set<pandora::Cluster *, CustomClusterOrder> CustomSortedClusterList;
-
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
@@ -69,6 +51,14 @@ private:
      *  @return boolean
      */
     bool IsClusterFragment(const pandora::Cluster *const pParentCluster, const pandora::Cluster *const pDaughterCluster) const;
+
+    /**
+     *  @brief  Sort clusters by ascending inner layer, and by descending hadronic energy within a layer
+     * 
+     *  @param  pLhs address of first cluster
+     *  @param  pRhs address of second cluster
+     */
+    static bool SortClustersByInnerLayer(const pandora::Cluster *const pLhs, const pandora::Cluster *const pRhs);
 
     std::string     m_trackClusterAssociationAlgName;   ///< The name of the track-cluster association algorithm to run
 
@@ -100,29 +90,6 @@ private:
     unsigned int    m_helixDistanceMaxOccupiedLayers;   ///< Max number of occupied layers to consider in helix-cluster distance calculation
     float           m_maxClusterHelixDistance;          ///< Max distance between parent cluster associated helix projections and daughter
 };
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool ProximityBasedMergingAlgorithm::CustomClusterOrder::operator()(const pandora::Cluster *lhs, const pandora::Cluster *rhs) const
-{
-    const pandora::PseudoLayer innerLayerLhs(lhs->GetInnerPseudoLayer()), innerLayerRhs(rhs->GetInnerPseudoLayer());
-
-    if (innerLayerLhs < innerLayerRhs)
-        return true;
-
-    if (innerLayerLhs > innerLayerRhs)
-        return false;
-
-    const float hadronicEnergyLhs(lhs->GetHadronicEnergy()), hadronicEnergyRhs(rhs->GetHadronicEnergy());
-
-    if (hadronicEnergyLhs > hadronicEnergyRhs)
-        return true;
-
-    if (hadronicEnergyLhs < hadronicEnergyRhs)
-        return false;
-
-    return lhs > rhs;
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------

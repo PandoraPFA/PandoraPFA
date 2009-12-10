@@ -21,18 +21,24 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    CustomSortedClusterList sortedClusterList;
+    ClusterVector clusterVector;
+    ClusterList deletedClusterList;
+
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
-            sortedClusterList.insert(*iter);
+            clusterVector.push_back(*iter);
     }
 
+    std::sort(clusterVector.begin(), clusterVector.end(), ProximityBasedMergingAlgorithm::SortClustersByInnerLayer);
+
     // Examine pairs of clusters to evaluate merging suitability. Begin by comparing clusters in highest layers with those in lowest layers.
-    for (CustomSortedClusterList::const_reverse_iterator iterI = sortedClusterList.rbegin(); iterI != sortedClusterList.rend();)
+    for (ClusterVector::const_reverse_iterator iterI = clusterVector.rbegin(), iterIEnd = clusterVector.rend(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
-        ++iterI;
+
+        if (deletedClusterList.end() != deletedClusterList.find(pDaughterCluster))
+            continue;
 
         if (!pDaughterCluster->GetAssociatedTrackList().empty())
             continue;
@@ -44,11 +50,14 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         Cluster *pBestParentCluster = NULL;
         float minGenericDistance = std::numeric_limits<float>::max();
 
-        for (CustomSortedClusterList::const_iterator iterJ = sortedClusterList.begin(); iterJ != sortedClusterList.end(); ++iterJ)
+        for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pParentCluster = *iterJ;
 
             if (pDaughterCluster == pParentCluster)
+                continue;
+
+            if (deletedClusterList.end() != deletedClusterList.find(pParentCluster))
                 continue;
 
             // Check level of overlap between clusters
@@ -120,8 +129,8 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         // Finally, check to see if daughter cluster is likely to be a fragment of the parent cluster
         if (this->IsClusterFragment(pBestParentCluster, pDaughterCluster))
         {
-            //sortedClusterList.erase(pDaughterCluster);
-            //PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+            deletedClusterList.insert(pDaughterCluster);
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
         }
     }
 
@@ -244,6 +253,18 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     }
 
     return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ProximityBasedMergingAlgorithm::SortClustersByInnerLayer(const Cluster *const pLhs, const Cluster *const pRhs)
+{
+    const PseudoLayer innerLayerLhs(pLhs->GetInnerPseudoLayer()), innerLayerRhs(pRhs->GetInnerPseudoLayer());
+
+    if (innerLayerLhs != innerLayerRhs)
+        return (innerLayerLhs < innerLayerRhs);
+
+    return (pLhs->GetHadronicEnergy() > pRhs->GetHadronicEnergy());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
