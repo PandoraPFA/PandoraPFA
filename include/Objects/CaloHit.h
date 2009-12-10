@@ -491,6 +491,12 @@ inline const void *CaloHit::GetParentCaloHitAddress() const
     return m_pParentAddress;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CaloHit::~CaloHit()
+{
+}
+
 } // namespace pandora
 
 #endif // #ifndef CALO_HIT_H

@@ -52,10 +52,14 @@ StatusCode LoopingTracksAlgorithm::Run()
         const bool isOutsideECalI(pGeometryHelper->IsOutsideECal(pClusterI->GetCentroid(outerLayerI)));
 
         ClusterFitResultMap::const_iterator iterJ = iterI;
-        for (++iterJ ; iterJ != clusterFitResultMap.end(); ++iterJ)
+        ++iterJ;
+
+        while (iterJ != clusterFitResultMap.end())
         {
             Cluster *pClusterJ = iterJ->first;
             const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
+            ++iterJ;
+
             const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
 
             if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
@@ -121,6 +125,7 @@ StatusCode LoopingTracksAlgorithm::Run()
                 // TODO decide which to delete and which to enlarge
                 // TODO decide whether to continue loop over daughter cluster candidates after merging
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
+                clusterFitResultMap.erase(pClusterJ);
             }
         }
     }

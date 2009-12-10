@@ -224,6 +224,11 @@ private:
     Cluster(Track *pTrack);
 
     /**
+     *  @brief  Destructor
+     */
+    ~Cluster();
+
+    /**
      *  @brief  Add a calo hit to the cluster
      * 
      *  @param  pCaloHit the address of the calo hit
@@ -515,6 +520,12 @@ inline StatusCode Cluster::SetBestEnergyEstimate(float bestEnergyEstimate)
 inline void Cluster::SetCurrentFitResult(const ClusterHelper::ClusterFitResult &currentFitResult)
 {
     m_currentFitResult = currentFitResult;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline Cluster::~Cluster()
+{
 }
 
 } // namespace pandora

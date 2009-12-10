@@ -37,9 +37,10 @@ StatusCode BackscatteredTracks2Algorithm::Run()
             continue;
 
         // Find a compatible daughter cluster
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end(); ++iterJ)
+        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end();)
         {
             Cluster *pDaughterCluster = *iterJ;
+            ++iterJ;
 
             if (pParentCluster == pDaughterCluster)
                 continue;

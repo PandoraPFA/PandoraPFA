@@ -39,9 +39,10 @@ StatusCode ShowerMipMerging2Algorithm::Run()
         const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
 
         // Compare this successfully fitted cluster with all others
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end(); ++iterJ)
+        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end();)
         {
             Cluster *pClusterJ = *iterJ;
+            ++iterJ;
 
             if (pClusterI == pClusterJ)
                 continue;

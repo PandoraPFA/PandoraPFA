@@ -58,9 +58,11 @@ StatusCode BrokenTracksAlgorithm::Run()
         const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
 
         // For each end fit, examine start fits for all other clusters
-        for (ClusterFitResultMap::const_iterator iterJ = startClusterFitResultMap.begin(); iterJ != startClusterFitResultMap.end(); ++iterJ)
+        for (ClusterFitResultMap::const_iterator iterJ = startClusterFitResultMap.begin(); iterJ != startClusterFitResultMap.end();)
         {
             Cluster *pClusterJ = iterJ->first;
+            const ClusterFitResult &clusterFitResultJ = iterJ->second;
+            ++iterJ;
 
             if (pClusterI == pClusterJ)
                 continue;
@@ -68,7 +70,6 @@ StatusCode BrokenTracksAlgorithm::Run()
             if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
-            const ClusterFitResult &clusterFitResultJ = iterJ->second;
             const PseudoLayer innerLayerJ(pClusterJ->GetInnerPseudoLayer());
 
             // Cut on layer separation between the two clusters
@@ -106,6 +107,7 @@ StatusCode BrokenTracksAlgorithm::Run()
                 // TODO decide whether to continue loop over daughter cluster candidates after merging
                 // Cluster to be enlarged is that for which the end fit was used
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
+                startClusterFitResultMap.erase(pClusterJ);
             }
         }
     }

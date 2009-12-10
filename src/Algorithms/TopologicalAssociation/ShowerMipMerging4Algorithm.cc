@@ -19,9 +19,10 @@ StatusCode ShowerMipMerging4Algorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end(); ++iterI)
+    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end();)
     {
         Cluster *pDaughterCluster = *iterI;
+        ++iterI;
 
         if (pDaughterCluster->GetNCaloHits() < m_minCaloHitsPerDaughterCluster)
             continue;

@@ -43,12 +43,6 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-CaloHit::~CaloHit()
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode CaloHit::SetPseudoLayer(PseudoLayer pseudoLayer)
 {
     if (!(m_pseudoLayer = pseudoLayer))
