@@ -46,9 +46,6 @@ StatusCode LoopingTracksAlgorithm::Run()
     {
         Cluster *pClusterI = iterI->first;
 
-        if (deletedClusterList.end() != deletedClusterList.find(pClusterI))
-            continue;
-
         if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
@@ -58,13 +55,13 @@ StatusCode LoopingTracksAlgorithm::Run()
         const ClusterHelper::ClusterFitResult &clusterFitResultI = iterI->second;
 
         ClusterFitResultMap::const_iterator iterJ = iterI;
+        ++iterJ;
 
-        for (++iterJ; iterJ != clusterFitResultMap.end(); ++iterJ)
+        while (iterJ != clusterFitResultMap.end())
         {
             Cluster *pClusterJ = iterJ->first;
-
-            if (deletedClusterList.end() != deletedClusterList.find(pClusterJ))
-                continue;
+            const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
+            ++iterJ;
 
             if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
@@ -85,7 +82,6 @@ StatusCode LoopingTracksAlgorithm::Run()
                 continue;
 
             // Check that cluster fit directions are compatible with looping track hypothesis
-            const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
             const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
 
             const float fitDirectionDotProduct(clusterFitResultI.GetDirection().GetDotProduct(clusterFitResultJ.GetDirection()));
@@ -130,7 +126,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             {
                 // TODO decide which to delete and which to enlarge
                 // TODO decide whether to continue loop over daughter cluster candidates after merging
-                deletedClusterList.insert(pClusterJ);
+                clusterFitResultMap.erase(pClusterJ);
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
             }
         }
@@ -168,7 +164,7 @@ float LoopingTracksAlgorithm::GetClosestDistanceBetweenOuterLayerHits(const Clus
                 closestDistance = distance;
         }
     }
-std::cout << "drMin " << closestDistance << std::endl;
+
     return closestDistance;
 }
 

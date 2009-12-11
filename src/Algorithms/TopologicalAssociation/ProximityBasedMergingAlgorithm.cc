@@ -22,8 +22,6 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     ClusterVector clusterVector;
-    ClusterList deletedClusterList;
-
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
@@ -33,11 +31,11 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
     std::sort(clusterVector.begin(), clusterVector.end(), ProximityBasedMergingAlgorithm::SortClustersByInnerLayer);
 
     // Examine pairs of clusters to evaluate merging suitability. Begin by comparing clusters in highest layers with those in lowest layers.
-    for (ClusterVector::const_reverse_iterator iterI = clusterVector.rbegin(), iterIEnd = clusterVector.rend(); iterI != iterIEnd; ++iterI)
+    for (ClusterVector::reverse_iterator iterI = clusterVector.rbegin(), iterIEnd = clusterVector.rend(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
 
-        if (deletedClusterList.end() != deletedClusterList.find(pDaughterCluster))
+        if (NULL == pDaughterCluster)
             continue;
 
         if (!pDaughterCluster->GetAssociatedTrackList().empty())
@@ -54,10 +52,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         {
             Cluster *pParentCluster = *iterJ;
 
-            if (pDaughterCluster == pParentCluster)
-                continue;
-
-            if (deletedClusterList.end() != deletedClusterList.find(pParentCluster))
+            if ((NULL == pParentCluster) || (pDaughterCluster == pParentCluster))
                 continue;
 
             // Check level of overlap between clusters
@@ -129,7 +124,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         // Finally, check to see if daughter cluster is likely to be a fragment of the parent cluster
         if (this->IsClusterFragment(pBestParentCluster, pDaughterCluster))
         {
-            deletedClusterList.insert(pDaughterCluster);
+            (*iterI) = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
         }
     }
