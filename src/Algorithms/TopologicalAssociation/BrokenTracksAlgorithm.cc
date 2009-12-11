@@ -20,8 +20,6 @@ StatusCode BrokenTracksAlgorithm::Run()
     const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     // Fit a straight line to start and end of all clusters in the current list
-    typedef ClusterHelper::ClusterFitResult ClusterFitResult;
-    typedef std::map<Cluster *, ClusterFitResult> ClusterFitResultMap;
     ClusterFitResultMap startClusterFitResultMap;
     ClusterFitResultMap endClusterFitResultMap;
 

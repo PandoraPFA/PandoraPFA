@@ -29,6 +29,9 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
+    typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
+    typedef std::map<pandora::Cluster *, ClusterFitResult> ClusterFitResultMap;
+
     unsigned int    m_nStartLayersToFit;                ///< The number of occupied pseudolayers to use in fit to the start of the cluster
     unsigned int    m_nEndLayersToFit;                  ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_maxFitRms;                        ///< The max value of the start/end fit rms for cluster to be considered

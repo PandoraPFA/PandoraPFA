@@ -117,16 +117,22 @@ float CartesianVector::GetOpeningAngle(const CartesianVector &rhs) const
     }
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CartesianVector::GetSphericalCoordinates(float& radius, float& phi, float& theta) const
+void CartesianVector::GetSphericalCoordinates(float &radius, float &phi, float &theta) const
 {
-    radius = GetMagnitude();
-    phi    = acos( GetZ()/radius );
-    theta  = atan2( GetY(), GetX() );
-}
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
+    const float magnitude(this->GetMagnitude());
+
+    if (0 == magnitude)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    radius = magnitude;
+    phi    = std::acos(m_z / radius);
+    theta  = std::atan2(m_y , m_x);
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
