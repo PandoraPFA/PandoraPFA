@@ -117,6 +117,17 @@ float CartesianVector::GetOpeningAngle(const CartesianVector &rhs) const
     }
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void CartesianVector::GetSphericalCoordinates(float& radius, float& phi, float& theta) const
+{
+    radius = GetMagnitude();
+    phi    = acos( GetZ()/radius );
+    theta  = atan2( GetY(), GetX() );
+}
+
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 CartesianVector CartesianVector::GetUnitVector() const

@@ -125,6 +125,16 @@ public:
     float GetOpeningAngle(const CartesianVector &rhs) const;
 
     /**
+     *  @brief  Get the spherical coordinates of the cartesian vector
+     * 
+     *  @param  radius the magnitude of the vector
+     *  @param  phi the azimuth of the vector
+     *  @param  theta the inclination of the vector
+     * 
+     */
+    void GetSphericalCoordinates(float& radius, float& phi, float& theta) const;
+
+    /**
      *  @brief  Get a unit vector in the direction of the cartesian vector
      * 
      *  @return The unit vector
