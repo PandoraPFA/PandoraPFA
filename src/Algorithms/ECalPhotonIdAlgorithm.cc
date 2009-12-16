@@ -19,6 +19,8 @@ using namespace pandora;
 
 PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::_instance = 0;
 
+const unsigned int ECalPhotonIdAlgorithm::m_maximumNumberOfLayers = 150; // TODO remove this, as we no longer fix number of layers
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance()
@@ -31,6 +33,7 @@ PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance()
     return _instance;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ECalPhotonIdAlgorithm::ECalPhotonIdAlgorithm()
@@ -153,11 +156,6 @@ StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MakePhotonIDLikelihoodHistograms", m_makingPhotonIdLikelihoodHistograms));
 
-    // max. number of layers - TODO remove this, as we no longer fix number of layers
-    m_maximumNumberOfLayers = 150;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "maxNumberOfLayers", m_maximumNumberOfLayers));
-
     // monitoring filename
     m_monitoringFileName = "photonIdMonitoring.root";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -270,7 +268,7 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     }
     catch(StatusCodeException &statusCodeException)
     {
-        std::cout << "IsPhoton/statusCodeException" << std::endl;
+        std::cout << "IsPhoton/statusCodeException " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
         return false; // it's not a photon then
     }
     catch(...)
@@ -304,7 +302,7 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     // loop through all tracks
     //
     const TrackList& trackList = photonCandidateCluster->GetAssociatedTrackList();
-    for( TrackList::iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack )
+    for( TrackList::const_iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack )
     {
         const TrackState& trackStateAtECal = (*itTrack)->GetTrackStateAtECal();
                 
@@ -475,8 +473,8 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
 StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, protoClusterPeaks_t &peak, int maxLayers)
 {
-    int nbins   = 41;
-    int ioffset = nbins/2; 
+    const int nbins(41);
+    const int ioffset(nbins / 2);
 
 //  int ifirst = 0; // this->FirstLayer(); // ???
     int ifirst = (int)cluster->GetInnerPseudoLayer();
@@ -584,7 +582,7 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, prot
 //   }
 
     // mask low ph region
-    float threshold = 0.025;
+    float threshold = 0.025f;
     for(int i=0; i<nbins; i++){
         for(int j=0; j<nbins; j++){
             if(tprofile[i][j]<threshold)assigned[i][j]=true;
@@ -630,8 +628,7 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, prot
     xxbar=(ipeak-ioffset)*(ipeak-ioffset)*tprofile[ipeak][jpeak];
     yybar=(jpeak-ioffset)*(jpeak-ioffset)*tprofile[ipeak][jpeak];
     assigned[ipeak][jpeak]=true;
-    dmin = sqrt(   (ipeak-ioffset)*(ipeak-ioffset)+
-                   (jpeak-ioffset)*(jpeak-ioffset));
+	dmin = std::sqrt(static_cast<float>((ipeak-ioffset)*(ipeak-ioffset)+(jpeak-ioffset)*(jpeak-ioffset)));
     float stillgoing = true;
     while(stillgoing){
 	for(int ip=pstart;ip<=pend;ip++){
@@ -656,7 +653,7 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, prot
                                 point[pcurrent][0] = is;
                                 point[pcurrent][1] = js;
                                 if(tprofile[is][js]/tprofile[ipeak][jpeak]>0.1){
-                                    float d = sqrt((is-ioffset)*(is-ioffset)+(js-ioffset)*(js-ioffset));
+                                    float d = std::sqrt(static_cast<float>((is-ioffset)*(is-ioffset)+(js-ioffset)*(js-ioffset)));
                                     if(d<dmin)dmin=d;
                                 }
                             }
@@ -752,7 +749,7 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 
         // --- loop through all the hits and do stuff mark has put into AddHit 
         unsigned int maxSetIndex = 0;
-        float lastRadLen =0.1;
+        float lastRadLen = 0.1f;
 
         OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
         for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
@@ -810,12 +807,18 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 
         // ---
 
-        float x0 = 3.5;                     // oops: hardcoded radiation length (W)
+        float x0 = 3.5f;                     // oops: hardcoded radiation length (W)
         float E0 = cluster->GetElectromagneticEnergy();
         // Effective critical energy
-        float EC = 0.08;                    // oops: critical energy hardcoded (  (thickness-Si*40.19MeV+thickness-W*93.11MeV)/sumThickness in GeV )
+        float EC = 0.08f;                    // oops: critical energy hardcoded (  (thickness-Si*40.19MeV+thickness-W*93.11MeV)/sumThickness in GeV )
         double a = 1.25+0.5*log(E0/EC);
+#ifdef __GNUC__
         double lngammaa = lgamma(a);
+#else
+        double lngammaa = 0.;
+        std::cout << " TODO - implement lgamma function " << std::endl;
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+#endif
         double gammaa = exp(lngammaa);
 
         float dist=0.;
@@ -843,7 +846,7 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
         unsigned int iStart = static_cast<unsigned int>(bStart);
         unsigned int iEnd = static_cast<unsigned int>(bEnd);
         float deltaStart = bStart-iStart;
-        float deltaEnd   = 1.0-bEnd+iEnd;
+        float deltaEnd   = 1.0f-bEnd+iEnd;
         if(iStart<=100){
             for(unsigned int ibin=iStart;ibin<=iEnd;++ibin){
                 float delta = 1.;
@@ -861,7 +864,7 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
     float t =0.;
     for(int i=0; i<100; i++){
         t+= X0BinSize;
-        float de = E0/2.0*pow(t/2,a-1)*exp(-t/2)*X0BinSize/gammaa;
+        float de = static_cast<float>(E0 / 2.0f * pow(t / 2, static_cast<float>(a - 1)) * exp(-t / 2) * X0BinSize / gammaa);
         expectedX0Profile[i] = de;
     }
 
@@ -901,7 +904,7 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
     }
     catch(StatusCodeException &statusCodeException)
     {
-        std::cout << "PhotonProfileID/statusCodeException" << std::endl;
+		std::cout << "PhotonProfileID/statusCodeException " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
         throw;
     }
     catch(...)
@@ -965,7 +968,7 @@ float ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, f
             {
                 itElectromagneticEnergyPerMCParticleId->second += electromagneticEnergy;
             }
-            sumElectromagneticEnergy += electromagneticEnergy;
+            sumElectromagneticEnergy += static_cast<float>(electromagneticEnergy);
 
             // sum up the input energy
             inputEnergy += (*itCaloHit)->GetInputEnergy();
@@ -985,7 +988,7 @@ float ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, f
                     itTrueEnergyPerMCParticleId->second += trueEnergy;
                 }
 
-                sumTrueEnergy            += trueEnergy;
+                sumTrueEnergy            += static_cast<float>(trueEnergy);
                 countedMcParticles.insert( mc );
             }
         }
@@ -1024,8 +1027,8 @@ float ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, f
     }
 
         
-    electromagneticEnergyContribution = itElectromagneticEnergyPerMCParticleId->second;
-    return itTrueEnergyPerMCParticleId->second; // return the energy contribution of photons
+    electromagneticEnergyContribution = static_cast<float>(itElectromagneticEnergyPerMCParticleId->second);
+    return static_cast<float>(itTrueEnergyPerMCParticleId->second); // return the energy contribution of photons
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1088,10 +1091,10 @@ void ECalPhotonIdAlgorithm::GetClusterProperties(const Cluster* cluster, Cluster
     // set the values in clusterProperties
     for( int i=0; i<3; ++i )
     {
-        clusterProperties.m_hitMean[i]    = hitMean[i].GetMean();
-        clusterProperties.m_centroid[i]   = centroid[i].GetMean();
-        clusterProperties.m_centroid10[i] = centroid10[i].GetMean();
-        clusterProperties.m_centroid20[i] = centroid20[i].GetMean();
+        clusterProperties.m_hitMean[i]    = static_cast<float>(hitMean[i].GetMean());
+        clusterProperties.m_centroid[i]   = static_cast<float>(centroid[i].GetMean());
+        clusterProperties.m_centroid10[i] = static_cast<float>(centroid10[i].GetMean());
+        clusterProperties.m_centroid20[i] = static_cast<float>(centroid20[i].GetMean());
     }
     clusterProperties.m_centroidEnergy   = centroidEnergy;
     clusterProperties.m_centroid10Energy = centroid10Energy;
@@ -1152,8 +1155,8 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
         std::cout << " likesstart[ie][irmsbin] = " << likesstart[ien][istartbin] << std::endl;
         std::cout << " likebstart[ie][irmsbin] = " << likebstart[ien][istartbin] << std::endl;
     }
-    float yes = likeSig[ien]*likesrms[ien][irmsbin]*likesfrac[ien][ifracbin]*likesstart[ien][istartbin];
-    float no  = likeBack[ien]*likebrms[ien][irmsbin]*likebfrac[ien][ifracbin]*likebstart[ien][istartbin];
+    float yes = static_cast<float>(likeSig[ien]*likesrms[ien][irmsbin]*likesfrac[ien][ifracbin]*likesstart[ien][istartbin]);
+    float no  = static_cast<float>(likeBack[ien]*likebrms[ien][irmsbin]*likebfrac[ien][ifracbin]*likebstart[ien][istartbin]);
     
     if(0)
     {
