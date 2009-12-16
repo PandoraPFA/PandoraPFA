@@ -95,7 +95,7 @@ private:
      *  @param  clusterVector vector containing addresses of current clusters
      */
     StatusCode FindHitsInPreviousLayers(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
-        const OrderedCaloHitList *const pOrderedCaloHitList, ClusterVector &clusterVector) const;
+        ClusterVector &clusterVector) const;
 
     /**
      *  @brief  Match clusters to calo hits in current pseudo layer

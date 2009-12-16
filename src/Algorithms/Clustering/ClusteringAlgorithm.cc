@@ -9,6 +9,7 @@
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 
 #include <cmath>
+#include <limits>
 
 using namespace pandora;
 
@@ -44,8 +45,7 @@ StatusCode ClusteringAlgorithm::Run()
             }
         }
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInPreviousLayers(pseudoLayer, &customSortedCaloHitList,
-            pOrderedCaloHitList, clusterVector));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInPreviousLayers(pseudoLayer, &customSortedCaloHitList, clusterVector));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInSameLayer(pseudoLayer, &customSortedCaloHitList, clusterVector));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
@@ -102,9 +102,9 @@ StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVec
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
-    const OrderedCaloHitList *const pOrderedCaloHitList, ClusterVector &clusterVector) const
+    ClusterVector &clusterVector) const
 {
-    for (CustomSortedCaloHitList::const_iterator iter = pCustomSortedCaloHitList->begin(), iterEnd = pCustomSortedCaloHitList->end();
+    for (CustomSortedCaloHitList::iterator iter = pCustomSortedCaloHitList->begin(), iterEnd = pCustomSortedCaloHitList->end();
         iter != iterEnd;)
     {
         CaloHit *pCaloHit = *iter;
@@ -176,7 +176,7 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Cus
         {
             clustersModified = false;
 
-            for (CustomSortedCaloHitList::const_iterator iter = pCustomSortedCaloHitList->begin(), iterEnd = pCustomSortedCaloHitList->end();
+            for (CustomSortedCaloHitList::iterator iter = pCustomSortedCaloHitList->begin(), iterEnd = pCustomSortedCaloHitList->end();
                 iter != iterEnd;)
             {
                 CaloHit *pCaloHit = *iter;
@@ -407,7 +407,7 @@ StatusCode ClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const pCalo
     bool hitFound(false);
     float smallestDistance(FLOAT_MAX);
 
-    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    for(CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         CaloHit *pHitInCluster = *iter;
         const CartesianVector &hitInClusterPosition(pHitInCluster->GetPositionVector());
@@ -436,7 +436,7 @@ StatusCode ClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCal
     bool hitFound(false);
     float smallestDistance(FLOAT_MAX);
 
-    for (CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         CaloHit *pHitInCluster = *iter;
         float hitDistance(FLOAT_MAX);
@@ -537,7 +537,7 @@ StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, 
     if(separation < m_maxTrackSeedSeparation)
     {
         const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
-        const float flexibility(1. + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
+        const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
 
         const float dCut ((ECAL == pCaloHit->GetHitType()) ?
             flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
@@ -562,7 +562,7 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterSeedStrategy", m_clusterSeedStrategy));
 
-    m_trackSeedMaxCosTheta = 0.7;
+    m_trackSeedMaxCosTheta = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackSeedMaxCosTheta", m_trackSeedMaxCosTheta));
 
@@ -591,7 +591,7 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterFormationStrategy", m_clusterFormationStrategy));
 
-    m_genericDistanceCut = 1.;
+    m_genericDistanceCut = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GenericDistanceCut", m_genericDistanceCut));
 
@@ -608,28 +608,28 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "ShouldFollowInitialDirection", m_shouldFollowInitialDirection));
 
     // Same layer distance parameters
-    m_sameLayerPadWidthsECal = 1.8;
+    m_sameLayerPadWidthsECal = 1.8f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "SameLayerPadWidthsECal", m_sameLayerPadWidthsECal));
 
-    m_sameLayerPadWidthsHCal = 1.8;
+    m_sameLayerPadWidthsHCal = 1.8f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "SameLayerPadWidthsHCal", m_sameLayerPadWidthsHCal));
 
     // Cone approach distance parameters
-    m_coneApproachMaxSeparation = 1000.;
+    m_coneApproachMaxSeparation = 1000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ConeApproachMaxSeparation", m_coneApproachMaxSeparation));
 
-    m_tanConeAngleECal = 0.36;
+    m_tanConeAngleECal = 0.36f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TanConeAngleECal", m_tanConeAngleECal));
 
-    m_tanConeAngleHCal = 1.00;
+    m_tanConeAngleHCal = 1.00f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TanConeAngleHCal", m_tanConeAngleHCal));
 
-    m_additionalPadWidthsECal = 1.5;
+    m_additionalPadWidthsECal = 1.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
 
@@ -637,20 +637,20 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
 
-    m_maxClusterDirProjection = 200.;
+    m_maxClusterDirProjection = 200.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxClusterDirProjection", m_maxClusterDirProjection));
 
-    m_minClusterDirProjection = -10.;
+    m_minClusterDirProjection = -10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterDirProjection", m_minClusterDirProjection));
 
     // Track seed distance parameters
-    m_trackPathWidth = 2.;
+    m_trackPathWidth = 2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackPathWidth", m_trackPathWidth));
 
-    m_maxTrackSeedSeparation = 250.;
+    m_maxTrackSeedSeparation = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackSeedSeparation", m_maxTrackSeedSeparation));
 
@@ -675,23 +675,23 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NLayersToFit", m_nLayersToFit));
 
-    m_fitSuccessDotProductCut1 = 0.75;
+    m_fitSuccessDotProductCut1 = 0.75f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitSuccessDotProductCut1", m_fitSuccessDotProductCut1));
 
-    m_fitSuccessChi2Cut1 = 5.0;
+    m_fitSuccessChi2Cut1 = 5.0f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitSuccessChi2Cut1", m_fitSuccessChi2Cut1));
 
-    m_fitSuccessDotProductCut2 = 0.50;
+    m_fitSuccessDotProductCut2 = 0.50f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitSuccessDotProductCut2", m_fitSuccessDotProductCut2));
 
-    m_fitSuccessChi2Cut2 = 2.5;
+    m_fitSuccessChi2Cut2 = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitSuccessChi2Cut2", m_fitSuccessChi2Cut2));
 
-    m_mipTrackChi2Cut = 2.5;
+    m_mipTrackChi2Cut = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MipTrackChi2Cut", m_mipTrackChi2Cut));
 

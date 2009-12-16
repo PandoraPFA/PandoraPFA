@@ -14,6 +14,8 @@
 #include "Objects/Helix.h"
 #include "Objects/Track.h"
 
+#include <limits>
+
 namespace pandora
 {
 
@@ -209,7 +211,7 @@ StatusCode FragmentRemovalHelper::GetClusterContactDetails(const Cluster *const 
         for (CaloHitList::const_iterator hitIterI = iterI->second->begin(), hitIterIEnd = iterI->second->end(); hitIterI != hitIterIEnd; ++hitIterI)
         {
             const CartesianVector &positionI((*hitIterI)->GetPositionVector());
-            const float separationCut(1.5 * (*hitIterI)->GetCellLengthScale() * distanceThreshold);
+            const float separationCut(1.5f * (*hitIterI)->GetCellLengthScale() * distanceThreshold);
 
             for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
             {

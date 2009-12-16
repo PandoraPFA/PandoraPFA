@@ -47,7 +47,7 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
 
     // Obtain helix fit to track state at ecal
     static const float bField(GeometryHelper::GetInstance()->GetBField());
-    m_pHelixFitAtECal = new Helix(m_trackStateAtECal.GetPosition(), m_trackStateAtECal.GetMomentum(), m_chargeSign, bField);
+    m_pHelixFitAtECal = new Helix(m_trackStateAtECal.GetPosition(), m_trackStateAtECal.GetMomentum(), static_cast<float>(m_chargeSign), bField);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

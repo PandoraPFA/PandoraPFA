@@ -209,7 +209,7 @@ CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs
 
 CartesianVector operator*(const CartesianVector &lhs, const double scalar)
 {
-    return CartesianVector(lhs.GetX() * scalar, lhs.GetY() * scalar, lhs.GetZ() * scalar);
+    return CartesianVector(static_cast<float>(lhs.GetX() * scalar), static_cast<float>(lhs.GetY() * scalar), static_cast<float>(lhs.GetZ() * scalar));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

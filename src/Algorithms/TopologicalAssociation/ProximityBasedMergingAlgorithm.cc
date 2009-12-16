@@ -8,7 +8,9 @@
 
 #include "Algorithms/TopologicalAssociation/ProximityBasedMergingAlgorithm.h"
 
+#include <algorithm>
 #include <cmath>
+#include <limits>
 
 using namespace pandora;
 
@@ -268,11 +270,11 @@ StatusCode ProximityBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHan
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_trackClusterAssociationAlgName));
 
-    m_canMergeMinMipFraction = 0.7;
+    m_canMergeMinMipFraction = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
 
-    m_canMergeMaxRms = 5.;
+    m_canMergeMaxRms = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
@@ -288,11 +290,11 @@ StatusCode ProximityBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinShowerLayerSpan", m_minShowerLayerSpan));
 
-    m_maxTrackClusterChi = 2.5;
+    m_maxTrackClusterChi = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackClusterChi", m_maxTrackClusterChi));
 
-    m_maxTrackClusterDChi2 = 1.;
+    m_maxTrackClusterDChi2 = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackClusterDChi2", m_maxTrackClusterDChi2));
 
@@ -300,7 +302,7 @@ StatusCode ProximityBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NGenericDistanceLayers", m_nGenericDistanceLayers));
 
-    m_maxGenericDistance = 50.;
+    m_maxGenericDistance = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxGenericDistance", m_maxGenericDistance));
 
@@ -308,31 +310,31 @@ StatusCode ProximityBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NAdjacentLayersToExamine", m_nAdjacentLayersToExamine));
 
-    m_maxParallelDistance = 1000.;
+    m_maxParallelDistance = 1000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxParallelDistance", m_maxParallelDistance));
 
-    m_maxInnerLayerSeparation = 500.;
+    m_maxInnerLayerSeparation = 500.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxInnerLayerSeparation", m_maxInnerLayerSeparation));
 
-    m_clusterContactThreshold = 2.;
+    m_clusterContactThreshold = 2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterContactThreshold", m_clusterContactThreshold));
 
-    m_minContactFraction = 0.3;
+    m_minContactFraction = 0.3f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinContactFraction", m_minContactFraction));
 
-    m_closeHitThreshold = 50.;
+    m_closeHitThreshold = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CloseHitThreshold", m_closeHitThreshold));
 
-    m_minCloseHitFraction = 0.2;
+    m_minCloseHitFraction = 0.2f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCloseHitFraction", m_minCloseHitFraction));
 
-    m_maxHelixPathlengthToDaughter = 300.;
+    m_maxHelixPathlengthToDaughter = 300.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxHelixPathlengthToDaughter", m_maxHelixPathlengthToDaughter));
 
@@ -344,7 +346,7 @@ StatusCode ProximityBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "HelixDistanceMaxOccupiedLayers", m_helixDistanceMaxOccupiedLayers));
 
-    m_maxClusterHelixDistance = 50.;
+    m_maxClusterHelixDistance = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxClusterHelixDistance", m_maxClusterHelixDistance));
 

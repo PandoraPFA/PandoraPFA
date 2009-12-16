@@ -30,18 +30,18 @@ namespace pandora
 {
 
 Pandora::Pandora() :
-    m_pAlgorithmManager(new AlgorithmManager(this)),
     m_pCaloHitManager(new CaloHitManager),
     m_pClusterManager(new ClusterManager),
     m_pGeometryHelper(GeometryHelper::GetInstance()),
     m_pMCManager(new MCManager),
     m_pParticleFlowObjectManager(new ParticleFlowObjectManager),
     m_pTrackManager(new TrackManager),
-    m_pPandoraSettings(PandoraSettings::GetInstance()),
-    m_pPandoraApiImpl(new PandoraApiImpl(this)),
-    m_pPandoraContentApiImpl(new PandoraContentApiImpl(this)),
-    m_pPandoraImpl(new PandoraImpl(this))
+    m_pPandoraSettings(PandoraSettings::GetInstance())
 {
+    m_pAlgorithmManager = new AlgorithmManager(this);
+    m_pPandoraApiImpl = new PandoraApiImpl(this);
+    m_pPandoraContentApiImpl = new PandoraContentApiImpl(this);
+    m_pPandoraImpl = new PandoraImpl(this);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

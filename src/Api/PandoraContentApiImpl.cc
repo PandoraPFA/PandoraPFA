@@ -424,11 +424,4 @@ StatusCode PandoraContentApiImpl::PrepareClustersForDeletion(const ClusterList &
     return STATUS_CODE_SUCCESS;
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template StatusCode PandoraContentApiImpl::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster) const;
-template StatusCode PandoraContentApiImpl::CreateCluster<CaloHitVector>(CaloHitVector *pCaloHitVector, Cluster *&pCluster) const;
-template StatusCode PandoraContentApiImpl::CreateCluster<Track>(pandora::Track *pTrack, Cluster *&pCluster) const;
-
 } // namespace pandora

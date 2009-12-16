@@ -250,7 +250,7 @@ bool GeometryHelper::IsInECalGapRegion(const CartesianVector &position) const
 StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer, bool shouldApplyOverlapCorrection) const
 {
     static const float overlapCorrection(GetECalBarrelParameters().GetInnerRCoordinate() *
-        ((GetECalEndCapParameters().GetInnerZCoordinate() / GetECalBarrelParameters().GetOuterZCoordinate()) - 1.));
+        ((GetECalEndCapParameters().GetInnerZCoordinate() / GetECalBarrelParameters().GetOuterZCoordinate()) - 1.f));
 
     if (shouldApplyOverlapCorrection && (ENCLOSING_ENDCAP == GetGeometryType()))
         radius -= overlapCorrection;
@@ -284,7 +284,7 @@ StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer, bo
 StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection) const
 {
     static const float overlapCorrection(GetECalEndCapParameters().GetInnerZCoordinate() *
-        ((GetECalBarrelParameters().GetInnerRCoordinate() / GetECalEndCapParameters().GetOuterRCoordinate()) - 1.));
+        ((GetECalBarrelParameters().GetInnerRCoordinate() / GetECalEndCapParameters().GetOuterRCoordinate()) - 1.f));
 
     if (shouldApplyOverlapCorrection && (ENCLOSING_BARREL == GetGeometryType()))
         zCoordinate -= overlapCorrection;
@@ -324,7 +324,7 @@ float GeometryHelper::GetMaximumRadius(float x, float y) const
         return std::sqrt((x * x) + (y * y));
 
     float maxRadius = 0;
-    static const float twoPi = 2. * std::acos(-1.);
+    static const float twoPi = static_cast<float>(2. * std::acos(-1.));
 
     // TODO shorten/remove these calculations
     for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)

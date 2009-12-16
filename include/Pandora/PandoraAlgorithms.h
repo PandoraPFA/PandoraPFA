@@ -13,7 +13,7 @@
 #include "Algorithms/MonitoringAlgorithm.h"
 #include "Algorithms/PfoConstructionAlgorithm.h"
 #include "Algorithms/PhotonClusteringAlgorithm.h"
-#include "Algorithms/ECalPhotonIdAlgorithm.h"
+//#include "Algorithms/ECalPhotonIdAlgorithm.h"
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
 #include "Algorithms/ReclusteringAlgorithm.h"
 #include "Algorithms/TopologicalAssociationAlgorithm.h"
@@ -42,7 +42,6 @@
     d("Monitoring",                 MonitoringAlgorithm::Factory)                   \
     d("PfoConstruction",            PfoConstructionAlgorithm::Factory)              \
     d("PhotonClustering",           PhotonClusteringAlgorithm::Factory)             \
-    d("ECalPhotonId",               ECalPhotonIdAlgorithm::Factory)                 \
     d("PrimaryClustering",          PrimaryClusteringAlgorithm::Factory)            \
     d("Reclustering",               ReclusteringAlgorithm::Factory)                 \
     d("TopologicalAssociation",     TopologicalAssociationAlgorithm::Factory)       \

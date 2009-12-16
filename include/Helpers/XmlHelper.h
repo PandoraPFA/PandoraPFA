@@ -94,6 +94,74 @@ private:
     static void TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter = " ");
 };
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline StatusCode XmlHelper::ReadValue(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, T &t)
+{
+    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
+
+    if (NULL == pXmlElement)
+        return STATUS_CODE_NOT_FOUND;
+
+    if (!StringToType(pXmlElement->GetText(), t))
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+template <>
+inline StatusCode XmlHelper::ReadValue<bool>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, bool &t)
+{
+    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
+
+    if (NULL == pXmlElement)
+        return STATUS_CODE_NOT_FOUND;
+
+    const std::string xmlElementString = pXmlElement->GetText();
+
+    if ((xmlElementString == "1") || (xmlElementString == "true"))
+    {
+        t = true;
+    }
+    else if ((xmlElementString == "0") || (xmlElementString == "false"))
+    {
+        t = false;
+    }
+    else
+    {
+        return STATUS_CODE_FAILURE;
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline StatusCode XmlHelper::ReadVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<T> &vector)
+{
+    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
+
+    if (NULL == pXmlElement)
+        return STATUS_CODE_NOT_FOUND;
+
+    StringVector tokens;
+    TokenizeString(pXmlElement->GetText(), tokens);
+
+    for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
+    {
+        T t;
+
+        if (!StringToType(*iter, t))
+            return STATUS_CODE_FAILURE;
+
+        vector.push_back(t);
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
 } // namespace pandora
 
 #endif // #ifndef XML_HELPER_H

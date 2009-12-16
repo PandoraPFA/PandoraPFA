@@ -70,13 +70,13 @@ bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitVector &caloHitVector)
 float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
 {
     static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
-    static const unsigned int densityWeightPower(PandoraSettings::GetInstance()->GetDensityWeightPower());
+    static const float densityWeightPower(static_cast<float>(PandoraSettings::GetInstance()->GetDensityWeightPower()));
 
     float densityWeightContribution = 0.;
     const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const float positionMagnitude(positionVector.GetMagnitude());
 
-    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    for(CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         if (pCaloHit == *iter)
             continue;
@@ -92,7 +92,7 @@ float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit,
         if (0 == rN)
             throw StatusCodeException(STATUS_CODE_FAILURE);
 
-        densityWeightContribution += (100. / rN);
+        densityWeightContribution += (100.f / rN);
     }
 
     return densityWeightContribution;
@@ -108,7 +108,7 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
     const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const bool isHitInBarrelRegion(pCaloHit->GetDetectorRegion() == BARREL);
 
-    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    for(CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         if (pCaloHit == *iter)
             continue;
@@ -153,7 +153,7 @@ unsigned int CaloHitHelper::IsolationCountNearbyHits(const CaloHit *const pCaloH
 
     unsigned int nearbyHitsFound = 0;
 
-    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    for(CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         if (pCaloHit == *iter)
             continue;
@@ -176,13 +176,13 @@ unsigned int CaloHitHelper::IsolationCountNearbyHits(const CaloHit *const pCaloH
 unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
 {
     static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
-    static const float mipNCellsForNearbyHit(PandoraSettings::GetInstance()->GetMipNCellsForNearbyHit() + 0.5);
+    static const float mipNCellsForNearbyHit(PandoraSettings::GetInstance()->GetMipNCellsForNearbyHit() + 0.5f);
 
     unsigned int nearbyHitsFound = 0;
     const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const bool isHitInBarrelRegion(pCaloHit->GetDetectorRegion() == BARREL);
 
-    for(CaloHitList::iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    for(CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         if (pCaloHit == *iter)
             continue;
@@ -350,7 +350,7 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
 {
     // Read settings
     static const bool useSimpleIsolationScheme(PandoraSettings::GetInstance()->ShouldUseSimpleIsolationScheme());
-    static const float isolationMaxNearbyHits(PandoraSettings::GetInstance()->GetIsolationMaxNearbyHits());
+    static const float isolationMaxNearbyHits(static_cast<float>(PandoraSettings::GetInstance()->GetIsolationMaxNearbyHits()));
     static const float mipLikeMipCut(PandoraSettings::GetInstance()->GetMipLikeMipCut());
     static const unsigned int mipMaxNearbyHits(PandoraSettings::GetInstance()->GetMipMaxNearbyHits());
     static const PseudoLayer densityWeightNLayers(PandoraSettings::GetInstance()->GetDensityWeightNLayers());

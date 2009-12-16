@@ -13,74 +13,6 @@
 namespace pandora
 {
 
-template <typename T>
-StatusCode XmlHelper::ReadValue(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, T &t)
-{
-    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
-
-    if (NULL == pXmlElement)
-        return STATUS_CODE_NOT_FOUND;
-
-    if (!StringToType(pXmlElement->GetText(), t))
-        return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-template <>
-StatusCode XmlHelper::ReadValue<bool>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, bool &t)
-{
-    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
-
-    if (NULL == pXmlElement)
-        return STATUS_CODE_NOT_FOUND;
-
-    const std::string xmlElementString = pXmlElement->GetText();
-
-    if ((xmlElementString == "1") || (xmlElementString == "true"))
-    {
-        t = true;
-    }
-    else if ((xmlElementString == "0") || (xmlElementString == "false"))
-    {
-        t = false;
-    }
-    else
-    {
-        return STATUS_CODE_FAILURE;
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template <typename T>
-StatusCode XmlHelper::ReadVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<T> &vector)
-{
-    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
-
-    if (NULL == pXmlElement)
-        return STATUS_CODE_NOT_FOUND;
-
-    StringVector tokens;
-    TokenizeString(pXmlElement->GetText(), tokens);
-
-    for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
-    {
-        T t;
-
-        if (!StringToType(*iter, t))
-            return STATUS_CODE_FAILURE;
-
-        vector.push_back(t);
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode XmlHelper::ProcessAlgorithmList(const Algorithm &algorithm, const TiXmlHandle &xmlHandle, const std::string &listName,
     StringVector &algorithmNames)
 {
@@ -156,21 +88,5 @@ void XmlHelper::TokenizeString(const std::string &inputString, StringVector &tok
         pos = inputString.find_first_of(delimiter, lastPos);
     }
 }
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template StatusCode XmlHelper::XmlHelper::ReadValue<std::string>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::string &s);
-template StatusCode XmlHelper::XmlHelper::ReadValue<int>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, int &i);
-template StatusCode XmlHelper::XmlHelper::ReadValue<unsigned int>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, unsigned int &u);
-template StatusCode XmlHelper::XmlHelper::ReadValue<float>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, float &f);
-template StatusCode XmlHelper::XmlHelper::ReadValue<double>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, double &d);
-template StatusCode XmlHelper::XmlHelper::ReadValue<bool>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, bool &b);
-
-template StatusCode XmlHelper::XmlHelper::ReadVectorOfValues<std::string>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<std::string> &vector);
-template StatusCode XmlHelper::XmlHelper::ReadVectorOfValues<int>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<int> &vector);
-template StatusCode XmlHelper::XmlHelper::ReadVectorOfValues<unsigned int>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<unsigned int> &vector);
-template StatusCode XmlHelper::XmlHelper::ReadVectorOfValues<float>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<float> &vector);
-template StatusCode XmlHelper::XmlHelper::ReadVectorOfValues<double>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<double> &vector);
 
 } // namespace pandora

@@ -15,6 +15,7 @@
 #include "Objects/Track.h"
 
 #include <cmath>
+#include <limits>
 
 namespace pandora
 {
@@ -220,8 +221,8 @@ StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitP
     const double bU(-bV / aV);
     const double r(std::sqrt(1. + aV * aV + aZ * aZ));
     const double dirU(1. / r), dirV(aV / r), dirZ(aZ / r);
-    CartesianVector direction(cosTheta * dirU - sinTheta * dirV, sinTheta * dirU + cosTheta * dirV, dirZ);
-    CartesianVector intercept(cosTheta * bU, sinTheta * bU, aZ * bU + bZ);
+    CartesianVector direction(static_cast<float>(cosTheta * dirU - sinTheta * dirV), static_cast<float>(sinTheta * dirU + cosTheta * dirV), static_cast<float>(dirZ));
+    CartesianVector intercept(static_cast<float>(cosTheta * bU), static_cast<float>(sinTheta * bU), static_cast<float>(aZ * bU + bZ));
 
     float dirCosR(direction.GetDotProduct(intercept) / intercept.GetMagnitude());
 
@@ -266,8 +267,8 @@ StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitP
 
     clusterFitResult.SetDirection(direction);
     clusterFitResult.SetIntercept(intercept);
-    clusterFitResult.SetChi2((chi2_V + chi2_Z) / nPoints);
-    clusterFitResult.SetRms(std::sqrt(rms / nPoints));
+    clusterFitResult.SetChi2(static_cast<float>((chi2_V + chi2_Z) / nPoints));
+    clusterFitResult.SetRms(static_cast<float>(std::sqrt(rms / nPoints)));
     clusterFitResult.SetRadialDirectionCosine(dirCosR);
     clusterFitResult.SetSuccessFlag(true);
 
@@ -307,8 +308,8 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
     const double bY((sumY - aY * sumZ) / nPoints);
 
     const double r(std::sqrt(1. + aX * aX + aY * aY));
-    CartesianVector direction(aX / r, aY / r, 1. / r);
-    CartesianVector intercept(bX, bY, (isPositiveZ) ? eCalEndCapZCoordinate : -eCalEndCapZCoordinate);
+    CartesianVector direction(static_cast<float>(aX / r), static_cast<float>(aY / r), static_cast<float>(1. / r));
+    CartesianVector intercept(static_cast<float>(bX), static_cast<float>(bY), (isPositiveZ) ? eCalEndCapZCoordinate : -eCalEndCapZCoordinate);
 
     float dirCosR(direction.GetDotProduct(intercept) / intercept.GetMagnitude());
     if (0 > dirCosR)
@@ -324,7 +325,7 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
     for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
         const CartesianVector difference(iter->GetPosition() - intercept);
-        const float error(iter->GetCellSize() / 3.46);
+        const float error(iter->GetCellSize() / 3.46f);
         const double chiX((difference.GetX() - aX * difference.GetZ()) / error);
         const double chiY((difference.GetY() - aY * difference.GetZ()) / error);
 
@@ -346,8 +347,8 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
 
     clusterFitResult.SetDirection(direction);
     clusterFitResult.SetIntercept(intercept);
-    clusterFitResult.SetChi2((chi2_X + chi2_Y) / nPoints);
-    clusterFitResult.SetRms(std::sqrt(rms / nPoints));
+    clusterFitResult.SetChi2(static_cast<float>((chi2_X + chi2_Y) / nPoints));
+    clusterFitResult.SetRms(static_cast<float>(std::sqrt(rms / nPoints)));
     clusterFitResult.SetRadialDirectionCosine(dirCosR);
     clusterFitResult.SetSuccessFlag(true);
 

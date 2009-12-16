@@ -11,9 +11,9 @@
 namespace pandora
 {
 
-const float Helix::FCT = 2.99792458E-4;
-const float Helix::TWO_PI = 2. * std::acos(-1.0);
-const float Helix::HALF_PI = 0.5 * std::acos(-1.0);
+const float Helix::FCT = 2.99792458E-4f;
+const float Helix::TWO_PI = static_cast<float>(2. * std::acos(-1.0));
+const float Helix::HALF_PI = static_cast<float>(0.5 * std::acos(-1.0));
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ Helix::Helix(const float phi0, const float d0, const float z0, const float omega
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     m_charge = omega / std::fabs(omega);
-    m_radius = 1. / std::fabs(omega);
+    m_radius = 1.f / std::fabs(omega);
     m_xAtPCA = -m_d0 * std::sin(m_phi0);
     m_yAtPCA = m_d0 * std::cos(m_phi0);
     m_referencePoint.SetValues(m_xAtPCA, m_yAtPCA, m_z0);
@@ -62,7 +62,7 @@ Helix::Helix(const CartesianVector &position, const CartesianVector &momentum, c
 
     m_omega     = charge / m_radius;
     m_tanLambda = momentum.GetZ() / m_pxy;
-    m_phiMomRefPoint = std::atan2(py, px);
+    m_phiMomRefPoint = static_cast<float>(std::atan2(py, px));
 
     const double x(position.GetX()), y(position.GetY());
     const double xCentre(x + radius * static_cast<double>(std::cos(m_phiMomRefPoint - HALF_PI * charge)));
@@ -81,8 +81,8 @@ Helix::Helix(const CartesianVector &position, const CartesianVector &momentum, c
     }
     m_d0 = static_cast<float>(d0);
 
-    m_phiRefPoint   =  std::atan2(y - yCentre, x - xCentre);
-    m_phiAtPCA      =  std::atan2(-yCentre, -xCentre);
+    m_phiRefPoint   =  static_cast<float>(std::atan2(y - yCentre, x - xCentre));
+    m_phiAtPCA      =  static_cast<float>(std::atan2(-yCentre, -xCentre));
     m_phi0          = -HALF_PI * charge + m_phiAtPCA;
 
     while (m_phi0 < 0.)
@@ -274,13 +274,13 @@ StatusCode Helix::GetPointOnCircle(const float radius, const CartesianVector &re
     const float phiCentre(std::atan2(m_yCentre, m_xCentre));
 
     float phiStar(radius * radius + distCenterToIP * distCenterToIP - m_radius * m_radius);
-    phiStar = 0.5 * phiStar / fmax(1.e-20, radius * distCenterToIP);
+	phiStar = 0.5f * phiStar / std::max(1.e-20f, radius * distCenterToIP);
 
-    if (phiStar > 1.0)
-        phiStar = 0.9999999;
+    if (phiStar > 1.f)
+        phiStar = 0.9999999f;
 
-    if (phiStar < -1.0)
-        phiStar = -0.9999999;
+    if (phiStar < -1.f)
+        phiStar = -0.9999999f;
 
     phiStar = std::acos(phiStar);
 
@@ -428,7 +428,7 @@ StatusCode Helix::GetDistanceToHelix(const Helix *const pHelix, CartesianVector 
             return STATUS_CODE_FAILURE;
 
         singlePoint = false;
-        float cosAlpha = 0.5 * (distance * distance + rad2 * rad2 - rad1 * rad1) / (distance * rad2);
+        float cosAlpha = 0.5f * (distance * distance + rad2 * rad2 - rad1 * rad1) / (distance * rad2);
         float alpha = std::acos(cosAlpha);
         float phi0 = std::atan2(y01 - y02, x01 - x02);
         phi1 = phi0 + alpha;

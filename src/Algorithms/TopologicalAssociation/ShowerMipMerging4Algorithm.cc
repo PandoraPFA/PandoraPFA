@@ -8,6 +8,8 @@
 
 #include "Algorithms/TopologicalAssociation/ShowerMipMerging4Algorithm.h"
 
+#include <limits>
+
 using namespace pandora;
 
 const float ShowerMipMerging4Algorithm::FLOAT_MAX = std::numeric_limits<float>::max();
@@ -115,11 +117,11 @@ float ShowerMipMerging4Algorithm::GetDistanceFromInitialProjection(const Cluster
 
 StatusCode ShowerMipMerging4Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_canMergeMinMipFraction = 0.7;
+    m_canMergeMinMipFraction = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
 
-    m_canMergeMaxRms = 5.;
+    m_canMergeMaxRms = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
@@ -135,15 +137,15 @@ StatusCode ShowerMipMerging4Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxLayerDifference", m_maxLayerDifference));
 
-    m_maxProjectionDistance = 50.;
+    m_maxProjectionDistance = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxProjectionDistance", m_maxProjectionDistance));
 
-    m_maxProjectionDistanceRatio = 0.9;
+    m_maxProjectionDistanceRatio = 0.9f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxProjectionDistanceRatio", m_maxProjectionDistanceRatio));
 
-    m_maxIntraLayerDistance = 500.;
+    m_maxIntraLayerDistance = 500.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxIntraLayerDistance", m_maxIntraLayerDistance));
 

@@ -8,6 +8,8 @@
 
 #include "Algorithms/TopologicalAssociation/BackscatteredTracksAlgorithm.h"
 
+#include <limits>
+
 using namespace pandora;
 
 StatusCode BackscatteredTracksAlgorithm::Run()
@@ -89,11 +91,11 @@ StatusCode BackscatteredTracksAlgorithm::Run()
 
 StatusCode BackscatteredTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_canMergeMinMipFraction = 0.7;
+    m_canMergeMinMipFraction = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
 
-    m_canMergeMaxRms = 5.;
+    m_canMergeMaxRms = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
@@ -101,7 +103,7 @@ StatusCode BackscatteredTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
 
-    m_fitToAllHitsRmsCut = 10.;
+    m_fitToAllHitsRmsCut = 10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitToAllHitsRmsCut", m_fitToAllHitsRmsCut));
 
@@ -109,11 +111,11 @@ StatusCode BackscatteredTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NOuterFitExclusionLayers", m_nOuterFitExclusionLayers));
 
-    m_nFitProjectionLayers = 2; // TODO alter this name
+    m_nFitProjectionLayers = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NFitProjectionLayers", m_nFitProjectionLayers));
 
-    m_maxIntraLayerDistance = 100.;
+    m_maxIntraLayerDistance = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxIntraLayerDistance", m_maxIntraLayerDistance));
 

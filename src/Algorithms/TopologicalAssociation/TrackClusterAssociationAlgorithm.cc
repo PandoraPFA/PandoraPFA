@@ -9,6 +9,7 @@
 #include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
 #include <cmath>
+#include <limits>
 
 using namespace pandora;
 
@@ -92,11 +93,11 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
 
 StatusCode TrackClusterAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_lowEnergyCut = 0.2;
+    m_lowEnergyCut = 0.2f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LowEnergyCut", m_lowEnergyCut));
 
-    m_maxTrackClusterDistance = 10.;
+    m_maxTrackClusterDistance = 10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackClusterDistance", m_maxTrackClusterDistance));
 
@@ -104,7 +105,7 @@ StatusCode TrackClusterAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlH
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSearchLayer", m_maxSearchLayer));
 
-    m_parallelDistanceCut = 100.;
+    m_parallelDistanceCut = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ParallelDistanceCut", m_parallelDistanceCut));
 

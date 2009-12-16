@@ -97,9 +97,9 @@ StatusCode CheatingAlgorithm::Run()
             return STATUS_CODE_INVALID_PARAMETER;
         }
 //          std::cout << "energy " << energy << std::endl;
-        pfo.m_energy = energy; 
+        pfo.m_energy = static_cast<float>(energy);
         pfo.m_chargeSign = charge;
-        pfo.m_mass = mass;
+        pfo.m_mass = static_cast<float>(mass);
         pfo.m_momentum = momentum;
         pfo.m_particleId = particleId;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfo));

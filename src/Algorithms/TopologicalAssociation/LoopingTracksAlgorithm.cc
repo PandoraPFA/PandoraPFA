@@ -11,6 +11,7 @@
 #include "Helpers/GeometryHelper.h"
 
 #include <cmath>
+#include <limits>
 
 using namespace pandora;
 
@@ -176,15 +177,15 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NLayersToFit", m_nLayersToFit));
 
-    m_fitChi2Cut = 100.;
+    m_fitChi2Cut = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitChi2Cut", m_fitChi2Cut));
 
-    m_canMergeMinMipFraction = 0.7;
+    m_canMergeMinMipFraction = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
 
-    m_canMergeMaxRms = 5.;
+    m_canMergeMaxRms = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
@@ -192,31 +193,31 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxOuterLayerDifference", m_maxOuterLayerDifference));
 
-    m_maxCentroidDifference = 2000.;
+    m_maxCentroidDifference = 2000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxCentroidDifference", m_maxCentroidDifference));
 
-    m_fitDirectionDotProductCutECal = -0.1;
+    m_fitDirectionDotProductCutECal = -0.1f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitDirectionDotProductCutECal", m_fitDirectionDotProductCutECal));
 
-    m_fitDirectionDotProductCutHCal = 0.;
+    m_fitDirectionDotProductCutHCal = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitDirectionDotProductCutHCal", m_fitDirectionDotProductCutHCal));
 
-    m_closestHitDistanceCutECal = 250.;
+    m_closestHitDistanceCutECal = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClosestHitDistanceCutECal", m_closestHitDistanceCutECal));
 
-    m_closestHitDistanceCutHCal = 500.;
+    m_closestHitDistanceCutHCal = 500.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClosestHitDistanceCutHCal", m_closestHitDistanceCutHCal));
 
-    m_fitResultsClosestApproachCutECal = 50.;
+    m_fitResultsClosestApproachCutECal = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitResultsClosestApproachCutECal", m_fitResultsClosestApproachCutECal));
 
-    m_fitResultsClosestApproachCutHCal = 200.;
+    m_fitResultsClosestApproachCutHCal = 200.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitResultsClosestApproachCutHCal", m_fitResultsClosestApproachCutHCal));
 
@@ -224,11 +225,11 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NGoodFeaturesForClusterMerge", m_nGoodFeaturesForClusterMerge));
 
-    m_goodFeaturesMaxFitDotProduct = -0.5;
+    m_goodFeaturesMaxFitDotProduct = -0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NGoodFeaturesForClusterMerge", m_nGoodFeaturesForClusterMerge));
 
-    m_goodFeaturesMaxFitApproach = 50.;
+    m_goodFeaturesMaxFitApproach = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GoodFeaturesMaxFitApproach", m_goodFeaturesMaxFitApproach));
 
@@ -236,7 +237,7 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GoodFeaturesMaxLayerDifference", m_goodFeaturesMaxLayerDifference));
 
-    m_goodFeaturesMinMipFraction = 0.9;
+    m_goodFeaturesMinMipFraction = 0.9f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GoodFeaturesMinMipFraction", m_goodFeaturesMinMipFraction));
 

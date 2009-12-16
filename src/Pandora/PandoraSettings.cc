@@ -56,15 +56,15 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsMonitoringEnabled", m_isMonitoringEnabled));
 
-        m_hadronicEnergyResolution = 0.6;
+        m_hadronicEnergyResolution = 0.6f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "HadronicEnergyResolution", m_hadronicEnergyResolution));
 
-        m_mcPfoSelectionRadius = 300.;
+        m_mcPfoSelectionRadius = 300.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MCPfoSelectionRadius", m_mcPfoSelectionRadius));
 
-        m_caloHitMaxSeparation = 100;
+        m_caloHitMaxSeparation = 100.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "CaloHitMaxSeparation", m_caloHitMaxSeparation));
 
@@ -80,11 +80,11 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ShouldUseSimpleIsolationScheme", m_shouldUseSimpleIsolationScheme));
 
-        m_isolationDensityWeightCutECal = 0.5;
+        m_isolationDensityWeightCutECal = 0.5f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationDensityWeightCutECal", m_isolationDensityWeightCutECal));
 
-        m_isolationDensityWeightCutHCal = 0.25;
+        m_isolationDensityWeightCutHCal = 0.25f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationDensityWeightCutHCal", m_isolationDensityWeightCutHCal));
 
@@ -92,11 +92,11 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationNLayers", m_isolationNLayers));
 
-        m_isolationCutDistanceECal = 50;
+        m_isolationCutDistanceECal = 50.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationCutDistanceECal", m_isolationCutDistanceECal));
 
-        m_isolationCutDistanceHCal = 250;
+        m_isolationCutDistanceHCal = 250.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationCutDistanceHCal", m_isolationCutDistanceHCal));
 
@@ -104,7 +104,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationMaxNearbyHits", m_isolationMaxNearbyHits));
 
-        m_mipLikeMipCut = 5;
+        m_mipLikeMipCut = 5.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MipLikeMipCut", m_mipLikeMipCut));
 
