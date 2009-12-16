@@ -51,9 +51,9 @@ StatusCode ConeBasedMergingAlgorithm::Run()
             if (pParentCluster->GetAssociatedTrackList().empty() && (innerLayerSeparation > m_maxInnerLayerSeparationNoTrack))
                 continue;
 
-            // 
+            // The best parent cluster is that for which a cone (around its mip fit) encloses the most daughter cluster hits
             const ClusterFitResult &mipFitResult = iterJ->second;
-            const float fractionInCone(this->GetFractionInCone(pDaughterCluster, mipFitResult, m_coneCosineHalfAngle));
+            const float fractionInCone(this->GetFractionInCone(pParentCluster, pDaughterCluster, mipFitResult));
 
             if (fractionInCone > highestConeFraction)
             {
@@ -64,6 +64,40 @@ StatusCode ConeBasedMergingAlgorithm::Run()
 
         if (NULL != pBestParentCluster)
         {
+            // Check consistency of cluster energy and energy of associated tracks
+            const TrackList &trackList(pBestParentCluster->GetAssociatedTrackList());
+
+            if (!trackList.empty())
+            {
+                float trackEnergySum(0.);
+
+                for (TrackList::const_iterator trackIter = trackList.begin(), trackIterEnd = trackList.end(); trackIter != trackIterEnd; ++trackIter)
+                    trackEnergySum += (*trackIter)->GetEnergyAtDca();
+
+                if (trackEnergySum > 0.)
+                {
+                    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+                    const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
+
+                    if (0. == sigmaE)
+                        continue;
+
+                    const float clusterEnergySum = (pBestParentCluster->GetHadronicEnergy() + pDaughterCluster->GetHadronicEnergy());
+
+                    const float chi((clusterEnergySum - trackEnergySum) / sigmaE);
+                    const float chi0((pBestParentCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
+
+                    bool canMergeClusters(pDaughterCluster->GetHadronicEnergy() > m_minDaughterHadronicEnergy);
+
+                    if (!canMergeClusters)
+                    {
+                        if ((chi > m_maxTrackClusterChi) || ((chi * chi - chi0 * chi0) > m_maxTrackClusterDChi2))
+                            continue;
+                    }
+                }
+            }
+
+            // Finally, merge the clusters
             (*iterI) = NULL;
             parentFitResultMap.erase(pDaughterCluster);
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
@@ -124,10 +158,67 @@ StatusCode ConeBasedMergingAlgorithm::PrepareClusters(ClusterVector &daughterVec
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float ConeBasedMergingAlgorithm::GetFractionInCone(const Cluster *const pDaughterCluster, const ClusterFitResult &parentMipFitResult,
-    const float coneCosineHalfAngle) const
+float ConeBasedMergingAlgorithm::GetFractionInCone(Cluster *const pParentCluster, const Cluster *const pDaughterCluster,
+    const ClusterFitResult &parentMipFitResult) const
 {
-    return 0.; // TODO under construction
+    // Apply preliminary checks
+    const unsigned int nDaughterCaloHits(pDaughterCluster->GetNCaloHits());
+
+    if (!parentMipFitResult.IsFitSuccessful() || (0 == nDaughterCaloHits))
+        return 0.;
+
+    const PseudoLayer parentShowerMaxLayer(pParentCluster->GetShowerMaxLayer());
+
+    if (pDaughterCluster->GetInnerPseudoLayer() < parentShowerMaxLayer)
+        return 0.;
+
+    // Identify cone vertex
+    const CartesianVector &parentMipFitDirection(parentMipFitResult.GetDirection());
+    const CartesianVector &parentMipFitIntercept(parentMipFitResult.GetIntercept());
+
+    const CartesianVector showerMaxDifference(pParentCluster->GetCentroid(parentShowerMaxLayer) - parentMipFitIntercept);
+    const float parallelDistanceToShowerMax(showerMaxDifference.GetDotProduct(parentMipFitDirection));
+    const CartesianVector coneVertex(parentMipFitIntercept + (parentMipFitDirection * parallelDistanceToShowerMax));
+
+    // Don't allow large distance associations at low angle
+    const float cosConeAngleWrtRadial(coneVertex.GetUnitVector().GetDotProduct(parentMipFitDirection));
+
+    if (cosConeAngleWrtRadial < m_minCosConeAngleWrtRadial)
+        return 0.;
+
+    // Count daughter cluster hits in cone
+    unsigned int nHitsInCone(0);
+    float minHitSeparation(std::numeric_limits<float>::max());
+    const OrderedCaloHitList &orderedCaloHitList(pDaughterCluster->GetOrderedCaloHitList());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            const CartesianVector positionDifference((*hitIter)->GetPositionVector() - coneVertex);
+            const float hitSeparation(positionDifference.GetMagnitude());
+
+            if (0. == hitSeparation)
+                throw StatusCodeException(STATUS_CODE_FAILURE);
+
+            if (hitSeparation < minHitSeparation)
+                minHitSeparation = hitSeparation;
+
+            const float cosTheta(parentMipFitDirection.GetDotProduct(positionDifference) / hitSeparation);
+
+            if (cosTheta > m_coneCosineHalfAngle)
+                nHitsInCone++;
+        }
+    }
+
+    // Further checks to prevent large distance associations at low angle
+    if ( ((cosConeAngleWrtRadial < m_cosConeAngleWrtRadialCut1) && (minHitSeparation > m_minHitSeparationCut1)) ||
+         ((cosConeAngleWrtRadial < m_cosConeAngleWrtRadialCut2) && (minHitSeparation > m_minHitSeparationCut2)) )
+    {
+        return 0.;
+    }
+
+    return static_cast<float>(nHitsInCone) / static_cast<float>(nDaughterCaloHits);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -179,6 +270,38 @@ StatusCode ConeBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_coneCosineHalfAngle = 0.9;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ConeCosineHalfAngle", m_coneCosineHalfAngle));
+
+    m_minDaughterHadronicEnergy = 1.;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinDaughterHadronicEnergy", m_minDaughterHadronicEnergy));
+
+    m_maxTrackClusterChi = 2.5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackClusterChi", m_maxTrackClusterChi));
+
+    m_maxTrackClusterDChi2 = 1.;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackClusterDChi2", m_maxTrackClusterDChi2));
+
+    m_minCosConeAngleWrtRadial = 0.25;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCosConeAngleWrtRadial", m_minCosConeAngleWrtRadial));
+
+    m_cosConeAngleWrtRadialCut1 = 0.5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CosConeAngleWrtRadialCut1", m_cosConeAngleWrtRadialCut1));
+
+    m_minHitSeparationCut1 = 1000.;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitSeparationCut1", m_minHitSeparationCut1));
+
+    m_cosConeAngleWrtRadialCut2 = 0.75;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CosConeAngleWrtRadialCut2", m_cosConeAngleWrtRadialCut2));
+
+    m_minHitSeparationCut2 = 1500.;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitSeparationCut2", m_minHitSeparationCut2));
 
     return STATUS_CODE_SUCCESS;
 }

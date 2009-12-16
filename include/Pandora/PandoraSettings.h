@@ -36,6 +36,13 @@ public:
     bool IsMonitoringEnabled() const;
 
     /**
+     *  @brief  Get the hadronic energy resolution as a fraction, X, such that sigmaE = ( X * E / sqrt(E) )
+     * 
+     *  @return The hadronic energy resolution
+     */
+    float GetHadronicEnergyResolution() const;
+
+    /**
      *  @brief  Get the radius used to select the pfo target from a mc particle decay chain, units mm
      * 
      *  @return The pfo selection radius
@@ -160,6 +167,8 @@ private:
 
     bool                    m_isMonitoringEnabled;              ///< Whether monitoring is enabled
 
+    float                   m_hadronicEnergyResolution;         ///< Hadronic energy resolution, X, such that sigmaE = ( X * E / sqrt(E) )
+
     float                   m_caloHitMaxSeparation;             ///< Max separation for associations between hits to be considered, units mm
 
     unsigned int            m_densityWeightPower;               ///< The density weighting power
@@ -186,6 +195,13 @@ private:
 inline bool PandoraSettings::IsMonitoringEnabled() const
 {
     return m_isMonitoringEnabled;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetHadronicEnergyResolution() const
+{
+    return m_hadronicEnergyResolution;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

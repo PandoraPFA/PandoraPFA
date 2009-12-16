@@ -69,8 +69,8 @@ private:
     int             m_minLayerSpan;                     ///< Min span between parent and daughter outer and inner layers
     int             m_minShowerLayerSpan;               ///< Min span between daughter inner layer and parent shower max layer
 
-    float           m_maxTrackClusterChi;               ///< Max no. standard deviations between cluster and associated track energies
-    float           m_maxTrackClusterChi0;              ///< Max no. standard deviations between parent cluster energy and track energies
+    float           m_maxTrackClusterChi;               ///< Max no. standard deviations between clusters and associated track energies
+    float           m_maxTrackClusterDChi2;             ///< Max diff between chi2 using parent+daughter energies and that using only parent
 
     unsigned int    m_nGenericDistanceLayers;           ///< Number of layers to examine when calculating generic distance between clusters
     float           m_maxGenericDistance;               ///< Max value of generic distance between two clusters for clusters to be merged

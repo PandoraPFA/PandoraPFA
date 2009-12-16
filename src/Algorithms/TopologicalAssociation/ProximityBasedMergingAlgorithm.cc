@@ -79,7 +79,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
 
             if (trackEnergySum > 0.)
             {
-                static const float hadronicEnergyResolution(0.6); //TODO get hadronic resolution constant from settings
+                static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
                 const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
 
                 if (0. == sigmaE)
@@ -90,7 +90,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
                 const float chi((clusterEnergySum - trackEnergySum) / sigmaE);
                 const float chi0((pParentCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
 
-                if ((chi > m_maxTrackClusterChi) || ((chi * chi - chi0 * chi0) > m_maxTrackClusterChi0))
+                if ((chi > m_maxTrackClusterChi) || ((chi * chi - chi0 * chi0) > m_maxTrackClusterDChi2))
                     continue;
             }
 
@@ -292,9 +292,9 @@ StatusCode ProximityBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackClusterChi", m_maxTrackClusterChi));
 
-    m_maxTrackClusterChi0 = 1.;
+    m_maxTrackClusterDChi2 = 1.;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxTrackClusterChi0", m_maxTrackClusterChi0));
+        "MaxTrackClusterDChi2", m_maxTrackClusterDChi2));
 
     m_nGenericDistanceLayers = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
