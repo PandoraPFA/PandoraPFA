@@ -41,6 +41,9 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         {
             Cluster *pCluster = *clusterIter;
 
+            if (0 == pCluster->GetNCaloHits())
+                continue;
+
             float trackClusterDistance(std::numeric_limits<float>::max());
             if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack, pCluster, m_maxSearchLayer, m_parallelDistanceCut, trackClusterDistance))
                 continue;
