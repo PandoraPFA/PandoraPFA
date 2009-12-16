@@ -88,7 +88,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             if (fitDirectionDotProduct > fitDirectionDotProductCut)
                 continue;
 
-            if (!(centroidDifference.GetDotProduct(clusterFitResultJ.GetDirection() - clusterFitResultI.GetDirection())) > 0.);
+            if (centroidDifference.GetDotProduct(clusterFitResultJ.GetDirection() - clusterFitResultI.GetDirection()) <= 0.)
                 continue;
 
             // Cut on distance of closest approach between hits in outer layers of the two clusters
@@ -148,7 +148,7 @@ float LoopingTracksAlgorithm::GetClosestDistanceBetweenOuterLayerHits(const Clus
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterI->GetOrderedCaloHitList().GetCaloHitsInPseudoLayer(outerLayerI, pCaloHitListI));
 
     CaloHitList *pCaloHitListJ = NULL;
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterI->GetOrderedCaloHitList().GetCaloHitsInPseudoLayer(outerLayerJ, pCaloHitListJ));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterJ->GetOrderedCaloHitList().GetCaloHitsInPseudoLayer(outerLayerJ, pCaloHitListJ));
 
     for (CaloHitList::const_iterator iterI = pCaloHitListI->begin(), iterIEnd = pCaloHitListI->end(); iterI != iterIEnd; ++iterI)
     {
