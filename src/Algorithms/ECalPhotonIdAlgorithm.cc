@@ -35,7 +35,7 @@ PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance()
 
 ECalPhotonIdAlgorithm::ECalPhotonIdAlgorithm()
 {
-    if (_printing > 0)
+    if (m_producePrintoutStatements > 0)
         std::cout << "constructor" << std::endl;
 }
 
@@ -43,14 +43,14 @@ ECalPhotonIdAlgorithm::ECalPhotonIdAlgorithm()
 
 StatusCode ECalPhotonIdAlgorithm::Initialize()
 {
-    if (_printing > 0)
+    if (m_producePrintoutStatements > 0)
     {
         std::cout << "initialize" << std::endl;
-        std::cout << "makingphotonid " <<_makingPhotonIDLikelihoodHistograms << std::endl;
+        std::cout << "makingphotonid " <<m_makingPhotonIdLikelihoodHistograms << std::endl;
     }
 
     // create monitoring histograms for likelihood
-    if(_makingPhotonIDLikelihoodHistograms)
+    if(m_makingPhotonIdLikelihoodHistograms)
         CreateOrSaveLikelihoodHistograms(true);
 
     return STATUS_CODE_SUCCESS;
@@ -60,14 +60,14 @@ StatusCode ECalPhotonIdAlgorithm::Initialize()
 
 ECalPhotonIdAlgorithm::~ECalPhotonIdAlgorithm()
 {
-    if (_printing > 0)
+    if (m_producePrintoutStatements > 0)
     {
         std::cout << "destructor" << std::endl;
-        std::cout << "makingphotonid " <<_makingPhotonIDLikelihoodHistograms << std::endl;
+        std::cout << "makingphotonid " <<m_makingPhotonIdLikelihoodHistograms << std::endl;
     }
 
     // create monitoring histograms for likelihood
-    if(_makingPhotonIDLikelihoodHistograms)
+    if(m_makingPhotonIdLikelihoodHistograms)
         CreateOrSaveLikelihoodHistograms(false);
 }
 
@@ -84,18 +84,18 @@ StatusCode ECalPhotonIdAlgorithm::Run()
 //     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
     // set object variables:
-    _nEcalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
+    m_nECalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
 
     ClusterList photonClusters;
     ClusterList nonPhotonClusters;
     for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++ )
     {
-        if( (*itCluster)->GetNCaloHits() < _minimumHitsInCluster )
+        if( (*itCluster)->GetNCaloHits() < m_minimumHitsInClusters )
             continue;
 
         if( IsPhoton( *itCluster ) )
         {
-            if (_printing > 0)
+            if (m_producePrintoutStatements > 0)
                     std::cout << "is photon cluster? --> YES ";
 
             photonClusters.insert( *itCluster );
@@ -103,13 +103,13 @@ StatusCode ECalPhotonIdAlgorithm::Run()
         }
         else
         {
-            if (_printing > 0)
+            if (m_producePrintoutStatements > 0)
                 std::cout << "is photon cluster? --> NO ";
 
             nonPhotonClusters.insert( *itCluster );
         }
 
-        if (_printing > 0)
+        if (m_producePrintoutStatements > 0)
             std::cout << std::endl;
     }
 
@@ -122,11 +122,10 @@ StatusCode ECalPhotonIdAlgorithm::Run()
         //    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_photonClusterListName, photonClusters));
     }
 
-//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pTrackList, pClusterList ) );
-//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, pTrackList, &photonClusters ) );
-
-    PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &nonPhotonClusters ) );
-    PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &photonClusters    ) );
+//     std::cout << "NON PHOTON CLUSTERS" << std::endl;
+//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &nonPhotonClusters ) );
+//     std::cout << "PHOTON CLUSTERS" << std::endl;
+//     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &photonClusters    ) );
 
     return STATUS_CODE_SUCCESS;
 }
@@ -140,24 +139,24 @@ StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     //    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterCandidatesListName", m_clusterCandidatesListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusters", m_photonClusterListName));
 
-    _minimumHitsInCluster = 5; // TODO adjust member variable names to form m_name for consistency
+    m_minimumHitsInClusters = 5; 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinimumHitsInCluster", _minimumHitsInCluster));
+        "MinimumHitsInCluster", m_minimumHitsInClusters));
 
     // debug printing
-    _printing = 1;
+    m_producePrintoutStatements = 1;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "Printing", _printing));
+        "Printing", m_producePrintoutStatements));
 
     // make photon ID likelihood histograms
-    _makingPhotonIDLikelihoodHistograms = 0;
+    m_makingPhotonIdLikelihoodHistograms = 0;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MakePhotonIDLikelihoodHistograms", _makingPhotonIDLikelihoodHistograms));
+        "MakePhotonIDLikelihoodHistograms", m_makingPhotonIdLikelihoodHistograms));
 
     // max. number of layers - TODO remove this, as we no longer fix number of layers
-    MAX_NUMBER_OF_LAYERS = 150;
+    m_maximumNumberOfLayers = 150;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "maxNumberOfLayers", MAX_NUMBER_OF_LAYERS));
+        "maxNumberOfLayers", m_maximumNumberOfLayers));
 
     // monitoring filename
     m_monitoringFileName = "photonIdMonitoring.root";
@@ -226,7 +225,7 @@ void ECalPhotonIdAlgorithm::CreateOrSaveLikelihoodHistograms(bool create)
 
 bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 {
-    if(_printing > 0)
+    if(m_producePrintoutStatements > 0)
         std::cout << "=============== IsPhoton? ===================" << std::endl;
 
 //     if(photonCandidateCluster==NULL)
@@ -236,12 +235,15 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
     // now perform photon ID
     pandora::protoClusterPeaks_t peak;
-    if(photonCandidateCluster->GetElectromagneticEnergy()<0.2)
+    if(photonCandidateCluster->GetElectromagneticEnergy()<=0.2)
         return false;
 
-    TransverseProfile(photonCandidateCluster, peak,_nEcalLayers); // tweaked: instead of searching for peaks, it only fills the properties of the "peak"(=cluster)
+    TransverseProfile(photonCandidateCluster, peak,m_nECalLayers); // tweaked: instead of searching for peaks, it only fills the properties of the "peak"(=cluster)
 
     peak.energy = photonCandidateCluster->GetElectromagneticEnergy();
+
+// "transverse profile" should be exchanged with something like that
+// 
 //     try
 //     {
 //         const ClusterHelper::ClusterFitResult& fitResult = cluster->GetFitToAllHitsResult();
@@ -279,10 +281,16 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
     float showerStart   = photonIdProperties.GetLongProfileShowerStart();
     float gammaFraction = photonIdProperties.GetLongProfileGammaFraction();
-    float truePhotonE = GetTrueEnergyContribution(photonCandidateCluster, 22); // get true photon energy contribution
-    float trueE       = GetTrueEnergyContribution(photonCandidateCluster);     // get true energy contribution
+    float electromagneticPhotonEContribution = 0.0;
+    float truePhotonE = GetTrueEnergyContribution(photonCandidateCluster, electromagneticPhotonEContribution, 22); // get true photon energy contribution
+    float electromagneticEContribution = 0.0;
+    float trueE       = GetTrueEnergyContribution(photonCandidateCluster, electromagneticEContribution);     // get true energy contribution
     float electromagneticE = photonCandidateCluster->GetElectromagneticEnergy();
-    float fraction = truePhotonE / trueE;
+    std::cout << "electromagneticE " << electromagneticE << std::endl;
+    std::cout << "electromagneticEContrib " << electromagneticEContribution << std::endl;
+    assert( electromagneticE - electromagneticEContribution < 0.0001 );
+    float fraction = electromagneticPhotonEContribution / electromagneticEContribution;
+//    float fraction = truePhotonE / trueE;
 
     ClusterProperties clusterProperties;
     GetClusterProperties( photonCandidateCluster, clusterProperties );
@@ -304,7 +312,7 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
         float approach;
 
         // ToDo: treat overlap-region barrel endcap as mark does (protocluster: DistanceToTrack)
-        CartesianVector hitMean(clusterProperties.hitMean[0],clusterProperties.hitMean[1],clusterProperties.hitMean[2] );
+        CartesianVector hitMean(clusterProperties.m_hitMean[0],clusterProperties.m_hitMean[1],clusterProperties.m_hitMean[2] );
         DistanceToPositionAndDirection(hitMean,
                                        trackStateAtECal.GetPosition(), 
                                        trackStateAtECal.GetMomentum().GetUnitVector(),
@@ -313,15 +321,15 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
         if( approach < closest )
         {
             closest = approach;
-            CartesianVector centroid(clusterProperties.centroid[0],clusterProperties.centroid[1],clusterProperties.centroid[2] );
+            CartesianVector centroid(clusterProperties.m_centroid[0],clusterProperties.m_centroid[1],clusterProperties.m_centroid[2] );
             DistanceToPositionAndDirection(centroid,trackStateAtECal.GetPosition(), trackStateAtECal.GetMomentum().GetUnitVector(),
                                            longitudinalComponent,cclosest  );
             if( cclosest > 999 ) cclosest = 0.0;
-            CartesianVector centroid10(clusterProperties.centroid10[0],clusterProperties.centroid10[1],clusterProperties.centroid10[2] );
+            CartesianVector centroid10(clusterProperties.m_centroid10[0],clusterProperties.m_centroid10[1],clusterProperties.m_centroid10[2] );
             DistanceToPositionAndDirection(centroid10,trackStateAtECal.GetPosition(), trackStateAtECal.GetMomentum().GetUnitVector(),
                                            longitudinalComponent,c10closest  );
             if( c10closest> 999 ) c10closest = 0.0;
-            CartesianVector centroid20(clusterProperties.centroid20[0],clusterProperties.centroid20[1],clusterProperties.centroid20[2] );
+            CartesianVector centroid20(clusterProperties.m_centroid20[0],clusterProperties.m_centroid20[1],clusterProperties.m_centroid20[2] );
             DistanceToPositionAndDirection(centroid20,trackStateAtECal.GetPosition(), trackStateAtECal.GetMomentum().GetUnitVector(),
                                            longitudinalComponent,c20closest  );
             if( c20closest> 999 ) c20closest = 0.0;
@@ -332,7 +340,8 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     if(cclosest<dist)dist = closest;
 
     unsigned int nhits = photonCandidateCluster->GetNCaloHits();
-    float pid = (PhotonIDLikelihoodCalculator::Instance())->PID( peak.energy, peak.rms, gammaFraction,showerStart);     
+    float pid = (PhotonIDLikelihoodCalculator::Instance())->PID( peak.energy, peak.rms, gammaFraction,showerStart );
+
 
     bool accept = false;
 
@@ -349,35 +358,54 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     
 
 //         float fracE = photonCandidateCluster->GetElectromagneticEnergy()/photonCandidateCluster->GetElectromagneticEnergy();
-    if(nhits>=_minimumHitsInCluster && peak.energy>0.2 && pid > pidCut && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
+    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > pidCut && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
         accept = true;
     }
     // cluster which is very close to a nearby track
-//             if(nhits>=_minimumHitsInCluster && peaks[ipeak].energy>0.2 && pid > 0.5 && showerStart<10 && gammaFraction < 1.0 &&peaks[ipeak].rms<5.0 && closest <= 2.0){
-    if(nhits>=_minimumHitsInCluster && peak.energy>0.2 && pid > 0.5 && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest <= 2.0){
+//             if(nhits>=m_minimumHitsInClusters && peaks[ipeak].energy>0.2 && pid > 0.5 && showerStart<10 && gammaFraction < 1.0 &&peaks[ipeak].rms<5.0 && closest <= 2.0){
+    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > 0.5 && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest <= 2.0){
         if(dist >  5.0 && pid > 0.9)accept = true;
         if(dist >  7.5 && pid > 0.8)accept = true;
         if(dist > 10.0 && pid > 0.7)accept = true;
     }
 
 
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "pid", pid ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "fraction", fraction ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "EtruePhot", truePhotonE ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "Etrue",     trueE ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "Eem", electromagneticE ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "accept", int(accept) ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakRms", peak.rms ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakE", peak.energy ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakE", peak.energy ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShStart", peak.showerStartDepth ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShDepth", peak.showerDepth90 ));
-    PANDORA_MONITORING_API(SetTreeVariable("photonId", "gammaFraction", gammaFraction ));
+    if( nhits>=m_minimumHitsInClusters )
+    {    
 
-    PANDORA_MONITORING_API(FillTree("photonId"));
+        // compute fitresults of cluster --> to get the position
+        const ClusterHelper::ClusterFitResult& fitResult = photonCandidateCluster->GetFitToAllHitsResult();
+        const CartesianVector& clusterDirection = fitResult.GetDirection();
+//     const CartesianVector& clusterIntercept = fitResult.GetIntercept();
+        float radius;
+        float phi;
+        float theta;
+        clusterDirection.GetSphericalCoordinates( radius, phi, theta );
+        // ---
 
 
-    if(_printing > 0 && fraction > 0.5)
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "pid", pid ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "fraction", fraction ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "EemPhot", electromagneticPhotonEContribution ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "EtruePhot", truePhotonE ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "Etrue",     trueE ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "Eem", electromagneticE ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "accept", float(accept) ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakRms", peak.rms ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakE", peak.energy ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "shStart", showerStart ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShStart", peak.showerStartDepth ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShDepth", peak.showerDepth90 ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "gammaFraction", gammaFraction ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "phi", phi ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "theta", theta ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "nhits", static_cast<int>(nhits) ));
+
+        PANDORA_MONITORING_API(FillTree("photonId"));
+    }
+
+
+    if(m_producePrintoutStatements > 0 && fraction > 0.5)
     {
         std::cout << "fraction " << fraction << " --> should be identified as photon  | true photon E " << truePhotonE << " elm E "  << electromagneticE  << std::endl;
     }
@@ -386,7 +414,7 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     PANDORA_MONITORING_API(Fill2DHistogram("energyVsPhotonE", electromagneticE, truePhotonE ));
 
 
-    if(_printing > 0 && peak.energy > 1.0)
+    if(m_producePrintoutStatements > 0 && peak.energy > 1.0)
     {
         std::cout << " PEAK  : " <<  peak.du << "," << peak.dv << "  E = " << peak.energy << " dmin : " << peak.dmin <<  " d25/d90 : " << peak.showerDepth25 << "/" << peak.showerDepth90  << " start : " << peak.showerStartDepth << " rms = " << peak.rms << " PhotonID : " << showerStart << " " << gammaFraction << " TRUE FRACTION = " << fraction << " pid " << pid << " d = " << closest << " c= " << dist;
         if(fraction<0.5 &&  accept)std::cout << " <---A*****************";
@@ -395,7 +423,7 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     }
 
     //********** code to make the likelihood histograms ************
-    if(_makingPhotonIDLikelihoodHistograms)
+    if(m_makingPhotonIdLikelihoodHistograms)
     {
         int ihist = -999;
         if( peak.energy> 0.2 && peak.energy <=  0.5)ihist=0;
@@ -433,7 +461,7 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
     if(accept)
     {
-        if (_printing > 0)
+        if (m_producePrintoutStatements > 0)
             std::cout << "accepted as photon" << std::endl;
 
         // changed: change returnValue to true
@@ -495,7 +523,7 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, prot
     int  done[nbins][nbins];
     bool assigned[nbins][nbins];
     float tprofile[nbins][nbins];
-    float tlprofile[nbins][nbins][MAX_NUMBER_OF_LAYERS];
+    float tlprofile[nbins][nbins][m_maximumNumberOfLayers];
     for(int i=0; i<nbins; ++i){
         for(int j=0; j<nbins; ++j){
             tprofile[i][j]=0;
@@ -574,7 +602,7 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, prot
     float ybar=0;
     float xxbar=0;
     float yybar=0;
-    float longitudinalProfile[MAX_NUMBER_OF_LAYERS];
+    float longitudinalProfile[m_maximumNumberOfLayers];
     for(int i=0;i<=maxLayers;i++)longitudinalProfile[i]=0.;
     
     for(int i=1; i<nbins-1; i++){
@@ -708,96 +736,96 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 //    float X0Max     = X0Bins*X0BinSize;
     float X0Profile[X0Bins];
     float expectedX0Profile[X0Bins];
-    float eProfile[MAX_NUMBER_OF_LAYERS];
-    for(unsigned int i=0;i<MAX_NUMBER_OF_LAYERS;i++)eProfile[i]=0.;
+    float eProfile[m_maximumNumberOfLayers];
+    for(unsigned int i=0;i<m_maximumNumberOfLayers;i++)eProfile[i]=0.;
     for(unsigned int i=0;i<X0Bins;i++)X0Profile[i]=0.;
     for(unsigned int i=0;i<X0Bins;i++)expectedX0Profile[i]=0.;
 
     // it should be able to make this more general and easier with the new code
-    if (_printing > 0)
+    if (m_producePrintoutStatements > 0)
         std::cout << "in photon profile id" << std::endl;
 
-    float radLenLayers[MAX_NUMBER_OF_LAYERS]; // radiation lengths per layer seen by the cluster (in the direction of the cluster
+    float radLenLayers[m_maximumNumberOfLayers]; // radiation lengths per layer seen by the cluster (in the direction of the cluster
     try
     {
         CartesianVector clusterDirection = cluster->GetFitToAllHitsResult().GetDirection().GetUnitVector();
 
-    // --- loop through all the hits and do stuff mark has put into AddHit 
-    unsigned int maxSetIndex = 0;
-    float lastRadLen =0.1;
+        // --- loop through all the hits and do stuff mark has put into AddHit 
+        unsigned int maxSetIndex = 0;
+        float lastRadLen =0.1;
 
-    OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
-    for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
-    {
-        unsigned int pseudoLayer = itLyr->first;
+        OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
+        for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
+        {
+            unsigned int pseudoLayer = itLyr->first;
 
-        CaloHitList::iterator itCaloHit    = itLyr->second->begin();
-        CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
+            CaloHitList::iterator itCaloHit    = itLyr->second->begin();
+            CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
 
-        int n = 0; // count number of cells in layer
+            int n = 0; // count number of cells in layer
         
-        radLenLayers[pseudoLayer] = 0.0; // initialisation
-        eProfile[pseudoLayer] = 0.0; // initialisation
-        for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
-        {
-            ++n;
-            eProfile[pseudoLayer] += (*itCaloHit)->GetElectromagneticEnergy(); // sum up the energies in each pseudo-layer
-
-            // radiationlengths
-            float angleClusterDirectionWrtPseudoLayerNormalVector = (*itCaloHit)->GetNormalVector().GetUnitVector().GetOpeningAngle( clusterDirection );
-            float cosOpeningAngle = fabs( cos( angleClusterDirectionWrtPseudoLayerNormalVector ) );
-
-            if( cosOpeningAngle < 0.3 )
+            radLenLayers[pseudoLayer] = 0.0; // initialisation
+            eProfile[pseudoLayer] = 0.0; // initialisation
+            for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
             {
-                if (_printing > 0)
+                ++n;
+                eProfile[pseudoLayer] += (*itCaloHit)->GetElectromagneticEnergy(); // sum up the energies in each pseudo-layer
+
+                // radiationlengths
+                float angleClusterDirectionWrtPseudoLayerNormalVector = (*itCaloHit)->GetNormalVector().GetUnitVector().GetOpeningAngle( clusterDirection );
+                float cosOpeningAngle = fabs( cos( angleClusterDirectionWrtPseudoLayerNormalVector ) );
+
+                if( cosOpeningAngle < 0.3 )
                 {
-                    std::cout << "Cluster has large angle to pseudo layer normal vector (cos = " << cosOpeningAngle << ", which is an angle of " 
-                              << angleClusterDirectionWrtPseudoLayerNormalVector << ") --> reset cos(angle) to 1.0" << std::endl;
+                    if (m_producePrintoutStatements > 0)
+                    {
+                        std::cout << "Cluster has large angle to pseudo layer normal vector (cos = " << cosOpeningAngle << ", which is an angle of " 
+                                  << angleClusterDirectionWrtPseudoLayerNormalVector << ") --> reset cos(angle) to 1.0" << std::endl;
+                    }
+                    cosOpeningAngle = 1.0;
                 }
-                cosOpeningAngle = 1.0;
+                radLenLayers[pseudoLayer] += (*itCaloHit)->GetNRadiationLengths()/cosOpeningAngle; // gives the radiation lengths per layer in the clusterDirection
+
+                //            std::cout << "radlen " <<  (*itCaloHit)->GetNRadiationLengths() << "  normalvect " << (*itCaloHit)->GetNormalVector().GetUnitVector() << "  clusterdir " << clusterDirection << std::endl;
             }
-            radLenLayers[pseudoLayer] += (*itCaloHit)->GetNRadiationLengths()/cosOpeningAngle; // gives the radiation lengths per layer in the clusterDirection
+            if( n>0 ) radLenLayers[pseudoLayer] /= n;
 
-            //            std::cout << "radlen " <<  (*itCaloHit)->GetNRadiationLengths() << "  normalvect " << (*itCaloHit)->GetNormalVector().GetUnitVector() << "  clusterdir " << clusterDirection << std::endl;
-        }
-        if( n>0 ) radLenLayers[pseudoLayer] /= n;
-
-        // set lengths in units of radiation length for all pseudo layers before the given hit (if not set already)
-        for( ; maxSetIndex < pseudoLayer; maxSetIndex++ )
-        {
-            radLenLayers[maxSetIndex] = radLenLayers[pseudoLayer];
-        }
-        maxSetIndex = pseudoLayer +1;
+            // set lengths in units of radiation length for all pseudo layers before the given hit (if not set already)
+            for( ; maxSetIndex < pseudoLayer; maxSetIndex++ )
+            {
+                radLenLayers[maxSetIndex] = radLenLayers[pseudoLayer];
+            }
+            maxSetIndex = pseudoLayer +1;
 
 //         std::cout << "radlenlayers[] " << radLenLayers[pseudoLayer] << " pseudo layer " << pseudoLayer << " n " << n << " eprofile[] " << eProfile[pseudoLayer] << std::endl;
-        lastRadLen = radLenLayers[pseudoLayer];
+            lastRadLen = radLenLayers[pseudoLayer];
 
-    }    
-    for( ; maxSetIndex <= _nEcalLayers; maxSetIndex++ )
-    {
-        radLenLayers[maxSetIndex] = lastRadLen;
-    }
+        }    
+        for( ; maxSetIndex <= m_nECalLayers; maxSetIndex++ )
+        {
+            radLenLayers[maxSetIndex] = lastRadLen;
+        }
 
 
 
-    // ---
+        // ---
 
-    float x0 = 3.5;                     // oops: hardcoded radiation length (W)
-    float E0 = cluster->GetElectromagneticEnergy();
-    // Effective critical energy
-    float EC = 0.08;                    // oops: critical energy hardcoded (  (thickness-Si*40.19MeV+thickness-W*93.11MeV)/sumThickness in GeV )
-    double a = 1.25+0.5*log(E0/EC);
-    double lngammaa = lgamma(a);
-    double gammaa = exp(lngammaa);
+        float x0 = 3.5;                     // oops: hardcoded radiation length (W)
+        float E0 = cluster->GetElectromagneticEnergy();
+        // Effective critical energy
+        float EC = 0.08;                    // oops: critical energy hardcoded (  (thickness-Si*40.19MeV+thickness-W*93.11MeV)/sumThickness in GeV )
+        double a = 1.25+0.5*log(E0/EC);
+        double lngammaa = lgamma(a);
+        double gammaa = exp(lngammaa);
 
-    float dist=0.;
-    int   X0ProfileEnd=0;
-    // step through ECAL making profile in radiation lengths
-    float ecalE = 0.;
-    int maxLayer = _nEcalLayers;
-    if(truncate)maxLayer = 35;
+        float dist=0.;
+        int   X0ProfileEnd=0;
+        // step through ECAL making profile in radiation lengths
+        float ecalE = 0.;
+        int maxLayer = m_nECalLayers;
+        if(truncate)maxLayer = 35;
 
-    for(unsigned int i=1; i<=_nEcalLayers; i++){
+        for(unsigned int i=1; i<=m_nECalLayers; i++){
         ecalE += eProfile[i];
 //         float dr = sep[i]/cost[i];
         float dr = radLenLayers[i];
@@ -840,7 +868,7 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
     float diffEmin = 9999.;
     int   ioffmin  = 0;
     bool  stillgoing = true;
-    for(int ioffset=0; stillgoing && ioffset<static_cast<int>(_nEcalLayers); ioffset++){
+    for(int ioffset=0; stillgoing && ioffset<static_cast<int>(m_nECalLayers); ioffset++){
         float diffE = 0.;
         for(int i=0; i<X0ProfileEnd; i++){
             if(i-ioffset<0){
@@ -861,12 +889,12 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
     }
   
     if(ecalE>0){
-        photonIdProperties._photonLongProfileFraction =  diffEmin/ecalE;
-        photonIdProperties._photonLongShowerStart     =  ioffmin*X0BinSize ;
+        photonIdProperties.SetLongProfileGammaFraction( diffEmin/ecalE    );
+        photonIdProperties.SetLongProfileShowerStart(   ioffmin*X0BinSize );
 //         std::cout << "=== longprofilefraction   " << photonIdProperties._photonLongProfileFraction << std::endl;
 //         std::cout << "=== photonLongShowerStart " << photonIdProperties._photonLongShowerStart << std::endl;
     }
-    else if (_printing > 0)
+    else if (m_producePrintoutStatements > 0)
     {
         std::cout << "ecalE <= 0 " << std::endl;
     }
@@ -886,20 +914,25 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-double ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, int pid )
+float ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, float& electromagneticEnergyContribution, int pid )
 {
     #define PHOTONID 22
 
     typedef std::set< MCParticle* > MCPARTICLESET;
     typedef std::map< int, double > ENERGYPIDMAP;
     typedef ENERGYPIDMAP::iterator ENERGYPIDMAPITERATOR;
-    ENERGYPIDMAP energyPerMCParticleId;
-    ENERGYPIDMAPITERATOR itEnergyPerMCParticleId;
+
+    ENERGYPIDMAP trueEnergyPerMCParticleId;
+    ENERGYPIDMAPITERATOR itTrueEnergyPerMCParticleId;
+
+    ENERGYPIDMAP electromagneticEnergyPerMCParticleId;
+    ENERGYPIDMAPITERATOR itElectromagneticEnergyPerMCParticleId;
+
     MCPARTICLESET countedMcParticles;
 
-    float electromagneticEnergy = 0.0;
     float inputEnergy = 0.0;
-    float trueEnergy = 0.0;
+    float sumTrueEnergy = 0.0;
+    float sumElectromagneticEnergy = 0.0;
         
     OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
 
@@ -911,57 +944,88 @@ double ECalPhotonIdAlgorithm::GetTrueEnergyContribution(const Cluster* cluster, 
 
         for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
         {
+
+            // sum up the true energies from the MC-particles (don't double count the MCParticles)
             MCParticle* mc = NULL; 
             (*itCaloHit)->GetMCParticle( mc );
-            if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
+            int particleId = 0;
+            if( mc != NULL )             // else --> special case: sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
+                particleId = mc->GetParticleId();
+
+
+            double electromagneticEnergy  = (*itCaloHit)->GetElectromagneticEnergy();
+
+            // add up the electromagnetic energy
+            itElectromagneticEnergyPerMCParticleId = electromagneticEnergyPerMCParticleId.find( particleId );
+            if( itElectromagneticEnergyPerMCParticleId == electromagneticEnergyPerMCParticleId.end() )
+            {
+                electromagneticEnergyPerMCParticleId.insert( std::make_pair<int,double>( particleId, electromagneticEnergy ) );
+            }
+            else
+            {
+                itElectromagneticEnergyPerMCParticleId->second += electromagneticEnergy;
+            }
+            sumElectromagneticEnergy += electromagneticEnergy;
+
+            // sum up the input energy
+            inputEnergy += (*itCaloHit)->GetInputEnergy();
 
             if( countedMcParticles.find( mc ) == countedMcParticles.end() ) 
             {
-                int particleId = mc->GetParticleId();
-                double energy  = mc->GetEnergy();
-                itEnergyPerMCParticleId = energyPerMCParticleId.find( particleId );
-                if( itEnergyPerMCParticleId == energyPerMCParticleId.end() )
+                double trueEnergy             = mc->GetEnergy();
+
+                // add up the true energy
+                itTrueEnergyPerMCParticleId = trueEnergyPerMCParticleId.find( particleId );
+                if( itTrueEnergyPerMCParticleId == trueEnergyPerMCParticleId.end() )
                 {
-                    energyPerMCParticleId.insert( std::make_pair<int,double>( particleId, energy ) );
+                    trueEnergyPerMCParticleId.insert( std::make_pair<int,double>( particleId, trueEnergy ) );
                 }
                 else
                 {
-                    itEnergyPerMCParticleId->second += energy;
+                    itTrueEnergyPerMCParticleId->second += trueEnergy;
                 }
-                trueEnergy += mc->GetEnergy();
+
+                sumTrueEnergy            += trueEnergy;
                 countedMcParticles.insert( mc );
             }
-            electromagneticEnergy += (*itCaloHit)->GetElectromagneticEnergy();
-            inputEnergy += (*itCaloHit)->GetInputEnergy();
         }
     }
 
-    float energySum = 0.0;
-    for( ENERGYPIDMAP::iterator it = energyPerMCParticleId.begin(), itEnd = energyPerMCParticleId.end(); it != itEnd; ++it )
+    if (m_producePrintoutStatements > 0)
     {
-        if (_printing > 0)
+        for( ENERGYPIDMAP::iterator it = trueEnergyPerMCParticleId.begin(), itEnd = trueEnergyPerMCParticleId.end(); it != itEnd; ++it )
         {
             std::cout << "pid " << it->first 
-                      << "  e-contrib " << it->second 
-                      << "  of electromagnetic energy: " << electromagneticEnergy 
+                      << "  e-contrib " << electromagneticEnergyPerMCParticleId.find(it->first)->second
+                      << "  true e-contrib " << it->second 
+                      << "  of electromagnetic energy: " << sumElectromagneticEnergy 
                       << "  and input energy: " << inputEnergy 
-                      << " true E: " << trueEnergy << std::endl;
+                      << "  true E: " << sumTrueEnergy << std::endl;
         }
-
-        energySum += it->second;
     }
 
-    if (_printing > 0)
-        std::cout << "energy-sum : " << energySum << std::endl;
+    if (m_producePrintoutStatements > 0)
+        std::cout << "energy-sum : " << sumElectromagneticEnergy << std::endl;
 
     if( pid == 0 )
-        return energySum;
+    {
+        electromagneticEnergyContribution = sumElectromagneticEnergy;
+        return sumTrueEnergy;
+    }
 
-    itEnergyPerMCParticleId = energyPerMCParticleId.find( pid );
-    if( itEnergyPerMCParticleId == energyPerMCParticleId.end() )
+    itTrueEnergyPerMCParticleId            = trueEnergyPerMCParticleId.find( pid );
+    itElectromagneticEnergyPerMCParticleId = electromagneticEnergyPerMCParticleId.find( pid );
+
+    if( (itTrueEnergyPerMCParticleId == trueEnergyPerMCParticleId.end()) 
+        || (itElectromagneticEnergyPerMCParticleId == electromagneticEnergyPerMCParticleId.end() ) )
+    {
+        electromagneticEnergyContribution = 0.0;
         return 0.0;
+    }
 
-    return itEnergyPerMCParticleId->second; // return the energy contribution of photons
+        
+    electromagneticEnergyContribution = itElectromagneticEnergyPerMCParticleId->second;
+    return itTrueEnergyPerMCParticleId->second; // return the energy contribution of photons
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1024,14 +1088,14 @@ void ECalPhotonIdAlgorithm::GetClusterProperties(const Cluster* cluster, Cluster
     // set the values in clusterProperties
     for( int i=0; i<3; ++i )
     {
-        clusterProperties.hitMean[i]    = hitMean[i].GetMean();
-        clusterProperties.centroid[i]   = centroid[i].GetMean();
-        clusterProperties.centroid10[i] = centroid10[i].GetMean();
-        clusterProperties.centroid20[i] = centroid20[i].GetMean();
+        clusterProperties.m_hitMean[i]    = hitMean[i].GetMean();
+        clusterProperties.m_centroid[i]   = centroid[i].GetMean();
+        clusterProperties.m_centroid10[i] = centroid10[i].GetMean();
+        clusterProperties.m_centroid20[i] = centroid20[i].GetMean();
     }
-    clusterProperties.centroidEnergy   = centroidEnergy;
-    clusterProperties.centroid10Energy = centroid10Energy;
-    clusterProperties.centroid20Energy = centroid20Energy;
+    clusterProperties.m_centroidEnergy   = centroidEnergy;
+    clusterProperties.m_centroid10Energy = centroid10Energy;
+    clusterProperties.m_centroid20Energy = centroid20Energy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -1070,7 +1134,7 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
     if(istartbin<0)istartbin  =  0;
     if(istartbin>21)istartbin = 21;
 
-    if(0) // TODO make _printing from main algorithm (public and) static so can access here
+    if(0) // TODO make m_producePrintoutStatements from main algorithm (public and) static so can access here
     {
         std::cout << " E     = " << E     << " -> " << ien       << std::endl;
         std::cout << " rms   = " << rms   << " -> " << irmsbin   << std::endl;

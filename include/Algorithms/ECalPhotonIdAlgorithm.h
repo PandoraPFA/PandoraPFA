@@ -184,102 +184,107 @@ namespace pandora {
 
 
 /**
- *  @brief  ECalPhotonIdAlgorithm class
+ *  @brief ECalPhotonIdAlgorithm class
  */
 class ECalPhotonIdAlgorithm : public pandora::Algorithm
 {
 
 
     /**
-     * provides the calculation of a running mean and RMS
-     * @author speckmay
+     * @brief provides the calculation of a running mean and RMS
      *
      */
     class RunningMeanRMS {
     public:
 	
 	/**
-	 * Constructor
+	 * @brief Constructor
 	 */
 	RunningMeanRMS(){
 	}
 	
 	/**
-	 * getter for current RMS
+	 * @brief getter for current RMS
+	 *
 	 * @return (double) RMS
 	 */
 	double GetRMS(){
-	    return rms;
+	    return m_Rms;
 	}
 	
 	/**
-	 * getter for current mean value
+	 * @brief getter for current mean value
+	 *
 	 * @return (double) mean value
 	 */
 	double GetMean(){
-	    return mean;
+	    return m_mean;
 	}
 	
 	/**
-	 * getter for current sum of event-weights
+	 * @brief getter for current sum of event-weights
+	 *
 	 * @return (double) weights
 	 */
 	double GetWeightSum(){
-	    return weights;
+	    return m_weights;
 	}
 	
 	/**
-	 * getter for current number of events
+	 * @brief getter for current number of events
+	 *
 	 * @return (int) number of events
 	 */
 	double GetN(){
-	    return n;
+	    return m_nEvents;
 	}
 	
 	/**
-	 * reset everything
+	 * @brief reset everything
 	 */
 	void Clear(){
-	    mean = 0;
-	    n = 0;
-	    weights = 0;
-	    s2 = 0;
-	    rms = 0;
+	    m_mean = 0;
+	    m_nEvents = 0;
+	    m_weights = 0;
+	    m_s2 = 0;
+	    m_Rms = 0;
 	}
 	
 	/**
-	 * calculate new mean and RMS value
+	 * @brief calculate new mean and RMS value
+	 *
 	 * @param value
 	 * @param eventWeight
 	 */
 	void Fill( double value, double eventWeight ){
 	    // calculate the mean-value
-	    int nNew = n + 1;
-	    double meanNew = CalcMean( mean, n, value, weights, eventWeight );
+	    int nNew = m_nEvents + 1;
+	    double meanNew = CalcMean( m_mean, m_nEvents, value, m_weights, eventWeight );
 
-	    double weightsumNew = weights + eventWeight;
+	    double weightsumNew = m_weights + eventWeight;
 	    // calculate rms
 	    // S = SQRT( ((n-1)*sOld2 + (xNew-mNew)*(xnew-mOld) )/n )
 	    // calculate the rms
-	    double s2New = CalcS2( mean, meanNew, nNew, s2, value );
+	    double s2New = CalcS2( m_mean, meanNew, nNew, m_s2, value );
         
-	    rms = sqrt( s2New );
-	    mean = meanNew;
-	    n = nNew;
-	    weights = weightsumNew;
-	    s2 = s2New;
+	    m_Rms = sqrt( s2New );
+	    m_mean = meanNew;
+	    m_nEvents = nNew;
+	    m_weights = weightsumNew;
+	    m_s2 = s2New;
 	}
 
 
-    protected:
-	double mean;
-	int    n;
-	double weights;
-	double s2;
-	double rms;
+    private:
+	double m_mean;
+	int    m_nEvents;
+	double m_weights;
+	double m_s2;
+	double m_Rms;
 
 	/**
-	 * calculate the new mean value 
+	 * @brief calculate the new mean value 
+	 *
 	 * @param meanOld
 	 * @param n
 	 * @param valNew
@@ -295,7 +300,8 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
 	}
 	
 	/**
-	 * calculate the new s2 value (necessary for calculating the RMS)
+	 * @brief calculate the new s2 value (necessary for calculating the RMS)
+	 *
 	 * @param meanOld
 	 * @param meanNew
 	 * @param nNew
@@ -314,25 +320,36 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
 
 
   
+    /**
+     * @brief stores photon Id properties
+     *
+     */
     class PhotonIdProperties {
     public:
-	float GetLongProfileShowerStart(){return _photonLongShowerStart;};
-	float GetLongProfileGammaFraction(){return _photonLongProfileFraction;};
+	float GetLongProfileShowerStart()  {return m_photonLongShowerStart;};
+	float GetLongProfileGammaFraction(){return m_photonLongProfileFraction;};
+	void  SetLongProfileShowerStart(   float photonLongShowerStart    ){ m_photonLongShowerStart = photonLongShowerStart;          }
+	void  SetLongProfileGammaFraction( float photonLongProfileFraction){  m_photonLongProfileFraction = photonLongProfileFraction; }
 
-	float _photonLongProfileFraction;
-	float _photonLongShowerStart;
+	float m_photonLongProfileFraction;
+	float m_photonLongShowerStart;
     };
 
+
+    /**
+     * @brief stores cluster properties
+     *
+     */
     class ClusterProperties {
     public:
-	float hitMean[3]; // alyways x,y,z
-	float centroid[3];
-	float centroid10[3];
-	float centroid20[3];
+	float m_hitMean[3]; // alyways x,y,z
+	float m_centroid[3];
+	float m_centroid10[3];
+	float m_centroid20[3];
 
-	float centroidEnergy;
-	float centroid10Energy;
-	float centroid20Energy;
+	float m_centroidEnergy;
+	float m_centroid10Energy;
+	float m_centroid20Energy;
     };
 
   
@@ -361,7 +378,7 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
     StatusCode TransverseProfile(const pandora::Cluster* cluster, pandora::protoClusterPeaks_t &peak, int maxLayers);
 //    const pandora::Cluster*   TransverseProfile(const pandora::Cluster* cluster, int peakForProtoCluster, int maxLayers, int extraLayers);
     void       PhotonProfileID(pandora::Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate = false);
-    double     GetTrueEnergyContribution(const pandora::Cluster* cluster, int pid = 0 );
+    float      GetTrueEnergyContribution(const pandora::Cluster* cluster, float& electromagneticEnergyContribution, int pid = 0 );
     void       GetClusterProperties(const pandora::Cluster* cluster, ClusterProperties& clusterProperties );
     void       DistanceToPositionAndDirection(const pandora::CartesianVector& position, 
 					      const pandora::CartesianVector& referencePosition,
@@ -377,15 +394,14 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
     StatusCode ReadSettings(TiXmlHandle xmlHandle);
 
 
-    unsigned int _nEcalLayers;
-    unsigned int _minimumHitsInCluster;
-    int _printing;
-    int _makingPhotonIDLikelihoodHistograms;
-    unsigned int MAX_NUMBER_OF_LAYERS;
+    unsigned int m_nECalLayers;
+    unsigned int m_minimumHitsInClusters;
+    int          m_producePrintoutStatements;
+    int          m_makingPhotonIdLikelihoodHistograms;
+    unsigned int m_maximumNumberOfLayers;
 
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
-    /*     std::string     m_associationAlgorithmName;     ///< The name of the topological association algorithm to run */
     std::string     m_clusterCandidatesListName;    ///< The name under which to get the cluster candidates
     std::string     m_photonClusterListName;        ///< The name under which to save the new photon cluster list
     std::string     m_monitoringFileName;           ///< filename for file where for monitoring information is stored
