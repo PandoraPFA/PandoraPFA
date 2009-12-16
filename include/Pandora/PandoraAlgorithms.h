@@ -42,7 +42,7 @@
     d("Monitoring",                 MonitoringAlgorithm::Factory)                   \
     d("PfoConstruction",            PfoConstructionAlgorithm::Factory)              \
     d("PhotonClustering",           PhotonClusteringAlgorithm::Factory)             \
-	d("ECalPhotonId",               ECalPhotonIdAlgorithm::Factory)                 \
+    d("ECalPhotonId",               ECalPhotonIdAlgorithm::Factory)                 \
     d("PrimaryClustering",          PrimaryClusteringAlgorithm::Factory)            \
     d("Reclustering",               ReclusteringAlgorithm::Factory)                 \
     d("TopologicalAssociation",     TopologicalAssociationAlgorithm::Factory)       \
