@@ -129,6 +129,16 @@ public:
     static StatusCode GetCurrentClusterListName(const pandora::Algorithm &algorithm, std::string &clusterListName);
 
     /**
+     *  @brief  Get a named cluster list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  clusterListName the name of the cluster list
+     *  @param  pClusterList to receive the address of the cluster list
+     */
+    static StatusCode GetClusterList(const pandora::Algorithm &algorithm, const std::string &clusterListName,
+        const pandora::ClusterList *&pClusterList);
+
+    /**
      *  @brief  Get the current ordered calo hit list
      * 
      *  @param  algorithm the algorithm calling this function
@@ -155,6 +165,16 @@ public:
     static StatusCode GetCurrentOrderedCaloHitListName(const pandora::Algorithm &algorithm, std::string &orderedCaloHitListName);
 
     /**
+     *  @brief  Get a named ordered calo hit list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  orderedCaloHitListName the name of the ordered calo hit list
+     *  @param  pOrderedCaloHitList to receive the address of the ordered calo hit list
+     */
+    static StatusCode GetOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &orderedCaloHitListName,
+        const pandora::OrderedCaloHitList *&pOrderedCaloHitList);
+
+    /**
      *  @brief  Get the current track list
      * 
      *  @param  algorithm the algorithm calling this function
@@ -179,6 +199,15 @@ public:
      *  @param  trackListName to receive the current track list name
      */
     static StatusCode GetCurrentTrackListName(const pandora::Algorithm &algorithm, std::string &trackListName);
+
+    /**
+     *  @brief  Get a named track list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  trackListName the name of the track list
+     *  @param  pTrackList to receive the address of the track list
+     */
+    static StatusCode GetTrackList(const pandora::Algorithm &algorithm, const std::string &trackListName, const pandora::TrackList *&pTrackList);
 
     /**
      *  @brief  Initialize reclustering operations
@@ -246,6 +275,18 @@ public:
      */
     static StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
         pandora::Cluster *pClusterToDelete);
+
+    /**
+     *  @brief  Merge two clusters from two specified lists, enlarging one cluster and deleting the second
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pClusterToEnlarge address of the cluster to enlarge
+     *  @param  pClusterToDelete address of the cluster to delete
+     *  @param  enlargeListName name of the list containing the cluster to enlarge
+     *  @param  deleteListName name of the list containing the cluster to delete
+     */
+    static StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
+        pandora::Cluster *pClusterToDelete, const std::string &enlargeListName, const std::string &deleteListName);
 
     /**
      *  @brief  Add an association between a track and a cluster

@@ -73,6 +73,14 @@ public:
     StatusCode GetCurrentClusterListName(std::string &clusterListName) const;
 
     /**
+     *  @brief  Get a named cluster list
+     * 
+     *  @param  clusterListName the name of the cluster list
+     *  @param  pClusterList to receive the address of the cluster list
+     */
+    StatusCode GetClusterList(const std::string &clusterListName, const ClusterList *&pClusterList) const;
+
+    /**
      *  @brief  Get the current ordered calo hit list
      * 
      *  @param  pOrderedCaloHitList to receive the address of the current ordered calo hit list
@@ -88,6 +96,14 @@ public:
     StatusCode GetCurrentOrderedCaloHitListName(std::string &orderedCaloHitListName) const;
 
     /**
+     *  @brief  Get a named ordered calo hit list
+     * 
+     *  @param  orderedCaloHitListName the name of the ordered calo hit list
+     *  @param  pOrderedCaloHitList to receive the address of the ordered calo hit list
+     */
+    StatusCode GetOrderedCaloHitList(const std::string &orderedCaloHitListName, const OrderedCaloHitList *&pOrderedCaloHitList) const;
+
+    /**
      *  @brief  Get the current track list
      * 
      *  @param  pTrackList to receive the address of the current track list
@@ -101,6 +117,14 @@ public:
      *  @param  trackListName to receive the current track list name
      */
     StatusCode GetCurrentTrackListName(std::string &trackListName) const;
+
+    /**
+     *  @brief  Get a named track list
+     * 
+     *  @param  trackListName the name of the track list
+     *  @param  pTrackList to receive the address of the track list
+     */
+    StatusCode GetTrackList(const std::string &trackListName, const TrackList *&pTrackList) const;
 
     /**
      *  @brief  Initialize reclustering operations
@@ -155,6 +179,17 @@ public:
      *  @param  pClusterToDelete address of the cluster to delete
      */
     StatusCode MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete) const;
+
+    /**
+     *  @brief  Merge two clusters from two specified lists, enlarging one cluster and deleting the second
+     * 
+     *  @param  pClusterToEnlarge address of the cluster to enlarge
+     *  @param  pClusterToDelete address of the cluster to delete
+     *  @param  enlargeListName name of the list containing the cluster to enlarge
+     *  @param  deleteListName name of the list containing the cluster to delete
+     */
+    StatusCode MergeAndDeleteClusters(pandora::Cluster *pClusterToEnlarge, pandora::Cluster *pClusterToDelete,
+        const std::string &enlargeListName, const std::string &deleteListName) const;
 
     /**
      *  @brief  Add an association between a track and a cluster

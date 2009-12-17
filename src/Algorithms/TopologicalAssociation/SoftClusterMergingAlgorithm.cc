@@ -17,11 +17,23 @@ StatusCode SoftClusterMergingAlgorithm::Run()
     // Begin by recalculating track-cluster associations
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
-    const ClusterList *pClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+    std::string inputClusterListName;
+    const ClusterList *pInputClusterList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList, inputClusterListName));
+
+    // Create a list containing both input and photon clusters
+    ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
+
+    const ClusterList *pPhotonClusterList = NULL;
+
+    if (m_shouldUsePhotonClusters)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_photonClusterListName, pPhotonClusterList));
+        combinedClusterList.insert(pPhotonClusterList->begin(), pPhotonClusterList->end());
+    }
 
     // Loop over soft daughter candidate clusters
-    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end();)
+    for (ClusterList::const_iterator iterI = pInputClusterList->begin(); iterI != pInputClusterList->end();)
     {
         Cluster *pDaughterCluster = *iterI;
         ++iterI;
@@ -33,7 +45,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
         float closestDistance(std::numeric_limits<float>::max());
 
         // Find best candidate parent cluster: that with closest distance between a pair of hits in the daughter and parent
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end(); ++iterJ)
+        for (ClusterList::const_iterator iterJ = combinedClusterList.begin(); iterJ != combinedClusterList.end(); ++iterJ)
         {
             Cluster *pParentCluster = *iterJ;
 
@@ -59,7 +71,16 @@ StatusCode SoftClusterMergingAlgorithm::Run()
             continue;
 
         if (this->CanMergeSoftCluster(pDaughterCluster, closestDistance))
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+        {
+            combinedClusterList.erase(pDaughterCluster);
+
+            const std::string &daughterListName(inputClusterListName);
+            const std::string &parentListName = ((pInputClusterList->end() != pInputClusterList->find(pBestParentCluster)) ?
+                inputClusterListName : m_photonClusterListName);
+
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster,
+                pDaughterCluster, parentListName, daughterListName));
+        }
     }
 
     return STATUS_CODE_SUCCESS;
@@ -132,6 +153,16 @@ bool SoftClusterMergingAlgorithm::CanMergeSoftCluster(const Cluster *const pDaug
 StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_trackClusterAssociationAlgName));
+
+    m_shouldUsePhotonClusters = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldUsePhotonClusters", m_shouldUsePhotonClusters));
+
+    if (m_shouldUsePhotonClusters)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
+            "PhotonClusterListName", m_photonClusterListName));
+    }
 
     m_maxHitsInSoftCluster = 9;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

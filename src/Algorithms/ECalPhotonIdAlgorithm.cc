@@ -284,8 +284,13 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     float electromagneticEContribution = 0.0;
     float trueE       = GetTrueEnergyContribution(photonCandidateCluster, electromagneticEContribution);     // get true energy contribution
     float electromagneticE = photonCandidateCluster->GetElectromagneticEnergy();
-    std::cout << "electromagneticE " << electromagneticE << std::endl;
-    std::cout << "electromagneticEContrib " << electromagneticEContribution << std::endl;
+
+    if (m_producePrintoutStatements > 0)
+    {
+        std::cout << "electromagneticE " << electromagneticE << std::endl;
+        std::cout << "electromagneticEContrib " << electromagneticEContribution << std::endl;
+    }
+
     assert( electromagneticE - electromagneticEContribution < 0.0001 );
     float fraction = electromagneticPhotonEContribution / electromagneticEContribution;
 //    float fraction = truePhotonE / trueE;

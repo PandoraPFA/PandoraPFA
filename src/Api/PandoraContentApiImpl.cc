@@ -132,6 +132,13 @@ StatusCode PandoraContentApiImpl::GetCurrentClusterListName(std::string &cluster
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::GetClusterList(const std::string &clusterListName, const ClusterList *&pClusterList) const
+{
+    return m_pPandora->m_pClusterManager->GetList(clusterListName, pClusterList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList,
     std::string &orderedCaloHitListName) const
 {
@@ -147,6 +154,13 @@ StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitListName(std::string &
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::GetOrderedCaloHitList(const std::string &orderedCaloHitListName, const OrderedCaloHitList *&pOrderedCaloHitList) const
+{
+    return m_pPandora->m_pCaloHitManager->GetList(orderedCaloHitListName, pOrderedCaloHitList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const
 {
     return m_pPandora->m_pTrackManager->GetCurrentList(pTrackList, trackListName);
@@ -157,6 +171,13 @@ StatusCode PandoraContentApiImpl::GetCurrentTrackList(const TrackList *&pTrackLi
 StatusCode PandoraContentApiImpl::GetCurrentTrackListName(std::string &trackListName) const
 {
     return m_pPandora->m_pTrackManager->GetCurrentListName(trackListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::GetTrackList(const std::string &trackListName, const TrackList *&pTrackList) const
+{
+    return m_pPandora->m_pTrackManager->GetList(trackListName, pTrackList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -246,6 +267,18 @@ StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnla
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(pClusterToDelete->GetAssociatedTrackList()));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete, const std::string &enlargeListName,
+    const std::string &deleteListName) const
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(pClusterToDelete->GetAssociatedTrackList()));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete,
+        enlargeListName, deleteListName));
 
     return STATUS_CODE_SUCCESS;
 }

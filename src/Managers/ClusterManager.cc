@@ -298,6 +298,35 @@ StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete, const std::string &enlargeListName,
+    const std::string &deleteListName)
+{
+    if (pClusterToEnlarge == pClusterToDelete)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    NameToClusterListMap::iterator enlargeListIter = m_nameToClusterListMap.find(enlargeListName);
+    NameToClusterListMap::iterator deleteListIter = m_nameToClusterListMap.find(deleteListName);
+
+    if ((m_nameToClusterListMap.end() == enlargeListIter) || (m_nameToClusterListMap.end() == deleteListIter))
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    ClusterList::iterator clusterToEnlargeIter = enlargeListIter->second->find(pClusterToEnlarge);
+    ClusterList::iterator clusterToDeleteIter = deleteListIter->second->find(pClusterToDelete);
+
+    if ((enlargeListIter->second->end() == clusterToEnlargeIter) || (deleteListIter->second->end() == clusterToDeleteIter))
+        return STATUS_CODE_NOT_FOUND;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pClusterToEnlarge->AddHitsFromSecondCluster(pClusterToDelete));
+
+    delete pClusterToDelete;
+    deleteListIter->second->erase(clusterToDeleteIter);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))

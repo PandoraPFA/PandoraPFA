@@ -76,6 +76,14 @@ StatusCode PandoraContentApi::GetCurrentClusterListName(const pandora::Algorithm
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::GetClusterList(const pandora::Algorithm &algorithm, const std::string &clusterListName,
+    const pandora::ClusterList *&pClusterList)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetClusterList(clusterListName, pClusterList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm,
     const pandora::OrderedCaloHitList *&pOrderedCaloHitList)
 {
@@ -100,6 +108,14 @@ StatusCode PandoraContentApi::GetCurrentOrderedCaloHitListName(const pandora::Al
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::GetOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &orderedCaloHitListName,
+    const pandora::OrderedCaloHitList *&pOrderedCaloHitList)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetOrderedCaloHitList(orderedCaloHitListName, pOrderedCaloHitList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::GetCurrentTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList *&pTrackList)
 {
     std::string trackListName;
@@ -119,6 +135,14 @@ StatusCode PandoraContentApi::GetCurrentTrackList(const pandora::Algorithm &algo
 StatusCode PandoraContentApi::GetCurrentTrackListName(const pandora::Algorithm &algorithm, std::string &trackListName)
 {
     return algorithm.GetPandoraContentApiImpl()->GetCurrentTrackListName(trackListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::GetTrackList(const pandora::Algorithm &algorithm, const std::string &trackListName,
+    const pandora::TrackList *&pTrackList)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetTrackList(trackListName, pTrackList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,6 +198,15 @@ StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &a
 {
     return algorithm.GetPandoraContentApiImpl()->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete);
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
+    pandora::Cluster *pClusterToDelete, const std::string &enlargeListName, const std::string &deleteListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete, enlargeListName, deleteListName);
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -167,6 +167,17 @@ private:
     StatusCode MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete);
 
     /**
+     *  @brief  Merge two clusters from two specified lists, enlarging one cluster and deleting the second
+     * 
+     *  @param  pClusterToEnlarge address of the cluster to enlarge
+     *  @param  pClusterToDelete address of the cluster to delete
+     *  @param  enlargeListName name of the list containing the cluster to enlarge
+     *  @param  deleteListName name of the list containing the cluster to delete
+     */
+    StatusCode MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete, const std::string &enlargeListName,
+        const std::string &deleteListName);
+
+    /**
      *  @brief  Register an algorithm with the cluster manager
      * 
      *  @param  pAlgorithm address of the algorithm
