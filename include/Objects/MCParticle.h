@@ -60,7 +60,7 @@ public:
      *  @brief Get inner radius of mc particle
      * 
      *  @return the mc particle inner radius
-     */	
+     */
     float GetInnerRadius() const;
 
     /**

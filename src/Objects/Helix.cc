@@ -274,7 +274,7 @@ StatusCode Helix::GetPointOnCircle(const float radius, const CartesianVector &re
     const float phiCentre(std::atan2(m_yCentre, m_xCentre));
 
     float phiStar(radius * radius + distCenterToIP * distCenterToIP - m_radius * m_radius);
-	phiStar = 0.5f * phiStar / std::max(1.e-20f, radius * distCenterToIP);
+    phiStar = 0.5f * phiStar / std::max(1.e-20f, radius * distCenterToIP);
 
     if (phiStar > 1.f)
         phiStar = 0.9999999f;
