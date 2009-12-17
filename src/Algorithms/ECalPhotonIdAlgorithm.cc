@@ -357,7 +357,9 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     //if(closest>50)pidCut=0.25;
 
     if(m_makingPhotonIdLikelihoodHistograms)
+    {
         PANDORA_MONITORING_API(Fill2DHistogram("pidVsPhotonEFraction", pid, fraction ));
+    }
 
 //         float fracE = photonCandidateCluster->GetElectromagneticEnergy()/photonCandidateCluster->GetElectromagneticEnergy();
     if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > pidCut && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
@@ -413,8 +415,9 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
     }
 
     if(m_makingPhotonIdLikelihoodHistograms)
-        PANDORA_MONITORING_API(Fill2DHistogram("energyVsPhotonE", electromagneticE, truePhotonE ));
-
+    {
+        PANDORA_MONITORING_API(Fill2DHistogram("energyVsPhotonE", electromagneticE, truePhotonE));
+    }
 
     if(m_producePrintoutStatements > 0 && peak.energy > 1.0)
     {
