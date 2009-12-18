@@ -268,7 +268,7 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(PseudoLayer pseudoLayer,
                     pHitInCluster->GetCellLengthScale(), iLayer - innerLayer));
             }
 
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitPoints(clusterFitPointList, clusterFitResult));
+            (void) ClusterHelper::FitPoints(clusterFitPointList, clusterFitResult);
 
             if (clusterFitResult.IsFitSuccessful())
             {
