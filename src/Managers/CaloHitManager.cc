@@ -338,11 +338,10 @@ StatusCode CaloHitManager::ResetForNextEvent()
 
     m_inputCaloHitVector.clear();
 
-    for (NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.begin();
-        listIter != m_nameToOrderedCaloHitListMap.end(); ++listIter)
+    for (NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.begin(); listIter != m_nameToOrderedCaloHitListMap.end();)
     {
         delete listIter->second;
-        m_nameToOrderedCaloHitListMap.erase(listIter);
+        m_nameToOrderedCaloHitListMap.erase(listIter++);
     }
 
     m_nameToOrderedCaloHitListMap.clear();

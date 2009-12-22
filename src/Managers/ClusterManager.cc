@@ -414,7 +414,7 @@ StatusCode ClusterManager::ResetForNextEvent()
     m_canMakeNewClusters = false;
     m_currentListName.clear();
 
-    for (NameToClusterListMap::iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end(); ++iter)
+    for (NameToClusterListMap::iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end();)
     {
         for (ClusterList::iterator clusterIter = iter->second->begin(), clusterIterEnd = iter->second->end(); 
             clusterIter != clusterIterEnd; ++clusterIter)
@@ -423,7 +423,7 @@ StatusCode ClusterManager::ResetForNextEvent()
         }
 
         delete iter->second;
-        m_nameToClusterListMap.erase(iter);
+        m_nameToClusterListMap.erase(iter++);
     }
 
     m_nameToClusterListMap.clear();

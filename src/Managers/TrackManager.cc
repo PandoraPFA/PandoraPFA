@@ -252,10 +252,10 @@ StatusCode TrackManager::ResetForNextEvent()
         }
     }
 
-    for (NameToTrackListMap::iterator iter = m_nameToTrackListMap.begin(); iter != m_nameToTrackListMap.end(); ++iter)
+    for (NameToTrackListMap::iterator iter = m_nameToTrackListMap.begin(); iter != m_nameToTrackListMap.end();)
     {
         delete iter->second;
-        m_nameToTrackListMap.erase(iter);
+        m_nameToTrackListMap.erase(iter++);
     }
 
     m_nameToTrackListMap.clear();
