@@ -38,13 +38,11 @@ StatusCode MonitoringAlgorithm::Run()
         for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
             caloHitIter != caloHitIterEnd; ++caloHitIter)
         {
-            CaloHit *pCaloHit = *caloHitIter;
-
-            PANDORA_MONITORING_API(Fill1DHistogram(PseudoLayerHistName, pCaloHit->GetPseudoLayer()));
-            PANDORA_MONITORING_API(Fill1DHistogram(DensityWeightHistName, pCaloHit->GetDensityWeight()));
-            PANDORA_MONITORING_API(Fill1DHistogram(SurroundingEnergyHistName, pCaloHit->GetSurroundingEnergy()));
-            PANDORA_MONITORING_API(Fill1DHistogram(PossibleMipFlagHistName, pCaloHit->IsPossibleMip()));
-            PANDORA_MONITORING_API(Fill1DHistogram(IsIsolatedFlagHistName, pCaloHit->IsIsolated()));
+            PANDORA_MONITORING_API(Fill1DHistogram(PseudoLayerHistName, (*caloHitIter)->GetPseudoLayer()));
+            PANDORA_MONITORING_API(Fill1DHistogram(DensityWeightHistName, (*caloHitIter)->GetDensityWeight()));
+            PANDORA_MONITORING_API(Fill1DHistogram(SurroundingEnergyHistName, (*caloHitIter)->GetSurroundingEnergy()));
+            PANDORA_MONITORING_API(Fill1DHistogram(PossibleMipFlagHistName, (*caloHitIter)->IsPossibleMip()));
+            PANDORA_MONITORING_API(Fill1DHistogram(IsIsolatedFlagHistName, (*caloHitIter)->IsIsolated()));
         }
     }
 

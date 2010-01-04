@@ -287,8 +287,8 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster )
 
     if (m_producePrintoutStatements > 0)
     {
-        std::cout << "electromagneticE " << electromagneticE << std::endl;
-        std::cout << "electromagneticEContrib " << electromagneticEContribution << std::endl;
+        std::cout << "electromagneticE " << electromagneticE << "electromagneticEContrib " << electromagneticEContribution
+                  << " truePhotonE " << truePhotonE << " trueE " << trueE << std::endl;
     }
 
     assert( electromagneticE - electromagneticEContribution < 0.0001 );
