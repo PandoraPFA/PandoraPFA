@@ -8,6 +8,8 @@
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 
+#include <limits>
+
 using namespace pandora;
 
 StatusCode ClusterPreparationAlgorithm::Run()
