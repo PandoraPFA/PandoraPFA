@@ -22,6 +22,10 @@
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
 
+#include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
+#include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
+#include "Algorithms/PfoConstruction/PfoCreationAlgorithm.h"
+
 #include "Algorithms/TopologicalAssociation/BackscatteredTracksAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/BackscatteredTracks2Algorithm.h"
 #include "Algorithms/TopologicalAssociation/BrokenTracksAlgorithm.h"
@@ -49,6 +53,9 @@
     d("TrackSelection",             TrackSelectionAlgorithm::Factory)               \
     d("Clustering",                 ClusteringAlgorithm::Factory)                   \
     d("PerfectClustering",          PerfectClusteringAlgorithm::Factory)            \
+    d("ClusterPreparation",         ClusterPreparationAlgorithm::Factory)           \
+    d("TrackPreparation",           TrackPreparationAlgorithm::Factory)             \
+    d("PfoCreation",                PfoCreationAlgorithm::Factory)                  \
     d("BackscatteredTracks",        BackscatteredTracksAlgorithm::Factory)          \
     d("BackscatteredTracks2",       BackscatteredTracks2Algorithm::Factory)         \
     d("BrokenTracks",               BrokenTracksAlgorithm::Factory)                 \

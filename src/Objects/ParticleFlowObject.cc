@@ -34,7 +34,7 @@ ParticleFlowObject::ParticleFlowObject(const PandoraContentApi::ParticleFlowObje
 
 void ParticleFlowObject::ExtractAndStoreTracks(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters)
 {
-    for (TrackList::const_iterator iter = particleFlowObjectParameters.m_trackList.begin(),
+    for (ConstTrackList::const_iterator iter = particleFlowObjectParameters.m_trackList.begin(),
         iterEnd = particleFlowObjectParameters.m_trackList.end(); iter != iterEnd; ++iter)
     {
         m_trackAddressList.push_back((*iter)->GetParentTrackAddress());
@@ -45,7 +45,7 @@ void ParticleFlowObject::ExtractAndStoreTracks(const PandoraContentApi::Particle
 
 void ParticleFlowObject::ExtractAndStoreCaloHits(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters)
 {
-    for (ClusterList::const_iterator clusterIter = particleFlowObjectParameters.m_clusterList.begin(),
+    for (ConstClusterList::const_iterator clusterIter = particleFlowObjectParameters.m_clusterList.begin(),
         clusterIterEnd = particleFlowObjectParameters.m_clusterList.end(); clusterIter != clusterIterEnd; ++clusterIter)
     {
         CaloHitAddressList caloHitAddressList;

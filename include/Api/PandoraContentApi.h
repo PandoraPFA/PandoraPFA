@@ -68,8 +68,8 @@ public:
             pandora::InputFloat             m_mass;             ///< The particle flow object mass
             pandora::InputFloat             m_energy;           ///< The particle flow object energy
             pandora::InputCartesianVector   m_momentum;         ///< The particle flow object momentum
-            pandora::ClusterList            m_clusterList;      ///< The clusters in the particle flow object
-            pandora::TrackList              m_trackList;        ///< The tracks in the particle flow object
+            pandora::ConstClusterList       m_clusterList;      ///< The clusters in the particle flow object
+            pandora::ConstTrackList         m_trackList;        ///< The tracks in the particle flow object
         };
 
         /**

@@ -59,14 +59,14 @@ public:
      * 
      *  @return The track list
      */
-    const TrackList &GetTrackList() const;
+    const ConstTrackList &GetTrackList() const;
 
     /**
      *  @brief  Get the cluster list
      * 
      *  @return The cluster list
      */
-    const ClusterList &GetClusterList() const;
+    const ConstClusterList &GetClusterList() const;
 
     /**
      *  @brief  Get track address list
@@ -108,8 +108,8 @@ private:
     const float             m_energy;                   ///< The particle flow object energy
     const CartesianVector   m_momentum;                 ///< The particle flow object momentum
 
-    const TrackList         m_trackList;                ///< The track list
-    const ClusterList       m_clusterList;              ///< The cluster list
+    const ConstTrackList    m_trackList;                ///< The track list
+    const ConstClusterList  m_clusterList;              ///< The cluster list
 
     TrackAddressList        m_trackAddressList;         ///< The track address list
     ClusterAddressList      m_clusterAddressList;       ///< The cluster address list
@@ -156,14 +156,14 @@ inline const CartesianVector &ParticleFlowObject::GetMomentum() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackList &ParticleFlowObject::GetTrackList() const
+inline const ConstTrackList &ParticleFlowObject::GetTrackList() const
 {
     return m_trackList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const ClusterList &ParticleFlowObject::GetClusterList() const
+inline const ConstClusterList &ParticleFlowObject::GetClusterList() const
 {
     return m_clusterList;
 }
