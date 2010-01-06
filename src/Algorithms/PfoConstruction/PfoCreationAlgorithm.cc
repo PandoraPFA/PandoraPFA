@@ -97,9 +97,9 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         if (!pCluster->GetAssociatedTrackList().empty())
             continue;
 
-        // TODO use BestEnergyEstimate to take advantage of cluster preparation energy corrections
+        // TODO use BestEnergyEstimate for photon clusters too, if photon cluster energy corrections are made
         const bool isPhoton(pCluster->IsPhoton());
-        float clusterEnergy(isPhoton ? pCluster->GetElectromagneticEnergy() : pCluster->GetHadronicEnergy());
+        float clusterEnergy(isPhoton ? pCluster->GetElectromagneticEnergy() : pCluster->GetBestEnergyEstimate());
 
         // Veto non-photon clusters below hadronic energy threshold and those occupying a single layer
         if (!isPhoton)
