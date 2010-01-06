@@ -337,6 +337,13 @@ private:
      */
     StatusCode PrepareClustersForDeletion(const ClusterList &clusterList) const;
 
+    /**
+     *  @brief  Prepare a list of clusters (formed as recluster candidates) for deletion, removing any track associations.
+     * 
+     *  @param  clusterList the list of clusters to prepare for deletion
+     */
+    StatusCode PrepareReclusterCandidatesForDeletion(const ClusterList &clusterList) const;
+
     Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
 
     friend class Pandora;
