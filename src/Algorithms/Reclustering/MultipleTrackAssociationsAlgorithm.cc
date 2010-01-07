@@ -8,39 +8,49 @@
 
 #include "Algorithms/Reclustering/MultipleTrackAssociationsAlgorithm.h"
 
+#include <limits>
+
 using namespace pandora;
 
 StatusCode MultipleTrackAssociationsAlgorithm::Run()
 {
-    const TrackList *pInputTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pInputTrackList));
+    // Begin by recalculating track-cluster associations
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
-    for (TrackList::const_iterator trackIter = pInputTrackList->begin(); trackIter != pInputTrackList->end(); ++trackIter)
+    // Store copy of input cluster list in a vector
+    const ClusterList *pClusterList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+
+    // Examine each cluster in the input list
+    for (ClusterVector::iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
-        // Select clusters and tracks to use for reclustering
-        TrackList reclusterTrackList;
-        reclusterTrackList.insert(*trackIter);
+        Cluster *pCluster = *iter;
 
+        const TrackList &trackList(pCluster->GetAssociatedTrackList());
+        const unsigned int nTrackAssociations(trackList.size());
+
+        if ((nTrackAssociations < m_minTrackAssociationsToSplit) || (nTrackAssociations > m_maxTrackAssociationsToSplit))
+            continue;
+
+        if (this->GetTrackClusterCompatibility(pCluster, trackList) < m_chiToAttemptReclustering)
+            continue;
+
+        // Specify clusters and tracks to be used in reclustering
         ClusterList reclusterClusterList;
+        reclusterClusterList.insert(pCluster);
 
-        const ClusterList *pInputClusterList = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList));
-
-        for (ClusterList::const_iterator clusterIter = pInputClusterList->begin(); clusterIter != pInputClusterList->end(); ++clusterIter)
-        {
-            // For now, by way of example, just pair each track with the first cluster
-            reclusterClusterList.insert(*clusterIter);
-            break;
-        }
+        TrackList reclusterTrackList(trackList.begin(), trackList.end());
 
         // Initialize reclustering with these local lists
         std::string originalClustersListName;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeReclustering(*this, reclusterTrackList, 
             reclusterClusterList, originalClustersListName));
 
-        // Run multiple clustering algorithms, using returned cluster candidate list to calculate a figure of merit and 
-        // identify the best recluster candidates.
-        std::string bestReclusterCandidateListName = originalClustersListName;
+        // Run multiple clustering algorithms and identify the best cluster candidates produced
+        std::string bestReclusterCandidateListName(originalClustersListName);
+        float bestReclusterCandidateChi2(std::numeric_limits<float>::max());
 
         for (StringVector::const_iterator clusteringIter = m_clusteringAlgorithms.begin(),
             clusteringIterEnd = m_clusteringAlgorithms.end(); clusteringIter != clusteringIterEnd; ++clusteringIter)
@@ -50,20 +60,93 @@ StatusCode MultipleTrackAssociationsAlgorithm::Run()
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, *clusteringIter, 
                 pReclusterCandidatesList, reclusterCandidatesListName));
 
-            // Run topological association algorithm
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
+            // TODO Address problem with removing all existing track-cluster associations
+            // TODO What about track projection clusters - how best to delete them?
 
-            // Calculate figure of merit for recluster candidates here. Label as best recluster candidates if applicable.
-            // For now, just take the last populated list.
+            // Run topological association algorithm
             if (!pReclusterCandidatesList->empty())
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
+
+            // Recalculate track-cluster associations TODO related to above problem
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
+
+            // Calculate figure of merit for recluster candidates. Label as best recluster candidates if applicable
+            const float reclusterCandidateChi2(this->GetReclusterFigureOfMerit(pReclusterCandidatesList));
+
+            if ((reclusterCandidateChi2 < bestReclusterCandidateChi2) && (reclusterCandidateChi2 < m_chiToAttemptReclustering * m_chiToAttemptReclustering))
+            {
+                bestReclusterCandidateChi2 = reclusterCandidateChi2;
                 bestReclusterCandidateListName = reclusterCandidatesListName;
+
+                // If chi2 is very good, stop the reclustering attempts
+                if(bestReclusterCandidateChi2 < m_chi2ForAutomaticClusterSelection)
+                    break;
+            }
         }
 
-        // Choose best clusters, which may be the originals
+        // Choose the best recluster candidates, which may still be the originals
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndReclustering(*this, bestReclusterCandidateListName));
+
+        // Original cluster may have been deleted: for safety, remove its address from ClusterVector
+        (*iter) = NULL;
     }
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float MultipleTrackAssociationsAlgorithm::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList) const
+{
+    float trackEnergySum(0.);
+
+    for (TrackList::const_iterator trackIter = trackList.begin(), trackIterEnd = trackList.end(); trackIter != trackIterEnd; ++trackIter)
+        trackEnergySum += (*trackIter)->GetEnergyAtDca();
+
+    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+
+    if ((0. == trackEnergySum) || (0. == hadronicEnergyResolution))
+        return STATUS_CODE_FAILURE;
+
+    const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
+    const float chi((pCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
+
+    return chi;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float MultipleTrackAssociationsAlgorithm::GetReclusterFigureOfMerit(const ClusterList *const pReclusterCandidatesList) const
+{
+    float chi2(0.);
+    float dof(0.);
+
+    for (ClusterList::const_iterator iter = pReclusterCandidatesList->begin(), iterEnd = pReclusterCandidatesList->end(); iter != iterEnd; ++iter)
+    {
+        Cluster *pCluster = *iter;
+
+        const TrackList &trackList(pCluster->GetAssociatedTrackList());
+        const unsigned int nTrackAssociations(trackList.size());
+
+        if (1 < nTrackAssociations)
+            return std::numeric_limits<float>::max();
+
+        if (0 == nTrackAssociations)
+            continue;
+
+        const float chi(this->GetTrackClusterCompatibility(pCluster, trackList));
+        chi2 += chi * chi;
+        dof += 1.;
+
+        // Veto case where track is now matched to v. low energy cluster
+        if (pCluster->GetHadronicEnergy() < m_minClusterEnergyForTrackAssociation)
+            return std::numeric_limits<float>::max();
+    }
+
+    if (0. == dof)
+        return std::numeric_limits<float>::max();
+
+    return chi2 /= dof;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,8 +155,35 @@ StatusCode MultipleTrackAssociationsAlgorithm::ReadSettings(const TiXmlHandle xm
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "clusteringAlgorithms",
         m_clusteringAlgorithms));
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "ClusterAssociation",
         m_associationAlgorithmName));
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "TrackClusterAssociation",
+        m_trackClusterAssociationAlgName));
+
+    m_minTrackAssociationsToSplit = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinTrackAssociationsToSplit", m_minTrackAssociationsToSplit));
+
+    if (m_minTrackAssociationsToSplit < 2)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_maxTrackAssociationsToSplit = std::numeric_limits<unsigned int>::max();
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackAssociationsToSplit", m_maxTrackAssociationsToSplit));
+
+    m_chiToAttemptReclustering = -3.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ChiToAttemptReclustering", m_chiToAttemptReclustering));
+
+    m_minClusterEnergyForTrackAssociation = 0.1f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinClusterEnergyForTrackAssociation", m_minClusterEnergyForTrackAssociation));
+
+    m_chi2ForAutomaticClusterSelection = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Chi2ForAutomaticClusterSelection", m_chi2ForAutomaticClusterSelection));
 
     return STATUS_CODE_SUCCESS;
 }
