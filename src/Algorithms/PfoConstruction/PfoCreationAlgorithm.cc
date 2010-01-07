@@ -28,7 +28,7 @@ StatusCode PfoCreationAlgorithm::CreateChargedPfos() const
 
     for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
-        const Track *pTrack = *iter;
+        Track *pTrack = *iter;
 
         // Specify the pfo parameters
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
@@ -42,7 +42,7 @@ StatusCode PfoCreationAlgorithm::CreateChargedPfos() const
         // TODO Add any back scatter daughters
 
         // Add any cluster associated with this track to the pfo
-        const Cluster *pAssociatedCluster = NULL;
+        Cluster *pAssociatedCluster = NULL;
 
         if (STATUS_CODE_SUCCESS == pTrack->GetAssociatedCluster(pAssociatedCluster))
         {
@@ -92,7 +92,7 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
     // Examine clusters with no associated tracks to form neutral pfos
     for (ClusterList::const_iterator iter = combinedClusterList.begin(), iterEnd = combinedClusterList.end(); iter != iterEnd; ++iter)
     {
-        const Cluster *pCluster = *iter;
+        Cluster *pCluster = *iter;
 
         if (!pCluster->GetAssociatedTrackList().empty())
             continue;

@@ -226,6 +226,13 @@ StatusCode PandoraContentApi::RemoveTrackClusterAssociation(const pandora::Algor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::RemoveCurrentTrackClusterAssociations(const pandora::Algorithm &algorithm)
+{
+    return algorithm.GetPandoraContentApiImpl()->RemoveCurrentTrackClusterAssociations();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::RemoveAllTrackClusterAssociations(const pandora::Algorithm &algorithm)
 {
     return algorithm.GetPandoraContentApiImpl()->RemoveAllTrackClusterAssociations();

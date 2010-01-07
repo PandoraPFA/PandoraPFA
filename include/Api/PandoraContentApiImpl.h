@@ -208,6 +208,11 @@ public:
     StatusCode RemoveTrackClusterAssociation(Track *const pTrack, Cluster *const pCluster) const;
 
     /**
+     *  @brief  Remove all track-cluster associations from objects in the current track and cluster lists
+     */
+    StatusCode RemoveCurrentTrackClusterAssociations() const;
+
+    /**
      *  @brief  Remove all associations between tracks and clusters
      */
     StatusCode RemoveAllTrackClusterAssociations() const;

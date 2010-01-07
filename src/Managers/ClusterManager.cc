@@ -486,6 +486,42 @@ StatusCode ClusterManager::RemoveAllTrackAssociations() const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::RemoveCurrentTrackAssociations(TrackList &danglingTracks) const
+{
+    NameToClusterListMap::const_iterator iter = m_nameToClusterListMap.find(m_currentListName);
+
+    if (m_nameToClusterListMap.end() == iter)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    for (ClusterList::iterator clusterIter = iter->second->begin(), clusterIterEnd = iter->second->end(); clusterIter != clusterIterEnd;
+        ++clusterIter)
+    {
+        TrackList &associatedTrackList((*clusterIter)->m_associatedTrackList);
+
+        if (associatedTrackList.empty())
+            continue;
+
+        danglingTracks.insert(associatedTrackList.begin(), associatedTrackList.end());
+        associatedTrackList.clear();
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::RemoveTrackAssociations(const TrackToClusterMap &trackToClusterList) const
+{
+    for (TrackToClusterMap::const_iterator iter = trackToClusterList.begin(), iterEnd = trackToClusterList.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, iter->second->RemoveTrackAssociation(iter->first));
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template StatusCode ClusterManager::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster);

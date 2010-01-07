@@ -176,16 +176,23 @@ private:
     StatusCode AddSiblingAssociations() const;
 
     /**
-     *  @brief  Remove all cluster associations from a specified list of tracks
+     *  @brief  Remove all track to cluster associations
+     */
+    StatusCode RemoveAllClusterAssociations() const;
+
+    /**
+     *  @brief  Remove track to cluster associations from all tracks in the current list
+     * 
+     *  @param  danglingClusters to receive the list of "dangling" associations
+     */
+    StatusCode RemoveCurrentClusterAssociations(TrackToClusterMap &danglingClusters) const;
+
+    /**
+     *  @brief  Remove track to cluster associations from a specified list of tracks
      * 
      *  @param  trackList the specified track list
      */
     StatusCode RemoveClusterAssociations(const TrackList &trackList) const;
-
-    /**
-     *  @brief  Remove all track to cluster associations
-     */
-    StatusCode RemoveAllClusterAssociations() const;
 
     /**
      *  @brief  AlgorithmInfo class

@@ -117,7 +117,7 @@ public:
      * 
      *  @param  pCluster to receive the address of the cluster
      */
-    StatusCode GetAssociatedCluster(const Cluster *&pCluster) const;
+    StatusCode GetAssociatedCluster(Cluster *&pCluster) const;
 
     /**
      *  @brief  Get address of the mc particle associated with the track
@@ -227,7 +227,7 @@ private:
 
     const Helix             *m_pHelixFitAtECal;         ///< Helix fit to the ecal track state
 
-    const Cluster           *m_pAssociatedCluster;      ///< The address of an associated cluster
+    Cluster                 *m_pAssociatedCluster;      ///< The address of an associated cluster
     const MCParticle        *m_pMCParticle;             ///< The address of the associated MC particle
     const void              *m_pParentAddress;          ///< The address of the parent track in the user framework
 
@@ -352,7 +352,7 @@ inline const Helix *const Track::GetHelixFitAtECal() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Track::GetAssociatedCluster(const Cluster *&pCluster) const
+inline StatusCode Track::GetAssociatedCluster(Cluster *&pCluster) const
 {
     if (NULL == m_pAssociatedCluster)
         return STATUS_CODE_NOT_INITIALIZED;

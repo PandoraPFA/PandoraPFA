@@ -60,14 +60,20 @@ StatusCode MultipleTrackAssociationsAlgorithm::Run()
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, *clusteringIter, 
                 pReclusterCandidatesList, reclusterCandidatesListName));
 
-            // TODO Address problem with removing all existing track-cluster associations
-            // TODO What about track projection clusters - how best to delete them?
-
             // Run topological association algorithm
             if (!pReclusterCandidatesList->empty())
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
 
-            // Recalculate track-cluster associations TODO related to above problem
+            // Remove any track projection clusters remaining at this stage
+            for (ClusterList::const_iterator reclusterIter = pReclusterCandidatesList->begin(); reclusterIter != pReclusterCandidatesList->end();)
+            {
+                Cluster *pReclusterCandidate = *(reclusterIter++);
+
+                if (0 == pReclusterCandidate->GetNCaloHits())
+                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pReclusterCandidate));
+            }
+
+            // Calculate final track-cluster associations for these recluster candidates
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
             // Calculate figure of merit for recluster candidates. Label as best recluster candidates if applicable

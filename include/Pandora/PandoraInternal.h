@@ -103,9 +103,6 @@ typedef std::vector<CaloHit *> CaloHitVector;
 typedef std::vector<Cluster *> ClusterVector;
 typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
 
-typedef std::set<const Track *> ConstTrackList;
-typedef std::set<const Cluster *> ConstClusterList;
-
 typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;
 typedef std::set<Track *, PointerLessThan<Track> > MomentumSortedTrackList;
 
@@ -114,7 +111,9 @@ typedef std::set<std::string> StringSet;
 typedef std::vector<std::string> StringVector;
 
 typedef const void * Uid;
+
 typedef std::map<Uid, MCParticle *> UidToMCParticleMap;
+typedef std::map<Track *, Cluster *> TrackToClusterMap;
 
 static const unsigned int TRACK_PROJECTION_LAYER = 0;
 

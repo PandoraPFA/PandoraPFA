@@ -22,7 +22,7 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     // Clear any existing track - cluster associations
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveAllTrackClusterAssociations(*this));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCurrentTrackClusterAssociations(*this));
 
     // Look to make new associations
     for (TrackList::const_iterator trackIter = pTrackList->begin(), trackIterEnd = pTrackList->end();

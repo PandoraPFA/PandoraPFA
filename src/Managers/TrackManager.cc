@@ -341,16 +341,6 @@ StatusCode TrackManager::AddSiblingAssociations() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::RemoveClusterAssociations(const TrackList &trackList) const
-{
-    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
-        (*iter)->m_pAssociatedCluster = NULL;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode TrackManager::RemoveAllClusterAssociations() const
 {
     NameToTrackListMap::const_iterator listIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
@@ -359,7 +349,46 @@ StatusCode TrackManager::RemoveAllClusterAssociations() const
         return STATUS_CODE_FAILURE;
 
     for (TrackList::iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
+    {
         (*iter)->m_pAssociatedCluster = NULL;
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::RemoveCurrentClusterAssociations(TrackToClusterMap &danglingClusters) const
+{
+    NameToTrackListMap::const_iterator listIter = m_nameToTrackListMap.find(m_currentListName);
+
+    if (m_nameToTrackListMap.end() == listIter)
+        return STATUS_CODE_FAILURE;
+
+    for (TrackList::iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
+    {
+        Cluster *&pAssociatedCluster = (*iter)->m_pAssociatedCluster;
+
+        if (NULL == pAssociatedCluster)
+            continue;
+
+        if (!danglingClusters.insert(TrackToClusterMap::value_type(*iter, pAssociatedCluster)).second)
+            return STATUS_CODE_FAILURE;
+
+        pAssociatedCluster = NULL;
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::RemoveClusterAssociations(const TrackList &trackList) const
+{
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+    {
+        (*iter)->m_pAssociatedCluster = NULL;
+    }
 
     return STATUS_CODE_SUCCESS;
 }

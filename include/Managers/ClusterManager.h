@@ -219,6 +219,20 @@ private:
     StatusCode RemoveAllTrackAssociations() const;
 
     /**
+     *  @brief  Remove cluster to track associations from all clusters in the current list
+     * 
+     *  @param  danglingTracks to receive the list of "dangling" associations
+     */
+    StatusCode RemoveCurrentTrackAssociations(TrackList &danglingTracks) const;
+
+    /**
+     *  @brief  Remove a specified list of cluster to track associations
+     * 
+     *  @param  trackToClusterList the specified track to cluster list
+     */
+    StatusCode RemoveTrackAssociations(const TrackToClusterMap &trackToClusterList) const;
+
+    /**
      *  @brief  AlgorithmInfo class
      */
     class AlgorithmInfo
