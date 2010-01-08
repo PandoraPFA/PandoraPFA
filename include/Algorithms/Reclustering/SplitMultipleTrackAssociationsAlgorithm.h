@@ -1,19 +1,19 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/Reclustering/MultipleTrackAssociationsAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/Reclustering/SplitMultipleTrackAssociationsAlgorithm.h
  * 
- *  @brief  Header file for the multiple track associations algorithm class.
+ *  @brief  Header file for the split multiple track associations algorithm class.
  * 
  *  $Log: $
  */
-#ifndef MULTIPLE_TRACK_ASSOCIATIONS_ALGORITHM_H
-#define MULTIPLE_TRACK_ASSOCIATIONS_ALGORITHM_H 1
+#ifndef SPLIT_MULTIPLE_TRACK_ASSOCIATIONS_ALGORITHM_H
+#define SPLIT_MULTIPLE_TRACK_ASSOCIATIONS_ALGORITHM_H 1
 
 #include "Algorithms/Algorithm.h"
 
 /**
- *  @brief  MultipleTrackAssociationsAlgorithm class
+ *  @brief  SplitMultipleTrackAssociationsAlgorithm class
  */
-class MultipleTrackAssociationsAlgorithm : public pandora::Algorithm
+class SplitMultipleTrackAssociationsAlgorithm : public pandora::Algorithm
 {
 public:
     /**
@@ -59,9 +59,9 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *MultipleTrackAssociationsAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *SplitMultipleTrackAssociationsAlgorithm::Factory::CreateAlgorithm() const
 {
-    return new MultipleTrackAssociationsAlgorithm();
+    return new SplitMultipleTrackAssociationsAlgorithm();
 }
 
-#endif // #ifndef MULTIPLE_TRACK_ASSOCIATIONS_ALGORITHM_H
+#endif // #ifndef SPLIT_MULTIPLE_TRACK_ASSOCIATIONS_ALGORITHM_H

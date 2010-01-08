@@ -26,7 +26,7 @@
 #include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/PfoCreationAlgorithm.h"
 
-#include "Algorithms/Reclustering/MultipleTrackAssociationsAlgorithm.h"
+#include "Algorithms/Reclustering/SplitMultipleTrackAssociationsAlgorithm.h"
 
 #include "Algorithms/TopologicalAssociation/BackscatteredTracksAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/BackscatteredTracks2Algorithm.h"
@@ -42,46 +42,46 @@
 #include "Algorithms/TopologicalAssociation/SoftClusterMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
-#define PANDORA_ALGORITHM_LIST(d)                                                   \
-    d("Cheating",                   CheatingAlgorithm::Factory)                     \
-    d("FragmentRemoval",            FragmentRemovalAlgorithm::Factory)              \
-    d("Monitoring",                 MonitoringAlgorithm::Factory)                   \
-    d("PfoConstruction",            PfoConstructionAlgorithm::Factory)              \
-    d("PhotonClustering",           PhotonClusteringAlgorithm::Factory)             \
-    d("ECalPhotonId",               ECalPhotonIdAlgorithm::Factory)                 \
-    d("PrimaryClustering",          PrimaryClusteringAlgorithm::Factory)            \
-    d("Reclustering",               ReclusteringAlgorithm::Factory)                 \
-    d("TopologicalAssociation",     TopologicalAssociationAlgorithm::Factory)       \
-    d("TrackSelection",             TrackSelectionAlgorithm::Factory)               \
-    d("Clustering",                 ClusteringAlgorithm::Factory)                   \
-    d("PerfectClustering",          PerfectClusteringAlgorithm::Factory)            \
-    d("ClusterPreparation",         ClusterPreparationAlgorithm::Factory)           \
-    d("TrackPreparation",           TrackPreparationAlgorithm::Factory)             \
-    d("PfoCreation",                PfoCreationAlgorithm::Factory)                  \
-    d("MultipleTrackAssociations",  MultipleTrackAssociationsAlgorithm::Factory)    \
-    d("BackscatteredTracks",        BackscatteredTracksAlgorithm::Factory)          \
-    d("BackscatteredTracks2",       BackscatteredTracks2Algorithm::Factory)         \
-    d("BrokenTracks",               BrokenTracksAlgorithm::Factory)                 \
-    d("ConeBasedMerging",           ConeBasedMergingAlgorithm::Factory)             \
-    d("IsolatedHitMerging",         IsolatedHitMergingAlgorithm::Factory)           \
-    d("LoopingTracks",              LoopingTracksAlgorithm::Factory)                \
-    d("ProximityBasedMerging",      ProximityBasedMergingAlgorithm::Factory)        \
-    d("ShowerMipMerging",           ShowerMipMergingAlgorithm::Factory)             \
-    d("ShowerMipMerging2",          ShowerMipMerging2Algorithm::Factory)            \
-    d("ShowerMipMerging3",          ShowerMipMerging3Algorithm::Factory)            \
-    d("ShowerMipMerging4",          ShowerMipMerging4Algorithm::Factory)            \
-    d("SoftClusterMerging",         SoftClusterMergingAlgorithm::Factory)           \
-    d("TrackClusterAssociation",    TrackClusterAssociationAlgorithm::Factory)
+#define PANDORA_ALGORITHM_LIST(d)                                                                           \
+    d("Cheating",                               CheatingAlgorithm::Factory)                                 \
+    d("FragmentRemoval",                        FragmentRemovalAlgorithm::Factory)                          \
+    d("Monitoring",                             MonitoringAlgorithm::Factory)                               \
+    d("PfoConstruction",                        PfoConstructionAlgorithm::Factory)                          \
+    d("PhotonClustering",                       PhotonClusteringAlgorithm::Factory)                         \
+    d("ECalPhotonId",                           ECalPhotonIdAlgorithm::Factory)                             \
+    d("PrimaryClustering",                      PrimaryClusteringAlgorithm::Factory)                        \
+    d("Reclustering",                           ReclusteringAlgorithm::Factory)                             \
+    d("TopologicalAssociation",                 TopologicalAssociationAlgorithm::Factory)                   \
+    d("TrackSelection",                         TrackSelectionAlgorithm::Factory)                           \
+    d("Clustering",                             ClusteringAlgorithm::Factory)                               \
+    d("PerfectClustering",                      PerfectClusteringAlgorithm::Factory)                        \
+    d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
+    d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \
+    d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \
+    d("SplitMultipleTrackAssociations",         SplitMultipleTrackAssociationsAlgorithm::Factory)           \
+    d("BackscatteredTracks",                    BackscatteredTracksAlgorithm::Factory)                      \
+    d("BackscatteredTracks2",                   BackscatteredTracks2Algorithm::Factory)                     \
+    d("BrokenTracks",                           BrokenTracksAlgorithm::Factory)                             \
+    d("ConeBasedMerging",                       ConeBasedMergingAlgorithm::Factory)                         \
+    d("IsolatedHitMerging",                     IsolatedHitMergingAlgorithm::Factory)                       \
+    d("LoopingTracks",                          LoopingTracksAlgorithm::Factory)                            \
+    d("ProximityBasedMerging",                  ProximityBasedMergingAlgorithm::Factory)                    \
+    d("ShowerMipMerging",                       ShowerMipMergingAlgorithm::Factory)                         \
+    d("ShowerMipMerging2",                      ShowerMipMerging2Algorithm::Factory)                        \
+    d("ShowerMipMerging3",                      ShowerMipMerging3Algorithm::Factory)                        \
+    d("ShowerMipMerging4",                      ShowerMipMerging4Algorithm::Factory)                        \
+    d("SoftClusterMerging",                     SoftClusterMergingAlgorithm::Factory)                       \
+    d("TrackClusterAssociation",                TrackClusterAssociationAlgorithm::Factory)
 
-#define PANDORA_CREATE_ALGORITHM(a, b)                                              \
-    {                                                                               \
-        StatusCode statusCode = RegisterAlgorithmFactory(a, new b);                 \
-                                                                                    \
-        if (STATUS_CODE_SUCCESS != statusCode)                                      \
-            throw StatusCodeException(statusCode);                                  \
+#define PANDORA_CREATE_ALGORITHM(a, b)                                                                      \
+    {                                                                                                       \
+        StatusCode statusCode = RegisterAlgorithmFactory(a, new b);                                         \
+                                                                                                            \
+        if (STATUS_CODE_SUCCESS != statusCode)                                                              \
+            throw StatusCodeException(statusCode);                                                          \
     }
 
-#define PANDORA_CREATE_ALL_ALGORITHMS()                                             \
+#define PANDORA_CREATE_ALL_ALGORITHMS()                                                                     \
     PANDORA_ALGORITHM_LIST(PANDORA_CREATE_ALGORITHM)
 
 #endif // #ifndef PANDORA_ALGORITHMS_H

@@ -1,18 +1,18 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/Reclustering/MultipleTrackAssociationsAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Reclustering/SplitMultipleTrackAssociationsAlgorithm.cc
  * 
- *  @brief  Implementation of the multiple track associations algorithm class.
+ *  @brief  Implementation of the split multiple track associations algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/Reclustering/MultipleTrackAssociationsAlgorithm.h"
+#include "Algorithms/Reclustering/SplitMultipleTrackAssociationsAlgorithm.h"
 
 #include <limits>
 
 using namespace pandora;
 
-StatusCode MultipleTrackAssociationsAlgorithm::Run()
+StatusCode SplitMultipleTrackAssociationsAlgorithm::Run()
 {
     // Begin by recalculating track-cluster associations
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
@@ -102,7 +102,7 @@ StatusCode MultipleTrackAssociationsAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float MultipleTrackAssociationsAlgorithm::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList) const
+float SplitMultipleTrackAssociationsAlgorithm::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList) const
 {
     float trackEnergySum(0.);
 
@@ -122,7 +122,7 @@ float MultipleTrackAssociationsAlgorithm::GetTrackClusterCompatibility(const Clu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float MultipleTrackAssociationsAlgorithm::GetReclusterFigureOfMerit(const ClusterList *const pReclusterCandidatesList) const
+float SplitMultipleTrackAssociationsAlgorithm::GetReclusterFigureOfMerit(const ClusterList *const pReclusterCandidatesList) const
 {
     float chi2(0.);
     float dof(0.);
@@ -157,7 +157,7 @@ float MultipleTrackAssociationsAlgorithm::GetReclusterFigureOfMerit(const Cluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MultipleTrackAssociationsAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode SplitMultipleTrackAssociationsAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "clusteringAlgorithms",
         m_clusteringAlgorithms));
