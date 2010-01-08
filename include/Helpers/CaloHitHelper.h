@@ -143,9 +143,11 @@ private:
 
     typedef std::map<CaloHit *, bool> CaloHitUsageMap;
     typedef std::map<std::string, CaloHitUsageMap *> NameToCaloHitUsageMap;
+    typedef std::vector<CaloHitUsageMap *> UsageMapVector;
 
-    static bool                         m_isReclustering;           ///< Whether the current algorithms are performing reclustering
+    static unsigned int                 m_nReclusteringProcesses;   ///< The number of reclustering algorithms currently in use
     static CaloHitUsageMap             *m_pCurrentUsageMap;         ///< Address of the current calo hit usage map
+    static UsageMapVector               m_parentCaloHitUsageMaps;   ///< List of current usage maps for all reclustering algorithms in use
     static NameToCaloHitUsageMap        m_nameToCaloHitUsageMap;    ///< The name to calo hit availability map
 
     friend class CaloHitManager;

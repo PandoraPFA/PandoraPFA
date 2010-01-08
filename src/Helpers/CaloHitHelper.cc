@@ -18,17 +18,16 @@
 namespace pandora
 {
 
-bool CaloHitHelper::m_isReclustering = false;
-
+unsigned int CaloHitHelper::m_nReclusteringProcesses = 0;
 CaloHitHelper::CaloHitUsageMap *CaloHitHelper::m_pCurrentUsageMap = NULL;
-
+CaloHitHelper::UsageMapVector CaloHitHelper::m_parentCaloHitUsageMaps;
 CaloHitHelper::NameToCaloHitUsageMap CaloHitHelper::m_nameToCaloHitUsageMap;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 bool CaloHitHelper::IsCaloHitAvailable(CaloHit *const pCaloHit)
 {
-    if (!m_isReclustering)
+    if (0 == m_nReclusteringProcesses)
         return pCaloHit->m_isAvailable;
 
     CaloHitUsageMap::iterator usageMapIter = m_pCurrentUsageMap->find(pCaloHit);
@@ -43,7 +42,7 @@ bool CaloHitHelper::IsCaloHitAvailable(CaloHit *const pCaloHit)
 
 bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitVector &caloHitVector)
 {
-    if (!m_isReclustering)
+    if (0 == m_nReclusteringProcesses)
     {
         for (CaloHitVector::const_iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
         {
@@ -217,7 +216,7 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
 
 StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHit *const pCaloHit, bool isAvailable)
 {
-    if (!m_isReclustering)
+    if (0 == m_nReclusteringProcesses)
     {
         pCaloHit->m_isAvailable = isAvailable;
         return STATUS_CODE_SUCCESS;
@@ -237,7 +236,7 @@ StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHit *const pCaloHit, bool i
 
 StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHitVector &caloHitVector, bool isAvailable)
 {
-    if (!m_isReclustering)
+    if (0 == m_nReclusteringProcesses)
     {
         for (CaloHitVector::iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
             (*iter)->m_isAvailable = isAvailable;
@@ -262,8 +261,8 @@ StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHitVector &caloHitVector, b
 
 StatusCode CaloHitHelper::CreateInitialCaloHitUsageMap(const std::string &usageMapName, const OrderedCaloHitList *pOrderedCaloHitList)
 {
-    if (!m_isReclustering)
-        return STATUS_CODE_NOT_ALLOWED;
+    if (0 < m_nReclusteringProcesses++)
+        m_parentCaloHitUsageMaps.push_back(m_pCurrentUsageMap);
 
     m_pCurrentUsageMap = new CaloHitUsageMap;
 
@@ -287,7 +286,7 @@ StatusCode CaloHitHelper::CreateInitialCaloHitUsageMap(const std::string &usageM
 
 StatusCode CaloHitHelper::CreateAdditionalCaloHitUsageMap(const std::string &usageMapName)
 {
-    if (!m_isReclustering)
+    if (0 == m_nReclusteringProcesses)
         return STATUS_CODE_NOT_ALLOWED;
 
     CaloHitUsageMap *pCaloHitUsageMap = new CaloHitUsageMap(*m_pCurrentUsageMap);
@@ -307,7 +306,7 @@ StatusCode CaloHitHelper::CreateAdditionalCaloHitUsageMap(const std::string &usa
 
 StatusCode CaloHitHelper::ApplyCaloHitUsageMap(const std::string &usageMapName)
 {
-    if (!m_isReclustering)
+    if (0 == m_nReclusteringProcesses)
         return STATUS_CODE_NOT_ALLOWED;
 
     NameToCaloHitUsageMap::const_iterator usageMapIter = m_nameToCaloHitUsageMap.find(usageMapName);
@@ -315,10 +314,31 @@ StatusCode CaloHitHelper::ApplyCaloHitUsageMap(const std::string &usageMapName)
     if (m_nameToCaloHitUsageMap.end() == usageMapIter)
         return STATUS_CODE_NOT_FOUND;
 
-    for (CaloHitUsageMap::const_iterator caloHitIter = usageMapIter->second->begin(), caloHitIterEnd = usageMapIter->second->end();
-        caloHitIter != caloHitIterEnd; ++caloHitIter)
+    if (1 == m_nReclusteringProcesses--)
     {
-        caloHitIter->first->m_isAvailable = caloHitIter->second;
+        for (CaloHitUsageMap::const_iterator caloHitIter = usageMapIter->second->begin(), caloHitIterEnd = usageMapIter->second->end();
+            caloHitIter != caloHitIterEnd; ++caloHitIter)
+        {
+            caloHitIter->first->m_isAvailable = caloHitIter->second;
+        }
+
+        CaloHitHelper::ClearCaloHitUsageMaps();
+    }
+    else
+    {
+        m_pCurrentUsageMap = m_parentCaloHitUsageMaps.back();
+        m_parentCaloHitUsageMaps.pop_back();
+
+        for (CaloHitUsageMap::const_iterator caloHitIter = usageMapIter->second->begin(), caloHitIterEnd = usageMapIter->second->end();
+            caloHitIter != caloHitIterEnd; ++caloHitIter)
+        {
+            CaloHitUsageMap::iterator currentMapIter = m_pCurrentUsageMap->find(caloHitIter->first);
+
+            if (m_pCurrentUsageMap->end() == currentMapIter)
+                return STATUS_CODE_FAILURE;
+
+            currentMapIter->second = caloHitIter->second;
+        }
     }
 
     return STATUS_CODE_SUCCESS;
@@ -328,18 +348,17 @@ StatusCode CaloHitHelper::ApplyCaloHitUsageMap(const std::string &usageMapName)
 
 StatusCode CaloHitHelper::ClearCaloHitUsageMaps()
 {
-    if (m_isReclustering)
-        return STATUS_CODE_NOT_ALLOWED;
-
     for (NameToCaloHitUsageMap::iterator iter = m_nameToCaloHitUsageMap.begin(), iterEnd = m_nameToCaloHitUsageMap.end(); iter != iterEnd; ++iter)
         delete iter->second;
 
     m_nameToCaloHitUsageMap.clear();
+    m_parentCaloHitUsageMaps.clear();
 
-    if (!m_nameToCaloHitUsageMap.empty())
+    if (!m_nameToCaloHitUsageMap.empty() || !m_parentCaloHitUsageMaps.empty())
         return STATUS_CODE_FAILURE;
 
     m_pCurrentUsageMap = NULL;
+    m_nReclusteringProcesses = 0;
 
     return STATUS_CODE_SUCCESS;
 }
