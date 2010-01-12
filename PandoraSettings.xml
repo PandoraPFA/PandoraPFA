@@ -2,54 +2,102 @@
 
 <pandora>
 
-    <!-- Select the tracks to use for clustering -->
-    <algorithm type = "TrackSelection">
-    </algorithm>
-
-    <!-- Photon clustering algorithm runs Clustering algorithm and saves a photon cluster list under a specified name-->
-    <algorithm type = "PhotonClustering">
-        <algorithm type = "Clustering" description = "ClusterFormation">
-        </algorithm>
-        <algorithm type = "TopologicalAssociation" description = "ClusterAssociation">
-        </algorithm>
-        <photonClusterListName> PhotonClusterList </photonClusterListName>
-    </algorithm>
-
     <!-- Primary clustering algorithm runs Clustering algorithm -->
     <algorithm type = "PrimaryClustering">
-        <algorithm type = "Clustering" description = "ClusterFormation">
+        <algorithm type = "Clustering" description = "ClusterFormation" instance = "mainClustering">
+            <!-- Non seed track related -->
+            <HitSortingStrategy>0</HitSortingStrategy>
+            <ClusterFormationStrategy>0</ClusterFormationStrategy>
+            <SameLayerPadWidthsECal>2.8</SameLayerPadWidthsECal>
+            <SameLayerPadWidthsHCal>1.8</SameLayerPadWidthsHCal>
+            <LayersToStepBackECal>3</LayersToStepBackECal>
+            <LayersToStepBackHCal>3</LayersToStepBackHCal>
+            <TanConeAngleECal>0.3</TanConeAngleECal>
+            <TanConeAngleHCal>0.5</TanConeAngleHCal>
+            <AdditionalPadWidthsECal>2.5</AdditionalPadWidthsECal>
+            <AdditionalPadWidthsHCal>2.5</AdditionalPadWidthsHCal>
+
+            <!-- Seed track related -->
+            <ClusterSeedStrategy>3</ClusterSeedStrategy>
+            <ShouldUseTrackSeed>true</ShouldUseTrackSeed>
+            <TrackSeedCutOffLayer>0</TrackSeedCutOffLayer>
+            <MaxLayersToTrackSeed>3</MaxLayersToTrackSeed>
         </algorithm>
-        <algorithm type = "TopologicalAssociation" description = "ClusterAssociation">
+
+        <!-- Topological associations, to be run after clustering -->
+        <algorithm type = "TopologicalAssociation" description = "ClusterAssociation" instance = "mainTopologicalAssoc">
+            <associationAlgorithms>
+                <algorithm type = "LoopingTracks"></algorithm>
+                <algorithm type = "BrokenTracks"></algorithm>
+                <algorithm type = "ShowerMipMerging"></algorithm>
+                <algorithm type = "ShowerMipMerging2"></algorithm>
+                <algorithm type = "BackscatteredTracks"></algorithm>
+                <algorithm type = "BackscatteredTracks2"></algorithm>
+                <algorithm type = "ShowerMipMerging3"></algorithm>
+                <algorithm type = "ShowerMipMerging4"></algorithm>
+                <algorithm type = "ProximityBasedMerging">
+                    <algorithm type = "TrackClusterAssociation"></algorithm>
+                </algorithm>
+                <algorithm type = "ConeBasedMerging">
+                    <algorithm type = "TrackClusterAssociation"></algorithm>
+                </algorithm>
+                <algorithm type = "SoftClusterMerging">
+                    <algorithm type = "TrackClusterAssociation"></algorithm>
+                    <ShouldUsePhotonClusters> false </ShouldUsePhotonClusters>
+                    <PhotonClusterListName> photonClusters </PhotonClusterListName>
+                </algorithm>
+                <algorithm type = "IsolatedHitMerging">
+                    <ShouldUsePhotonClusters> false </ShouldUsePhotonClusters>
+                    <PhotonClusterListName> photonClusters </PhotonClusterListName>
+                </algorithm>
+            </associationAlgorithms>
         </algorithm>
         <clusterListName> PrimaryClusterList </clusterListName>
     </algorithm>
 
     <!-- Reclustering algorithm runs multiple Clustering algorithms -->
     <algorithm type = "Reclustering">
-        <clusteringAlgorithms>
-            <algorithm type = "Clustering">
+        <reclusteringAlgorithms>
+
+            <algorithm type = "SplitTrackAssociations" instance = "mySplitInstance">
+                <clusteringAlgorithms>
+                    <algorithm type = "Clustering" instance = "mainClustering"/>
+                    <algorithm type = "Clustering"/>
+                </clusteringAlgorithms>
+                <algorithm type = "TopologicalAssociation" description = "ClusterAssociation" instance = "mainTopologicalAssoc"></algorithm>
+                <algorithm type = "TrackClusterAssociation" description = "TrackClusterAssociation"></algorithm>
             </algorithm>
 
-            <algorithm type = "Clustering">
+            <algorithm type = "ResolveTrackAssociations">
+                <clusteringAlgorithms>
+                    <algorithm type = "Clustering" instance = "mainClustering"/>
+                    <algorithm type = "Clustering"/>
+                </clusteringAlgorithms>
+                <NTrackAssociationsToResolve>2</NTrackAssociationsToResolve>
+                <algorithm type = "TopologicalAssociation" description = "ClusterAssociation" instance = "mainTopologicalAssoc"></algorithm>
+                <algorithm type = "TrackClusterAssociation" description = "TrackClusterAssociation"></algorithm>
+                <algorithm type = "SplitTrackAssociations" description = "SplitTrackClusterAssociation" instance = "mySplitInstance"></algorithm>
             </algorithm>
 
-            <algorithm type = "Clustering">
-            </algorithm>
-
-            <algorithm type = "Clustering">
-            </algorithm>
-        </clusteringAlgorithms>
-
-        <algorithm type = "TopologicalAssociation" description = "ClusterAssociation">
-        </algorithm>
-    </algorithm>
-
-    <!-- Perform fragment removal -->
-    <algorithm type = "FragmentRemoval">
+        </reclusteringAlgorithms>
     </algorithm>
 
     <!-- Create the final particle flow objects -->
     <algorithm type = "PfoConstruction">
+        <algorithm type = "ClusterPreparation" description = "ClusterPreparation"></algorithm>
+        <algorithm type = "TrackPreparation" description = "TrackPreparation"></algorithm>
+        <algorithm type = "PfoCreation" description = "PfoCreation">
+            <ShouldUsePhotonClusters> false </ShouldUsePhotonClusters>
+            <PhotonClusterListName> photonClusters </PhotonClusterListName>
+        </algorithm>
     </algorithm>
 
+    <IsMonitoringEnabled> true </IsMonitoringEnabled>
+    <MipNCellsForNearbyHit> 2 </MipNCellsForNearbyHit>
+    <IsolationDensityWeightCutECal> 0.1 </IsolationDensityWeightCutECal>
+    <IsolationDensityWeightCutHCal> 0.1 </IsolationDensityWeightCutHCal>
+    <ShouldUseSimpleIsolationScheme> false </ShouldUseSimpleIsolationScheme>
+    <IsolationCutDistanceECal> 25. </IsolationCutDistanceECal>
+    <IsolationCutDistanceHCal> 200. </IsolationCutDistanceHCal>
+    <IsolationMaxNearbyHits> 2 </IsolationMaxNearbyHits>
 </pandora>
