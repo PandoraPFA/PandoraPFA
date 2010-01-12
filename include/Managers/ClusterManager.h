@@ -94,6 +94,15 @@ private:
     StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &clusterListName);
 
     /**
+     *  @brief  Temporarily replace the current cluster list with another list, which may only be a temporary list.
+     *          This switch will persist only for the duration of the algorithm and its daughters; unless otherwise
+     *          specified, the current list will revert to the algorithm input list upon algorithm completion.
+     * 
+     *  @param  clusterListName the name of the new current (and algorithm input) cluster list
+     */
+    StatusCode TemporarilyReplaceCurrentList(const std::string &clusterListName);
+
+    /**
      *  @brief  Reset the current list to the algorithm input list
      *
      *  @param  pAlgorithm address of the algorithm changing the cluster lists

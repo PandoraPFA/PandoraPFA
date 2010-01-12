@@ -11,8 +11,10 @@
 #include "Api/PandoraContentApi.h"
 
 #include "Helpers/CaloHitHelper.h"
+#include "Helpers/ClusterHelper.h"
 #include "Helpers/FragmentRemovalHelper.h"
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/ReclusterHelper.h"
 #include "Helpers/XmlHelper.h"
 
 #include "Objects/CaloHit.h"

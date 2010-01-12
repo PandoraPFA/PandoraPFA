@@ -1,18 +1,18 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/Reclustering/SplitMultipleTrackAssociationsAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Reclustering/SplitTrackAssociationsAlg.cc
  * 
- *  @brief  Implementation of the split multiple track associations algorithm class.
+ *  @brief  Implementation of the split track associations algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/Reclustering/SplitMultipleTrackAssociationsAlgorithm.h"
+#include "Algorithms/Reclustering/SplitTrackAssociationsAlg.h"
 
 #include <limits>
 
 using namespace pandora;
 
-StatusCode SplitMultipleTrackAssociationsAlgorithm::Run()
+StatusCode SplitTrackAssociationsAlg::Run()
 {
     // Begin by recalculating track-cluster associations
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
@@ -28,13 +28,17 @@ StatusCode SplitMultipleTrackAssociationsAlgorithm::Run()
     {
         Cluster *pCluster = *iter;
 
+        // Check compatibility of cluster with its associated tracks
         const TrackList &trackList(pCluster->GetAssociatedTrackList());
         const unsigned int nTrackAssociations(trackList.size());
 
         if ((nTrackAssociations < m_minTrackAssociationsToSplit) || (nTrackAssociations > m_maxTrackAssociationsToSplit))
             continue;
 
-        if (this->GetTrackClusterCompatibility(pCluster, trackList) < m_chiToAttemptReclustering)
+        float chi(0.);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::EvaluateTrackClusterCompatibility(pCluster, trackList, chi));
+
+        if (chi < m_chiToAttemptReclustering)
             continue;
 
         // Specify clusters and tracks to be used in reclustering
@@ -49,23 +53,23 @@ StatusCode SplitMultipleTrackAssociationsAlgorithm::Run()
             reclusterClusterList, originalClustersListName));
 
         // Run multiple clustering algorithms and identify the best cluster candidates produced
-        std::string bestReclusterCandidateListName(originalClustersListName);
-        float bestReclusterCandidateChi2(std::numeric_limits<float>::max());
+        std::string bestReclusterListName(originalClustersListName);
+        float bestReclusterChi2(std::numeric_limits<float>::max());
 
         for (StringVector::const_iterator clusteringIter = m_clusteringAlgorithms.begin(),
             clusteringIterEnd = m_clusteringAlgorithms.end(); clusteringIter != clusteringIterEnd; ++clusteringIter)
         {
-            std::string reclusterCandidatesListName;
-            const ClusterList *pReclusterCandidatesList = NULL;
+            std::string reclusterListName;
+            const ClusterList *pReclusterList = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, *clusteringIter, 
-                pReclusterCandidatesList, reclusterCandidatesListName));
+                pReclusterList, reclusterListName));
 
             // Run topological association algorithm
-            if (!pReclusterCandidatesList->empty())
+            if (!pReclusterList->empty())
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
 
             // Remove any track projection clusters remaining at this stage
-            for (ClusterList::const_iterator reclusterIter = pReclusterCandidatesList->begin(); reclusterIter != pReclusterCandidatesList->end();)
+            for (ClusterList::const_iterator reclusterIter = pReclusterList->begin(); reclusterIter != pReclusterList->end();)
             {
                 Cluster *pReclusterCandidate = *(reclusterIter++);
 
@@ -77,21 +81,29 @@ StatusCode SplitMultipleTrackAssociationsAlgorithm::Run()
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
             // Calculate figure of merit for recluster candidates. Label as best recluster candidates if applicable
-            const float reclusterCandidateChi2(this->GetReclusterFigureOfMerit(pReclusterCandidatesList));
+            ReclusterHelper::ReclusterResult reclusterResult;
+            if (STATUS_CODE_SUCCESS != ReclusterHelper::ExtractReclusterResults(pReclusterList, reclusterResult))
+                continue;
 
-            if ((reclusterCandidateChi2 < bestReclusterCandidateChi2) && (reclusterCandidateChi2 < m_chiToAttemptReclustering * m_chiToAttemptReclustering))
+            if (reclusterResult.GetMinTrackAssociationEnergy() < m_minClusterEnergyForTrackAssociation)
+                continue;
+
+            // Are recluster candidates good enough to justify replacing original clusters?
+            const float reclusterChi2(reclusterResult.GetChi2PerDof());
+
+            if ((reclusterChi2 < bestReclusterChi2) && (reclusterChi2 < m_chiToAttemptReclustering * m_chiToAttemptReclustering))
             {
-                bestReclusterCandidateChi2 = reclusterCandidateChi2;
-                bestReclusterCandidateListName = reclusterCandidatesListName;
+                bestReclusterChi2 = reclusterChi2;
+                bestReclusterListName = reclusterListName;
 
                 // If chi2 is very good, stop the reclustering attempts
-                if(bestReclusterCandidateChi2 < m_chi2ForAutomaticClusterSelection)
+                if(bestReclusterChi2 < m_chi2ForAutomaticClusterSelection)
                     break;
             }
         }
 
         // Choose the best recluster candidates, which may still be the originals
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndReclustering(*this, bestReclusterCandidateListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndReclustering(*this, bestReclusterListName));
 
         // Original cluster may have been deleted: for safety, remove its address from ClusterVector
         (*iter) = NULL;
@@ -102,62 +114,7 @@ StatusCode SplitMultipleTrackAssociationsAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float SplitMultipleTrackAssociationsAlgorithm::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList) const
-{
-    float trackEnergySum(0.);
-
-    for (TrackList::const_iterator trackIter = trackList.begin(), trackIterEnd = trackList.end(); trackIter != trackIterEnd; ++trackIter)
-        trackEnergySum += (*trackIter)->GetEnergyAtDca();
-
-    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
-
-    if ((0. == trackEnergySum) || (0. == hadronicEnergyResolution))
-        return STATUS_CODE_FAILURE;
-
-    const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
-    const float chi((pCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
-
-    return chi;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float SplitMultipleTrackAssociationsAlgorithm::GetReclusterFigureOfMerit(const ClusterList *const pReclusterCandidatesList) const
-{
-    float chi2(0.);
-    float dof(0.);
-
-    for (ClusterList::const_iterator iter = pReclusterCandidatesList->begin(), iterEnd = pReclusterCandidatesList->end(); iter != iterEnd; ++iter)
-    {
-        Cluster *pCluster = *iter;
-
-        const TrackList &trackList(pCluster->GetAssociatedTrackList());
-        const unsigned int nTrackAssociations(trackList.size());
-
-        if (1 < nTrackAssociations)
-            return std::numeric_limits<float>::max();
-
-        if (0 == nTrackAssociations)
-            continue;
-
-        const float chi(this->GetTrackClusterCompatibility(pCluster, trackList));
-        chi2 += chi * chi;
-        dof += 1.;
-
-        // Veto case where track is now matched to v. low energy cluster
-        if (pCluster->GetHadronicEnergy() < m_minClusterEnergyForTrackAssociation)
-            return std::numeric_limits<float>::max();
-    }
-
-    if (0. == dof)
-        return std::numeric_limits<float>::max();
-
-    return chi2 /= dof;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode SplitMultipleTrackAssociationsAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode SplitTrackAssociationsAlg::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "clusteringAlgorithms",
         m_clusteringAlgorithms));

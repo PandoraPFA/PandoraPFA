@@ -267,6 +267,15 @@ public:
         const ClusterList &clustersToSave) const;
 
     /**
+     *  @brief  Temporarily replace the current cluster list with another list, which may only be a temporary list. This switch
+     *          will persist only for the duration of the algorithm and its daughters; unless otherwise specified, the current list
+     *          will revert to the algorithm input list upon algorithm completion.
+     * 
+     *  @param  newClusterListName the name of the replacement cluster list
+     */
+    StatusCode TemporarilyReplaceCurrentClusterList(const std::string &newClusterListName) const;
+
+    /**
      *  @brief  Save the current ordered calo hit list under a new name
      * 
      *  @param  algorithm the algorithm calling this function

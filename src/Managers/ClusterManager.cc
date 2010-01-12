@@ -97,6 +97,19 @@ StatusCode ClusterManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterManager::TemporarilyReplaceCurrentList(const std::string &clusterListName)
+{
+    if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(clusterListName))
+        return STATUS_CODE_NOT_FOUND;
+
+    m_canMakeNewClusters = false;
+    m_currentListName = clusterListName;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ClusterManager::MakeTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName)
 {
     AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);

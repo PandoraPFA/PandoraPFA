@@ -380,6 +380,13 @@ StatusCode PandoraContentApiImpl::SaveClusterListAndReplaceCurrent(const Algorit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::TemporarilyReplaceCurrentClusterList(const std::string &newClusterListName) const
+{
+    return m_pPandora->m_pClusterManager->TemporarilyReplaceCurrentList(newClusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::SaveClusterListAndReplaceCurrent(const Algorithm &algorithm, const std::string &newClusterListName,
     const ClusterList &clustersToSave) const
 {

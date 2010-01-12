@@ -26,7 +26,10 @@
 #include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/PfoCreationAlgorithm.h"
 
-#include "Algorithms/Reclustering/SplitMultipleTrackAssociationsAlgorithm.h"
+#include "Algorithms/Reclustering/ClusterSplittingAlg.h"
+#include "Algorithms/Reclustering/SplitTrackAssociationsAlg.h"
+#include "Algorithms/Reclustering/ResolveTrackAssociationsAlg.h"
+#include "Algorithms/Reclustering/TrackDrivenAssociationAlg.h"
 
 #include "Algorithms/TopologicalAssociation/BackscatteredTracksAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/BackscatteredTracks2Algorithm.h"
@@ -58,7 +61,10 @@
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
     d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \
-    d("SplitMultipleTrackAssociations",         SplitMultipleTrackAssociationsAlgorithm::Factory)           \
+    d("ClusterSplitting",                       ClusterSplittingAlg::Factory)                               \
+    d("ResolveTrackAssociations",               ResolveTrackAssociationsAlg::Factory)                       \
+    d("SplitTrackAssociations",                 SplitTrackAssociationsAlg::Factory)                         \
+    d("TrackDrivenAssociation",                 TrackDrivenAssociationAlg::Factory)                         \
     d("BackscatteredTracks",                    BackscatteredTracksAlgorithm::Factory)                      \
     d("BackscatteredTracks2",                   BackscatteredTracks2Algorithm::Factory)                     \
     d("BrokenTracks",                           BrokenTracksAlgorithm::Factory)                             \

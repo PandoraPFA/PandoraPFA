@@ -277,6 +277,13 @@ StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Al
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::TemporarilyReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->TemporarilyReplaceCurrentClusterList(newClusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::SaveOrderedCaloHitList(const pandora::Algorithm &algorithm,
     const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
 {
