@@ -176,6 +176,22 @@ bool CartesianVector::operator+=(const CartesianVector &rhs)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool CartesianVector::operator*=(const float scalar)
+{
+    if (!m_isInitialized)
+    {
+        this->SetValues(0.0, 0.0, 0.0);
+    }
+    else
+    {
+        this->SetValues(m_x + scalar, m_y + scalar, m_z + scalar);
+    }
+
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 bool CartesianVector::operator-=(const CartesianVector &rhs)
 {
     if (!m_isInitialized)
@@ -211,6 +227,14 @@ CartesianVector operator*(const CartesianVector &lhs, const double scalar)
 {
     return CartesianVector(static_cast<float>(lhs.GetX() * scalar), static_cast<float>(lhs.GetY() * scalar), static_cast<float>(lhs.GetZ() * scalar));
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float operator*(const CartesianVector &lhs, const CartesianVector &rhs)
+{
+    return (lhs.GetX() * rhs.GetX() + lhs.GetY() * rhs.GetY() + lhs.GetZ() * rhs.GetZ());
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
