@@ -12,6 +12,8 @@
 
 #include "Objects/CaloHit.h"
 #include "Objects/MCParticle.h"
+#include "Objects/Cluster.h"
+#include "Objects/CartesianVector.h"
 
 #include <sstream>
 #include <cmath>
@@ -69,7 +71,15 @@ StatusCode CheatingAlgorithm::Run()
                     energy = (*itCluster)->GetHadronicEnergy();
                     particleId = 2112;
                     mass += 0.9396;
-                    momentum = (*itCluster)->GetFitToAllHitsResult().GetDirection() * std::sqrt(energy * energy - mass * mass);
+
+                    CartesianVector energyWeightedClusterPosition(0.0,0.0,0.0);
+                    ComputeEnergyWeightedClusterPosition( (*itCluster), energyWeightedClusterPosition );
+                    
+                    CartesianVector clusterMomentum = energyWeightedClusterPosition * (*itCluster)->GetHadronicEnergy();
+                    float totalGravity = sqrt(energyWeightedClusterPosition*energyWeightedClusterPosition);
+                    
+                    momentum = clusterMomentum* (1.0/totalGravity);
+//                    momentum = (*itCluster)->GetFitToAllHitsResult().GetDirection() * std::sqrt(energy * energy - mass * mass);
                 }
             }
         }
@@ -129,4 +139,30 @@ StatusCode CheatingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "energyFrom", m_energyFrom));
 
     return STATUS_CODE_SUCCESS;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void CheatingAlgorithm::ComputeEnergyWeightedClusterPosition( Cluster* cluster, CartesianVector& energyWeightedClusterPosition )
+{
+    energyWeightedClusterPosition.SetValues( 0, 0, 0 ); // assign 0.0 for x, y and z position
+
+    float energySum = 0.0;
+
+    OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
+    for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
+    {
+        CaloHitList::iterator itCaloHit    = itLyr->second->begin();
+        CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
+
+        for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
+        {
+            float hitEnergy = (*itCaloHit)->GetElectromagneticEnergy(); 
+            energySum += hitEnergy;
+            
+            energyWeightedClusterPosition += (*itCaloHit)->GetPositionVector() * hitEnergy;
+        }
+    }
+    energyWeightedClusterPosition *= 1.0/energySum;
 }

@@ -10,6 +10,10 @@
 
 #include "Algorithms/Algorithm.h"
 
+class pandora::Cluster;
+class pandora::CartesianVector;
+
+
 /**
  *  @brief CheatingAlgorithm class
  */
@@ -17,6 +21,8 @@ class CheatingAlgorithm : public pandora::Algorithm
 {
 private:
 public:
+
+
     /**
      *  @brief  Factory class for instantiating algorithm
      */
@@ -29,6 +35,8 @@ public:
 private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+
+    void       ComputeEnergyWeightedClusterPosition( pandora::Cluster* cluster, pandora::CartesianVector& energyWeightedClusterPosition );
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_cheatingListName;             ///< The name under which to save the new cheated cluster list
