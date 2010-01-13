@@ -10,6 +10,8 @@
 
 #include "Pandora/PandoraInternal.h"
 
+#include "Objects/CartesianVector.h"
+
 #include "StatusCodes.h"
 
 namespace pandora
@@ -39,11 +41,35 @@ public:
      * 
      *  @param  pClusterI address of the cluster for which the fraction is calculated
      *  @param  pClusterJ address of the cluster used in the comparison
-     *  @param  coneCosineHalfAngle
+     *  @param  coneCosineHalfAngle the cone cosine half angle
      * 
      *  @return The fraction of calo hits in the cone
      */
     static float GetFractionOfHitsInCone(const Cluster *const pClusterI, Cluster *const pClusterJ, const float coneCosineHalfAngle);
+
+    /**
+     *  @brief  Get the fraction of calo hits in a cluster that lie within a cone along the direction of a specified track
+     * 
+     *  @param  pCluster address of the cluster for which the fraction is calculated
+     *  @param  pTrack address of the cluster used in the comparison
+     *  @param  coneCosineHalfAngle the cone cosine half angle
+     * 
+     *  @return The fraction of calo hits in the cone
+     */
+    static float GetFractionOfHitsInCone(const Cluster *const pCluster, const Track *const pTrack, const float coneCosineHalfAngle);
+
+    /**
+     *  @brief  Get the fraction of calo hits in a cluster that lie within a specified cone
+     * 
+     *  @param  pCluster address of the cluster for which the fraction is calculated
+     *  @param  coneApex position vector specifying cone apex
+     *  @param  coneDirection unit vector specifying cone direction
+     *  @param  coneCosineHalfAngle the cone cosine half angle
+     * 
+     *  @return The fraction of calo hits in the cone
+     */
+    static float GetFractionOfHitsInCone(const Cluster *const pCluster, const CartesianVector &coneApex, const CartesianVector &coneDirection,
+        const float coneCosineHalfAngle);
 
     /**
      *  @brief  Get the number of pseudo layers crossed by helix in specified range of z coordinates

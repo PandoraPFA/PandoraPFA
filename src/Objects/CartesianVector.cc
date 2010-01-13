@@ -163,29 +163,9 @@ bool CartesianVector::operator=(const CartesianVector &rhs)
 bool CartesianVector::operator+=(const CartesianVector &rhs)
 {
     if (!m_isInitialized)
-    {
-        this->SetValues(rhs.GetX(), rhs.GetY(), rhs.GetZ());
-    }
-    else
-    {
-        this->SetValues(m_x + rhs.GetX(), m_y + rhs.GetY(), m_z + rhs.GetZ());
-    }
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    return m_isInitialized;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool CartesianVector::operator*=(const float scalar)
-{
-    if (!m_isInitialized)
-    {
-        this->SetValues(0.0, 0.0, 0.0);
-    }
-    else
-    {
-        this->SetValues(m_x + scalar, m_y + scalar, m_z + scalar);
-    }
+    this->SetValues(m_x + rhs.GetX(), m_y + rhs.GetY(), m_z + rhs.GetZ());
 
     return m_isInitialized;
 }
@@ -195,13 +175,21 @@ bool CartesianVector::operator*=(const float scalar)
 bool CartesianVector::operator-=(const CartesianVector &rhs)
 {
     if (!m_isInitialized)
-    {
-        this->SetValues(-rhs.GetX(), -rhs.GetY(), -rhs.GetZ());
-    }
-    else
-    {
-        this->SetValues(m_x - rhs.GetX(), m_y - rhs.GetY(), m_z - rhs.GetZ());
-    }
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    this->SetValues(m_x - rhs.GetX(), m_y - rhs.GetY(), m_z - rhs.GetZ());
+
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool CartesianVector::operator*=(const double scalar)
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    this->SetValues(static_cast<float>(m_x * scalar), static_cast<float>(m_y * scalar), static_cast<float>(m_z * scalar));
 
     return m_isInitialized;
 }
@@ -227,14 +215,6 @@ CartesianVector operator*(const CartesianVector &lhs, const double scalar)
 {
     return CartesianVector(static_cast<float>(lhs.GetX() * scalar), static_cast<float>(lhs.GetY() * scalar), static_cast<float>(lhs.GetZ() * scalar));
 }
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float operator*(const CartesianVector &lhs, const CartesianVector &rhs)
-{
-    return (lhs.GetX() * rhs.GetX() + lhs.GetY() * rhs.GetY() + lhs.GetZ() * rhs.GetZ());
-}
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

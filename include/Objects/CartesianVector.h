@@ -166,15 +166,7 @@ public:
      * 
      *  @param  scalar the scalar to multiply
      */
-    bool operator*=(const float scalar);
-
-    /**
-     *  @brief  Cartesian vector *= operator
-     * 
-     *  @param  rhs the vector to multiply
-     */
-    bool operator*=(const CartesianVector &rhs);
-
+    bool operator*=(const double scalar);
 
 private:
     float   m_x;                ///< The x coordinate
@@ -207,14 +199,6 @@ CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs
  *  @param  scalar the value of the scalar
  */
 CartesianVector operator*(const CartesianVector &lhs, const double scalar);
-
-/**
- *  @brief  Cartesian vector multiplication with vector operator (dot-product)
- * 
- *  @param  lhs the cartesian vector to be multiplied by the vector
- *  @param  rhs second cartesian vector, which is multiplied to the first 
- */
-float operator*(const CartesianVector &lhs, const CartesianVector &rhs);
 
 /**
  *  @brief  Operator to dump cartesian vector properties to an ostream

@@ -76,7 +76,7 @@ StatusCode CheatingAlgorithm::Run()
                     ComputeEnergyWeightedClusterPosition( (*itCluster), energyWeightedClusterPosition );
                     
                     CartesianVector clusterMomentum = energyWeightedClusterPosition * (*itCluster)->GetHadronicEnergy();
-                    float totalGravity = sqrt(energyWeightedClusterPosition*energyWeightedClusterPosition);
+                    const float totalGravity(energyWeightedClusterPosition.GetMagnitude());
                     
                     momentum = clusterMomentum* (1.0/totalGravity);
 //                    momentum = (*itCluster)->GetFitToAllHitsResult().GetDirection() * std::sqrt(energy * energy - mass * mass);

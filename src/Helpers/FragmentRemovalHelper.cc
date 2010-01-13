@@ -55,11 +55,6 @@ float FragmentRemovalHelper::GetFractionOfCloseHits(const Cluster *const pCluste
 
 float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClusterI, Cluster *const pClusterJ, const float coneCosineHalfAngle)
 {
-    const unsigned int nCaloHitsI(pClusterI->GetNCaloHits());
-
-    if (0 == nCaloHitsI)
-        return 0.;
-
     CartesianVector coneApex, coneDirection;
     const TrackList &associatedTrackList(pClusterJ->GetAssociatedTrackList());
 
@@ -79,8 +74,31 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
         coneDirection = pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector();
     }
 
+    return FragmentRemovalHelper::GetFractionOfHitsInCone(pClusterI, coneApex, coneDirection, coneCosineHalfAngle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pCluster, const Track *const pTrack, const float coneCosineHalfAngle)
+{
+    const CartesianVector coneApex(pTrack->GetTrackStateAtECal().GetPosition());
+    const CartesianVector coneDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector());
+
+    return FragmentRemovalHelper::GetFractionOfHitsInCone(pCluster, coneApex, coneDirection, coneCosineHalfAngle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pCluster, const CartesianVector &coneApex,
+    const CartesianVector &coneDirection, const float coneCosineHalfAngle)
+{
+    const unsigned int nCaloHits(pCluster->GetNCaloHits());
+
+    if (0 == nCaloHits)
+        return 0.;
+
     unsigned int nHitsInCone(0);
-    const OrderedCaloHitList &orderedCaloHitList(pClusterI->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
@@ -98,7 +116,7 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
         }
     }
 
-    return static_cast<float>(nHitsInCone) / static_cast<float>(nCaloHitsI);
+    return static_cast<float>(nHitsInCone) / static_cast<float>(nCaloHits);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
