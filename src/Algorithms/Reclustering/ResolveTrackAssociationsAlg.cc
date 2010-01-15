@@ -37,7 +37,7 @@ StatusCode ResolveTrackAssociationsAlg::Run()
         const TrackList &trackList(pParentCluster->GetAssociatedTrackList());
         const unsigned int nTrackAssociations(trackList.size());
 
-        if (nTrackAssociations < m_nTrackAssociationsToResolve)
+        if ((nTrackAssociations < m_minTrackAssociations) || (nTrackAssociations > m_maxTrackAssociations))
             continue;
 
         float chi(0.);
@@ -124,33 +124,20 @@ StatusCode ResolveTrackAssociationsAlg::Run()
             }
 
             // If no ideal candidate is found, store a best guess candidate for future modification
-            else if (m_nTrackAssociationsToResolve == (reclusterResult.GetNExcessTrackAssociations() + 1))
+            else if (m_shouldUseBestGuessCandidates)
             {
-                const float reclusterChi(reclusterResult.GetChi());
-
-                if ((reclusterChi > 0) && (reclusterChi < bestGuessChi))
+                if ((reclusterResult.GetNExcessTrackAssociations() > 0) && (reclusterResult.GetChi() > 0) && (reclusterResult.GetChi() < bestGuessChi))
                 {
-                    bestGuessChi = reclusterChi;
+                    bestGuessChi = reclusterResult.GetChi();
                     bestGuessListName = reclustersListName;
                 }
             }
         }
 
         // If no ideal candidate constructed, try to split the track associations in the best guess candidates
-        if (bestReclusterListName.empty() && !bestGuessListName.empty())
+        if (m_shouldUseBestGuessCandidates && bestReclusterListName.empty())
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::TemporarilyReplaceCurrentClusterList(*this, bestGuessListName));
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_splitAssociationAlgName));
-
-            const ClusterList *pNewBestGuessList = NULL;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, bestGuessListName, pNewBestGuessList));
-
-            ReclusterHelper::ReclusterResult reclusterResult;
-            if (STATUS_CODE_SUCCESS == ReclusterHelper::ExtractReclusterResults(pNewBestGuessList, reclusterResult))
-            {
-                if (reclusterResult.GetChi2PerDof() < m_chiToAttemptReclustering * m_chiToAttemptReclustering)
-                    bestReclusterListName = bestGuessListName;
-            }
+            bestReclusterListName = bestGuessListName;
         }
 
         // Tidy cluster vector, to remove addresses of deleted clusters
@@ -184,14 +171,16 @@ StatusCode ResolveTrackAssociationsAlg::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "TrackClusterAssociation",
         m_trackClusterAssociationAlgName));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "SplitTrackClusterAssociation",
-        m_splitAssociationAlgName));
+    m_minTrackAssociations = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinTrackAssociations", m_minTrackAssociations));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
-        "NTrackAssociationsToResolve", m_nTrackAssociationsToResolve));
-
-    if (m_nTrackAssociationsToResolve < 2)
+    if (m_minTrackAssociations < 2)
         return STATUS_CODE_INVALID_PARAMETER;
+
+    m_maxTrackAssociations = std::numeric_limits<unsigned int>::max();
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackAssociations", m_maxTrackAssociations));
 
     m_chiToAttemptReclustering = -3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -212,6 +201,10 @@ StatusCode ResolveTrackAssociationsAlg::ReadSettings(const TiXmlHandle xmlHandle
     m_chi2ForAutomaticClusterSelection = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "Chi2ForAutomaticClusterSelection", m_chi2ForAutomaticClusterSelection));
+
+    m_shouldUseBestGuessCandidates = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldUseBestGuessCandidates", m_shouldUseBestGuessCandidates));
 
     return STATUS_CODE_SUCCESS;
 }

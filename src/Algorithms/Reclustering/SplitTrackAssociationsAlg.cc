@@ -32,7 +32,7 @@ StatusCode SplitTrackAssociationsAlg::Run()
         const TrackList &trackList(pCluster->GetAssociatedTrackList());
         const unsigned int nTrackAssociations(trackList.size());
 
-        if ((nTrackAssociations < m_minTrackAssociationsToSplit) || (nTrackAssociations > m_maxTrackAssociationsToSplit))
+        if ((nTrackAssociations < m_minTrackAssociations) || (nTrackAssociations > m_maxTrackAssociations))
             continue;
 
         float chi(0.);
@@ -125,16 +125,16 @@ StatusCode SplitTrackAssociationsAlg::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "TrackClusterAssociation",
         m_trackClusterAssociationAlgName));
 
-    m_minTrackAssociationsToSplit = 2;
+    m_minTrackAssociations = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinTrackAssociationsToSplit", m_minTrackAssociationsToSplit));
+        "MinTrackAssociations", m_minTrackAssociations));
 
-    if (m_minTrackAssociationsToSplit < 2)
+    if (m_minTrackAssociations < 2)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    m_maxTrackAssociationsToSplit = std::numeric_limits<unsigned int>::max();
+    m_maxTrackAssociations = std::numeric_limits<unsigned int>::max();
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxTrackAssociationsToSplit", m_maxTrackAssociationsToSplit));
+        "MaxTrackAssociations", m_maxTrackAssociations));
 
     m_chiToAttemptReclustering = -3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

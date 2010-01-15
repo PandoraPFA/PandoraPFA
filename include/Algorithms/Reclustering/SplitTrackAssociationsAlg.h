@@ -33,8 +33,8 @@ private:
     std::string             m_associationAlgorithmName;             ///< The name of the topological association algorithm to run
     std::string             m_trackClusterAssociationAlgName;       ///< The name of the track-cluster association algorithm to run
 
-    unsigned int            m_minTrackAssociationsToSplit;          ///< The min number of associated tracks required to start reclustering
-    unsigned int            m_maxTrackAssociationsToSplit;          ///< The max number of associated tracks required to start reclustering
+    unsigned int            m_minTrackAssociations;                 ///< The min number of associated tracks required to start reclustering
+    unsigned int            m_maxTrackAssociations;                 ///< The max number of associated tracks required to start reclustering
     float                   m_chiToAttemptReclustering;             ///< The min track/cluster chi value required to start reclustering
 
     float                   m_minClusterEnergyForTrackAssociation;  ///< Energy threshold for recluster candidates with track associations
