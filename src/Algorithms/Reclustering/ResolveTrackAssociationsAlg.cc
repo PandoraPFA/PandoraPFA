@@ -134,7 +134,7 @@ StatusCode ResolveTrackAssociationsAlg::Run()
             }
         }
 
-        // If no ideal candidate constructed, try to split the track associations in the best guess candidates
+        // If no ideal candidate constructed, can choose to use best guess candidates, which could be split by later algorithms
         if (m_shouldUseBestGuessCandidates && bestReclusterListName.empty())
         {
             bestReclusterListName = bestGuessListName;

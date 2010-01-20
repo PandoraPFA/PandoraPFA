@@ -30,6 +30,12 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
     {
         Track *pTrack = *trackIter;
 
+        if (!pTrack->ReachesECal())
+            continue;
+
+        if ((std::fabs(pTrack->GetD0()) > m_maxAbsoluteTrackD0) || (std::fabs(pTrack->GetZ0()) > m_maxAbsoluteTrackZ0))
+            continue;
+
         Cluster *pBestCluster = NULL;
         Cluster *pBestLowEnergyCluster = NULL;
 
@@ -93,6 +99,14 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
 
 StatusCode TrackClusterAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    m_maxAbsoluteTrackD0 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackD0", m_maxAbsoluteTrackD0));
+
+    m_maxAbsoluteTrackZ0 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackZ0", m_maxAbsoluteTrackZ0));
+
     m_lowEnergyCut = 0.2f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LowEnergyCut", m_lowEnergyCut));

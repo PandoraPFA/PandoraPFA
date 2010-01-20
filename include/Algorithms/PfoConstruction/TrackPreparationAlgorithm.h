@@ -29,7 +29,7 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    std::string     m_trackClusterAssociationAlgName;       ///< The name of the track-cluster association algorithm to run
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

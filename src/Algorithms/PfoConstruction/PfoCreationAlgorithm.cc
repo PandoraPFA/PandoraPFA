@@ -97,9 +97,12 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         if (!pCluster->GetAssociatedTrackList().empty())
             continue;
 
-        // TODO use BestEnergyEstimate for photon clusters too, if photon cluster energy corrections are made
+        if (pCluster->GetNCaloHits() < m_minHitsInCluster)
+            continue;
+
+        // TODO use BestEnergyEstimate, if energy corrections are made
         const bool isPhoton(pCluster->IsPhoton());
-        float clusterEnergy(isPhoton ? pCluster->GetElectromagneticEnergy() : pCluster->GetBestEnergyEstimate());
+        float clusterEnergy(isPhoton ? pCluster->GetElectromagneticEnergy() : pCluster->GetHadronicEnergy());
 
         // Veto non-photon clusters below hadronic energy threshold and those occupying a single layer
         if (!isPhoton)
@@ -146,9 +149,13 @@ StatusCode PfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
             "PhotonClusterListName", m_photonClusterListName));
     }
 
-    m_minClusterHadronicEnergy = 2.f;
+    m_minClusterHadronicEnergy = 0.25f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterHadronicEnergy", m_minClusterHadronicEnergy));
+
+    m_minHitsInCluster = 5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitsInCluster", m_minHitsInCluster));
 
     return STATUS_CODE_SUCCESS;
 }
