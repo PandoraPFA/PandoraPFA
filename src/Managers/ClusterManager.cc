@@ -265,9 +265,9 @@ StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCalo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::DeleteCluster(Cluster *pCluster)
+StatusCode ClusterManager::DeleteCluster(Cluster *pCluster, const std::string &listName)
 {
-    NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
+    NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(listName);
 
     if (m_nameToClusterListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;

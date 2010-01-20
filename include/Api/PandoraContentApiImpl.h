@@ -134,8 +134,8 @@ public:
      *  @param  inputClusterList the input cluster list
      *  @param  originalClustersListName to receive the name of the list in which the original clusters are stored
      */
-    StatusCode InitializeReclustering(const pandora::Algorithm &algorithm, const TrackList &inputTrackList, 
-        const ClusterList &inputClusterList, std::string &originalClustersListName) const;
+    StatusCode InitializeReclustering(const Algorithm &algorithm, const TrackList &inputTrackList, const ClusterList &inputClusterList,
+        std::string &originalClustersListName) const;
 
     /**
      *  @brief  End reclustering operations
@@ -144,7 +144,7 @@ public:
      *  @param  pandora the pandora instance performing reclustering
      *  @param  selectedClusterListName the name of the list containing the chosen recluster candidates (or the original candidates)
      */
-    StatusCode EndReclustering(const pandora::Algorithm &algorithm, const std::string &selectedClusterListName) const;
+    StatusCode EndReclustering(const Algorithm &algorithm, const std::string &selectedClusterListName) const;
 
     /**
      *  @brief  Run a clustering algorithm (an algorithm that will create new cluster objects)
@@ -154,7 +154,7 @@ public:
      *  @param  pNewClusterList the address of the new cluster list populated
      *  @param  newClusterListName the name of the new cluster list populated
      */
-     StatusCode RunClusteringAlgorithm(const pandora::Algorithm &algorithm, const std::string &clusteringAlgorithmName,
+     StatusCode RunClusteringAlgorithm(const Algorithm &algorithm, const std::string &clusteringAlgorithmName,
         const ClusterList *&pNewClusterList, std::string &newClusterListName) const;
 
     /**
@@ -170,7 +170,15 @@ public:
      * 
      *  @param  pCluster address of the cluster to delete
      */
-    StatusCode DeleteCluster(pandora::Cluster *pCluster) const;
+    StatusCode DeleteCluster(Cluster *pCluster) const;
+
+    /**
+     *  @brief  Delete a cluster from a specified list
+     * 
+     *  @param  pCluster address of the cluster to delete
+     *  @param  clusterListName name of the list containing the cluster
+     */
+    StatusCode DeleteCluster(Cluster *pCluster, const std::string &clusterListName) const;
 
     /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
@@ -188,8 +196,8 @@ public:
      *  @param  enlargeListName name of the list containing the cluster to enlarge
      *  @param  deleteListName name of the list containing the cluster to delete
      */
-    StatusCode MergeAndDeleteClusters(pandora::Cluster *pClusterToEnlarge, pandora::Cluster *pClusterToDelete,
-        const std::string &enlargeListName, const std::string &deleteListName) const;
+    StatusCode MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete, const std::string &enlargeListName,
+        const std::string &deleteListName) const;
 
     /**
      *  @brief  Add an association between a track and a cluster
@@ -223,7 +231,7 @@ public:
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
      */
-    StatusCode SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName) const;
+    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &newClusterListName) const;
 
     /**
      *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
@@ -233,8 +241,7 @@ public:
      *  @param  clustersToSave a subset of the algorithm input cluster list - only clusters in both this and the current
      *          cluster lists will be saved
      */
-    StatusCode SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-        const ClusterList &clustersToSave) const;
+    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &newClusterListName, const ClusterList &clustersToSave) const;
 
     /**
      *  @brief  Replace the current cluster list with a pre-saved list; use this new list as a permanent replacement
@@ -243,7 +250,7 @@ public:
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the name of the replacement cluster list
      */
-    StatusCode ReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName) const;
+    StatusCode ReplaceCurrentClusterList(const Algorithm &algorithm, const std::string &newClusterListName) const;
 
     /**
      *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
@@ -252,7 +259,7 @@ public:
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
      */
-    StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName) const;
+    StatusCode SaveClusterListAndReplaceCurrent(const Algorithm &algorithm, const std::string &newClusterListName) const;
 
     /**
      *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
@@ -263,7 +270,7 @@ public:
      *  @param  pClustersToSave a subset of the current cluster list - only clusters in both this and the current
      *          cluster lists will be saved
      */
-    StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
+    StatusCode SaveClusterListAndReplaceCurrent(const Algorithm &algorithm, const std::string &newClusterListName,
         const ClusterList &clustersToSave) const;
 
     /**
@@ -291,7 +298,7 @@ public:
      *  @param  algorithm the algorithm calling this function
      *  @param  newListName the name of the replacement ordered calo hit list
      */
-    StatusCode ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName) const;
+    StatusCode ReplaceCurrentOrderedCaloHitList(const Algorithm &algorithm, const std::string &newListName) const;
 
     /**
      *  @brief  Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
@@ -318,7 +325,7 @@ public:
      *  @param  algorithm the algorithm calling this function
      *  @param  newListName the name of the replacement track list
      */
-    StatusCode ReplaceCurrentTrackList(const pandora::Algorithm &algorithm, const std::string &newListName) const;
+    StatusCode ReplaceCurrentTrackList(const Algorithm &algorithm, const std::string &newListName) const;
 
     /**
      *  @brief  Save the current track list under a new name; use this new list as a permanent replacement for the current

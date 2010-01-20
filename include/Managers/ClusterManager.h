@@ -168,6 +168,14 @@ private:
     StatusCode DeleteCluster(Cluster *pCluster);
 
     /**
+     *  @brief  Delete a cluster from a specified list
+     * 
+     *  @param  pCluster address of the cluster to delete
+     *  @param  listName the name of the list containing the cluster
+     */
+    StatusCode DeleteCluster(Cluster *pCluster, const std::string &listName);
+
+    /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
      * 
      *  @param  pClusterToEnlarge address of the cluster to enlarge
@@ -327,6 +335,13 @@ inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const p
 inline StatusCode ClusterManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
 {
     return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::DeleteCluster(Cluster *pCluster)
+{
+    return this->DeleteCluster(pCluster, m_currentListName);
 }
 
 } // namespace pandora
