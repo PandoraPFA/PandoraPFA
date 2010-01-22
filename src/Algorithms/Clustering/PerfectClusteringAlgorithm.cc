@@ -90,8 +90,9 @@ StatusCode PerfectClusteringAlgorithm::Run()
     {
         if( itCHList->first == NULL ) continue;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, itCHList->second, pCluster ));
-        float energy = itCHList->first->GetEnergy();
-        pCluster->SetBestEnergyEstimate( energy );
+
+//         float energy = itCHList->first->GetEnergy();
+//         pCluster->SetBestEnergyEstimate( energy );
 
         // add the track associations to the clusters
         itTracksPerMCParticle = tracksPerMCParticle.find( itCHList->first );
