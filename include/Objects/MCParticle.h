@@ -54,7 +54,7 @@ public:
      *
      *  @return the mc particle momentum
      */
-    float GetMomentum() const;
+    const CartesianVector &GetMomentum() const;
 
     /**
      *  @brief Get inner radius of mc particle
@@ -158,7 +158,7 @@ private:
     Uid                 m_uid;              ///< Unique ID of the particle
 
     float               m_energy;           ///< Energy of the particle
-    float               m_momentum;         ///< Momentum of the particle
+    CartesianVector     m_momentum;         ///< Momentum of the particle
     float               m_innerRadius;      ///< Inner radius of the particle's path
     float               m_outerRadius;      ///< Outer radius of the particle's path
     int                 m_particleId;       ///< Particle id (particle type)
@@ -262,7 +262,7 @@ inline float MCParticle::GetEnergy() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float MCParticle::GetMomentum() const
+inline const CartesianVector &MCParticle::GetMomentum() const
 {
     return m_momentum;
 }

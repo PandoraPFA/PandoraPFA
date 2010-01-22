@@ -94,7 +94,7 @@ public:
     {
     public:
         pandora::InputFloat             m_energy;                   ///< The MC particle's energy
-        pandora::InputFloat             m_momentum;                 ///< The MC particle's momentum
+        pandora::InputCartesianVector   m_momentum;                 ///< The MC particle's momentum
         pandora::InputFloat             m_innerRadius;              ///< The MC particle's path's inner radius
         pandora::InputFloat             m_outerRadius;              ///< The MC particle's path's outer radius
         pandora::InputInt               m_particleId;               ///< The MC particle's ID (PDG code)
