@@ -350,6 +350,10 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
 	float m_centroidEnergy;
 	float m_centroid10Energy;
 	float m_centroid20Energy;
+
+	pandora::CartesianVector m_centroidFirstLayer; 
+
+	int   m_innerPseudoLayer;
     };
 
   
@@ -374,9 +378,11 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
 
 
  private:
-    bool       IsPhoton( pandora::Cluster* cluster ); 
-    StatusCode TransverseProfile(const pandora::Cluster* cluster, pandora::protoClusterPeaks_t &peak, int maxLayers);
-//    const pandora::Cluster*   TransverseProfile(const pandora::Cluster* cluster, int peakForProtoCluster, int maxLayers, int extraLayers);
+    bool       IsPhoton( pandora::Cluster* cluster, pandora::protoClusterPeaks_t& peak ); 
+
+    StatusCode TransverseProfile(const pandora::Cluster* cluster, std::vector<pandora::protoClusterPeaks_t> &peaks, int maxLayers);
+    pandora::Cluster* TransverseProfile( ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, int peakForProtoCluster, unsigned int maxLayers, int extraLayers = 0);
+
     void       PhotonProfileID(pandora::Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate = false);
     float      GetTrueEnergyContribution(const pandora::Cluster* cluster, float& electromagneticEnergyContribution, int pid = 0 );
     void       GetClusterProperties(const pandora::Cluster* cluster, ClusterProperties& clusterProperties );
@@ -401,7 +407,8 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
     int          m_makingPhotonIdLikelihoodHistograms;
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
-    std::string     m_clusterCandidatesListName;    ///< The name under which to get the cluster candidates
+    std::string     m_clusterListName;              ///< name of the initial cluster list
+
     std::string     m_photonClusterListName;        ///< The name under which to save the new photon cluster list
     std::string     m_monitoringFileName;           ///< filename for file where for monitoring information is stored
     std::string     m_strategy;                     ///< The strategy used for photon recognition
