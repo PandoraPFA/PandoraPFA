@@ -91,7 +91,7 @@ public:
      *  @param  startLayer the first pseudo layer of the cluster to examine
      *  @param  endLayer the last pseudo layer of the cluster to examine
      *  @param  maxOccupiedLayers the maximum number of occupied cluster pseudo layers to examine
-     *  @param  closestDistanceToHit to receive the closest distance between the helix and a hit in the speicified range of the cluster
+     *  @param  closestDistanceToHit to receive the closest distance between the helix and a hit in the specified range of the cluster
      *  @param  meanDistanceToHits to receive the mean distance between the helix and hits in the specified range of the cluster
      */
     static StatusCode GetClusterHelixDistance(const Cluster *const pCluster, const Helix *const pHelix, const PseudoLayer startLayer,
