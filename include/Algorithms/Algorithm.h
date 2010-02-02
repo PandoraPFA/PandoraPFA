@@ -14,6 +14,7 @@
 #include "Helpers/ClusterHelper.h"
 #include "Helpers/FragmentRemovalHelper.h"
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/PhotonIdHelper.h"
 #include "Helpers/ReclusterHelper.h"
 #include "Helpers/XmlHelper.h"
 
