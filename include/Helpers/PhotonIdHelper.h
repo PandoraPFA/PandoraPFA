@@ -10,6 +10,8 @@
 
 #include "Pandora/PandoraInternal.h"
 
+#include "StatusCodes.h"
+
 namespace pandora
 {
 
@@ -19,7 +21,14 @@ namespace pandora
 class PhotonIdHelper
 {
 public:
-
+    /**
+     *  @brief  Calculate shower profile for a cluster and compare it with the expected profile for a photon
+     * 
+     *  @param  pCluster address of the cluster to investigate
+     *  @param  profileShowerStart to receive the profile shower start, in radiation lengths
+     *  @param  profileGammaFraction to receive the profile gamma fraction
+     */
+    static StatusCode CalculateShowerProfile(Cluster *const pCluster, float &profileShowerStart, float &profileGammaFraction);
 };
 
 } // namespace pandora
