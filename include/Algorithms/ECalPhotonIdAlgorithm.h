@@ -406,10 +406,8 @@ class ECalPhotonIdAlgorithm : public pandora::Algorithm
     int          m_producePrintoutStatements;
     int          m_makingPhotonIdLikelihoodHistograms;
 
-    std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_clusterListName;              ///< name of the initial cluster list
 
-    std::string     m_photonClusterListName;        ///< The name under which to save the new photon cluster list
     std::string     m_monitoringFileName;           ///< filename for file where for monitoring information is stored
     std::string     m_strategy;                     ///< The strategy used for photon recognition
 

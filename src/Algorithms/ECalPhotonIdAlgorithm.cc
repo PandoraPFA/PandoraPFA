@@ -58,6 +58,11 @@ StatusCode ECalPhotonIdAlgorithm::Initialize()
     if(m_makingPhotonIdLikelihoodHistograms)
         CreateOrSaveLikelihoodHistograms(true);
 
+
+    // set object variables:
+    m_nECalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
+
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -82,90 +87,103 @@ StatusCode ECalPhotonIdAlgorithm::Run()
 {
     // Run initial clustering algorithm
     const ClusterList *pClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList,m_clusterListName));
-
-    // set object variables:
-    m_nECalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
-
-    ClusterList photonClusters;
-    ClusterList nonPhotonClusters;
-
-    std::vector<Cluster*> temporaryClusterList(pClusterList->begin(), pClusterList->end() );
-
-    for( std::vector<Cluster*>::const_iterator itCluster = temporaryClusterList.begin(), itClusterEnd = temporaryClusterList.end(); itCluster != itClusterEnd; itCluster++ )
+    try
     {
-        std::cout << "*** main cluster cells : " << (*itCluster)->GetNCaloHits() << std::endl;
-        if( (*itCluster)->GetElectromagneticEnergy()<=0.2 || (*itCluster)->GetNCaloHits() < m_minimumHitsInClusters ) 
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_clusterListName, pClusterList));
+    }
+    catch(StatusCodeException &statusCodeException)
+    {
+        std::cout << "GetClusterList/statusCodeException " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
+        std::cout << "probably an empty cluster list has been given" << std::endl;
+    }
+
+
+    if( pClusterList != NULL )
+    {
+
+        ClusterList photonClusters;
+        ClusterList nonPhotonClusters;
+
+        std::vector<Cluster*> temporaryClusterList(pClusterList->begin(), pClusterList->end() );
+
+        for( std::vector<Cluster*>::const_iterator itCluster = temporaryClusterList.begin(), itClusterEnd = temporaryClusterList.end(); itCluster != itClusterEnd; ++itCluster )
         {
-            if (m_producePrintoutStatements > 0)
-                std::cout << "is photon cluster? --> NO / electromagnetic energy too small (<=0.2)" << std::endl;
-            nonPhotonClusters.insert( *itCluster );
-            continue;
-        }
-        std::cout << "sub-clustering" << std::endl;
+            Cluster* pCluster = (*itCluster);
 
-        std::vector<protoClusterPeaks_t> peaks;
-        TransverseProfile( (*itCluster), peaks,m_nECalLayers); 
-
-        // get the ordered calohits of the cluster
-
-        ClusterProperties clusterProperties;
-        GetClusterProperties( (*itCluster), clusterProperties );
-
-        const OrderedCaloHitList pOrderedCaloHitList( (*itCluster)->GetOrderedCaloHitList() );
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, (*itCluster), m_clusterListName));
-
-
-        // cluster these hits differently ==============================
-
-
-        std::cout << "loop through peaks : " << peaks.size() << std::endl;
-        
-        int peakForProtoCluster = 0;
-        for( std::vector<pandora::protoClusterPeaks_t>::iterator itPeak = peaks.begin(), itPeakEnd = peaks.end(); itPeak != itPeakEnd; ++itPeak )
-        {
-            std::cout << "transverse profile B" << std::endl;
-            Cluster* pPhotonCandidateCluster = TransverseProfile( clusterProperties, pOrderedCaloHitList, peakForProtoCluster, m_nECalLayers);
-
-            if( pPhotonCandidateCluster != NULL )
+            std::cout << "*** main cluster cells : " << pCluster->GetNCaloHits() << std::endl;
+            if( pCluster->GetElectromagneticEnergy()<=0.2 || pCluster->GetNCaloHits() < m_minimumHitsInClusters ) 
             {
+                if (m_producePrintoutStatements > 0)
+                    std::cout << "is photon cluster? --> NO / electromagnetic energy too small (<=0.2)" << std::endl;
+                nonPhotonClusters.insert( pCluster );
+                continue;
+            }
+            std::cout << "sub-clustering" << std::endl;
 
-                std::cout << "*** sub  cluster size : " << pPhotonCandidateCluster->GetNCaloHits() << std::endl;
+            std::vector<protoClusterPeaks_t> peaks;
+            TransverseProfile( pCluster, peaks,m_nECalLayers); 
+
+            // get the ordered calohits of the cluster
+
+            ClusterProperties clusterProperties;
+            GetClusterProperties( (*itCluster), clusterProperties );
+
+            const OrderedCaloHitList pOrderedCaloHitList( (*itCluster)->GetOrderedCaloHitList() );
+            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, (*itCluster), m_clusterListName));
+
+
+            // cluster these hits differently ==============================
+
+
+            std::cout << "loop through peaks : " << peaks.size() << std::endl;
+        
+            int peakForProtoCluster = 0;
+            for( std::vector<pandora::protoClusterPeaks_t>::iterator itPeak = peaks.begin(), itPeakEnd = peaks.end(); itPeak != itPeakEnd; ++itPeak )
+            {
+                std::cout << "transverse profile B" << std::endl;
+                Cluster* pPhotonCandidateCluster = TransverseProfile( clusterProperties, pOrderedCaloHitList, peakForProtoCluster, m_nECalLayers);
+
+                if( pPhotonCandidateCluster != NULL )
+                {
+
+                    std::cout << "*** sub  cluster size : " << pPhotonCandidateCluster->GetNCaloHits() << std::endl;
             
 
-                std::cout << "check if photon" << std::endl;
-                if( IsPhoton( pPhotonCandidateCluster, (*itPeak) ) )
-                {
+                    std::cout << "check if photon" << std::endl;
+                    if( IsPhoton( pPhotonCandidateCluster, (*itPeak) ) )
+                    {
+                        if (m_producePrintoutStatements > 0)
+                            std::cout << "is photon cluster? --> YES ";
+
+                        photonClusters.insert( pPhotonCandidateCluster );
+                        pPhotonCandidateCluster->SetIsPhotonFlag( true );
+                    }
+                    else
+                    {
+                        if (m_producePrintoutStatements > 0)
+                            std::cout << "is photon cluster? --> NO ";
+
+                        nonPhotonClusters.insert( pPhotonCandidateCluster );
+                    }
+
                     if (m_producePrintoutStatements > 0)
-                        std::cout << "is photon cluster? --> YES ";
+                        std::cout << std::endl;
 
-                    photonClusters.insert( pPhotonCandidateCluster );
-                    pPhotonCandidateCluster->SetIsPhotonFlag( true );
                 }
-                else
-                {
-                    if (m_producePrintoutStatements > 0)
-                        std::cout << "is photon cluster? --> NO ";
-
-                    nonPhotonClusters.insert( pPhotonCandidateCluster );
-                }
-
-                if (m_producePrintoutStatements > 0)
-                    std::cout << std::endl;
-
+                ++peakForProtoCluster;
             }
-            ++peakForProtoCluster;
         }
+
     }
 
 
 
-    //Save the clusters tagged as photons
-    if( !photonClusters.empty() )
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_photonClusterListName, photonClusters));
-        //    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_photonClusterListName, photonClusters));
-    }
+//     //Save the clusters tagged as photons
+//     if( !photonClusters.empty() )
+//     {
+//         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_photonClusterListName, photonClusters));
+//         //    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_photonClusterListName, photonClusters));
+//     }
 
 //     std::cout << "NON PHOTON CLUSTERS" << std::endl;
 //     PANDORA_MONITORING_API(DrawEvent(DETECTOR_VIEW_XZ, &nonPhotonClusters ) );
@@ -179,9 +197,8 @@ StatusCode ECalPhotonIdAlgorithm::Run()
 
 StatusCode ECalPhotonIdAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "ClusterFormation",       m_clusteringAlgorithmName   ));
-
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusters", m_photonClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterListName", m_clusterListName));
+//    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "photonClusters", m_photonClusterListName));
 
     m_minimumHitsInClusters = 5; 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -288,6 +305,7 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster, protoClus
     catch(StatusCodeException &statusCodeException)
     {
         std::cout << "IsPhoton/statusCodeException " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
+        std::cout << "it's not a photon then" << std::endl;
         return false; // it's not a photon then
     }
     catch(...)
@@ -400,6 +418,9 @@ bool ECalPhotonIdAlgorithm::IsPhoton( Cluster* photonCandidateCluster, protoClus
 
     if( nhits>=m_minimumHitsInClusters )
     {    
+
+
+        std::cout << "write out monitoring info" << std::endl;
 
         // compute fitresults of cluster --> to get the position
         const ClusterHelper::ClusterFitResult& fitResult = photonCandidateCluster->GetFitToAllHitsResult();
@@ -572,6 +593,7 @@ StatusCode ECalPhotonIdAlgorithm::TransverseProfile(const Cluster* cluster, std:
             if(first){
 //              pixelsize  = hiti->getHitSizeZ();
                 pixelsize  = caloHit->GetCellSizeV(); // in barrel: perpendicular to beam and pixel thickness; in endcap: perp. to thickness and up
+                // probably using the GetCellLengthScale or getcellthickness
             }
             const CartesianVector& position = caloHit->GetPositionVector();
             float dx = (position.GetX() -x0)/pixelsize;
@@ -830,11 +852,11 @@ pandora::Cluster* ECalPhotonIdAlgorithm::TransverseProfile( ClusterProperties& c
         CaloHitList* caloHitList;
         if( STATUS_CODE_SUCCESS != pOrderedCaloHitList.GetCaloHitsInPseudoLayer( PseudoLayer(i), caloHitList ) ) 
         {
-            std::cout << "BBB i layer " << i << "   hits: 0 " << std::endl;
+//             std::cout << "BBB i layer " << i << "   hits: 0 " << std::endl;
             continue;
         }
 //             std::cout << "BBB n hits " << caloHitList->size() << std::endl;
-        std::cout << "BBB i layer " << i << "   hits: " << caloHitList->size() << std::endl;
+//         std::cout << "BBB i layer " << i << "   hits: " << caloHitList->size() << std::endl;
         for( CaloHitList::iterator itCaloHit = caloHitList->begin(), itCaloHitEnd = caloHitList->end(); itCaloHit != itCaloHitEnd; ++itCaloHit )
         {
 
@@ -856,7 +878,7 @@ pandora::Cluster* ECalPhotonIdAlgorithm::TransverseProfile( ClusterProperties& c
             int idvt  = static_cast<int>(dvt+0.5+ioffset);
             if(idut>=0&&idut<nbins&&idvt>=0&&idvt<nbins){
                 if(i<=maxLayers)tprofile[idut][idvt] += caloHit->GetElectromagneticEnergy();  
-                std::cout << "tprofile["<<idut<<"]["<<idvt<<"] = " << tprofile[idut][idvt] << "  EM energy : " << caloHit->GetElectromagneticEnergy() << std::endl;
+//                 std::cout << "BBB tprofile["<<idut<<"]["<<idvt<<"] = " << tprofile[idut][idvt] << "  EM energy : " << caloHit->GetElectromagneticEnergy() << std::endl;
                 if(i<=maxLayers+extraLayers)tlprofile[idut][idvt][i].push_back(caloHit);  
             }
         }
@@ -898,7 +920,7 @@ pandora::Cluster* ECalPhotonIdAlgorithm::TransverseProfile( ClusterProperties& c
             for(int j=1; j<nbins-1; j++){
                 if(!assigned[i][j]){
                     if(tprofile[i][j]>peakheight){
-                        std::cout << "BBB tprofile[i][j]>peakheight " << i << "," << j << " " << tprofile[i][j] << " < " << peakheight << std::endl;
+//                         std::cout << "BBB tprofile[i][j]>peakheight " << i << "," << j << " " << tprofile[i][j] << " < " << peakheight << std::endl;
                         peakheight = tprofile[i][j];
                         ipeak = i;
                         jpeak = j;
@@ -1181,6 +1203,10 @@ void ECalPhotonIdAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdPropertie
             photonIdProperties.SetLongProfileShowerStart(   ioffmin*X0BinSize );
 //         std::cout << "=== longprofilefraction   " << photonIdProperties._photonLongProfileFraction << std::endl;
 //         std::cout << "=== photonLongShowerStart " << photonIdProperties._photonLongShowerStart << std::endl;
+
+//            std::cout << "EEE ecal e " << ecalE << std::endl;
+//            std::cout << "EEE longprofilefraction " << photonIdProperties.GetLongProfileGammaFraction() << std::endl;
+//            std::cout << "EEE longshowerstart     " << photonIdProperties.GetLongProfileShowerStart()     << std::endl;
         }
         else if (m_producePrintoutStatements > 0)
         {
@@ -1446,6 +1472,7 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
     }
     float yes = static_cast<float>(likeSig[ien]*likesrms[ien][irmsbin]*likesfrac[ien][ifracbin]*likesstart[ien][istartbin]);
     float no  = static_cast<float>(likeBack[ien]*likebrms[ien][irmsbin]*likebfrac[ien][ifracbin]*likebstart[ien][istartbin]);
+
     
     if(0)
     {
