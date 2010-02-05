@@ -23,12 +23,17 @@
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
 
 #include "Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.h"
+#include "Algorithms/FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
 
 #include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
-#include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
+#include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
 #include "Algorithms/PfoConstruction/PfoCreationAlgorithm.h"
+#include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
+#include "Algorithms/PfoConstruction/TrackRecoveryAlgorithm.h"
+#include "Algorithms/PfoConstruction/TrackRecoveryHelixAlgorithm.h"
+#include "Algorithms/PfoConstruction/TrackRecoveryInteractionsAlgorithm.h"
 
 #include "Algorithms/Reclustering/SplitTrackAssociationsAlg.h"
 #include "Algorithms/Reclustering/ResolveTrackAssociationsAlg.h"
@@ -62,10 +67,15 @@
     d("Clustering",                             ClusteringAlgorithm::Factory)                               \
     d("ECalPhotonClustering",                   ECalPhotonClusteringAlgorithm::Factory)                     \
     d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                      \
+    d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                   \
     d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
-    d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \
+    d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                  \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \
+    d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \
+    d("TrackRecovery",                          TrackRecoveryAlgorithm::Factory)                            \
+    d("TrackRecoveryHelix",                     TrackRecoveryHelixAlgorithm::Factory)                       \
+    d("TrackRecoveryInteractions",              TrackRecoveryInteractionsAlgorithm::Factory)                \
     d("ResolveTrackAssociations",               ResolveTrackAssociationsAlg::Factory)                       \
     d("SplitTrackAssociations",                 SplitTrackAssociationsAlg::Factory)                         \
     d("TrackDrivenAssociation",                 TrackDrivenAssociationAlg::Factory)                         \
