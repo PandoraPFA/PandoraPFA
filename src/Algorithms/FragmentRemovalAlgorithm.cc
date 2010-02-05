@@ -38,29 +38,28 @@ ClusterContact::ClusterContact(Cluster *const pDaughterCluster, Cluster *const p
     m_pDaughterCluster(pDaughterCluster),
     m_pParentCluster(pParentCluster),
     m_parentClusterEnergy(pParentCluster->GetHadronicEnergy()),
+    m_nContactLayers(0),
+    m_contactFraction(0.f),
     m_meanDistanceToHelix(std::numeric_limits<float>::max()),
     m_closestDistanceToHelix(std::numeric_limits<float>::max())
 {
     m_distanceToClosestHit = ClusterHelper::GetDistanceToClosestHit(pDaughterCluster, pParentCluster);
-    m_coneFraction1 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, /* m_ */0.90f);
-    m_coneFraction2 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, /* m_ */0.95f);
-    m_coneFraction3 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, /* m_ */0.985f);
-    m_closeHitFraction1 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, /* m_ */100.f);
-    m_closeHitFraction2 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, /* m_ */50.f);
+    m_coneFraction1 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, 0.90f);
+    m_coneFraction2 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, 0.95f);
+    m_coneFraction3 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, 0.985f);
+    m_closeHitFraction1 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, 100.f);
+    m_closeHitFraction2 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, 50.f);
 
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster,
-        /* m_ */2.f, m_nContactLayers, m_contactFraction));
+    (void) FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, 2.f, m_nContactLayers, m_contactFraction);
 
     // Configure range of layers in which daughter cluster will be compared to helix fits
     const PseudoLayer startLayer(pDaughterCluster->GetInnerPseudoLayer());
 
-    const PseudoLayer endLayer((pParentCluster->GetMipFraction() > /* m_ */0.8f) ?
-        startLayer + /* m_ */20 :
-        std::max(startLayer + /* m_ */20, pParentCluster->GetOuterPseudoLayer() + /* m_ */10));
+    const PseudoLayer endLayer((pParentCluster->GetMipFraction() > 0.8f) ?
+        startLayer + 20 : std::max(startLayer + 20, pParentCluster->GetOuterPseudoLayer() + 10));
 
-    const unsigned int maxOccupiedLayers((pParentCluster->GetMipFraction() > /* m_ */0.8f) ?
-        std::numeric_limits<unsigned int>::max() :
-        /* m_ */9);
+    const unsigned int maxOccupiedLayers((pParentCluster->GetMipFraction() > 0.8f) ?
+        std::numeric_limits<unsigned int>::max() : 9);
 
     // Calculate closest distance between daughter cluster and helix fits to parent associated tracks
     float trackEnergySum(0.);

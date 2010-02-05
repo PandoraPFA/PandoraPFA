@@ -13,7 +13,6 @@ using namespace pandora;
 StatusCode MainFragmentRemovalAlgorithm::Run()
 {
     bool isFirstPass(true), shouldRecalculate(true);
-    Cluster *pBestParentCluster(NULL), *pBestDaughterCluster(NULL);
 
     ClusterList affectedClusters;
     ClusterContactMap clusterContactMap;
@@ -21,9 +20,9 @@ StatusCode MainFragmentRemovalAlgorithm::Run()
     while (shouldRecalculate)
     {
         shouldRecalculate = false;
+        Cluster *pBestParentCluster(NULL), *pBestDaughterCluster(NULL);
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterContactMap(isFirstPass, affectedClusters, clusterContactMap,
-            pBestParentCluster, pBestDaughterCluster));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterContactMap(isFirstPass, affectedClusters, clusterContactMap));
 
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterMergingCandidates(clusterContactMap, pBestParentCluster,
             pBestDaughterCluster));
@@ -36,6 +35,7 @@ StatusCode MainFragmentRemovalAlgorithm::Run()
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetAffectedClusters(clusterContactMap, pBestParentCluster,
                 pBestDaughterCluster, affectedClusters));
 
+            clusterContactMap.erase(clusterContactMap.find(pBestDaughterCluster));
             shouldRecalculate = true;
         }
     }
@@ -46,7 +46,7 @@ StatusCode MainFragmentRemovalAlgorithm::Run()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters,
-    ClusterContactMap &clusterContactMap, const Cluster *const pBestParentCluster, const Cluster *const pBestDaughterCluster) const
+    ClusterContactMap &clusterContactMap) const
 {
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
@@ -120,13 +120,13 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
     for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = iterI->first;
+        float globalDeltaChi2(0.f);
 
         // Check to see if merging parent and daughter clusters would improve track-cluster compatibility
-        if (!this->PassesPreselection(pDaughterCluster, iterI->second))
+        if (!this->PassesPreselection(pDaughterCluster, iterI->second, globalDeltaChi2))
             continue;
 
         float highestExcessEvidence(0.f);
-        const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
         const PseudoLayer daughterCorrectionLayer(this->GetClusterCorrectionLayer(pDaughterCluster));
 
         for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
@@ -137,7 +137,8 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
                 throw StatusCodeException(STATUS_CODE_FAILURE);
 
             const float totalEvidence(this->GetTotalEvidenceForMerge(clusterContact));
-            const float requiredEvidence(this->GetRequiredEvidenceForMerge(daughterClusterEnergy, daughterCorrectionLayer, clusterContact));
+            const float requiredEvidence(this->GetRequiredEvidenceForMerge(pDaughterCluster, clusterContact, daughterCorrectionLayer,
+                globalDeltaChi2));
             const float excessEvidence(totalEvidence - requiredEvidence);
 
             if(excessEvidence > highestExcessEvidence)
@@ -153,7 +154,8 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector) const
+bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector,
+    float &globalDeltaChi2) const
 {
     float totalTrackEnergy(0.f), totalClusterEnergy(0.f);
     const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
@@ -184,6 +186,8 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
 
     const float oldChi2Total(oldChiTotal * oldChiTotal);
     const float newChi2Total(newChiTotal * newChiTotal);
+
+    globalDeltaChi2 = oldChi2Total - newChi2Total;
 
     if ((newChi2Total < /* m_ */9.f) || (newChi2Total < oldChi2Total))
         return true;
@@ -256,10 +260,127 @@ float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContac
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(const float daughterClusterEnergy, const PseudoLayer correctionLayer,
-    const ClusterContact &clusterContact) const
+float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const pDaughterCluster, const ClusterContact &clusterContact,
+    const PseudoLayer correctionLayer, const float globalDeltaChi2) const
 {
-    return 0.f;
+    // Primary evidence requirement is obtained from change in chi2.
+    const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
+
+    const float oldChi(this->GetTrackClusterCompatibility(clusterContact.GetParentClusterEnergy(), clusterContact.GetParentTrackEnergy()));
+    const float newChi(this->GetTrackClusterCompatibility(daughterClusterEnergy + clusterContact.GetParentClusterEnergy(),
+        clusterContact.GetParentTrackEnergy()));
+
+    const float oldChi2(oldChi * oldChi);
+    const float newChi2(newChi * newChi);
+
+    const float chi2Evidence(m_chi2Base - (oldChi2 - newChi2));
+    const float globalChi2Evidence(m_chi2Base + m_globalChi2Penalty - globalDeltaChi2);
+    const bool usingGlobalChi2(((newChi2 > oldChi2) && (newChi2 > 9.f)) || (globalChi2Evidence < chi2Evidence));
+
+    // Final evidence requirement is corrected to account for following factors:
+    // 1. Layer corrections
+    float layerCorrection(0.f);
+
+    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
+    static const unsigned int halfHCal(GeometryHelper::GetInstance()->GetHCalBarrelParameters().GetNLayers() / 2);
+    static const unsigned int halfECal(nECalLayers / 2);
+
+    const PseudoLayer innerLayer(pDaughterCluster->GetInnerPseudoLayer());
+    const PseudoLayer outerLayer(pDaughterCluster->GetOuterPseudoLayer());
+
+    if(correctionLayer <= halfECal)
+    {
+        layerCorrection = 2.f;
+    }
+    else if((correctionLayer > halfECal) && (correctionLayer <= nECalLayers))
+    {
+        layerCorrection = 0.f;
+    }
+    else if(correctionLayer > nECalLayers)
+    {
+        layerCorrection = -1.f;
+    }
+    else if(correctionLayer > nECalLayers + halfHCal)
+    {
+        layerCorrection = -2.f;
+    }
+
+    if((outerLayer - innerLayer < 4) && (innerLayer > 5))
+        layerCorrection = -2.f;
+
+    if(std::abs(static_cast<int>(correctionLayer) - static_cast<int>(nECalLayers)) < 4)
+        layerCorrection = -3.f;
+
+    // 2. Leaving cluster corrections - TODO
+    float leavingCorrection(0.f);
+
+    // 3. Energy correction
+    float energyCorrection(0.f);
+
+    if(daughterClusterEnergy < 3.)
+        energyCorrection = daughterClusterEnergy - 3;
+
+    // 4. Low energy fragment corrections
+    float lowEnergyCorrection(0.f);
+
+    if(daughterClusterEnergy < 1.5f)
+    {
+        const unsigned int nHitLayers(pDaughterCluster->GetOrderedCaloHitList().size());
+
+        if(nHitLayers < 6)
+        {
+            lowEnergyCorrection += -1.f;
+
+            if(nHitLayers < 4)
+                lowEnergyCorrection += -1.f;
+        }
+
+        if(correctionLayer > nECalLayers)
+            lowEnergyCorrection += -1.f;
+    }
+
+    // 5. Angular corrections
+    float angularCorrection(0.f);
+    const float radialDirectionCosine(pDaughterCluster->GetFitToAllHitsResult().GetRadialDirectionCosine());
+
+    if(radialDirectionCosine < 0.75f)
+        angularCorrection = -0.5f + (radialDirectionCosine - 0.75f) * 2.f;
+
+    // 6. Photon cluster corrections
+    float photonCorrection(0.f);
+
+    if(pDaughterCluster->IsPhoton())
+    {
+        const float showerStart(pDaughterCluster->GetProfileShowerStart());
+        const float photonFraction(pDaughterCluster->GetProfilePhotonFraction());
+
+        if(daughterClusterEnergy > 2.f && showerStart < 5.f)
+            photonCorrection = 10.f;
+
+        if(daughterClusterEnergy > 2.f && showerStart < 2.5f)
+            photonCorrection = 100.f;
+
+        if(daughterClusterEnergy < 2.f && showerStart < 2.5f)
+            photonCorrection = 5.f;
+
+        if(daughterClusterEnergy < 2.f && showerStart < 2.5f && photonFraction < 0.8f)
+            photonCorrection = 10.f;
+
+        if(daughterClusterEnergy < 2.f && showerStart > 2.5f)
+            photonCorrection = 2.f;
+
+        if(daughterClusterEnergy < 0.5f && (showerStart > 2.5f || photonFraction > 1.f))
+            photonCorrection = 2.f;
+
+        if(daughterClusterEnergy < 1.f && showerStart > 2.5f)
+            photonCorrection = 0.f;
+    }
+
+    const float requiredEvidence(usingGlobalChi2 ?
+        layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection :
+        layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection + lowEnergyCorrection);
+
+    return std::max(0.5f, requiredEvidence);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -341,7 +462,13 @@ StatusCode MainFragmentRemovalAlgorithm::GetAffectedClusters(const ClusterContac
 
 StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    // Read settings from xml file here
+    m_contactWeight = 1.f;
+    m_coneWeight = 1.f;
+    m_distanceWeight = 1.f;
+    m_trackExtrapolationWeight = 1.f;
+
+    m_chi2Base = 5.f;
+    m_globalChi2Penalty = 5.f;
 
     return STATUS_CODE_SUCCESS;
 }

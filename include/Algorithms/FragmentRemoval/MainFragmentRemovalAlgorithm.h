@@ -35,28 +35,25 @@ private:
     /**
      *  @brief  
      * 
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
+     *  @param  isFirstPass
+     *  @param  affectedClusters
+     *  @param  clusterContactMap
      */
-    StatusCode GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters, ClusterContactMap &clusterContactMap,
-        const Cluster *const pBestParentCluster, const Cluster *const pBestDaughterCluster) const;
+    StatusCode GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters, ClusterContactMap &clusterContactMap) const;
 
     /**
      *  @brief  
      * 
-     *  @param  
+     *  @param  clusterContact
      */
     bool PassesClusterContactCuts(const ClusterContact &clusterContact) const;
 
     /**
      *  @brief  
      * 
-     *  @param  
-     *  @param  
-     *  @param  
+     *  @param  clusterContactMap
+     *  @param  pBestParentCluster
+     *  @param  pBestDaughterCluster
      */
     StatusCode GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
         Cluster *&pBestDaughterCluster) const;
@@ -64,17 +61,18 @@ private:
     /**
      *  @brief  
      * 
-     *  @param  
-     *  @param  
+     *  @param  pDaughterCluster
+     *  @param  clusterContactVector
+     *  @param  globalDeltaChi2
      * 
      *  @return boolean
      */
-    bool PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector) const;
+    bool PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector, float &globalDeltaChi2) const;
 
     /**
      *  @brief  
      * 
-     *  @param  
+     *  @param  clusterContact
      * 
      *  @return
      */
@@ -83,18 +81,20 @@ private:
     /**
      *  @brief  
      * 
-     *  @param  
-     *  @param  
-     *  @param  
+     *  @param  pDaughterCluster
+     *  @param  clusterContact
+     *  @param  correctionLayer
+     *  @param  globalDeltaChi2
      * 
      *  @return
      */
-    float GetRequiredEvidenceForMerge(const float daughterClusterEnergy, const PseudoLayer correctionLayer, const ClusterContact &clusterContact) const;
+    float GetRequiredEvidenceForMerge(Cluster *const pDaughterCluster, const ClusterContact &clusterContact, const PseudoLayer correctionLayer,
+        const float globalDeltaChi2) const;
 
     /**
      *  @brief  
      * 
-     *  @param  
+     *  @param  pDaughterCluster
      * 
      *  @return
      */
@@ -103,8 +103,8 @@ private:
     /**
      *  @brief  
      * 
-     *  @param  
-     *  @param  
+     *  @param  clusterEnergy
+     *  @param  trackEnergy
      * 
      *  @return 
      */
@@ -113,10 +113,10 @@ private:
     /**
      *  @brief  
      * 
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
+     *  @param  clusterContactMap
+     *  @param  pBestParentCluster
+     *  @param  pBestDaughterCluster
+     *  @param  affectedClusters
      */
     StatusCode GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
         Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
@@ -125,6 +125,9 @@ private:
     float           m_coneWeight;                   ///< 
     float           m_distanceWeight;               ///< 
     float           m_trackExtrapolationWeight;     ///< 
+
+    float           m_chi2Base;                     ///< 
+    float           m_globalChi2Penalty;            ///< 
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
