@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/Clustering/PerfectClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Cheating/CheatingClusteringAlgorithm.cc
  * 
- *  @brief  Implementation of the perfect clustering algorithm class.
+ *  @brief  Implementation of the cheating clustering algorithm class
  * 
  *  $Log: $
  */
 
-#include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
+#include "Algorithms/Cheating/CheatingClusteringAlgorithm.h"
 
 #include "Api/PandoraContentApi.h"
 
@@ -17,7 +17,7 @@
 
 using namespace pandora;
 
-StatusCode PerfectClusteringAlgorithm::Run()
+StatusCode CheatingClusteringAlgorithm::Run()
 {
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
@@ -121,11 +121,9 @@ StatusCode PerfectClusteringAlgorithm::Run()
     return STATUS_CODE_SUCCESS;
 }
 
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode CheatingClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     return STATUS_CODE_SUCCESS;
 }

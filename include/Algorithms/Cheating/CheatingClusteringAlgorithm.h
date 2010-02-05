@@ -1,19 +1,19 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/Clustering/PerfectClusteringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/Cheating/CheatingClusteringAlgorithm.h
  * 
- *  @brief  Header file for the perfect clustering algorithm class.
+ *  @brief  Header file for the cheating clustering algorithm class.
  * 
  *  $Log: $
  */
-#ifndef PERFECT_CLUSTERING_ALGORITHM_H
-#define PERFECT_CLUSTERING_ALGORITHM_H 1
+#ifndef CHEATING_CLUSTERING_ALGORITHM_H
+#define CHEATING_CLUSTERING_ALGORITHM_H 1
 
 #include "Algorithms/Algorithm.h"
 
 /**
- *  @brief PerfectClusteringAlgorithm class
+ *  @brief CheatingClusteringAlgorithm class
  */
-class PerfectClusteringAlgorithm : public pandora::Algorithm
+class CheatingClusteringAlgorithm : public pandora::Algorithm
 {
 private:
 public:
@@ -34,9 +34,9 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *PerfectClusteringAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *CheatingClusteringAlgorithm::Factory::CreateAlgorithm() const
 {
-    return new PerfectClusteringAlgorithm();
+    return new CheatingClusteringAlgorithm();
 }
 
-#endif // #ifndef FULL_CHEATING_CLUSTERING_H
+#endif // #ifndef CHEATING_CLUSTERING_ALGORITHM_H

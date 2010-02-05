@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/CaloHitMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Monitoring/CaloHitMonitoringAlgorithm.cc
  * 
  *  @brief  Implementation of the calo hit monitoring algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/CaloHitMonitoringAlgorithm.h"
+#include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
 
 using namespace pandora;
 

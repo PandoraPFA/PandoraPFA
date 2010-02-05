@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/CheatingAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/CheatingCheatingPfoCreationAlgorithm.cc
  * 
- *  @brief  Implementation of the clustering algorithm class.
+ *  @brief  Implementation of the cheating pfo creation algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/CheatingAlgorithm.h"
+#include "Algorithms/Cheating/CheatingPfoCreationAlgorithm.h"
 
 #include "Api/PandoraContentApi.h"
 
@@ -20,7 +20,7 @@
 
 using namespace pandora;
 
-StatusCode CheatingAlgorithm::Run()
+StatusCode CheatingPfoCreationAlgorithm::Run()
 {
     // Run initial clustering algorithm
     const ClusterList *pClusterList = NULL;
@@ -91,7 +91,7 @@ StatusCode CheatingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CheatingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode CheatingPfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
 //     settings example:
 //
@@ -110,10 +110,9 @@ StatusCode CheatingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     return STATUS_CODE_SUCCESS;
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingAlgorithm::ComputeEnergyWeightedClusterPosition( Cluster* cluster, CartesianVector& energyWeightedClusterPosition )
+void CheatingPfoCreationAlgorithm::ComputeEnergyWeightedClusterPosition( Cluster* cluster, CartesianVector& energyWeightedClusterPosition )
 {
     energyWeightedClusterPosition.SetValues( 0, 0, 0 ); // assign 0.0 for x, y and z position
 
@@ -136,10 +135,10 @@ void CheatingAlgorithm::ComputeEnergyWeightedClusterPosition( Cluster* cluster, 
     energyWeightedClusterPosition *= 1.0/energySum;
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingAlgorithm::ComputeFromCalorimeter( pandora::Cluster* cluster, float& energy, CartesianVector& momentum, float& mass, int& particleId, int& charge )
+void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter( pandora::Cluster* cluster, float& energy, CartesianVector& momentum, float& mass,
+    int& particleId, int& charge )
 {
     TrackList trackList = cluster->GetAssociatedTrackList();
     if (trackList.empty()) // cluster doesn't have tracks
@@ -191,7 +190,8 @@ void CheatingAlgorithm::ComputeFromCalorimeter( pandora::Cluster* cluster, float
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingAlgorithm::ComputeFromMc( pandora::Cluster* cluster, float& energy, CartesianVector& momentum, float& mass, int& particleId, int& charge )
+void CheatingPfoCreationAlgorithm::ComputeFromMc( pandora::Cluster* cluster, float& energy, CartesianVector& momentum, float& mass,
+    int& particleId, int& charge )
 {
     // match calohitvectors to their MCParticles
     std::map< MCParticle*, float > energyPerMCParticle;
@@ -224,9 +224,10 @@ void CheatingAlgorithm::ComputeFromMc( pandora::Cluster* cluster, float& energy,
             }
         }
     }
-    
+
     std::map<MCParticle*, float>::iterator it = max_element( energyPerMCParticle.begin(), energyPerMCParticle.end(), 
-                                                             pandora::Select2nd<std::map<MCParticle*, float>::value_type, std::greater<float> >() );
+         pandora::Select2nd<std::map<MCParticle*, float>::value_type, std::greater<float> >() );
+
     MCParticle* mc = it->first;
     energy     = mc->GetEnergy();
     particleId = mc->GetParticleId();
@@ -234,7 +235,8 @@ void CheatingAlgorithm::ComputeFromMc( pandora::Cluster* cluster, float& energy,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingAlgorithm::ComputeFromTracks( pandora::Cluster* cluster, float& energy, CartesianVector& momentum, float& mass, int& particleId, int& charge )
+void CheatingPfoCreationAlgorithm::ComputeFromTracks( pandora::Cluster* cluster, float& energy, CartesianVector& momentum, float& mass,
+    int& particleId, int& charge )
 {
 //     int num = 0;
     TrackList trackList = cluster->GetAssociatedTrackList();
@@ -257,7 +259,8 @@ void CheatingAlgorithm::ComputeFromTracks( pandora::Cluster* cluster, float& ene
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingAlgorithm::ComputeFromCalorimeterAndTracks( pandora::Cluster* cluster, float& energy, CartesianVector& momentum, float& mass, int& particleId, int& charge )
+void CheatingPfoCreationAlgorithm::ComputeFromCalorimeterAndTracks( pandora::Cluster* cluster, float& energy, CartesianVector& momentum,
+    float& mass, int& particleId, int& charge )
 {
     TrackList trackList = cluster->GetAssociatedTrackList();
     if (trackList.empty()) // cluster doesn't have tracks
@@ -269,4 +272,3 @@ void CheatingAlgorithm::ComputeFromCalorimeterAndTracks( pandora::Cluster* clust
         ComputeFromTracks( cluster, energy, momentum, mass, particleId, charge );
     }
 }
-

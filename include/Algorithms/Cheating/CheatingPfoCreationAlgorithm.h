@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/CheatingAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/Cheating/CheatingPfoCreationAlgorithm.h
  * 
- *  @brief  Header file for the cheating algorithm class.
+ *  @brief  Header file for the cheating pfo creation algorithm class.
  * 
  *  $Log: $
  */
-#ifndef CHEATING_ALGORITHM_H
-#define CHEATING_ALGORITHM_H 1
+#ifndef CHEATING_PFO_CREATION_ALGORITHM_H
+#define CHEATING_PFO_CREATION_ALGORITHM_H 1
 
 #include "Algorithms/Algorithm.h"
 
@@ -33,16 +33,14 @@ class Select2nd : public std::binary_function<Pair, Pair, typename Pair::second_
 
 } // namespace pandora
 
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *  @brief CheatingAlgorithm class
+ *  @brief CheatingPfoCreationAlgorithm class
  */
-class CheatingAlgorithm : public pandora::Algorithm
+class CheatingPfoCreationAlgorithm : public pandora::Algorithm
 {
-private:
 public:
-
-
     /**
      *  @brief  Factory class for instantiating algorithm
      */
@@ -71,12 +69,11 @@ private:
     bool            m_debug;                        ///< turn on debugging statements
 };
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *CheatingAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *CheatingPfoCreationAlgorithm::Factory::CreateAlgorithm() const
 {
-    return new CheatingAlgorithm();
+    return new CheatingPfoCreationAlgorithm();
 }
 
-#endif // #ifndef CHEATING_ALGORITHM_H
+#endif // #ifndef CHEATING_PFO_CREATION_ALGORITHM_H

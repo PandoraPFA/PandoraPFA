@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/CaloHitMonitoringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h
  * 
  *  @brief  Header file for the calo hit monitoring algorithm class.
  * 
