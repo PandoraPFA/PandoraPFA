@@ -72,7 +72,7 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
 
         //       set energy, charge, mass, momentum, particleId
         pfo.m_energy     = energy;
-        pfo.m_chargeSign = charge;
+        pfo.m_charge     = charge;
         pfo.m_mass       = mass;
         pfo.m_momentum   = momentum;
         pfo.m_particleId = particleId;

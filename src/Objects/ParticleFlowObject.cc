@@ -16,7 +16,7 @@ namespace pandora
 
 ParticleFlowObject::ParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) :
     m_particleId(particleFlowObjectParameters.m_particleId.Get()),
-    m_chargeSign(particleFlowObjectParameters.m_chargeSign.Get()),
+    m_charge(particleFlowObjectParameters.m_charge.Get()),
     m_mass(particleFlowObjectParameters.m_mass.Get()),
     m_energy(particleFlowObjectParameters.m_energy.Get()),
     m_momentum(particleFlowObjectParameters.m_momentum.Get()),

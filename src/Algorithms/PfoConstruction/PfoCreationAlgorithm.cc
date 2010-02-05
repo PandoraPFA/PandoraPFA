@@ -32,7 +32,7 @@ StatusCode PfoCreationAlgorithm::CreateChargedPfos() const
 
         // Specify the pfo parameters
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
-        pfoParameters.m_chargeSign = pTrack->GetChargeSign();
+        pfoParameters.m_charge = pTrack->GetChargeSign();
         pfoParameters.m_particleId = ((pTrack->GetChargeSign() > 0) ? 211 : -211);
         pfoParameters.m_mass = pTrack->GetMass();
         pfoParameters.m_energy = pTrack->GetEnergyAtDca();
@@ -117,7 +117,7 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         // Specify the pfo parameters
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
         pfoParameters.m_particleId = (isPhoton ? 22 : 2112);
-        pfoParameters.m_chargeSign = 0;
+        pfoParameters.m_charge = 0;
         pfoParameters.m_mass = 0;
         pfoParameters.m_energy = clusterEnergy;
         pfoParameters.m_clusterList.insert(pCluster);

@@ -27,11 +27,11 @@ public:
     int GetParticleId() const;
 
     /**
-     *  @brief  Get particle flow object charge sign
+     *  @brief  Get particle flow object charge
      * 
-     *  @return The particle flow object charge sign
+     *  @return The particle flow object charge
      */
-    int GetChargeSign() const;
+    int GetCharge() const;
 
     /**
      *  @brief  Get particle flow object mass
@@ -103,7 +103,7 @@ private:
     void ExtractAndStoreCaloHits(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters);
 
     const int               m_particleId;               ///< The particle flow object id (PDG code)
-    const int               m_chargeSign;               ///< The particle flow object charge sign
+    const int               m_charge;                   ///< The particle flow object charge
     const float             m_mass;                     ///< The particle flow object mass
     const float             m_energy;                   ///< The particle flow object energy
     const CartesianVector   m_momentum;                 ///< The particle flow object momentum
@@ -128,9 +128,9 @@ inline int ParticleFlowObject::GetParticleId() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline int ParticleFlowObject::GetChargeSign() const
+inline int ParticleFlowObject::GetCharge() const
 {
-    return m_chargeSign;
+    return m_charge;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

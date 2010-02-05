@@ -64,7 +64,7 @@ public:
         {
         public:
             pandora::InputInt               m_particleId;       ///< The particle flow object id (PDG code)
-            pandora::InputInt               m_chargeSign;       ///< The particle flow object charge sign
+            pandora::InputInt               m_charge;           ///< The particle flow object charge
             pandora::InputFloat             m_mass;             ///< The particle flow object mass
             pandora::InputFloat             m_energy;           ///< The particle flow object energy
             pandora::InputCartesianVector   m_momentum;         ///< The particle flow object momentum
