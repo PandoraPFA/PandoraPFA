@@ -1,19 +1,19 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/MonitoringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/CaloHitMonitoringAlgorithm.h
  * 
- *  @brief  Header file for the monitoring algorithm class.
+ *  @brief  Header file for the calo hit monitoring algorithm class.
  * 
  *  $Log: $
  */
-#ifndef MONITORING_ALGORITHM_H
-#define MONITORING_ALGORITHM_H 1
+#ifndef CALO_HIT_MONITORING_ALGORITHM_H
+#define CALO_HIT_MONITORING_ALGORITHM_H 1
 
 #include "Algorithms/Algorithm.h"
 
 /**
- *  @brief  MonitoringAlgorithm class
+ *  @brief  CaloHitMonitoringAlgorithm class
  */
-class MonitoringAlgorithm : public pandora::Algorithm
+class CaloHitMonitoringAlgorithm : public pandora::Algorithm
 {
 public:
     /**
@@ -34,9 +34,9 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *MonitoringAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *CaloHitMonitoringAlgorithm::Factory::CreateAlgorithm() const
 {
-    return new MonitoringAlgorithm();
+    return new CaloHitMonitoringAlgorithm();
 }
 
-#endif // #ifndef MONITORING_ALGORITHM_H
+#endif // #ifndef CALO_HIT_MONITORING_ALGORITHM_H

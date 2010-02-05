@@ -133,7 +133,7 @@ StatusCode FragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterCo
         {
             ClusterContact clusterContact = *iterJ;
 
-            if (pDaughterCluster != clusterContact.GetDaughterCluster()) // TODO remove this after testing
+            if (pDaughterCluster != clusterContact.GetDaughterCluster())
                 throw StatusCodeException(STATUS_CODE_FAILURE);
 
             const float totalEvidence(this->GetTotalEvidenceForMerge(clusterContact));
@@ -259,7 +259,7 @@ float FragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContact &c
 float FragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(const float daughterClusterEnergy, const PseudoLayer correctionLayer,
     const ClusterContact &clusterContact) const
 {
-    return 0.f; // TODO
+    return 0.f;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

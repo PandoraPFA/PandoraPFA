@@ -26,9 +26,9 @@ public:
      * 
      *  @param  pCluster address of the cluster to investigate
      *  @param  profileShowerStart to receive the profile shower start, in radiation lengths
-     *  @param  profileGammaFraction to receive the profile gamma fraction
+     *  @param  profilePhotonFraction to receive the profile photon fraction
      */
-    static StatusCode CalculateShowerProfile(Cluster *const pCluster, float &profileShowerStart, float &profileGammaFraction);
+    static StatusCode CalculateShowerProfile(Cluster *const pCluster, float &profileShowerStart, float &profilePhotonFraction);
 };
 
 } // namespace pandora

@@ -6,6 +6,8 @@
  *  $Log: $
  */
 
+#include "Helpers/PhotonIdHelper.h"
+
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 #include "Objects/Track.h"
@@ -86,6 +88,8 @@ StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
     m_showerMaxLayer.Reset();
+    m_profileShowerStart.Reset();
+    m_profilePhotonFraction.Reset();
 
     m_nCaloHits++;
 
@@ -147,6 +151,8 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
     m_showerMaxLayer.Reset();
+    m_profileShowerStart.Reset();
+    m_profilePhotonFraction.Reset();
 
     m_nCaloHits--;
 
@@ -248,6 +254,19 @@ void Cluster::CalculateShowerMaxLayer()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void Cluster::CalculateShowerProfile()
+{
+    float profileShowerStart(0.), profilePhotonFraction(0.);
+
+    PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, PhotonIdHelper::CalculateShowerProfile(this,
+        profileShowerStart, profilePhotonFraction));
+
+    m_profileShowerStart = profileShowerStart;
+    m_profilePhotonFraction = profilePhotonFraction;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void Cluster::CalculateFitToAllHitsResult()
 {
     (void) ClusterHelper::FitPoints(this, m_fitToAllHitsResult);
@@ -278,7 +297,10 @@ StatusCode Cluster::ResetProperties()
     m_bestEnergyEstimate.Reset();
     m_innerPseudoLayer.Reset();
     m_outerPseudoLayer.Reset();
+
     m_showerMaxLayer.Reset();
+    m_profileShowerStart.Reset();
+    m_profilePhotonFraction.Reset();
 
     m_currentFitResult.Reset();
     m_fitToAllHitsResult.Reset();
@@ -297,6 +319,8 @@ StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
     m_showerMaxLayer.Reset();
+    m_profileShowerStart.Reset();
+    m_profilePhotonFraction.Reset();
 
     m_nCaloHits += pCluster->GetNCaloHits();
     m_nPossibleMipHits += pCluster->GetNPossibleMipHits();

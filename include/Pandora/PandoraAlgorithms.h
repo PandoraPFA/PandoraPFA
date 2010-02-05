@@ -8,11 +8,8 @@
 #ifndef PANDORA_ALGORITHMS_H
 #define PANDORA_ALGORITHMS_H 1
 
-#include "Algorithms/CheatingAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
-#include "Algorithms/MonitoringAlgorithm.h"
 #include "Algorithms/PfoConstructionAlgorithm.h"
-#include "Algorithms/PhotonClusteringAlgorithm.h"
 #include "Algorithms/ECalPhotonIdAlgorithm.h"
 #include "Algorithms/ECalPhotonFindingAlgorithm.h"
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
@@ -20,8 +17,12 @@
 #include "Algorithms/TopologicalAssociationAlgorithm.h"
 #include "Algorithms/TrackSelectionAlgorithm.h"
 
+#include "Algorithms/Cheating/CheatingAlgorithm.h"
+
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/PerfectClusteringAlgorithm.h"
+
+#include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
@@ -47,19 +48,18 @@
 #include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
 #define PANDORA_ALGORITHM_LIST(d)                                                                           \
-    d("Cheating",                               CheatingAlgorithm::Factory)                                 \
     d("FragmentRemoval",                        FragmentRemovalAlgorithm::Factory)                          \
-    d("Monitoring",                             MonitoringAlgorithm::Factory)                               \
     d("PfoConstruction",                        PfoConstructionAlgorithm::Factory)                          \
-    d("PhotonClustering",                       PhotonClusteringAlgorithm::Factory)                         \
     d("ECalPhotonId",                           ECalPhotonIdAlgorithm::Factory)                             \
     d("ECalPhotonFinding",                      ECalPhotonFindingAlgorithm::Factory)                        \
     d("PrimaryClustering",                      PrimaryClusteringAlgorithm::Factory)                        \
     d("Reclustering",                           ReclusteringAlgorithm::Factory)                             \
     d("TopologicalAssociation",                 TopologicalAssociationAlgorithm::Factory)                   \
     d("TrackSelection",                         TrackSelectionAlgorithm::Factory)                           \
+    d("Cheating",                               CheatingAlgorithm::Factory)                                 \
     d("Clustering",                             ClusteringAlgorithm::Factory)                               \
     d("PerfectClustering",                      PerfectClusteringAlgorithm::Factory)                        \
+    d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
     d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \

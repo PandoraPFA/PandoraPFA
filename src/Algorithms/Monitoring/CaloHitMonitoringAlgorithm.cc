@@ -1,16 +1,16 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/MonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/CaloHitMonitoringAlgorithm.cc
  * 
- *  @brief  Implementation of the monitoring algorithm class.
+ *  @brief  Implementation of the calo hit monitoring algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/MonitoringAlgorithm.h"
+#include "Algorithms/CaloHitMonitoringAlgorithm.h"
 
 using namespace pandora;
 
-StatusCode MonitoringAlgorithm::Run()
+StatusCode CaloHitMonitoringAlgorithm::Run()
 {
     static unsigned int eventNumber = 1;
     const std::string eventNumberString(TypeToString(eventNumber));
@@ -60,7 +60,7 @@ StatusCode MonitoringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode CaloHitMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
 

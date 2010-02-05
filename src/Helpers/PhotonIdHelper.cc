@@ -11,24 +11,26 @@
 
 #include "Objects/Cluster.h"
 
+#include "Pandora/PandoraSettings.h"
+
 #include <cmath>
 
 namespace pandora
 {
 
-StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float &profileShowerStart, float &profileGammaFraction)
+StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float &profileShowerStart, float &profilePhotonFraction)
 {
-    // TODO remove hard coded numbers
-
     // 1. Construct cluster profile.
     const float clusterEnergy(pCluster->GetElectromagneticEnergy());
 
-    if(clusterEnergy < 0 || (pCluster->GetNCaloHits() <= 1))
+    if(clusterEnergy <= 0.f || (pCluster->GetNCaloHits() < 1))
         return STATUS_CODE_INVALID_PARAMETER;
 
     // Profile settings
-    const float binWidth(0.5f);
-    const unsigned int nBins(100);
+    static const PandoraSettings *const pPandoraSettings(PandoraSettings::GetInstance());
+
+    static const float binWidth(pPandoraSettings->GetShowerProfileBinWidth());
+    static const unsigned int nBins(pPandoraSettings->GetShowerProfileNBins());
     unsigned int profileEndBin(0);
 
     float profile[nBins];
@@ -43,7 +45,7 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
     const PseudoLayer outerPseudoLayer(pCluster->GetOuterPseudoLayer());
 
     if (innerPseudoLayer > nECalLayers)
-        return STATUS_CODE_INVALID_PARAMETER;
+        return STATUS_CODE_NOT_FOUND;
 
     const CartesianVector &clusterDirection(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
         pCluster->GetFitToAllHitsResult().GetDirection() : pCluster->GetInitialDirection());
@@ -74,8 +76,8 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
             const float openingAngle((*hitIter)->GetNormalVector().GetOpeningAngle(clusterDirection));
             float cosOpeningAngle(std::fabs(std::cos(openingAngle)));
 
-            if (cosOpeningAngle < 0.3f)
-                cosOpeningAngle = 1.f;
+            static const float minCosOpeningAngle(pPandoraSettings->GetShowerProfileMinCosAngle());
+            cosOpeningAngle = std::max(cosOpeningAngle, minCosOpeningAngle);
 
             energyInLayer += (*hitIter)->GetElectromagneticEnergy();
             nRadiationLengthsInLayer += (*hitIter)->GetNRadiationLengths() / cosOpeningAngle;
@@ -101,6 +103,7 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
 
         for (unsigned int iBin = startBin; iBin <= endBin; ++iBin)
         {
+            // TODO Should delta be a multiple of bin widths?
             float delta(1.f);
 
             if (startBin == iBin)
@@ -118,13 +121,16 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
         profileEndBin = endBin;
     }
 
-    if (0.f == eCalEnergy)
+    if (eCalEnergy <= 0.f)
         return STATUS_CODE_FAILURE;
 
 
     // 2. Construct expected cluster profile
-    const float criticalEnergy(0.08f);
-    const double a(1.25 + 0.5 * std::log(clusterEnergy / criticalEnergy));
+    static const float criticalEnergy(pPandoraSettings->GetShowerProfileCriticalEnergy());
+    static const float parameter0(pPandoraSettings->GetShowerProfileParameter0());
+    static const float parameter1(pPandoraSettings->GetShowerProfileParameter1());
+
+    const double a(parameter0 + parameter1 * std::log(clusterEnergy / criticalEnergy));
 
 #ifdef __GNUC__
     const double gammaA(std::exp(lgamma(a)));
@@ -171,12 +177,14 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
             binOffsetAtMinDifference = iBinOffset;
         }
 
-        if(profileDifference - minProfileDifference > 0.1f)
+        static const float maxDifference(pPandoraSettings->GetShowerProfileMaxDifference());
+
+        if(profileDifference - minProfileDifference > maxDifference)
             break;
     }
 
     profileShowerStart =  binOffsetAtMinDifference * binWidth;
-    profileGammaFraction = minProfileDifference / eCalEnergy;
+    profilePhotonFraction = minProfileDifference / eCalEnergy;
 
     return STATUS_CODE_SUCCESS;
 }

@@ -166,6 +166,20 @@ public:
     PseudoLayer GetShowerMaxLayer();
 
     /**
+     *  @brief  Get the cluster profile shower start, units radiation lengths
+     * 
+     *  @return The cluster profile shower start
+     */
+    float GetProfileShowerStart();
+
+    /**
+     *  @brief  Get the cluster profile photon fraction
+     * 
+     *  @return The cluster profile photon fraction
+     */
+    float GetProfilePhotonFraction();
+
+    /**
      *  @brief  Get the list of tracks associated with the cluster
      * 
      *  @return Address of the list of associated tracks
@@ -246,6 +260,11 @@ private:
      *  @brief  Calculate the pseudo layer at which the cluster energy deposition is greatest
      */
     void CalculateShowerMaxLayer();
+
+    /**
+     *  @brief  Calculate shower profile and compare it with the expected profile for a photon
+     */
+    void CalculateShowerProfile();
 
     /**
      *  @brief  Calculate result of a linear fit to all calo hits in the cluster
@@ -335,6 +354,9 @@ private:
     InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
     InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
     InputPseudoLayer        m_showerMaxLayer;           ///< The pseudo layer at which the cluster energy deposition is greatest
+
+    InputFloat              m_profileShowerStart;       ///< The cluster profile shower start, units radiation lengths
+    InputFloat              m_profilePhotonFraction;    ///< The cluster profile photon fraction
 
     TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
 
@@ -482,6 +504,26 @@ inline PseudoLayer Cluster::GetShowerMaxLayer()
         this->CalculateShowerMaxLayer();
 
     return m_showerMaxLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetProfileShowerStart()
+{
+    if (!m_profileShowerStart.IsInitialized())
+        this->CalculateShowerProfile();
+
+    return m_profileShowerStart.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetProfilePhotonFraction()
+{
+    if (!m_profilePhotonFraction.IsInitialized())
+        this->CalculateShowerProfile();
+
+    return m_profilePhotonFraction.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
