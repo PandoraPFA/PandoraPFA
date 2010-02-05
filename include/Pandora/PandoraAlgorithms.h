@@ -22,6 +22,8 @@
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
 
+#include "Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.h"
+
 #include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
@@ -59,6 +61,7 @@
     d("CheatingPfoCreation",                    CheatingPfoCreationAlgorithm::Factory)                      \
     d("Clustering",                             ClusteringAlgorithm::Factory)                               \
     d("ECalPhotonClustering",                   ECalPhotonClusteringAlgorithm::Factory)                     \
+    d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                      \
     d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
     d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \

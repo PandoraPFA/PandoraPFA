@@ -1,16 +1,16 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/FragmentRemovalAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.cc
  * 
- *  @brief  Implementation of the fragment removal algorithm class.
+ *  @brief  Implementation of the main fragment removal algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/FragmentRemovalAlgorithm.h"
+#include "Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.h"
 
 using namespace pandora;
 
-StatusCode FragmentRemovalAlgorithm::Run()
+StatusCode MainFragmentRemovalAlgorithm::Run()
 {
     bool isFirstPass(true), shouldRecalculate(true);
     Cluster *pBestParentCluster(NULL), *pBestDaughterCluster(NULL);
@@ -45,7 +45,7 @@ StatusCode FragmentRemovalAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters,
+StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters,
     ClusterContactMap &clusterContactMap, const Cluster *const pBestParentCluster, const Cluster *const pBestDaughterCluster) const
 {
     const ClusterList *pClusterList = NULL;
@@ -91,7 +91,7 @@ StatusCode FragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass, con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool FragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact &clusterContact) const
+bool MainFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact &clusterContact) const
 {
     if (clusterContact.GetDistanceToClosestHit() > /* m_ */750.f)
         return false;
@@ -114,7 +114,7 @@ bool FragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact &cl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
+StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
     Cluster *&pBestDaughterCluster) const
 {
     for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
@@ -153,7 +153,7 @@ StatusCode FragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterCo
 }
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool FragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector) const
+bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector) const
 {
     float totalTrackEnergy(0.f), totalClusterEnergy(0.f);
     const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
@@ -193,7 +193,7 @@ bool FragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float FragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContact &clusterContact) const
+float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContact &clusterContact) const
 {
     // Calculate a measure of the evidence that the daughter candidate cluster is a fragment of the parent candidate cluster:
 
@@ -256,7 +256,7 @@ float FragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContact &c
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float FragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(const float daughterClusterEnergy, const PseudoLayer correctionLayer,
+float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(const float daughterClusterEnergy, const PseudoLayer correctionLayer,
     const ClusterContact &clusterContact) const
 {
     return 0.f;
@@ -264,7 +264,7 @@ float FragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(const float daughter
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer FragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluster *const pDaughterCluster) const
+PseudoLayer MainFragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluster *const pDaughterCluster) const
 {
     float energySum(0.f);
     unsigned int layerCounter(0);
@@ -289,7 +289,7 @@ PseudoLayer FragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluster *c
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float FragmentRemovalAlgorithm::GetTrackClusterCompatibility(const float clusterEnergy, const float trackEnergy) const
+float MainFragmentRemovalAlgorithm::GetTrackClusterCompatibility(const float clusterEnergy, const float trackEnergy) const
 {
     static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
 
@@ -304,7 +304,7 @@ float FragmentRemovalAlgorithm::GetTrackClusterCompatibility(const float cluster
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FragmentRemovalAlgorithm::GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
+StatusCode MainFragmentRemovalAlgorithm::GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
     Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const
 {
     if (clusterContactMap.end() == clusterContactMap.find(pBestDaughterCluster))
@@ -339,60 +339,9 @@ StatusCode FragmentRemovalAlgorithm::GetAffectedClusters(const ClusterContactMap
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read settings from xml file here
 
     return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-FragmentRemovalAlgorithm::ClusterContact::ClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster) :
-    m_pDaughterCluster(pDaughterCluster),
-    m_pParentCluster(pParentCluster),
-    m_parentClusterEnergy(pParentCluster->GetHadronicEnergy()),
-    m_meanDistanceToHelix(std::numeric_limits<float>::max()),
-    m_closestDistanceToHelix(std::numeric_limits<float>::max())
-{
-    m_distanceToClosestHit = ClusterHelper::GetDistanceToClosestHit(pDaughterCluster, pParentCluster);
-    m_coneFraction1 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, /* m_ */0.90f);
-    m_coneFraction2 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, /* m_ */0.95f);
-    m_coneFraction3 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, /* m_ */0.985f);
-    m_closeHitFraction1 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, /* m_ */100.f);
-    m_closeHitFraction2 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, /* m_ */50.f);
-
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster,
-        /* m_ */2.f, m_nContactLayers, m_contactFraction));
-
-    // Configure range of layers in which daughter cluster will be compared to helix fits
-    const PseudoLayer startLayer(pDaughterCluster->GetInnerPseudoLayer());
-
-    const PseudoLayer endLayer((pParentCluster->GetMipFraction() > /* m_ */0.8f) ?
-        startLayer + /* m_ */20 : std::max(startLayer + /* m_ */20, pParentCluster->GetOuterPseudoLayer() + /* m_ */10));
-
-    const unsigned int maxOccupiedLayers((pParentCluster->GetMipFraction() > /* m_ */0.8f) ?
-        std::numeric_limits<unsigned int>::max() : /* m_ */9);
-
-    // Calculate closest distance between daughter cluster and helix fits to parent associated tracks
-    float trackEnergySum(0.);
-    const TrackList &parentTrackList(pParentCluster->GetAssociatedTrackList());
-
-    for (TrackList::const_iterator iter = parentTrackList.begin(), iterEnd = parentTrackList.end(); iter != iterEnd; ++iter)
-    {
-        trackEnergySum += (*iter)->GetEnergyAtDca();
-        float meanDistanceToHelix(std::numeric_limits<float>::max()), closestDistanceToHelix(std::numeric_limits<float>::max());
-
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemovalHelper::GetClusterHelixDistance(pDaughterCluster,
-            (*iter)->GetHelixFitAtECal(), startLayer, endLayer, maxOccupiedLayers, closestDistanceToHelix, meanDistanceToHelix));
-
-        if (closestDistanceToHelix < m_closestDistanceToHelix)
-        {
-            m_meanDistanceToHelix = meanDistanceToHelix;
-            m_closestDistanceToHelix = closestDistanceToHelix;
-        }
-    }
-
-    m_parentTrackEnergy = trackEnergySum;
 }
