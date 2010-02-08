@@ -58,7 +58,7 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass,
         if (!pDaughterCluster->GetAssociatedTrackList().empty())
             continue;
 
-        if ((pDaughterCluster->GetNCaloHits() < /* m_ */5) || (pDaughterCluster->GetHadronicEnergy() < /* m_ */0.1))
+        if ((pDaughterCluster->GetNCaloHits() < m_minDaughterCaloHits) || (pDaughterCluster->GetHadronicEnergy() < m_minDaughterHadronicEnergy))
             continue;
 
         // Identify whether cluster contacts need to be recalculated
@@ -93,15 +93,15 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass,
 
 bool MainFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact &clusterContact) const
 {
-    if (clusterContact.GetDistanceToClosestHit() > /* m_ */750.f)
+    if (clusterContact.GetDistanceToClosestHit() > m_contactCutMaxDistance)
         return false;
 
-    if ((clusterContact.GetNContactLayers() > /* m_ */0) ||
-        (clusterContact.GetConeFraction1() > /* m_ */0.25f) ||
-        (clusterContact.GetCloseHitFraction1() > /* m_ */0.25) ||
-        (clusterContact.GetCloseHitFraction2() > /* m_ */0.15) ||
-        (clusterContact.GetMeanDistanceToHelix() < /* m_ */250.f) ||
-        (clusterContact.GetClosestDistanceToHelix() < /* m_ */150.f))
+    if ((clusterContact.GetNContactLayers() > m_contactCutNLayers) ||
+        (clusterContact.GetConeFraction1() > m_contactCutConeFraction1) ||
+        (clusterContact.GetCloseHitFraction1() > m_contactCutCloseHitFraction1) ||
+        (clusterContact.GetCloseHitFraction2() > m_contactCutCloseHitFraction2) ||
+        (clusterContact.GetMeanDistanceToHelix() < m_contactCutMeanDistanceToHelix) ||
+        (clusterContact.GetClosestDistanceToHelix() < m_contactCutClosestDistanceToHelix))
     {
         return true;
     }
@@ -109,7 +109,8 @@ bool MainFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact
     static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
     const PseudoLayer daughterInnerLayer(clusterContact.GetDaughterCluster()->GetInnerPseudoLayer());
 
-    return ((clusterContact.GetDistanceToClosestHit() < /* m_ */250.f) && (daughterInnerLayer + /* m_ */10 > nECalLayers));
+    return ((clusterContact.GetDistanceToClosestHit() < m_contactCutNearECalDistance) &&
+        (daughterInnerLayer + m_contactCutLayersFromECal > nECalLayers));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,7 +174,7 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
         const float oldChi2(oldChi * oldChi);
         const float newChi2(newChi * newChi);
 
-        if ((newChi2 < /* m_ */16.f) || (newChi2 < oldChi2))
+        if ((newChi2 < m_maxChi2) || (newChi2 < oldChi2))
             return true;
 
         totalTrackEnergy += clusterContact.GetParentTrackEnergy();
@@ -189,7 +190,7 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
 
     globalDeltaChi2 = oldChi2Total - newChi2Total;
 
-    if ((newChi2Total < /* m_ */9.f) || (newChi2Total < oldChi2Total))
+    if ((newChi2Total < m_maxGlobalChi2) || (newChi2Total < oldChi2Total))
         return true;
 
     return false;
@@ -203,23 +204,23 @@ float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContac
 
     // 1. Layers in contact
     float contactEvidence(0.f);
-    if (clusterContact.GetNContactLayers() > /* m_ */10)
+    if (clusterContact.GetNContactLayers() > m_contactEvidenceNLayers1)
     {
-        contactEvidence = /* m_ */2.f;
+        contactEvidence = m_contactEvidence1;
     }
-    else if (clusterContact.GetNContactLayers() > /* m_ */4)
+    else if (clusterContact.GetNContactLayers() > m_contactEvidenceNLayers2)
     {
-        contactEvidence = /* m_ */1.f;
+        contactEvidence = m_contactEvidence2;
     }
-    else if (clusterContact.GetNContactLayers() > /* m_ */1)
+    else if (clusterContact.GetNContactLayers() > m_contactEvidenceNLayers3)
     {
-        contactEvidence = /* m_ */0.5f;
+        contactEvidence = m_contactEvidence3;
     }
-    contactEvidence *= (/* m_ */1.f + clusterContact.GetContactFraction());
+    contactEvidence *= (1.f + clusterContact.GetContactFraction());
 
     // 2. Cone extrapolation
     float coneEvidence(0.f);
-    if (clusterContact.GetConeFraction1() > /* m_ */0.5f)
+    if (clusterContact.GetConeFraction1() > m_coneEvidenceFraction1)
     {
         coneEvidence = clusterContact.GetConeFraction1() + clusterContact.GetConeFraction2() + clusterContact.GetConeFraction3();
 
@@ -227,31 +228,32 @@ float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContac
         const PseudoLayer daughterInnerLayer(clusterContact.GetDaughterCluster()->GetInnerPseudoLayer());
 
         if (daughterInnerLayer < nECalLayers)
-            coneEvidence *= /* m_ */0.5f;
+            coneEvidence *= m_coneEvidenceECalMultiplier;
     }
 
     // 3. Track extrapolation
     float trackExtrapolationEvidence(0.f);
-    if (clusterContact.GetClosestDistanceToHelix() < /* m_ */200.f)
+    if (clusterContact.GetClosestDistanceToHelix() < m_closestTrackEvidence1)
     {
-        trackExtrapolationEvidence = (/* m_ */200.f - clusterContact.GetClosestDistanceToHelix()) / /* m_ */100.f;
+        trackExtrapolationEvidence = (m_closestTrackEvidence1 - clusterContact.GetClosestDistanceToHelix()) / m_closestTrackEvidence1d;
 
-        if(clusterContact.GetClosestDistanceToHelix() < /* m_ */50.f)
-            trackExtrapolationEvidence += (/* m_ */50.f - clusterContact.GetClosestDistanceToHelix()) / /* m_ */20.f;
+        if(clusterContact.GetClosestDistanceToHelix() < m_closestTrackEvidence2)
+            trackExtrapolationEvidence += (m_closestTrackEvidence2 - clusterContact.GetClosestDistanceToHelix()) / m_closestTrackEvidence2d;
 
-        trackExtrapolationEvidence += (/* m_ */200.f - clusterContact.GetMeanDistanceToHelix()) / /* m_ */100.f;
+        if(clusterContact.GetMeanDistanceToHelix() < m_meanTrackEvidence1)
+            trackExtrapolationEvidence += (m_meanTrackEvidence1 - clusterContact.GetMeanDistanceToHelix()) / m_meanTrackEvidence1d;
 
-        if(clusterContact.GetMeanDistanceToHelix() < /* m_ */50.f)
-            trackExtrapolationEvidence += (/* m_ */50.f - clusterContact.GetClosestDistanceToHelix()) / /* m_ */50.f;
+        if(clusterContact.GetMeanDistanceToHelix() < m_meanTrackEvidence2)
+            trackExtrapolationEvidence += (m_meanTrackEvidence2 - clusterContact.GetClosestDistanceToHelix()) / m_meanTrackEvidence2d;
     }
 
     // 4. Distance of closest approach
     float distanceEvidence(0.f);
-    if (clusterContact.GetDistanceToClosestHit() < /* m_ */100.)
+    if (clusterContact.GetDistanceToClosestHit() < m_distanceEvidence1)
     {
-        distanceEvidence = (/* m_ */100.f - clusterContact.GetDistanceToClosestHit()) / /* m_ */100.f;
-        distanceEvidence += clusterContact.GetCloseHitFraction1();
-        distanceEvidence += /* m_ */2.f * clusterContact.GetCloseHitFraction2();
+        distanceEvidence = (m_distanceEvidence1 - clusterContact.GetDistanceToClosestHit()) / m_distanceEvidence1d;
+        distanceEvidence += m_distanceEvidenceCloseFraction1Multiplier * clusterContact.GetCloseHitFraction1();
+        distanceEvidence += m_distanceEvidenceCloseFraction2Multiplier * clusterContact.GetCloseHitFraction2();
     }
 
     return ((m_contactWeight * contactEvidence) + (m_coneWeight * coneEvidence) + (m_distanceWeight * distanceEvidence) +
@@ -275,7 +277,7 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
 
     const float chi2Evidence(m_chi2Base - (oldChi2 - newChi2));
     const float globalChi2Evidence(m_chi2Base + m_globalChi2Penalty - globalDeltaChi2);
-    const bool usingGlobalChi2(((newChi2 > oldChi2) && (newChi2 > 9.f)) || (globalChi2Evidence < chi2Evidence));
+    const bool usingGlobalChi2(((newChi2 > oldChi2) && (newChi2 > m_maxGlobalChi2)) || (globalChi2Evidence < chi2Evidence));
 
     // Final evidence requirement is corrected to account for following factors:
     // 1. Layer corrections
@@ -290,26 +292,26 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
 
     if(correctionLayer <= halfECal)
     {
-        layerCorrection = 2.f;
+        layerCorrection = m_layerCorrection1;
     }
     else if((correctionLayer > halfECal) && (correctionLayer <= nECalLayers))
     {
-        layerCorrection = 0.f;
+        layerCorrection = m_layerCorrection2;
     }
     else if(correctionLayer > nECalLayers)
     {
-        layerCorrection = -1.f;
+        layerCorrection = m_layerCorrection3;
     }
     else if(correctionLayer > nECalLayers + halfHCal)
     {
-        layerCorrection = -2.f;
+        layerCorrection = m_layerCorrection4;
     }
 
-    if((outerLayer - innerLayer < 4) && (innerLayer > 5))
-        layerCorrection = -2.f;
+    if((outerLayer - innerLayer < m_layerCorrectionLayerSpan) && (innerLayer > m_layerCorrectionMinInnerLayer))
+        layerCorrection = m_layerCorrection5;
 
-    if(std::abs(static_cast<int>(correctionLayer) - static_cast<int>(nECalLayers)) < 4)
-        layerCorrection = -3.f;
+    if(std::abs(static_cast<int>(correctionLayer) - static_cast<int>(nECalLayers)) < m_layerCorrectionLayersFromECal)
+        layerCorrection = m_layerCorrection6;
 
     // 2. Leaving cluster corrections - TODO
     float leavingCorrection(0.f);
@@ -317,34 +319,35 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     // 3. Energy correction
     float energyCorrection(0.f);
 
-    if(daughterClusterEnergy < 3.)
-        energyCorrection = daughterClusterEnergy - 3;
+    if(daughterClusterEnergy < m_energyCorrectionThreshold)
+        energyCorrection = daughterClusterEnergy - m_energyCorrectionThreshold;
 
     // 4. Low energy fragment corrections
     float lowEnergyCorrection(0.f);
 
-    if(daughterClusterEnergy < 1.5f)
+    if(daughterClusterEnergy < m_lowEnergyCorrectionThreshold)
     {
         const unsigned int nHitLayers(pDaughterCluster->GetOrderedCaloHitList().size());
 
-        if(nHitLayers < 6)
+        if(nHitLayers < m_lowEnergyCorrectionNHitLayers1)
         {
-            lowEnergyCorrection += -1.f;
+            lowEnergyCorrection += m_lowEnergyCorrection1;
 
-            if(nHitLayers < 4)
-                lowEnergyCorrection += -1.f;
+            if(nHitLayers < m_lowEnergyCorrectionNHitLayers2)
+                lowEnergyCorrection += m_lowEnergyCorrection2;
         }
 
         if(correctionLayer > nECalLayers)
-            lowEnergyCorrection += -1.f;
+            lowEnergyCorrection += m_lowEnergyCorrection3;
     }
 
     // 5. Angular corrections
     float angularCorrection(0.f);
-    const float radialDirectionCosine(pDaughterCluster->GetFitToAllHitsResult().GetRadialDirectionCosine());
+    const float radialDirectionCosine(pDaughterCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
+        pDaughterCluster->GetFitToAllHitsResult().GetRadialDirectionCosine() : 0.f);
 
-    if(radialDirectionCosine < 0.75f)
-        angularCorrection = -0.5f + (radialDirectionCosine - 0.75f) * 2.f;
+    if(radialDirectionCosine < m_angularCorrectionOffset)
+        angularCorrection = m_angularCorrectionConstant + (radialDirectionCosine - m_angularCorrectionOffset) * m_angularCorrectionGradient;
 
     // 6. Photon cluster corrections
     float photonCorrection(0.f);
@@ -354,33 +357,33 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
         const float showerStart(pDaughterCluster->GetProfileShowerStart());
         const float photonFraction(pDaughterCluster->GetProfilePhotonFraction());
 
-        if(daughterClusterEnergy > 2.f && showerStart < 5.f)
-            photonCorrection = 10.f;
+        if(daughterClusterEnergy > m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart1)
+            photonCorrection = m_photonCorrection1;
 
-        if(daughterClusterEnergy > 2.f && showerStart < 2.5f)
-            photonCorrection = 100.f;
+        if(daughterClusterEnergy > m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2)
+            photonCorrection = m_photonCorrection2;
 
-        if(daughterClusterEnergy < 2.f && showerStart < 2.5f)
-            photonCorrection = 5.f;
+        if(daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2)
+            photonCorrection = m_photonCorrection3;
 
-        if(daughterClusterEnergy < 2.f && showerStart < 2.5f && photonFraction < 0.8f)
-            photonCorrection = 10.f;
+        if(daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2 && photonFraction < m_photonCorrectionPhotonFraction1)
+            photonCorrection = m_photonCorrection4;
 
-        if(daughterClusterEnergy < 2.f && showerStart > 2.5f)
-            photonCorrection = 2.f;
+        if(daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart > m_photonCorrectionShowerStart2)
+            photonCorrection = m_photonCorrection5;
 
-        if(daughterClusterEnergy < 0.5f && (showerStart > 2.5f || photonFraction > 1.f))
-            photonCorrection = 2.f;
+        if(daughterClusterEnergy < m_photonCorrectionEnergy2 && (showerStart > m_photonCorrectionShowerStart2 || photonFraction > m_photonCorrectionPhotonFraction2))
+            photonCorrection = m_photonCorrection6;
 
-        if(daughterClusterEnergy < 1.f && showerStart > 2.5f)
-            photonCorrection = 0.f;
+        if(daughterClusterEnergy < m_photonCorrectionEnergy3 && showerStart > m_photonCorrectionShowerStart2)
+            photonCorrection = m_photonCorrection7;
     }
 
     const float requiredEvidence(usingGlobalChi2 ?
         layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection :
         layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection + lowEnergyCorrection);
 
-    return std::max(0.5f, requiredEvidence);
+    return std::max(m_minRequiredEvidence, requiredEvidence);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -399,7 +402,7 @@ PseudoLayer MainFragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluste
             energySum += (*hitIter)->GetHadronicEnergy();
         }
 
-        if ((++layerCounter > /* m_ */3) || (energySum > /* m_ */0.25f))
+        if ((++layerCounter > m_correctionLayerNHitLayers) || (energySum > m_correctionLayerHadronicEnergy))
         {
             return iter->first;
         }
@@ -462,13 +465,334 @@ StatusCode MainFragmentRemovalAlgorithm::GetAffectedClusters(const ClusterContac
 
 StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_contactWeight = 1.f;
-    m_coneWeight = 1.f;
-    m_distanceWeight = 1.f;
-    m_trackExtrapolationWeight = 1.f;
+    // Initial daughter cluster selection
+    m_minDaughterCaloHits = 5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinDaughterCaloHits", m_minDaughterCaloHits));
+
+    m_minDaughterHadronicEnergy = 0.1f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinDaughterHadronicEnergy", m_minDaughterHadronicEnergy));
+
+    // Cluster contact cuts
+    m_contactCutMaxDistance = 750.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutMaxDistance", m_contactCutMaxDistance));
+
+    m_contactCutNLayers = 0;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutNLayers", m_contactCutNLayers));
+
+    m_contactCutConeFraction1 = 0.25f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutConeFraction1", m_contactCutConeFraction1));
+
+    m_contactCutCloseHitFraction1 = 0.25f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutCloseHitFraction1", m_contactCutCloseHitFraction1));
+
+    m_contactCutCloseHitFraction2 = 0.15f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutCloseHitFraction2", m_contactCutCloseHitFraction2));
+
+    m_contactCutMeanDistanceToHelix = 250.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutMeanDistanceToHelix", m_contactCutMeanDistanceToHelix));
+
+    m_contactCutClosestDistanceToHelix = 150.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutClosestDistanceToHelix", m_contactCutClosestDistanceToHelix));
+
+    m_contactCutNearECalDistance = 250.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutNearECalDistance", m_contactCutNearECalDistance));
+
+    m_contactCutLayersFromECal = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutLayersFromECal", m_contactCutLayersFromECal));
+
+    // Track-cluster consistency Chi2 values
+    m_maxChi2 = 16.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxChi2", m_maxChi2));
+
+    m_maxGlobalChi2 = 9.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxGlobalChi2", m_maxGlobalChi2));
 
     m_chi2Base = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Chi2Base", m_chi2Base));
+
     m_globalChi2Penalty = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "GlobalChi2Penalty", m_globalChi2Penalty));
+
+    // Correction layer parameters
+    m_correctionLayerNHitLayers = 3;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CorrectionLayerNHitLayers", m_correctionLayerNHitLayers));
+
+    m_correctionLayerHadronicEnergy = 0.25f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CorrectionLayerHadronicEnergy", m_correctionLayerHadronicEnergy));
+
+    // Total evidence: Contact evidence
+    m_contactEvidenceNLayers1 = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidenceNLayers1", m_contactEvidenceNLayers1));
+
+    m_contactEvidence1 = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidence1", m_contactEvidence1));
+
+    m_contactEvidenceNLayers2 = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidenceNLayers2", m_contactEvidenceNLayers2));
+
+    m_contactEvidence2 = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidence2", m_contactEvidence2));
+
+    m_contactEvidenceNLayers3 = 1;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidenceNLayers3", m_contactEvidenceNLayers3));
+
+    m_contactEvidence3 = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidence3", m_contactEvidence3));
+
+    // Cone evidence
+    m_coneEvidenceFraction1 = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeEvidenceFraction1", m_coneEvidenceFraction1));
+
+    m_coneEvidenceECalMultiplier = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeEvidenceECalMultiplier", m_coneEvidenceECalMultiplier));
+
+    // Track extrapolation evidence
+    m_closestTrackEvidence1 = 200.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ClosestTrackEvidence1", m_closestTrackEvidence1));
+
+    m_closestTrackEvidence1d = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ClosestTrackEvidence1d", m_closestTrackEvidence1d));
+
+    if (0.f == m_closestTrackEvidence1d)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_closestTrackEvidence2 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ClosestTrackEvidence2", m_closestTrackEvidence2));
+
+    m_closestTrackEvidence2d = 20.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ClosestTrackEvidence2d", m_closestTrackEvidence2d));
+
+    if (0.f == m_closestTrackEvidence2d)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_meanTrackEvidence1 = 200.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MeanTrackEvidence1", m_meanTrackEvidence1));
+
+    m_meanTrackEvidence1d = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MeanTrackEvidence1d", m_meanTrackEvidence1d));
+
+    if (0.f == m_meanTrackEvidence1d)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_meanTrackEvidence2 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MeanTrackEvidence2", m_meanTrackEvidence2));
+
+    m_meanTrackEvidence2d = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MeanTrackEvidence2d", m_meanTrackEvidence2d));
+
+    if (0.f == m_meanTrackEvidence2d)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    // Distance of closest approach evidence
+    m_distanceEvidence1 = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceEvidence1", m_distanceEvidence1));
+
+    m_distanceEvidence1d = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceEvidence1d", m_distanceEvidence1d));
+
+    if (0.f == m_distanceEvidence1d)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_distanceEvidenceCloseFraction1Multiplier = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceEvidenceCloseFraction1Multiplier", m_distanceEvidenceCloseFraction1Multiplier));
+
+    m_distanceEvidenceCloseFraction2Multiplier = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceEvidenceCloseFraction2Multiplier", m_distanceEvidenceCloseFraction2Multiplier));
+
+    // Evidence weightings
+    m_contactWeight = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactWeight", m_contactWeight));
+
+    m_coneWeight = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeWeight", m_coneWeight));
+
+    m_distanceWeight = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceWeight", m_distanceWeight));
+
+    m_trackExtrapolationWeight = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "TrackExtrapolationWeight", m_trackExtrapolationWeight));
+
+    // Required evidence: Layer correction
+    m_layerCorrection1 = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrection1", m_layerCorrection1));
+
+    m_layerCorrection2 = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrection2", m_layerCorrection2));
+
+    m_layerCorrection3 = -1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrection3", m_layerCorrection3));
+
+    m_layerCorrection4 = -2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrection4", m_layerCorrection4));
+
+    m_layerCorrection5 = -2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrection5", m_layerCorrection5));
+
+    m_layerCorrection6 = -3.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrection6", m_layerCorrection6));
+
+    m_layerCorrectionLayerSpan = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionLayerSpan", m_layerCorrectionLayerSpan));
+
+    m_layerCorrectionMinInnerLayer = 5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionMinInnerLayer", m_layerCorrectionMinInnerLayer));
+
+    m_layerCorrectionLayersFromECal = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionLayersFromECal", m_layerCorrectionLayersFromECal));
+
+    // Energy correction
+    m_energyCorrectionThreshold = 3.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EnergyCorrectionThreshold", m_energyCorrectionThreshold));
+
+    // Low energy correction
+    m_lowEnergyCorrectionThreshold = 1.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LowEnergyCorrectionThreshold", m_lowEnergyCorrectionThreshold));
+
+    m_lowEnergyCorrectionNHitLayers1 = 6;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LowEnergyCorrectionNHitLayers1", m_lowEnergyCorrectionNHitLayers1));
+
+    m_lowEnergyCorrectionNHitLayers2 = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LowEnergyCorrectionNHitLayers2", m_lowEnergyCorrectionNHitLayers2));
+
+    m_lowEnergyCorrection1 = -1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LowEnergyCorrection1", m_lowEnergyCorrection1));
+
+    m_lowEnergyCorrection2 = -1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LowEnergyCorrection2", m_lowEnergyCorrection2));
+
+    m_lowEnergyCorrection3 = -1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LowEnergyCorrection3", m_lowEnergyCorrection3));
+
+    // Angular correction
+    m_angularCorrectionOffset = 0.75f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AngularCorrectionOffset", m_angularCorrectionOffset));
+
+    m_angularCorrectionConstant = -0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AngularCorrectionConstant", m_angularCorrectionConstant));
+
+    m_angularCorrectionGradient = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AngularCorrectionGradient", m_angularCorrectionGradient));
+
+    // Photon correction
+    m_photonCorrectionEnergy1 = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrectionEnergy1", m_photonCorrectionEnergy1));
+
+    m_photonCorrectionEnergy2 = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrectionEnergy2", m_photonCorrectionEnergy2));
+
+    m_photonCorrectionEnergy3 = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrectionEnergy3", m_photonCorrectionEnergy3));
+
+    m_photonCorrectionShowerStart1 = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrectionShowerStart1", m_photonCorrectionShowerStart1));
+
+    m_photonCorrectionShowerStart2 = 2.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrectionShowerStart2", m_photonCorrectionShowerStart2));
+
+    m_photonCorrectionPhotonFraction1 = 0.8f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrectionPhotonFraction1", m_photonCorrectionPhotonFraction1));
+
+    m_photonCorrectionPhotonFraction2 = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrectionPhotonFraction2", m_photonCorrectionPhotonFraction2));
+
+    m_photonCorrection1 = 10.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrection1", m_photonCorrection1));
+
+    m_photonCorrection2 = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrection2", m_photonCorrection2));
+
+    m_photonCorrection3 = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrection3", m_photonCorrection3));
+
+    m_photonCorrection4 = 10.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrection4", m_photonCorrection4));
+
+    m_photonCorrection5 = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrection5", m_photonCorrection5));
+
+    m_photonCorrection6 = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrection6", m_photonCorrection6));
+
+    m_photonCorrection7 = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PhotonCorrection7", m_photonCorrection7));
+
+    m_minRequiredEvidence = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinRequiredEvidence", m_minRequiredEvidence));
 
     return STATUS_CODE_SUCCESS;
 }
