@@ -339,12 +339,10 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
         const unsigned int nHitLayers(pDaughterCluster->GetOrderedCaloHitList().size());
 
         if(nHitLayers < m_lowEnergyCorrectionNHitLayers1)
-        {
             lowEnergyCorrection += m_lowEnergyCorrection1;
 
-            if(nHitLayers < m_lowEnergyCorrectionNHitLayers2)
-                lowEnergyCorrection += m_lowEnergyCorrection2;
-        }
+        if(nHitLayers < m_lowEnergyCorrectionNHitLayers2)
+            lowEnergyCorrection += m_lowEnergyCorrection2;
 
         if(correctionLayer > nECalLayers)
             lowEnergyCorrection += m_lowEnergyCorrection3;
@@ -389,8 +387,8 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     }
 
     const float requiredEvidence(usingGlobalChi2 ?
-        layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection :
-        layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection + lowEnergyCorrection);
+        globalChi2Evidence + layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection :
+        chi2Evidence + layerCorrection + angularCorrection + energyCorrection + leavingCorrection + photonCorrection + lowEnergyCorrection);
 
     return std::max(m_minRequiredEvidence, requiredEvidence);
 }
@@ -512,13 +510,13 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ContactCutClosestDistanceToHelix", m_contactCutClosestDistanceToHelix));
 
-    m_contactCutNearECalDistance = 250.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ContactCutNearECalDistance", m_contactCutNearECalDistance));
-
     m_contactCutLayersFromECal = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ContactCutLayersFromECal", m_contactCutLayersFromECal));
+
+    m_contactCutNearECalDistance = 250.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactCutNearECalDistance", m_contactCutNearECalDistance));
 
     // Track-cluster consistency Chi2 values
     m_maxChi2 = 16.f;

@@ -91,44 +91,44 @@ private:
     StatusCode GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
         Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
 
-    unsigned int        m_nMaxPasses;                               ///< 
+    unsigned int        m_nMaxPasses;                               ///< Maximum number of passes over cluster contact information
 
-    unsigned int        m_minDaughterCaloHits;                      ///< 
-    float               m_minDaughterHadronicEnergy;                ///< 
+    unsigned int        m_minDaughterCaloHits;                      ///< Min number of calo hits in daughter candidate clusters
+    float               m_minDaughterHadronicEnergy;                ///< Min hadronic energy for daughter candidate clusters
 
-    float               m_minEvidence;                              ///< 
+    float               m_minEvidence;                              ///< Min evidence before parent/daughter candidates can be merged
 
-    unsigned int        m_photonLikeMinInnerLayer;                  ///< 
-    float               m_photonLikeMinDCosR;                       ///< 
-    float               m_photonLikeMaxShowerStart;                 ///< 
-    float               m_photonLikeMaxPhotonFraction;              ///< 
+    unsigned int        m_photonLikeMinInnerLayer;                  ///< Min inner layer to identify daughter cluster as photon-like
+    float               m_photonLikeMinDCosR;                       ///< Max radial direction cosine to identify daughter as photon-like
+    float               m_photonLikeMaxShowerStart;                 ///< Max profile shower start to identify daughter as photon-like
+    float               m_photonLikeMaxPhotonFraction;              ///< Max profile photon fraction to identify daughter as photon-like
 
-    float               m_contactCutMaxDistance;                    ///< 
-    unsigned int        m_contactCutNLayers;                        ///< 
-    float               m_contactCutConeFraction1;                  ///< 
-    float               m_contactCutCloseHitFraction1;              ///< 
-    float               m_contactCutCloseHitFraction2;              ///< 
-    float               m_contactCutNearbyDistance;                 ///< 
-    float               m_contactCutNearbyCloseHitFraction2;        ///< 
+    float               m_contactCutMaxDistance;                    ///< Max distance between closest hits to store cluster contact info
+    unsigned int        m_contactCutNLayers;                        ///< Number of contact layers to store cluster contact info
+    float               m_contactCutConeFraction1;                  ///< Cone fraction 1 value to store cluster contact info
+    float               m_contactCutCloseHitFraction1;              ///< Close hit fraction 1 value to store cluster contact info
+    float               m_contactCutCloseHitFraction2;              ///< Close hit fraction 2 value to store cluster contact info
+    float               m_contactCutNearbyDistance;                 ///< Distance between closest hits to mark clusters as nearby
+    float               m_contactCutNearbyCloseHitFraction2;        ///< Close hit fraction 2 in nearby hits to store cluster contact info
 
-    unsigned int        m_contactEvidenceNLayers1;                  ///< 
-    unsigned int        m_contactEvidenceNLayers2;                  ///< 
-    unsigned int        m_contactEvidenceNLayers3;                  ///< 
-    float               m_contactEvidence1;                         ///< 
-    float               m_contactEvidence2;                         ///< 
-    float               m_contactEvidence3;                         ///< 
+    unsigned int        m_contactEvidenceNLayers1;                  ///< Contact evidence n layers cut 1
+    unsigned int        m_contactEvidenceNLayers2;                  ///< Contact evidence n layers cut 2
+    unsigned int        m_contactEvidenceNLayers3;                  ///< Contact evidence n layers cut 3
+    float               m_contactEvidence1;                         ///< Contact evidence contribution 1
+    float               m_contactEvidence2;                         ///< Contact evidence contribution 2
+    float               m_contactEvidence3;                         ///< Contact evidence contribution 3
 
-    float               m_coneEvidenceFraction1;                    ///< 
-    float               m_coneEvidenceECalMultiplier;               ///< 
+    float               m_coneEvidenceFraction1;                    ///< Cone fraction 1 value required for cone evidence contribution
+    float               m_coneEvidenceECalMultiplier;               ///< Cone evidence multiplier for daughter clusters starting in ecal
 
-    float               m_distanceEvidence1;                        ///< 
-    float               m_distanceEvidence1d;                       ///< 
-    float               m_distanceEvidenceCloseFraction1Multiplier; ///< 
-    float               m_distanceEvidenceCloseFraction2Multiplier; ///< 
+    float               m_distanceEvidence1;                        ///< Offset for distance evidence contribution 1
+    float               m_distanceEvidence1d;                       ///< Denominator for distance evidence contribution 1
+    float               m_distanceEvidenceCloseFraction1Multiplier; ///< Distance evidence multiplier for close hit fraction 1
+    float               m_distanceEvidenceCloseFraction2Multiplier; ///< Distance evidence multiplier for close hit fraction 2
 
-    float               m_contactWeight;                            ///< 
-    float               m_coneWeight;                               ///< 
-    float               m_distanceWeight;                           ///< 
+    float               m_contactWeight;                            ///< Weight for layers in contact evidence
+    float               m_coneWeight;                               ///< Weight for cone extrapolation evidence
+    float               m_distanceWeight;                           ///< Weight for distance of closest approach evidence
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -129,96 +129,95 @@ private:
     StatusCode GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
         Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
 
-    unsigned int        m_minDaughterCaloHits;                      ///< 
-    float               m_minDaughterHadronicEnergy;                ///< 
+    unsigned int        m_minDaughterCaloHits;                      ///< Min number of calo hits in daughter candidate clusters
+    float               m_minDaughterHadronicEnergy;                ///< Min hadronic energy for daughter candidate clusters
 
-    float               m_contactCutMaxDistance;                    ///< 
+    float               m_contactCutMaxDistance;                    ///< Max distance between closest hits to store cluster contact info
+    unsigned int        m_contactCutNLayers;                        ///< Number of contact layers to store cluster contact info
+    float               m_contactCutConeFraction1;                  ///< Cone fraction 1 value to store cluster contact info
+    float               m_contactCutCloseHitFraction1;              ///< Close hit fraction 1 value to store cluster contact info
+    float               m_contactCutCloseHitFraction2;              ///< Close hit fraction 2 value to store cluster contact info
+    float               m_contactCutMeanDistanceToHelix;            ///< Mean distance to helix value to store cluster contact info
+    float               m_contactCutClosestDistanceToHelix;         ///< Closest distance to helix value to store cluster contact info
+    unsigned int        m_contactCutLayersFromECal;                 ///< Inner layer "n" layers below ecal-end marks cluster as "near ecal"
+    float               m_contactCutNearECalDistance;               ///< Hit separation for "near ecal" clusters to store contact info
 
-    unsigned int        m_contactCutNLayers;                        ///< 
-    float               m_contactCutConeFraction1;                  ///< 
-    float               m_contactCutCloseHitFraction1;              ///< 
-    float               m_contactCutCloseHitFraction2;              ///< 
-    float               m_contactCutMeanDistanceToHelix;            ///< 
-    float               m_contactCutClosestDistanceToHelix;         ///< 
-    float               m_contactCutNearECalDistance;               ///< 
-    unsigned int        m_contactCutLayersFromECal;                 ///< 
+    float               m_maxChi2;                                  ///< Pre-selection: new chi2 value to allow cluster merging
+    float               m_maxGlobalChi2;                            ///< Pre-selection: new global chi2 value to allow cluster merging
+    float               m_chi2Base;                                 ///< Required evidence: min contribution from change in chi2
+    float               m_globalChi2Penalty;                        ///< Required evidence penalty for using global chi2 measure
 
-    float               m_maxChi2;                                  ///< 
-    float               m_maxGlobalChi2;                            ///< 
-    float               m_chi2Base;                                 ///< 
-    float               m_globalChi2Penalty;                        ///< 
+    unsigned int        m_correctionLayerNHitLayers;                ///< Number of hit-layers passed to identify correction layer
+    float               m_correctionLayerHadronicEnergy;            ///< Total hadronic energy sum passed to identify correction layer
 
-    unsigned int        m_correctionLayerNHitLayers;                ///< 
-    float               m_correctionLayerHadronicEnergy;            ///< 
+    unsigned int        m_contactEvidenceNLayers1;                  ///< Contact evidence n layers cut 1
+    unsigned int        m_contactEvidenceNLayers2;                  ///< Contact evidence n layers cut 2
+    unsigned int        m_contactEvidenceNLayers3;                  ///< Contact evidence n layers cut 3
+    float               m_contactEvidence1;                         ///< Contact evidence contribution 1
+    float               m_contactEvidence2;                         ///< Contact evidence contribution 2
+    float               m_contactEvidence3;                         ///< Contact evidence contribution 3
 
-    unsigned int        m_contactEvidenceNLayers1;                  ///< 
-    unsigned int        m_contactEvidenceNLayers2;                  ///< 
-    unsigned int        m_contactEvidenceNLayers3;                  ///< 
-    float               m_contactEvidence1;                         ///< 
-    float               m_contactEvidence2;                         ///< 
-    float               m_contactEvidence3;                         ///< 
+    float               m_coneEvidenceFraction1;                    ///< Cone fraction 1 value required for cone evidence contribution
+    float               m_coneEvidenceECalMultiplier;               ///< Cone evidence multiplier for daughter clusters starting in ecal
 
-    float               m_coneEvidenceFraction1;                    ///< 
-    float               m_coneEvidenceECalMultiplier;               ///< 
+    float               m_closestTrackEvidence1;                    ///< Offset for closest distance to helix evidence contribution 1
+    float               m_closestTrackEvidence1d;                   ///< Denominator for closest distance to helix evidence contribution 1
+    float               m_closestTrackEvidence2;                    ///< Offset for closest distance to helix evidence contribution 2
+    float               m_closestTrackEvidence2d;                   ///< Denominator for closest distance to helix evidence contribution 2
+    float               m_meanTrackEvidence1;                       ///< Offset for mean distance to helix evidence contribution 1
+    float               m_meanTrackEvidence1d;                      ///< Denominator for mean distance to helix evidence contribution 1
+    float               m_meanTrackEvidence2;                       ///< Offset for mean distance to helix evidence contribution 2
+    float               m_meanTrackEvidence2d;                      ///< Denominator for mean distance to helix evidence contribution 1
 
-    float               m_closestTrackEvidence1;                    ///< 
-    float               m_closestTrackEvidence1d;                   ///< 
-    float               m_closestTrackEvidence2;                    ///< 
-    float               m_closestTrackEvidence2d;                   ///< 
-    float               m_meanTrackEvidence1;                       ///< 
-    float               m_meanTrackEvidence1d;                      ///< 
-    float               m_meanTrackEvidence2;                       ///< 
-    float               m_meanTrackEvidence2d;                      ///< 
+    float               m_distanceEvidence1;                        ///< Offset for distance evidence contribution 1
+    float               m_distanceEvidence1d;                       ///< Denominator for distance evidence contribution 1
+    float               m_distanceEvidenceCloseFraction1Multiplier; ///< Distance evidence multiplier for close hit fraction 1
+    float               m_distanceEvidenceCloseFraction2Multiplier; ///< Distance evidence multiplier for close hit fraction 2
 
-    float               m_distanceEvidence1;                        ///< 
-    float               m_distanceEvidence1d;                       ///< 
-    float               m_distanceEvidenceCloseFraction1Multiplier; ///< 
-    float               m_distanceEvidenceCloseFraction2Multiplier; ///< 
+    float               m_contactWeight;                            ///< Weight for layers in contact evidence
+    float               m_coneWeight;                               ///< Weight for cone extrapolation evidence
+    float               m_distanceWeight;                           ///< Weight for distance of closest approach evidence
+    float               m_trackExtrapolationWeight;                 ///< Weight for track extrapolation evidence
 
-    float               m_contactWeight;                            ///< 
-    float               m_coneWeight;                               ///< 
-    float               m_distanceWeight;                           ///< 
-    float               m_trackExtrapolationWeight;                 ///< 
+    float               m_layerCorrection1;                         ///< Layer correction contribution 1
+    float               m_layerCorrection2;                         ///< Layer correction contribution 2
+    float               m_layerCorrection3;                         ///< Layer correction contribution 3
+    float               m_layerCorrection4;                         ///< Layer correction contribution 4
+    float               m_layerCorrection5;                         ///< Layer correction contribution 5
+    float               m_layerCorrection6;                         ///< Layer correction contribution 6
+    float               m_layerCorrectionLayerSpan;                 ///< Daughter layer span for layer correction contribution 5
+    float               m_layerCorrectionMinInnerLayer;             ///< Daughter min inner layer for layer correction contribution 5
+    float               m_layerCorrectionLayersFromECal;            ///< Daughter layers from ecal for layer correction contribution 6
 
-    float               m_layerCorrection1;                         ///< 
-    float               m_layerCorrection2;                         ///< 
-    float               m_layerCorrection3;                         ///< 
-    float               m_layerCorrection4;                         ///< 
-    float               m_layerCorrection5;                         ///< 
-    float               m_layerCorrection6;                         ///< 
-    float               m_layerCorrectionLayerSpan;                 ///< 
-    float               m_layerCorrectionMinInnerLayer;             ///< 
-    float               m_layerCorrectionLayersFromECal;            ///< 
+    float               m_energyCorrectionThreshold;                ///< Energy correction threshold
 
-    float               m_energyCorrectionThreshold;                ///< 
+    float               m_lowEnergyCorrectionThreshold;             ///< Low energy correction threshold
+    unsigned int        m_lowEnergyCorrectionNHitLayers1;           ///< Number of hit layers for low energy correction contribution 1
+    unsigned int        m_lowEnergyCorrectionNHitLayers2;           ///< Number of hit layers for low energy correction contribution 2
+    float               m_lowEnergyCorrection1;                     ///< Low energy correction contribution 1
+    float               m_lowEnergyCorrection2;                     ///< Low energy correction contribution 2
+    float               m_lowEnergyCorrection3;                     ///< Low energy correction contribution 3
 
-    float               m_lowEnergyCorrectionThreshold;             ///< 
-    unsigned int        m_lowEnergyCorrectionNHitLayers1;           ///< 
-    unsigned int        m_lowEnergyCorrectionNHitLayers2;           ///< 
-    float               m_lowEnergyCorrection1;                     ///< 
-    float               m_lowEnergyCorrection2;                     ///< 
-    float               m_lowEnergyCorrection3;                     ///< 
+    float               m_angularCorrectionOffset;                  ///< Offset value for angular correction
+    float               m_angularCorrectionConstant;                ///< Constant value for angular correction
+    float               m_angularCorrectionGradient;                ///< Gradient value for angular correction
 
-    float               m_angularCorrectionOffset;                  ///< 
-    float               m_angularCorrectionConstant;                ///< 
-    float               m_angularCorrectionGradient;                ///< 
+    float               m_photonCorrectionEnergy1;                  ///< Photon correction energy value 1
+    float               m_photonCorrectionEnergy2;                  ///< Photon correction energy value 2
+    float               m_photonCorrectionEnergy3;                  ///< Photon correction energy value 3
+    float               m_photonCorrectionShowerStart1;             ///< Photon correction profile shower start value 1
+    float               m_photonCorrectionShowerStart2;             ///< Photon correction profile shower start value 1
+    float               m_photonCorrectionPhotonFraction1;          ///< Photon correction profile photon fraction value 1
+    float               m_photonCorrectionPhotonFraction2;          ///< Photon correction profile photon fraction value 2
+    float               m_photonCorrection1;                        ///< Photon correction contribution 1
+    float               m_photonCorrection2;                        ///< Photon correction contribution 2
+    float               m_photonCorrection3;                        ///< Photon correction contribution 3
+    float               m_photonCorrection4;                        ///< Photon correction contribution 4
+    float               m_photonCorrection5;                        ///< Photon correction contribution 5
+    float               m_photonCorrection6;                        ///< Photon correction contribution 6
+    float               m_photonCorrection7;                        ///< Photon correction contribution 7
 
-    float               m_photonCorrectionEnergy1;                  ///< 
-    float               m_photonCorrectionEnergy2;                  ///< 
-    float               m_photonCorrectionEnergy3;                  ///< 
-    float               m_photonCorrectionShowerStart1;             ///< 
-    float               m_photonCorrectionShowerStart2;             ///< 
-    float               m_photonCorrectionPhotonFraction1;          ///< 
-    float               m_photonCorrectionPhotonFraction2;          ///< 
-    float               m_photonCorrection1;                        ///< 
-    float               m_photonCorrection2;                        ///< 
-    float               m_photonCorrection3;                        ///< 
-    float               m_photonCorrection4;                        ///< 
-    float               m_photonCorrection5;                        ///< 
-    float               m_photonCorrection6;                        ///< 
-    float               m_photonCorrection7;                        ///< 
-
-    float               m_minRequiredEvidence;                      ///< 
+    float               m_minRequiredEvidence;                      ///< Minimum required evidence to merge parent/daughter clusters
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
