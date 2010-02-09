@@ -116,6 +116,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MipMaxNearbyHits", m_mipMaxNearbyHits));
 
+        // Shower profile parameters
         m_showerProfileBinWidth = 0.5f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ShowerProfileBinWidth", m_showerProfileBinWidth));
@@ -143,6 +144,47 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         m_showerProfileMaxDifference = 0.1f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ShowerProfileMaxDifference", m_showerProfileMaxDifference));
+
+        // Cluster contact parameters
+        m_contactConeCosineHalfAngle1 = 0.9f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactConeCosineHalfAngle1", m_contactConeCosineHalfAngle1));
+
+        m_contactConeCosineHalfAngle2 = 0.95f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactConeCosineHalfAngle2", m_contactConeCosineHalfAngle2));
+
+        m_contactConeCosineHalfAngle3 = 0.985f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactConeCosineHalfAngle3", m_contactConeCosineHalfAngle3));
+
+        m_contactCloseHitDistance1 = 100.f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactCloseHitDistance1", m_contactCloseHitDistance1));
+
+        m_contactCloseHitDistance2 = 50.f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactCloseHitDistance2", m_contactCloseHitDistance2));
+
+        m_contactDistanceThreshold = 2.f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactDistanceThreshold", m_contactDistanceThreshold));
+
+        m_contactHelixComparisonMipFractionCut = 0.8f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactHelixComparisonMipFractionCut", m_contactHelixComparisonMipFractionCut));
+
+        m_contactHelixComparisonStartOffset = 20;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactHelixComparisonStartOffset", m_contactHelixComparisonStartOffset));
+
+        m_contactHelixComparisonStartOffsetMip = 20;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactHelixComparisonStartOffsetMip", m_contactHelixComparisonStartOffsetMip));
+
+        m_contactNHelixComparisonLayers = 9;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactNHelixComparisonLayers", m_contactNHelixComparisonLayers));
 
         m_isInitialized = true;
 

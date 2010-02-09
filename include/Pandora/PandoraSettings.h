@@ -192,6 +192,76 @@ public:
      */
     float GetShowerProfileMaxDifference() const;
 
+    /**
+     *  @brief  Get the cosine half angle for first cone comparison in cluster contact object
+     * 
+     *  @return The cosine half angle
+     */
+    float GetContactConeCosineHalfAngle1() const;
+
+    /**
+     *  @brief  Get the cosine half angle for second cone comparison in cluster contact object
+     * 
+     *  @return The cosine half angle
+     */
+    float GetContactConeCosineHalfAngle2() const;
+
+    /**
+     *  @brief  Get the cosine half angle for third cone comparison in cluster contact object
+     * 
+     *  @return The cosine half angle
+     */
+    float GetContactConeCosineHalfAngle3() const;
+
+    /**
+     *  @brief  Get the first distance used to identify close hits in cluster contact object
+     * 
+     *  @return The close hit distance
+     */
+    float GetContactCloseHitDistance1() const;
+
+    /**
+     *  @brief  Get the second distance used to identify close hits in cluster contact object
+     * 
+     *  @return The close hit distance
+     */
+    float GetContactCloseHitDistance2() const;
+
+    /**
+     *  @brief  Get the number of calorimeter cell-widths used to identify cluster contact layers
+     * 
+     *  @return The number of calorimeter cell-widths
+     */
+    float GetContactDistanceThreshold() const;
+
+    /**
+     *  @brief  Get the mip fraction cut used in cluster contact helix comparison
+     * 
+     *  @return The mip fraction cut
+     */
+    float GetContactHelixComparisonMipFractionCut() const;
+
+    /**
+     *  @brief  Get the start layer offset used in cluster contact helix comparison
+     * 
+     *  @return The start layer offset
+     */
+    unsigned int GetContactHelixComparisonStartOffset() const;
+
+    /**
+     *  @brief  Get the start layer offset used for mip-like clusters in cluster contact helix comparison
+     * 
+     *  @return The start layer offset for mip-like clusters
+     */
+    unsigned int GetContactHelixComparisonStartOffsetMip() const;
+
+    /**
+     *  @brief  Get the max number of layers used in helix comparison for non mip-like clusters
+     * 
+     *  @return The number of comparison layers used for non mip-like clusters
+     */
+    unsigned int GetContactNHelixComparisonLayers() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -248,6 +318,19 @@ private:
     float                   m_showerProfileParameter1;          ///< Parameter1, used to calculate argument for gamma function
 
     float                   m_showerProfileMaxDifference;       ///< Max difference between current and best shower profile comparisons
+
+    float                   m_contactConeCosineHalfAngle1;      ///< Cosine half angle for first cone comparison in cluster contact object
+    float                   m_contactConeCosineHalfAngle2;      ///< Cosine half angle for second cone comparison in cluster contact object
+    float                   m_contactConeCosineHalfAngle3;      ///< Cosine half angle for third cone comparison in cluster contact object
+    float                   m_contactCloseHitDistance1;         ///< First distance used to identify close hits in cluster contact object
+    float                   m_contactCloseHitDistance2;         ///< Second distance used to identify close hits in cluster contact object
+
+    float                   m_contactDistanceThreshold;         ///< Number of calorimeter cell-widths used to identify cluster contact layers
+
+    float                   m_contactHelixComparisonMipFractionCut; ///< Mip fraction cut used in cluster contact helix comparison
+    unsigned int            m_contactHelixComparisonStartOffset;    ///< Start layer offset used in cluster contact helix comparison
+    unsigned int            m_contactHelixComparisonStartOffsetMip; ///< Start layer offset used for mip-like clusters in helix comparison
+    unsigned int            m_contactNHelixComparisonLayers;        ///< Max number of layers used in helix comparison for non mip-like clusters
 
     friend class Pandora;
 };
@@ -411,6 +494,76 @@ inline float PandoraSettings::GetShowerProfileParameter1() const
 inline float PandoraSettings::GetShowerProfileMaxDifference() const
 {
     return m_showerProfileMaxDifference;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactConeCosineHalfAngle1() const
+{
+    return m_contactConeCosineHalfAngle1;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactConeCosineHalfAngle2() const
+{
+    return m_contactConeCosineHalfAngle2;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactConeCosineHalfAngle3() const
+{
+    return m_contactConeCosineHalfAngle3;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactCloseHitDistance1() const
+{
+    return m_contactCloseHitDistance1;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactCloseHitDistance2() const
+{
+    return m_contactCloseHitDistance2;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactDistanceThreshold() const
+{
+    return m_contactDistanceThreshold;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactHelixComparisonMipFractionCut() const
+{
+    return m_contactHelixComparisonMipFractionCut;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetContactHelixComparisonStartOffset() const
+{
+    return m_contactHelixComparisonStartOffset;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetContactHelixComparisonStartOffsetMip() const
+{
+    return m_contactHelixComparisonStartOffsetMip;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetContactNHelixComparisonLayers() const
+{
+    return m_contactNHelixComparisonLayers;
 }
 
 } // namespace pandora

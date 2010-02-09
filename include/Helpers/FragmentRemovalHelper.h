@@ -102,7 +102,7 @@ public:
      * 
      *  @param  pClusterI address of the first cluster
      *  @param  pClusterJ address of the second cluster
-     *  @param  distanceThreshold the distance, used alongside the calorimeter cell sizes, to determine whether layers are in contact
+     *  @param  distanceThreshold number of calorimeter cell-widths used to determine whether layers are in contact
      *  @param  nContactLayers to receive the number of contact layers
      *  @param  contactFraction to receive the ratio of the number of contact layers to number of overlap layers
      */
@@ -226,6 +226,14 @@ public:
     float GetClosestDistanceToHelix() const;
 
 private:
+    /**
+     *  @brief  Compare daughter cluster with helix fits to parent associated tracks
+     * 
+     *  @param  pDaughterCluster address of the daughter candidate cluster
+     *  @param  pParentCluster address of the parent candidate cluster
+     */
+    void ClusterHelixComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster);
+
     Cluster        *m_pDaughterCluster;             ///< Address of the daughter candidate cluster
     Cluster        *m_pParentCluster;               ///< Address of the parent candidate cluster
 
