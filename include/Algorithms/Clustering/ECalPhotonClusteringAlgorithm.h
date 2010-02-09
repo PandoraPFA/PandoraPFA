@@ -160,15 +160,15 @@ namespace pandora
         int   showerDepth25;
         int   showerStartDepth;
         float rms;
-        float *cost;
+        int peakNumber;
     } protoClusterPeaks_t;
 
     class PhotonIDLikelihoodCalculator
     {
     public:
-        static PhotonIDLikelihoodCalculator* Instance();
-        float  PID(float E, float rms, float frac, float start);
-        void Delete();
+	static PhotonIDLikelihoodCalculator* Instance();
+	float  PID(float E, float rms, float frac, float start);
+	void Delete();
 
     protected:
         PhotonIDLikelihoodCalculator() {}
@@ -340,6 +340,8 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
     class ClusterProperties
     {
     public:
+        float electromagneticEnergy;
+
         float m_hitMean[3]; // alyways x,y,z
         float m_centroid[3];
         float m_centroid10[3];
@@ -373,8 +375,12 @@ public:
      */
     virtual StatusCode Initialize();
 
-private:
-    bool       IsPhoton( pandora::Cluster* cluster, pandora::protoClusterPeaks_t& peak ); 
+ private:
+    bool       IsPhoton( pandora::Cluster* &pPhotonCandidateCluster, 
+			 const pandora::OrderedCaloHitList& pOriginalOrderedCaloHitList, 
+			 pandora::protoClusterPeaks_t& peak, 
+			 ClusterProperties& originalClusterProperties, 
+			 bool& useOriginalCluster ); 
 
     StatusCode TransverseProfile(const pandora::Cluster* cluster, std::vector<pandora::protoClusterPeaks_t> &peaks, int maxLayers);
     pandora::Cluster* TransverseProfile( ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, int peakForProtoCluster, unsigned int maxLayers, int extraLayers = 0);
@@ -391,6 +397,7 @@ private:
 
     void CreateOrSaveLikelihoodHistograms(bool create);
 
+    pandora::CaloHitVector* MakeCaloHitVectorFromOrderedCaloHitList( const pandora::OrderedCaloHitList& pOrderedCaloHitList );
 
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
