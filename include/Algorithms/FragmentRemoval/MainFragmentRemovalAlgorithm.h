@@ -169,6 +169,7 @@ private:
     float               m_meanTrackEvidence1d;                      ///< 
     float               m_meanTrackEvidence2;                       ///< 
     float               m_meanTrackEvidence2d;                      ///< 
+
     float               m_distanceEvidence1;                        ///< 
     float               m_distanceEvidence1d;                       ///< 
     float               m_distanceEvidenceCloseFraction1Multiplier; ///< 

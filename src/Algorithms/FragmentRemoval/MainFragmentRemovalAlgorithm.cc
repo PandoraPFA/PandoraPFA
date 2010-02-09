@@ -55,14 +55,23 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass,
     {
         Cluster *pDaughterCluster = *iterI;
 
+        // Identify whether cluster contacts need to be recalculated
+        if (!isFirstPass)
+        {
+            if (affectedClusters.end() == affectedClusters.find(pDaughterCluster))
+                continue;
+
+            ClusterContactMap::iterator pastEntryIter = clusterContactMap.find(pDaughterCluster);
+
+            if (clusterContactMap.end() != pastEntryIter)
+                clusterContactMap.erase(pastEntryIter);
+        }
+
+        // Apply simple daughter selection cuts
         if (!pDaughterCluster->GetAssociatedTrackList().empty())
             continue;
 
         if ((pDaughterCluster->GetNCaloHits() < m_minDaughterCaloHits) || (pDaughterCluster->GetHadronicEnergy() < m_minDaughterHadronicEnergy))
-            continue;
-
-        // Identify whether cluster contacts need to be recalculated
-        if (!isFirstPass && (affectedClusters.end() == affectedClusters.find(pDaughterCluster)))
             continue;
 
         // Calculate the cluster contact information
@@ -142,7 +151,7 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
                 globalDeltaChi2));
             const float excessEvidence(totalEvidence - requiredEvidence);
 
-            if(excessEvidence > highestExcessEvidence)
+            if (excessEvidence > highestExcessEvidence)
             {
                 highestExcessEvidence = excessEvidence;
                 pBestDaughterCluster = pDaughterCluster;
@@ -542,21 +551,21 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ContactEvidenceNLayers1", m_contactEvidenceNLayers1));
 
-    m_contactEvidence1 = 2.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ContactEvidence1", m_contactEvidence1));
-
     m_contactEvidenceNLayers2 = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ContactEvidenceNLayers2", m_contactEvidenceNLayers2));
 
-    m_contactEvidence2 = 1.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ContactEvidence2", m_contactEvidence2));
-
     m_contactEvidenceNLayers3 = 1;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ContactEvidenceNLayers3", m_contactEvidenceNLayers3));
+
+    m_contactEvidence1 = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidence1", m_contactEvidence1));
+
+    m_contactEvidence2 = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactEvidence2", m_contactEvidence2));
 
     m_contactEvidence3 = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
