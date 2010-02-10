@@ -29,7 +29,7 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    std::string     m_trackClusterAssociationAlgName;       ///< The name of the track-cluster association algorithm to run
+    pandora::StringVector   m_associationAlgorithms;        ///< The ordered list of track-cluster associations algorithm to run
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -189,6 +189,8 @@ private:
     float               m_layerCorrectionMinInnerLayer;             ///< Daughter min inner layer for layer correction contribution 5
     float               m_layerCorrectionLayersFromECal;            ///< Daughter layers from ecal for layer correction contribution 6
 
+    float               m_leavingCorrection;                        ///< Correction for clusters leaving calorimeters
+
     float               m_energyCorrectionThreshold;                ///< Energy correction threshold
 
     float               m_lowEnergyCorrectionThreshold;             ///< Low energy correction threshold

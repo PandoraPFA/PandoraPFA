@@ -317,6 +317,15 @@ public:
      */
     static bool CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms);
 
+    /**
+     *  @brief  Whether a cluster should be considered as leaving the calorimeters, leading to leakage of its energy
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsClusterLeavingDetector(Cluster *const pCluster);
+
 private:
     /**
      *  @brief  Fit points in barrel region

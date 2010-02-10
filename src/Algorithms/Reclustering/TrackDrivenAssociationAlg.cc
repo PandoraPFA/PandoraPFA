@@ -44,7 +44,8 @@ StatusCode TrackDrivenAssociationAlg::Run()
         if (chi > m_chiToAttemptReclustering)
             continue;
 
-        // TODO if leaving cluster continue
+        if (ClusterHelper::IsClusterLeavingDetector(pParentCluster))
+            continue;
 
         // Specify tracks and clusters to be used in reclustering
         TrackList reclusterTrackList(parentTrackList.begin(), parentTrackList.end());

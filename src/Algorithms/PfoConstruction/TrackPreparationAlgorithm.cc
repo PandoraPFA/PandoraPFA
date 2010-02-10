@@ -12,7 +12,11 @@ using namespace pandora;
 
 StatusCode TrackPreparationAlgorithm::Run()
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
+    // Run track-cluster association daughter algorithms
+    for (StringVector::const_iterator iter = m_associationAlgorithms.begin(), iterEnd = m_associationAlgorithms.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, *iter));
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -21,7 +25,8 @@ StatusCode TrackPreparationAlgorithm::Run()
 
 StatusCode TrackPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_trackClusterAssociationAlgName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "trackClusterAssociationAlgorithms",
+        m_associationAlgorithms));
 
     return STATUS_CODE_SUCCESS;
 }

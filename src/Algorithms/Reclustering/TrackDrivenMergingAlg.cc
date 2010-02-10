@@ -30,7 +30,8 @@ StatusCode TrackDrivenMergingAlg::Run()
         if ((nTrackAssociations < m_minTrackAssociations) || (nTrackAssociations > m_maxTrackAssociations))
             continue;
 
-        // TODO if leaving cluster continue
+        if (ClusterHelper::IsClusterLeavingDetector(pParentCluster))
+            continue;
 
         // Check compatibility of cluster with its associated tracks
         float trackEnergySum(0.);

@@ -322,8 +322,11 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     if(std::abs(static_cast<int>(correctionLayer) - static_cast<int>(nECalLayers)) < m_layerCorrectionLayersFromECal)
         layerCorrection = m_layerCorrection6;
 
-    // 2. Leaving cluster corrections - TODO
+    // 2. Leaving cluster corrections
     float leavingCorrection(0.f);
+
+    if (ClusterHelper::IsClusterLeavingDetector(clusterContact.GetParentCluster()))
+        leavingCorrection = m_leavingCorrection;
 
     // 3. Energy correction
     float energyCorrection(0.f);
@@ -696,6 +699,11 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     m_layerCorrectionLayersFromECal = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerCorrectionLayersFromECal", m_layerCorrectionLayersFromECal));
+
+    // Leaving correction
+    m_leavingCorrection = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LeavingCorrection", m_leavingCorrection));
 
     // Energy correction
     m_energyCorrectionThreshold = 3.f;

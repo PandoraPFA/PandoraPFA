@@ -12,7 +12,96 @@ using namespace pandora;
 
 StatusCode TrackRecoveryAlgorithm::Run()
 {
-    // Algorithm code here
+    const TrackList *pTrackList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
+
+    const ClusterList *pClusterList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+
+    // Loop over all unassociated tracks in the current track list
+    for (TrackList::const_iterator iterT = pTrackList->begin(), iterTEnd = pTrackList->end(); iterT != iterTEnd; ++iterT)
+    {
+        Track *pTrack = *iterT;
+
+        // Use only unassociated tracks that are flagged as reaching ECal
+        if (pTrack->HasAssociatedCluster() || !pTrack->ReachesECal())
+            continue;
+
+        // To avoid tracks split along main track z-axis, examine number of parent/daughter tracks and start z coordinate
+        const float zEnd(std::fabs(pTrack->GetTrackStateAtEnd().GetPosition().GetZ()));
+        const float zStart(std::fabs(pTrack->GetTrackStateAtStart().GetPosition().GetZ()));
+
+        if (!pTrack->GetDaughterTrackList().empty())
+            continue;
+
+        if ((zStart > m_maxTrackZStart) && pTrack->GetParentTrackList().empty())
+            continue;
+
+        // Extract track energy resolution information
+        const float trackEnergy(pTrack->GetEnergyAtDca());
+        static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+
+        if ((0. == trackEnergy) || (0. == hadronicEnergyResolution))
+            return STATUS_CODE_FAILURE;
+
+        const float sigmaE(hadronicEnergyResolution * trackEnergy / std::sqrt(trackEnergy));
+
+        // Identify best cluster to be associated with this track, based on energy consistency and proximity
+        Cluster *pBestCluster(NULL);
+        float smallestTrackClusterDistance(std::numeric_limits<float>::max());
+
+        for (ClusterList::const_iterator iterC = pClusterList->begin(), iterCEnd = pClusterList->end(); iterC != iterCEnd; ++iterC)
+        {
+            Cluster *pCluster = *iterC;
+
+            if (!pCluster->GetAssociatedTrackList().empty())
+                continue;
+
+            const bool isLeavingCluster(ClusterHelper::IsClusterLeavingDetector(pCluster));
+
+            const float deltaE(pCluster->GetHadronicEnergy() - trackEnergy);
+            const float chi(deltaE / sigmaE);
+
+            if ((std::fabs(chi) < m_maxAbsoluteTrackClusterChi) || (isLeavingCluster && (chi < 0.f)))
+            {
+                float trackClusterDistance(std::numeric_limits<float>::max());
+
+                if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack, pCluster, m_maxSearchLayer, m_parallelDistanceCut,
+                    trackClusterDistance))
+                {
+                    continue;
+                }
+
+                if (trackClusterDistance < smallestTrackClusterDistance)
+                {
+                    smallestTrackClusterDistance = trackClusterDistance;
+                    pBestCluster = pCluster;
+                }
+            }
+        }
+
+        // Should track be associated with "best" cluster? Depends on whether track reaches ECal EndCap or Barrel:
+        static const float mainTrackerZExtent(GeometryHelper::GetInstance()->GetMainTrackerZExtent());
+
+        if (zEnd > mainTrackerZExtent - m_endCapMaxDeltaZ)
+        {
+            if ( (smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance1) ||
+                ((smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance2) && (pBestCluster->GetHadronicEnergy() < trackEnergy)) )
+            {
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pTrack, pBestCluster));
+            }
+        }
+        else
+        {
+            if (smallestTrackClusterDistance < m_barrelMaxTrackClusterDistance)
+            {
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pTrack, pBestCluster));
+            }
+        }
+
+        // ATTN: This algorithm previously identified low pt tracks as those for which:
+        // ((zStart < 100.f) && (zEnd > mainTrackerZExtent - 100.f) && (pTrack->GetEnergyAtDca()< 1.5f))
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -21,7 +110,37 @@ StatusCode TrackRecoveryAlgorithm::Run()
 
 StatusCode TrackRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    // Read settings from xml file here
+    m_maxTrackZStart = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackZStart", m_maxTrackZStart));
+
+    m_maxAbsoluteTrackClusterChi = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackClusterChi", m_maxAbsoluteTrackClusterChi));
+
+    m_endCapMaxDeltaZ = 200.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EndCapMaxDeltaZ", m_endCapMaxDeltaZ));
+
+    m_endCapMaxTrackClusterDistance1 = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EndCapMaxTrackClusterDistance1", m_endCapMaxTrackClusterDistance1));
+
+    m_endCapMaxTrackClusterDistance2 = 250.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EndCapMaxTrackClusterDistance2", m_endCapMaxTrackClusterDistance2));
+
+    m_barrelMaxTrackClusterDistance = 10.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "BarrelMaxTrackClusterDistance", m_barrelMaxTrackClusterDistance));
+
+    m_maxSearchLayer = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxSearchLayer", m_maxSearchLayer));
+
+    m_parallelDistanceCut = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ParallelDistanceCut", m_parallelDistanceCut));
 
     return STATUS_CODE_SUCCESS;
 }

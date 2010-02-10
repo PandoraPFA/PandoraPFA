@@ -585,6 +585,15 @@ bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFractio
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ClusterHelper::IsClusterLeavingDetector(Cluster *const pCluster)
+{
+    // TODO implement IsClusterLeavingDetector function
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :

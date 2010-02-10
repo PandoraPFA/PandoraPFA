@@ -113,6 +113,13 @@ public:
     const Helix *const GetHelixFitAtECal() const;
 
     /**
+     *  @brief  Whether the track has an associated cluster
+     * 
+     *  @return boolean
+     */
+    bool HasAssociatedCluster() const;
+
+    /**
      *  @brief  Get address of the cluster associated with the track
      * 
      *  @param  pCluster to receive the address of the cluster
@@ -348,6 +355,13 @@ inline const TrackStateList &Track::GetCalorimeterProjections() const
 inline const Helix *const Track::GetHelixFitAtECal() const
 {
     return m_pHelixFitAtECal;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::HasAssociatedCluster() const
+{
+    return (NULL != m_pAssociatedCluster);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
