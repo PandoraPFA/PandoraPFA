@@ -176,8 +176,9 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
     {
         ClusterContact clusterContact = *iter;
 
-        const float oldChi(this->GetTrackClusterCompatibility(clusterContact.GetParentClusterEnergy(), clusterContact.GetParentTrackEnergy()));
-        const float newChi(this->GetTrackClusterCompatibility(daughterClusterEnergy + clusterContact.GetParentClusterEnergy(),
+        const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(clusterContact.GetParentClusterEnergy(),
+            clusterContact.GetParentTrackEnergy()));
+        const float newChi(ReclusterHelper::GetTrackClusterCompatibility(daughterClusterEnergy + clusterContact.GetParentClusterEnergy(),
             clusterContact.GetParentTrackEnergy()));
 
         const float oldChi2(oldChi * oldChi);
@@ -191,8 +192,8 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
     }
 
     // Check again using total energies of all contact clusters and their associated tracks
-    const float oldChiTotal(this->GetTrackClusterCompatibility(totalClusterEnergy, totalTrackEnergy));
-    const float newChiTotal(this->GetTrackClusterCompatibility(daughterClusterEnergy + totalClusterEnergy, totalTrackEnergy));
+    const float oldChiTotal(ReclusterHelper::GetTrackClusterCompatibility(totalClusterEnergy, totalTrackEnergy));
+    const float newChiTotal(ReclusterHelper::GetTrackClusterCompatibility(daughterClusterEnergy + totalClusterEnergy, totalTrackEnergy));
 
     const float oldChi2Total(oldChiTotal * oldChiTotal);
     const float newChi2Total(newChiTotal * newChiTotal);
@@ -277,8 +278,9 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     // Primary evidence requirement is obtained from change in chi2.
     const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
 
-    const float oldChi(this->GetTrackClusterCompatibility(clusterContact.GetParentClusterEnergy(), clusterContact.GetParentTrackEnergy()));
-    const float newChi(this->GetTrackClusterCompatibility(daughterClusterEnergy + clusterContact.GetParentClusterEnergy(),
+    const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(clusterContact.GetParentClusterEnergy(),
+        clusterContact.GetParentTrackEnergy()));
+    const float newChi(ReclusterHelper::GetTrackClusterCompatibility(daughterClusterEnergy + clusterContact.GetParentClusterEnergy(),
         clusterContact.GetParentTrackEnergy()));
 
     const float oldChi2(oldChi * oldChi);
@@ -419,21 +421,6 @@ PseudoLayer MainFragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluste
     }
 
     return pDaughterCluster->GetInnerPseudoLayer();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float MainFragmentRemovalAlgorithm::GetTrackClusterCompatibility(const float clusterEnergy, const float trackEnergy) const
-{
-    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
-
-    if ((0. == trackEnergy) || (0. == hadronicEnergyResolution))
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-
-    const float sigmaE(hadronicEnergyResolution * trackEnergy / std::sqrt(trackEnergy));
-    const float chi((clusterEnergy - trackEnergy) / sigmaE);
-
-    return chi;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -109,16 +109,6 @@ private:
     PseudoLayer GetClusterCorrectionLayer(const Cluster *const pDaughterCluster) const;
 
     /**
-     *  @brief  Get measure of the compatibility between a cluster and its associated tracks
-     * 
-     *  @param  clusterEnergy the cluster energy
-     *  @param  trackEnergy the sum of the energies of the associated tracks
-     * 
-     *  @return the track-cluster compatibility
-     */
-    float GetTrackClusterCompatibility(const float clusterEnergy, const float trackEnergy) const;
-
-    /**
      *  @brief  Get the list of clusters for which cluster contact information will be affected by a specified cluster merge
      * 
      *  @param  clusterContactMap the cluster contact map

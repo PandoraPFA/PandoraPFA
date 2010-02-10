@@ -40,8 +40,7 @@ StatusCode ResolveTrackAssociationsAlg::Run()
         if ((nTrackAssociations < m_minTrackAssociations) || (nTrackAssociations > m_maxTrackAssociations))
             continue;
 
-        float chi(0.);
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::EvaluateTrackClusterCompatibility(pParentCluster, trackList, chi));
+        const float chi(ReclusterHelper::GetTrackClusterCompatibility(pParentCluster, trackList));
 
         if (chi > m_chiToAttemptReclustering)
             continue;

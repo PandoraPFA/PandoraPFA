@@ -85,7 +85,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
                 const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
 
                 if (0. == sigmaE)
-                    continue;
+                    return STATUS_CODE_FAILURE;
 
                 const float clusterEnergySum = (daughterHadronicEnergy + pParentCluster->GetHadronicEnergy());
 

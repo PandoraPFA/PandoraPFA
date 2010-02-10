@@ -19,7 +19,7 @@
 namespace pandora
 {
 
-StatusCode ReclusterHelper::EvaluateTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList, float &chi)
+float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList)
 {
     float trackEnergySum(0.);
 
@@ -29,12 +29,27 @@ StatusCode ReclusterHelper::EvaluateTrackClusterCompatibility(const Cluster *con
     static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
 
     if ((0. == trackEnergySum) || (0. == hadronicEnergyResolution))
-        return STATUS_CODE_FAILURE;
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 
     const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
-    chi = ((pCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
+    const float chi((pCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
 
-    return STATUS_CODE_SUCCESS;
+    return chi;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float ReclusterHelper::GetTrackClusterCompatibility(const float clusterEnergy, const float trackEnergy)
+{
+    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+
+    if ((0. == trackEnergy) || (0. == hadronicEnergyResolution))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    const float sigmaE(hadronicEnergyResolution * trackEnergy / std::sqrt(trackEnergy));
+    const float chi((clusterEnergy - trackEnergy) / sigmaE);
+
+    return chi;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -61,8 +76,7 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
 
         nExcessTrackAssociations += nTrackAssociations - 1;
 
-        float newChi(0.);
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::EvaluateTrackClusterCompatibility(pCluster, trackList, newChi));
+        const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pCluster, trackList));
 
         chi2 += newChi * newChi;
         chi += newChi;

@@ -37,6 +37,10 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
         m_calorimeterProjections.push_back(new TrackState(*iter));
     }
 
+    // Consistency checks
+    if (0.f == m_energyAtDca)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
     // Charge sign must be either +1 or -1
     const int chargeSign(trackParameters.m_chargeSign.Get());
 

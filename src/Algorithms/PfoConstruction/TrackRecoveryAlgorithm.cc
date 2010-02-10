@@ -80,6 +80,9 @@ StatusCode TrackRecoveryAlgorithm::Run()
             }
         }
 
+        if (NULL == pBestCluster)
+            continue;
+
         // Should track be associated with "best" cluster? Depends on whether track reaches ECal EndCap or Barrel:
         static const float mainTrackerZExtent(GeometryHelper::GetInstance()->GetMainTrackerZExtent());
 
@@ -100,7 +103,7 @@ StatusCode TrackRecoveryAlgorithm::Run()
         }
 
         // ATTN: This algorithm previously identified low pt tracks as those for which:
-        // ((zStart < 100.f) && (zEnd > mainTrackerZExtent - 100.f) && (pTrack->GetEnergyAtDca()< 1.5f))
+        //       ((zStart < 100.f) && (zEnd > mainTrackerZExtent - 100.f) && (pTrack->GetEnergyAtDca()< 1.5f))
     }
 
     return STATUS_CODE_SUCCESS;
@@ -134,7 +137,7 @@ StatusCode TrackRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "BarrelMaxTrackClusterDistance", m_barrelMaxTrackClusterDistance));
 
-    m_maxSearchLayer = 10;
+    m_maxSearchLayer = 20;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSearchLayer", m_maxSearchLayer));
 

@@ -95,9 +95,21 @@ public:
      *
      *  @param  pCluster address of the cluster
      *  @param  trackList address of the list of tracks associated with the cluster
-     *  @param  chi to receive the chi value for the suitability of the track/cluster associations
+     * 
+     *  @return the chi value for the suitability of the track/cluster associations
      */
-    static StatusCode EvaluateTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList, float &chi);
+    static float GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList);
+
+        /**
+     *  @brief  Evaluate the compatibility of a cluster with its associated tracks. Reclustering can be used to split up a
+     *          cluster and produce more favourable track/cluster matches.
+     * 
+     *  @param  clusterEnergy the cluster energy
+     *  @param  trackEnergy the sum of the energies of the associated tracks
+     * 
+     *  @return the chi value for the suitability of the track/cluster associations
+     */
+    static float GetTrackClusterCompatibility(const float clusterEnergy, const float trackEnergy);
 
     /**
      *  @brief  Extract recluster results, indicating suitability of recluster candidates as a replacement for the original clusters

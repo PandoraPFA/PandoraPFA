@@ -60,6 +60,9 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "HadronicEnergyResolution", m_hadronicEnergyResolution));
 
+        if (0.f == m_hadronicEnergyResolution)
+            return STATUS_CODE_INVALID_PARAMETER;
+
         m_mcPfoSelectionRadius = 300.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MCPfoSelectionRadius", m_mcPfoSelectionRadius));
