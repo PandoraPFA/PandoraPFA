@@ -124,6 +124,9 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ShowerProfileBinWidth", m_showerProfileBinWidth));
 
+        if (0.f == m_showerProfileBinWidth)
+            return STATUS_CODE_INVALID_PARAMETER;
+
         m_showerProfileNBins = 100;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ShowerProfileNBins", m_showerProfileNBins));

@@ -10,26 +10,79 @@
 
 #include "Algorithms/Algorithm.h"
 
+using namespace pandora;
+
 /**
  *  @brief  TrackRecoveryHelixAlgorithm class
  */
-class TrackRecoveryHelixAlgorithm : public pandora::Algorithm
+class TrackRecoveryHelixAlgorithm : public Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public pandora::AlgorithmFactory
+    class Factory : public AlgorithmFactory
     {
     public:
         Algorithm *CreateAlgorithm() const;
     };
 
 private:
+    /**
+     *  @brief  AssociationInfo class
+     */
+    class AssociationInfo
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  pCluster address of cluster to which association could be made
+         *  @param  closestApproach distance of closest approach between the cluster and the track under consideration
+         */
+        AssociationInfo(Cluster *const pCluster, const float closestApproach);
+
+        /**
+         *  @brief  Get the address of the cluster to which association could be made
+         * 
+         *  @return The address of the cluster
+         */
+        Cluster *GetCluster() const;
+
+        /**
+         *  @brief  Get the distance of closest approach between the cluster and the track under consideration
+         * 
+         *  @return The distance of closest approach
+         */
+        float GetClosestApproach() const;
+
+    private:
+        Cluster    *m_pCluster;                         ///< 
+        float       m_closestApproach;                  ///< 
+    };
+
+    typedef std::vector<AssociationInfo> AssociationInfoVector;
+    typedef std::map<Track *, AssociationInfoVector> TrackAssociationInfoMap;
+
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    /**
+     *  @brief  Get a map specifying cluster association information for every possible matching cluster
+     * 
+     *  @param  trackAssociationInfoMap the track association info map
+     */
+    StatusCode GetTrackAssociationInfoMap(TrackAssociationInfoMap &trackAssociationInfoMap) const;
+
+    /**
+     *  @brief  Use information in the track association info map to create track to cluster associations
+     * 
+     *  @param  trackAssociationInfoMap the track association info map
+     */
+    StatusCode MakeTrackClusterAssociations(TrackAssociationInfoMap &trackAssociationInfoMap) const;
+
+    unsigned int    m_maxSearchLayer;                   ///< Max pseudo layer to examine when calculating track-cluster distance
+    float           m_parallelDistanceCut;              ///< Max allowed projection of track-hit separation along track direction
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,6 +90,29 @@ private:
 inline pandora::Algorithm *TrackRecoveryHelixAlgorithm::Factory::CreateAlgorithm() const
 {
     return new TrackRecoveryHelixAlgorithm();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline TrackRecoveryHelixAlgorithm::AssociationInfo::AssociationInfo(Cluster *const pCluster, const float closestApproach) :
+    m_pCluster(pCluster),
+    m_closestApproach(closestApproach)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline Cluster *TrackRecoveryHelixAlgorithm::AssociationInfo::GetCluster() const
+{
+    return m_pCluster;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float TrackRecoveryHelixAlgorithm::AssociationInfo::GetClosestApproach() const
+{
+    return m_closestApproach;
 }
 
 #endif // #ifndef TRACK_RECOVERY_HELIX_ALGORITHM_H

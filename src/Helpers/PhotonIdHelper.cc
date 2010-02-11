@@ -42,7 +42,6 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
     // Extract information from the cluster
     static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
     const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
-    const PseudoLayer outerPseudoLayer(pCluster->GetOuterPseudoLayer());
 
     if (innerPseudoLayer > nECalLayers)
         return STATUS_CODE_NOT_FOUND;
@@ -54,16 +53,16 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
     float eCalEnergy(0.f);
     float nRadiationLengths(0.f);
     float nRadiationLengthsInLastLayer(0.f);
-
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    for (PseudoLayer iLayer = innerPseudoLayer, iLayerEnd = std::min(outerPseudoLayer, nECalLayers); iLayer <= iLayerEnd; ++iLayer)
+    for (PseudoLayer iLayer = innerPseudoLayer; iLayer <= nECalLayers; ++iLayer)
     {
         OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
 
         if ((orderedCaloHitList.end() == iter) || (iter->second->empty()))
         {
             nRadiationLengths += nRadiationLengthsInLastLayer;
+            profileEndBin = std::min(static_cast<unsigned int>(nRadiationLengths / binWidth), nBins);
             continue;
         }
 
@@ -124,7 +123,6 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
     if (eCalEnergy <= 0.f)
         return STATUS_CODE_FAILURE;
 
-
     // 2. Construct expected cluster profile
     static const float criticalEnergy(pPandoraSettings->GetShowerProfileCriticalEnergy());
     static const float parameter0(pPandoraSettings->GetShowerProfileParameter0());
@@ -143,25 +141,24 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
     float t(0.);
     float expectedProfile[nBins];
 
-    for(unsigned int iBin = 0; iBin < nBins; ++iBin)
+    for (unsigned int iBin = 0; iBin < nBins; ++iBin)
     {
         t += binWidth;
         expectedProfile[iBin] = static_cast<float>(clusterEnergy / 2. * std::pow(t / 2.f, static_cast<float>(a - 1.)) *
             std::exp(-t / 2.) * binWidth / gammaA);
     }
 
-
     // 3. Compare the cluster profile with the expected profile
     unsigned int binOffsetAtMinDifference(0);
     float minProfileDifference(std::numeric_limits<float>::max());
 
-    for(unsigned int iBinOffset = 0; iBinOffset < nECalLayers; ++iBinOffset)
+    for (unsigned int iBinOffset = 0; iBinOffset < nECalLayers; ++iBinOffset)
     {
         float profileDifference(0.);
 
-        for(unsigned int iBin = 0; iBin < profileEndBin; ++iBin)
+        for (unsigned int iBin = 0; iBin < profileEndBin; ++iBin)
         {
-            if(iBin < iBinOffset)
+            if (iBin < iBinOffset)
             {
                 profileDifference += profile[iBin];
             }
@@ -171,7 +168,7 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
             }
         }
 
-        if(profileDifference < minProfileDifference)
+        if (profileDifference < minProfileDifference)
         {
             minProfileDifference = profileDifference;
             binOffsetAtMinDifference = iBinOffset;
@@ -179,7 +176,7 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
 
         static const float maxDifference(pPandoraSettings->GetShowerProfileMaxDifference());
 
-        if(profileDifference - minProfileDifference > maxDifference)
+        if (profileDifference - minProfileDifference > maxDifference)
             break;
     }
 
