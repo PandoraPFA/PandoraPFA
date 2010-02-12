@@ -49,6 +49,9 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
         {
             Cluster *pCluster = *iterC;
 
+            if (0 == pCluster->GetNCaloHits())
+                continue;
+
             if (!pCluster->GetAssociatedTrackList().empty() || pCluster->IsPhoton())
                 continue;
 
@@ -56,19 +59,22 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
             const float clusterZPosition(pCluster->GetCentroid(innerLayer).GetZ());
 
-            if ((std::fabs(trackECalZPosition) < (std::fabs(clusterZPosition) + 250.)) || (trackECalZPosition * clusterZPosition < 0.f))
+            if ((std::fabs(trackECalZPosition) > (std::fabs(clusterZPosition) + m_maxTrackClusterDeltaZ)) ||
+                (trackECalZPosition * clusterZPosition < 0.f))
+            {
                 continue;
+            }
 
             // Check consistency of track momentum and cluster energy
             const float chi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetHadronicEnergy(), trackEnergy));
 
-            if (std::fabs(chi) > 2.5)
+            if (std::fabs(chi) > m_maxAbsoluteTrackClusterChi)
                 continue;
 
             // Cut on number of layers crossed by track helix in its motion between ecal projection and the cluster
             const PseudoLayer nLayersCrossed(FragmentRemovalHelper::GetNLayersCrossed(pHelix, trackECalZPosition, clusterZPosition));
 
-            if (nLayersCrossed > 50.f)
+            if (nLayersCrossed > m_maxLayersCrossed)
                 continue;
 
             // Get distance of closest approach between track projected direction and cluster
@@ -85,14 +91,17 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             float meanDistanceToHits(std::numeric_limits<float>::max());
 
             if (STATUS_CODE_SUCCESS != FragmentRemovalHelper::GetClusterHelixDistance(pCluster, pHelix, innerLayer,
-                innerLayer + 20, 9, closestDistanceToHit, meanDistanceToHits))
+                innerLayer + m_helixComparisonNLayers, m_helixComparisonMaxOccupiedLayers, closestDistanceToHit, meanDistanceToHits))
             {
                 continue;
             }
 
             // Cut on closest distance of approach between track and cluster
-            if ((trackClusterDistance > 100.f) && ((closestDistanceToHit > 100.f) || (meanDistanceToHits > 150.f)))
+            if ( (trackClusterDistance > m_maxTrackClusterDistance) &&
+                ((closestDistanceToHit > m_maxClosestHelixClusterDistance) || (meanDistanceToHits > m_maxMeanHelixClusterDistance)) )
+            {
                 continue;
+            }
 
             AssociationInfo associationInfo(pCluster, std::min(closestDistanceToHit, trackClusterDistance));
             trackAssociationInfoMap[pTrack].push_back(associationInfo);
@@ -139,7 +148,7 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pBestTrack, pBestCluster));
 
-            // TODO: Currently allow same cluster to be associated to multiple tracks - only clear information on a per track basis here
+            // ATTN: Currently allow same cluster to be associated to multiple tracks - only clear information on a per track basis here
             trackAssociationInfoMap.erase(trackAssociationInfoMap.find(pBestTrack));
             shouldContinue = true;
         }
@@ -152,6 +161,18 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
 
 StatusCode TrackRecoveryHelixAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    m_maxTrackClusterDeltaZ = 250.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackClusterDeltaZ", m_maxTrackClusterDeltaZ));
+
+    m_maxAbsoluteTrackClusterChi = 2.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackClusterChi", m_maxAbsoluteTrackClusterChi));
+
+    m_maxLayersCrossed = 50;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxLayersCrossed", m_maxLayersCrossed));
+
     m_maxSearchLayer = 20;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSearchLayer", m_maxSearchLayer));
@@ -159,6 +180,26 @@ StatusCode TrackRecoveryHelixAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     m_parallelDistanceCut = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ParallelDistanceCut", m_parallelDistanceCut));
+
+    m_helixComparisonNLayers = 20;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HelixComparisonNLayers", m_helixComparisonNLayers));
+
+    m_helixComparisonMaxOccupiedLayers = 9;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HelixComparisonMaxOccupiedLayers", m_helixComparisonMaxOccupiedLayers));
+
+    m_maxTrackClusterDistance = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackClusterDistance", m_maxTrackClusterDistance));
+
+    m_maxClosestHelixClusterDistance = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxClosestHelixClusterDistance", m_maxClosestHelixClusterDistance));
+
+    m_maxMeanHelixClusterDistance = 150.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxMeanHelixClusterDistance", m_maxMeanHelixClusterDistance));
 
     return STATUS_CODE_SUCCESS;
 }

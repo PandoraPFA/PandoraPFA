@@ -144,14 +144,18 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     for (float z = zStart; std::fabs(z) < std::fabs(zEnd + 0.5 * deltaZ); z += deltaZ)
     {
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(z, referencePoint, intersectionPoint));
+
+        if (pGeometryHelper->IsOutsideHCal(intersectionPoint))
+            continue;
+
         const PseudoLayer iLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
-        const bool isInECalGapRegion(pGeometryHelper->IsInECalGapRegion(intersectionPoint));
 
         if (iLayer != currentLayer)
         {
-            if (!isInECalGapRegion)
+            if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
+            {
                 layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
-
+            }
             currentLayer = iLayer;
         }
     }

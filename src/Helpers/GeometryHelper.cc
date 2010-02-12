@@ -157,19 +157,19 @@ PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector
 
     if (zCoordinate < eCalEndCapParameters.GetInnerZCoordinate())
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindBarrelLayer(radius, pseudoLayer));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindBarrelLayer(radius, pseudoLayer));
     }
     else if (radius < eCalBarrelParameters.GetInnerRCoordinate())
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindEndCapLayer(zCoordinate, pseudoLayer));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindEndCapLayer(zCoordinate, pseudoLayer));
     }
     else
     {
         PseudoLayer bestBarrelLayer;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindBarrelLayer(radius, bestBarrelLayer, true));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindBarrelLayer(radius, bestBarrelLayer, true));
 
         PseudoLayer bestEndCapLayer;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindEndCapLayer(zCoordinate, bestEndCapLayer, true));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindEndCapLayer(zCoordinate, bestEndCapLayer, true));
 
         pseudoLayer = std::max(bestBarrelLayer, bestEndCapLayer);
     }
