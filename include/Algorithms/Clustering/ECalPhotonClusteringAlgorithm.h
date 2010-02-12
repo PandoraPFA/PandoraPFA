@@ -326,9 +326,9 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
     {
     public:
         float GetLongProfileShowerStart()  {return m_photonLongShowerStart;};
-        float GetLongProfileGammaFraction(){return m_photonLongProfileFraction;};
+        float GetLongProfilePhotonFraction(){return m_photonLongProfileFraction;};
         void  SetLongProfileShowerStart(   float photonLongShowerStart    ){ m_photonLongShowerStart = photonLongShowerStart;          }
-        void  SetLongProfileGammaFraction( float photonLongProfileFraction){  m_photonLongProfileFraction = photonLongProfileFraction; }
+        void  SetLongProfilePhotonFraction( float photonLongProfileFraction){  m_photonLongProfileFraction = photonLongProfileFraction; }
 
         float m_photonLongProfileFraction;
         float m_photonLongShowerStart;
@@ -385,7 +385,6 @@ public:
     StatusCode TransverseProfile(const pandora::Cluster* cluster, std::vector<pandora::protoClusterPeaks_t> &peaks, int maxLayers);
     pandora::Cluster* TransverseProfile( ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, int peakForProtoCluster, unsigned int maxLayers, int extraLayers = 0);
 
-    void       PhotonProfileID(pandora::Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate = false);
     float      GetTrueEnergyContribution(const pandora::Cluster* cluster, float& electromagneticEnergyContribution, int pid = 0 );
     void       GetClusterProperties(const pandora::Cluster* cluster, ClusterProperties& clusterProperties );
     void       DistanceToPositionAndDirection(const pandora::CartesianVector& position, 
@@ -396,6 +395,10 @@ public:
 
 
     void CreateOrSaveLikelihoodHistograms(bool create);
+
+    void ComputeTransverseVectors( const pandora::CartesianVector& direction, 
+				   pandora::CartesianVector& transverseUnitVectorU, 
+				   pandora::CartesianVector& transverseUnitVectorV );
 
     pandora::CaloHitVector* MakeCaloHitVectorFromOrderedCaloHitList( const pandora::OrderedCaloHitList& pOrderedCaloHitList );
 

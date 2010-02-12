@@ -294,7 +294,9 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     PhotonIdProperties photonIdProperties;
     try
     {
-        PhotonProfileID(pPhotonCandidateCluster, photonIdProperties);
+        PhotonIdHelper::CalculateShowerProfile(pPhotonCandidateCluster, 
+                                               photonIdProperties.m_photonLongShowerStart, 
+                                               photonIdProperties.m_photonLongProfileFraction );
     }
     catch(StatusCodeException &statusCodeException)
     {
@@ -312,7 +314,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     }
 
     float showerStart   = photonIdProperties.GetLongProfileShowerStart();
-    float gammaFraction = photonIdProperties.GetLongProfileGammaFraction();
+    float photonFraction = photonIdProperties.GetLongProfilePhotonFraction();
     float electromagneticPhotonEContribution = 0.0;
     float truePhotonE = GetTrueEnergyContribution(pPhotonCandidateCluster, electromagneticPhotonEContribution, 22); // get true photon energy contribution
     float electromagneticEContribution = 0.0;
@@ -379,7 +381,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     unsigned int nhits = pPhotonCandidateCluster->GetNCaloHits();
     
     float pid = 0;
-    pid = (PhotonIDLikelihoodCalculator::Instance())->PID( peak.energy, peak.rms, gammaFraction,showerStart );
+    pid = (PhotonIDLikelihoodCalculator::Instance())->PID( peak.energy, peak.rms, photonFraction,showerStart );
 
 
     bool accept = false;
@@ -399,11 +401,11 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
 
     float fracE = pPhotonCandidateCluster->GetElectromagneticEnergy()/originalClusterProperties.electromagneticEnergy;
     
-    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > pidCut && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
+    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > pidCut && showerStart<10 && photonFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
         accept = true;
     }
 
-    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > pidCut && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
+    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > pidCut && showerStart<10 && photonFraction < 1.0 &&peak.rms<5.0 && closest > 2.0){
         accept = true;
         // OK found photon cluster - use this sub-cluster (peak) or the whole thing 
         float diffE = originalClusterProperties.electromagneticEnergy - electromagneticE;
@@ -416,8 +418,8 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
 
 
     // cluster which is very close to a nearby track
-//             if(nhits>=m_minimumHitsInClusters && peaks[ipeak].energy>0.2 && pid > 0.5 && showerStart<10 && gammaFraction < 1.0 &&peaks[ipeak].rms<5.0 && closest <= 2.0){
-    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > 0.5 && showerStart<10 && gammaFraction < 1.0 &&peak.rms<5.0 && closest <= 2.0){
+//             if(nhits>=m_minimumHitsInClusters && peaks[ipeak].energy>0.2 && pid > 0.5 && showerStart<10 && photonFraction < 1.0 &&peaks[ipeak].rms<5.0 && closest <= 2.0){
+    if(nhits>=m_minimumHitsInClusters && peak.energy>0.2 && pid > 0.5 && showerStart<10 && photonFraction < 1.0 &&peak.rms<5.0 && closest <= 2.0){
         if(dist >  5.0 && pid > 0.9)accept = true;
         if(dist >  7.5 && pid > 0.8)accept = true;
         if(dist > 10.0 && pid > 0.7)accept = true;
@@ -450,7 +452,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "shStart", showerStart ));
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShStart", peak.showerStartDepth ));
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "peakShDepth", peak.showerDepth90 ));
-        PANDORA_MONITORING_API(SetTreeVariable("photonId", "gammaFraction", gammaFraction ));
+        PANDORA_MONITORING_API(SetTreeVariable("photonId", "photonFraction", photonFraction ));
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "phi", phi ));
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "theta", theta ));
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "nhits", static_cast<int>(nhits) ));
@@ -471,7 +473,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
 
     if(m_producePrintoutStatements > 0 && peak.energy > 1.0)
     {
-        std::cout << " PEAK  : " <<  peak.du << "," << peak.dv << "  E = " << peak.energy << " dmin : " << peak.dmin <<  " d25/d90 : " << peak.showerDepth25 << "/" << peak.showerDepth90  << " start : " << peak.showerStartDepth << " rms = " << peak.rms << " PhotonID : " << showerStart << " " << gammaFraction << " TRUE FRACTION = " << fraction << " pid " << pid << " d = " << closest << " c= " << dist;
+        std::cout << " PEAK  : " <<  peak.du << "," << peak.dv << "  E = " << peak.energy << " dmin : " << peak.dmin <<  " d25/d90 : " << peak.showerDepth25 << "/" << peak.showerDepth90  << " start : " << peak.showerStartDepth << " rms = " << peak.rms << " PhotonID : " << showerStart << " " << photonFraction << " TRUE FRACTION = " << fraction << " pid " << pid << " d = " << closest << " c= " << dist;
         if(fraction<0.5 &&  accept)std::cout << " <---A*****************";
         if(fraction>0.5 && !accept) std::cout << " <---B*****************";
         std::cout << std::endl;    
@@ -501,7 +503,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
         if( peak.energy>10.0 && peak.energy <= 20.0)ihist=6;
         if( peak.energy>20.0 && peak.energy <= 50.0)ihist=7;
         if( peak.energy>50.0)ihist=8;
-        if(ihist>=0 && gammaFraction<1.0 && showerStart<10. && peak.rms<5.)
+        if(ihist>=0 && photonFraction<1.0 && showerStart<10. && peak.rms<5.)
         {
             const std::string iHist(TypeToString(ihist));
             if(fraction>0.5)
@@ -510,7 +512,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
                 const std::string hName_sighistfrac("sighistfrac" + iHist);
                 const std::string hName_sighiststart("sighiststart" + iHist);
                 PANDORA_MONITORING_API(Fill1DHistogram(hName_sighistrms, peak.rms));
-                PANDORA_MONITORING_API(Fill1DHistogram(hName_sighistfrac, gammaFraction));
+                PANDORA_MONITORING_API(Fill1DHistogram(hName_sighistfrac, photonFraction));
                 PANDORA_MONITORING_API(Fill1DHistogram(hName_sighiststart, showerStart));
             }
             else
@@ -519,7 +521,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
                 const std::string hName_backhistfrac("backhistfrac" + iHist);
                 const std::string hName_backhiststart("backhiststart" + iHist);
                 PANDORA_MONITORING_API(Fill1DHistogram(hName_backhistrms, peak.rms));
-                PANDORA_MONITORING_API(Fill1DHistogram(hName_backhistfrac, gammaFraction));
+                PANDORA_MONITORING_API(Fill1DHistogram(hName_backhistfrac, photonFraction));
                 PANDORA_MONITORING_API(Fill1DHistogram(hName_backhiststart, showerStart));
             }
         }
@@ -537,6 +539,98 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     return returnValue;
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void ECalPhotonClusteringAlgorithm::ComputeTransverseVectors( const pandora::CartesianVector& direction, 
+                                                              pandora::CartesianVector& transverseUnitVectorU, 
+                                                              pandora::CartesianVector& transverseUnitVectorV )
+{
+
+    // calculate unit vector
+    CartesianVector unitVector = direction.GetUnitVector();
+    float ux = unitVector.GetX();
+    float uy = unitVector.GetY();
+    float uz = unitVector.GetZ();
+
+    transverseUnitVectorU = CartesianVector( uy, -ux, 0 ).GetUnitVector();
+    float utx = transverseUnitVectorU.GetX();
+//    float uty = transverseUnitVectorU.GetY();
+
+    #define EPSILON 0.00001
+    if(fabs(utx-0)>EPSILON && 
+       fabs(uz -0)>EPSILON )
+    {
+        float x2 = ux*ux;
+        float y2 = uy*uy;
+        transverseUnitVectorV.SetValues( ux / uy,
+                                          1,
+                                          -(x2+y2)/(uz*uy) );
+//         transverseUnitVectorV.SetValues( -uty / utx,
+//                                          1,
+//                                          (uty*ux-uy*utx)/utx/uz );
+        transverseUnitVectorV = transverseUnitVectorV.GetUnitVector();
+    }else if( fabs(utx-0) > EPSILON &&
+              fabs(uz -0) > EPSILON )
+    {
+        transverseUnitVectorV.SetValues( 1,
+                                         0,
+                                         ux/uz );
+        transverseUnitVectorV = transverseUnitVectorV.GetUnitVector();
+    }else if( fabs(utx-0)>EPSILON &&
+              fabs(uz -0)>EPSILON )
+    {
+        transverseUnitVectorV.SetValues( 0,
+                                         0,
+                                         1 );
+    }else
+    {
+        transverseUnitVectorV.SetValues( 0,0,0 );
+    }
+
+
+
+//     float x0   = clusterProperties.m_centroidFirstLayer.GetX();
+//     float y0   = clusterProperties.m_centroidFirstLayer.GetY();
+//     float z0   = clusterProperties.m_centroidFirstLayer.GetZ();
+//     float r0   = sqrt(x0*x0+y0*y0+z0*z0);
+//     float ux   = x0/r0;
+//     float uy   = y0/r0;
+//     float uz   = z0/r0;
+//     float utx  = uy/sqrt(ux*ux+uy*uy);
+//     float uty  = -ux/sqrt(ux*ux+uy*uy);
+//     float utz  = 0;
+//     float vtx=0;
+//     float vty=0;
+//     float vtz=0;
+//     if(utx!=0&&uz!=0){
+//         vtx  = -uty/utx;
+//         vtz  = (uty*ux-uy*utx)/utx/uz;
+//         vty  = 1;
+//         float v    = sqrt(vtx*vtx+vty*vty+vtz*vtz);
+//         vtx = vtx/v;
+//         vty = vty/v;
+//         vtz = vtz/v;
+//     }
+//     if(utx==0&&uz!=0){
+//         vtx  = 1;
+//         vtz  = ux/uz;
+//         vty  = 0;
+//         float v    = sqrt(vtx*vtx+vty*vty+vtz*vtz);
+//         vtx = vtx/v;
+//         vty = vty/v;
+//         vtz = vtz/v;
+//     }
+//     if(utx==0&&uz==0){
+//         vtx  = 0;
+//         vtz  = 1;
+//         vty  = 0;
+//     }
+    
+}
+
+
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ECalPhotonClusteringAlgorithm::TransverseProfile(const Cluster* cluster, std::vector<protoClusterPeaks_t> &peaks, int maxLayers)
@@ -546,43 +640,18 @@ StatusCode ECalPhotonClusteringAlgorithm::TransverseProfile(const Cluster* clust
 
     int ifirst = (int)cluster->GetInnerPseudoLayer();
 
-    CartesianVector centroid = cluster->GetCentroid(ifirst);
+    const CartesianVector centroid = cluster->GetCentroid(ifirst);
     float x0   = centroid.GetX();
     float y0   = centroid.GetY();
     float z0   = centroid.GetZ();
-    float r0   = sqrt(x0*x0+y0*y0+z0*z0);
-    float ux   = x0/r0;
-    float uy   = y0/r0;
-    float uz   = z0/r0;
-    float utx  = uy/sqrt(ux*ux+uy*uy);
-    float uty  = -ux/sqrt(ux*ux+uy*uy);
-    float utz  = 0;
-    float vtx=0;
-    float vty=0;
-    float vtz=0;
-    if(utx!=0&&uz!=0){
-        vtx  = -uty/utx;
-        vtz  = (uty*ux-uy*utx)/utx/uz;
-        vty  = 1;
-        float v    = sqrt(vtx*vtx+vty*vty+vtz*vtz);
-        vtx = vtx/v;
-        vty = vty/v;
-        vtz = vtz/v;
-    }
-    if(utx==0&&uz!=0){
-        vtx  = 1;
-        vtz  = ux/uz;
-        vty  = 0;
-        float v    = sqrt(vtx*vtx+vty*vty+vtz*vtz);
-        vtx = vtx/v;
-        vty = vty/v;
-        vtz = vtz/v;
-    }
-    if(utx==0&&uz==0){
-        vtx  = 0;
-        vtz  = 1;
-        vty  = 0;
-    }
+
+
+    CartesianVector transverseUnitVectorU(-1,-1,-1);
+    CartesianVector transverseUnitVectorV(-1,-1,-1);
+    ComputeTransverseVectors( centroid,
+                              transverseUnitVectorU, 
+                              transverseUnitVectorV );
+
 
     int  done[nbins][nbins];
     bool assigned[nbins][nbins];
@@ -613,8 +682,16 @@ StatusCode ECalPhotonClusteringAlgorithm::TransverseProfile(const Cluster* clust
             float dx = (position.GetX() -x0)/pixelsize; // TODO: this could maybe be replaced by GetCellSizeU()
             float dy = (position.GetY() -y0)/pixelsize; // TODO: this could maybe be replaced by GetCellSizeV()
             float dz = (position.GetZ() -z0)/pixelsize; // TODO: this could maybe be replaced by GetCellSizeThickness()
-            float dut = dx*utx+dy*uty+dz*utz;
-            float dvt = dx*vtx+dy*vty+dz*vtz;
+//             float dut = dx*utx+dy*uty+dz*utz;
+//             float dvt = dx*vtx+dy*vty+dz*vtz;
+            float dut = 
+                dx*transverseUnitVectorU.GetX()+
+                dy*transverseUnitVectorU.GetY()+
+                dz*transverseUnitVectorU.GetZ();
+            float dvt = 
+                dx*transverseUnitVectorV.GetX()+
+                dy*transverseUnitVectorV.GetY()+
+                dz*transverseUnitVectorV.GetZ();
             int idut  = static_cast<int>(dut+0.5+ioffset);
             int idvt  = static_cast<int>(dvt+0.5+ioffset);
             if(idut>=0&&idut<nbins&&idvt>=0&&idvt<nbins){
@@ -799,39 +876,15 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
     float x0   = clusterProperties.m_centroidFirstLayer.GetX();
     float y0   = clusterProperties.m_centroidFirstLayer.GetY();
     float z0   = clusterProperties.m_centroidFirstLayer.GetZ();
-    float r0   = sqrt(x0*x0+y0*y0+z0*z0);
-    float ux   = x0/r0;
-    float uy   = y0/r0;
-    float uz   = z0/r0;
-    float utx  = uy/sqrt(ux*ux+uy*uy);
-    float uty  = -ux/sqrt(ux*ux+uy*uy);
-    float utz  = 0;
-    float vtx=0;
-    float vty=0;
-    float vtz=0;
-    if(utx!=0&&uz!=0){
-        vtx  = -uty/utx;
-        vtz  = (uty*ux-uy*utx)/utx/uz;
-        vty  = 1;
-        float v    = sqrt(vtx*vtx+vty*vty+vtz*vtz);
-        vtx = vtx/v;
-        vty = vty/v;
-        vtz = vtz/v;
-    }
-    if(utx==0&&uz!=0){
-        vtx  = 1;
-        vtz  = ux/uz;
-        vty  = 0;
-        float v    = sqrt(vtx*vtx+vty*vty+vtz*vtz);
-        vtx = vtx/v;
-        vty = vty/v;
-        vtz = vtz/v;
-    }
-    if(utx==0&&uz==0){
-        vtx  = 0;
-        vtz  = 1;
-        vty  = 0;
-    }
+    const CartesianVector centroid( x0, y0, z0 );
+
+    CartesianVector transverseUnitVectorU(-1,-1,-1);
+    CartesianVector transverseUnitVectorV(-1,-1,-1);
+    ComputeTransverseVectors( centroid,
+                              transverseUnitVectorU, 
+                              transverseUnitVectorV );
+
+
 
     int  done[nbins][nbins];
     bool assigned[nbins][nbins];
@@ -871,8 +924,16 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
             float dx = (position.GetX() -x0)/pixelsize; // TODO: this could maybe be replaced by GetCellSizeU()
             float dy = (position.GetY() -y0)/pixelsize; // TODO: this could maybe be replaced by GetCellSizeV()
             float dz = (position.GetZ() -z0)/pixelsize; // TODO: this could maybe be replaced by GetCellSizeThickness()
-            float dut = dx*utx+dy*uty+dz*utz;
-            float dvt = dx*vtx+dy*vty+dz*vtz;
+//             float dut = dx*utx+dy*uty+dz*utz;
+//             float dvt = dx*vtx+dy*vty+dz*vtz;
+            float dut = 
+                dx*transverseUnitVectorU.GetX()+
+                dy*transverseUnitVectorU.GetY()+
+                dz*transverseUnitVectorU.GetZ();
+            float dvt = 
+                dx*transverseUnitVectorV.GetX()+
+                dy*transverseUnitVectorV.GetY()+
+                dz*transverseUnitVectorV.GetZ();
             int idut  = static_cast<int>(dut+0.5+ioffset);
             int idvt  = static_cast<int>(dvt+0.5+ioffset);
             if(idut>=0&&idut<nbins&&idvt>=0&&idvt<nbins){
@@ -913,7 +974,6 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
             for(int j=1; j<nbins-1; j++){
                 if(!assigned[i][j]){
                     if(tprofile[i][j]>peakheight){
-//                         std::cout << "BBB tprofile[i][j]>peakheight " << i << "," << j << " " << tprofile[i][j] << " < " << peakheight << std::endl;
                         peakheight = tprofile[i][j];
                         ipeak = i;
                         jpeak = j;
@@ -1013,206 +1073,6 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
 
 
 
-
-
-
-
-
-
-
-
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void ECalPhotonClusteringAlgorithm::PhotonProfileID( Cluster* cluster, PhotonIdProperties& photonIdProperties, bool truncate)
-{
-    float X0BinSize = 0.5;
-    const unsigned int X0Bins = 100;
-//    float X0Max     = X0Bins*X0BinSize;
-    float X0Profile[X0Bins];
-    float expectedX0Profile[X0Bins];
-    float eProfile[m_maximumNumberOfLayers];
-    for(unsigned int i=0;i<m_maximumNumberOfLayers;i++)eProfile[i]=0.;
-    for(unsigned int i=0;i<X0Bins;i++)X0Profile[i]=0.;
-    for(unsigned int i=0;i<X0Bins;i++)expectedX0Profile[i]=0.;
-
-    // it should be able to make this more general and easier with the new code
-    if (m_producePrintoutStatements > 0)
-        std::cout << "in photon profile id" << std::endl;
-
-    float radLenLayers[m_maximumNumberOfLayers]; // radiation lengths per layer seen by the cluster (in the direction of the cluster
-    try
-    {
-        CartesianVector clusterDirection = cluster->GetFitToAllHitsResult().GetDirection().GetUnitVector();
-
-        // --- loop through all the hits and do stuff mark has put into AddHit 
-        unsigned int maxSetIndex = 0;
-        float lastRadLen = 0.1f;
-
-        OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
-        for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
-        {
-            unsigned int pseudoLayer = itLyr->first;
-
-            CaloHitList::iterator itCaloHit    = itLyr->second->begin();
-            CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
-
-            int n = 0; // count number of cells in layer
-        
-            radLenLayers[pseudoLayer] = 0.0; // initialisation
-            eProfile[pseudoLayer] = 0.0; // initialisation
-            for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
-            {
-                ++n;
-                eProfile[pseudoLayer] += (*itCaloHit)->GetElectromagneticEnergy(); // sum up the energies in each pseudo-layer
-
-                // radiationlengths
-                float angleClusterDirectionWrtPseudoLayerNormalVector = (*itCaloHit)->GetNormalVector().GetUnitVector().GetOpeningAngle( clusterDirection );
-                float cosOpeningAngle = fabs( cos( angleClusterDirectionWrtPseudoLayerNormalVector ) );
-
-                if( cosOpeningAngle < 0.3 )
-                {
-                    if (m_producePrintoutStatements > 0)
-                    {
-                        std::cout << "Cluster has large angle to pseudo layer normal vector (cos = " << cosOpeningAngle << ", which is an angle of " 
-                                  << angleClusterDirectionWrtPseudoLayerNormalVector << ") --> reset cos(angle) to 1.0" << std::endl;
-                    }
-                    cosOpeningAngle = 1.0;
-                }
-                radLenLayers[pseudoLayer] += (*itCaloHit)->GetNRadiationLengths()/cosOpeningAngle; // gives the radiation lengths per layer in the clusterDirection
-
-                //            std::cout << "radlen " <<  (*itCaloHit)->GetNRadiationLengths() << "  normalvect " << (*itCaloHit)->GetNormalVector().GetUnitVector() << "  clusterdir " << clusterDirection << std::endl;
-            }
-            if( n>0 ) radLenLayers[pseudoLayer] /= n;
-
-            // set lengths in units of radiation length for all pseudo layers before the given hit (if not set already)
-            for( ; maxSetIndex < pseudoLayer; maxSetIndex++ )
-            {
-                radLenLayers[maxSetIndex] = radLenLayers[pseudoLayer];
-            }
-            maxSetIndex = pseudoLayer +1;
-
-//         std::cout << "radlenlayers[] " << radLenLayers[pseudoLayer] << " pseudo layer " << pseudoLayer << " n " << n << " eprofile[] " << eProfile[pseudoLayer] << std::endl;
-            lastRadLen = radLenLayers[pseudoLayer];
-
-        }    
-        for( ; maxSetIndex <= m_nECalLayers; maxSetIndex++ )
-        {
-            radLenLayers[maxSetIndex] = lastRadLen;
-        }
-
-
-
-        // ---
-
-        float x0 = 3.5f;                     // oops: hardcoded radiation length (W)
-        float E0 = cluster->GetElectromagneticEnergy();
-        // Effective critical energy
-        float EC = 0.08f;                    // oops: critical energy hardcoded (  (thickness-Si*40.19MeV+thickness-W*93.11MeV)/sumThickness in GeV )
-        double a = 1.25+0.5*log(E0/EC);
-#ifdef __GNUC__
-        double lngammaa = lgamma(a);
-#else
-        double lngammaa = 0.;
-        std::cout << " TODO - implement lgamma function " << std::endl;
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-#endif
-        double gammaa = exp(lngammaa);
-
-        float dist=0.;
-        int   X0ProfileEnd=0;
-        // step through ECAL making profile in radiation lengths
-        float ecalE = 0.;
-        int maxLayer = m_nECalLayers;
-        if(truncate)maxLayer = 35;
-
-        for(unsigned int i=1; i<=m_nECalLayers; i++){
-            ecalE += eProfile[i];
-//         float dr = sep[i]/cost[i];
-            float dr = radLenLayers[i];
-            float dt = dr/x0;
-            //        float dt = radLenLayers[i];
-            float distStart = dist;
-            dist+= dt;
-            float deltaX0Bins = dt/X0BinSize;
-            float bStart = distStart/X0BinSize;
-            float bEnd   = dist/X0BinSize;
-    
-//         std::cout << "=== dr " << dr << " dt " << dt << " distStart " << distStart << " dist " << dist << " X0BinSize " << X0BinSize << " bEnd " << bEnd << " layer " << i << std::endl;
-
-            if(bEnd>100)bEnd=100.;
-            unsigned int iStart = static_cast<unsigned int>(bStart);
-            unsigned int iEnd = static_cast<unsigned int>(bEnd);
-            float deltaStart = bStart-iStart;
-            float deltaEnd   = 1.0f-bEnd+iEnd;
-            if(iStart<=100){
-                for(unsigned int ibin=iStart;ibin<=iEnd;++ibin){
-                    float delta = 1.;
-                    if(ibin==iStart)delta = delta - deltaStart;
-                    if(ibin==iEnd)delta   = delta - deltaEnd;
-                    float frac = delta/deltaX0Bins;
-                    if(ibin<100)X0Profile[ibin] += eProfile[i]*frac; 
-//                 std::cout << "=== === X0Profile[ibin="<<ibin<<"] " << X0Profile[ibin] << " eProfile[i="<<i<<"] " << eProfile[i] << "  frac " << frac << std::endl;
-                }
-            }
-            X0ProfileEnd = iEnd;
-            if(X0ProfileEnd>=100)X0ProfileEnd=100;
-        }
-        if(truncate)E0=ecalE;
-        float t =0.;
-        for(int i=0; i<100; i++){
-            t+= X0BinSize;
-            float de = static_cast<float>(E0 / 2.0f * pow(t / 2, static_cast<float>(a - 1)) * exp(-t / 2) * X0BinSize / gammaa);
-            expectedX0Profile[i] = de;
-        }
-
-        float diffEmin = 9999.;
-        int   ioffmin  = 0;
-        bool  stillgoing = true;
-        for(int ioffset=0; stillgoing && ioffset<static_cast<int>(m_nECalLayers); ioffset++){
-            float diffE = 0.;
-            for(int i=0; i<X0ProfileEnd; i++){
-                if(i-ioffset<0){
-                    diffE += X0Profile[i];
-                }else{
-                    diffE += fabs(expectedX0Profile[i-ioffset]-X0Profile[i]);
-                }
-
-//             if( i < X0ProfileEnd )
-//                 std::cout << "=== === X0Profile[i="<<i<<"] " << X0Profile[i] << "     expectedX0Profile[i="<<i<<"] " << expectedX0Profile[i]  << "      diffE " << diffE << std::endl;
-
-            }
-            if(diffE<diffEmin){
-                diffEmin = diffE;
-                ioffmin = ioffset;
-            }
-            if(diffE-diffEmin>0.1)stillgoing = false;
-        }
-  
-        if(ecalE>0){
-            photonIdProperties.SetLongProfileGammaFraction( diffEmin/ecalE    );
-            photonIdProperties.SetLongProfileShowerStart(   ioffmin*X0BinSize );
-//         std::cout << "=== longprofilefraction   " << photonIdProperties._photonLongProfileFraction << std::endl;
-//         std::cout << "=== photonLongShowerStart " << photonIdProperties._photonLongShowerStart << std::endl;
-        }
-        else if (m_producePrintoutStatements > 0)
-        {
-            std::cout << "ecalE <= 0 " << std::endl;
-        }
-
-    }
-    catch(StatusCodeException &statusCodeException)
-    {
-        std::cout << "PhotonProfileID/statusCodeException " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
-        throw;
-    }
-    catch(...)
-    {
-        std::cout << "PhotonProfileID/unknown exception" << std::endl;
-        throw;
-    }
-}
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
