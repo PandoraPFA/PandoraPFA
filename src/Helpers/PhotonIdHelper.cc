@@ -130,13 +130,7 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
 
     const double a(parameter0 + parameter1 * std::log(clusterEnergy / criticalEnergy));
 
-#ifdef __GNUC__
-    const double gammaA(std::exp(lgamma(a)));
-#else
-    const double gammaA(0.);
-    std::cout << "PhotonIdHelper, error: lgamma function only implemented for gcc." << std::endl;
-    return STATUS_CODE_FAILURE;
-#endif
+    const double gammaA(std::exp(gamma(a))); // gamma() and lgamma() both return the natural log of gamma!
 
     float t(0.);
     float expectedProfile[nBins];
