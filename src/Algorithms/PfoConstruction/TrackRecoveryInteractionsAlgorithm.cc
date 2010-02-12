@@ -27,6 +27,9 @@ StatusCode TrackRecoveryInteractionsAlgorithm::Run()
         if (pTrack->HasAssociatedCluster() || !pTrack->ReachesECal())
             continue;
 
+        if (!pTrack->GetDaughterTrackList().empty())
+            continue;
+
         // Identify best cluster to be associated with this track, based on energy consistency and proximity
         Cluster *pBestCluster(NULL);
         float smallestTrackClusterDistance(std::numeric_limits<float>::max());

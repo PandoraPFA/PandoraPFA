@@ -29,6 +29,15 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
+    /**
+     *  @brief  
+     * 
+     *  @param  
+     *  @param  
+     *  @param  
+     */
+    float GetMeanDeltaR(pandora::Cluster *const pCluster, const float helixXCentre, const float helixYCentre, const float helixRadius) const;
+
     // Member variables here
 };
 

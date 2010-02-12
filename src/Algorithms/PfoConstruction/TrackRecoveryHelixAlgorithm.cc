@@ -40,6 +40,9 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
         if (pTrack->HasAssociatedCluster() || !pTrack->ReachesECal())
             continue;
 
+        if (!pTrack->GetDaughterTrackList().empty())
+            continue;
+
         // Extract track information
         const Helix *const pHelix(pTrack->GetHelixFitAtECal());
         const float trackEnergy(pTrack->GetEnergyAtDca());

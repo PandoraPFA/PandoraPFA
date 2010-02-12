@@ -30,7 +30,11 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
     {
         Track *pTrack = *trackIter;
 
+        // Use only tracks that are flagged as reaching ECal
         if (!pTrack->ReachesECal())
+            continue;
+
+        if (!pTrack->GetDaughterTrackList().empty())
             continue;
 
         if ((std::fabs(pTrack->GetD0()) > m_maxAbsoluteTrackD0) || (std::fabs(pTrack->GetZ0()) > m_maxAbsoluteTrackZ0))
