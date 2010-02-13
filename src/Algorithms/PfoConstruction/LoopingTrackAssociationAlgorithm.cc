@@ -46,7 +46,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         const float helixRadius(pHelix->GetRadius());
         const float helixTanLambda(pHelix->GetTanLambda());
 
-        const float helixDCosZ(helixTanLambda / (1.f + helixTanLambda));
+        const float helixDCosZ(helixTanLambda / std::sqrt(1.f + helixTanLambda * helixTanLambda));
         const float trackEnergy(pTrack->GetEnergyAtDca());
 
         // 
@@ -86,15 +86,19 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
 
             const float innerLayerDeltaX(innerCentroid.GetX() - helixXCentre);
             const float innerLayerDeltaY(innerCentroid.GetY() - helixYCentre);
-            const float innerLayerDeltaR((innerLayerDeltaX * innerLayerDeltaX) + (innerLayerDeltaY * innerLayerDeltaY) - helixRadius);
+            const float innerLayerDeltaR(std::sqrt((innerLayerDeltaX * innerLayerDeltaX) + (innerLayerDeltaY * innerLayerDeltaY)) - std::fabs(helixRadius));
 
             const float meanDeltaR(this->GetMeanDeltaR(pCluster, helixXCentre, helixYCentre, helixRadius));
 
             // 
-            const float deltaR(std::min(innerLayerDeltaR, meanDeltaR));
+            const bool isInRangeInner((innerLayerDeltaR < 50.f) && (innerLayerDeltaR > -100.f));
+            const bool isInRangeMean((meanDeltaR < 50.f) && (meanDeltaR > -100.f));
 
-            if ((deltaR > 50.f) || (deltaR < -100.f)) // TODO Check on both innerLayerDeltaR and meanDeltaR
+            if (!isInRangeInner && !isInRangeMean)
                 continue;
+
+            // ATTN: Have changed order of std::min and std::fabs here
+            const float deltaR(std::min(std::fabs(innerLayerDeltaR), std::fabs(meanDeltaR)));
 
             // 
             CartesianVector helixDirection;
@@ -114,7 +118,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
                 float helixDCosY(1.f - helixDCosZ * helixDCosZ);
                 helixDCosY = std::sqrt(std::max(helixDCosY, 0.f));
 
-                if (innerLayerDeltaX * helixRadius > 0) // TODO check inequalities
+                if (innerLayerDeltaX * helixRadius > 0)
                     helixDCosY *= -1.f;
 
                 helixDirection.SetValues(0.f, helixDCosY, helixDCosZ);
@@ -172,7 +176,9 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
 float LoopingTrackAssociationAlgorithm::GetMeanDeltaR(Cluster *const pCluster, const float helixXCentre, const float helixYCentre,
     const float helixRadius) const
 {
-    float meanDeltaR(0.f);
+    float deltaRSum(0.f);
+    unsigned int nContributions(0);
+
     const PseudoLayer endLayer(pCluster->GetInnerPseudoLayer() + 10);
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
@@ -181,26 +187,23 @@ float LoopingTrackAssociationAlgorithm::GetMeanDeltaR(Cluster *const pCluster, c
         if (iter->first > endLayer)
             break;
 
-        const unsigned int nHitsInLayer(iter->second->size());
-
-        if (0 == nHitsInLayer)
-            continue;
-
-        float layerDeltaR(0.f);
-
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             const CartesianVector &hitPosition((*hitIter)->GetPositionVector());
             const float hitDeltaX(hitPosition.GetX() - helixXCentre);
             const float hitDeltaY(hitPosition.GetY() - helixYCentre);
 
-            layerDeltaR += ((hitDeltaX * hitDeltaX) + (hitDeltaY * hitDeltaY));
+            deltaRSum += std::sqrt((hitDeltaX * hitDeltaX) + (hitDeltaY * hitDeltaY));
+            nContributions++;
         }
-
-        meanDeltaR += layerDeltaR / static_cast<float>(nHitsInLayer);
     }
 
-    return (meanDeltaR - helixRadius);
+    if (0 == nContributions)
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    const float meanDeltaR((deltaRSum / static_cast<float>(nContributions)) - std::fabs(helixRadius));
+
+    return meanDeltaR;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
