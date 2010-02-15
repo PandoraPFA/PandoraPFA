@@ -32,19 +32,27 @@ private:
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
-     *  @brief  Create particle flow objects corresponding to charged particles. These pfos contain tracks from the main tracker
-     *          and the clusters associated with these tracks.
+     *  @brief  Create particle flow objects starting from tracks in the main tracker. The pfos will account for associated
+     *          daughter/sibling tracks and associated calorimeter clusters.
      */
-    StatusCode CreateChargedPfos() const;
+    StatusCode CreateTrackBasedPfos() const;
 
     /**
-     *  @brief  Add relevant tracks and clusters to a charged pfo
+     *  @brief  Set the basic parameters for a track-based pfo
+     * 
+     *  @param  pTrack address of the track to consider
+     *  @param  pfoParameters the pfo parameters to populate
+     */
+    StatusCode SetTrackBasedPfoParameters(pandora::Track *const pTrack, PfoParameters &pfoParameters) const;
+
+    /**
+     *  @brief  Add relevant tracks and clusters to a track-based pfo
      * 
      *  @param  pTrack address of the track to consider
      *  @param  pfoParameters the pfo parameters to populate
      *  @param  readSiblingInfo whether to read sibling track information (set to false to avoid multiple counting)
      */
-    StatusCode PopulateChargedPfo(const pandora::Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo = true) const;
+    StatusCode PopulateTrackBasedPfo(pandora::Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo = true) const;
 
     /**
      *  @brief  Create particle flow objects corresponding to neutral particles, These pfos consist only of clusters that have no

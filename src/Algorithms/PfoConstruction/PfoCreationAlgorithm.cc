@@ -12,7 +12,7 @@ using namespace pandora;
 
 StatusCode PfoCreationAlgorithm::Run()
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateChargedPfos());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateTrackBasedPfos());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNeutralPfos());
 
     return STATUS_CODE_SUCCESS;
@@ -20,7 +20,7 @@ StatusCode PfoCreationAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PfoCreationAlgorithm::CreateChargedPfos() const
+StatusCode PfoCreationAlgorithm::CreateTrackBasedPfos() const
 {
     // Current track list should contain those tracks selected as "good" by the track preparation algorithm
     const TrackList *pTrackList = NULL;
@@ -32,17 +32,12 @@ StatusCode PfoCreationAlgorithm::CreateChargedPfos() const
 
         // Specify the pfo parameters
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
-        pfoParameters.m_charge = pTrack->GetChargeSign();
-        pfoParameters.m_particleId = ((pTrack->GetChargeSign() > 0) ? 211 : -211);
-        pfoParameters.m_mass = pTrack->GetMass();
-        pfoParameters.m_energy = pTrack->GetEnergyAtDca();
-        pfoParameters.m_momentum = pTrack->GetMomentumAtDca();
-        pfoParameters.m_trackList.insert(pTrack);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SetTrackBasedPfoParameters(pTrack, pfoParameters));
 
         // Walk along list of associated daughter/sibling tracks and their cluster associations
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateChargedPfo(pTrack, pfoParameters));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateTrackBasedPfo(pTrack, pfoParameters));
 
-        // Create the charged pfo
+        // Create the pfo
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfoParameters));
     }
 
@@ -51,8 +46,54 @@ StatusCode PfoCreationAlgorithm::CreateChargedPfos() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PfoCreationAlgorithm::PopulateChargedPfo(const Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo) const
+StatusCode PfoCreationAlgorithm::SetTrackBasedPfoParameters(Track *const pTrack, PfoParameters &pfoParameters) const
 {
+    // TODO More sophisticated particle id - currently assumes pion or photon conversion
+
+    const TrackList &siblingTrackList(pTrack->GetSiblingTrackList());
+
+    // Single parent track as pfo target
+    if (siblingTrackList.empty())
+    {
+        pfoParameters.m_charge = pTrack->GetChargeSign();
+        pfoParameters.m_particleId = ((pTrack->GetChargeSign() > 0) ? 211 : -211);
+        pfoParameters.m_mass = pTrack->GetMass();
+        pfoParameters.m_energy = pTrack->GetEnergyAtDca();
+        pfoParameters.m_momentum = pTrack->GetMomentumAtDca();
+
+        return STATUS_CODE_SUCCESS;
+    }
+
+    // Sibling tracks as first evidence of pfo target
+    int charge(0);
+    float energy(0.f);
+    CartesianVector momentum(0.f, 0.f, 0.f);
+
+    for (TrackList::const_iterator iter = siblingTrackList.begin(), iterEnd = siblingTrackList.end(); iter != iterEnd; ++iter)
+    {
+        Track *pSiblingTrack = *iter;
+
+        charge += pSiblingTrack->GetChargeSign();
+        energy += pSiblingTrack->GetEnergyAtDca();
+        momentum += pSiblingTrack->GetMomentumAtDca();
+    }
+
+    pfoParameters.m_charge = charge;
+    pfoParameters.m_energy = energy;
+    pfoParameters.m_momentum = momentum;
+    pfoParameters.m_mass = std::sqrt(std::max(energy * energy - momentum.GetDotProduct(momentum), 0.f));
+    pfoParameters.m_particleId = 22;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PfoCreationAlgorithm::PopulateTrackBasedPfo(Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo) const
+{
+    // Add track to the pfo
+    pfoParameters.m_trackList.insert(pTrack);
+
     // Add any cluster associated with this track to the pfo
     Cluster *pAssociatedCluster = NULL;
 
@@ -71,7 +112,7 @@ StatusCode PfoCreationAlgorithm::PopulateChargedPfo(const Track *const pTrack, P
 
         for (TrackList::const_iterator iter = siblingTrackList.begin(), iterEnd = siblingTrackList.end(); iter != iterEnd; ++iter)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateChargedPfo(*iter, pfoParameters, false));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateTrackBasedPfo(*iter, pfoParameters, false));
         }
     }
 
@@ -80,7 +121,7 @@ StatusCode PfoCreationAlgorithm::PopulateChargedPfo(const Track *const pTrack, P
 
     for (TrackList::const_iterator iter = daughterTrackList.begin(), iterEnd = daughterTrackList.end(); iter != iterEnd; ++iter)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateChargedPfo(*iter, pfoParameters));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateTrackBasedPfo(*iter, pfoParameters));
     }
 
     return STATUS_CODE_SUCCESS;

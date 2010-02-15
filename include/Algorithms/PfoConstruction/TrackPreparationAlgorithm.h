@@ -37,9 +37,32 @@ private:
      */
     StatusCode CreatePfoTrackList(const pandora::TrackList &inputTrackList, pandora::TrackList &pfoTrackList) const;
 
+    /**
+     *  @brief  Whether a track, or any of its daughters or siblings has an associated cluster
+     * 
+     *  @param  pTrack address of the track
+     *  @param  readSiblingInfo whether to read sibling track information (set to false to avoid multiple counting)
+     *
+     *  @return boolean
+     */
+    bool HasAssociatedClusters(const pandora::Track *const pTrack, const bool readSiblingInfo = true) const;
+
+    /**
+     *  @brief  Whether a track is low pt and the charged particle is therefore unlikely to have produced calorimeter clusters
+     * 
+     *  @param  pTrack address of the track
+     *
+     *  @return boolean
+     */
+    bool IsLowPt(const pandora::Track *const pTrack) const;
+
     std::string             m_inputTrackListName;           ///< The name of the input track list to prepare
     std::string             m_outputTrackListName;          ///< The name of the output track list, containing parent tracks of charged pfos
     pandora::StringVector   m_associationAlgorithms;        ///< The ordered list of track-cluster associations algorithm to run
+
+    float                   m_lowPtEnergy;                  ///< Low pt track energy threshold
+    float                   m_lowPtTrackStartDeltaZ;        ///< Low pt max z separation between interaction point and track start
+    float                   m_lowPtTrackEndDeltaZ;          ///< Low pt max z separation between ecal endcap and track end
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
