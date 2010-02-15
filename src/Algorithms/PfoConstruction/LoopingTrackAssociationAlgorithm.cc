@@ -32,13 +32,13 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         if (!pTrack->GetDaughterTrackList().empty())
             continue;
 
-        // 
+        // Use only tracks that reach the ecal endcap, not barrel
         const float trackECalZPosition(pTrack->GetTrackStateAtECal().GetPosition().GetZ());
 
-        if (endCapZPosition - std::fabs(trackECalZPosition) > 50.f)
+        if (endCapZPosition - std::fabs(trackECalZPosition) > m_maxEndCapDeltaZ)
             continue;
 
-        // 
+        // Extract information from the track
         const Helix *const pHelix(pTrack->GetHelixFitAtECal());
 
         const float helixXCentre(pHelix->GetXCentre());
@@ -49,7 +49,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         const float helixDCosZ(helixTanLambda / std::sqrt(1.f + helixTanLambda * helixTanLambda));
         const float trackEnergy(pTrack->GetEnergyAtDca());
 
-        // 
+        // Identify best cluster to be associated with this track, using projection of track helix onto endcap
         Cluster *pBestCluster(NULL);
         float smallestDeltaR(std::numeric_limits<float>::max());
 
@@ -60,28 +60,28 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
             if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()))
                 continue;
 
-            // 
+            // Demand that cluster starts in first few layers of ecal
             const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
 
-            if (innerLayer > 10)
+            if (innerLayer > m_maxClusterInnerLayer)
                 continue;
 
-            // 
+            // Ensure that cluster is in same endcap region as track
             const float clusterZPosition(pCluster->GetCentroid(innerLayer).GetZ());
 
-            if (endCapZPosition - std::fabs(clusterZPosition) > 50.f)
+            if (endCapZPosition - std::fabs(clusterZPosition) > m_maxEndCapDeltaZ)
                 continue;
 
-            if (endCapZPosition * trackECalZPosition < 0.f)
+            if (clusterZPosition * trackECalZPosition < 0.f)
                 continue;
 
             // Check consistency of track momentum and cluster energy
             const float chi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetHadronicEnergy(), trackEnergy));
 
-            if (std::fabs(chi) > 2.f)
+            if (std::fabs(chi) > m_maxAbsoluteTrackClusterChi)
                 continue;
 
-            //
+            // Calculate distance of cluster from centre of helix for i) cluster inner layer and ii) first m_nClusterDeltaRLayers layers
             const CartesianVector innerCentroid(pCluster->GetCentroid(innerLayer));
 
             const float innerLayerDeltaX(innerCentroid.GetX() - helixXCentre);
@@ -90,17 +90,16 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
 
             const float meanDeltaR(this->GetMeanDeltaR(pCluster, helixXCentre, helixYCentre, helixRadius));
 
-            // 
-            const bool isInRangeInner((innerLayerDeltaR < 50.f) && (innerLayerDeltaR > -100.f));
-            const bool isInRangeMean((meanDeltaR < 50.f) && (meanDeltaR > -100.f));
+            // Check that cluster is sufficiently close to helix path
+            const bool isInRangeInner((innerLayerDeltaR < m_maxDeltaR) && (innerLayerDeltaR > m_minDeltaR));
+            const bool isInRangeMean((meanDeltaR < m_maxDeltaR) && (meanDeltaR > m_minDeltaR));
 
             if (!isInRangeInner && !isInRangeMean)
                 continue;
 
-            // ATTN: Have changed order of std::min and std::fabs here
-            const float deltaR(std::min(std::fabs(innerLayerDeltaR), std::fabs(meanDeltaR)));
+            const float deltaR(std::min(std::fabs(innerLayerDeltaR), std::fabs(meanDeltaR))); // ATTN: Changed order of min and fabs here
 
-            // 
+            // Calculate projected helix direction at endcap
             CartesianVector helixDirection;
 
             if (0.f != innerLayerDeltaY)
@@ -124,38 +123,38 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
                 helixDirection.SetValues(0.f, helixDCosY, helixDCosZ);
             }
 
-            // 
+            // Calculate direction of first n layers of cluster
             ClusterHelper::ClusterFitResult clusterFitResult;
-            if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, innerLayer, innerLayer + 10, clusterFitResult))
+            if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, innerLayer, innerLayer + m_nClusterFitLayers, clusterFitResult))
                 continue;
 
-            // 
+            // Compare cluster direction with the projected helix direction
             const float directionCosine(helixDirection.GetDotProduct(clusterFitResult.GetDirection()));
 
-            if ((pCluster->GetMipFraction() < 0.5) && (directionCosine < 0.975))
+            if ((directionCosine < m_directionCosineCut) && (pCluster->GetMipFraction() < m_clusterMipFractionCut))
                 continue;
 
-            // 
+            // Use position and direction results to identify track/cluster match
             bool isPossibleMatch(false);
 
-            if (directionCosine > 925.f)
+            if (directionCosine > m_directionCosineCut1)
             {
                 isPossibleMatch = true;
             }
-            else if ((directionCosine > 0.85f) && (deltaR < 50.f))
+            else if ((directionCosine > m_directionCosineCut2) && (deltaR < m_deltaRCut2))
             {
                 isPossibleMatch = true;
             }
-            else if ((directionCosine > 0.75f) && (deltaR < 25.f))
+            else if ((directionCosine > m_directionCosineCut3) && (deltaR < m_deltaRCut3))
             {
                 isPossibleMatch = true;
             }
-            else if ((directionCosine > 0.f) && (deltaR < 10.f))
+            else if ((directionCosine > m_directionCosineCut4) && (deltaR < m_deltaRCut4))
             {
                 isPossibleMatch = true;
             }
 
-            if (isPossibleMatch)
+            if (isPossibleMatch && (deltaR < smallestDeltaR))
             {
                 smallestDeltaR = deltaR;
                 pBestCluster = pCluster;
@@ -179,7 +178,7 @@ float LoopingTrackAssociationAlgorithm::GetMeanDeltaR(Cluster *const pCluster, c
     float deltaRSum(0.f);
     unsigned int nContributions(0);
 
-    const PseudoLayer endLayer(pCluster->GetInnerPseudoLayer() + 10);
+    const PseudoLayer endLayer(pCluster->GetInnerPseudoLayer() + m_nClusterDeltaRLayers);
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
@@ -210,7 +209,69 @@ float LoopingTrackAssociationAlgorithm::GetMeanDeltaR(Cluster *const pCluster, c
 
 StatusCode LoopingTrackAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    // Read settings from xml file here
+    m_maxEndCapDeltaZ = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxEndCapDeltaZ", m_maxEndCapDeltaZ));
+
+    m_maxClusterInnerLayer = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxClusterInnerLayer", m_maxClusterInnerLayer));
+
+    m_maxAbsoluteTrackClusterChi = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackClusterChi", m_maxAbsoluteTrackClusterChi));
+
+    m_maxDeltaR = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxDeltaR", m_maxDeltaR));
+
+    m_minDeltaR = -100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinDeltaR", m_minDeltaR));
+
+    m_nClusterFitLayers = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NClusterFitLayers", m_nClusterFitLayers));
+
+    m_nClusterDeltaRLayers = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NClusterDeltaRLayers", m_nClusterDeltaRLayers));
+
+    m_directionCosineCut = 0.975f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DirectionCosineCut", m_directionCosineCut));
+
+    m_clusterMipFractionCut = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ClusterMipFractionCut", m_clusterMipFractionCut));
+
+    m_directionCosineCut1 = 925.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DirectionCosineCut1", m_directionCosineCut1));
+
+    m_directionCosineCut2 = 0.85f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DirectionCosineCut2", m_directionCosineCut2));
+
+    m_deltaRCut2 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DeltaRCut2", m_deltaRCut2));
+
+    m_directionCosineCut3 = 0.75f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DirectionCosineCut3", m_directionCosineCut3));
+
+    m_deltaRCut3 = 25.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DeltaRCut3", m_deltaRCut3));
+
+    m_directionCosineCut4 = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DirectionCosineCut4", m_directionCosineCut4));
+
+    m_deltaRCut4 = 10.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DeltaRCut4", m_deltaRCut4));
 
     return STATUS_CODE_SUCCESS;
 }
