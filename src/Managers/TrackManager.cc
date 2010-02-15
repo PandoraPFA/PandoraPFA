@@ -112,7 +112,8 @@ StatusCode TrackManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *c
     if (m_nameToTrackListMap.end() == m_nameToTrackListMap.find(trackListName))
         return STATUS_CODE_NOT_FOUND;
 
-    if ((m_algorithmInfoMap.size() > 1) || (m_savedLists.end() == m_savedLists.find(trackListName)))
+    // ATTN: Previously couldn't replace lists unless called from a top-level algorithm: return if (m_algorithmInfoMap.size() > 1)
+    if (m_savedLists.end() == m_savedLists.find(trackListName))
         return STATUS_CODE_NOT_ALLOWED;
 
     m_currentListName = trackListName;

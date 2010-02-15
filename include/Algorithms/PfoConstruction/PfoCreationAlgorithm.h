@@ -26,6 +26,8 @@ public:
     };
 
 private:
+    typedef PandoraContentApi::ParticleFlowObject::Parameters PfoParameters;
+
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
@@ -34,6 +36,15 @@ private:
      *          and the clusters associated with these tracks.
      */
     StatusCode CreateChargedPfos() const;
+
+    /**
+     *  @brief  Add relevant tracks and clusters to a charged pfo
+     * 
+     *  @param  pTrack address of the track to consider
+     *  @param  pfoParameters the pfo parameters to populate
+     *  @param  readSiblingInfo whether to read sibling track information (set to false to avoid multiple counting)
+     */
+    StatusCode PopulateChargedPfo(const pandora::Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo = true) const;
 
     /**
      *  @brief  Create particle flow objects corresponding to neutral particles, These pfos consist only of clusters that have no

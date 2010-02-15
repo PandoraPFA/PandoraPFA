@@ -29,7 +29,7 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    std::string     m_selectedTrackListName;        ///< The name under which to save the new list of selected tracks
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

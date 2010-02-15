@@ -29,6 +29,16 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
+    /**
+     *  @brief  Create list of parent tracks to be used in construction of charged pfos
+     * 
+     *  @param  inputTrackList the input track list
+     *  @param  pfoTrackList to receive the list of parent tracks to be used in construction of charged pfos
+     */
+    StatusCode CreatePfoTrackList(const pandora::TrackList &inputTrackList, pandora::TrackList &pfoTrackList) const;
+
+    std::string             m_inputTrackListName;           ///< The name of the input track list to prepare
+    std::string             m_outputTrackListName;          ///< The name of the output track list, containing parent tracks of charged pfos
     pandora::StringVector   m_associationAlgorithms;        ///< The ordered list of track-cluster associations algorithm to run
 };
 

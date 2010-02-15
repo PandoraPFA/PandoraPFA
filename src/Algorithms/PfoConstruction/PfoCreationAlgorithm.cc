@@ -39,34 +39,48 @@ StatusCode PfoCreationAlgorithm::CreateChargedPfos() const
         pfoParameters.m_momentum = pTrack->GetMomentumAtDca();
         pfoParameters.m_trackList.insert(pTrack);
 
-        // TODO Add any back scatter daughters
+        // Walk along list of associated daughter/sibling tracks and their cluster associations
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateChargedPfo(pTrack, pfoParameters));
 
-        // Add any cluster associated with this track to the pfo
-        Cluster *pAssociatedCluster = NULL;
-
-        if (STATUS_CODE_SUCCESS == pTrack->GetAssociatedCluster(pAssociatedCluster))
-        {
-            if (NULL == pAssociatedCluster)
-                return STATUS_CODE_FAILURE;
-
-            pfoParameters.m_clusterList.insert(pAssociatedCluster);
-
-            // TODO check to see if cluster is leaving detector
-
-            // TODO If the cluster energy is larger than reasonable for track, use cluster energy
-        }
-
-        // TODO Electron ID
-
-        // TODO Split tracks
-
-        // TODO Kinks
-
-        // TODO Prongs
-
-        // TODO V0s
-
+        // Create the charged pfo
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfoParameters));
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PfoCreationAlgorithm::PopulateChargedPfo(const Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo) const
+{
+    // Add any cluster associated with this track to the pfo
+    Cluster *pAssociatedCluster = NULL;
+
+    if (STATUS_CODE_SUCCESS == pTrack->GetAssociatedCluster(pAssociatedCluster))
+    {
+        if (NULL == pAssociatedCluster)
+            return STATUS_CODE_FAILURE;
+
+        pfoParameters.m_clusterList.insert(pAssociatedCluster);
+    }
+
+    // Consider any sibling tracks
+    if (readSiblingInfo)
+    {
+        const TrackList &siblingTrackList(pTrack->GetSiblingTrackList());
+
+        for (TrackList::const_iterator iter = siblingTrackList.begin(), iterEnd = siblingTrackList.end(); iter != iterEnd; ++iter)
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateChargedPfo(*iter, pfoParameters, false));
+        }
+    }
+
+    // Consider any daughter tracks
+    const TrackList &daughterTrackList(pTrack->GetDaughterTrackList());
+
+    for (TrackList::const_iterator iter = daughterTrackList.begin(), iterEnd = daughterTrackList.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateChargedPfo(*iter, pfoParameters));
     }
 
     return STATUS_CODE_SUCCESS;

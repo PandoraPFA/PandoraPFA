@@ -12,7 +12,22 @@ using namespace pandora;
 
 StatusCode TrackSelectionAlgorithm::Run()
 {
-    // Algorithm code here
+    // Read current track list
+    const TrackList *pCurrentTrackList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pCurrentTrackList));
+
+    // Filter current track list to select tracks to be used during clustering
+    TrackList clusteringTrackList;
+
+    for (TrackList::const_iterator iter = pCurrentTrackList->begin(), iterEnd = pCurrentTrackList->end(); iter != iterEnd; ++iter)
+    {
+        if ((*iter)->GetDaughterTrackList().empty())
+            clusteringTrackList.insert(*iter);
+    }
+
+    // Save the filtered list and set it to be the current list for next algorithms
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, clusteringTrackList,
+        m_selectedTrackListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -21,7 +36,9 @@ StatusCode TrackSelectionAlgorithm::Run()
 
 StatusCode TrackSelectionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    // Read settings from xml file here
+    m_selectedTrackListName = "clustering";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "SelectedTrackListName", m_selectedTrackListName));
 
     return STATUS_CODE_SUCCESS;
 }

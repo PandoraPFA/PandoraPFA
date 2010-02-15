@@ -101,9 +101,6 @@ StatusCode TrackRecoveryAlgorithm::Run()
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pTrack, pBestCluster));
             }
         }
-
-        // ATTN: This algorithm previously identified low pt tracks as those for which:
-        //       ((zStart < 100.f) && (zEnd > mainTrackerZExtent - 100.f) && (pTrack->GetEnergyAtDca()< 1.5f))
     }
 
     return STATUS_CODE_SUCCESS;

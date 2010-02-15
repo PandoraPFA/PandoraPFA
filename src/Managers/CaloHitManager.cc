@@ -122,7 +122,8 @@ StatusCode CaloHitManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm 
     if (m_nameToOrderedCaloHitListMap.end() == m_nameToOrderedCaloHitListMap.find(orderedCaloHitListName))
         return STATUS_CODE_NOT_FOUND;
 
-    if ((m_algorithmInfoMap.size() > 1) || (m_savedLists.end() == m_savedLists.find(orderedCaloHitListName)))
+    // ATTN: Previously couldn't replace lists unless called from a top-level algorithm: return if (m_algorithmInfoMap.size() > 1)
+    if (m_savedLists.end() == m_savedLists.find(orderedCaloHitListName))
         return STATUS_CODE_NOT_ALLOWED;
 
     m_currentListName = orderedCaloHitListName;
