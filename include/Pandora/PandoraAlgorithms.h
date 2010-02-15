@@ -18,9 +18,13 @@
 
 #include "Algorithms/Cheating/CheatingClusteringAlgorithm.h"
 #include "Algorithms/Cheating/CheatingPfoCreationAlgorithm.h"
+#include "Algorithms/Cheating/PerfectClusteringAlgorithm.h"
+#include "Algorithms/Cheating/PerfectNeutralHadronClusteringAlgorithm.h"
+#include "Algorithms/Cheating/PerfectPhotonClusteringAlgorithm.h"
 
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
+#include "Algorithms/Clustering/ForcedClusteringAlgorithm.h"
 
 #include "Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.h"
 #include "Algorithms/FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
@@ -64,8 +68,12 @@
     d("TrackSelection",                         TrackSelectionAlgorithm::Factory)                           \
     d("CheatingClustering",                     CheatingClusteringAlgorithm::Factory)                       \
     d("CheatingPfoCreation",                    CheatingPfoCreationAlgorithm::Factory)                      \
+    d("PerfectClustering",                      PerfectClusteringAlgorithm::Factory)                        \
+    d("PerfectNeutralHadronClustering",         PerfectNeutralHadronClusteringAlgorithm::Factory)           \
+    d("PerfectPhotonClustering",                PerfectPhotonClusteringAlgorithm::Factory)                  \
     d("Clustering",                             ClusteringAlgorithm::Factory)                               \
     d("ECalPhotonClustering",                   ECalPhotonClusteringAlgorithm::Factory)                     \
+    d("ForcedClustering",                       ForcedClusteringAlgorithm::Factory)                         \
     d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                      \
     d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                   \
     d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
