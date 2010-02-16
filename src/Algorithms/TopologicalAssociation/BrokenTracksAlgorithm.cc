@@ -17,7 +17,7 @@ StatusCode BrokenTracksAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     // Fit a straight line to start and end of all clusters in the current list
     ClusterFitResultMap startClusterFitResultMap;
@@ -25,6 +25,9 @@ StatusCode BrokenTracksAlgorithm::Run()
 
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
+        if (!ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            continue;
+
         ClusterFitResult startClusterFitResult;
         (void) ClusterHelper::FitStart(*iter, m_nStartLayersToFit, startClusterFitResult);
 
@@ -49,9 +52,6 @@ StatusCode BrokenTracksAlgorithm::Run()
     {
         Cluster *pClusterI = iterI->first;
 
-        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
-            continue;
-
         const ClusterFitResult &clusterFitResultI = iterI->second;
         const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
 
@@ -63,9 +63,6 @@ StatusCode BrokenTracksAlgorithm::Run()
             ++iterJ;
 
             if (pClusterI == pClusterJ)
-                continue;
-
-            if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
             const PseudoLayer innerLayerJ(pClusterJ->GetInnerPseudoLayer());

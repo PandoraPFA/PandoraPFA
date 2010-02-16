@@ -39,6 +39,9 @@ private:
      */
     float GetClosestDistanceBetweenOuterLayerHits(const pandora::Cluster *const pClusterI, const pandora::Cluster *const pClusterJ) const;
 
+    typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
+    typedef std::map<pandora::Cluster *, ClusterFitResult> ClusterFitResultMap;
+
     unsigned int    m_nLayersToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_fitChi2Cut;                       ///< The chi2 cut to apply to fit results
 

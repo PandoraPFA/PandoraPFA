@@ -20,14 +20,16 @@ StatusCode LoopingTracksAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     // Fit a straight line to the last n occupied pseudo layers in each cluster and store results
-    typedef std::map<Cluster *, ClusterHelper::ClusterFitResult> ClusterFitResultMap;
     ClusterFitResultMap clusterFitResultMap;
 
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
+        if (!ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            continue;
+
         ClusterHelper::ClusterFitResult clusterFitResult;
 
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(*iter, m_nLayersToFit, clusterFitResult))
@@ -40,15 +42,10 @@ StatusCode LoopingTracksAlgorithm::Run()
             return STATUS_CODE_FAILURE;
     }
 
-    ClusterList deletedClusterList;
-
     // Loop over cluster combinations, comparing fit results to determine whether clusters should be merged
     for (ClusterFitResultMap::const_iterator iterI = clusterFitResultMap.begin(); iterI != clusterFitResultMap.end(); ++iterI)
     {
         Cluster *pClusterI = iterI->first;
-
-        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
-            continue;
 
         const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
         const bool isOutsideECalI(pGeometryHelper->IsOutsideECal(pClusterI->GetCentroid(outerLayerI)));
@@ -63,9 +60,6 @@ StatusCode LoopingTracksAlgorithm::Run()
             Cluster *pClusterJ = iterJ->first;
             const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
             ++iterJ;
-
-            if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
-                continue;
 
             // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
             const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
@@ -123,7 +117,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             }
 
             // Now have sufficient information to decide whether to join clusters
-            if(isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
+            if (isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
                 // TODO decide which to delete and which to enlarge
                 // TODO decide whether to continue loop over daughter cluster candidates after merging

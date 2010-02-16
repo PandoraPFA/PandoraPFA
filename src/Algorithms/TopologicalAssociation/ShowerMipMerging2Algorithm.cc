@@ -17,7 +17,7 @@ StatusCode ShowerMipMerging2Algorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end(); ++iterI)
     {
