@@ -332,7 +332,7 @@ public:
     static StatusCode RemoveAllTrackClusterAssociations(const pandora::Algorithm &algorithm);
 
     /**
-     *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
+     *  @brief  Save the current cluster list
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
@@ -340,7 +340,7 @@ public:
     static StatusCode SaveClusterList(const pandora::Algorithm &algorithm, const std::string newClusterListName);
 
     /**
-     *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
+     *  @brief  Save the current cluster list
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name

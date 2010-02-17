@@ -52,7 +52,7 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         {
             Cluster *pCluster = *clusterIter;
 
-            if (0 == pCluster->GetNCaloHits())
+            if (0 == pCluster->GetNCaloHits() || pCluster->IsPhoton())
                 continue;
 
             float trackClusterDistance(std::numeric_limits<float>::max());

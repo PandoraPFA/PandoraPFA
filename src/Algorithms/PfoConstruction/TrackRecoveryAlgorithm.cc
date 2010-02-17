@@ -54,7 +54,7 @@ StatusCode TrackRecoveryAlgorithm::Run()
         {
             Cluster *pCluster = *iterC;
 
-            if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()))
+            if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()) || pCluster->IsPhoton())
                 continue;
 
             const bool isLeavingCluster(ClusterHelper::IsClusterLeavingDetector(pCluster));

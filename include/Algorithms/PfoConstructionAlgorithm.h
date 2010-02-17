@@ -31,6 +31,7 @@ private:
 
     std::string     m_clusterPreparationAlgorithmName;      ///< The name of the cluster preparation algorithm to run
     std::string     m_trackPreparationAlgorithmName;        ///< The name of the track preparation algorithm to run
+    std::string     m_fragmentRemovalAlgorithmName;         ///< The name of the fragment removal algorithm to run
     std::string     m_pfoCreationAlgorithmName;             ///< The name of the pfo creation algorithm to run
 };
 

@@ -38,7 +38,7 @@ StatusCode TrackRecoveryInteractionsAlgorithm::Run()
         {
             Cluster *pCluster = *iterC;
 
-            if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()))
+            if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()) || pCluster->IsPhoton())
                 continue;
 
             float trackClusterDistance(std::numeric_limits<float>::max());
