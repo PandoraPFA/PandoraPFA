@@ -425,20 +425,21 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
         if(dist > 10.0 && pid > 0.7)accept = true;
     }
 
-
     if( nhits>=m_minimumHitsInClusters )
     {    
         // Debugging info
-        
-        // compute fitresults of cluster --> to get the position
-        const ClusterHelper::ClusterFitResult& fitResult = pPhotonCandidateCluster->GetFitToAllHitsResult();
-        const CartesianVector& clusterDirection = fitResult.GetDirection();
-        float radius;
-        float phi;
-        float theta;
-        clusterDirection.GetSphericalCoordinates( radius, phi, theta );
-        // ---
+        float radius(std::numeric_limits<float>::max());
+        float phi(std::numeric_limits<float>::max());
+        float theta(std::numeric_limits<float>::max());
 
+        // compute fitresults of cluster --> to get the position
+        const ClusterHelper::ClusterFitResult &fitResult(pPhotonCandidateCluster->GetFitToAllHitsResult());
+
+        if (fitResult.IsFitSuccessful())
+        {
+            const CartesianVector &clusterDirection(fitResult.GetDirection());
+            clusterDirection.GetSphericalCoordinates( radius, phi, theta );
+        }
 
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "pid", pid ));
         PANDORA_MONITORING_API(SetTreeVariable("photonId", "fraction", fraction ));
@@ -480,7 +481,9 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     }
 
     if(useOriginalCluster){
-        std::cout << "Use original cluster " << std::endl;
+        if (m_producePrintoutStatements > 0)
+            std::cout << "Use original cluster " << std::endl;
+
         // we don't need the photon candidate any more
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster));
 
@@ -719,7 +722,8 @@ StatusCode ECalPhotonClusteringAlgorithm::TransverseProfile(const Cluster* clust
     float dmin=9999.;
 
     while(stillfindingpeaks){
-        std::cout << "PEAK SEARCH" << std::endl;
+        if (m_producePrintoutStatements > 0)
+            std::cout << "PEAK SEARCH" << std::endl;
 
         float peakheight = 0.;
         int   ipeak =0;
@@ -1058,7 +1062,9 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
                 }
 
                 // create the new cluster here
-                std::cout << "create new cluster " << std::endl;
+                if (m_producePrintoutStatements > 0)
+                    std::cout << "create new cluster " << std::endl;
+
                 PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitVector, newCluster ));
 
             }

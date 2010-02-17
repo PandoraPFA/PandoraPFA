@@ -26,15 +26,12 @@ StatusCode ECalPhotonIdAlgorithm::Run()
     const ClusterList* pInitialClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pInitialClusterList ));
 
-    std::cout << "save clusterlist A  size " << pInitialClusterList->size() << std::endl;
     if( !pInitialClusterList->empty() )
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName));
 
-    std::cout << "run photonextraction" << std::endl;
     const ClusterList* pPhotonClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_photonExtractionAlgorithmName, pPhotonClusterList));
 
-    std::cout << "save clusterlist B  size " << pPhotonClusterList->size() << std::endl;
     if( !pPhotonClusterList->empty() )
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName));
 
