@@ -28,12 +28,16 @@ enum StatusCode
     STATUS_CODE_UNCHANGED
 };
 
+// TODO: check if __FUNCTION__ macro is available for all platforms and compilers
+
 #define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                \
     {                                                                                           \
         StatusCode statusCode = Command;                                                        \
         if (statusCode Operator StatusCode1)                                                    \
         {                                                                                       \
             std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl; \
+            std::cout << "    in function: " << __FUNCTION__ << std::endl;                      \
+            std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;\
             return statusCode;                                                                  \
         }                                                                                       \
     }
@@ -44,6 +48,8 @@ enum StatusCode
         if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))             \
         {                                                                                       \
             std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl; \
+            std::cout << "    in function: " << __FUNCTION__ << std::endl;                      \
+            std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;\
             return statusCode;                                                                  \
         }                                                                                       \
     }
@@ -54,6 +60,8 @@ enum StatusCode
         if (statusCode Operator StatusCode1)                                                    \
         {                                                                                       \
             std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;  \
+            std::cout << "    in function: " << __FUNCTION__ << std::endl;                      \
+            std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;\
             throw StatusCodeException(statusCode);                                              \
         }                                                                                       \
     }
@@ -64,6 +72,8 @@ enum StatusCode
         if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))             \
         {                                                                                       \
             std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;  \
+            std::cout << "    in function: " << __FUNCTION__ << std::endl;                      \
+            std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;\
             throw StatusCodeException(statusCode);                                              \
         }                                                                                       \
     }
