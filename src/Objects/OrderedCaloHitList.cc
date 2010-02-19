@@ -115,6 +115,9 @@ bool OrderedCaloHitList::operator= (const OrderedCaloHitList &rhs)
     if (this == &rhs)
         return true;
 
+    if (!this->empty())
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->Reset());
+
     return (STATUS_CODE_SUCCESS == this->Add(rhs));
 }
 

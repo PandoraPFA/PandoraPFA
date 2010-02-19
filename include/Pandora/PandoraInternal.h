@@ -100,6 +100,7 @@ typedef std::set<Cluster *> ClusterList;
 typedef std::set<MCParticle *> MCParticleList;
 typedef std::vector<TrackState *> TrackStateList;
 typedef std::vector<CaloHit *> CaloHitVector;
+typedef std::vector<Track *> TrackVector;
 typedef std::vector<Cluster *> ClusterVector;
 typedef std::vector<ParticleFlowObject *> ParticleFlowObjectList;
 

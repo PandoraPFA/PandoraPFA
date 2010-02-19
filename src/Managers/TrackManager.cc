@@ -113,17 +113,19 @@ StatusCode TrackManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *c
         return STATUS_CODE_NOT_FOUND;
 
     // ATTN: Previously couldn't replace lists unless called from a top-level algorithm: return if (m_algorithmInfoMap.size() > 1)
+    //       Then algorithhm parent list was only replaced for algorithm calling this function.
     if (m_savedLists.end() == m_savedLists.find(trackListName))
         return STATUS_CODE_NOT_ALLOWED;
 
+    if (m_algorithmInfoMap.end() == m_algorithmInfoMap.find(pAlgorithm))
+        return STATUS_CODE_FAILURE;
+
     m_currentListName = trackListName;
 
-    AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
-
-    if (m_algorithmInfoMap.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    iter->second.m_parentListName = trackListName;
+    for (AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.begin(), iterEnd = m_algorithmInfoMap.end(); iter != iterEnd; ++iter)
+    {
+        iter->second.m_parentListName = trackListName;
+    }
 
     return STATUS_CODE_SUCCESS;
 }
