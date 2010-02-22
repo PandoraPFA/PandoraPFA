@@ -20,9 +20,9 @@
 namespace pandora
 {
 
-StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult)
+StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult)
 {
-    if (nOccupiedLayers < 2)
+    if (maxOccupiedLayers < 2)
         return STATUS_CODE_INVALID_PARAMETER;
 
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
@@ -31,7 +31,7 @@ StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int n
     if (0 == listSize)
         return STATUS_CODE_NOT_INITIALIZED;
 
-    if (nOccupiedLayers > listSize)
+    if (listSize < 2)
         return STATUS_CODE_OUT_OF_RANGE;
 
     unsigned int occupiedLayerCount(0);
@@ -39,7 +39,7 @@ StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int n
     ClusterFitPointList clusterFitPointList;
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
-        if (++occupiedLayerCount > nOccupiedLayers)
+        if (++occupiedLayerCount > maxOccupiedLayers)
             break;
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
@@ -53,9 +53,9 @@ StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int n
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult)
+StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult)
 {
-    if (nOccupiedLayers < 2)
+    if (maxOccupiedLayers < 2)
         return STATUS_CODE_INVALID_PARAMETER;
 
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
@@ -64,7 +64,7 @@ StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int nOc
     if (0 == listSize)
         return STATUS_CODE_NOT_INITIALIZED;
 
-    if (nOccupiedLayers > listSize)
+    if (listSize < 2)
         return STATUS_CODE_OUT_OF_RANGE;
 
     unsigned int occupiedLayerCount(0);
@@ -72,7 +72,7 @@ StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int nOc
     ClusterFitPointList clusterFitPointList;
     for (OrderedCaloHitList::const_reverse_iterator iter = orderedCaloHitList.rbegin(), iterEnd = orderedCaloHitList.rend(); iter != iterEnd; ++iter)
     {
-        if (++occupiedLayerCount > nOccupiedLayers)
+        if (++occupiedLayerCount > maxOccupiedLayers)
             break;
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)

@@ -39,7 +39,12 @@ private:
      */
     float GetMeanDeltaR(pandora::Cluster *const pCluster, const float helixXCentre, const float helixYCentre, const float helixRadius) const;
 
+    float           m_maxAbsoluteTrackD0;               ///< Max absolute track d0 value to allow association with a cluster
+    float           m_maxAbsoluteTrackZ0;               ///< Max absolute track z0 value to allow association with a cluster
     float           m_maxEndCapDeltaZ;                  ///< Max z separation between track ecal projection/cluster start and ecal endcap
+
+    unsigned int    m_minHitsInCluster;                 ///< Min number of calo hits in cluster
+    unsigned int    m_minOccupiedLayersInCluster;       ///< Min number of occupied layers in cluster
     unsigned int    m_maxClusterInnerLayer;             ///< Max cluster inner pseudo layer to allow association
     float           m_maxAbsoluteTrackClusterChi;       ///< Max absolute track-cluster consistency chi value to allow association
 

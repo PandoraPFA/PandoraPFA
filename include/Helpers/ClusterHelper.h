@@ -184,19 +184,19 @@ public:
      *  @brief  Fit points in first n occupied pseudolayers of a cluster
      * 
      *  @param  pCluster the cluster containing the ordered list of calo hits to fit
-     *  @param  nOccupiedLayers the number of occupied pseudo layers to consider
+     *  @param  maxOccupiedLayers the maximum number of occupied pseudo layers to consider
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitStart(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult);
+    static StatusCode FitStart(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Fit points in last n occupied pseudolayers of a cluster
      * 
      *  @param  pCluster the cluster containing the ordered list of calo hits to fit
-     *  @param  nOccupiedLayers the number of occupied pseudo layers to consider
+     *  @param  maxOccupiedLayers the maximum number of occupied pseudo layers to consider
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitEnd(const Cluster *const pCluster, unsigned int nOccupiedLayers, ClusterFitResult &clusterFitResult);
+    static StatusCode FitEnd(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Fit all cluster points within the specified (inclusive) pseudolayer range

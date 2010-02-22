@@ -15,21 +15,28 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
+    TrackVector trackVector(pTrackList->begin(), pTrackList->end());
+    std::sort(trackVector.begin(), trackVector.end(), Track::SortByEnergy);
+
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     static const float endCapZPosition(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetInnerZCoordinate());
 
     // Loop over all unassociated tracks in the current track list
-    for (TrackList::const_iterator iterT = pTrackList->begin(), iterTEnd = pTrackList->end(); iterT != iterTEnd; ++iterT)
+    for (TrackVector::const_iterator iterT = trackVector.begin(), iterTEnd = trackVector.end(); iterT != iterTEnd; ++iterT)
     {
         Track *pTrack = *iterT;
 
         // Use only unassociated tracks that are flagged as reaching ECal
-        if (pTrack->HasAssociatedCluster() || !pTrack->ReachesECal())
+        // TODO decide whether to use only tracks that are flagged as reaching ECal
+        if (pTrack->HasAssociatedCluster())// || !pTrack->ReachesECal())
             continue;
 
         if (!pTrack->GetDaughterTrackList().empty())
+            continue;
+
+        if ((std::fabs(pTrack->GetD0()) > m_maxAbsoluteTrackD0) || (std::fabs(pTrack->GetZ0()) > m_maxAbsoluteTrackZ0))
             continue;
 
         // Use only tracks that reach the ecal endcap, not barrel
@@ -57,7 +64,10 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         {
             Cluster *pCluster = *iterC;
 
-            if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()))
+            if (!pCluster->GetAssociatedTrackList().empty())
+                continue;
+
+            if ((pCluster->GetNCaloHits() < m_minHitsInCluster) || (pCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
                 continue;
 
             // Demand that cluster starts in first few layers of ecal
@@ -87,7 +97,6 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
             const float innerLayerDeltaX(innerCentroid.GetX() - helixXCentre);
             const float innerLayerDeltaY(innerCentroid.GetY() - helixYCentre);
             const float innerLayerDeltaR(std::sqrt((innerLayerDeltaX * innerLayerDeltaX) + (innerLayerDeltaY * innerLayerDeltaY)) - std::fabs(helixRadius));
-
             const float meanDeltaR(this->GetMeanDeltaR(pCluster, helixXCentre, helixYCentre, helixRadius));
 
             // Check that cluster is sufficiently close to helix path
@@ -125,7 +134,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
 
             // Calculate direction of first n layers of cluster
             ClusterHelper::ClusterFitResult clusterFitResult;
-            if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, innerLayer, innerLayer + m_nClusterFitLayers, clusterFitResult))
+            if (STATUS_CODE_SUCCESS != ClusterHelper::FitStart(pCluster, m_nClusterFitLayers, clusterFitResult))
                 continue;
 
             // Compare cluster direction with the projected helix direction
@@ -209,9 +218,25 @@ float LoopingTrackAssociationAlgorithm::GetMeanDeltaR(Cluster *const pCluster, c
 
 StatusCode LoopingTrackAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    m_maxAbsoluteTrackD0 = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackD0", m_maxAbsoluteTrackD0));
+
+    m_maxAbsoluteTrackZ0 = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackZ0", m_maxAbsoluteTrackZ0));
+
     m_maxEndCapDeltaZ = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxEndCapDeltaZ", m_maxEndCapDeltaZ));
+
+    m_minHitsInCluster = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitsInCluster", m_minHitsInCluster));
+
+    m_minOccupiedLayersInCluster = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 
     m_maxClusterInnerLayer = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -233,7 +258,7 @@ StatusCode LoopingTrackAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlH
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NClusterFitLayers", m_nClusterFitLayers));
 
-    m_nClusterDeltaRLayers = 10;
+    m_nClusterDeltaRLayers = 9;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NClusterDeltaRLayers", m_nClusterDeltaRLayers));
 
@@ -245,7 +270,7 @@ StatusCode LoopingTrackAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlH
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterMipFractionCut", m_clusterMipFractionCut));
 
-    m_directionCosineCut1 = 925.f;
+    m_directionCosineCut1 = 0.925f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DirectionCosineCut1", m_directionCosineCut1));
 
