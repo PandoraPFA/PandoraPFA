@@ -100,7 +100,7 @@ private:
     /**
      *  @brief  Get the cluster correction layer. Working from innermost to outermost layer, the correction layer is that in which:
      *          i)  the number of hit-layers passes m_correctionLayerNHitLayers, or
-     *          ii) the total calo hit hadronic energy passes m_correctionLayerHadronicEnergy
+     *          ii) the total calo hit hadronic energy passes (m_correctionLayerEnergyFraction * cluster energy)
      * 
      *  @param  pDaughterCluster address of the daughter cluster candidate
      * 
@@ -138,7 +138,7 @@ private:
     float               m_globalChi2Penalty;                        ///< Required evidence penalty for using global chi2 measure
 
     unsigned int        m_correctionLayerNHitLayers;                ///< Number of hit-layers passed to identify correction layer
-    float               m_correctionLayerHadronicEnergy;            ///< Total hadronic energy sum passed to identify correction layer
+    float               m_correctionLayerEnergyFraction;            ///< Fraction of total hadronic energy passed to identify correction layer
 
     unsigned int        m_contactEvidenceNLayers1;                  ///< Contact evidence n layers cut 1
     unsigned int        m_contactEvidenceNLayers2;                  ///< Contact evidence n layers cut 2

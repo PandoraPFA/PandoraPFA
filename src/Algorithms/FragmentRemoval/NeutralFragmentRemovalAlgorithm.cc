@@ -145,10 +145,11 @@ bool NeutralFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterCont
 StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
     Cluster *&pBestDaughterCluster) const
 {
+    float highestEvidence(0.f);
+
     for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = iterI->first;
-        float highestEvidence(0.f);
 
         for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
         {
@@ -266,7 +267,7 @@ StatusCode NeutralFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinDaughterCaloHits", m_minDaughterCaloHits));
 
-    m_minDaughterHadronicEnergy = 0.1f;
+    m_minDaughterHadronicEnergy = 0.025f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinDaughterHadronicEnergy", m_minDaughterHadronicEnergy));
 

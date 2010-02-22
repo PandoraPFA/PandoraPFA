@@ -29,14 +29,14 @@ StatusCode MainFragmentRemovalAlgorithm::Run()
 
         if ((NULL != pBestParentCluster) && (NULL != pBestDaughterCluster))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster,
-                pBestDaughterCluster));
-
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetAffectedClusters(clusterContactMap, pBestParentCluster,
                 pBestDaughterCluster, affectedClusters));
 
             clusterContactMap.erase(clusterContactMap.find(pBestDaughterCluster));
             shouldRecalculate = true;
+
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster,
+                pBestDaughterCluster));
         }
     }
 
@@ -127,6 +127,8 @@ bool MainFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact
 StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
     Cluster *&pBestDaughterCluster) const
 {
+    float highestExcessEvidence(0.f);
+
     for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = iterI->first;
@@ -136,7 +138,6 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
         if (!this->PassesPreselection(pDaughterCluster, iterI->second, globalDeltaChi2))
             continue;
 
-        float highestExcessEvidence(0.f);
         const PseudoLayer daughterCorrectionLayer(this->GetClusterCorrectionLayer(pDaughterCluster));
 
         for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
@@ -162,6 +163,7 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
 
     return STATUS_CODE_SUCCESS;
 }
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector,
@@ -301,27 +303,27 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     const PseudoLayer innerLayer(pDaughterCluster->GetInnerPseudoLayer());
     const PseudoLayer outerLayer(pDaughterCluster->GetOuterPseudoLayer());
 
-    if(correctionLayer <= halfECal)
+    if (correctionLayer <= halfECal)
     {
         layerCorrection = m_layerCorrection1;
     }
-    else if((correctionLayer > halfECal) && (correctionLayer <= nECalLayers))
+    else if ((correctionLayer > halfECal) && (correctionLayer <= nECalLayers))
     {
         layerCorrection = m_layerCorrection2;
     }
-    else if(correctionLayer > nECalLayers)
+    else if (correctionLayer > nECalLayers)
     {
         layerCorrection = m_layerCorrection3;
     }
-    else if(correctionLayer > nECalLayers + halfHCal)
+    else if (correctionLayer > nECalLayers + halfHCal)
     {
         layerCorrection = m_layerCorrection4;
     }
 
-    if((outerLayer - innerLayer < m_layerCorrectionLayerSpan) && (innerLayer > m_layerCorrectionMinInnerLayer))
+    if ((outerLayer - innerLayer < m_layerCorrectionLayerSpan) && (innerLayer > m_layerCorrectionMinInnerLayer))
         layerCorrection = m_layerCorrection5;
 
-    if(std::abs(static_cast<int>(correctionLayer) - static_cast<int>(nECalLayers)) < m_layerCorrectionLayersFromECal)
+    if (std::abs(static_cast<int>(correctionLayer) - static_cast<int>(nECalLayers)) < m_layerCorrectionLayersFromECal)
         layerCorrection = m_layerCorrection6;
 
     // 2. Leaving cluster corrections
@@ -333,23 +335,23 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     // 3. Energy correction
     float energyCorrection(0.f);
 
-    if(daughterClusterEnergy < m_energyCorrectionThreshold)
+    if (daughterClusterEnergy < m_energyCorrectionThreshold)
         energyCorrection = daughterClusterEnergy - m_energyCorrectionThreshold;
 
     // 4. Low energy fragment corrections
     float lowEnergyCorrection(0.f);
 
-    if(daughterClusterEnergy < m_lowEnergyCorrectionThreshold)
+    if (daughterClusterEnergy < m_lowEnergyCorrectionThreshold)
     {
         const unsigned int nHitLayers(pDaughterCluster->GetOrderedCaloHitList().size());
 
-        if(nHitLayers < m_lowEnergyCorrectionNHitLayers1)
+        if (nHitLayers < m_lowEnergyCorrectionNHitLayers1)
             lowEnergyCorrection += m_lowEnergyCorrection1;
 
-        if(nHitLayers < m_lowEnergyCorrectionNHitLayers2)
+        if (nHitLayers < m_lowEnergyCorrectionNHitLayers2)
             lowEnergyCorrection += m_lowEnergyCorrection2;
 
-        if(correctionLayer > nECalLayers)
+        if (correctionLayer > nECalLayers)
             lowEnergyCorrection += m_lowEnergyCorrection3;
     }
 
@@ -358,36 +360,36 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     const float radialDirectionCosine(pDaughterCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
         pDaughterCluster->GetFitToAllHitsResult().GetRadialDirectionCosine() : 0.f);
 
-    if(radialDirectionCosine < m_angularCorrectionOffset)
+    if (radialDirectionCosine < m_angularCorrectionOffset)
         angularCorrection = m_angularCorrectionConstant + (radialDirectionCosine - m_angularCorrectionOffset) * m_angularCorrectionGradient;
 
     // 6. Photon cluster corrections
     float photonCorrection(0.f);
 
-    if(pDaughterCluster->IsPhoton())
+    if (pDaughterCluster->IsPhoton())
     {
         const float showerStart(pDaughterCluster->GetProfileShowerStart());
         const float photonFraction(pDaughterCluster->GetProfilePhotonFraction());
 
-        if(daughterClusterEnergy > m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart1)
+        if (daughterClusterEnergy > m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart1)
             photonCorrection = m_photonCorrection1;
 
-        if(daughterClusterEnergy > m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2)
+        if (daughterClusterEnergy > m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2)
             photonCorrection = m_photonCorrection2;
 
-        if(daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2)
+        if (daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2)
             photonCorrection = m_photonCorrection3;
 
-        if(daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2 && photonFraction < m_photonCorrectionPhotonFraction1)
+        if (daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2 && photonFraction < m_photonCorrectionPhotonFraction1)
             photonCorrection = m_photonCorrection4;
 
-        if(daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart > m_photonCorrectionShowerStart2)
+        if (daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart > m_photonCorrectionShowerStart2)
             photonCorrection = m_photonCorrection5;
 
-        if(daughterClusterEnergy < m_photonCorrectionEnergy2 && (showerStart > m_photonCorrectionShowerStart2 || photonFraction > m_photonCorrectionPhotonFraction2))
+        if (daughterClusterEnergy < m_photonCorrectionEnergy2 && (showerStart > m_photonCorrectionShowerStart2 || photonFraction > m_photonCorrectionPhotonFraction2))
             photonCorrection = m_photonCorrection6;
 
-        if(daughterClusterEnergy < m_photonCorrectionEnergy3 && showerStart > m_photonCorrectionShowerStart2)
+        if (daughterClusterEnergy < m_photonCorrectionEnergy3 && showerStart > m_photonCorrectionShowerStart2)
             photonCorrection = m_photonCorrection7;
     }
 
@@ -405,6 +407,7 @@ PseudoLayer MainFragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluste
     float energySum(0.f);
     unsigned int layerCounter(0);
 
+    const float totalClusterEnergy(pDaughterCluster->GetHadronicEnergy());
     const OrderedCaloHitList &orderedCaloHitList(pDaughterCluster->GetOrderedCaloHitList());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
@@ -414,7 +417,7 @@ PseudoLayer MainFragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluste
             energySum += (*hitIter)->GetHadronicEnergy();
         }
 
-        if ((++layerCounter > m_correctionLayerNHitLayers) || (energySum > m_correctionLayerHadronicEnergy))
+        if ((++layerCounter >= m_correctionLayerNHitLayers) || (energySum > m_correctionLayerEnergyFraction * totalClusterEnergy))
         {
             return iter->first;
         }
@@ -467,7 +470,7 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinDaughterCaloHits", m_minDaughterCaloHits));
 
-    m_minDaughterHadronicEnergy = 0.1f;
+    m_minDaughterHadronicEnergy = 0.025f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinDaughterHadronicEnergy", m_minDaughterHadronicEnergy));
 
@@ -530,9 +533,9 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CorrectionLayerNHitLayers", m_correctionLayerNHitLayers));
 
-    m_correctionLayerHadronicEnergy = 0.25f;
+    m_correctionLayerEnergyFraction = 0.25f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "CorrectionLayerHadronicEnergy", m_correctionLayerHadronicEnergy));
+        "CorrectionLayerEnergyFraction", m_correctionLayerEnergyFraction));
 
     // Total evidence: Contact evidence
     m_contactEvidenceNLayers1 = 10;
