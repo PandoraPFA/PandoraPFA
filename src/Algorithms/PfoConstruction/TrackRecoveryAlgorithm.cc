@@ -15,16 +15,23 @@ StatusCode TrackRecoveryAlgorithm::Run()
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
+    TrackVector trackVector(pTrackList->begin(), pTrackList->end());
+    std::sort(trackVector.begin(), trackVector.end(), Track::SortByEnergy);
+
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     // Loop over all unassociated tracks in the current track list
-    for (TrackList::const_iterator iterT = pTrackList->begin(), iterTEnd = pTrackList->end(); iterT != iterTEnd; ++iterT)
+    for (TrackVector::const_iterator iterT = trackVector.begin(), iterTEnd = trackVector.end(); iterT != iterTEnd; ++iterT)
     {
         Track *pTrack = *iterT;
 
         // Use only unassociated tracks that are flagged as reaching ECal
-        if (pTrack->HasAssociatedCluster() || !pTrack->ReachesECal())
+        // TODO decide whether to use only tracks that are flagged as reaching ECal
+        if (pTrack->HasAssociatedCluster())// || !pTrack->ReachesECal())
+            continue;
+
+        if ((std::fabs(pTrack->GetD0()) > m_maxAbsoluteTrackD0) || (std::fabs(pTrack->GetZ0()) > m_maxAbsoluteTrackZ0))
             continue;
 
         // To avoid tracks split along main track z-axis, examine number of parent/daughter tracks and start z coordinate
@@ -110,6 +117,14 @@ StatusCode TrackRecoveryAlgorithm::Run()
 
 StatusCode TrackRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    m_maxAbsoluteTrackD0 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackD0", m_maxAbsoluteTrackD0));
+
+    m_maxAbsoluteTrackZ0 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackZ0", m_maxAbsoluteTrackZ0));
+
     m_maxTrackZStart = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackZStart", m_maxTrackZStart));
@@ -134,7 +149,7 @@ StatusCode TrackRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "BarrelMaxTrackClusterDistance", m_barrelMaxTrackClusterDistance));
 
-    m_maxSearchLayer = 20;
+    m_maxSearchLayer = 19;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSearchLayer", m_maxSearchLayer));
 

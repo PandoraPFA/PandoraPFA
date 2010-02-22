@@ -18,6 +18,9 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
+    TrackVector trackVector(pTrackList->begin(), pTrackList->end());
+    std::sort(trackVector.begin(), trackVector.end(), Track::SortByEnergy);
+
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
@@ -25,14 +28,13 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCurrentTrackClusterAssociations(*this));
 
     // Look to make new associations
-    for (TrackList::const_iterator trackIter = pTrackList->begin(), trackIterEnd = pTrackList->end();
-        trackIter != trackIterEnd; ++trackIter)
+    for (TrackVector::const_iterator trackIter = trackVector.begin(), trackIterEnd = trackVector.end(); trackIter != trackIterEnd; ++trackIter)
     {
         Track *pTrack = *trackIter;
 
-        // Use only tracks that are flagged as reaching ECal
-        if (!pTrack->ReachesECal())
-            continue;
+        // TODO decide whether to use only tracks that are flagged as reaching ECal
+        //    if (!pTrack->ReachesECal())
+        //        continue;
 
         if (!pTrack->GetDaughterTrackList().empty())
             continue;
@@ -119,7 +121,7 @@ StatusCode TrackClusterAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlH
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackClusterDistance", m_maxTrackClusterDistance));
 
-    m_maxSearchLayer = 10;
+    m_maxSearchLayer = 9;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSearchLayer", m_maxSearchLayer));
 

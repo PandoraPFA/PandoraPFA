@@ -56,13 +56,20 @@ private:
          */
         float GetClosestApproach() const;
 
+        /**
+         *  @brief  Operator< to order by address of associated cluster
+         * 
+         *  @param  rhs association info to compare with
+         */
+        bool operator< (const AssociationInfo &rhs) const;
+
     private:
-        Cluster    *m_pCluster;                         ///< 
-        float       m_closestApproach;                  ///< 
+        Cluster    *m_pCluster;                         ///< The cluster to which an association would be made
+        float       m_closestApproach;                  ///< The distance of closest approach
     };
 
-    typedef std::vector<AssociationInfo> AssociationInfoVector;
-    typedef std::map<Track *, AssociationInfoVector> TrackAssociationInfoMap;
+    typedef std::set<AssociationInfo> AssociationInfoSet;
+    typedef std::map<Track *, AssociationInfoSet> TrackAssociationInfoMap;
 
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
@@ -80,6 +87,9 @@ private:
      *  @param  trackAssociationInfoMap the track association info map
      */
     StatusCode MakeTrackClusterAssociations(TrackAssociationInfoMap &trackAssociationInfoMap) const;
+
+    float           m_maxAbsoluteTrackD0;               ///< Max absolute track d0 value to allow association with a cluster
+    float           m_maxAbsoluteTrackZ0;               ///< Max absolute track z0 value to allow association with a cluster
 
     float           m_maxTrackClusterDeltaZ;            ///< Max z separation between track ecal projection and cluster to allow association
     float           m_maxAbsoluteTrackClusterChi;       ///< Max absolute track-cluster consistency chi value to allow association
@@ -124,6 +134,13 @@ inline Cluster *TrackRecoveryHelixAlgorithm::AssociationInfo::GetCluster() const
 inline float TrackRecoveryHelixAlgorithm::AssociationInfo::GetClosestApproach() const
 {
     return m_closestApproach;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool TrackRecoveryHelixAlgorithm::AssociationInfo::operator< (const TrackRecoveryHelixAlgorithm::AssociationInfo &rhs) const
+{
+    return (this->m_pCluster > rhs.m_pCluster);
 }
 
 #endif // #ifndef TRACK_RECOVERY_HELIX_ALGORITHM_H

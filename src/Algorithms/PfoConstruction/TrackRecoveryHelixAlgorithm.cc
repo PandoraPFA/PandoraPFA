@@ -37,10 +37,14 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
         Track *pTrack = *iterT;
 
         // Use only unassociated tracks that are flagged as reaching ECal
-        if (pTrack->HasAssociatedCluster() || !pTrack->ReachesECal())
+        // TODO decide whether to use only tracks that are flagged as reaching ECal
+        if (pTrack->HasAssociatedCluster())// || !pTrack->ReachesECal())
             continue;
 
         if (!pTrack->GetDaughterTrackList().empty())
+            continue;
+
+        if ((std::fabs(pTrack->GetD0()) > m_maxAbsoluteTrackD0) || (std::fabs(pTrack->GetZ0()) > m_maxAbsoluteTrackZ0))
             continue;
 
         // Extract track information
@@ -86,7 +90,7 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack, pCluster, m_maxSearchLayer, m_parallelDistanceCut,
                 trackClusterDistance))
             {
-                continue;
+                trackClusterDistance = std::numeric_limits<float>::max();
             }
 
             // Get distance of closest approach between track helix projection and cluster
@@ -96,7 +100,8 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             if (STATUS_CODE_SUCCESS != FragmentRemovalHelper::GetClusterHelixDistance(pCluster, pHelix, innerLayer,
                 innerLayer + m_helixComparisonNLayers, m_helixComparisonMaxOccupiedLayers, closestDistanceToHit, meanDistanceToHits))
             {
-                continue;
+                closestDistanceToHit = std::numeric_limits<float>::max();
+                meanDistanceToHits = std::numeric_limits<float>::max();
             }
 
             // Cut on closest distance of approach between track and cluster
@@ -107,7 +112,9 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             }
 
             AssociationInfo associationInfo(pCluster, std::min(closestDistanceToHit, trackClusterDistance));
-            trackAssociationInfoMap[pTrack].push_back(associationInfo);
+
+            if (!(trackAssociationInfoMap[pTrack].insert(AssociationInfoSet::value_type(associationInfo)).second))
+                return STATUS_CODE_FAILURE;
         }
     }
 
@@ -132,7 +139,7 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
         for (TrackAssociationInfoMap::const_iterator iter = trackAssociationInfoMap.begin(), iterEnd = trackAssociationInfoMap.end();
             iter != iterEnd; ++iter)
         {
-            for (AssociationInfoVector::const_iterator infoIter = iter->second.begin(), infoIterEnd = iter->second.end();
+            for (AssociationInfoSet::const_iterator infoIter = iter->second.begin(), infoIterEnd = iter->second.end();
                 infoIter != infoIterEnd; ++infoIter)
             {
                 const float approach(infoIter->GetClosestApproach());
@@ -151,8 +158,24 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pBestTrack, pBestCluster));
 
-            // ATTN: Currently allow same cluster to be associated to multiple tracks - only clear information on a per track basis here
+            // Clear information to prevent multiple associations to same track/cluster
             trackAssociationInfoMap.erase(trackAssociationInfoMap.find(pBestTrack));
+
+            for (TrackAssociationInfoMap::iterator iter = trackAssociationInfoMap.begin(), iterEnd = trackAssociationInfoMap.end(); iter != iterEnd; ++iter)
+            {
+                for (AssociationInfoSet::iterator infoIter = iter->second.begin(), infoIterEnd = iter->second.end(); infoIter != infoIterEnd;)
+                {
+                    if (infoIter->GetCluster() == pBestCluster)
+                    {
+                        iter->second.erase(infoIter++);
+                    }
+                    else
+                    {
+                        infoIter++;
+                    }
+                }
+            }
+
             shouldContinue = true;
         }
     }
@@ -164,6 +187,14 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
 
 StatusCode TrackRecoveryHelixAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    m_maxAbsoluteTrackD0 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackD0", m_maxAbsoluteTrackD0));
+
+    m_maxAbsoluteTrackZ0 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxAbsoluteTrackZ0", m_maxAbsoluteTrackZ0));
+
     m_maxTrackClusterDeltaZ = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackClusterDeltaZ", m_maxTrackClusterDeltaZ));
@@ -176,7 +207,7 @@ StatusCode TrackRecoveryHelixAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxLayersCrossed", m_maxLayersCrossed));
 
-    m_maxSearchLayer = 20;
+    m_maxSearchLayer = 19;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxSearchLayer", m_maxSearchLayer));
 

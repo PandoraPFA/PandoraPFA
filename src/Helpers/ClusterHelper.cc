@@ -517,9 +517,15 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, con
     for (TrackStateList::const_iterator iter = trackStateList.begin(), iterEnd = trackStateList.end(); iter != iterEnd; ++iter)
     {
         const TrackState *const pTrackState = *iter;
+        float altProjectionDistance(std::numeric_limits<float>::max());
 
-        if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(*pTrackState, pCluster, maxSearchLayer, parallelDistanceCut, minDistance))
+        if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(*pTrackState, pCluster, maxSearchLayer, parallelDistanceCut, altProjectionDistance))
+        {
             distanceFound = true;
+
+            if (altProjectionDistance < minDistance)
+                minDistance = altProjectionDistance;
+        }
     }
 
     if (!distanceFound)

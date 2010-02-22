@@ -29,6 +29,14 @@ public:
     bool operator< (const Track &rhs) const;
 
     /**
+     *  @brief  Sort tracks by descending energy at dca
+     * 
+     *  @param  pLhs address of first track
+     *  @param  pRhs address of second track
+     */
+    static bool SortByEnergy(const Track *const pLhs, const Track *const pRhs);
+
+    /**
      *  @brief  Get the 2D impact parameter wrt (0,0)
      * 
      *  @return the 2D impact parameter wrt (0,0)
@@ -270,6 +278,13 @@ inline bool Track::operator< (const Track &rhs) const
 {
     return (!(m_momentumMagnitudeAtDca > rhs.m_momentumMagnitudeAtDca) && !(rhs.m_momentumMagnitudeAtDca > m_momentumMagnitudeAtDca) ?
         (this > &rhs) : (m_momentumMagnitudeAtDca > rhs.m_momentumMagnitudeAtDca));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::SortByEnergy(const Track *const pLhs, const Track *const pRhs)
+{
+    return (pLhs->GetEnergyAtDca() > pRhs->GetEnergyAtDca());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

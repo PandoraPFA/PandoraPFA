@@ -633,7 +633,7 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
 
-    m_additionalPadWidthsHCal = 2.5;
+    m_additionalPadWidthsHCal = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
 
