@@ -573,15 +573,15 @@ void ECalPhotonClusteringAlgorithm::ComputeTransverseVectors( const pandora::Car
 //                                          1,
 //                                          (uty*ux-uy*utx)/utx/uz );
         transverseUnitVectorV = transverseUnitVectorV.GetUnitVector();
-    }else if( fabs(utx-0) > EPSILON &&
+    }else if( fabs(utx-0) < EPSILON &&
               fabs(uz -0) > EPSILON )
     {
         transverseUnitVectorV.SetValues( 1,
                                          0,
                                          ux/uz );
         transverseUnitVectorV = transverseUnitVectorV.GetUnitVector();
-    }else if( fabs(utx-0)>EPSILON &&
-              fabs(uz -0)>EPSILON )
+    }else if( fabs(utx-0)<EPSILON &&
+              fabs(uz -0)<EPSILON )
     {
         transverseUnitVectorV.SetValues( 0,
                                          0,

@@ -17,6 +17,8 @@
 
 using namespace pandora;
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode CheatingClusteringAlgorithm::Run()
 {
     const TrackList *pTrackList = NULL;

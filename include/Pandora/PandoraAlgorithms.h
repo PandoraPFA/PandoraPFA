@@ -16,11 +16,11 @@
 #include "Algorithms/TopologicalAssociationAlgorithm.h"
 #include "Algorithms/TrackSelectionAlgorithm.h"
 
-#include "Algorithms/Cheating/CheatingClusteringAlgorithm.h"
-#include "Algorithms/Cheating/CheatingPfoCreationAlgorithm.h"
 #include "Algorithms/Cheating/PerfectClusteringAlgorithm.h"
-#include "Algorithms/Cheating/PerfectNeutralHadronClusteringAlgorithm.h"
 #include "Algorithms/Cheating/PerfectPhotonClusteringAlgorithm.h"
+#include "Algorithms/Cheating/PerfectNeutralHadronClusteringAlgorithm.h"
+#include "Algorithms/Cheating/CheatingTrackToClusterMatching.h"
+#include "Algorithms/Cheating/CheatingPfoCreationAlgorithm.h"
 
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
@@ -66,11 +66,11 @@
     d("Reclustering",                           ReclusteringAlgorithm::Factory)                             \
     d("TopologicalAssociation",                 TopologicalAssociationAlgorithm::Factory)                   \
     d("TrackSelection",                         TrackSelectionAlgorithm::Factory)                           \
-    d("CheatingClustering",                     CheatingClusteringAlgorithm::Factory)                       \
-    d("CheatingPfoCreation",                    CheatingPfoCreationAlgorithm::Factory)                      \
     d("PerfectClustering",                      PerfectClusteringAlgorithm::Factory)                        \
-    d("PerfectNeutralHadronClustering",         PerfectNeutralHadronClusteringAlgorithm::Factory)           \
     d("PerfectPhotonClustering",                PerfectPhotonClusteringAlgorithm::Factory)                  \
+    d("PerfectNeutralHadronClustering",         PerfectNeutralHadronClusteringAlgorithm::Factory)           \
+    d("CheatingTrackToClusterMatching",         CheatingTrackToClusterMatching::Factory)                    \
+    d("CheatingPfoCreation",                    CheatingPfoCreationAlgorithm::Factory)                      \
     d("Clustering",                             ClusteringAlgorithm::Factory)                               \
     d("ECalPhotonClustering",                   ECalPhotonClusteringAlgorithm::Factory)                     \
     d("ForcedClustering",                       ForcedClusteringAlgorithm::Factory)                         \

@@ -21,15 +21,16 @@ using namespace pandora;
 
 StatusCode PerfectClusteringAlgorithm::Run()
 {
-    const TrackList *pTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
-
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
     // match calohitvectors to their MCParticles
     std::map< MCParticle*, CaloHitVector* > hitsPerMcParticle;
     std::map< MCParticle*, CaloHitVector* >::iterator itHitsPerMcParticle;
+
+    OrderedCaloHitList pNewOrderedCaloHitList; 
+
+    int a = 0, b=0;
 
     for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; itLyr++ )
     {
@@ -50,7 +51,17 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
             // some selection criteria possible
             if( !SelectCaloHitsOfMcParticleForClustering( mc ) )
+            {
+ //               std::cout << "." << std::flush;
+                pNewOrderedCaloHitList.AddCaloHit( pCaloHit );
+                ++a;
                 continue;
+            }
+            else
+            {
+                ++b;
+ //               std::cout << "|" << std::flush;
+            }
 
 
             // add hit to calohitvector
@@ -70,6 +81,10 @@ StatusCode PerfectClusteringAlgorithm::Run()
         }
     }
 
+
+//    std::cout << std::endl;
+//    std::cout << "hits: refused " << a << "   taken " << b << "  total : " << (a+b) << std::endl;
+
     // create the clusters
     ClusterList clusterList;
     pandora::Cluster *pCluster;
@@ -78,17 +93,26 @@ StatusCode PerfectClusteringAlgorithm::Run()
          itCHList != itCHListEnd; ++itCHList )
     {
         if( itCHList->first == NULL ) continue; // hits without MCParticle are not clustered
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, itCHList->second, pCluster ));
+        CaloHitVector* pCaloHitVector = itCHList->second;
+        if( !pCaloHitVector->empty() )
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitVector, pCluster ));
         
-        if( !clusterList.insert( pCluster ).second )
-            return STATUS_CODE_FAILURE;
+            if( !clusterList.insert( pCluster ).second )
+                return STATUS_CODE_FAILURE;
+        }
 
         // delete the created CaloHitVectors
-        delete itCHList->second;
+        delete pCaloHitVector;
     }
 
     if( !m_clusterListName.empty() )
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName, clusterList ));
+
+    if( !m_orderedCaloHitListName.empty() )
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(*this, pNewOrderedCaloHitList, m_orderedCaloHitListName ));
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -97,8 +121,33 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
 StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_clusterListName = "";
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterListName", m_clusterListName));
+    try
+    {
+        XmlHelper::ReadValue(xmlHandle, "clusterListName", m_clusterListName);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        m_clusterListName = "";
+    }
+    catch(...)
+    {
+        std::cout << "unknown exception in PerfectClusteringAlgorithm." << std::endl;
+        return STATUS_CODE_FAILURE;
+    }
+
+    try
+    {
+        XmlHelper::ReadValue(xmlHandle, "orderedCaloHitListName", m_orderedCaloHitListName);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        m_orderedCaloHitListName = "";
+    }
+    catch(...)
+    {
+        std::cout << "unknown exception in PerfectClusteringAlgorithm." << std::endl;
+        return STATUS_CODE_FAILURE;
+    }
 
     return STATUS_CODE_SUCCESS;
 }

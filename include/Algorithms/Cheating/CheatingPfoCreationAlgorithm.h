@@ -62,7 +62,8 @@ private:
     void       ComputeFromCalorimeterAndTracks( pandora::Cluster* cluster, float& energy, pandora::CartesianVector& momentum, float& mass, int& particleId, int& charge );
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
-    std::string     m_cheatingListName;             ///< The name under which to save the new cheated cluster list
+    std::string     m_inputClusterListName;         ///< if a clusterlistname is given, take the clusters from there instead of running a clustering algorithm
+    std::string     m_outputClusterListName;        ///< The name under which to save the new cheated cluster list
 
     std::string     m_energyFrom;                   ///< tells which energy is taken
 

@@ -24,11 +24,22 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
 {
     // Run initial clustering algorithm
     const ClusterList *pClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
+    if( !m_clusteringAlgorithmName.empty() ){
+        std::cout << "run clusteringalgorithm" << std::endl;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
+    }
+    if( !m_inputClusterListName.empty() )
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_inputClusterListName, pClusterList));
+    if( m_clusteringAlgorithmName.empty() && 
+        m_inputClusterListName.empty() )
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList( *this, pClusterList ) );
+
+
 
     double energySum = 0.;
     CartesianVector momentumSum(0, 0, 0);
 
+ //   std::cout << "pclusterlist size " << pClusterList->size() << std::endl;
     for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; itCluster++)
     {
         CartesianVector momentum(0, 0, 0);
@@ -102,10 +113,52 @@ StatusCode CheatingPfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
 //         <clusterListName> CheatedClusterList </clusterListName>
 //     </algorithm> 
 //
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterListName", m_cheatingListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "energyFrom", m_energyFrom));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "debug", m_debug));
+    try
+    {
+        XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        m_clusteringAlgorithmName = "";
+    }
+    catch(...)
+    {
+        std::cout << "unknown exception in CheatingPfoCreationAlgorithm. (ReadSetting/ProcessFirstAlgorithm)" << std::endl;
+        return STATUS_CODE_FAILURE;
+    }
+
+    try
+    {
+        XmlHelper::ReadValue(xmlHandle, "inputClusterListName", m_inputClusterListName);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        m_inputClusterListName    = "";
+    }    
+    catch(...)
+    {
+        std::cout << "unknown exception in CheatingPfoCreationAlgorithm. (ReadSetting/ReadValue/m_inputClusterListName)" << std::endl;
+        return STATUS_CODE_FAILURE;
+    }
+
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "energyFrom", m_energyFrom));
+
+    try
+    {
+        XmlHelper::ReadValue(xmlHandle, "debug", m_debug);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        m_debug   = false;
+    }    
+    catch(...)
+    {
+        std::cout << "unknown exception in CheatingPfoCreationAlgorithm. (ReadSetting/ReadValue/m_debug)" << std::endl;
+        return STATUS_CODE_FAILURE;
+    }
+
+    std::cout << "clustering algorithm : " << m_clusteringAlgorithmName << std::endl;
+
 
     return STATUS_CODE_SUCCESS;
 }
