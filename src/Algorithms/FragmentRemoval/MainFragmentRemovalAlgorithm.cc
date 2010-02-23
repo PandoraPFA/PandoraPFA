@@ -368,8 +368,8 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
 
     if (pDaughterCluster->IsPhoton())
     {
-        const float showerStart(pDaughterCluster->GetProfileShowerStart());
-        const float photonFraction(pDaughterCluster->GetProfilePhotonFraction());
+        const float showerStart(pDaughterCluster->GetShowerProfileStart());
+        const float showerDiscrepancy(pDaughterCluster->GetShowerProfileDiscrepancy());
 
         if (daughterClusterEnergy > m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart1)
             photonCorrection = m_photonCorrection1;
@@ -380,13 +380,13 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
         if (daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2)
             photonCorrection = m_photonCorrection3;
 
-        if (daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2 && photonFraction < m_photonCorrectionPhotonFraction1)
+        if (daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart < m_photonCorrectionShowerStart2 && showerDiscrepancy < m_photonCorrectionShowerDiscrepancy1)
             photonCorrection = m_photonCorrection4;
 
         if (daughterClusterEnergy < m_photonCorrectionEnergy1 && showerStart > m_photonCorrectionShowerStart2)
             photonCorrection = m_photonCorrection5;
 
-        if (daughterClusterEnergy < m_photonCorrectionEnergy2 && (showerStart > m_photonCorrectionShowerStart2 || photonFraction > m_photonCorrectionPhotonFraction2))
+        if (daughterClusterEnergy < m_photonCorrectionEnergy2 && (showerStart > m_photonCorrectionShowerStart2 || showerDiscrepancy > m_photonCorrectionShowerDiscrepancy2))
             photonCorrection = m_photonCorrection6;
 
         if (daughterClusterEnergy < m_photonCorrectionEnergy3 && showerStart > m_photonCorrectionShowerStart2)
@@ -759,13 +759,13 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "PhotonCorrectionShowerStart2", m_photonCorrectionShowerStart2));
 
-    m_photonCorrectionPhotonFraction1 = 0.8f;
+    m_photonCorrectionShowerDiscrepancy1 = 0.8f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonCorrectionPhotonFraction1", m_photonCorrectionPhotonFraction1));
+        "PhotonCorrectionShowerDiscrepancy1", m_photonCorrectionShowerDiscrepancy1));
 
-    m_photonCorrectionPhotonFraction2 = 1.f;
+    m_photonCorrectionShowerDiscrepancy2 = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonCorrectionPhotonFraction2", m_photonCorrectionPhotonFraction2));
+        "PhotonCorrectionShowerDiscrepancy2", m_photonCorrectionShowerDiscrepancy2));
 
     m_photonCorrection1 = 10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

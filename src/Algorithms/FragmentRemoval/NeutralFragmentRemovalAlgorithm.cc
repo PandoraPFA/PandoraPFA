@@ -112,8 +112,8 @@ bool NeutralFragmentRemovalAlgorithm::IsPhotonLike(Cluster *const pDaughterClust
 
     if ((innerPseudoLayer < nECalLayers) && (innerPseudoLayer < m_photonLikeMinInnerLayer) &&
         (clusterFitResult.IsFitSuccessful()) && (clusterFitResult.GetRadialDirectionCosine() > m_photonLikeMinDCosR) &&
-        (pDaughterCluster->GetProfileShowerStart() < m_photonLikeMaxShowerStart) &&
-        (pDaughterCluster->GetProfilePhotonFraction() < m_photonLikeMaxPhotonFraction))
+        (pDaughterCluster->GetShowerProfileStart() < m_photonLikeMaxShowerStart) &&
+        (pDaughterCluster->GetShowerProfileDiscrepancy() < m_photonLikeMaxProfileDiscrepancy))
     {
         return true;
     }
@@ -288,9 +288,9 @@ StatusCode NeutralFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "PhotonLikeMaxShowerStart", m_photonLikeMaxShowerStart));
 
-    m_photonLikeMaxPhotonFraction = 0.75f;
+    m_photonLikeMaxProfileDiscrepancy = 0.75f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonLikeMaxPhotonFraction", m_photonLikeMaxPhotonFraction));
+        "PhotonLikeMaxProfileDiscrepancy", m_photonLikeMaxProfileDiscrepancy));
 
     // Cluster contact cuts
     m_contactCutMaxDistance = 500.f;

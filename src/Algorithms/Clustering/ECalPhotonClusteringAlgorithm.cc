@@ -294,9 +294,8 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     PhotonIdProperties photonIdProperties;
     try
     {
-        PhotonIdHelper::CalculateShowerProfile(pPhotonCandidateCluster, 
-                                               photonIdProperties.m_photonLongShowerStart, 
-                                               photonIdProperties.m_photonLongProfileFraction );
+        photonIdProperties.m_photonLongShowerStart = pPhotonCandidateCluster->GetShowerProfileStart();
+        photonIdProperties.m_photonLongProfileFraction = pPhotonCandidateCluster->GetShowerProfileDiscrepancy();
     }
     catch(StatusCodeException &statusCodeException)
     {

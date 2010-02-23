@@ -199,8 +199,8 @@ private:
     float               m_photonCorrectionEnergy3;                  ///< Photon correction energy value 3
     float               m_photonCorrectionShowerStart1;             ///< Photon correction profile shower start value 1
     float               m_photonCorrectionShowerStart2;             ///< Photon correction profile shower start value 1
-    float               m_photonCorrectionPhotonFraction1;          ///< Photon correction profile photon fraction value 1
-    float               m_photonCorrectionPhotonFraction2;          ///< Photon correction profile photon fraction value 2
+    float               m_photonCorrectionShowerDiscrepancy1;       ///< Photon correction profile discrepancy value 1
+    float               m_photonCorrectionShowerDiscrepancy2;       ///< Photon correction profile discrepancy value 2
     float               m_photonCorrection1;                        ///< Photon correction contribution 1
     float               m_photonCorrection2;                        ///< Photon correction contribution 2
     float               m_photonCorrection3;                        ///< Photon correction contribution 3

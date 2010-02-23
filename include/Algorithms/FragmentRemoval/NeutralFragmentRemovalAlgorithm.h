@@ -100,8 +100,8 @@ private:
 
     unsigned int        m_photonLikeMinInnerLayer;                  ///< Min inner layer to identify daughter cluster as photon-like
     float               m_photonLikeMinDCosR;                       ///< Max radial direction cosine to identify daughter as photon-like
-    float               m_photonLikeMaxShowerStart;                 ///< Max profile shower start to identify daughter as photon-like
-    float               m_photonLikeMaxPhotonFraction;              ///< Max profile photon fraction to identify daughter as photon-like
+    float               m_photonLikeMaxShowerStart;                 ///< Max shower profile start to identify daughter as photon-like
+    float               m_photonLikeMaxProfileDiscrepancy;          ///< Max shower profile discrepancy to identify daughter as photon-like
 
     float               m_contactCutMaxDistance;                    ///< Max distance between closest hits to store cluster contact info
     unsigned int        m_contactCutNLayers;                        ///< Number of contact layers to store cluster contact info

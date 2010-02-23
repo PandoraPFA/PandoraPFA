@@ -173,18 +173,18 @@ public:
     PseudoLayer GetShowerMaxLayer();
 
     /**
-     *  @brief  Get the cluster profile shower start, units radiation lengths
+     *  @brief  Get the cluster shower profile start, units radiation lengths
      * 
-     *  @return The cluster profile shower start
+     *  @return The cluster shower profile start
      */
-    float GetProfileShowerStart();
+    float GetShowerProfileStart();
 
     /**
-     *  @brief  Get the cluster profile photon fraction
+     *  @brief  Get the cluster shower profile discrepancy
      * 
-     *  @return The cluster profile photon fraction
+     *  @return The cluster shower profile discrepancy
      */
-    float GetProfilePhotonFraction();
+    float GetShowerProfileDiscrepancy();
 
     /**
      *  @brief  Get the list of tracks associated with the cluster
@@ -357,8 +357,8 @@ private:
     InputPseudoLayer        m_showerStartLayer;         ///< The pseudo layer at which shower commences
     InputPseudoLayer        m_showerMaxLayer;           ///< The pseudo layer at which the cluster energy deposition is greatest
 
-    InputFloat              m_profileShowerStart;       ///< The cluster profile shower start, units radiation lengths
-    InputFloat              m_profilePhotonFraction;    ///< The cluster profile photon fraction
+    InputFloat              m_showerProfileStart;       ///< The cluster shower profile start, units radiation lengths
+    InputFloat              m_showerProfileDiscrepancy; ///< The cluster shower profile discrepancy
 
     TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
 
@@ -520,22 +520,22 @@ inline PseudoLayer Cluster::GetShowerMaxLayer()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetProfileShowerStart()
+inline float Cluster::GetShowerProfileStart()
 {
-    if (!m_profileShowerStart.IsInitialized())
+    if (!m_showerProfileStart.IsInitialized())
         this->CalculateShowerProfile();
 
-    return m_profileShowerStart.Get();
+    return m_showerProfileStart.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetProfilePhotonFraction()
+inline float Cluster::GetShowerProfileDiscrepancy()
 {
-    if (!m_profilePhotonFraction.IsInitialized())
+    if (!m_showerProfileDiscrepancy.IsInitialized())
         this->CalculateShowerProfile();
 
-    return m_profilePhotonFraction.Get();
+    return m_showerProfileDiscrepancy.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

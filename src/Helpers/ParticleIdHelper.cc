@@ -1,13 +1,13 @@
 /**
- *  @file   PandoraPFANew/src/Helpers/PhotonIdHelper.cc
+ *  @file   PandoraPFANew/src/Helpers/ParticleIdHelper.cc
  * 
- *  @brief  Implementation of the photon id helper class.
+ *  @brief  Implementation of the particle id helper class.
  * 
  *  $Log: $
  */
 
 #include "Helpers/GeometryHelper.h"
-#include "Helpers/PhotonIdHelper.h"
+#include "Helpers/ParticleIdHelper.h"
 
 #include "Objects/Cluster.h"
 
@@ -18,7 +18,7 @@
 namespace pandora
 {
 
-StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float &profileShowerStart, float &profilePhotonFraction)
+StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy)
 {
     // 1. Construct cluster profile.
     const float clusterEnergy(pCluster->GetElectromagneticEnergy());
@@ -130,7 +130,7 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
 
     const double a(parameter0 + parameter1 * std::log(clusterEnergy / criticalEnergy));
 
-    const double gammaA(std::exp(gamma(a))); // gamma() and lgamma() both return the natural log of gamma!
+    const double gammaA(std::exp(gamma(a)));
 
     float t(0.);
     float expectedProfile[nBins];
@@ -174,8 +174,8 @@ StatusCode PhotonIdHelper::CalculateShowerProfile(Cluster *const pCluster, float
             break;
     }
 
-    profileShowerStart =  binOffsetAtMinDifference * binWidth;
-    profilePhotonFraction = minProfileDifference / eCalEnergy;
+    showerProfileStart =  binOffsetAtMinDifference * binWidth;
+    showerProfileDiscrepancy = minProfileDifference / eCalEnergy;
 
     return STATUS_CODE_SUCCESS;
 }
