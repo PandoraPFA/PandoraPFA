@@ -121,33 +121,8 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
 StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    try
-    {
-        XmlHelper::ReadValue(xmlHandle, "clusterListName", m_clusterListName);
-    }
-    catch (StatusCodeException &statusCodeException)
-    {
-        m_clusterListName = "";
-    }
-    catch(...)
-    {
-        std::cout << "unknown exception in PerfectClusteringAlgorithm." << std::endl;
-        return STATUS_CODE_FAILURE;
-    }
-
-    try
-    {
-        XmlHelper::ReadValue(xmlHandle, "orderedCaloHitListName", m_orderedCaloHitListName);
-    }
-    catch (StatusCodeException &statusCodeException)
-    {
-        m_orderedCaloHitListName = "";
-    }
-    catch(...)
-    {
-        std::cout << "unknown exception in PerfectClusteringAlgorithm." << std::endl;
-        return STATUS_CODE_FAILURE;
-    }
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "clusterListName", m_clusterListName) );
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "orderedCaloHitListName", m_orderedCaloHitListName));
 
     return STATUS_CODE_SUCCESS;
 }
