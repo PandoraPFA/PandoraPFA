@@ -68,7 +68,7 @@ private:
     float           m_canMergeMaxRms;                   ///< The maximum all hit fit rms for clusters (flagged as photons) to be merged
 
     unsigned int    m_minCaloHitsPerCluster;            ///< The min number of calo hits per cluster
-    unsigned int    m_minLayersToShowerMax;             ///< The min number of layers between parent inner layer and shower max layer
+    unsigned int    m_minLayersToShowerStart;           ///< The min number of layers between parent inner layer and shower start layer
 
     float           m_minConeFraction;                  ///< The min fraction of daughter hits that must lie in parent mip fit cone
     float           m_maxInnerLayerSeparation;          ///< Max distance between parent and daughter inner layer centroids

@@ -66,7 +66,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
 
             const int layerSpan1(static_cast<int>(parentOuterLayer) - static_cast<int>(daughterInnerLayer));
             const int layerSpan2(static_cast<int>(daughterOuterLayer) - static_cast<int>(parentInnerLayer));
-            const int showerLayerSpan(static_cast<int>(daughterInnerLayer) - static_cast<int>(pParentCluster->GetShowerMaxLayer()));
+            const int showerLayerSpan(static_cast<int>(daughterInnerLayer) - static_cast<int>(pParentCluster->GetShowerStartLayer()));
             const int layerSpan(std::min(layerSpan1, layerSpan2));
 
             if ((layerSpan < m_minLayerSpan) || (showerLayerSpan < m_minShowerLayerSpan))

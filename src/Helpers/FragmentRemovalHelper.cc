@@ -62,11 +62,11 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
 
     if (associatedTrackList.empty())
     {
-        const PseudoLayer showerMaxLayer(pClusterJ->GetShowerMaxLayer());
-        const CartesianVector showerMaxCentroid(pClusterJ->GetCentroid(showerMaxLayer));
+        const PseudoLayer showerStartLayer(pClusterJ->GetShowerStartLayer());
+        const CartesianVector showerStartCentroid(pClusterJ->GetCentroid(showerStartLayer));
 
-        coneApex = showerMaxCentroid;
-        coneDirection = showerMaxCentroid.GetUnitVector();
+        coneApex = showerStartCentroid;
+        coneDirection = showerStartCentroid.GetUnitVector();
     }
     else
     {

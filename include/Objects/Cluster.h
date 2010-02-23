@@ -159,6 +159,13 @@ public:
     PseudoLayer GetOuterPseudoLayer() const;
 
     /**
+     *  @brief  Get the pseudo layer at which shower commences
+     * 
+     *  @return The pseudo layer at which shower commences
+     */
+    PseudoLayer GetShowerStartLayer();
+
+    /**
      *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
      * 
      *  @return The pseudo layer at which the cluster energy deposition is greatest
@@ -257,6 +264,11 @@ private:
     StatusCode RemoveCaloHit(CaloHit *const pCaloHit);
 
     /**
+     *  @brief  Calculate the pseudo layer at which shower commences
+     */
+    void CalculateShowerStartLayer();
+
+    /**
      *  @brief  Calculate the pseudo layer at which the cluster energy deposition is greatest
      */
     void CalculateShowerMaxLayer();
@@ -324,18 +336,6 @@ private:
     bool                    m_isMipTrack;               ///< Whether the cluster has been flagged as a section of mip track
     const Track            *m_pTrackSeed;               ///< Address of the track with which the cluster is seeded
 
-    float                   m_sumX;                     ///< The sum of the x coordinates of the constituent calo hits
-    float                   m_sumY;                     ///< The sum of the y coordinates of the constituent calo hits
-    float                   m_sumZ;                     ///< The sum of the z coordinates of the constituent calo hits
-
-    float                   m_sumXX;                    ///< The sum of the coordinates x*x for the constituent calo hits
-    float                   m_sumYY;                    ///< The sum of the coordinates y*y for the constituent calo hits
-    float                   m_sumZZ;                    ///< The sum of the coordinates z*z for the constituent calo hits
-
-    float                   m_sumXY;                    ///< The sum of the coordinates x*y for the constituent calo hits
-    float                   m_sumXZ;                    ///< The sum of the coordinates x*z for the constituent calo hits
-    float                   m_sumYZ;                    ///< The sum of the coordinates y*z for the constituent calo hits
-
     ValueByPseudoLayerMap   m_sumXByPseudoLayer;        ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumYByPseudoLayer;        ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumZByPseudoLayer;        ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
@@ -353,6 +353,8 @@ private:
 
     InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
     InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
+
+    InputPseudoLayer        m_showerStartLayer;         ///< The pseudo layer at which shower commences
     InputPseudoLayer        m_showerMaxLayer;           ///< The pseudo layer at which the cluster energy deposition is greatest
 
     InputFloat              m_profileShowerStart;       ///< The cluster profile shower start, units radiation lengths
@@ -494,6 +496,16 @@ inline PseudoLayer Cluster::GetInnerPseudoLayer() const
 inline PseudoLayer Cluster::GetOuterPseudoLayer() const
 {
     return m_outerPseudoLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline PseudoLayer Cluster::GetShowerStartLayer()
+{
+    if (!m_showerStartLayer.IsInitialized())
+        this->CalculateShowerStartLayer();
+
+    return m_showerStartLayer.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

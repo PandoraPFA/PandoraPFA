@@ -276,6 +276,20 @@ public:
      */
     float GetContactMaxTrackClusterDeltaZ() const;
 
+    /**
+     *  @brief  Get the max layer mip-fraction to declare a layer as shower-like
+     * 
+     *  @return The max layer mip-fraction
+     */
+    float GetShowerStartMipFraction() const;
+
+    /**
+     *  @brief  Get the number of successive shower-like layers required to identify shower start
+     * 
+     *  @return The number of successive shower-like layers
+     */
+    unsigned int GetShowerStartNonMipLayers() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -348,6 +362,9 @@ private:
 
     unsigned int            m_contactMaxLayersCrossedByHelix;   ///< Max no. of layers crossed by helix between track projection and cluster
     float                   m_contactMaxTrackClusterDeltaZ;     ///< Max z separation between track projection and cluster
+
+    float                   m_showerStartMipFraction;           ///< Max layer mip-fraction to declare a layer as shower-like
+    unsigned int            m_showerStartNonMipLayers;          ///< Number of successive shower-like layers required to identify shower start
 
     friend class Pandora;
 };
@@ -595,6 +612,20 @@ inline unsigned int PandoraSettings::GetContactMaxLayersCrossedByHelix() const
 inline float PandoraSettings::GetContactMaxTrackClusterDeltaZ() const
 {
     return m_contactMaxTrackClusterDeltaZ;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetShowerStartMipFraction() const
+{
+    return m_showerStartMipFraction;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetShowerStartNonMipLayers() const
+{
+    return m_showerStartNonMipLayers;
 }
 
 } // namespace pandora

@@ -141,12 +141,12 @@ StatusCode ConeBasedMergingAlgorithm::PrepareClusters(ClusterVector &daughterVec
             continue;
 
         const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
-        const PseudoLayer showerMaxLayer(pCluster->GetShowerMaxLayer());
+        const PseudoLayer showerStartLayer(pCluster->GetShowerStartLayer());
 
-        if ((innerLayer > showerMaxLayer) || ((showerMaxLayer - innerLayer) < m_minLayersToShowerMax))
+        if ((innerLayer > showerStartLayer) || ((showerStartLayer - innerLayer) < m_minLayersToShowerStart))
             continue;
 
-        const PseudoLayer fitEndLayer((showerMaxLayer > 1) ? showerMaxLayer - 1 : 0);
+        const PseudoLayer fitEndLayer((showerStartLayer > 1) ? showerStartLayer - 1 : 0);
 
         ClusterFitResult mipFitResult;
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, innerLayer, fitEndLayer, mipFitResult))
@@ -170,18 +170,18 @@ float ConeBasedMergingAlgorithm::GetFractionInCone(Cluster *const pParentCluster
     if (!parentMipFitResult.IsFitSuccessful() || (0 == nDaughterCaloHits))
         return 0.;
 
-    const PseudoLayer parentShowerMaxLayer(pParentCluster->GetShowerMaxLayer());
+    const PseudoLayer parentShowerStartLayer(pParentCluster->GetShowerStartLayer());
 
-    if (pDaughterCluster->GetInnerPseudoLayer() < parentShowerMaxLayer)
+    if (pDaughterCluster->GetInnerPseudoLayer() < parentShowerStartLayer)
         return 0.;
 
     // Identify cone vertex
     const CartesianVector &parentMipFitDirection(parentMipFitResult.GetDirection());
     const CartesianVector &parentMipFitIntercept(parentMipFitResult.GetIntercept());
 
-    const CartesianVector showerMaxDifference(pParentCluster->GetCentroid(parentShowerMaxLayer) - parentMipFitIntercept);
-    const float parallelDistanceToShowerMax(showerMaxDifference.GetDotProduct(parentMipFitDirection));
-    const CartesianVector coneVertex(parentMipFitIntercept + (parentMipFitDirection * parallelDistanceToShowerMax));
+    const CartesianVector showerStartDifference(pParentCluster->GetCentroid(parentShowerStartLayer) - parentMipFitIntercept);
+    const float parallelDistanceToShowerStart(showerStartDifference.GetDotProduct(parentMipFitDirection));
+    const CartesianVector coneVertex(parentMipFitIntercept + (parentMipFitDirection * parallelDistanceToShowerStart));
 
     // Don't allow large distance associations at low angle
     const float cosConeAngleWrtRadial(coneVertex.GetUnitVector().GetDotProduct(parentMipFitDirection));
@@ -254,9 +254,9 @@ StatusCode ConeBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
 
-    m_minLayersToShowerMax = 4;
+    m_minLayersToShowerStart = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinLayersToShowerMax", m_minLayersToShowerMax));
+        "MinLayersToShowerStart", m_minLayersToShowerStart));
 
     m_minConeFraction = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

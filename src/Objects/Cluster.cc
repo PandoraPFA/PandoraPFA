@@ -23,9 +23,6 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_isPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
-    m_sumX(0), m_sumY(0), m_sumZ(0),
-    m_sumXX(0), m_sumYY(0), m_sumZZ(0),
-    m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
     m_initialDirection(pCaloHit->GetPositionVector().GetUnitVector()),
     m_isFitUpToDate(false)
 {
@@ -45,9 +42,6 @@ Cluster::Cluster(CaloHitVector *pCaloHitVector) :
     m_isPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
-    m_sumX(0), m_sumY(0), m_sumZ(0),
-    m_sumXX(0), m_sumYY(0), m_sumZZ(0),
-    m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
     m_isFitUpToDate(false)
 {
     if (NULL == pCaloHitVector)
@@ -68,9 +62,6 @@ Cluster::Cluster(Track *pTrack) :
     m_hadronicEnergy(0),
     m_isPhoton(false),
     m_isMipTrack(true),
-    m_sumX(0), m_sumY(0), m_sumZ(0),
-    m_sumXX(0), m_sumYY(0), m_sumZZ(0),
-    m_sumXY(0), m_sumXZ(0), m_sumYZ(0),
     m_isFitUpToDate(false)
 {
     if (NULL == pTrack)
@@ -87,6 +78,7 @@ StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
+    m_showerStartLayer.Reset();
     m_showerMaxLayer.Reset();
     m_profileShowerStart.Reset();
     m_profilePhotonFraction.Reset();
@@ -101,10 +93,6 @@ StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
     const float z(pCaloHit->GetPositionVector().GetZ());
     const float electromagneticEnergy(pCaloHit->GetElectromagneticEnergy());
     const float hadronicEnergy(pCaloHit->GetHadronicEnergy());
-
-    m_sumX += x; m_sumY += y; m_sumZ += z;
-    m_sumXX += x * x; m_sumYY += y * y; m_sumZZ += z * z;
-    m_sumXY += x * y; m_sumXZ += x * z; m_sumYZ += y * z;
 
     m_electromagneticEnergy += electromagneticEnergy;
     m_hadronicEnergy += hadronicEnergy;
@@ -150,6 +138,7 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
 
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
+    m_showerStartLayer.Reset();
     m_showerMaxLayer.Reset();
     m_profileShowerStart.Reset();
     m_profilePhotonFraction.Reset();
@@ -164,10 +153,6 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
     const float z(pCaloHit->GetPositionVector().GetZ());
     const float electromagneticEnergy(pCaloHit->GetElectromagneticEnergy());
     const float hadronicEnergy(pCaloHit->GetHadronicEnergy());
-
-    m_sumX -= x; m_sumY -= y; m_sumZ -= z;
-    m_sumXX -= x * x; m_sumYY -= y * y; m_sumZZ -= z * z;
-    m_sumXY -= x * y; m_sumXZ -= x * z; m_sumYZ -= y * z;
 
     m_electromagneticEnergy -= pCaloHit->GetElectromagneticEnergy();
     m_hadronicEnergy -= pCaloHit->GetHadronicEnergy();
@@ -228,6 +213,16 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void Cluster::CalculateShowerStartLayer()
+{
+    const PseudoLayer showerStartLayer(ClusterHelper::GetShowerStartLayer(this));
+
+    if (!(m_showerStartLayer = showerStartLayer))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void Cluster::CalculateShowerMaxLayer()
 {
     PseudoLayer showerMaxLayer(0);
@@ -261,8 +256,8 @@ void Cluster::CalculateShowerProfile()
     PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, PhotonIdHelper::CalculateShowerProfile(this,
         profileShowerStart, profilePhotonFraction));
 
-    m_profileShowerStart = profileShowerStart;
-    m_profilePhotonFraction = profilePhotonFraction;
+    if (!(m_profileShowerStart = profileShowerStart) || !(m_profilePhotonFraction = profilePhotonFraction))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -283,10 +278,6 @@ StatusCode Cluster::ResetProperties()
     m_nCaloHits = 0;
     m_nPossibleMipHits = 0;
 
-    m_sumX = m_sumY = m_sumZ = 0;
-    m_sumXX = m_sumYY = m_sumZZ = 0;
-    m_sumXY = m_sumXZ = m_sumYZ = 0;
-
     m_sumXByPseudoLayer.clear();
     m_sumYByPseudoLayer.clear();
     m_sumZByPseudoLayer.clear();
@@ -298,6 +289,7 @@ StatusCode Cluster::ResetProperties()
     m_innerPseudoLayer.Reset();
     m_outerPseudoLayer.Reset();
 
+    m_showerStartLayer.Reset();
     m_showerMaxLayer.Reset();
     m_profileShowerStart.Reset();
     m_profilePhotonFraction.Reset();
@@ -318,6 +310,7 @@ StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
 
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
+    m_showerStartLayer.Reset();
     m_showerMaxLayer.Reset();
     m_profileShowerStart.Reset();
     m_profilePhotonFraction.Reset();
@@ -327,14 +320,6 @@ StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
 
     m_electromagneticEnergy += pCluster->GetElectromagneticEnergy();
     m_hadronicEnergy += pCluster->GetHadronicEnergy();
-
-    const float x(pCluster->m_sumX);
-    const float y(pCluster->m_sumY);
-    const float z(pCluster->m_sumZ);
-
-    m_sumX += x; m_sumY += y; m_sumZ += z;
-    m_sumXX += x * x; m_sumYY += y * y; m_sumZZ += z * z;
-    m_sumXY += x * y; m_sumXZ += x * z; m_sumYZ += y * z;
 
     // Loop over pseudo layers in second cluster
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)

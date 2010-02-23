@@ -200,6 +200,15 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ContactMaxTrackClusterDeltaZ", m_contactMaxTrackClusterDeltaZ));
 
+        // Shower start parameters
+        m_showerStartMipFraction = 0.8f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ShowerStartMipFraction", m_showerStartMipFraction));
+
+        m_showerStartNonMipLayers = 2;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ShowerStartNonMipLayers", m_showerStartNonMipLayers));
+
         m_isInitialized = true;
 
         return STATUS_CODE_SUCCESS;

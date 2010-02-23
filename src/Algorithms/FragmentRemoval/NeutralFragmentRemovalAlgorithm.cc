@@ -30,14 +30,14 @@ StatusCode NeutralFragmentRemovalAlgorithm::Run()
 
         if ((NULL != pBestParentCluster) && (NULL != pBestDaughterCluster))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster,
-                pBestDaughterCluster));
-
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetAffectedClusters(clusterContactMap, pBestParentCluster,
                 pBestDaughterCluster, affectedClusters));
 
             clusterContactMap.erase(clusterContactMap.find(pBestDaughterCluster));
             shouldRecalculate = true;
+
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster,
+                pBestDaughterCluster));
         }
     }
 
@@ -137,7 +137,7 @@ bool NeutralFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterCont
     }
 
     return ((clusterContact.GetDistanceToClosestHit() < m_contactCutNearbyDistance) &&
-        (clusterContact.GetCloseHitFraction2() < m_contactCutNearbyCloseHitFraction2));
+        (clusterContact.GetCloseHitFraction2() > m_contactCutNearbyCloseHitFraction2));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

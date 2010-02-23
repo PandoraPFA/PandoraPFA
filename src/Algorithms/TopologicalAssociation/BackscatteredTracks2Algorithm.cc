@@ -27,12 +27,12 @@ StatusCode BackscatteredTracks2Algorithm::Run()
         if (!ClusterHelper::CanMergeCluster(pParentCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
-        // Fit the parent cluster candidate from its innermost layer to its showermax layer
+        // Fit the parent cluster candidate from its innermost layer to its showerstart layer
         const PseudoLayer parentInnerLayer(pParentCluster->GetInnerPseudoLayer());
-        const PseudoLayer parentShowerMaxLayer(pParentCluster->GetShowerMaxLayer());
+        const PseudoLayer parentShowerStartLayer(pParentCluster->GetShowerStartLayer());
 
         ClusterHelper::ClusterFitResult parentClusterFitResult;
-        if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pParentCluster, parentInnerLayer, parentShowerMaxLayer, parentClusterFitResult))
+        if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pParentCluster, parentInnerLayer, parentShowerStartLayer, parentClusterFitResult))
             continue;
 
         if (parentClusterFitResult.GetRms() > m_maxFitRms)
@@ -53,7 +53,7 @@ StatusCode BackscatteredTracks2Algorithm::Run()
             // Backscattered particle is expected to be daughter of a parent mip section; cut on overlap between relevant layers
             const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
 
-            if ((parentShowerMaxLayer <= daughterOuterLayer) || (parentInnerLayer >= daughterOuterLayer))
+            if ((parentShowerStartLayer <= daughterOuterLayer) || (parentInnerLayer >= daughterOuterLayer))
                 continue;
 
             // Cut on the distance of closest approach between the fit to the parent cluster and the daughter cluster candidate

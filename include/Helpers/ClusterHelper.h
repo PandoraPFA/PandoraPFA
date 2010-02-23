@@ -326,6 +326,16 @@ public:
      */
     static bool IsClusterLeavingDetector(Cluster *const pCluster);
 
+    /**
+     *  @brief  Get the layer at which shower can be considered to start; this function evaluates the the starting point of
+     *          a series of "showerStartNonMipLayers" successive layers, each with mip fraction below "showerLayerMipFraction"
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return The shower start layer
+     */
+    static PseudoLayer GetShowerStartLayer(Cluster *const pCluster);
+
 private:
     /**
      *  @brief  Fit points in barrel region

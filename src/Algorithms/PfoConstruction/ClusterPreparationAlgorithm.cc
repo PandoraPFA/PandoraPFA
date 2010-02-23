@@ -289,22 +289,22 @@ StatusCode ClusterPreparationAlgorithm::IdentifyPhotons() const
         if (firstLayerInRadiationLengths > m_photonIdRadiationLengthsCut)
             continue;
 
-        // Cut on position of shower max layer
-        const int showerMaxLayer(static_cast<int>(pCluster->GetShowerMaxLayer()));
+        // Cut on position of shower start layer
+        const int showerStartLayer(static_cast<int>(pCluster->GetShowerStartLayer()));
 
-        float showerMaxCut1(m_photonIdShowerMaxCut1_0);
-        const float showerMaxCut2(m_photonIdShowerMaxCut2);
+        float showerStartCut1(m_photonIdShowerStartCut1_0);
+        const float showerStartCut2(m_photonIdShowerStartCut2);
 
-        if (totalElectromagneticEnergy > m_photonIdShowerMaxCut1Energy_1)
+        if (totalElectromagneticEnergy > m_photonIdShowerStartCut1Energy_1)
         {
-            showerMaxCut1 = m_photonIdShowerMaxCut1_1;
+            showerStartCut1 = m_photonIdShowerStartCut1_1;
         }
-        else if (totalElectromagneticEnergy > m_photonIdShowerMaxCut1Energy_2)
+        else if (totalElectromagneticEnergy > m_photonIdShowerStartCut1Energy_2)
         {
-            showerMaxCut1 = m_photonIdShowerMaxCut1_2;
+            showerStartCut1 = m_photonIdShowerStartCut1_2;
         }
 
-        if ((showerMaxLayer - innerLayer < showerMaxCut1 * rDotN) || (showerMaxLayer - innerLayer > showerMaxCut2 * rDotN))
+        if ((showerStartLayer - innerLayer < showerStartCut1 * rDotN) || (showerStartLayer - innerLayer > showerStartCut2 * rDotN))
             continue;
 
         // Cut on layer by which 90% of cluster energy has been deposited
@@ -457,29 +457,29 @@ StatusCode ClusterPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "PhotonIdRadiationLengthsCut", m_photonIdRadiationLengthsCut));
 
-    m_photonIdShowerMaxCut1_0 = 0.f;
+    m_photonIdShowerStartCut1_0 = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1_0", m_photonIdShowerMaxCut1_0));
+        "PhotonIdShowerStartCut1_0", m_photonIdShowerStartCut1_0));
 
-    m_photonIdShowerMaxCut2 = 40.f;
+    m_photonIdShowerStartCut2 = 40.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut2", m_photonIdShowerMaxCut2));
+        "PhotonIdShowerStartCut2", m_photonIdShowerStartCut2));
 
-    m_photonIdShowerMaxCut1Energy_1 = 3.f;
+    m_photonIdShowerStartCut1Energy_1 = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1Energy_1", m_photonIdShowerMaxCut1Energy_1));
+        "PhotonIdShowerStartCut1Energy_1", m_photonIdShowerStartCut1Energy_1));
 
-    m_photonIdShowerMaxCut1_1 = 3.f;
+    m_photonIdShowerStartCut1_1 = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1_1", m_photonIdShowerMaxCut1_1));
+        "PhotonIdShowerStartCut1_1", m_photonIdShowerStartCut1_1));
 
-    m_photonIdShowerMaxCut1Energy_2 = 1.5f;
+    m_photonIdShowerStartCut1Energy_2 = 1.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1Energy_2", m_photonIdShowerMaxCut1Energy_2));
+        "PhotonIdShowerStartCut1Energy_2", m_photonIdShowerStartCut1Energy_2));
 
-    m_photonIdShowerMaxCut1_2 = 1.f;
+    m_photonIdShowerStartCut1_2 = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1_2", m_photonIdShowerMaxCut1_2));
+        "PhotonIdShowerStartCut1_2", m_photonIdShowerStartCut1_2));
 
     m_photonIdLayer90Cut1 = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

@@ -14,6 +14,8 @@
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
 
+#include "Pandora/PandoraSettings.h"
+
 #include <cmath>
 #include <limits>
 
@@ -597,6 +599,60 @@ bool ClusterHelper::IsClusterLeavingDetector(Cluster *const pCluster)
     // TODO implement IsClusterLeavingDetector function
 
     return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PseudoLayer ClusterHelper::GetShowerStartLayer(Cluster *const pCluster)
+{
+    static const float showerStartMipFraction(PandoraSettings::GetInstance()->GetShowerStartMipFraction());
+    static const unsigned int showerStartNonMipLayers(PandoraSettings::GetInstance()->GetShowerStartNonMipLayers());
+
+    PseudoLayer currentShowerLayers(0);
+    PseudoLayer currentShowerStartLayer(pCluster->GetInnerPseudoLayer());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    PseudoLayer showerStartLayer(pCluster->GetOuterPseudoLayer());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        const unsigned int nTotalHits(iter->second->size());
+
+        if (0 == nTotalHits)
+            continue;
+
+        unsigned int nMipHits(0);
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            if ((*hitIter)->IsPossibleMip())
+                nMipHits++;
+        }
+
+        const float mipFraction(static_cast<float>(nMipHits) / static_cast<float>(nTotalHits));
+
+        if (mipFraction < showerStartMipFraction)
+        {
+            currentShowerLayers++;
+
+            if (1 == currentShowerLayers)
+            {
+                currentShowerStartLayer = iter->first;
+            }
+
+            if (currentShowerLayers >= showerStartNonMipLayers)
+            {
+                showerStartLayer = currentShowerStartLayer;
+                break;
+            }
+        }
+        else
+        {
+            currentShowerLayers = 0;
+        }
+    }
+
+    return showerStartLayer;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
