@@ -30,8 +30,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
     OrderedCaloHitList pNewOrderedCaloHitList; 
 
-    int a = 0, b=0;
-
     for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; itLyr++ )
     {
         // int pseudoLayer = itLyr->first;
@@ -52,15 +50,8 @@ StatusCode PerfectClusteringAlgorithm::Run()
             // some selection criteria possible
             if( !SelectCaloHitsOfMcParticleForClustering( mc ) )
             {
- //               std::cout << "." << std::flush;
                 pNewOrderedCaloHitList.AddCaloHit( pCaloHit );
-                ++a;
                 continue;
-            }
-            else
-            {
-                ++b;
- //               std::cout << "|" << std::flush;
             }
 
 
@@ -81,9 +72,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
         }
     }
 
-
-//    std::cout << std::endl;
-//    std::cout << "hits: refused " << a << "   taken " << b << "  total : " << (a+b) << std::endl;
 
     // create the clusters
     ClusterList clusterList;
@@ -110,9 +98,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName, clusterList ));
 
     if( !m_orderedCaloHitListName.empty() )
-    {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(*this, pNewOrderedCaloHitList, m_orderedCaloHitListName ));
-    }
 
     return STATUS_CODE_SUCCESS;
 }
