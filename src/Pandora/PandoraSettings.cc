@@ -192,6 +192,14 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ContactNHelixComparisonLayers", m_contactNHelixComparisonLayers));
 
+        m_contactMaxLayersCrossedByHelix = 100;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactMaxLayersCrossedByHelix", m_contactMaxLayersCrossedByHelix));
+
+        m_contactMaxTrackClusterDeltaZ = 250.f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ContactMaxTrackClusterDeltaZ", m_contactMaxTrackClusterDeltaZ));
+
         m_isInitialized = true;
 
         return STATUS_CODE_SUCCESS;

@@ -262,6 +262,20 @@ public:
      */
     unsigned int GetContactNHelixComparisonLayers() const;
 
+    /**
+     *  @brief  Get the max number of layers crossed by helix between track projection and cluster
+     * 
+     *  @return The max number of layers crossed by helix
+     */
+    unsigned int GetContactMaxLayersCrossedByHelix() const;
+
+    /**
+     *  @brief  Get the max z separation between track projection and cluster
+     * 
+     *  @return The max z separation
+     */
+    float GetContactMaxTrackClusterDeltaZ() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -331,6 +345,9 @@ private:
     unsigned int            m_contactHelixComparisonStartOffset;    ///< Start layer offset used in cluster contact helix comparison
     unsigned int            m_contactHelixComparisonStartOffsetMip; ///< Start layer offset used for mip-like clusters in helix comparison
     unsigned int            m_contactNHelixComparisonLayers;        ///< Max number of layers used in helix comparison for non mip-like clusters
+
+    unsigned int            m_contactMaxLayersCrossedByHelix;   ///< Max no. of layers crossed by helix between track projection and cluster
+    float                   m_contactMaxTrackClusterDeltaZ;     ///< Max z separation between track projection and cluster
 
     friend class Pandora;
 };
@@ -564,6 +581,20 @@ inline unsigned int PandoraSettings::GetContactHelixComparisonStartOffsetMip() c
 inline unsigned int PandoraSettings::GetContactNHelixComparisonLayers() const
 {
     return m_contactNHelixComparisonLayers;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetContactMaxLayersCrossedByHelix() const
+{
+    return m_contactMaxLayersCrossedByHelix;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactMaxTrackClusterDeltaZ() const
+{
+    return m_contactMaxTrackClusterDeltaZ;
 }
 
 } // namespace pandora
