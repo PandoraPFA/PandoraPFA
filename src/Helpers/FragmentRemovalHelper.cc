@@ -129,6 +129,11 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     if ((0 == nSamplingPoints) || (1000 < nSamplingPoints))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
+    const float deltaZ((zEnd - zStart) / static_cast<float>(nSamplingPoints));
+
+    if (std::fabs(deltaZ) < 0.001f)
+        return 0;
+
     CartesianVector intersectionPoint;
     const CartesianVector &referencePoint(pHelix->GetReferencePoint());
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(zStart, referencePoint, intersectionPoint));
@@ -138,8 +143,6 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
 
     PseudoLayer currentLayer(startLayer);
     PseudoLayer layerCount(0);
-
-    const float deltaZ((zEnd - zStart) / static_cast<float>(nSamplingPoints));
 
     for (float z = zStart; std::fabs(z) < std::fabs(zEnd + 0.5 * deltaZ); z += deltaZ)
     {

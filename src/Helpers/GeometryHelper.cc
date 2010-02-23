@@ -319,20 +319,31 @@ float GeometryHelper::GetMaximumRadius(float x, float y) const
 {
     static const unsigned int symmetryOrder = GetECalBarrelParameters().GetInnerSymmetryOrder();
     static const float phi0 = GetECalBarrelParameters().GetInnerPhiCoordinate();
+    static const float twoPi = static_cast<float>(2. * std::acos(-1.));
 
     if (symmetryOrder <= 2)
         return std::sqrt((x * x) + (y * y));
 
-    float maxRadius = 0;
-    static const float twoPi = static_cast<float>(2. * std::acos(-1.));
+    // First time only, create vector containing cosine and sine of relevant angles
+    typedef std::vector< std::pair<float, float> > AngleVector;
+    static AngleVector angleVector;
 
-    // TODO shorten/remove these calculations
-    for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)
+    if (angleVector.empty())
     {
-        const float phi = phi0 + ((twoPi * static_cast<float>(iSymmetry)) / static_cast<float>(symmetryOrder));
-        const float radius = (x * std::cos(phi)) + (y * std::sin(phi));
+        for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)
+        {
+            const float phi = phi0 + ((twoPi * static_cast<float>(iSymmetry)) / static_cast<float>(symmetryOrder));
+            angleVector.push_back(std::make_pair(std::cos(phi), std::sin(phi)));
+        }
+    }
 
-        if(radius > maxRadius)
+    // Calculate maximum radius using cached angles
+    float maxRadius(0.);
+    for (AngleVector::const_iterator iter = angleVector.begin(), iterEnd = angleVector.end(); iter != iterEnd; ++iter)
+    {
+        const float radius((x * iter->first) + (y * iter->second));
+
+        if (radius > maxRadius)
             maxRadius = radius;
     }
 
