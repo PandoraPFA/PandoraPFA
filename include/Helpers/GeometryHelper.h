@@ -37,9 +37,11 @@ public:
     class LayerParameters
     {
     public:
-        float                   m_closestDistanceToIp;      ///< Closest distance of the layer from the interaction point, units mm
-        float                   m_nRadiationLengths;        ///< Absorber material in front of layer, units radiation lengths
-        float                   m_nInteractionLengths;      ///< Absorber material in front of layer, units interaction lengths
+        float       m_closestDistanceToIp;              ///< Closest distance of the layer from the interaction point, units mm
+        float       m_nRadiationLengths;                ///< Absorber material in front of layer, units radiation lengths
+        float       m_nInteractionLengths;              ///< Absorber material in front of layer, units interaction lengths
+        float       m_cumulativeRadiationLengths;       ///< Cumulative subdetector absorber material in front of layer, radiation lengths
+        float       m_cumulativeInteractionLengths;     ///< Cumulative subdetector absorber material in front of layer, interaction lengths
     };
 
     typedef std::vector<LayerParameters> LayerParametersList;

@@ -82,13 +82,13 @@ private:
     static float        m_photonIdEndCapZSeparation;        ///< To determine whether cluster strikes endcap: max z distance to inner centroid
     static float        m_photonIdRadiationLengthsCut;      ///< Max number of radiation lengths before cluster inner layer
 
-    static float        m_photonIdShowerStartCut1_0;        ///< Default value for shower start cut 1: min number of layers from inner layer
-    static float        m_photonIdShowerStartCut1Energy_1;  ///< Energy above which shower start cut 1 value 1 is applied
-    static float        m_photonIdShowerStartCut1_1;        ///< Shower start cut 1 value 1
-    static float        m_photonIdShowerStartCut1Energy_2;  ///< Energy above which shower start cut 1 value 2 is applied
-    static float        m_photonIdShowerStartCut1_2;        ///< Shower start cut 1 value 2
+    static float        m_photonIdShowerMaxCut1_0;          ///< Default value for shower max cut 1: min number of layers from inner layer
+    static float        m_photonIdShowerMaxCut1Energy_1;    ///< Energy above which shower max cut 1 value 1 is applied
+    static float        m_photonIdShowerMaxCut1_1;          ///< Shower max cut 1 value 1
+    static float        m_photonIdShowerMaxCut1Energy_2;    ///< Energy above which shower max cut 1 value 2 is applied
+    static float        m_photonIdShowerMaxCut1_2;          ///< Shower max cut 1 value 2
 
-    static float        m_photonIdShowerStartCut2;          ///< Shower start cut 2: max number of layers from inner layer
+    static float        m_photonIdShowerMaxCut2;            ///< Shower max cut 2: max number of layers from inner layer
 
     static float        m_photonIdLayer90Cut1;              ///< Cut on cluster layer 90: min number of layers from inner layer
 

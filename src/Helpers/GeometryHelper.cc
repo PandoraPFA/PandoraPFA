@@ -127,13 +127,25 @@ void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::Geometr
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
     }
 
+    float cumulativeRadiationLengths(0.);
+    float cumulativeInteractionLengths(0.);
+
     for (PandoraApi::GeometryParameters::LayerParametersList::const_iterator iter = inputParameters.m_layerParametersList.begin();
         iter != inputParameters.m_layerParametersList.end(); ++iter)
     {
         LayerParameters layerParameters;
-        layerParameters.m_closestDistanceToIp   = iter->m_closestDistanceToIp.Get();
-        layerParameters.m_nRadiationLengths     = iter->m_nRadiationLengths.Get();
-        layerParameters.m_nInteractionLengths   = iter->m_nInteractionLengths.Get();
+        layerParameters.m_closestDistanceToIp = iter->m_closestDistanceToIp.Get();
+
+        const float nRadiationLengths(iter->m_nRadiationLengths.Get());
+        const float nInteractionLengths(iter->m_nInteractionLengths.Get());
+
+        cumulativeRadiationLengths += nRadiationLengths;
+        cumulativeInteractionLengths += nInteractionLengths;
+
+        layerParameters.m_nRadiationLengths = nRadiationLengths;
+        layerParameters.m_nInteractionLengths = nInteractionLengths;
+        layerParameters.m_cumulativeRadiationLengths = cumulativeRadiationLengths;
+        layerParameters.m_cumulativeInteractionLengths = cumulativeInteractionLengths;
 
         m_layerParametersList.push_back(layerParameters);
 

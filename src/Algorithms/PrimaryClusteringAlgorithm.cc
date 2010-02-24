@@ -17,7 +17,7 @@ StatusCode PrimaryClusteringAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
 
     if (pClusterList->empty())
-        return STATUS_CODE_SUCCESS;
+        return STATUS_CODE_NOT_INITIALIZED;
 
     // Run topological association algorithm
     if (!m_associationAlgorithmName.empty())
