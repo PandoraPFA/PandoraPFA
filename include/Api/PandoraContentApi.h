@@ -259,7 +259,7 @@ public:
     static StatusCode AddCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
 
     /**
-     *  @brief  Delete a cluster in the current list
+     *  @brief  Delete a cluster from the current list
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  pCluster address of the cluster to delete
@@ -274,6 +274,23 @@ public:
      *  @param  clusterListName name of the list containing the cluster
      */
     static StatusCode DeleteCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, const std::string &clusterListName);
+
+    /**
+     *  @brief  Delete a list of clusters from the current list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  clusterList the list of clusters to delete
+     */
+    static StatusCode DeleteClusters(const pandora::Algorithm &algorithm, const pandora::ClusterList &clusterList);
+
+    /**
+     *  @brief  Delete a list of clusters from a specified list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  clusterList the list of clusters to delete
+     *  @param  clusterListName name of the list containing the clusters
+     */
+    static StatusCode DeleteClusters(const pandora::Algorithm &algorithm, const pandora::ClusterList &clusterList, const std::string &clusterListName);
 
     /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second

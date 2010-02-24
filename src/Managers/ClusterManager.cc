@@ -275,13 +275,39 @@ StatusCode ClusterManager::DeleteCluster(Cluster *pCluster, const std::string &l
     if (m_nameToClusterListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;
 
-    ClusterList::iterator clusterIter = listIter->second->find(pCluster);
+    ClusterList::iterator deletionIter = listIter->second->find(pCluster);
 
-    if (listIter->second->end() == clusterIter)
+    if (listIter->second->end() == deletionIter)
         return STATUS_CODE_NOT_FOUND;
 
     delete pCluster;
-    listIter->second->erase(clusterIter);
+    listIter->second->erase(deletionIter);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::DeleteClusters(const ClusterList &clusterList, const std::string &listName)
+{
+    NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(listName);
+
+    if (m_nameToClusterListMap.end() == listIter)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    for (ClusterList::const_iterator clusterIter = clusterList.begin(), clusterIterEnd = clusterList.end(); clusterIter != clusterIterEnd;
+        ++clusterIter)
+    {
+        Cluster *pCluster = *clusterIter;
+
+        ClusterList::iterator deletionIter = listIter->second->find(pCluster);
+
+        if (listIter->second->end() == deletionIter)
+            return STATUS_CODE_NOT_FOUND;
+
+        delete pCluster;
+        listIter->second->erase(deletionIter);
+    }
 
     return STATUS_CODE_SUCCESS;
 }

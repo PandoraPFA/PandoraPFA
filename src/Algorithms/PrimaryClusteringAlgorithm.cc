@@ -23,16 +23,8 @@ StatusCode PrimaryClusteringAlgorithm::Run()
     if (!m_associationAlgorithmName.empty())
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
 
-    // Select all clusters containing calo hits - i.e. reject the clusters corresponding only to track projections
-    ClusterList clustersToSave;
-    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
-    {
-        if ((*iter)->GetNCaloHits() > 0)
-            clustersToSave.insert(*iter);
-    }
-
     //Save the clusters and replace current list
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_clusterListName, clustersToSave));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_clusterListName));
 
     return STATUS_CODE_SUCCESS;
 }

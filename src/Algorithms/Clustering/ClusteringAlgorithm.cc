@@ -52,6 +52,8 @@ StatusCode ClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
 
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RemoveEmptyClusters(clusterVector));
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -553,6 +555,29 @@ StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, 
     }
 
     return STATUS_CODE_UNCHANGED;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusteringAlgorithm::RemoveEmptyClusters(ClusterVector &clusterVector) const
+{
+    ClusterList clusterDeletionList;
+
+    for (ClusterVector::iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
+    {
+        if (0 == (*iter)->GetNCaloHits())
+        {
+            clusterDeletionList.insert(*iter);
+            (*iter) = NULL;
+        }
+    }
+
+    if (!clusterDeletionList.empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteClusters(*this, clusterDeletionList));
+    }
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

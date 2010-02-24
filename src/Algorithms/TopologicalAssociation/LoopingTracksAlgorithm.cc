@@ -20,12 +20,15 @@ StatusCode LoopingTracksAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
+
     static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     // Fit a straight line to the last n occupied pseudo layers in each cluster and store results
-    ClusterFitResultMap clusterFitResultMap;
+    ClusterFitResultVector clusterFitResultVector;
 
-    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
         if (!ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
@@ -38,64 +41,72 @@ StatusCode LoopingTracksAlgorithm::Run()
         if (clusterFitResult.GetChi2() > m_fitChi2Cut)
             continue;
 
-        if (!clusterFitResultMap.insert(ClusterFitResultMap::value_type(*iter, clusterFitResult)).second)
-            return STATUS_CODE_FAILURE;
+        clusterFitResultVector.push_back(std::make_pair(*iter, clusterFitResult));
     }
 
     // Loop over cluster combinations, comparing fit results to determine whether clusters should be merged
-    for (ClusterFitResultMap::const_iterator iterI = clusterFitResultMap.begin(); iterI != clusterFitResultMap.end(); ++iterI)
+    for (ClusterFitResultVector::iterator iterI = clusterFitResultVector.begin(); iterI != clusterFitResultVector.end(); ++iterI)
     {
-        Cluster *pClusterI = iterI->first;
+        Cluster *pParentCluster = iterI->first;
 
-        const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
-        const bool isOutsideECalI(pGeometryHelper->IsOutsideECal(pClusterI->GetCentroid(outerLayerI)));
+        const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
+        const bool isParentOutsideECal(pGeometryHelper->IsOutsideECal(pParentCluster->GetCentroid(parentOuterLayer)));
 
-        const ClusterHelper::ClusterFitResult &clusterFitResultI = iterI->second;
+        const ClusterHelper::ClusterFitResult &parentClusterFitResult = iterI->second;
 
-        ClusterFitResultMap::const_iterator iterJ = iterI;
-        ++iterJ;
+        Cluster *pBestDaughterCluster(NULL);
+        float minFitResultsApproach(std::numeric_limits<float>::max());
 
-        while (iterJ != clusterFitResultMap.end())
+        ClusterFitResultVector::iterator iterJ(iterI);
+        ClusterFitResultVector::iterator bestDaughterClusterIter(clusterFitResultVector.end());
+
+        for (++iterJ; iterJ != clusterFitResultVector.end(); ++iterJ)
         {
-            Cluster *pClusterJ = iterJ->first;
-            const ClusterHelper::ClusterFitResult &clusterFitResultJ = iterJ->second;
-            ++iterJ;
+            Cluster *pDaughterCluster = iterJ->first;
+            const ClusterHelper::ClusterFitResult &daughterClusterFitResult = iterJ->second;
+
+            if (NULL == pDaughterCluster)
+                continue;
 
             // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
-            const PseudoLayer outerLayerJ(pClusterJ->GetOuterPseudoLayer());
+            const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
 
-            const bool isOutsideECalJ(pGeometryHelper->IsOutsideECal(pClusterJ->GetCentroid(outerLayerJ)));
-            const bool isOutsideECal(isOutsideECalI && isOutsideECalJ);
+            const bool isDaughterOutsideECal(pGeometryHelper->IsOutsideECal(pDaughterCluster->GetCentroid(daughterOuterLayer)));
+            const bool isOutsideECal(isParentOutsideECal && isDaughterOutsideECal);
 
             // Apply loose cuts to examine suitability of merging clusters before proceeding
-            const PseudoLayer outerLayerDifference((outerLayerI > outerLayerJ) ? (outerLayerI - outerLayerJ) : (outerLayerJ - outerLayerI));
+            const PseudoLayer outerLayerDifference((parentOuterLayer > daughterOuterLayer) ? (parentOuterLayer - daughterOuterLayer) :
+                (daughterOuterLayer - parentOuterLayer));
+
             if (outerLayerDifference > m_maxOuterLayerDifference)
                 continue;
 
-            const CartesianVector centroidDifference(pClusterI->GetCentroid(outerLayerI) - pClusterJ->GetCentroid(outerLayerJ));
+            const CartesianVector centroidDifference(pParentCluster->GetCentroid(parentOuterLayer) - pDaughterCluster->GetCentroid(daughterOuterLayer));
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
             // Check that cluster fit directions are compatible with looping track hypothesis
             const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
 
-            const float fitDirectionDotProduct(clusterFitResultI.GetDirection().GetDotProduct(clusterFitResultJ.GetDirection()));
+            const float fitDirectionDotProduct(parentClusterFitResult.GetDirection().GetDotProduct(daughterClusterFitResult.GetDirection()));
             if (fitDirectionDotProduct > fitDirectionDotProductCut)
                 continue;
 
-            if (centroidDifference.GetDotProduct(clusterFitResultJ.GetDirection() - clusterFitResultI.GetDirection()) <= 0.)
+            if (centroidDifference.GetDotProduct(daughterClusterFitResult.GetDirection() - parentClusterFitResult.GetDirection()) <= 0.)
                 continue;
 
             // Cut on distance of closest approach between hits in outer layers of the two clusters
+            const float closestHitDistance(this->GetClosestDistanceBetweenOuterLayerHits(pParentCluster, pDaughterCluster));
             const float closestHitDistanceCut(isOutsideECal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
 
-            if (this->GetClosestDistanceBetweenOuterLayerHits(pClusterI, pClusterJ) > closestHitDistanceCut)
+            if (closestHitDistance > closestHitDistanceCut)
                 continue;
 
             // Cut on distance of closest approach between fit extrapolations
+            const float fitResultsClosestApproach(ClusterHelper::GetFitResultsClosestApproach(parentClusterFitResult, daughterClusterFitResult));
             const float fitResultsClosestApproachCut(isOutsideECal ? m_fitResultsClosestApproachCutHCal : m_fitResultsClosestApproachCutECal);
 
-            if (ClusterHelper::GetFitResultsClosestApproach(clusterFitResultI, clusterFitResultJ) > fitResultsClosestApproachCut)
+            if ((fitResultsClosestApproach > fitResultsClosestApproachCut) || (fitResultsClosestApproach > minFitResultsApproach))
                 continue;
 
             // Merge clusters if they are in HCal, otherwise look for "good" features (bit ad hoc) ...
@@ -112,18 +123,25 @@ StatusCode LoopingTracksAlgorithm::Run()
                 if(outerLayerDifference < m_goodFeaturesMaxLayerDifference)
                     nGoodFeatures++;
 
-                if((pClusterI->GetMipFraction() > m_goodFeaturesMinMipFraction) && (pClusterJ->GetMipFraction() > m_goodFeaturesMinMipFraction))
+                if((pParentCluster->GetMipFraction() > m_goodFeaturesMinMipFraction) && (pDaughterCluster->GetMipFraction() > m_goodFeaturesMinMipFraction))
                     nGoodFeatures++;
             }
 
             // Now have sufficient information to decide whether to join clusters
             if (isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
-                // TODO decide which to delete and which to enlarge
-                // TODO decide whether to continue loop over daughter cluster candidates after merging
-                clusterFitResultMap.erase(pClusterJ);
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
+                bestDaughterClusterIter = iterJ;
+                pBestDaughterCluster = pDaughterCluster;
+                minFitResultsApproach = fitResultsClosestApproach;
             }
+        }
+
+        if ((NULL != pBestDaughterCluster) && (bestDaughterClusterIter != clusterFitResultVector.end()))
+        {
+            // Prevent further usage of daughter cluster address
+            // TODO implement safe merge here
+//            bestDaughterClusterIter->first = NULL;
+//            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestDaughterCluster));
         }
     }
 

@@ -31,7 +31,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
             clusterVector.push_back(*iter);
     }
 
-    std::sort(clusterVector.begin(), clusterVector.end(), ProximityBasedMergingAlgorithm::SortClustersByInnerLayer);
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Examine pairs of clusters to evaluate merging suitability. Begin by comparing clusters in highest layers with those in lowest layers.
     for (ClusterVector::reverse_iterator iterI = clusterVector.rbegin(), iterIEnd = clusterVector.rend(); iterI != iterIEnd; ++iterI)
@@ -251,18 +251,6 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     }
 
     return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool ProximityBasedMergingAlgorithm::SortClustersByInnerLayer(const Cluster *const pLhs, const Cluster *const pRhs)
-{
-    const PseudoLayer innerLayerLhs(pLhs->GetInnerPseudoLayer()), innerLayerRhs(pRhs->GetInnerPseudoLayer());
-
-    if (innerLayerLhs != innerLayerRhs)
-        return (innerLayerLhs < innerLayerRhs);
-
-    return (pLhs->GetHadronicEnergy() > pRhs->GetHadronicEnergy());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

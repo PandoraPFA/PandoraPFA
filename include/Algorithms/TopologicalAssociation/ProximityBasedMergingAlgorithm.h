@@ -52,14 +52,6 @@ private:
      */
     bool IsClusterFragment(const pandora::Cluster *const pParentCluster, const pandora::Cluster *const pDaughterCluster) const;
 
-    /**
-     *  @brief  Sort clusters by ascending inner layer, and by descending hadronic energy within a layer
-     * 
-     *  @param  pLhs address of first cluster
-     *  @param  pRhs address of second cluster
-     */
-    static bool SortClustersByInnerLayer(const pandora::Cluster *const pLhs, const pandora::Cluster *const pRhs);
-
     std::string     m_trackClusterAssociationAlgName;   ///< The name of the track-cluster association algorithm to run
 
     float           m_canMergeMinMipFraction;           ///< The minimum mip fraction for clusters (flagged as photons) to be merged

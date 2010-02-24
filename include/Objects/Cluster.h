@@ -30,6 +30,14 @@ class Cluster
 {
 public:
     /**
+     *  @brief  Sort clusters by ascending inner layer, and by descending mip fraction within a layer
+     * 
+     *  @param  pLhs address of first cluster
+     *  @param  pRhs address of second cluster
+     */
+    static bool SortByInnerLayer(const pandora::Cluster *const pLhs, const pandora::Cluster *const pRhs);
+
+    /**
      *  @brief  Get the ordered calo hit list
      * 
      *  @return Address of the ordered calo hit list
@@ -381,6 +389,19 @@ private:
 
     ADD_TEST_CLASS_FRIENDS;
 };
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Cluster::SortByInnerLayer(const Cluster *const pLhs, const Cluster *const pRhs)
+{
+    const PseudoLayer innerLayerLhs(pLhs->GetInnerPseudoLayer()), innerLayerRhs(pRhs->GetInnerPseudoLayer());
+
+    if (innerLayerLhs != innerLayerRhs)
+        return (innerLayerLhs < innerLayerRhs);
+
+    return (pLhs->GetMipFraction() > pRhs->GetMipFraction());
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

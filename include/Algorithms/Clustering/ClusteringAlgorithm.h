@@ -182,6 +182,13 @@ private:
      */
     StatusCode GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, float &distance) const;
 
+    /**
+     *  @brief  Remove any empty clusters at the end of the algorithm
+     * 
+     *  @param  clusterVector containing the addresses of all clusters created
+     */
+    StatusCode RemoveEmptyClusters(ClusterVector &clusterVector) const;
+
     static const float FLOAT_MAX;
 
     unsigned int    m_clusterSeedStrategy;          ///< Flag determining if and how clusters should be seeded with tracks

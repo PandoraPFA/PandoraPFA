@@ -181,6 +181,21 @@ public:
     StatusCode DeleteCluster(Cluster *pCluster, const std::string &clusterListName) const;
 
     /**
+     *  @brief  Delete a list of clusters from the current list
+     * 
+     *  @param  clusterList the list of clusters to delete
+     */
+    StatusCode DeleteClusters(const ClusterList &clusterList) const;
+
+    /**
+     *  @brief  Delete a list of clusters from a specified list
+     * 
+     *  @param  clusterList the list of clusters to delete
+     *  @param  clusterListName name of the list containing the clusters
+     */
+     StatusCode DeleteClusters(const ClusterList &clusterList, const std::string &clusterListName) const;
+
+    /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
      * 
      *  @param  pClusterToEnlarge address of the cluster to enlarge
