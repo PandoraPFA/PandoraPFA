@@ -20,7 +20,7 @@ StatusCode ClusterPreparationAlgorithm::Run()
 
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
-        if (!(*iter)->IsPhoton())
+        if (!(*iter)->IsPhotonFast())
             (*iter)->SetBestEnergyEstimate((*iter)->GetHadronicEnergy());
     }
 
@@ -97,8 +97,7 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
 
                     if (newHitHadronicEnergy < hitHadronicEnergy)
                     {
-                        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCluster->SetBestEnergyEstimate(pCluster->GetHadronicEnergy() +
-                            newHitHadronicEnergy - hitHadronicEnergy));
+                        pCluster->SetBestEnergyEstimate(pCluster->GetHadronicEnergy() + newHitHadronicEnergy - hitHadronicEnergy);
                     }
                 }
             }
@@ -169,8 +168,7 @@ StatusCode ClusterPreparationAlgorithm::ScaleHotHadronEnergy() const
 
         if (meanMipsPerHit > m_hotHadronMipsPerHit)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() *
-                m_scaledHotHadronMipsPerHit / meanMipsPerHit));
+            pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() * m_scaledHotHadronMipsPerHit / meanMipsPerHit);
         }
     }
 

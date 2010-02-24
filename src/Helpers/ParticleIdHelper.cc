@@ -168,7 +168,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
 
 bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
 {
-    // Already flagged as a photon?
+    // Already flagged as a photon by full photon id algorithm?
     if (pCluster->IsPhoton())
         return true;
 

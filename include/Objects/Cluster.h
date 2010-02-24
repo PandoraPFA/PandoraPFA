@@ -80,7 +80,7 @@ public:
     float GetHadronicEnergy() const;
 
     /**
-     *  @brief  Whether the cluster has been flagged as a photon cluster
+     *  @brief  Whether the cluster has been flagged as a photon
      * 
      *  @return boolean
      */
@@ -108,6 +108,29 @@ public:
     const Track *const GetTrackSeed() const;
 
     /**
+     *  @brief  Get the innermost pseudo layer in the cluster
+     * 
+     *  @return The innermost pseudo layer in the cluster
+     */
+    PseudoLayer GetInnerPseudoLayer() const;
+
+    /**
+     *  @brief  Get the outermost pseudo layer in the cluster
+     * 
+     *  @return The outermost pseudo layer in the cluster
+     */
+    PseudoLayer GetOuterPseudoLayer() const;
+
+    /**
+     *  @brief  Get the centroid for the cluster at a particular pseudo layer
+     * 
+     *  @param  pseudoLayer the pseudo layer of interest
+     * 
+     *  @return The centroid, returned by value
+     */
+    const CartesianVector GetCentroid(PseudoLayer pseudoLayer) const;
+
+    /**
      *  @brief  Get the initial direction of the cluster
      * 
      *  @return The initial direction of the cluster
@@ -129,15 +152,6 @@ public:
     const ClusterHelper::ClusterFitResult &GetFitToAllHitsResult();
 
     /**
-     *  @brief  Get the centroid for the cluster at a particular pseudo layer
-     * 
-     *  @param  pseudoLayer the pseudo layer of interest
-     * 
-     *  @return The centroid, returned by value
-     */
-    const CartesianVector GetCentroid(PseudoLayer pseudoLayer) const;
-
-    /**
      *  @brief  Get the best estimate of the cluster energy, units GeV
      * 
      *  @return The best energy estimate
@@ -145,18 +159,11 @@ public:
     float GetBestEnergyEstimate() const;
 
     /**
-     *  @brief  Get the innermost pseudo layer in the cluster
+     *  @brief  Whether the cluster has been flagged as a photon by fast photon id function
      * 
-     *  @return The innermost pseudo layer in the cluster
+     *  @return boolean
      */
-    PseudoLayer GetInnerPseudoLayer() const;
-
-    /**
-     *  @brief  Get the outermost pseudo layer in the cluster
-     * 
-     *  @return The outermost pseudo layer in the cluster
-     */
-    PseudoLayer GetOuterPseudoLayer() const;
+    bool IsPhotonFast();
 
     /**
      *  @brief  Get the pseudo layer at which shower commences
@@ -212,7 +219,7 @@ public:
      * 
      *  @param  bestEnergyEstimate the best energy estimate
      */
-    StatusCode SetBestEnergyEstimate(float bestEnergyEstimate);
+    void SetBestEnergyEstimate(float bestEnergyEstimate);
 
     /**
      *  @brief  Set the result of the current linear fit to the cluster. This function is usually called by a clustering
@@ -264,6 +271,11 @@ private:
     StatusCode RemoveCaloHit(CaloHit *const pCaloHit);
 
     /**
+     *  @brief  Calculate the fast photon flag
+     */
+    void CalculateFastPhotonFlag();
+
+    /**
      *  @brief  Calculate the pseudo layer at which shower commences
      */
     void CalculateShowerStartLayer();
@@ -291,7 +303,7 @@ private:
     /**
      *  @brief  Reset those cluster properties that must be recalculated upon addition/removal of a calo hit
      */
-    void FlagOutdatedProperties();
+    void ResetOutdatedProperties();
 
     /**
      *  @brief  Add the calo hits from a second cluster to this
@@ -333,10 +345,8 @@ private:
 
     unsigned int            m_nCaloHits;                ///< The number of calo hits
     unsigned int            m_nPossibleMipHits;         ///< The number of calo hits that have been flagged as possible mip hits
-
     float                   m_electromagneticEnergy;    ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
     float                   m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
-
     bool                    m_isPhoton;                 ///< Whether the cluster has been flagged as a photon cluster
     bool                    m_isMipTrack;               ///< Whether the cluster has been flagged as a section of mip track
     const Track            *m_pTrackSeed;               ///< Address of the track with which the cluster is seeded
@@ -344,24 +354,23 @@ private:
     ValueByPseudoLayerMap   m_sumXByPseudoLayer;        ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumYByPseudoLayer;        ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumZByPseudoLayer;        ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
-
     ValueByPseudoLayerMap   m_emEnergyByPseudoLayer;    ///< The electromagnetic energy of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_hadEnergyByPseudoLayer;   ///< The hadronic energy of the calo hits, stored by pseudo layer
 
     CartesianVector         m_initialDirection;         ///< The initial direction of the cluster
-
     ClusterFitResult        m_currentFitResult;         ///< The current fit result, usually set by a clustering algorithm, as cluster grows
+
     ClusterFitResult        m_fitToAllHitsResult;       ///< The result of a linear fit to all calo hits in the cluster
     bool                    m_isFitUpToDate;            ///< Whether the fit to all calo hits is up to date
-
-    InputFloat              m_bestEnergyEstimate;       ///< The best estimate of the cluster energy, units GeV
 
     InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
     InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
 
+    InputFloat              m_bestEnergyEstimate;       ///< The best estimate of the cluster energy, units GeV
+
+    InputBool               m_isPhotonFast;             ///< Whether the cluster is flagged as a photon by fast photon id function
     InputPseudoLayer        m_showerStartLayer;         ///< The pseudo layer at which shower commences
     InputPseudoLayer        m_showerMaxLayer;           ///< The pseudo layer at which the cluster energy deposition is greatest
-
     InputFloat              m_showerProfileStart;       ///< The cluster shower profile start, units radiation lengths
     InputFloat              m_showerProfileDiscrepancy; ///< The cluster shower profile discrepancy
 
@@ -460,6 +469,20 @@ inline const Track *const Cluster::GetTrackSeed() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline PseudoLayer Cluster::GetInnerPseudoLayer() const
+{
+    return m_innerPseudoLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline PseudoLayer Cluster::GetOuterPseudoLayer() const
+{
+    return m_outerPseudoLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const CartesianVector &Cluster::GetInitialDirection() const
 {
     return m_initialDirection;
@@ -491,16 +514,12 @@ inline float Cluster::GetBestEnergyEstimate() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline PseudoLayer Cluster::GetInnerPseudoLayer() const
+inline bool Cluster::IsPhotonFast()
 {
-    return m_innerPseudoLayer.Get();
-}
+    if (!m_isPhotonFast.IsInitialized())
+        this->CalculateFastPhotonFlag();
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline PseudoLayer Cluster::GetOuterPseudoLayer() const
-{
-    return m_outerPseudoLayer.Get();
+    return m_isPhotonFast.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -566,12 +585,10 @@ inline void Cluster::SetIsMipTrackFlag(bool isMipTrackFlag)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Cluster::SetBestEnergyEstimate(float bestEnergyEstimate)
+inline void Cluster::SetBestEnergyEstimate(float bestEnergyEstimate)
 {
     if (!(m_bestEnergyEstimate = bestEnergyEstimate))
-        return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -589,11 +606,12 @@ inline Cluster::~Cluster()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void Cluster::FlagOutdatedProperties()
+inline void Cluster::ResetOutdatedProperties()
 {
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
     m_showerStartLayer.Reset();
+    m_isPhotonFast.Reset();
     m_showerMaxLayer.Reset();
     m_showerProfileStart.Reset();
     m_showerProfileDiscrepancy.Reset();

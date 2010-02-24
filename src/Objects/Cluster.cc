@@ -76,7 +76,7 @@ StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.AddCaloHit(pCaloHit));
 
-    this->FlagOutdatedProperties();
+    this->ResetOutdatedProperties();
 
     m_nCaloHits++;
 
@@ -131,7 +131,7 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
     if (m_orderedCaloHitList.empty())
         return this->ResetProperties();
 
-    this->FlagOutdatedProperties();
+    this->ResetOutdatedProperties();
 
     m_nCaloHits--;
 
@@ -199,6 +199,16 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
     return CartesianVector(xValueIter->second / nHitsInLayer, yValueIter->second / nHitsInLayer, zValueIter->second / nHitsInLayer);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Cluster::CalculateFastPhotonFlag()
+{
+    const bool fastPhotonFlag(ParticleIdHelper::IsPhotonFast(this));
+
+    if (!(m_isPhotonFast = fastPhotonFlag))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -279,6 +289,7 @@ StatusCode Cluster::ResetProperties()
     m_innerPseudoLayer.Reset();
     m_outerPseudoLayer.Reset();
 
+    m_isPhotonFast.Reset();
     m_showerStartLayer.Reset();
     m_showerMaxLayer.Reset();
     m_showerProfileStart.Reset();
@@ -298,7 +309,7 @@ StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.Add(orderedCaloHitList));
 
-    this->FlagOutdatedProperties();
+    this->ResetOutdatedProperties();
 
     m_nCaloHits += pCluster->GetNCaloHits();
     m_nPossibleMipHits += pCluster->GetNPossibleMipHits();
