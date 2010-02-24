@@ -247,20 +247,20 @@ void CheatingPfoCreationAlgorithm::ComputeFromMc( pandora::Cluster* cluster, flo
     int& particleId, int& charge )
 {
     // match calohitvectors to their MCParticles
-    std::map< MCParticle*, float > energyPerMCParticle;
-    std::map< MCParticle*, float >::iterator itEnergyPerMCParticle;
+    std::map< const MCParticle*, float > energyPerMCParticle;
+    std::map< const MCParticle*, float >::iterator itEnergyPerMCParticle;
 
     const OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
 
     for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
     {
         // int pseudoLayer = itLyr->first;
-        CaloHitList::iterator itCaloHit    = itLyr->second->begin();
-        CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
+        CaloHitList::const_iterator itCaloHit    = itLyr->second->begin();
+        CaloHitList::const_iterator itCaloHitEnd = itLyr->second->end();
 
         for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
         {
-            MCParticle* mc = NULL; 
+            const MCParticle* mc = NULL; 
             (*itCaloHit)->GetMCParticle( mc );
             if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 
@@ -278,10 +278,10 @@ void CheatingPfoCreationAlgorithm::ComputeFromMc( pandora::Cluster* cluster, flo
         }
     }
 
-    std::map<MCParticle*, float>::iterator it = max_element( energyPerMCParticle.begin(), energyPerMCParticle.end(), 
-         pandora::Select2nd<std::map<MCParticle*, float>::value_type, std::greater<float> >() );
+    std::map<const MCParticle*, float>::const_iterator it = max_element( energyPerMCParticle.begin(), energyPerMCParticle.end(), 
+         pandora::Select2nd<std::map<const MCParticle*, float>::value_type, std::greater<float> >() );
 
-    MCParticle* mc = it->first;
+    const MCParticle* mc = it->first;
     energy     = mc->GetEnergy();
     particleId = mc->GetParticleId();
 }

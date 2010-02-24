@@ -50,8 +50,8 @@ StatusCode CheatingTrackToClusterMatching::Run()
         for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
         {
             // int pseudoLayer = itLyr->first;
-            CaloHitList::iterator itCaloHit    = itLyr->second->begin();
-            CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
+            CaloHitList::const_iterator itCaloHit    = itLyr->second->begin();
+            CaloHitList::const_iterator itCaloHitEnd = itLyr->second->end();
 
             for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
             {
@@ -61,7 +61,7 @@ StatusCode CheatingTrackToClusterMatching::Run()
                 float energy = pCaloHit->GetElectromagneticEnergy(); // ??? option to take hadronic energy as instead?
 
                 // fetch the MCParticle
-                MCParticle* mc = NULL; 
+                const MCParticle* mc = NULL; 
                 pCaloHit->GetMCParticle( mc );
                 if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 

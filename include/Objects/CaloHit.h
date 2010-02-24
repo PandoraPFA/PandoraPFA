@@ -191,7 +191,7 @@ public:
      * 
      *  @param  pMCParticle to receive the address of the mc particle
      */
-    StatusCode GetMCParticle(MCParticle *&pMCParticle) const;
+    StatusCode GetMCParticle(const MCParticle *&pMCParticle) const;
 
     /**
      *  @brief  Get the address of the parent calo hit in the user framework
@@ -286,7 +286,7 @@ private:
 
     bool                    m_isAvailable;              ///< Whether the calo hit is available to be added to a cluster
 
-    MCParticle              *m_pMCParticle;             ///< The associated MC particle
+    const MCParticle        *m_pMCParticle;             ///< The associated MC particle
     const void              *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
 
     friend class CaloHitHelper;
@@ -474,7 +474,7 @@ inline bool CaloHit::IsIsolated() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode CaloHit::GetMCParticle(MCParticle *&pMCParticle) const
+inline StatusCode CaloHit::GetMCParticle(const MCParticle *&pMCParticle) const
 {
     if (NULL == m_pMCParticle)
         return STATUS_CODE_NOT_INITIALIZED;

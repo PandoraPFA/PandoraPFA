@@ -32,7 +32,7 @@ public:
     };
 
 protected:
-    virtual bool SelectCaloHitsOfMcParticleForClustering( pandora::MCParticle* pMcParticle ) const;
+    virtual bool SelectCaloHitsOfMcParticleForClustering( const pandora::MCParticle* pMcParticle ) const;
 
 
 private:

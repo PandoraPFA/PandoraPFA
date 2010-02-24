@@ -25,8 +25,8 @@ StatusCode PerfectClusteringAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
     // match calohitvectors to their MCParticles
-    std::map< MCParticle*, CaloHitVector* > hitsPerMcParticle;
-    std::map< MCParticle*, CaloHitVector* >::iterator itHitsPerMcParticle;
+    std::map< const MCParticle*, CaloHitVector* > hitsPerMcParticle;
+    std::map< const MCParticle*, CaloHitVector* >::iterator itHitsPerMcParticle;
 
     OrderedCaloHitList pNewOrderedCaloHitList; 
 
@@ -42,7 +42,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
             CaloHit* pCaloHit = (*itCaloHit);
 
             // fetch the MCParticle
-            MCParticle* mc = NULL; 
+            const MCParticle* mc = NULL; 
             pCaloHit->GetMCParticle( mc );
             if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 
@@ -77,7 +77,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
     ClusterList clusterList;
     pandora::Cluster *pCluster;
 
-    for( std::map< MCParticle*, CaloHitVector* >::iterator itCHList = hitsPerMcParticle.begin(), itCHListEnd = hitsPerMcParticle.end(); 
+    for( std::map< const MCParticle*, CaloHitVector* >::const_iterator itCHList = hitsPerMcParticle.begin(), itCHListEnd = hitsPerMcParticle.end(); 
          itCHList != itCHListEnd; ++itCHList )
     {
         if( itCHList->first == NULL ) continue; // hits without MCParticle are not clustered
@@ -117,7 +117,7 @@ StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool PerfectClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( MCParticle* pMcParticle ) const
+bool PerfectClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( const MCParticle* pMcParticle ) const
 {
     return true;
 }

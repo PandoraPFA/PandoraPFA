@@ -1086,7 +1086,7 @@ float ECalPhotonClusteringAlgorithm::GetTrueEnergyContribution(const Cluster* cl
 {
 #define PHOTONID 22
 
-    typedef std::set< MCParticle* > MCPARTICLESET;
+    typedef std::set< const MCParticle* > MCPARTICLESET;
     typedef std::map< int, double > ENERGYPIDMAP;
     typedef ENERGYPIDMAP::iterator ENERGYPIDMAPITERATOR;
 
@@ -1107,14 +1107,14 @@ float ECalPhotonClusteringAlgorithm::GetTrueEnergyContribution(const Cluster* cl
     for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
     {
         // int pseudoLayer = itLyr->first;
-        CaloHitList::iterator itCaloHit    = itLyr->second->begin();
-        CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
+        CaloHitList::const_iterator itCaloHit    = itLyr->second->begin();
+        CaloHitList::const_iterator itCaloHitEnd = itLyr->second->end();
 
         for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
         {
 
             // sum up the true energies from the MC-particles (don't double count the MCParticles)
-            MCParticle* mc = NULL; 
+            const MCParticle* mc = NULL; 
             (*itCaloHit)->GetMCParticle( mc );
             int particleId = 0;
             if( mc != NULL )             // else --> special case: sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
