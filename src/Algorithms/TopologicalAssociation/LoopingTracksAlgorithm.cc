@@ -35,24 +35,27 @@ StatusCode LoopingTracksAlgorithm::Run()
 
         ClusterHelper::ClusterFitResult clusterFitResult;
 
+        // TODO cut on number of calo hits and number of hit layers
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(*iter, m_nLayersToFit, clusterFitResult))
             continue;
 
         if (clusterFitResult.GetChi2() > m_fitChi2Cut)
             continue;
 
-        clusterFitResultVector.push_back(std::make_pair(*iter, clusterFitResult));
+        clusterFitResultVector.push_back(new ClusterAndFitResultPair(*iter, clusterFitResult));
     }
 
     // Loop over cluster combinations, comparing fit results to determine whether clusters should be merged
     for (ClusterFitResultVector::iterator iterI = clusterFitResultVector.begin(); iterI != clusterFitResultVector.end(); ++iterI)
     {
-        Cluster *pParentCluster = iterI->first;
+        if (NULL == (*iterI))
+            continue;
+
+        Cluster *pParentCluster((*iterI)->GetCluster());
+        const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetClusterFitResult());
 
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
         const bool isParentOutsideECal(pGeometryHelper->IsOutsideECal(pParentCluster->GetCentroid(parentOuterLayer)));
-
-        const ClusterHelper::ClusterFitResult &parentClusterFitResult = iterI->second;
 
         Cluster *pBestDaughterCluster(NULL);
         float minFitResultsApproach(std::numeric_limits<float>::max());
@@ -62,11 +65,11 @@ StatusCode LoopingTracksAlgorithm::Run()
 
         for (++iterJ; iterJ != clusterFitResultVector.end(); ++iterJ)
         {
-            Cluster *pDaughterCluster = iterJ->first;
-            const ClusterHelper::ClusterFitResult &daughterClusterFitResult = iterJ->second;
-
-            if (NULL == pDaughterCluster)
+            if (NULL == (*iterJ))
                 continue;
+
+            Cluster *pDaughterCluster((*iterJ)->GetCluster());
+            const ClusterHelper::ClusterFitResult &daughterClusterFitResult((*iterJ)->GetClusterFitResult());
 
             // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
             const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
@@ -139,10 +142,16 @@ StatusCode LoopingTracksAlgorithm::Run()
         if ((NULL != pBestDaughterCluster) && (bestDaughterClusterIter != clusterFitResultVector.end()))
         {
             // Prevent further usage of daughter cluster address
-            // TODO implement safe merge here
-//            bestDaughterClusterIter->first = NULL;
-//            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestDaughterCluster));
+            delete (*bestDaughterClusterIter);
+            (*bestDaughterClusterIter) = NULL;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestDaughterCluster));
         }
+    }
+
+    for (ClusterFitResultVector::iterator iter = clusterFitResultVector.begin(); iter != clusterFitResultVector.end(); ++iter)
+    {
+        if (NULL != (*iter))
+            delete (*iter);
     }
 
     return STATUS_CODE_SUCCESS;
