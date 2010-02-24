@@ -76,12 +76,7 @@ StatusCode Cluster::AddCaloHit(CaloHit *const pCaloHit)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.AddCaloHit(pCaloHit));
 
-    m_isFitUpToDate = false;
-    m_fitToAllHitsResult.Reset();
-    m_showerStartLayer.Reset();
-    m_showerMaxLayer.Reset();
-    m_showerProfileStart.Reset();
-    m_showerProfileDiscrepancy.Reset();
+    this->FlagOutdatedProperties();
 
     m_nCaloHits++;
 
@@ -136,12 +131,7 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
     if (m_orderedCaloHitList.empty())
         return this->ResetProperties();
 
-    m_isFitUpToDate = false;
-    m_fitToAllHitsResult.Reset();
-    m_showerStartLayer.Reset();
-    m_showerMaxLayer.Reset();
-    m_showerProfileStart.Reset();
-    m_showerProfileDiscrepancy.Reset();
+    this->FlagOutdatedProperties();
 
     m_nCaloHits--;
 
@@ -308,12 +298,7 @@ StatusCode Cluster::AddHitsFromSecondCluster(Cluster *const pCluster)
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.Add(orderedCaloHitList));
 
-    m_isFitUpToDate = false;
-    m_fitToAllHitsResult.Reset();
-    m_showerStartLayer.Reset();
-    m_showerMaxLayer.Reset();
-    m_showerProfileStart.Reset();
-    m_showerProfileDiscrepancy.Reset();
+    this->FlagOutdatedProperties();
 
     m_nCaloHits += pCluster->GetNCaloHits();
     m_nPossibleMipHits += pCluster->GetNPossibleMipHits();

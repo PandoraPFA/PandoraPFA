@@ -8,7 +8,8 @@
 
 #include "Algorithms/TopologicalAssociation/ProximityBasedMergingAlgorithm.h"
 
-#include <algorithm>
+#include "Helpers/FragmentRemovalHelper.h"
+
 #include <cmath>
 #include <limits>
 

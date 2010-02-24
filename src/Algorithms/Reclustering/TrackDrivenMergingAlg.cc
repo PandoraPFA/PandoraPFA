@@ -8,6 +8,8 @@
 
 #include "Algorithms/Reclustering/TrackDrivenMergingAlg.h"
 
+#include "Helpers/FragmentRemovalHelper.h"
+
 using namespace pandora;
 
 StatusCode TrackDrivenMergingAlg::Run()

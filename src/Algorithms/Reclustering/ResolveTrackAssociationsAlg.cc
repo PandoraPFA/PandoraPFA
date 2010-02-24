@@ -8,6 +8,9 @@
 
 #include "Algorithms/Reclustering/ResolveTrackAssociationsAlg.h"
 
+#include "Helpers/FragmentRemovalHelper.h"
+#include "Helpers/ReclusterHelper.h"
+
 #include <limits>
 
 using namespace pandora;

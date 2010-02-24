@@ -8,6 +8,8 @@
 
 #include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
 
+#include "Helpers/ReclusterHelper.h"
+
 using namespace pandora;
 
 StatusCode LoopingTrackAssociationAlgorithm::Run()

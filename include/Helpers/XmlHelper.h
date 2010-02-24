@@ -12,6 +12,8 @@
 
 #include "Pandora/PandoraInternal.h"
 
+#include "StatusCodes.h"
+
 namespace pandora
 {
 

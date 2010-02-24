@@ -8,6 +8,8 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Helpers/ParticleIdHelper.h"
+
 #include "Pandora/PandoraSettings.h"
 
 namespace pandora
@@ -52,6 +54,10 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         if (m_isInitialized)
             return STATUS_CODE_ALREADY_INITIALIZED;
 
+        // Helper function settings
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ParticleIdHelper::ReadSettings(pXmlHandle));
+
+        // Global pandora settings
         m_isMonitoringEnabled = false;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsMonitoringEnabled", m_isMonitoringEnabled));
@@ -118,38 +124,6 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         m_mipMaxNearbyHits = 1;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MipMaxNearbyHits", m_mipMaxNearbyHits));
-
-        // Shower profile parameters
-        m_showerProfileBinWidth = 0.5f;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "ShowerProfileBinWidth", m_showerProfileBinWidth));
-
-        if (0.f == m_showerProfileBinWidth)
-            return STATUS_CODE_INVALID_PARAMETER;
-
-        m_showerProfileNBins = 100;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "ShowerProfileNBins", m_showerProfileNBins));
-
-        m_showerProfileMinCosAngle = 0.3f;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "ShowerProfileMinCosAngle", m_showerProfileMinCosAngle));
-
-        m_showerProfileCriticalEnergy = 0.08f;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "ShowerProfileCriticalEnergy", m_showerProfileCriticalEnergy));
-
-        m_showerProfileParameter0 = 1.25f;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "ShowerProfileParameter0", m_showerProfileParameter0));
-
-        m_showerProfileParameter1 = 0.5f;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "ShowerProfileParameter1", m_showerProfileParameter1));
-
-        m_showerProfileMaxDifference = 0.1f;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "ShowerProfileMaxDifference", m_showerProfileMaxDifference));
 
         // Cluster contact parameters
         m_contactConeCosineHalfAngle1 = 0.9f;

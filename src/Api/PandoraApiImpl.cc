@@ -11,6 +11,7 @@
 #include "Api/PandoraApi.h"
 #include "Api/PandoraApiImpl.h"
 
+#include "Helpers/CaloHitHelper.h"
 #include "Helpers/GeometryHelper.h"
 
 #include "Managers/AlgorithmManager.h"

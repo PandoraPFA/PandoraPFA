@@ -141,58 +141,6 @@ public:
     unsigned int GetMipMaxNearbyHits() const;
 
     /**
-     *  @brief  Get the bin width used to construct shower profiles, units radiation lengths
-     * 
-     *  @return The bin width used to construct shower profiles
-     */
-    float GetShowerProfileBinWidth() const;
-
-    /**
-     *  @brief  Get the number of bins used to construct shower profiles
-     * 
-     *  @return The number of bins used to construct shower profiles
-     */
-    unsigned int GetShowerProfileNBins() const;
-
-    /**
-     *  @brief  Get the min angular correction used to adjust radiation length measures
-     * 
-     *  @return The min angular correction used to adjust radiation length measures
-     */
-    float GetShowerProfileMinCosAngle() const;
-
-    /**
-     *  @brief  Get critical energy, used to calculate argument for gamma function:
-     *          a = (parameter0 + parameter1 * std::log(clusterEnergy / criticalEnergy)
-     * 
-     *  @return The critical energy
-     */
-    float GetShowerProfileCriticalEnergy() const;
-
-    /**
-     *  @brief  Get parameter0, used to calculate argument for gamma function:
-     *          a = (parameter0 + parameter1 * std::log(clusterEnergy / criticalEnergy)
-     * 
-     *  @return The parameter0
-     */
-    float GetShowerProfileParameter0() const;
-
-    /**
-     *  @brief  Get parameter1, used to calculate argument for gamma function:
-     *          a = (parameter0 + parameter1 * std::log(clusterEnergy / criticalEnergy)
-     * 
-     *  @return The parameter1
-     */
-    float GetShowerProfileParameter1() const;
-
-    /**
-     *  @brief  Get the max difference between current and best shower profile comparisons
-     * 
-     *  @return The max difference between current and best shower profile comparisons
-     */
-    float GetShowerProfileMaxDifference() const;
-
-    /**
      *  @brief  Get the cosine half angle for first cone comparison in cluster contact object
      * 
      *  @return The cosine half angle
@@ -337,16 +285,6 @@ private:
     unsigned int            m_mipNCellsForNearbyHit;            ///< Separation (in calorimeter cells) for hits to be declared "nearby"
     unsigned int            m_mipMaxNearbyHits;                 ///< Max number of "nearby" hits for a hit to be flagged as a possible mip
 
-    float                   m_showerProfileBinWidth;            ///< Bin width used to construct shower profiles, units radiation lengths
-    unsigned int            m_showerProfileNBins;               ///< Number of bins used to construct shower profiles
-    float                   m_showerProfileMinCosAngle;         ///< Min angular correction used to adjust radiation length measures
-
-    float                   m_showerProfileCriticalEnergy;      ///< Critical energy, used to calculate argument for gamma function
-    float                   m_showerProfileParameter0;          ///< Parameter0, used to calculate argument for gamma function
-    float                   m_showerProfileParameter1;          ///< Parameter1, used to calculate argument for gamma function
-
-    float                   m_showerProfileMaxDifference;       ///< Max difference between current and best shower profile comparisons
-
     float                   m_contactConeCosineHalfAngle1;      ///< Cosine half angle for first cone comparison in cluster contact object
     float                   m_contactConeCosineHalfAngle2;      ///< Cosine half angle for second cone comparison in cluster contact object
     float                   m_contactConeCosineHalfAngle3;      ///< Cosine half angle for third cone comparison in cluster contact object
@@ -479,55 +417,6 @@ inline unsigned int PandoraSettings::GetMipNCellsForNearbyHit() const
 inline unsigned int PandoraSettings::GetMipMaxNearbyHits() const
 {
     return m_mipMaxNearbyHits;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetShowerProfileBinWidth() const
-{
-    return m_showerProfileBinWidth;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline unsigned int PandoraSettings::GetShowerProfileNBins() const
-{
-    return m_showerProfileNBins;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetShowerProfileMinCosAngle() const
-{
-    return m_showerProfileMinCosAngle;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetShowerProfileCriticalEnergy() const
-{
-    return m_showerProfileCriticalEnergy;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetShowerProfileParameter0() const
-{
-    return m_showerProfileParameter0;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetShowerProfileParameter1() const
-{
-    return m_showerProfileParameter1;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetShowerProfileMaxDifference() const
-{
-    return m_showerProfileMaxDifference;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

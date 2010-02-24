@@ -8,6 +8,8 @@
 
 #include "Algorithms/Reclustering/SplitTrackAssociationsAlg.h"
 
+#include "Helpers/ReclusterHelper.h"
+
 #include <limits>
 
 using namespace pandora;

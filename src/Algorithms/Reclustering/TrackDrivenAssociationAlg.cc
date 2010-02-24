@@ -8,6 +8,9 @@
 
 #include "Algorithms/Reclustering/TrackDrivenAssociationAlg.h"
 
+#include "Helpers/FragmentRemovalHelper.h"
+#include "Helpers/ReclusterHelper.h"
+
 using namespace pandora;
 
 StatusCode TrackDrivenAssociationAlg::Run()

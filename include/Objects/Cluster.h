@@ -284,9 +284,14 @@ private:
     void CalculateFitToAllHitsResult();
 
     /**
-     *  @brief  Reset the cluster properties
+     *  @brief  Reset all cluster properties
      */
     StatusCode ResetProperties();
+
+    /**
+     *  @brief  Reset those cluster properties that must be recalculated upon addition/removal of a calo hit
+     */
+    void FlagOutdatedProperties();
 
     /**
      *  @brief  Add the calo hits from a second cluster to this
@@ -580,6 +585,18 @@ inline void Cluster::SetCurrentFitResult(const ClusterHelper::ClusterFitResult &
 
 inline Cluster::~Cluster()
 {
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void Cluster::FlagOutdatedProperties()
+{
+    m_isFitUpToDate = false;
+    m_fitToAllHitsResult.Reset();
+    m_showerStartLayer.Reset();
+    m_showerMaxLayer.Reset();
+    m_showerProfileStart.Reset();
+    m_showerProfileDiscrepancy.Reset();
 }
 
 } // namespace pandora

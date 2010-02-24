@@ -8,6 +8,8 @@
 
 #include "Algorithms/PfoConstruction/TrackRecoveryInteractionsAlgorithm.h"
 
+#include "Helpers/ReclusterHelper.h"
+
 using namespace pandora;
 
 StatusCode TrackRecoveryInteractionsAlgorithm::Run()

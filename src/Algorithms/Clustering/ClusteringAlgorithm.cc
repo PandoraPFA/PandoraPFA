@@ -8,6 +8,8 @@
 
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 
+#include "Helpers/CaloHitHelper.h"
+
 #include <cmath>
 #include <limits>
 
