@@ -587,7 +587,7 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
 bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
 {
     return ( (pCluster->GetNCaloHits() > 0) &&
-        (!pCluster->IsPhoton() ||
+        (!pCluster->IsPhotonFast() ||
         (pCluster->GetMipFraction() > minMipFraction) ||
         (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms))) );
 }

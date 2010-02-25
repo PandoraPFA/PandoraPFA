@@ -15,68 +15,93 @@ StatusCode ShowerMipMergingAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end(); ++iterI)
+    // Apply preselection and order clusters by inner layer
+    ClusterVector clusterVector;
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
-        Cluster *pClusterI = *iterI;
+        Cluster *pCluster = *iter;
 
-        if (pClusterI->GetNCaloHits() < m_minCaloHitsPerCluster)
+        if (pCluster->GetNCaloHits() < m_minHitsInCluster)
             continue;
 
-        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
+        if (!ClusterHelper::CanMergeCluster(pCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
-        // Determine whether cluster is a plausible mip candidate
-        if (pClusterI->GetMipFraction() < m_mipFractionCut)
+        clusterVector.push_back(pCluster);
+    }
+
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
+
+    // Loop over all candidate parent clusters
+    for (ClusterVector::const_iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
+    {
+        Cluster *pParentCluster = *iterI;
+
+        // Check to see if cluster has already been changed
+        if (NULL == pParentCluster)
             continue;
 
-        if (!pClusterI->GetFitToAllHitsResult().IsFitSuccessful() || (pClusterI->GetFitToAllHitsResult().GetRms() > m_fitToAllHitsRmsCut))
+        if (pParentCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster)
             continue;
 
-        ClusterHelper::ClusterFitResult clusterFitResultI;
-        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pClusterI, m_nPointsToFit, clusterFitResultI))
+        if (!pParentCluster->GetFitToAllHitsResult().IsFitSuccessful() || (pParentCluster->GetFitToAllHitsResult().GetRms() > m_fitToAllHitsRmsCut))
             continue;
 
-        const PseudoLayer innerLayerI(pClusterI->GetInnerPseudoLayer());
-        const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
+        // Calculate properties to compare with possible daughter clusters
+        ClusterHelper::ClusterFitResult parentClusterFitResult;
+        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pParentCluster, m_nPointsToFit, parentClusterFitResult))
+            continue;
+
+        const PseudoLayer parentInnerLayer(pParentCluster->GetInnerPseudoLayer());
+        const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
+        const CartesianVector parentOuterCentroid(pParentCluster->GetCentroid(parentOuterLayer));
+
+        float minDistanceToCentroid(std::numeric_limits<float>::max());
+        ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
 
         // Compare this mip candidate cluster with all other clusters
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end();)
+        for (ClusterVector::iterator iterJ = clusterVector.begin(); iterJ != clusterVector.end(); ++iterJ)
         {
-            Cluster *pClusterJ = *iterJ;
-            ++iterJ;
+            Cluster *pDaughterCluster = *iterJ;
 
-            if (pClusterI == pClusterJ)
-                continue;
-
-            if (pClusterJ->GetNCaloHits() < m_minCaloHitsPerCluster)
-                continue;
-
-            if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            // Check to see if cluster has already been changed
+            if ((NULL == pDaughterCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
             // Check mip candidate cluster has origin closest to IP
-            const PseudoLayer innerLayerJ(pClusterJ->GetInnerPseudoLayer());
+            const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
-            if (innerLayerJ >= innerLayerI)
+            if (daughterInnerLayer < parentInnerLayer)
                 continue;
 
             // Cut on physical separation of clusters
-            const CartesianVector centroidDifference(pClusterI->GetCentroid(outerLayerI) - pClusterJ->GetCentroid(innerLayerJ));
+            const CartesianVector centroidDifference(parentOuterCentroid - pDaughterCluster->GetCentroid(daughterInnerLayer));
+
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
             // Cut on distance between projected fit result and nearest cluster hit
-            const float distanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(clusterFitResultI, pClusterJ, outerLayerI, outerLayerI + m_nFitProjectionLayers));
+            const float distanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(parentClusterFitResult, pDaughterCluster, parentOuterLayer,
+                parentOuterLayer + m_nFitProjectionLayers));
+
             if (distanceToClosestHit > m_maxDistanceToClosestHit)
                 continue;
 
             // Also cut on distance between projected fit result and nearest cluster centroid
-            const float distanceToClosestCentroid(ClusterHelper::GetDistanceToClosestCentroid(clusterFitResultI, pClusterJ, outerLayerI, outerLayerI + m_nFitProjectionLayers));
-            if (distanceToClosestCentroid < m_maxDistanceToClosestCentroid)
+            const float distanceToClosestCentroid(ClusterHelper::GetDistanceToClosestCentroid(parentClusterFitResult, pDaughterCluster,
+                parentOuterLayer, parentOuterLayer + m_nFitProjectionLayers));
+
+            if ((distanceToClosestCentroid < m_maxDistanceToClosestCentroid) && (distanceToClosestCentroid < minDistanceToCentroid))
             {
-                // TODO decide whether to continue loop over daughter cluster candidates after merging
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
+                bestDaughterClusterIter = iterJ;
+                minDistanceToCentroid = distanceToClosestCentroid;
             }
+        }
+
+        if (bestDaughterClusterIter != clusterVector.end())
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, *bestDaughterClusterIter));
+            *bestDaughterClusterIter = NULL;
         }
     }
 
@@ -99,9 +124,13 @@ StatusCode ShowerMipMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NPointsToFit", m_nPointsToFit));
 
-    m_minCaloHitsPerCluster = 6;
+    m_minHitsInCluster = 6;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
+        "MinHitsInCluster", m_minHitsInCluster));
+
+    m_minOccupiedLayersInCluster = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 
     m_mipFractionCut = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

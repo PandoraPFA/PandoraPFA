@@ -30,23 +30,23 @@ StatusCode LoopingTracksAlgorithm::Run()
 
     for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
-        if (!ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
+        Cluster *pCluster = *iter;
+
+        if (!ClusterHelper::CanMergeCluster(pCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            continue;
+
+        if ((pCluster->GetNCaloHits() < m_minHitsInCluster) || (pCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
             continue;
 
         ClusterHelper::ClusterFitResult clusterFitResult;
+        (void) ClusterHelper::FitEnd(pCluster, m_nLayersToFit, clusterFitResult);
 
-        // TODO cut on number of calo hits and number of hit layers
-        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(*iter, m_nLayersToFit, clusterFitResult))
-            continue;
-
-        if (clusterFitResult.GetChi2() > m_fitChi2Cut)
-            continue;
-
-        clusterFitRelationList.push_back(new ClusterFitRelation(*iter, clusterFitResult));
+        if (clusterFitResult.IsFitSuccessful() && (clusterFitResult.GetChi2() < m_fitChi2Cut))
+            clusterFitRelationList.push_back(new ClusterFitRelation(pCluster, clusterFitResult));
     }
 
     // Loop over cluster combinations, comparing fit results to determine whether clusters should be merged
-    for (ClusterFitRelationList::const_iterator iterI = clusterFitRelationList.begin(); iterI != clusterFitRelationList.end(); ++iterI)
+    for (ClusterFitRelationList::const_iterator iterI = clusterFitRelationList.begin(), iterIEnd = clusterFitRelationList.end(); iterI != iterIEnd; ++iterI)
     {
         if ((*iterI)->IsDefunct())
             continue;
@@ -84,13 +84,14 @@ StatusCode LoopingTracksAlgorithm::Run()
                 continue;
 
             const CartesianVector centroidDifference(pParentCluster->GetCentroid(parentOuterLayer) - pDaughterCluster->GetCentroid(daughterOuterLayer));
+
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
             // Check that cluster fit directions are compatible with looping track hypothesis
             const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
-
             const float fitDirectionDotProduct(parentClusterFitResult.GetDirection().GetDotProduct(daughterClusterFitResult.GetDirection()));
+
             if (fitDirectionDotProduct > fitDirectionDotProductCut)
                 continue;
 
@@ -144,10 +145,9 @@ StatusCode LoopingTracksAlgorithm::Run()
         }
     }
 
+    // Tidy up
     for (ClusterFitRelationList::iterator iter = clusterFitRelationList.begin(); iter != clusterFitRelationList.end(); ++iter)
-    {
         delete (*iter);
-    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -204,6 +204,14 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_canMergeMaxRms = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
+
+    m_minHitsInCluster = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitsInCluster", m_minHitsInCluster));
+
+    m_minOccupiedLayersInCluster = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 
     m_maxOuterLayerDifference = 6;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

@@ -32,8 +32,10 @@ private:
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
 
+    unsigned int    m_minHitsInCluster;                 ///< Min number of calo hits in cluster
+    unsigned int    m_minOccupiedLayersInCluster;       ///< Min number of occupied layers in cluster
+
     unsigned int    m_nPointsToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
-    unsigned int    m_minCaloHitsPerCluster;            ///< The min number of calo hits a cluster must contain if it is to be merged
 
     float           m_mipFractionCut;                   ///< The min mip fraction required to identify a cluster as mip-like
     float           m_fitToAllHitsRmsCut;               ///< The max rms value (for the fit to all hits) to identify a cluster as mip-like

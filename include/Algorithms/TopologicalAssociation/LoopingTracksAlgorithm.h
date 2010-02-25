@@ -10,18 +10,16 @@
 
 #include "Algorithms/Algorithm.h"
 
-using namespace pandora;
-
 /**
  *  @brief  LoopingTracksAlgorithm class
  */
-class LoopingTracksAlgorithm : public Algorithm
+class LoopingTracksAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
         Algorithm *CreateAlgorithm() const;
@@ -39,10 +37,10 @@ private:
      * 
      *  @return the closest distance between outer layer hits
      */
-    float GetClosestDistanceBetweenOuterLayerHits(const Cluster *const pClusterI, const Cluster *const pClusterJ) const;
+    float GetClosestDistanceBetweenOuterLayerHits(const pandora::Cluster *const pClusterI, const pandora::Cluster *const pClusterJ) const;
 
-    typedef ClusterHelper::ClusterFitResult ClusterFitResult;
-    typedef ClusterHelper::ClusterFitRelation ClusterFitRelation;
+    typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
+    typedef pandora::ClusterHelper::ClusterFitRelation ClusterFitRelation;
     typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
 
     unsigned int    m_nLayersToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
@@ -50,6 +48,9 @@ private:
 
     float           m_canMergeMinMipFraction;           ///< The minimum mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The maximum all hit fit rms for clusters (flagged as photons) to be merged
+
+    unsigned int    m_minHitsInCluster;                 ///< Min number of calo hits in cluster
+    unsigned int    m_minOccupiedLayersInCluster;       ///< Min number of occupied layers in cluster
 
     unsigned int    m_maxOuterLayerDifference;          ///< The maximum difference (for merging) between cluster outer pseudo layers
     float           m_maxCentroidDifference;            ///< The maximum difference (for merging) between cluster outer layer centroids
@@ -73,7 +74,7 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Algorithm *LoopingTracksAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *LoopingTracksAlgorithm::Factory::CreateAlgorithm() const
 {
     return new LoopingTracksAlgorithm();
 }

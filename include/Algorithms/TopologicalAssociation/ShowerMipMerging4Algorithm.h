@@ -39,8 +39,6 @@ private:
      */
     float GetDistanceFromInitialProjection(const pandora::Cluster *const pClusterToProject, const pandora::Cluster *const pClusterToExamine) const;
 
-    static const float FLOAT_MAX;
-
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
 

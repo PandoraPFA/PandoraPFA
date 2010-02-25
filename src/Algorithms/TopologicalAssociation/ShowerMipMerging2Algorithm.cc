@@ -17,69 +17,87 @@ StatusCode ShowerMipMerging2Algorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
+    // Apply preselection and order clusters by inner layer
+    ClusterVector clusterVector;
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    {
+        if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            clusterVector.push_back(*iter);
+    }
+
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
+
     static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end(); ++iterI)
+    // Loop over all candidate parent clusters
+    for (ClusterVector::const_iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
     {
-        Cluster *pClusterI = *iterI;
+        Cluster *pParentCluster = *iterI;
 
-        if (pClusterI->GetNCaloHits() < m_minCaloHitsPerCluster)
+        // Check to see if cluster has already been changed
+        if (NULL == pParentCluster)
             continue;
 
-        if (!ClusterHelper::CanMergeCluster(pClusterI, m_canMergeMinMipFraction, m_canMergeMaxRms))
+        if ((pParentCluster->GetNCaloHits() < m_minHitsInCluster) || (pParentCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
             continue;
 
-        if (!pClusterI->GetFitToAllHitsResult().IsFitSuccessful() || (pClusterI->GetFitToAllHitsResult().GetChi2() > m_fitToAllHitsChi2Cut))
+        if (!pParentCluster->GetFitToAllHitsResult().IsFitSuccessful() || (pParentCluster->GetFitToAllHitsResult().GetChi2() > m_fitToAllHitsChi2Cut))
             continue;
 
-        ClusterHelper::ClusterFitResult clusterFitResultI;
-        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pClusterI, m_nPointsToFit, clusterFitResultI))
+        ClusterHelper::ClusterFitResult parentClusterFitResult;
+        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pParentCluster, m_nPointsToFit, parentClusterFitResult))
             continue;
 
-        const PseudoLayer outerLayerI(pClusterI->GetOuterPseudoLayer());
+        const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
+        const CartesianVector parentOuterCentroid(pParentCluster->GetCentroid(parentOuterLayer));
+
+        float minPerpendicularDistance(std::numeric_limits<float>::max());
+        ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
 
         // Compare this successfully fitted cluster with all others
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end();)
+        for (ClusterVector::iterator iterJ = clusterVector.begin(); iterJ != clusterVector.end(); ++iterJ)
         {
-            Cluster *pClusterJ = *iterJ;
-            ++iterJ;
+            Cluster *pDaughterCluster = *iterJ;
 
-            if (pClusterI == pClusterJ)
-                continue;
-
-            if (pClusterJ->GetNCaloHits() < m_minCaloHitsPerCluster)
-                continue;
-
-            if (!ClusterHelper::CanMergeCluster(pClusterJ, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            // Check to see if cluster has already been changed
+            if ((NULL == pDaughterCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
             // Cut on layer separation between the two clusters
-            const PseudoLayer innerLayerJ(pClusterJ->GetInnerPseudoLayer());
+            const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
-            if ((innerLayerJ <= outerLayerI) || ((innerLayerJ - outerLayerI) > m_maxLayerDifference))
+            if ((daughterInnerLayer <= parentOuterLayer) || ((daughterInnerLayer - parentOuterLayer) > m_maxLayerDifference))
                 continue;
 
             // Also cut on physical separation between the two clusters
-            const CartesianVector centroidDifference(pClusterI->GetCentroid(outerLayerI) - pClusterJ->GetCentroid(innerLayerJ));
+            const CartesianVector daughterInnerCentroid(pDaughterCluster->GetCentroid(daughterInnerLayer));
+            const CartesianVector centroidDifference(parentOuterCentroid - daughterInnerCentroid);
+
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
             // Require clusters to point at one another
-            if (centroidDifference.GetUnitVector().GetDotProduct(clusterFitResultI.GetDirection()) > m_maxFitDirectionDotProduct)
+            if (centroidDifference.GetUnitVector().GetDotProduct(parentClusterFitResult.GetDirection()) > m_maxFitDirectionDotProduct)
                 continue;
 
             // Cut on perpendicular distance between fit direction and centroid difference vector.
-            const bool isOutsideECalJ(pGeometryHelper->IsOutsideECal(pClusterJ->GetCentroid(innerLayerJ)));
-            const float perpendicularDistanceCut(isOutsideECalJ ? m_perpendicularDistanceCutHcal : m_perpendicularDistanceCutEcal);
+            const bool isDaughterOutsideECal(pGeometryHelper->IsOutsideECal(daughterInnerCentroid));
+            const float perpendicularDistanceCut(isDaughterOutsideECal ? m_perpendicularDistanceCutHcal : m_perpendicularDistanceCutEcal);
 
-            const CartesianVector fitICrossCentroidDifference(clusterFitResultI.GetDirection().GetCrossProduct(centroidDifference));
-            const float fitIPerpendicularDistance(fitICrossCentroidDifference.GetMagnitude());
+            const CartesianVector parentCrossProduct(parentClusterFitResult.GetDirection().GetCrossProduct(centroidDifference));
+            const float perpendicularDistance(parentCrossProduct.GetMagnitude());
 
-            if (fitIPerpendicularDistance < perpendicularDistanceCut)
+            if ((perpendicularDistance < perpendicularDistanceCut) && (perpendicularDistance < minPerpendicularDistance))
             {
-                // TODO decide whether to continue loop over daughter cluster candidates after merging
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pClusterI, pClusterJ));
+                bestDaughterClusterIter = iterJ;
+                minPerpendicularDistance = perpendicularDistance;
             }
+        }
+
+        if (bestDaughterClusterIter != clusterVector.end())
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, *bestDaughterClusterIter));
+            *bestDaughterClusterIter = NULL;
         }
     }
 
@@ -98,9 +116,13 @@ StatusCode ShowerMipMerging2Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
-    m_minCaloHitsPerCluster = 2;
+    m_minHitsInCluster = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
+        "MinHitsInCluster", m_minHitsInCluster));
+
+    m_minOccupiedLayersInCluster = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 
     m_fitToAllHitsChi2Cut = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

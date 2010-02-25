@@ -30,7 +30,8 @@ private:
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
-    typedef std::map<pandora::Cluster *, ClusterFitResult> ClusterFitResultMap;
+    typedef pandora::ClusterHelper::ClusterFitRelation ClusterFitRelation;
+    typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
 
     unsigned int    m_nStartLayersToFit;                ///< The number of occupied pseudolayers to use in fit to the start of the cluster
     unsigned int    m_nEndLayersToFit;                  ///< The number of occupied pseudolayers to use in fit to the end of the cluster
@@ -38,6 +39,9 @@ private:
 
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
+
+    unsigned int    m_minHitsInCluster;                 ///< Min number of calo hits in cluster
+    unsigned int    m_minOccupiedLayersInCluster;       ///< Min number of occupied layers in cluster
 
     unsigned int    m_maxLayerDifference;               ///< The max difference (for merging) between cluster outer and inner pseudo layers
     float           m_maxCentroidDifference;            ///< The max difference (for merging) between cluster outer and inner centroids

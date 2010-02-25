@@ -12,10 +12,6 @@
 
 using namespace pandora;
 
-const float ShowerMipMerging4Algorithm::FLOAT_MAX = std::numeric_limits<float>::max();
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ShowerMipMerging4Algorithm::Run()
 {
     const ClusterList *pClusterList = NULL;
@@ -67,7 +63,7 @@ StatusCode ShowerMipMerging4Algorithm::Run()
             continue;
 
         // Check closest approach within a layer between best parent cluster and the daughter cluster
-        float intraLayerDistance(FLOAT_MAX);
+        float intraLayerDistance(std::numeric_limits<float>::max());
         if (STATUS_CODE_SUCCESS != ClusterHelper::GetClosestIntraLayerDistance(pBestParentCluster, pDaughterCluster, intraLayerDistance))
             continue;
 
@@ -84,7 +80,7 @@ StatusCode ShowerMipMerging4Algorithm::Run()
 
 float ShowerMipMerging4Algorithm::GetDistanceFromInitialProjection(const Cluster *const pClusterToProject, const Cluster *const pClusterToExamine) const
 {
-    float minDistance(FLOAT_MAX);
+    float minDistance(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitList(pClusterToExamine->GetOrderedCaloHitList());
 
     const CartesianVector innerCentroidI(pClusterToProject->GetCentroid(pClusterToProject->GetInnerPseudoLayer()));
