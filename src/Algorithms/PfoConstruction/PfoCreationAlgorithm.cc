@@ -156,7 +156,7 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
             continue;
 
         // TODO use BestEnergyEstimate, if energy corrections are made
-        const bool isPhoton(pCluster->IsPhoton());
+        const bool isPhoton(pCluster->IsPhotonFast());
         float clusterEnergy(isPhoton ? pCluster->GetElectromagneticEnergy() : pCluster->GetBestEnergyEstimate());
 
         // Veto non-photon clusters below hadronic energy threshold and those occupying a single layer

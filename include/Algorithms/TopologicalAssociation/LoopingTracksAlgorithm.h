@@ -31,42 +31,6 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    typedef ClusterHelper::ClusterFitResult ClusterFitResult;
-
-    /**
-     *  @brief  ClusterAndFitResultPair class
-     */
-    class ClusterAndFitResultPair
-    {
-    public:
-        /**
-         *  @brief  Constructor
-         * 
-         *  @param  pCluster the address of the cluster
-         *  @param  clusterFitResult the cluster fit result
-         */
-        ClusterAndFitResultPair(Cluster *const pCluster, const ClusterFitResult &clusterFitResult);
-
-        /**
-         *  @brief  Get the address of the cluster
-         * 
-         *  @return The address of the cluster
-         */
-        Cluster *GetCluster() const;
-
-        /**
-         *  @brief  Get the cluster fit result
-         * 
-         *  @return The cluster fit result
-         */
-        const ClusterFitResult &GetClusterFitResult() const;
-    private:
-        Cluster                    *m_pCluster;             ///< Address of the cluster
-        const ClusterFitResult      m_clusterFitResult;     ///< The cluster fit result
-    };
-
-    typedef std::vector<ClusterAndFitResultPair*> ClusterFitResultVector;
-
     /**
      *  @brief  Get the closest distance between hits in the outermost pseudolayer of two clusters
      * 
@@ -76,6 +40,10 @@ private:
      *  @return the closest distance between outer layer hits
      */
     float GetClosestDistanceBetweenOuterLayerHits(const Cluster *const pClusterI, const Cluster *const pClusterJ) const;
+
+    typedef ClusterHelper::ClusterFitResult ClusterFitResult;
+    typedef ClusterHelper::ClusterFitRelation ClusterFitRelation;
+    typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
 
     unsigned int    m_nLayersToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_fitChi2Cut;                       ///< The chi2 cut to apply to fit results
@@ -108,29 +76,6 @@ private:
 inline Algorithm *LoopingTracksAlgorithm::Factory::CreateAlgorithm() const
 {
     return new LoopingTracksAlgorithm();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline LoopingTracksAlgorithm::ClusterAndFitResultPair::ClusterAndFitResultPair(Cluster *const pCluster, const ClusterFitResult &clusterFitResult) :
-    m_pCluster(pCluster),
-    m_clusterFitResult(clusterFitResult)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline Cluster *LoopingTracksAlgorithm::ClusterAndFitResultPair::GetCluster() const
-{
-    return m_pCluster;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline const ClusterHelper::ClusterFitResult &LoopingTracksAlgorithm::ClusterAndFitResultPair::GetClusterFitResult() const
-{
-    return m_clusterFitResult;
 }
 
 #endif // #ifndef LOOPING_TRACKS_ALGORITHM_H

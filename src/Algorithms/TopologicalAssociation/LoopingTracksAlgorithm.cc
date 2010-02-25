@@ -26,7 +26,7 @@ StatusCode LoopingTracksAlgorithm::Run()
     static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     // Fit a straight line to the last n occupied pseudo layers in each cluster and store results
-    ClusterFitResultVector clusterFitResultVector;
+    ClusterFitRelationList clusterFitRelationList;
 
     for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
@@ -42,13 +42,13 @@ StatusCode LoopingTracksAlgorithm::Run()
         if (clusterFitResult.GetChi2() > m_fitChi2Cut)
             continue;
 
-        clusterFitResultVector.push_back(new ClusterAndFitResultPair(*iter, clusterFitResult));
+        clusterFitRelationList.push_back(new ClusterFitRelation(*iter, clusterFitResult));
     }
 
     // Loop over cluster combinations, comparing fit results to determine whether clusters should be merged
-    for (ClusterFitResultVector::iterator iterI = clusterFitResultVector.begin(); iterI != clusterFitResultVector.end(); ++iterI)
+    for (ClusterFitRelationList::const_iterator iterI = clusterFitRelationList.begin(); iterI != clusterFitRelationList.end(); ++iterI)
     {
-        if (NULL == (*iterI))
+        if ((*iterI)->IsDefunct())
             continue;
 
         Cluster *pParentCluster((*iterI)->GetCluster());
@@ -57,15 +57,14 @@ StatusCode LoopingTracksAlgorithm::Run()
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
         const bool isParentOutsideECal(pGeometryHelper->IsOutsideECal(pParentCluster->GetCentroid(parentOuterLayer)));
 
-        Cluster *pBestDaughterCluster(NULL);
+        ClusterFitRelation *pBestClusterFitRelation(NULL);
         float minFitResultsApproach(std::numeric_limits<float>::max());
+        ClusterFitRelationList::const_iterator iterJ(iterI);
 
-        ClusterFitResultVector::iterator iterJ(iterI);
-        ClusterFitResultVector::iterator bestDaughterClusterIter(clusterFitResultVector.end());
-
-        for (++iterJ; iterJ != clusterFitResultVector.end(); ++iterJ)
+        for (++iterJ; iterJ != clusterFitRelationList.end(); ++iterJ)
         {
-            if (NULL == (*iterJ))
+            // Check to see if cluster has already been changed
+            if ((*iterJ)->IsDefunct())
                 continue;
 
             Cluster *pDaughterCluster((*iterJ)->GetCluster());
@@ -133,25 +132,21 @@ StatusCode LoopingTracksAlgorithm::Run()
             // Now have sufficient information to decide whether to join clusters
             if (isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
-                bestDaughterClusterIter = iterJ;
-                pBestDaughterCluster = pDaughterCluster;
+                pBestClusterFitRelation = *iterJ;
                 minFitResultsApproach = fitResultsClosestApproach;
             }
         }
 
-        if ((NULL != pBestDaughterCluster) && (bestDaughterClusterIter != clusterFitResultVector.end()))
+        if (NULL != pBestClusterFitRelation)
         {
-            // Prevent further usage of daughter cluster address
-            delete (*bestDaughterClusterIter);
-            (*bestDaughterClusterIter) = NULL;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestDaughterCluster));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestClusterFitRelation->GetCluster()));
+            pBestClusterFitRelation->SetAsDefunct();
         }
     }
 
-    for (ClusterFitResultVector::iterator iter = clusterFitResultVector.begin(); iter != clusterFitResultVector.end(); ++iter)
+    for (ClusterFitRelationList::iterator iter = clusterFitRelationList.begin(); iter != clusterFitRelationList.end(); ++iter)
     {
-        if (NULL != (*iter))
-            delete (*iter);
+        delete (*iter);
     }
 
     return STATUS_CODE_SUCCESS;
