@@ -113,51 +113,14 @@ StatusCode CheatingPfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
 //         <clusterListName> CheatedClusterList </clusterListName>
 //     </algorithm> 
 //
-    try
-    {
-        XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName);
-    }
-    catch (StatusCodeException &statusCodeException)
-    {
-        m_clusteringAlgorithmName = "";
-    }
-    catch(...)
-    {
-        std::cout << "unknown exception in CheatingPfoCreationAlgorithm. (ReadSetting/ProcessFirstAlgorithm)" << std::endl;
-        return STATUS_CODE_FAILURE;
-    }
+    PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName));
 
-    try
-    {
-        XmlHelper::ReadValue(xmlHandle, "inputClusterListName", m_inputClusterListName);
-    }
-    catch (StatusCodeException &statusCodeException)
-    {
-        m_inputClusterListName    = "";
-    }    
-    catch(...)
-    {
-        std::cout << "unknown exception in CheatingPfoCreationAlgorithm. (ReadSetting/ReadValue/m_inputClusterListName)" << std::endl;
-        return STATUS_CODE_FAILURE;
-    }
+    PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "InputClusterListName", m_inputClusterListName));
 
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "energyFrom", m_energyFrom));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "EnergyFrom", m_energyFrom));
 
-    try
-    {
-        XmlHelper::ReadValue(xmlHandle, "debug", m_debug);
-    }
-    catch (StatusCodeException &statusCodeException)
-    {
-        m_debug   = false;
-    }    
-    catch(...)
-    {
-        std::cout << "unknown exception in CheatingPfoCreationAlgorithm. (ReadSetting/ReadValue/m_debug)" << std::endl;
-        return STATUS_CODE_FAILURE;
-    }
-
-    std::cout << "clustering algorithm : " << m_clusteringAlgorithmName << std::endl;
+    m_debug   = false;
+    PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Debug", m_debug));
 
 
     return STATUS_CODE_SUCCESS;

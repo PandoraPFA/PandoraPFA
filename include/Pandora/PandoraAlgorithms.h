@@ -30,6 +30,7 @@
 #include "Algorithms/FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
 
 #include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
+#include "Algorithms/Monitoring/EnergyMonitoringAlgorithm.h"
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
@@ -77,6 +78,7 @@
     d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                      \
     d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                   \
     d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
+    d("EnergyMonitoring",                       EnergyMonitoringAlgorithm::Factory)                         \
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
     d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                  \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \

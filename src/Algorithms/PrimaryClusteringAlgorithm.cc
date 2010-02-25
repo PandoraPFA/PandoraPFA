@@ -40,7 +40,7 @@ StatusCode PrimaryClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "ClusterAssociation", m_associationAlgorithmName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
-        "clusterListName", m_clusterListName));
+        "ClusterListName", m_clusterListName));
 
     return STATUS_CODE_SUCCESS;
 }

@@ -90,15 +90,8 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
 
     // Run initial clustering algorithm
     const ClusterList *pClusterList = NULL;
-    try
-    {
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_clusterListName, pClusterList));
-    }
-    catch(StatusCodeException &statusCodeException)
-    {
-        std::cout << "GetClusterList/statusCodeException " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
-        std::cout << "probably an empty cluster list has been given" << std::endl;
-    }
+    if( STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, m_clusterListName, pClusterList))
+        return STATUS_CODE_SUCCESS;
 
 
     if( pClusterList != NULL )
@@ -191,16 +184,16 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
 
 StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "clusterListName", m_clusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ClusterListName", m_clusterListName));
 
     m_minimumHitsInClusters = 5; 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
                                                                                                          "MinimumHitsInCluster", m_minimumHitsInClusters));
 
     // debug printing
-    m_producePrintoutStatements = 2;
+    m_producePrintoutStatements = 0;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-                                                                                                         "Printing", m_producePrintoutStatements));
+                                                                                                         "Print", m_producePrintoutStatements));
 
     // make photon ID likelihood histograms
     m_makingPhotonIdLikelihoodHistograms = 0;
@@ -267,7 +260,7 @@ void ECalPhotonClusteringAlgorithm::CreateOrSaveLikelihoodHistograms(bool create
 
         try
         {
-            PANDORA_MONITORING_API(PrintTree("photonId"));
+//            PANDORA_MONITORING_API(PrintTree("photonId"));
             PANDORA_MONITORING_API(SaveTree("photonId", m_monitoringFileName, "UPDATE" ));
         }
         catch(...)

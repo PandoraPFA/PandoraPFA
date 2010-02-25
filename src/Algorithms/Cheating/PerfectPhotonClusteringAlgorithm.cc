@@ -15,7 +15,7 @@ using namespace pandora;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool PerfectPhotonClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( MCParticle* pMcParticle ) const
+bool PerfectPhotonClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( const MCParticle* pMcParticle ) const
 {
     #define PHOTON 22
 

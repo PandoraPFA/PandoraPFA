@@ -24,10 +24,8 @@ StatusCode CheatingTrackToClusterMatching::Run()
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
-
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList( *this, pClusterList ) );
-
 
     // get the energy of the CaloHits classified by their creating MCParticle for each of the clusters
     typedef std::map< const MCParticle*, float > EnergyPerMcParticle;

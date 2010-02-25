@@ -15,7 +15,7 @@ using namespace pandora;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool PerfectNeutralHadronClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( MCParticle* pMcParticle ) const
+bool PerfectNeutralHadronClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( const MCParticle* pMcParticle ) const
 {
     #define K0L 130
     #define K0S 310
@@ -23,7 +23,7 @@ bool PerfectNeutralHadronClusteringAlgorithm::SelectCaloHitsOfMcParticleForClust
 
 
     if( pMcParticle->GetParticleId() == K0L ||
-        pMcParticle->GetParticleId() == K0S ||
+//        pMcParticle->GetParticleId() == K0S ||
         pMcParticle->GetParticleId() == NEUTRON )
 	return true;
     return false;
