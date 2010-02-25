@@ -181,54 +181,6 @@ public:
     };
 
     /**
-     *  @brief  ClusterFitRelation class
-     */
-    class ClusterFitRelation
-    {
-    public:
-        /**
-         *  @brief  Constructor
-         * 
-         *  @param  pCluster the address of the cluster
-         *  @param  clusterFitResult the cluster fit result
-         */
-        ClusterFitRelation(Cluster *const pCluster, const ClusterFitResult &clusterFitResult);
-
-        /**
-         *  @brief  Get the address of the cluster
-         * 
-         *  @return The address of the cluster
-         */
-        Cluster *GetCluster() const;
-
-        /**
-         *  @brief  Get the cluster fit result
-         * 
-         *  @return The cluster fit result
-         */
-        const ClusterFitResult &GetClusterFitResult() const;
-
-        /**
-         *  @brief  Whether the cluster fit relation is defunct (the cluster has changed or been deleted and the
-         *          fit result is no longer valid).
-         * 
-         *  @return boolean
-         */
-        bool IsDefunct() const;
-
-        /**
-         *  @brief  Set the cluster fit relation as defunct. This should be called when the cluster has changed,
-         *          or if it has been deleted or merged with another cluster.
-         */
-        void SetAsDefunct();
-
-    private:
-        bool                        m_isDefunct;            ///< Whether the cluster fit relation is defunct
-        Cluster                    *m_pCluster;             ///< Address of the cluster
-        const ClusterFitResult      m_clusterFitResult;     ///< The cluster fit result
-    };
-
-    /**
      *  @brief  Fit points in first n occupied pseudolayers of a cluster
      * 
      *  @param  pCluster the cluster containing the ordered list of calo hits to fit
@@ -548,51 +500,6 @@ inline void ClusterHelper::ClusterFitResult::Reset()
     m_chi2.Reset();
     m_rms.Reset();
     m_dirCosR.Reset();
-}
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline ClusterHelper::ClusterFitRelation::ClusterFitRelation(Cluster *const pCluster, const ClusterFitResult &clusterFitResult) :
-    m_isDefunct(false),
-    m_pCluster(pCluster),
-    m_clusterFitResult(clusterFitResult)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline Cluster *ClusterHelper::ClusterFitRelation::GetCluster() const
-{
-    if (m_isDefunct)
-        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
-
-    return m_pCluster;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline const ClusterHelper::ClusterFitResult &ClusterHelper::ClusterFitRelation::GetClusterFitResult() const
-{
-    if (m_isDefunct)
-        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
-
-    return m_clusterFitResult;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool ClusterHelper::ClusterFitRelation::IsDefunct() const
-{
-    return m_isDefunct;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline void ClusterHelper::ClusterFitRelation::SetAsDefunct()
-{
-    m_isDefunct = true;
 }
 
 } // namespace pandora

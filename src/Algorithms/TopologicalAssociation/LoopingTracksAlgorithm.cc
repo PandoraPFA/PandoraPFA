@@ -146,7 +146,7 @@ StatusCode LoopingTracksAlgorithm::Run()
     }
 
     // Tidy up
-    for (ClusterFitRelationList::iterator iter = clusterFitRelationList.begin(); iter != clusterFitRelationList.end(); ++iter)
+    for (ClusterFitRelationList::const_iterator iter = clusterFitRelationList.begin(), iterEnd = clusterFitRelationList.end(); iter != iterEnd; ++iter)
         delete (*iter);
 
     return STATUS_CODE_SUCCESS;

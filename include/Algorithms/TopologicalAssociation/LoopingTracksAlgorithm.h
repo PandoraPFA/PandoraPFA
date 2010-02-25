@@ -10,16 +10,18 @@
 
 #include "Algorithms/Algorithm.h"
 
+using namespace pandora;
+
 /**
  *  @brief  LoopingTracksAlgorithm class
  */
-class LoopingTracksAlgorithm : public pandora::Algorithm
+class LoopingTracksAlgorithm : public Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public pandora::AlgorithmFactory
+    class Factory : public AlgorithmFactory
     {
     public:
         Algorithm *CreateAlgorithm() const;
@@ -28,6 +30,58 @@ public:
 private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+
+    typedef ClusterHelper::ClusterFitResult ClusterFitResult;
+
+    /**
+     *  @brief  ClusterFitRelation class
+     */
+    class ClusterFitRelation
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  pCluster the address of the cluster
+         *  @param  clusterFitResult the cluster fit result
+         */
+        ClusterFitRelation(Cluster *const pCluster, const ClusterFitResult &clusterFitResult);
+
+        /**
+         *  @brief  Get the address of the cluster
+         * 
+         *  @return The address of the cluster
+         */
+        Cluster *GetCluster() const;
+
+        /**
+         *  @brief  Get the cluster fit result
+         * 
+         *  @return The cluster fit result
+         */
+        const ClusterFitResult &GetClusterFitResult() const;
+
+        /**
+         *  @brief  Whether the cluster fit relation is defunct (the cluster has changed or been deleted and the
+         *          fit result is no longer valid).
+         * 
+         *  @return boolean
+         */
+        bool IsDefunct() const;
+
+        /**
+         *  @brief  Set the cluster fit relation as defunct. This should be called when the cluster has changed,
+         *          or if it has been deleted or merged with another cluster.
+         */
+        void SetAsDefunct();
+
+    private:
+        bool                        m_isDefunct;            ///< Whether the cluster fit relation is defunct
+        Cluster                    *m_pCluster;             ///< Address of the cluster
+        const ClusterFitResult      m_clusterFitResult;     ///< The cluster fit result
+    };
+
+    typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
 
     /**
      *  @brief  Get the closest distance between hits in the outermost pseudolayer of two clusters
@@ -38,10 +92,6 @@ private:
      *  @return the closest distance between outer layer hits
      */
     float GetClosestDistanceBetweenOuterLayerHits(const pandora::Cluster *const pClusterI, const pandora::Cluster *const pClusterJ) const;
-
-    typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
-    typedef pandora::ClusterHelper::ClusterFitRelation ClusterFitRelation;
-    typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
 
     unsigned int    m_nLayersToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_fitChi2Cut;                       ///< The chi2 cut to apply to fit results
@@ -74,9 +124,53 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *LoopingTracksAlgorithm::Factory::CreateAlgorithm() const
+inline Algorithm *LoopingTracksAlgorithm::Factory::CreateAlgorithm() const
 {
     return new LoopingTracksAlgorithm();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline LoopingTracksAlgorithm::ClusterFitRelation::ClusterFitRelation(Cluster *const pCluster, const ClusterFitResult &clusterFitResult) :
+    m_isDefunct(false),
+    m_pCluster(pCluster),
+    m_clusterFitResult(clusterFitResult)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline Cluster *LoopingTracksAlgorithm::ClusterFitRelation::GetCluster() const
+{
+    if (m_isDefunct)
+        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+
+    return m_pCluster;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const ClusterHelper::ClusterFitResult &LoopingTracksAlgorithm::ClusterFitRelation::GetClusterFitResult() const
+{
+    if (m_isDefunct)
+        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+
+    return m_clusterFitResult;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool LoopingTracksAlgorithm::ClusterFitRelation::IsDefunct() const
+{
+    return m_isDefunct;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void LoopingTracksAlgorithm::ClusterFitRelation::SetAsDefunct()
+{
+    m_isDefunct = true;
 }
 
 #endif // #ifndef LOOPING_TRACKS_ALGORITHM_H

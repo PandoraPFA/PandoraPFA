@@ -23,8 +23,7 @@ StatusCode BrokenTracksAlgorithm::Run()
     static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     // Fit a straight line to start and end of all clusters in the current list
-    ClusterFitRelationList startFitRelationList;
-    ClusterFitRelationList endFitRelationList;
+    ClusterFitRelationList clusterFitRelationList;
 
     for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
@@ -36,27 +35,28 @@ StatusCode BrokenTracksAlgorithm::Run()
         if ((pCluster->GetNCaloHits() < m_minHitsInCluster) || (pCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
             continue;
 
-        ClusterFitResult startClusterFitResult;
-        (void) ClusterHelper::FitStart(pCluster, m_nStartLayersToFit, startClusterFitResult);
+        ClusterFitResult startFitResult, endFitResult;
+        (void) ClusterHelper::FitStart(pCluster, m_nStartLayersToFit, startFitResult);
+        (void) ClusterHelper::FitEnd(pCluster, m_nEndLayersToFit, endFitResult);
 
-        if (startClusterFitResult.IsFitSuccessful() && (startClusterFitResult.GetRms() < m_maxFitRms))
-            startFitRelationList.push_back(new ClusterFitRelation(pCluster, startClusterFitResult));
-
-        ClusterFitResult endClusterFitResult;
-        (void) ClusterHelper::FitEnd(pCluster, m_nEndLayersToFit, endClusterFitResult);
-
-        if (endClusterFitResult.IsFitSuccessful() && (endClusterFitResult.GetRms() < m_maxFitRms))
-            endFitRelationList.push_back(new ClusterFitRelation(pCluster, endClusterFitResult));
+        if ((startFitResult.IsFitSuccessful() && (startFitResult.GetRms() < m_maxFitRms)) ||
+            (endFitResult.IsFitSuccessful() && (endFitResult.GetRms() < m_maxFitRms)))
+        {
+            clusterFitRelationList.push_back(new ClusterFitRelation(pCluster, startFitResult, endFitResult));
+        }
     }
 
     // Loop over cluster combinations, comparing fit results to determine whether clusters should be merged
-    for (ClusterFitRelationList::const_iterator iterI = endFitRelationList.begin(), iterIEnd = endFitRelationList.end(); iterI != iterIEnd; ++iterI)
+    for (ClusterFitRelationList::const_iterator iterI = clusterFitRelationList.begin(), iterIEnd = clusterFitRelationList.end(); iterI != iterIEnd; ++iterI)
     {
         if ((*iterI)->IsDefunct())
             continue;
 
         Cluster *pParentCluster((*iterI)->GetCluster());
-        const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetClusterFitResult());
+        const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetEndFitResult());
+
+        if (!parentClusterFitResult.IsFitSuccessful() || (parentClusterFitResult.GetRms() > m_maxFitRms))
+            continue;
 
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
         const CartesianVector parentOuterCentroid(pParentCluster->GetCentroid(parentOuterLayer));
@@ -65,16 +65,19 @@ StatusCode BrokenTracksAlgorithm::Run()
         float minDistanceProduct(std::numeric_limits<float>::max());
 
         // For each end fit, examine start fits for all other clusters
-        for (ClusterFitRelationList::const_iterator iterJ = startFitRelationList.begin(), iterJEnd = startFitRelationList.end(); iterJ != iterJEnd; ++iterJ)
+        for (ClusterFitRelationList::const_iterator iterJ = clusterFitRelationList.begin(), iterJEnd = clusterFitRelationList.end(); iterJ != iterJEnd; ++iterJ)
         {
             // Check to see if cluster has already been changed
             if ((*iterJ)->IsDefunct())
                 continue;
 
             Cluster *pDaughterCluster((*iterJ)->GetCluster());
-            const ClusterHelper::ClusterFitResult &daughterClusterFitResult((*iterJ)->GetClusterFitResult());
+            const ClusterHelper::ClusterFitResult &daughterClusterFitResult((*iterJ)->GetStartFitResult());
 
             if (pParentCluster == pDaughterCluster)
+                continue;
+
+            if (!daughterClusterFitResult.IsFitSuccessful() || (daughterClusterFitResult.GetRms() > m_maxFitRms))
                 continue;
 
             const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -124,25 +127,13 @@ StatusCode BrokenTracksAlgorithm::Run()
 
         if (NULL != pBestClusterFitRelation)
         {
-            Cluster *pBestDaughterCluster = pBestClusterFitRelation->GetCluster();
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestClusterFitRelation->GetCluster()));
             pBestClusterFitRelation->SetAsDefunct();
-
-            for (ClusterFitRelationList::const_iterator defunctIter = endFitRelationList.begin(), defunctIterEnd = endFitRelationList.end();
-                defunctIter != defunctIterEnd; ++defunctIter)
-            {
-                if (!(*defunctIter)->IsDefunct() && ((*defunctIter)->GetCluster() == pBestDaughterCluster))
-                    (*defunctIter)->SetAsDefunct();
-            }
-
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestDaughterCluster));
         }
     }
 
     // Tidy up
-    for (ClusterFitRelationList::iterator iter = startFitRelationList.begin(); iter != startFitRelationList.end(); ++iter)
-        delete (*iter);
-
-    for (ClusterFitRelationList::iterator iter = endFitRelationList.begin(); iter != endFitRelationList.end(); ++iter)
+    for (ClusterFitRelationList::const_iterator iter = clusterFitRelationList.begin(), iterEnd = clusterFitRelationList.end(); iter != iterEnd; ++iter)
         delete (*iter);
 
     return STATUS_CODE_SUCCESS;
