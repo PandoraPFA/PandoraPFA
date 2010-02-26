@@ -77,8 +77,11 @@ StatusCode BackscatteredTracks2Algorithm::Run()
                 continue;
 
             // Cut on the distance of closest approach between the fit to the parent cluster and the daughter cluster candidate
-            const PseudoLayer fitProjectionInnerLayer((daughterOuterLayer > m_nFitProjectionLayers) ? daughterOuterLayer - m_nFitProjectionLayers : 0);
-            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(parentClusterFitResult, pDaughterCluster, fitProjectionInnerLayer, daughterOuterLayer));
+            const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
+            const PseudoLayer fitProjectionOuterLayer((daughterOuterLayer > m_nFitProjectionLayers) ? daughterOuterLayer - m_nFitProjectionLayers : 0);
+
+            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(parentClusterFitResult, pDaughterCluster,
+                daughterInnerLayer, fitProjectionOuterLayer));
 
             if ((fitDistanceToClosestHit < m_maxFitDistanceToClosestHit) && (fitDistanceToClosestHit < minFitDistanceToClosestHit))
             {

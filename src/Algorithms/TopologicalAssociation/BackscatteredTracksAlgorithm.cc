@@ -60,7 +60,7 @@ StatusCode BackscatteredTracksAlgorithm::Run()
             Cluster *pParentCluster = *iterJ;
 
             // Check to see if cluster has already been changed
-            if ((NULL == pDaughterCluster) || (pParentCluster == pDaughterCluster))
+            if ((NULL == pParentCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
             if ((pParentCluster->GetOuterPseudoLayer() <= daughterOuterLayer) || (pParentCluster->GetInnerPseudoLayer() >= daughterOuterLayer))
