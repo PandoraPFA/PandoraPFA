@@ -33,9 +33,10 @@ StatusCode ConeBasedMergingAlgorithm::Run()
 
         Cluster *pBestParentCluster(NULL);
         float highestConeFraction(m_minConeFraction);
+
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
-        for (ClusterFitResultMap::const_iterator iterJ = parentFitResultMap.begin(); iterJ != parentFitResultMap.end(); ++iterJ)
+        for (ClusterFitResultMap::const_iterator iterJ = parentFitResultMap.begin(), iterJEnd = parentFitResultMap.end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pParentCluster = iterJ->first;
 
@@ -65,46 +66,40 @@ StatusCode ConeBasedMergingAlgorithm::Run()
             }
         }
 
-        if (NULL != pBestParentCluster)
+        if (NULL == pBestParentCluster)
+            continue;
+
+        // Check consistency of cluster energy and energy of associated tracks
+        float trackEnergySum(0.);
+        const TrackList &trackList(pBestParentCluster->GetAssociatedTrackList());
+
+        for (TrackList::const_iterator trackIter = trackList.begin(), trackIterEnd = trackList.end(); trackIter != trackIterEnd; ++trackIter)
+            trackEnergySum += (*trackIter)->GetEnergyAtDca();
+
+        if (trackEnergySum > 0.)
         {
-            // Check consistency of cluster energy and energy of associated tracks
-            const TrackList &trackList(pBestParentCluster->GetAssociatedTrackList());
+            static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+            const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
 
-            if (!trackList.empty())
+            if (0. == sigmaE)
+                return STATUS_CODE_FAILURE;
+
+            const float clusterEnergySum = (pBestParentCluster->GetHadronicEnergy() + pDaughterCluster->GetHadronicEnergy());
+
+            const float chi((clusterEnergySum - trackEnergySum) / sigmaE);
+            const float chi0((pBestParentCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
+
+            if (pDaughterCluster->GetHadronicEnergy() < m_minDaughterHadronicEnergy)
             {
-                float trackEnergySum(0.);
-
-                for (TrackList::const_iterator trackIter = trackList.begin(), trackIterEnd = trackList.end(); trackIter != trackIterEnd; ++trackIter)
-                    trackEnergySum += (*trackIter)->GetEnergyAtDca();
-
-                if (trackEnergySum > 0.)
-                {
-                    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
-                    const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
-
-                    if (0. == sigmaE)
-                        return STATUS_CODE_FAILURE;
-
-                    const float clusterEnergySum = (pBestParentCluster->GetHadronicEnergy() + pDaughterCluster->GetHadronicEnergy());
-
-                    const float chi((clusterEnergySum - trackEnergySum) / sigmaE);
-                    const float chi0((pBestParentCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
-
-                    bool canMergeClusters(pDaughterCluster->GetHadronicEnergy() > m_minDaughterHadronicEnergy);
-
-                    if (!canMergeClusters)
-                    {
-                        if ((chi > m_maxTrackClusterChi) || ((chi * chi - chi0 * chi0) > m_maxTrackClusterDChi2))
-                            continue;
-                    }
-                }
+                if ((chi > m_maxTrackClusterChi) || ((chi * chi - chi0 * chi0) > m_maxTrackClusterDChi2))
+                    continue;
             }
-
-            // Finally, merge the clusters
-            (*iterI) = NULL;
-            parentFitResultMap.erase(pDaughterCluster);
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
         }
+
+        // Tidy containers and merge the clusters
+        (*iterI) = NULL;
+        parentFitResultMap.erase(pDaughterCluster);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -120,21 +115,21 @@ StatusCode ConeBasedMergingAlgorithm::PrepareClusters(ClusterVector &daughterVec
     // Store cluster list in a vector and sort by descending inner layer, and by number of hits within a layer
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
-        if ((*iter)->GetNCaloHits() < m_minCaloHitsPerCluster)
+        if ((*iter)->GetNCaloHits() < m_minHitsInCluster)
             continue;
 
         if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
             daughterVector.push_back(*iter);
     }
 
-    std::sort(daughterVector.begin(), daughterVector.end(), ConeBasedMergingAlgorithm::SortClustersByInnerLayer);
+    std::sort(daughterVector.begin(), daughterVector.end(), Cluster::SortByInnerLayer);
 
     // Perform a mip fit to all parent candidate clusters
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
 
-        if (pCluster->GetNCaloHits() < m_minCaloHitsPerCluster)
+        if (pCluster->GetNCaloHits() < m_minHitsInCluster)
             continue;
 
         if (!ClusterHelper::CanMergeCluster(pCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
@@ -181,10 +176,10 @@ float ConeBasedMergingAlgorithm::GetFractionInCone(Cluster *const pParentCluster
 
     const CartesianVector showerStartDifference(pParentCluster->GetCentroid(parentShowerStartLayer) - parentMipFitIntercept);
     const float parallelDistanceToShowerStart(showerStartDifference.GetDotProduct(parentMipFitDirection));
-    const CartesianVector coneVertex(parentMipFitIntercept + (parentMipFitDirection * parallelDistanceToShowerStart));
+    const CartesianVector coneApex(parentMipFitIntercept + (parentMipFitDirection * parallelDistanceToShowerStart));
 
     // Don't allow large distance associations at low angle
-    const float cosConeAngleWrtRadial(coneVertex.GetUnitVector().GetDotProduct(parentMipFitDirection));
+    const float cosConeAngleWrtRadial(coneApex.GetUnitVector().GetDotProduct(parentMipFitDirection));
 
     if (cosConeAngleWrtRadial < m_minCosConeAngleWrtRadial)
         return 0.;
@@ -198,7 +193,7 @@ float ConeBasedMergingAlgorithm::GetFractionInCone(Cluster *const pParentCluster
     {
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            const CartesianVector positionDifference((*hitIter)->GetPositionVector() - coneVertex);
+            const CartesianVector positionDifference((*hitIter)->GetPositionVector() - coneApex);
             const float hitSeparation(positionDifference.GetMagnitude());
 
             if (0. == hitSeparation)
@@ -226,18 +221,6 @@ float ConeBasedMergingAlgorithm::GetFractionInCone(Cluster *const pParentCluster
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ConeBasedMergingAlgorithm::SortClustersByInnerLayer(const Cluster *const pLhs, const Cluster *const pRhs)
-{
-    const PseudoLayer innerLayerLhs(pLhs->GetInnerPseudoLayer()), innerLayerRhs(pRhs->GetInnerPseudoLayer());
-
-    if (innerLayerLhs != innerLayerRhs)
-        return (innerLayerLhs < innerLayerRhs);
-
-    return (pLhs->GetNCaloHits() > pRhs->GetNCaloHits());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ConeBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_trackClusterAssociationAlgName));
@@ -250,9 +233,9 @@ StatusCode ConeBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
-    m_minCaloHitsPerCluster = 6;
+    m_minHitsInCluster = 6;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
+        "MinHitsInCluster", m_minHitsInCluster));
 
     m_minLayersToShowerStart = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

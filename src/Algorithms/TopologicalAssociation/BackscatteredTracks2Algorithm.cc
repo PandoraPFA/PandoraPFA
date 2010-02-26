@@ -17,14 +17,26 @@ StatusCode BackscatteredTracks2Algorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end(); ++iterI)
+    // Apply preselection and order clusters by inner layer
+    ClusterVector clusterVector;
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    {
+        if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            clusterVector.push_back(*iter);
+    }
+
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
+
+    // Loop over candidate daughter/parent cluster combinations
+    for (ClusterVector::const_iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
     {
         Cluster *pParentCluster = *iterI;
 
-        if (pParentCluster->GetNCaloHits() < m_minCaloHitsPerCluster)
+        // Check to see if cluster has already been changed
+        if (NULL == pParentCluster)
             continue;
 
-        if (!ClusterHelper::CanMergeCluster(pParentCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
+        if (pParentCluster->GetNCaloHits() < m_minCaloHitsPerCluster)
             continue;
 
         // Fit the parent cluster candidate from its innermost layer to its showerstart layer
@@ -38,16 +50,16 @@ StatusCode BackscatteredTracks2Algorithm::Run()
         if (parentClusterFitResult.GetRms() > m_maxFitRms)
             continue;
 
+        float minFitDistanceToClosestHit(std::numeric_limits<float>::max());
+        ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
+
         // Find a compatible daughter cluster
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end();)
+        for (ClusterVector::iterator iterJ = clusterVector.begin(); iterJ != clusterVector.end(); ++iterJ)
         {
             Cluster *pDaughterCluster = *iterJ;
-            ++iterJ;
 
-            if (pParentCluster == pDaughterCluster)
-                continue;
-
-            if (!ClusterHelper::CanMergeCluster(pDaughterCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            // Check to see if cluster has already been changed
+            if ((NULL == pDaughterCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
             // Backscattered particle is expected to be daughter of a parent mip section; cut on overlap between relevant layers
@@ -56,23 +68,29 @@ StatusCode BackscatteredTracks2Algorithm::Run()
             if ((parentShowerStartLayer <= daughterOuterLayer) || (parentInnerLayer >= daughterOuterLayer))
                 continue;
 
-            // Cut on the distance of closest approach between the fit to the parent cluster and the daughter cluster candidate
-            const PseudoLayer fitProjectionInnerLayer((daughterOuterLayer > m_nFitProjectionLayers) ? daughterOuterLayer - m_nFitProjectionLayers : 0);
-            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(parentClusterFitResult, pDaughterCluster, fitProjectionInnerLayer, daughterOuterLayer));
-
-            if (fitDistanceToClosestHit > m_maxFitDistanceToClosestHit)
-                continue;
-
             // Cut on the closest approach within a layer between parent cluster and the daughter cluster candidate
             float intraLayerDistance(std::numeric_limits<float>::max());
             if (STATUS_CODE_SUCCESS != ClusterHelper::GetClosestIntraLayerDistance(pParentCluster, pDaughterCluster, intraLayerDistance))
                 continue;
 
-            if (intraLayerDistance < m_maxIntraLayerDistance)
+            if (intraLayerDistance > m_maxIntraLayerDistance)
+                continue;
+
+            // Cut on the distance of closest approach between the fit to the parent cluster and the daughter cluster candidate
+            const PseudoLayer fitProjectionInnerLayer((daughterOuterLayer > m_nFitProjectionLayers) ? daughterOuterLayer - m_nFitProjectionLayers : 0);
+            const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(parentClusterFitResult, pDaughterCluster, fitProjectionInnerLayer, daughterOuterLayer));
+
+            if ((fitDistanceToClosestHit < m_maxFitDistanceToClosestHit) && (fitDistanceToClosestHit < minFitDistanceToClosestHit))
             {
-                // TODO decide whether to continue loop over daughter cluster candidates after merging
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pDaughterCluster));
+                bestDaughterClusterIter = iterJ;
+                minFitDistanceToClosestHit = fitDistanceToClosestHit;
             }
+        }
+
+        if (bestDaughterClusterIter != clusterVector.end())
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, *bestDaughterClusterIter));
+            *bestDaughterClusterIter = NULL;
         }
     }
 

@@ -20,7 +20,6 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
     // Begin by recalculating track-cluster associations
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
-    // Store cluster list in a vector and sort by ascending inner layer, and by descending hadronic energy within a layer
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
@@ -38,6 +37,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
     {
         Cluster *pDaughterCluster = *iterI;
 
+        // Check to see if cluster has already been changed
         if (NULL == pDaughterCluster)
             continue;
 
@@ -55,6 +55,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         {
             Cluster *pParentCluster = *iterJ;
 
+            // Check to see if cluster has already been changed
             if ((NULL == pParentCluster) || (pDaughterCluster == pParentCluster))
                 continue;
 
@@ -127,8 +128,8 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         // Finally, check to see if daughter cluster is likely to be a fragment of the parent cluster
         if (this->IsClusterFragment(pBestParentCluster, pDaughterCluster))
         {
-            (*iterI) = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+            *iterI = NULL;
         }
     }
 

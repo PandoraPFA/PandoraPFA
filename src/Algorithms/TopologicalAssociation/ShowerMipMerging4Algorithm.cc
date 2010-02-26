@@ -17,10 +17,17 @@ StatusCode ShowerMipMerging4Algorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end();)
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
+
+    // Loop over possible mip-stub daughter clusters
+    for (ClusterVector::iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
-        ++iterI;
+
+        // Check to see if cluster has already been changed
+        if (NULL == pDaughterCluster)
+            continue;
 
         if (pDaughterCluster->GetNCaloHits() < m_minCaloHitsPerDaughterCluster)
             continue;
@@ -28,8 +35,8 @@ StatusCode ShowerMipMerging4Algorithm::Run()
         if (!ClusterHelper::CanMergeCluster(pDaughterCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
-        Cluster *pBestParentCluster = NULL;
-        float minProjectionDistance = std::numeric_limits<float>::max();
+        Cluster *pBestParentCluster(NULL);
+        float minProjectionDistance(std::numeric_limits<float>::max());
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
@@ -38,7 +45,8 @@ StatusCode ShowerMipMerging4Algorithm::Run()
         {
             Cluster *pParentCluster = *iterJ;
 
-            if (pDaughterCluster == pParentCluster)
+            // Check to see if cluster has already been changed
+            if ((NULL == pParentCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
             if (pParentCluster->GetNCaloHits() < m_minCaloHitsPerParentCluster)
@@ -70,6 +78,7 @@ StatusCode ShowerMipMerging4Algorithm::Run()
         if (intraLayerDistance < m_maxIntraLayerDistance)
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+            *iterI = NULL;
         }
     }
 

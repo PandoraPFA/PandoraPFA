@@ -17,12 +17,18 @@ StatusCode ShowerMipMerging3Algorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(); iterI != pClusterList->end();)
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
+
+    // Loop over possible mip-stub daughter clusters
+    for (ClusterVector::iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
-        ++iterI;
 
-        // Identify a possible mip-stub daughter cluster
+        // Check to see if cluster has already been changed
+        if (NULL == pDaughterCluster)
+            continue;
+
         if (pDaughterCluster->GetNCaloHits() < m_minCaloHitsPerDaughterCluster)
             continue;
 
@@ -37,8 +43,8 @@ StatusCode ShowerMipMerging3Algorithm::Run()
         if (daughterClusterFitResult.GetChi2() > m_maxFitChi2)
             continue;
 
-        Cluster *pBestParentCluster = NULL;
-        float closestClusterApproach = std::numeric_limits<float>::max();
+        Cluster *pBestParentCluster(NULL);
+        float closestClusterApproach(std::numeric_limits<float>::max());
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
@@ -47,7 +53,8 @@ StatusCode ShowerMipMerging3Algorithm::Run()
         {
             Cluster *pParentCluster = *iterJ;
 
-            if (pDaughterCluster == pParentCluster)
+            // Check to see if cluster has already been changed
+            if ((NULL == pParentCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
             if (pParentCluster->GetNCaloHits() < m_minCaloHitsPerParentCluster)
@@ -62,11 +69,13 @@ StatusCode ShowerMipMerging3Algorithm::Run()
             // Cut on distance between projected fit result and nearest cluster hit
             const PseudoLayer fitProjectionInnerLayer((parentOuterLayer > m_nFitProjectionLayers) ? parentOuterLayer - m_nFitProjectionLayers : 0);
             const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, fitProjectionInnerLayer, parentOuterLayer));
+
             if (fitDistanceToClosestHit < m_maxFitDistanceToClosestHit)
                 continue;
 
             // Cluster approach is the smallest distance between a hit in daughter cluster and a hit in parent cluster
             const float clusterApproach(ClusterHelper::GetDistanceToClosestHit(pDaughterCluster, pParentCluster));
+
             if (clusterApproach < closestClusterApproach)
             {
                 closestClusterApproach = clusterApproach;
@@ -78,6 +87,7 @@ StatusCode ShowerMipMerging3Algorithm::Run()
         if ((closestClusterApproach < m_closestClusterApproachCut) && (pBestParentCluster != NULL))
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+            *iterI = NULL;
         }
     }
 

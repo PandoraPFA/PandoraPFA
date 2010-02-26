@@ -20,8 +20,10 @@ StatusCode ClusterPreparationAlgorithm::Run()
 
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
-        if (!(*iter)->IsPhotonFast())
-            (*iter)->SetBestEnergyEstimate((*iter)->GetHadronicEnergy());
+        Cluster *pCluster = *iter;
+
+        if (!pCluster->IsPhotonFast())
+            pCluster->SetBestEnergyEstimate(pCluster->GetHadronicEnergy());
     }
 
     // Now make corrections to these energy estimates

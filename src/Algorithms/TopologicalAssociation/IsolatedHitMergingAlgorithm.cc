@@ -20,6 +20,10 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
     const ClusterList *pInputClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList, inputClusterListName));
 
+    // Create a vector of input clusters, ordered by inner layer
+    ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());
+    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayer);
+
     // Create a list containing both input and photon clusters
     ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
 
@@ -33,48 +37,49 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
 
     // FIRST PART - find "small" clusters, below threshold number of calo hits, delete them and associate hits with other clusters
-    for (ClusterList::const_iterator iterI = pInputClusterList->begin(), iterIEnd = pInputClusterList->end(); iterI != iterIEnd;)
+    for (ClusterVector::iterator iterI = inputClusterVector.begin(), iterIEnd = inputClusterVector.end(); iterI != iterIEnd; ++iterI)
     {
-        Cluster *pClusterI = *iterI;
-        ++iterI;
+        Cluster *pClusterToDelete = *iterI;
 
-        const unsigned int nCaloHitsI(pClusterI->GetNCaloHits());
-
-        if (nCaloHitsI > m_minHitsInCluster)
+        if (NULL == pClusterToDelete)
             continue;
 
-        CaloHitVector caloHitVectorI;
-        pClusterI->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorI);
+        if (pClusterToDelete->GetNCaloHits() > m_minHitsInCluster)
+            continue;
 
-        combinedClusterList.erase(pClusterI);
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pClusterI));
+        CaloHitVector caloHitVector;
+        pClusterToDelete->GetOrderedCaloHitList().GetCaloHitVector(caloHitVector);
 
-        // Redistribute hits that used to be in cluster I amoungst other clusters
-        for (CaloHitVector::const_iterator hitIterI = caloHitVectorI.begin(), hitIterIEnd = caloHitVectorI.end(); hitIterI != hitIterIEnd; ++hitIterI)
+        combinedClusterList.erase(pClusterToDelete);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pClusterToDelete));
+        *iterI = NULL;
+
+        // Redistribute hits that used to be in cluster I amongst other clusters
+        for (CaloHitVector::const_iterator hitIter = caloHitVector.begin(), hitIterEnd = caloHitVector.end(); hitIter != hitIterEnd; ++hitIter)
         {
             // TODO should these hits be flagged as isolated?
-            CaloHit *pCaloHitI = *hitIterI;
+            CaloHit *pCaloHit = *hitIter;
 
-            Cluster *pBestCluster = NULL;
+            Cluster *pBestHostCluster = NULL;
             float minDistance(std::numeric_limits<float>::max());
 
             // Find the most appropriate cluster for this newly-available hit
             for (ClusterList::const_iterator iterJ = combinedClusterList.begin(), iterJEnd = combinedClusterList.end(); iterJ != iterJEnd; ++iterJ)
             {
-                Cluster *pClusterJ = *iterJ;
+                Cluster *pNewHostCluster = *iterJ;
 
-                const float distance(this->GetDistanceToHit(pClusterJ, pCaloHitI));
+                const float distance(this->GetDistanceToHit(pNewHostCluster, pCaloHit));
 
                 if (distance < minDistance)
                 {
                     minDistance = distance;
-                    pBestCluster = pClusterJ;
+                    pBestHostCluster = pNewHostCluster;
                 }
             }
 
-            if ((NULL != pBestCluster) && (minDistance < m_maxRecombinationDistance))
+            if ((NULL != pBestHostCluster) && (minDistance < m_maxRecombinationDistance))
             {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHitI));
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestHostCluster, pCaloHit));
             }
         }
     }
@@ -88,9 +93,9 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
     {
         for (CaloHitList::const_iterator hitIterI = iterI->second->begin(); hitIterI != iterI->second->end(); ++hitIterI)
         {
-            CaloHit *pCaloHitI = *hitIterI;
+            CaloHit *pCaloHit = *hitIterI;
 
-            if (!pCaloHitI->IsIsolated() || !CaloHitHelper::IsCaloHitAvailable(pCaloHitI))
+            if (!pCaloHit->IsIsolated() || !CaloHitHelper::IsCaloHitAvailable(pCaloHit))
                 continue;
 
             Cluster *pBestCluster = NULL;
@@ -99,20 +104,20 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             // Find most appropriate cluster for this isolated hit
             for (ClusterList::const_iterator iterJ = combinedClusterList.begin(), iterJEnd = combinedClusterList.end(); iterJ != iterJEnd; ++iterJ)
             {
-                Cluster *pClusterJ = *iterJ;
+                Cluster *pCluster = *iterJ;
 
-                const float distance(this->GetDistanceToHit(pClusterJ, pCaloHitI));
+                const float distance(this->GetDistanceToHit(pCluster, pCaloHit));
 
                 if (distance < minDistance)
                 {
                     minDistance = distance;
-                    pBestCluster = pClusterJ;
+                    pBestCluster = pCluster;
                 }
             }
 
             if ((NULL != pBestCluster) && (minDistance < m_maxRecombinationDistance))
             {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHitI));
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHit));
             }
         }
     }

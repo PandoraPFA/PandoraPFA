@@ -21,6 +21,10 @@ StatusCode SoftClusterMergingAlgorithm::Run()
     const ClusterList *pInputClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList, inputClusterListName));
 
+    // Create a vector of input clusters, ordered by inner layer
+    ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());
+    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayer);
+
     // Create a list containing both input and photon clusters
     ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
 
@@ -33,10 +37,12 @@ StatusCode SoftClusterMergingAlgorithm::Run()
     }
 
     // Loop over soft daughter candidate clusters
-    for (ClusterList::const_iterator iterI = pInputClusterList->begin(); iterI != pInputClusterList->end();)
+    for (ClusterVector::iterator iterI = inputClusterVector.begin(), iterIEnd = inputClusterVector.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
-        ++iterI;
+
+        if (NULL == pDaughterCluster)
+            continue;
 
         if(!this->IsSoftCluster(pDaughterCluster))
             continue;
@@ -72,6 +78,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
         if (this->CanMergeSoftCluster(pDaughterCluster, closestDistance))
         {
+            *iterI = NULL;
             combinedClusterList.erase(pDaughterCluster);
 
             const std::string &daughterListName(inputClusterListName);
