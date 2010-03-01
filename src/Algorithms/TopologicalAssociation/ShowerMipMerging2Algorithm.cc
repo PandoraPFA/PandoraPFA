@@ -41,11 +41,11 @@ StatusCode ShowerMipMerging2Algorithm::Run()
         if ((pParentCluster->GetNCaloHits() < m_minHitsInCluster) || (pParentCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
             continue;
 
-        if (!pParentCluster->GetFitToAllHitsResult().IsFitSuccessful() || (pParentCluster->GetFitToAllHitsResult().GetChi2() > m_fitToAllHitsChi2Cut))
-            continue;
-
         ClusterHelper::ClusterFitResult parentClusterFitResult;
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pParentCluster, m_nPointsToFit, parentClusterFitResult))
+            continue;
+
+        if (!parentClusterFitResult.IsFitSuccessful() || (parentClusterFitResult.GetChi2() > m_fitToAllHitsChi2Cut))
             continue;
 
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
@@ -120,7 +120,7 @@ StatusCode ShowerMipMerging2Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
 
-    m_minOccupiedLayersInCluster = 4;
+    m_minOccupiedLayersInCluster = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 
