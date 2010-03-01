@@ -253,6 +253,19 @@ StatusCode PandoraContentApiImpl::AddCaloHitToCluster(Cluster *pCluster, CaloHit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit) const
+{
+    if (pCluster->GetNCaloHits() <= 1)
+        return STATUS_CODE_NOT_ALLOWED;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->RemoveCaloHitFromCluster(pCluster, pCaloHit));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, true));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClusterForDeletion(pCluster));

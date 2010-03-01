@@ -41,6 +41,9 @@ StatusCode ShowerMipMergingAlgorithm::Run()
         if (NULL == pParentCluster)
             continue;
 
+        if (pParentCluster->GetMipFraction() <= m_mipFractionCut)
+            continue;
+
         if (pParentCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster)
             continue;
 
@@ -56,7 +59,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
         const CartesianVector parentOuterCentroid(pParentCluster->GetCentroid(parentOuterLayer));
 
-        float minDistanceToCentroid(std::numeric_limits<float>::max());
+        float minDistanceToCentroid(m_maxDistanceToClosestCentroid);
         ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
 
         // Compare this mip candidate cluster with all other clusters
@@ -91,7 +94,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
             const float distanceToClosestCentroid(ClusterHelper::GetDistanceToClosestCentroid(parentClusterFitResult, pDaughterCluster,
                 parentOuterLayer, parentOuterLayer + m_nFitProjectionLayers));
 
-            if ((distanceToClosestCentroid < m_maxDistanceToClosestCentroid) && (distanceToClosestCentroid < minDistanceToCentroid))
+            if (distanceToClosestCentroid < minDistanceToCentroid)
             {
                 bestDaughterClusterIter = iterJ;
                 minDistanceToCentroid = distanceToClosestCentroid;
@@ -128,7 +131,7 @@ StatusCode ShowerMipMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
 
-    m_minOccupiedLayersInCluster = 4;
+    m_minOccupiedLayersInCluster = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 

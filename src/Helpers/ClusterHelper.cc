@@ -589,10 +589,10 @@ bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFractio
     if (0 == pCluster->GetNCaloHits())
         return false;
 
-    if (!pCluster->IsPhotonFast())
+    if (!(pCluster->IsPhotonFast()))
         return true;
 
-    if (pCluster->GetMipFraction() > minMipFraction)
+    if (!(pCluster->GetMipFraction() <= minMipFraction))
         return true;
 
     return (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms));

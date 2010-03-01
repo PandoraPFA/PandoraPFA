@@ -161,6 +161,14 @@ private:
     StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit);
 
     /**
+     *  @brief  Remove a calo hit from a cluster
+     *
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the hit to remove
+     */
+    StatusCode RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit);
+
+    /**
      *  @brief  Delete a cluster from the current list
      * 
      *  @param  pCluster address of the cluster to delete

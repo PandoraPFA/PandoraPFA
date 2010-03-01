@@ -259,6 +259,16 @@ public:
     static StatusCode AddCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
 
     /**
+     *  @brief  Remove a calo hit from a cluster. Note this function will not remove the final calo hit from a cluster, and
+     *          will instead return status code "not allowed" as a prompt to delete the cluster
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the hit to remove
+     */
+    static StatusCode RemoveCaloHitFromCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
+
+    /**
      *  @brief  Delete a cluster from the current list
      * 
      *  @param  algorithm the algorithm calling this function

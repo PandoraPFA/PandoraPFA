@@ -268,6 +268,13 @@ StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCalo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterManager::RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit)
+{
+    return pCluster->RemoveCaloHit(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ClusterManager::DeleteCluster(Cluster *pCluster, const std::string &listName)
 {
     NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(listName);

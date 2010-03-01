@@ -166,6 +166,15 @@ public:
     StatusCode AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const;
 
     /**
+     *  @brief  Remove a calo hit from a cluster. Note this function will not remove the final calo hit from a cluster, and
+     *          will instead return status code "not allowed" as a prompt to delete the cluster
+     *
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the hit to remove
+     */
+    StatusCode RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit) const;
+
+    /**
      *  @brief  Delete a cluster in the current list
      * 
      *  @param  pCluster address of the cluster to delete
