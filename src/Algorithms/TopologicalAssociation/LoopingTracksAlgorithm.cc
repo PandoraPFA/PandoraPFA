@@ -23,7 +23,7 @@ StatusCode LoopingTracksAlgorithm::Run()
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
-    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
 
     // Fit a straight line to the last n occupied pseudo layers in each cluster and store results
     ClusterFitRelationList clusterFitRelationList;
@@ -55,7 +55,8 @@ StatusCode LoopingTracksAlgorithm::Run()
         const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetClusterFitResult());
 
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
-        const bool isParentOutsideECal(pGeometryHelper->IsOutsideECal(pParentCluster->GetCentroid(parentOuterLayer)));
+        const bool isParentOutsideECal(parentOuterLayer > nECalLayers);
+        const bool isParentDeepInHCal(parentOuterLayer > nECalLayers + m_nDeepInHCalLayers);
 
         ClusterFitRelation *pBestClusterFitRelation(NULL);
         float minFitResultsApproach(std::numeric_limits<float>::max());
@@ -73,8 +74,10 @@ StatusCode LoopingTracksAlgorithm::Run()
             // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
             const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
 
-            const bool isDaughterOutsideECal(pGeometryHelper->IsOutsideECal(pDaughterCluster->GetCentroid(daughterOuterLayer)));
+            const bool isDaughterOutsideECal(daughterOuterLayer > nECalLayers);
+            const bool isDaughterDeepInHCal(daughterOuterLayer > nECalLayers + m_nDeepInHCalLayers);
             const bool isOutsideECal(isParentOutsideECal && isDaughterOutsideECal);
+            const bool isDeepInHCal(isParentDeepInHCal && isDaughterDeepInHCal);
 
             // Apply loose cuts to examine suitability of merging clusters before proceeding
             const PseudoLayer outerLayerDifference((parentOuterLayer > daughterOuterLayer) ? (parentOuterLayer - daughterOuterLayer) :
@@ -89,7 +92,7 @@ StatusCode LoopingTracksAlgorithm::Run()
                 continue;
 
             // Check that cluster fit directions are compatible with looping track hypothesis
-            const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
+            const float fitDirectionDotProductCut(isDeepInHCal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
             const float fitDirectionDotProduct(parentClusterFitResult.GetDirection().GetDotProduct(daughterClusterFitResult.GetDirection()));
 
             if (fitDirectionDotProduct > fitDirectionDotProductCut)
@@ -100,7 +103,7 @@ StatusCode LoopingTracksAlgorithm::Run()
 
             // Cut on distance of closest approach between hits in outer layers of the two clusters
             const float closestHitDistance(this->GetClosestDistanceBetweenOuterLayerHits(pParentCluster, pDaughterCluster));
-            const float closestHitDistanceCut(isOutsideECal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
+            const float closestHitDistanceCut(isDeepInHCal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
 
             if (closestHitDistance > closestHitDistanceCut)
                 continue;
@@ -115,23 +118,23 @@ StatusCode LoopingTracksAlgorithm::Run()
             // Merge clusters if they are in HCal, otherwise look for "good" features (bit ad hoc) ...
             unsigned int nGoodFeatures(0);
 
-            if (!isOutsideECal)
+            if (!isDeepInHCal)
             {
-                if(fitDirectionDotProduct < m_goodFeaturesMaxFitDotProduct)
+                if (fitDirectionDotProduct < m_goodFeaturesMaxFitDotProduct)
                     nGoodFeatures++;
 
-                if(fitResultsClosestApproachCut < m_goodFeaturesMaxFitApproach)
+                if (fitResultsClosestApproach < m_goodFeaturesMaxFitApproach)
                     nGoodFeatures++;
 
-                if(outerLayerDifference < m_goodFeaturesMaxLayerDifference)
+                if (outerLayerDifference < m_goodFeaturesMaxLayerDifference)
                     nGoodFeatures++;
 
-                if((pParentCluster->GetMipFraction() > m_goodFeaturesMinMipFraction) && (pDaughterCluster->GetMipFraction() > m_goodFeaturesMinMipFraction))
+                if ((pParentCluster->GetMipFraction() > m_goodFeaturesMinMipFraction) && (pDaughterCluster->GetMipFraction() > m_goodFeaturesMinMipFraction))
                     nGoodFeatures++;
             }
 
             // Now have sufficient information to decide whether to join clusters
-            if (isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
+            if (isDeepInHCal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
                 pBestClusterFitRelation = *iterJ;
                 minFitResultsApproach = fitResultsClosestApproach;
@@ -197,6 +200,10 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitChi2Cut", m_fitChi2Cut));
 
+    m_nDeepInHCalLayers = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NDeepInHCalLayers", m_nDeepInHCalLayers));
+
     m_canMergeMinMipFraction = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
@@ -209,7 +216,7 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
 
-    m_minOccupiedLayersInCluster = 4;
+    m_minOccupiedLayersInCluster = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 

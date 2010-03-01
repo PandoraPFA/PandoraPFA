@@ -96,6 +96,8 @@ private:
     unsigned int    m_nLayersToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_fitChi2Cut;                       ///< The chi2 cut to apply to fit results
 
+    unsigned int    m_nDeepInHCalLayers;                ///< Number of HCal layers beyond which cluster is declared to be "deep in HCal"
+
     float           m_canMergeMinMipFraction;           ///< The minimum mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The maximum all hit fit rms for clusters (flagged as photons) to be merged
 
@@ -106,10 +108,10 @@ private:
     float           m_maxCentroidDifference;            ///< The maximum difference (for merging) between cluster outer layer centroids
 
     float           m_fitDirectionDotProductCutECal;    ///< ECal cut on max value of dot product between cluster fit directions
-    float           m_fitDirectionDotProductCutHCal;    ///< HCal cut on max value of dot product between cluster fit directions
+    float           m_fitDirectionDotProductCutHCal;    ///< Deep in HCal cut on max value of dot product between cluster fit directions
 
     float           m_closestHitDistanceCutECal;        ///< ECal cut on distance between cluster hits in outermost pseudolayers
-    float           m_closestHitDistanceCutHCal;        ///< HCal cut on distance between cluster hits in outermost pseudolayers
+    float           m_closestHitDistanceCutHCal;        ///< Deep in HCal cut on distance between cluster hits in outermost pseudolayers
 
     float           m_fitResultsClosestApproachCutECal; ///< ECal cut on closest distance of approach between two cluster fit results
     float           m_fitResultsClosestApproachCutHCal; ///< HCal cut on closest distance of approach between two cluster fit results
