@@ -400,7 +400,12 @@ inline bool Cluster::SortByInnerLayer(const Cluster *const pLhs, const Cluster *
     if (innerLayerLhs != innerLayerRhs)
         return (innerLayerLhs < innerLayerRhs);
 
-    return (pLhs->GetMipFraction() > pRhs->GetMipFraction());
+    const float mipFractionLhs(pLhs->GetMipFraction()), mipFractionRhs(pRhs->GetMipFraction());
+
+    if (mipFractionLhs != mipFractionRhs)
+        return (mipFractionLhs > mipFractionRhs);
+
+    return (pLhs->GetNCaloHits() > pRhs->GetNCaloHits());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
