@@ -36,8 +36,10 @@ private:
     float           m_fitToAllHitsRmsCut;               ///< The max rms value (for the fit to all hits) to use cluster as a daughter
 
     unsigned int    m_nOuterFitExclusionLayers;         ///< The number of outer layers to exclude from the daughter cluster fit
-    unsigned int    m_nFitProjectionLayers;             ///< The number of layers to project daughter fit for comparison with parent cluster
-    float           m_maxIntraLayerDistance;            ///< Max value of closest intra layer approach between parent and daughter clusters
+    unsigned int    m_nFitProjectionLayers;             ///< The number of layers to project daughter fit for comparison with parent clusters
+
+    float           m_maxFitDistanceToClosestHit;       ///< Max distance between daughter cluster fit and hits in parent cluster
+    float           m_maxCentroidDistance;              ///< Max value of closest layer centroid distance between parent/daughter clusters
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -464,6 +464,46 @@ float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &cluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterHelper::GetDistanceToClosestCentroid(const Cluster *const pClusterI, const Cluster *const pClusterJ, float &centroidDistance)
+{
+    // Return if clusters do not overlap
+    if ((pClusterI->GetOuterPseudoLayer() < pClusterJ->GetInnerPseudoLayer()) || (pClusterJ->GetOuterPseudoLayer() < pClusterI->GetInnerPseudoLayer()))
+        return STATUS_CODE_NOT_FOUND;
+
+    bool distanceFound(false);
+    float minDistance(std::numeric_limits<float>::max());
+    const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
+
+    for (OrderedCaloHitList::const_iterator iterI = orderedCaloHitListI.begin(), iterIEnd = orderedCaloHitListI.end(); iterI != iterIEnd; ++iterI)
+    {
+        const CartesianVector centroidI(pClusterI->GetCentroid(iterI->first));
+
+        for (OrderedCaloHitList::const_iterator iterJ = orderedCaloHitListJ.begin(), iterJEnd = orderedCaloHitListJ.end(); iterJ != iterJEnd; ++iterJ)
+        {
+            if (orderedCaloHitListI.end() == orderedCaloHitListI.find(iterJ->first))
+                continue;
+
+            const CartesianVector centroidJ(pClusterJ->GetCentroid(iterJ->first));
+
+            const float distance((centroidI - centroidJ).GetMagnitude());
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                distanceFound = true;
+            }
+        }
+    }
+
+    if (!distanceFound)
+        return STATUS_CODE_NOT_FOUND;
+
+    centroidDistance = minDistance;
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClusterI, const Cluster *const pClusterJ, float &intraLayerDistance)
 {
     // Return if clusters do not overlap

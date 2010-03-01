@@ -28,7 +28,7 @@ StatusCode BackscatteredTracksAlgorithm::Run()
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Loop over candidate daughter/parent cluster combinations
-    for (ClusterVector::iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
+    for (ClusterVector::iterator iterI = clusterVector.begin(), iterIEnd = clusterVector.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
 
@@ -51,11 +51,11 @@ StatusCode BackscatteredTracksAlgorithm::Run()
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pDaughterCluster, daughterInnerLayer, daughterOuterFitLayer, daughterClusterFitResult))
             continue;
 
-        Cluster *pBestParentCluster = NULL;
-        float minFitDistanceToClosestHit = std::numeric_limits<float>::max();
+        Cluster *pBestParentCluster(NULL);
+        float minFitDistanceToClosestHit(m_maxFitDistanceToClosestHit);
 
         // Find the most plausible parent cluster, with the smallest distance to the projection of the daughter cluster fit
-        for (ClusterVector::const_iterator iterJ = clusterVector.begin(); iterJ != clusterVector.end(); ++iterJ)
+        for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pParentCluster = *iterJ;
 
@@ -67,11 +67,11 @@ StatusCode BackscatteredTracksAlgorithm::Run()
                 continue;
 
             // Cut on the closest approach within a layer between parent cluster candidate and the daughter cluster
-            float intraLayerDistance(std::numeric_limits<float>::max());
-            if (STATUS_CODE_SUCCESS != ClusterHelper::GetClosestIntraLayerDistance(pParentCluster, pDaughterCluster, intraLayerDistance))
+            float centroidDistance(std::numeric_limits<float>::max());
+            if (STATUS_CODE_SUCCESS != ClusterHelper::GetDistanceToClosestCentroid(pParentCluster, pDaughterCluster, centroidDistance))
                 continue;
 
-            if (intraLayerDistance > m_maxIntraLayerDistance)
+            if (centroidDistance > m_maxCentroidDistance)
                 continue;
 
             // Calculate the smallest distance between the projected daughter cluster fit and the parent cluster candidate
@@ -79,6 +79,7 @@ StatusCode BackscatteredTracksAlgorithm::Run()
             const PseudoLayer fitProjectionOuterLayer(daughterOuterLayer + m_nFitProjectionLayers);
 
             const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, fitProjectionInnerLayer, fitProjectionOuterLayer));
+
             if (fitDistanceToClosestHit < minFitDistanceToClosestHit)
             {
                 minFitDistanceToClosestHit = fitDistanceToClosestHit;
@@ -109,7 +110,7 @@ StatusCode BackscatteredTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
-    m_minCaloHitsPerCluster = 5;
+    m_minCaloHitsPerCluster = 6;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
 
@@ -125,9 +126,13 @@ StatusCode BackscatteredTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NFitProjectionLayers", m_nFitProjectionLayers));
 
-    m_maxIntraLayerDistance = 100.f;
+    m_maxFitDistanceToClosestHit = 30.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxIntraLayerDistance", m_maxIntraLayerDistance));
+        "MaxFitDistanceToClosestHit", m_maxFitDistanceToClosestHit));
+
+    m_maxCentroidDistance = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxCentroidDistance", m_maxCentroidDistance));
 
     return STATUS_CODE_SUCCESS;
 }
