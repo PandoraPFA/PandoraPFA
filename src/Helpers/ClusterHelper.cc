@@ -586,10 +586,16 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
 
 bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
 {
-    return ( (pCluster->GetNCaloHits() > 0) &&
-        (!pCluster->IsPhotonFast() ||
-        (pCluster->GetMipFraction() > minMipFraction) ||
-        (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms))) );
+    if (0 == pCluster->GetNCaloHits())
+        return false;
+
+    if (!pCluster->IsPhotonFast())
+        return true;
+
+    if (pCluster->GetMipFraction() > minMipFraction)
+        return true;
+
+    return (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

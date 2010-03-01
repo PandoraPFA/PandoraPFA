@@ -200,11 +200,10 @@ bool GeometryHelper::IsOutsideECal(const CartesianVector &position) const
     if (position.GetZ() > eCalEndCapOuterZCoordinate)
         return true;
 
-    const float x(position.GetX());
-    const float y(position.GetY());
-    const float r(std::sqrt((x * x) + (y * y)));
+    static const float eCalBarrelMaxRadius(this->GetMaximumRadius(0.f, eCalBarrelOuterRCoordinate));
+    const float maxRadius(this->GetMaximumRadius(position.GetX(), position.GetY()));
 
-    if (r > eCalBarrelOuterRCoordinate)
+    if (maxRadius > eCalBarrelMaxRadius)
         return true;
 
     return false;
@@ -220,11 +219,10 @@ bool GeometryHelper::IsOutsideHCal(const CartesianVector &position) const
     if (position.GetZ() > hCalEndCapOuterZCoordinate)
         return true;
 
-    const float x(position.GetX());
-    const float y(position.GetY());
-    const float r(std::sqrt((x * x) + (y * y)));
+    static const float hCalBarrelMaxRadius(this->GetMaximumRadius(0.f, hCalBarrelOuterRCoordinate));
+    const float maxRadius(this->GetMaximumRadius(position.GetX(), position.GetY()));
 
-    if (r > hCalBarrelOuterRCoordinate)
+    if (maxRadius > hCalBarrelMaxRadius)
         return true;
 
     return false;

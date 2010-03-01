@@ -92,15 +92,16 @@ private:
 
     typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
 
-    unsigned int    m_nStartLayersToFit;                ///< The number of occupied pseudolayers to use in fit to the start of the cluster
-    unsigned int    m_nEndLayersToFit;                  ///< The number of occupied pseudolayers to use in fit to the end of the cluster
-    float           m_maxFitRms;                        ///< The max value of the start/end fit rms for cluster to be considered
-
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
 
     unsigned int    m_minHitsInCluster;                 ///< Min number of calo hits in cluster
-    unsigned int    m_minOccupiedLayersInCluster;       ///< Min number of occupied layers in cluster
+    unsigned int    m_minOccupiedLayersForStartFit;     ///< Min number of occupied layers in cluster to allow fit to start of cluster
+    unsigned int    m_minOccupiedLayersForEndFit;       ///< Min number of occupied layers in cluster to allow fit to end of cluster
+
+    unsigned int    m_nStartLayersToFit;                ///< The number of occupied pseudolayers to use in fit to the start of the cluster
+    unsigned int    m_nEndLayersToFit;                  ///< The number of occupied pseudolayers to use in fit to the end of the cluster
+    float           m_maxFitRms;                        ///< The max value of the start/end fit rms for cluster to be considered
 
     unsigned int    m_maxLayerDifference;               ///< The max difference (for merging) between cluster outer and inner pseudo layers
     float           m_maxCentroidDifference;            ///< The max difference (for merging) between cluster outer and inner centroids

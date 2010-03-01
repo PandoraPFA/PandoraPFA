@@ -32,12 +32,17 @@ StatusCode BrokenTracksAlgorithm::Run()
         if (!ClusterHelper::CanMergeCluster(pCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
-        if ((pCluster->GetNCaloHits() < m_minHitsInCluster) || (pCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
+        if (pCluster->GetNCaloHits() < m_minHitsInCluster)
             continue;
 
         ClusterFitResult startFitResult, endFitResult;
-        (void) ClusterHelper::FitStart(pCluster, m_nStartLayersToFit, startFitResult);
-        (void) ClusterHelper::FitEnd(pCluster, m_nEndLayersToFit, endFitResult);
+        const unsigned int nOccupiedLayers(pCluster->GetOrderedCaloHitList().size());
+ 
+        if (nOccupiedLayers >= m_minOccupiedLayersForStartFit)
+            (void) ClusterHelper::FitStart(pCluster, m_nStartLayersToFit, startFitResult);
+
+        if (nOccupiedLayers >= m_minOccupiedLayersForEndFit)
+            (void) ClusterHelper::FitEnd(pCluster, m_nEndLayersToFit, endFitResult);
 
         if ((startFitResult.IsFitSuccessful() && (startFitResult.GetRms() < m_maxFitRms)) ||
             (endFitResult.IsFitSuccessful() && (endFitResult.GetRms() < m_maxFitRms)))
@@ -84,17 +89,19 @@ StatusCode BrokenTracksAlgorithm::Run()
             const CartesianVector daughterInnerCentroid(pDaughterCluster->GetCentroid(daughterInnerLayer));
 
             // Cut on layer separation between the two clusters
-            if ((daughterInnerLayer < parentOuterLayer) || ((daughterInnerLayer - parentOuterLayer) > m_maxLayerDifference))
+            if ((daughterInnerLayer <= parentOuterLayer) || ((daughterInnerLayer - parentOuterLayer) > m_maxLayerDifference))
                 continue;
 
             // Also cut on physical separation between the two clusters
             const CartesianVector centroidDifference(daughterInnerCentroid - parentOuterCentroid);
+
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
             // Check that cluster fit directions are compatible
             const float fitDirectionDotProduct(parentClusterFitResult.GetDirection().GetDotProduct(daughterClusterFitResult.GetDirection()));
-            if (fitDirectionDotProduct > m_fitDirectionDotProductCut)
+
+            if (fitDirectionDotProduct < m_fitDirectionDotProductCut)
                 continue;
 
             // Cut on distance of closest approach between start and end fits
@@ -143,18 +150,6 @@ StatusCode BrokenTracksAlgorithm::Run()
 
 StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_nStartLayersToFit = 5;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "NStartLayersToFit", m_nStartLayersToFit));
-
-    m_nEndLayersToFit = 8;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "NEndLayersToFit", m_nEndLayersToFit));
-
-    m_maxFitRms = 15.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxFitRms", m_maxFitRms));
-
     m_canMergeMinMipFraction = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
@@ -167,9 +162,25 @@ StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
 
-    m_minOccupiedLayersInCluster = 4;
+    m_minOccupiedLayersForStartFit = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
+        "MinOccupiedLayersForStartFit", m_minOccupiedLayersForStartFit));
+
+    m_minOccupiedLayersForEndFit = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinOccupiedLayersForEndFit", m_minOccupiedLayersForEndFit));
+
+    m_nStartLayersToFit = 5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NStartLayersToFit", m_nStartLayersToFit));
+
+    m_nEndLayersToFit = 8;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NEndLayersToFit", m_nEndLayersToFit));
+
+    m_maxFitRms = 15.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxFitRms", m_maxFitRms));
 
     m_maxLayerDifference = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
