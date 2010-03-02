@@ -83,7 +83,7 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPa
             if (pDaughterCluster == pParentCluster)
                 continue;
 
-            if (!pParentCluster->GetAssociatedTrackList().empty() || pParentCluster->IsPhoton())
+            if (!pParentCluster->GetAssociatedTrackList().empty() || pParentCluster->IsPhotonFast())
                 continue;
 
             const ClusterContact clusterContact(pDaughterCluster, pParentCluster);
@@ -103,7 +103,7 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPa
 
 bool NeutralFragmentRemovalAlgorithm::IsPhotonLike(Cluster *const pDaughterCluster) const
 {
-    if (pDaughterCluster->IsPhoton())
+    if (pDaughterCluster->IsPhotonFast())
         return true;
 
     static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());

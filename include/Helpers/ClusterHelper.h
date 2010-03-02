@@ -229,10 +229,9 @@ public:
      * 
      *  @param  lhs first cluster fit result
      *  @param  rhs second cluster fit result
-     * 
-     *  @return the distance of closest approach
+     *  @param  closestApproach to receive the closest distance of approach
      */
-    static float GetFitResultsClosestApproach(const ClusterFitResult &lhs, const ClusterFitResult &rhs);
+    static StatusCode GetFitResultsClosestApproach(const ClusterFitResult &lhs, const ClusterFitResult &rhs, float &closestApproach);
 
     /**
      *  @brief  Get closest distance of approach between projected cluster fit result and hits in a second cluster

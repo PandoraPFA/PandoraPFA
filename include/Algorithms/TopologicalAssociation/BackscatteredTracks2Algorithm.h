@@ -38,7 +38,7 @@ private:
     unsigned int    m_nFitProjectionLayers;             ///< The number of layers to project parent fit for comparison with daughter cluster
     float           m_maxFitDistanceToClosestHit;       ///< The max distance between projected parent fit and hits in daughter cluster
 
-    float           m_maxIntraLayerDistance;            ///< Max value of closest intra layer approach between parent and daughter clusters
+    float           m_maxCentroidDistance;              ///< Max value of closest layer centroid distance between parent/daughter clusters
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

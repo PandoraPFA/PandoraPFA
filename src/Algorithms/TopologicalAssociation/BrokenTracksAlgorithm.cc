@@ -107,8 +107,12 @@ StatusCode BrokenTracksAlgorithm::Run()
             // Cut on distance of closest approach between start and end fits
             const bool isDaughterOutsideECal(pGeometryHelper->IsOutsideECal(daughterInnerCentroid));
             const float trackMergeCut(isDaughterOutsideECal ? m_trackMergeCutHcal : m_trackMergeCutEcal);
+            float fitResultsClosestApproach(std::numeric_limits<float>::max());
 
-            if (ClusterHelper::GetFitResultsClosestApproach(parentClusterFitResult, daughterClusterFitResult) > trackMergeCut)
+            if (STATUS_CODE_SUCCESS != ClusterHelper::GetFitResultsClosestApproach(parentClusterFitResult, daughterClusterFitResult, fitResultsClosestApproach))
+                continue;
+
+            if (fitResultsClosestApproach > trackMergeCut)
                 continue;
 
             // Cut on perpendicular distance between fit directions and centroid difference vector.

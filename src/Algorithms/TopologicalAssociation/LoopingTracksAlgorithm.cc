@@ -109,8 +109,11 @@ StatusCode LoopingTracksAlgorithm::Run()
                 continue;
 
             // Cut on distance of closest approach between fit extrapolations
-            const float fitResultsClosestApproach(ClusterHelper::GetFitResultsClosestApproach(parentClusterFitResult, daughterClusterFitResult));
             const float fitResultsClosestApproachCut(isOutsideECal ? m_fitResultsClosestApproachCutHCal : m_fitResultsClosestApproachCutECal);
+            float fitResultsClosestApproach(std::numeric_limits<float>::max());
+
+            if (STATUS_CODE_SUCCESS != ClusterHelper::GetFitResultsClosestApproach(parentClusterFitResult, daughterClusterFitResult, fitResultsClosestApproach))
+                continue;
 
             if ((fitResultsClosestApproach > fitResultsClosestApproachCut) || (fitResultsClosestApproach > minFitResultsApproach))
                 continue;

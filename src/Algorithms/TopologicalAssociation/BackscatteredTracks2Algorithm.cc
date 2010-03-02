@@ -28,7 +28,7 @@ StatusCode BackscatteredTracks2Algorithm::Run()
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Loop over candidate daughter/parent cluster combinations
-    for (ClusterVector::const_iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
+    for (ClusterVector::const_iterator iterI = clusterVector.begin(), iterIEnd = clusterVector.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pParentCluster = *iterI;
 
@@ -47,14 +47,14 @@ StatusCode BackscatteredTracks2Algorithm::Run()
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pParentCluster, parentInnerLayer, parentShowerStartLayer, parentClusterFitResult))
             continue;
 
-        if (parentClusterFitResult.GetRms() > m_maxFitRms)
+        if (!parentClusterFitResult.IsFitSuccessful() || (parentClusterFitResult.GetRms() > m_maxFitRms))
             continue;
 
-        float minFitDistanceToClosestHit(std::numeric_limits<float>::max());
+        float minFitDistanceToClosestHit(m_maxFitDistanceToClosestHit);
         ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
 
         // Find a compatible daughter cluster
-        for (ClusterVector::iterator iterJ = clusterVector.begin(); iterJ != clusterVector.end(); ++iterJ)
+        for (ClusterVector::iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pDaughterCluster = *iterJ;
 
@@ -69,22 +69,26 @@ StatusCode BackscatteredTracks2Algorithm::Run()
                 continue;
 
             // Cut on the closest approach within a layer between parent cluster and the daughter cluster candidate
-            float intraLayerDistance(std::numeric_limits<float>::max());
-            if (STATUS_CODE_SUCCESS != ClusterHelper::GetClosestIntraLayerDistance(pParentCluster, pDaughterCluster, intraLayerDistance))
+            float centroidDistance(std::numeric_limits<float>::max());
+            if (STATUS_CODE_SUCCESS != ClusterHelper::GetDistanceToClosestCentroid(pParentCluster, pDaughterCluster, centroidDistance))
                 continue;
 
-            if (intraLayerDistance > m_maxIntraLayerDistance)
+            if (centroidDistance > m_maxCentroidDistance)
                 continue;
 
             // Cut on the distance of closest approach between the fit to the parent cluster and the daughter cluster candidate
             const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
             const PseudoLayer fitProjectionOuterLayer((daughterOuterLayer > m_nFitProjectionLayers) ? daughterOuterLayer - m_nFitProjectionLayers : 0);
 
+            if (daughterInnerLayer > fitProjectionOuterLayer)
+                continue;
+
             const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(parentClusterFitResult, pDaughterCluster,
                 daughterInnerLayer, fitProjectionOuterLayer));
 
-            if ((fitDistanceToClosestHit < m_maxFitDistanceToClosestHit) && (fitDistanceToClosestHit < minFitDistanceToClosestHit))
+            if (fitDistanceToClosestHit < minFitDistanceToClosestHit)
             {
+
                 bestDaughterClusterIter = iterJ;
                 minFitDistanceToClosestHit = fitDistanceToClosestHit;
             }
@@ -112,7 +116,7 @@ StatusCode BackscatteredTracks2Algorithm::ReadSettings(const TiXmlHandle xmlHand
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
-    m_minCaloHitsPerCluster = 5;
+    m_minCaloHitsPerCluster = 6;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitsPerCluster", m_minCaloHitsPerCluster));
 
@@ -128,9 +132,9 @@ StatusCode BackscatteredTracks2Algorithm::ReadSettings(const TiXmlHandle xmlHand
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxFitDistanceToClosestHit", m_maxFitDistanceToClosestHit));
 
-    m_maxIntraLayerDistance = 1000.f;
+    m_maxCentroidDistance = 1000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxIntraLayerDistance", m_maxIntraLayerDistance));
+        "MaxCentroidDistance", m_maxCentroidDistance));
 
     return STATUS_CODE_SUCCESS;
 }

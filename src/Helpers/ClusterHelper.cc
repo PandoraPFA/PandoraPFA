@@ -359,15 +359,24 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float ClusterHelper::GetFitResultsClosestApproach(const ClusterHelper::ClusterFitResult &lhs, const ClusterHelper::ClusterFitResult &rhs)
+StatusCode ClusterHelper::GetFitResultsClosestApproach(const ClusterHelper::ClusterFitResult &lhs, const ClusterHelper::ClusterFitResult &rhs,
+    float &closestApproach)
 {
-    if (!lhs.IsFitSuccessful() || !rhs.IsFitSuccessful())
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    try
+    {
+        if (!lhs.IsFitSuccessful() || !rhs.IsFitSuccessful())
+            return STATUS_CODE_INVALID_PARAMETER;
 
-    const CartesianVector directionNormal((lhs.GetDirection().GetCrossProduct(rhs.GetDirection())).GetUnitVector());
-    const CartesianVector interceptDifference(lhs.GetIntercept() - rhs.GetIntercept());
+        const CartesianVector directionNormal((lhs.GetDirection().GetCrossProduct(rhs.GetDirection())).GetUnitVector());
+        const CartesianVector interceptDifference(lhs.GetIntercept() - rhs.GetIntercept());
+        closestApproach = std::fabs(directionNormal.GetDotProduct(interceptDifference));
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        return statusCodeException.GetStatusCode();
+    }
 
-    return std::fabs(directionNormal.GetDotProduct(interceptDifference));
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -632,7 +641,7 @@ bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFractio
     if (!(pCluster->IsPhotonFast()))
         return true;
 
-    if (!(pCluster->GetMipFraction() <= minMipFraction))
+    if (pCluster->GetMipFraction() > minMipFraction)
         return true;
 
     return (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms));
@@ -654,17 +663,61 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(Cluster *const pCluster)
     static const float showerStartMipFraction(PandoraSettings::GetInstance()->GetShowerStartMipFraction());
     static const unsigned int showerStartNonMipLayers(PandoraSettings::GetInstance()->GetShowerStartNonMipLayers());
 
-    PseudoLayer currentShowerLayers(0);
-    PseudoLayer currentShowerStartLayer(pCluster->GetInnerPseudoLayer());
+    const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
+    const PseudoLayer outerLayer(pCluster->GetOuterPseudoLayer());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    PseudoLayer showerStartLayer(pCluster->GetOuterPseudoLayer());
+    PseudoLayer currentShowerLayers(0);
+    PseudoLayer lastForwardLayer(outerLayer);
+    bool foundLastForwardLayer(false);
 
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    // Find two consecutive shower layers
+    for (PseudoLayer iLayer = innerLayer; iLayer <= outerLayer; ++iLayer)
     {
-        const unsigned int nTotalHits(iter->second->size());
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+        const bool isLayerPopulated((orderedCaloHitList.end() != iter) && !iter->second->empty());
+        float mipFraction(0.f);
 
-        if (0 == nTotalHits)
+        if (isLayerPopulated)
+        {
+            unsigned int nMipHits(0);
+
+            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            {
+                if ((*hitIter)->IsPossibleMip())
+                    nMipHits++;
+            }
+
+            mipFraction = static_cast<float>(nMipHits) / static_cast<float>(iter->second->size());
+        }
+
+        if (mipFraction > showerStartMipFraction)
+        {
+            currentShowerLayers = 0;
+        }
+        else if (++currentShowerLayers >= showerStartNonMipLayers)
+        {
+            if (isLayerPopulated)
+                lastForwardLayer = iLayer;
+
+            foundLastForwardLayer = true;
+            break;
+        }
+    }
+
+    if (!foundLastForwardLayer)
+        return outerLayer;
+
+    PseudoLayer currentMipLayers(0);
+    PseudoLayer showerStartLayer(lastForwardLayer);
+
+    // Now go backwards to find two consecutive mip layers
+    for (PseudoLayer iLayer = lastForwardLayer; iLayer >= innerLayer; --iLayer)
+    {
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+        const bool isLayerPopulated((orderedCaloHitList.end() != iter) && !iter->second->empty());
+
+        if (!isLayerPopulated)
             continue;
 
         unsigned int nMipHits(0);
@@ -675,26 +728,16 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(Cluster *const pCluster)
                 nMipHits++;
         }
 
-        const float mipFraction(static_cast<float>(nMipHits) / static_cast<float>(nTotalHits));
+        const float mipFraction(static_cast<float>(nMipHits) / static_cast<float>(iter->second->size()));
 
         if (mipFraction < showerStartMipFraction)
         {
-            currentShowerLayers++;
-
-            if (1 == currentShowerLayers)
-            {
-                currentShowerStartLayer = iter->first;
-            }
-
-            if (currentShowerLayers >= showerStartNonMipLayers)
-            {
-                showerStartLayer = currentShowerStartLayer;
-                break;
-            }
+            currentMipLayers = 0;
+            showerStartLayer = iLayer;
         }
-        else
+        else if (++currentMipLayers >= showerStartNonMipLayers)
         {
-            currentShowerLayers = 0;
+            return showerStartLayer;
         }
     }
 
