@@ -21,7 +21,7 @@ StatusCode ShowerMipMerging4Algorithm::Run()
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Loop over possible mip-stub daughter clusters
-    for (ClusterVector::iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
+    for (ClusterVector::iterator iterI = clusterVector.begin(), iterIEnd = clusterVector.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
 
@@ -36,12 +36,12 @@ StatusCode ShowerMipMerging4Algorithm::Run()
             continue;
 
         Cluster *pBestParentCluster(NULL);
-        float minProjectionDistance(std::numeric_limits<float>::max());
+        float minProjectionDistance(m_maxProjectionDistance);
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
         // Find the closest plausible parent cluster, with the smallest cluster approach distance
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end(); ++iterJ)
+        for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pParentCluster = *iterJ;
 
@@ -54,12 +54,14 @@ StatusCode ShowerMipMerging4Algorithm::Run()
 
             // Cut on layer separation between the two clusters
             const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
+            const PseudoLayer minDaughterInnerLayer((parentOuterLayer > m_maxLayerDifference) ? parentOuterLayer - m_maxLayerDifference : 0);
 
-            if ((daughterInnerLayer > parentOuterLayer) || ((parentOuterLayer - daughterInnerLayer) > m_maxLayerDifference))
+            if (daughterInnerLayer < minDaughterInnerLayer)
                 continue;
 
             // Get the smallest distance between a hit in the daughter cluster and the projected initial direction of the parent cluster
             const float projectionDistance(this->GetDistanceFromInitialProjection(pParentCluster, pDaughterCluster));
+
             if (projectionDistance < minProjectionDistance)
             {
                 minProjectionDistance = projectionDistance;
@@ -67,15 +69,15 @@ StatusCode ShowerMipMerging4Algorithm::Run()
             }
         }
 
-        if ((pBestParentCluster == NULL) || (minProjectionDistance > m_maxProjectionDistance))
+        if (pBestParentCluster == NULL)
             continue;
 
         // Check closest approach within a layer between best parent cluster and the daughter cluster
-        float intraLayerDistance(std::numeric_limits<float>::max());
-        if (STATUS_CODE_SUCCESS != ClusterHelper::GetClosestIntraLayerDistance(pBestParentCluster, pDaughterCluster, intraLayerDistance))
+        float centroidDistance(std::numeric_limits<float>::max());
+        if (STATUS_CODE_SUCCESS != ClusterHelper::GetDistanceToClosestCentroid(pBestParentCluster, pDaughterCluster, centroidDistance))
             continue;
 
-        if (intraLayerDistance < m_maxIntraLayerDistance)
+        if (centroidDistance < m_maxCentroidDistance)
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
             *iterI = NULL;
@@ -89,21 +91,25 @@ StatusCode ShowerMipMerging4Algorithm::Run()
 
 float ShowerMipMerging4Algorithm::GetDistanceFromInitialProjection(const Cluster *const pClusterToProject, const Cluster *const pClusterToExamine) const
 {
-    float minDistance(std::numeric_limits<float>::max());
-    const OrderedCaloHitList &orderedCaloHitList(pClusterToExamine->GetOrderedCaloHitList());
-
     const CartesianVector innerCentroidI(pClusterToProject->GetCentroid(pClusterToProject->GetInnerPseudoLayer()));
     const CartesianVector &projectedDirection(pClusterToProject->GetInitialDirection());
 
+    float minDistance(std::numeric_limits<float>::max());
+    const PseudoLayer lastLayer(pClusterToExamine->GetInnerPseudoLayer() + m_nProjectionExaminationLayers);
+    const OrderedCaloHitList &orderedCaloHitList(pClusterToExamine->GetOrderedCaloHitList());
+
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
+        if (iter->first > lastLayer)
+            break;
+
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             const CartesianVector separation((*hitIter)->GetPositionVector() - innerCentroidI);
             const CartesianVector directionCrossSeparation(projectedDirection.GetCrossProduct(separation));
 
             const float perpendicularDistance(directionCrossSeparation.GetMagnitude());
-            const float parallelDistance(projectedDirection.GetDotProduct(separation));
+            const float parallelDistance(std::fabs(projectedDirection.GetDotProduct(separation)));
 
             if ((0 == parallelDistance) || ((perpendicularDistance / parallelDistance) > m_maxProjectionDistanceRatio))
                 continue;
@@ -130,15 +136,15 @@ StatusCode ShowerMipMerging4Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
-    m_minCaloHitsPerDaughterCluster = 5;
+    m_minCaloHitsPerDaughterCluster = 6;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitsPerDaughterCluster", m_minCaloHitsPerDaughterCluster));
 
-    m_minCaloHitsPerParentCluster = 10;
+    m_minCaloHitsPerParentCluster = 11;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCaloHitsPerParentCluster", m_minCaloHitsPerParentCluster));
 
-    m_maxLayerDifference = 5;
+    m_maxLayerDifference = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxLayerDifference", m_maxLayerDifference));
 
@@ -150,9 +156,13 @@ StatusCode ShowerMipMerging4Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxProjectionDistanceRatio", m_maxProjectionDistanceRatio));
 
-    m_maxIntraLayerDistance = 500.f;
+    m_nProjectionExaminationLayers = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxIntraLayerDistance", m_maxIntraLayerDistance));
+        "NProjectionExaminationLayers", m_nProjectionExaminationLayers));
+
+    m_maxCentroidDistance = 500.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxCentroidDistance", m_maxCentroidDistance));
 
     return STATUS_CODE_SUCCESS;
 }

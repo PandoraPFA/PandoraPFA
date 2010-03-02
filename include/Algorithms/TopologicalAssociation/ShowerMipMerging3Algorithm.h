@@ -42,7 +42,7 @@ private:
     unsigned int    m_nFitProjectionLayers;             ///< The number of layers to project cluster fit for comparison with second cluster
     float           m_maxFitDistanceToClosestHit;       ///< The max distance between projected cluster fit and hits in second cluster
 
-    float           m_maxClusterApproach;               ///< TODO
+    float           m_maxClusterApproach;               ///< The max value of smallest hit separation between parent and daughter clusters
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

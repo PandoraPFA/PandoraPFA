@@ -49,8 +49,9 @@ private:
 
     float           m_maxProjectionDistance;            ///< Max value of distance between daughter cluster hits and parent projection
     float           m_maxProjectionDistanceRatio;       ///< Max ratio (perp./parallel distances) to allow projection distance calculation
+    unsigned int    m_nProjectionExaminationLayers;     ///< Number of layers to examine to calculate distance from initial projection
 
-    float           m_maxIntraLayerDistance;            ///< Max value of closest intra layer approach between parent and daughter clusters
+    float           m_maxCentroidDistance;              ///< Max value of closest layer centroid separation between parent/daughter clusters
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
