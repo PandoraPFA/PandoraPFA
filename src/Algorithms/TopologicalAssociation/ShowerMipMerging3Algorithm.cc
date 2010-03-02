@@ -21,7 +21,7 @@ StatusCode ShowerMipMerging3Algorithm::Run()
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Loop over possible mip-stub daughter clusters
-    for (ClusterVector::iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
+    for (ClusterVector::iterator iterI = clusterVector.begin(), iterIEnd = clusterVector.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
 
@@ -29,14 +29,17 @@ StatusCode ShowerMipMerging3Algorithm::Run()
         if (NULL == pDaughterCluster)
             continue;
 
-        if (pDaughterCluster->GetNCaloHits() < m_minCaloHitsPerDaughterCluster)
+        if (pDaughterCluster->GetNCaloHits() < m_minCaloHitsInDaughter)
+            continue;
+
+        if (pDaughterCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInDaughter)
             continue;
 
         if (!ClusterHelper::CanMergeCluster(pDaughterCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
         ClusterHelper::ClusterFitResult daughterClusterFitResult;
-        if (STATUS_CODE_SUCCESS != ClusterHelper::FitEnd(pDaughterCluster, m_nPointsToFit, daughterClusterFitResult))
+        if (STATUS_CODE_SUCCESS != ClusterHelper::FitStart(pDaughterCluster, m_nPointsToFit, daughterClusterFitResult))
             continue;
 
         // Mip stub cluster must be consistent with a straight line fit
@@ -44,12 +47,12 @@ StatusCode ShowerMipMerging3Algorithm::Run()
             continue;
 
         Cluster *pBestParentCluster(NULL);
-        float closestClusterApproach(std::numeric_limits<float>::max());
+        float minFitDistanceToClosestHit(m_maxFitDistanceToClosestHit);
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
 
         // Find the closest plausible parent cluster, with the smallest cluster approach distance
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(); iterJ != pClusterList->end(); ++iterJ)
+        for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pParentCluster = *iterJ;
 
@@ -57,7 +60,7 @@ StatusCode ShowerMipMerging3Algorithm::Run()
             if ((NULL == pParentCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
-            if (pParentCluster->GetNCaloHits() < m_minCaloHitsPerParentCluster)
+            if (pParentCluster->GetNCaloHits() < m_minCaloHitsInParent)
                 continue;
 
             // We are looking for small mip stub clusters emerging from the parent shower-like cluster
@@ -66,25 +69,25 @@ StatusCode ShowerMipMerging3Algorithm::Run()
             if (daughterInnerLayer < parentOuterLayer)
                 continue;
 
+            // Cluster approach is the smallest distance between a hit in daughter cluster and a hit in parent cluster
+            const float clusterApproach(ClusterHelper::GetDistanceToClosestHit(pDaughterCluster, pParentCluster));
+
+            if (clusterApproach > m_maxClusterApproach)
+                continue;
+
             // Cut on distance between projected fit result and nearest cluster hit
             const PseudoLayer fitProjectionInnerLayer((parentOuterLayer > m_nFitProjectionLayers) ? parentOuterLayer - m_nFitProjectionLayers : 0);
             const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, fitProjectionInnerLayer, parentOuterLayer));
 
-            if (fitDistanceToClosestHit < m_maxFitDistanceToClosestHit)
-                continue;
-
-            // Cluster approach is the smallest distance between a hit in daughter cluster and a hit in parent cluster
-            const float clusterApproach(ClusterHelper::GetDistanceToClosestHit(pDaughterCluster, pParentCluster));
-
-            if (clusterApproach < closestClusterApproach)
+            if (fitDistanceToClosestHit < minFitDistanceToClosestHit)
             {
-                closestClusterApproach = clusterApproach;
+                minFitDistanceToClosestHit = fitDistanceToClosestHit;
                 pBestParentCluster = pParentCluster;
             }
         }
 
         // If parent cluster found, within threshold approach distance, merge the clusters
-        if ((closestClusterApproach < m_closestClusterApproachCut) && (pBestParentCluster != NULL))
+        if (pBestParentCluster != NULL)
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
             *iterI = NULL;
@@ -106,13 +109,17 @@ StatusCode ShowerMipMerging3Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMaxRms", m_canMergeMaxRms));
 
-    m_minCaloHitsPerDaughterCluster = 5;
+    m_minCaloHitsInDaughter = 6;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinCaloHitsPerDaughterCluster", m_minCaloHitsPerDaughterCluster));
+        "MinCaloHitsInDaughter", m_minCaloHitsInDaughter));
 
-    m_minCaloHitsPerParentCluster = 2;
+    m_minOccupiedLayersInDaughter = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinCaloHitsPerParentCluster", m_minCaloHitsPerParentCluster));
+        "MinOccupiedLayersInDaughter", m_minOccupiedLayersInDaughter));
+
+    m_minCaloHitsInParent = 3;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCaloHitsInParent", m_minCaloHitsInParent));
 
     m_nPointsToFit = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -126,13 +133,13 @@ StatusCode ShowerMipMerging3Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NFitProjectionLayers", m_nFitProjectionLayers));
 
-    m_maxFitDistanceToClosestHit = 250.f;
+    m_maxFitDistanceToClosestHit = 30.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxFitDistanceToClosestHit", m_maxFitDistanceToClosestHit));
 
-    m_closestClusterApproachCut = 30.f;
+    m_maxClusterApproach = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ClosestClusterApproachCut", m_closestClusterApproachCut));
+        "MaxClusterApproach", m_maxClusterApproach));
 
     return STATUS_CODE_SUCCESS;
 }
