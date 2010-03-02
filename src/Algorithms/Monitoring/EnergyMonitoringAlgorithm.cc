@@ -177,6 +177,10 @@ StatusCode EnergyMonitoringAlgorithm::Run()
 StatusCode EnergyMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
+
+    if( m_clusterListNames.empty() )
+        return STATUS_CODE_NOT_INITIALIZED;
+
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
 
     m_treeName = "emon";
@@ -213,6 +217,13 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
 
     if( m_print )
     {
+        std::cout << "cluster list names : ";
+        for( STRINGVECTOR::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
+        {
+            std::cout << (*itClusterName) << " " << std::flush;
+        }
+        std::cout << std::endl;
+
         #define width 12
         #define precision 1
 

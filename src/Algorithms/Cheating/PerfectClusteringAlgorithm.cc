@@ -10,6 +10,8 @@
 
 #include "Api/PandoraContentApi.h"
 
+#include "Helpers/CaloHitHelper.h"
+
 #include "Objects/CaloHit.h"
 #include "Objects/MCParticle.h"
 
@@ -27,8 +29,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
     // match calohitvectors to their MCParticles
     std::map< const MCParticle*, CaloHitVector* > hitsPerMcParticle;
     std::map< const MCParticle*, CaloHitVector* >::iterator itHitsPerMcParticle;
-
-    OrderedCaloHitList pNewOrderedCaloHitList; 
 
     int selected = 0, notSelected = 0;
 
@@ -49,6 +49,9 @@ StatusCode PerfectClusteringAlgorithm::Run()
         {
             CaloHit* pCaloHit = (*itCaloHit);
 
+            if( !CaloHitHelper::IsCaloHitAvailable( pCaloHit ) )
+                continue;
+
             // fetch the MCParticle
             const MCParticle* mc = NULL; 
             pCaloHit->GetMCParticle( mc );
@@ -58,7 +61,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
             // some selection criteria possible
             if( !SelectCaloHitsOfMcParticleForClustering( mc ) )
             {
-                pNewOrderedCaloHitList.AddCaloHit( pCaloHit );
                 if( m_debug )
                 {
                     std::cout << "." << std::flush;
@@ -128,9 +130,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
     if( !m_clusterListName.empty() && !clusterList.empty())
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName, clusterList ));
 
-    if( !m_orderedCaloHitListName.empty() )
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(*this, pNewOrderedCaloHitList, m_orderedCaloHitListName ));
-
     return STATUS_CODE_SUCCESS;
 }
 
@@ -139,7 +138,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
 StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ClusterListName", m_clusterListName) );
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "OrderedCaloHitListName", m_orderedCaloHitListName));
 
     m_debug = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Debug", m_debug));

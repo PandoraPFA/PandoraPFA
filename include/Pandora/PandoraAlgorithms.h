@@ -21,6 +21,7 @@
 #include "Algorithms/Cheating/PerfectNeutralHadronClusteringAlgorithm.h"
 #include "Algorithms/Cheating/CheatingTrackToClusterMatching.h"
 #include "Algorithms/Cheating/CheatingPfoCreationAlgorithm.h"
+#include "Algorithms/Cheating/PerfectFragmentRemovalAlgorithm.h"
 
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
@@ -72,6 +73,7 @@
     d("PerfectNeutralHadronClustering",         PerfectNeutralHadronClusteringAlgorithm::Factory)           \
     d("CheatingTrackToClusterMatching",         CheatingTrackToClusterMatching::Factory)                    \
     d("CheatingPfoCreation",                    CheatingPfoCreationAlgorithm::Factory)                      \
+    d("PerfectFragmentRemoval",                 PerfectFragmentRemovalAlgorithm::Factory)                   \
     d("Clustering",                             ClusteringAlgorithm::Factory)                               \
     d("ECalPhotonClustering",                   ECalPhotonClusteringAlgorithm::Factory)                     \
     d("ForcedClustering",                       ForcedClusteringAlgorithm::Factory)                         \
