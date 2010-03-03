@@ -23,7 +23,14 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    // Apply preselection and order clusters by inner layer
+    ClusterVector clusterVector;
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    {
+        if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            clusterVector.push_back(*iter);
+    }
+
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Examine pairs of clusters to evaluate merging suitability. Begin by comparing clusters in highest layers with those in lowest layers.

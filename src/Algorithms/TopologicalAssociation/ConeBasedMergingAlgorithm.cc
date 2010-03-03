@@ -31,6 +31,9 @@ StatusCode ConeBasedMergingAlgorithm::Run()
         if (NULL == pDaughterCluster)
             continue;
 
+        if (!ClusterHelper::CanMergeCluster(pDaughterCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            continue;
+
         Cluster *pBestParentCluster(NULL);
         float highestConeFraction(m_minConeFraction);
 
@@ -41,6 +44,13 @@ StatusCode ConeBasedMergingAlgorithm::Run()
             Cluster *pParentCluster = iterJ->first;
 
             if (pDaughterCluster == pParentCluster)
+                continue;
+
+            if (!ClusterHelper::CanMergeCluster(pParentCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
+                continue;
+
+            // Cut on separation of daughter inner layer and parent shower start layer
+            if (daughterInnerLayer < pParentCluster->GetShowerStartLayer())
                 continue;
 
             // Cut on inner layer separation
@@ -89,7 +99,7 @@ StatusCode ConeBasedMergingAlgorithm::Run()
             const float chi((clusterEnergySum - trackEnergySum) / sigmaE);
             const float chi0((pBestParentCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
 
-            if (pDaughterCluster->GetHadronicEnergy() < m_minDaughterHadronicEnergy)
+            if (pDaughterCluster->GetHadronicEnergy() > m_minDaughterHadronicEnergy)
             {
                 if ((chi > m_maxTrackClusterChi) || ((chi * chi - chi0 * chi0) > m_maxTrackClusterDChi2))
                     continue;
@@ -147,6 +157,9 @@ StatusCode ConeBasedMergingAlgorithm::PrepareClusters(ClusterVector &daughterVec
         if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, innerLayer, fitEndLayer, mipFitResult))
             continue;
 
+        if (!mipFitResult.IsFitSuccessful())
+            continue;
+
         if (!parentFitResultMap.insert(ClusterFitResultMap::value_type(pCluster, mipFitResult)).second)
             return STATUS_CODE_FAILURE;
     }
@@ -159,22 +172,16 @@ StatusCode ConeBasedMergingAlgorithm::PrepareClusters(ClusterVector &daughterVec
 float ConeBasedMergingAlgorithm::GetFractionInCone(Cluster *const pParentCluster, const Cluster *const pDaughterCluster,
     const ClusterFitResult &parentMipFitResult) const
 {
-    // Apply preliminary checks
     const unsigned int nDaughterCaloHits(pDaughterCluster->GetNCaloHits());
 
-    if (!parentMipFitResult.IsFitSuccessful() || (0 == nDaughterCaloHits))
-        return 0.;
-
-    const PseudoLayer parentShowerStartLayer(pParentCluster->GetShowerStartLayer());
-
-    if (pDaughterCluster->GetInnerPseudoLayer() < parentShowerStartLayer)
+    if (0 == nDaughterCaloHits)
         return 0.;
 
     // Identify cone vertex
     const CartesianVector &parentMipFitDirection(parentMipFitResult.GetDirection());
     const CartesianVector &parentMipFitIntercept(parentMipFitResult.GetIntercept());
 
-    const CartesianVector showerStartDifference(pParentCluster->GetCentroid(parentShowerStartLayer) - parentMipFitIntercept);
+    const CartesianVector showerStartDifference(pParentCluster->GetCentroid(pParentCluster->GetShowerStartLayer()) - parentMipFitIntercept);
     const float parallelDistanceToShowerStart(showerStartDifference.GetDotProduct(parentMipFitDirection));
     const CartesianVector coneApex(parentMipFitIntercept + (parentMipFitDirection * parallelDistanceToShowerStart));
 
@@ -277,7 +284,7 @@ StatusCode ConeBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CosConeAngleWrtRadialCut1", m_cosConeAngleWrtRadialCut1));
 
-    m_minHitSeparationCut1 = 1000.f;
+    m_minHitSeparationCut1 = std::sqrt(1000.f);
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitSeparationCut1", m_minHitSeparationCut1));
 
@@ -285,7 +292,7 @@ StatusCode ConeBasedMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CosConeAngleWrtRadialCut2", m_cosConeAngleWrtRadialCut2));
 
-    m_minHitSeparationCut2 = 1500.f;
+    m_minHitSeparationCut2 = std::sqrt(1500.f);
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitSeparationCut2", m_minHitSeparationCut2));
 
