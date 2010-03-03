@@ -36,7 +36,7 @@ private:
      * 
      *  @return boolean
      */
-    bool IsSoftCluster(const pandora::Cluster *const pDaughterCluster) const;
+    bool IsSoftCluster(pandora::Cluster *const pDaughterCluster) const;
 
     /**
      *  @brief  Whether a soft daughter candidate cluster can be merged with a parent a specified distance away

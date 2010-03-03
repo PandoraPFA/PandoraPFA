@@ -95,7 +95,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool SoftClusterMergingAlgorithm::IsSoftCluster(const Cluster *const pDaughterCluster) const
+bool SoftClusterMergingAlgorithm::IsSoftCluster(Cluster *const pDaughterCluster) const
 {
     // Note the cuts applied here are order-dependent - use the order defined in original version of pandora
     const unsigned int nCaloHits(pDaughterCluster->GetNCaloHits());
@@ -125,7 +125,7 @@ bool SoftClusterMergingAlgorithm::IsSoftCluster(const Cluster *const pDaughterCl
     if (pDaughterCluster->GetHadronicEnergy() < m_minClusterHadEnergy)
         isSoftCluster = true;
 
-    if (pDaughterCluster->IsPhoton() && (pDaughterCluster->GetElectromagneticEnergy() > m_minClusterEMEnergy))
+    if (pDaughterCluster->IsPhotonFast() && (pDaughterCluster->GetElectromagneticEnergy() > m_minClusterEMEnergy))
         isSoftCluster = false;
 
     return isSoftCluster;
@@ -171,7 +171,7 @@ StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
             "PhotonClusterListName", m_photonClusterListName));
     }
 
-    m_maxHitsInSoftCluster = 9;
+    m_maxHitsInSoftCluster = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxHitsInSoftCluster", m_maxHitsInSoftCluster));
 
@@ -183,11 +183,11 @@ StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxHadEnergyForSoftClusterNoTrack", m_maxHadEnergyForSoftClusterNoTrack));
 
-    m_minClusterHadEnergy = 0.5f;
+    m_minClusterHadEnergy = 0.25f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterHadEnergy", m_minClusterHadEnergy));
 
-    m_minClusterEMEnergy = 0.1f;
+    m_minClusterEMEnergy = 0.025f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterEMEnergy", m_minClusterEMEnergy));
 
@@ -211,7 +211,7 @@ StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "InnerLayerCut2", m_innerLayerCut2));
 
-    m_maxClusterDistance = 500.f;
+    m_maxClusterDistance = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxClusterDistance", m_maxClusterDistance));
 
