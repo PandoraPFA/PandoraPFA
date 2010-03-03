@@ -37,7 +37,7 @@ StatusCode PerfectFragmentRemovalAlgorithm::Run()
             Cluster* pCluster = (*itCluster);
 
             float removedCaloHitEnergy;
-            PANDORA_THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, FragmentRemoval( pCluster, removedCaloHitEnergy ) );
+            PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, FragmentRemoval( pCluster, removedCaloHitEnergy ) );
 
             removedEnergy += removedCaloHitEnergy;
         }
@@ -153,7 +153,7 @@ StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval( Cluster* pCluster, 
         {
             CaloHit* pCaloHit = (*itCaloHit);
             removedEnergy += pCaloHit->GetElectromagneticEnergy();
-            PANDORA_THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCaloHitFromCluster(*this, pCluster, pCaloHit ));
+            PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCaloHitFromCluster(*this, pCluster, pCaloHit ));
         }
     }
 

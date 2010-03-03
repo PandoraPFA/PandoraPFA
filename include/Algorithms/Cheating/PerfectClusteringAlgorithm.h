@@ -42,6 +42,8 @@ private:
     std::string     m_clusterListName;                  ///< if clusterListName is set, cluster-list are stored with this name
     std::string     m_orderedCaloHitListName;           ///< if orderedCaloHitListName is set, the orderedCaloHitList containing the remaining hits are stored and set current
 
+    pandora::IntVector m_particleIdList;                ///< list of particle ids of MCPFOs to be selected
+
     bool            m_debug;                            ///< turn on additional debugging output
 };
 

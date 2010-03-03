@@ -17,7 +17,7 @@ using namespace pandora;
 
 bool PerfectPhotonClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( const MCParticle* pMcParticle ) const
 {
-    #define PHOTON 22
+    static const int PHOTON = 22;
 
     if( pMcParticle->GetParticleId() == PHOTON )
 	return true;

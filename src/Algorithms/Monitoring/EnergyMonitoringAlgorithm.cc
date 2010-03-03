@@ -18,12 +18,6 @@
 
 using namespace pandora;
 
-#define K0L      130
-#define K0S      310
-#define NEUTRON  2112
-#define PHOTON   22
-#define ELECTRON 11
-#define POSITRON -11
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,10 +64,17 @@ EnergyMonitoringAlgorithm::~EnergyMonitoringAlgorithm()
 
 StatusCode EnergyMonitoringAlgorithm::Run()
 {
-    typedef std::vector<const ClusterList*> CLUSTERVECTOR;
-    CLUSTERVECTOR clusterListVector;
+    static const int K0L      = 130;
+//    static const int K0S      = 310;
+    static const int NEUTRON  = 2112;
+    static const int PHOTON   = 22;
+//    static const int ELECTRON = 11;
+//    static const int POSITRON = -11;
 
-    for( STRINGVECTOR::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
+    typedef std::vector<const ClusterList*> ClusterVector;
+    ClusterVector clusterListVector;
+
+    for( pandora::StringVector::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
     {
         const ClusterList* pClusterList = NULL;
         if( STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, (*itClusterName), pClusterList))
@@ -86,7 +87,7 @@ StatusCode EnergyMonitoringAlgorithm::Run()
     EnergyMixing truePhotons;
     
 
-    for( CLUSTERVECTOR::iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
+    for( ClusterVector::iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
     {
         const ClusterList* pClusterList = (*itClusterList);
         for( ClusterList::iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
@@ -218,14 +219,14 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
     if( m_print )
     {
         std::cout << "cluster list names : ";
-        for( STRINGVECTOR::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
+        for( pandora::StringVector::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
         {
             std::cout << (*itClusterName) << " " << std::flush;
         }
         std::cout << std::endl;
 
-        #define width 12
-        #define precision 1
+        static const int width = 12;
+        static const int precision = 1;
 
         std::ios_base::fmtflags original_flags = std::cout.flags();   // store the original flags
 
@@ -250,6 +251,8 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
 
     if( !(m_monitoringFileName.empty()) && !(m_treeName.empty()) )
     {
+        if( m_print )
+            std::cout << "energy monitoring written into tree : " << m_treeName << std::endl;
         PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ch2ch", trueCharged_recoChargedCalo ));
         PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ch2ne", trueCharged_recoNeutralCalo ));
         PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ch2ph", trueCharged_recoPhotonCalo ));

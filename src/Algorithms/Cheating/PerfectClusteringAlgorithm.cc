@@ -142,6 +142,8 @@ StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_debug = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Debug", m_debug));
 
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ParticleIdList", m_particleIdList));
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -151,6 +153,14 @@ StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
 bool PerfectClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( const MCParticle* pMcParticle ) const
 {
-    return true;
+    if( m_particleIdList.empty() )
+        return true;
+    for( IntVector::const_iterator itParticleId = m_particleIdList.begin(), itParticleIdEnd = m_particleIdList.end(); itParticleId != itParticleIdEnd; ++itParticleId )
+    {
+        const int& particleId = (*itParticleId);
+        if( pMcParticle->GetParticleId() == particleId )
+            return true;
+    }
+    return false;
 }
 

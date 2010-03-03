@@ -110,6 +110,7 @@ typedef std::set<Track *, PointerLessThan<Track> > MomentumSortedTrackList;
 typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;
 typedef std::vector<std::string> StringVector;
+typedef std::vector<int> IntVector;
 
 typedef const void * Uid;
 
