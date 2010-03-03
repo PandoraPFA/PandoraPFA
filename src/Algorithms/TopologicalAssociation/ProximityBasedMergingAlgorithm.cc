@@ -23,13 +23,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    ClusterVector clusterVector;
-    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
-    {
-        if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
-            clusterVector.push_back(*iter);
-    }
-
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Examine pairs of clusters to evaluate merging suitability. Begin by comparing clusters in highest layers with those in lowest layers.
@@ -44,12 +38,15 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         if (!pDaughterCluster->GetAssociatedTrackList().empty())
             continue;
 
+        if (!ClusterHelper::CanMergeCluster(pDaughterCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
+            continue;
+
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
         const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
         const float daughterHadronicEnergy(pDaughterCluster->GetHadronicEnergy());
 
-        Cluster *pBestParentCluster = NULL;
-        float minGenericDistance = std::numeric_limits<float>::max();
+        Cluster *pBestParentCluster(NULL);
+        float minGenericDistance(m_maxGenericDistance);
 
         for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
         {
@@ -57,6 +54,9 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
 
             // Check to see if cluster has already been changed
             if ((NULL == pParentCluster) || (pDaughterCluster == pParentCluster))
+                continue;
+
+            if (!ClusterHelper::CanMergeCluster(pParentCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
             // Check level of overlap between clusters
@@ -114,7 +114,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         }
 
         // Check distance and inner layer separation for best parent candidate cluster and daughter cluster
-        if ((minGenericDistance > m_maxGenericDistance) || (NULL == pBestParentCluster))
+        if (NULL == pBestParentCluster)
             continue;
 
         const CartesianVector parentInnerLayerCentroid(pBestParentCluster->GetCentroid(pBestParentCluster->GetInnerPseudoLayer()));
@@ -202,7 +202,7 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     // Must meet one of following criteria if we are to identify daughter cluster as a fragment of parent:
 
     // 1. Large fraction of hits in clusters that are deemed to be "close"
-    if (FragmentRemovalHelper::GetFractionOfCloseHits(pParentCluster, pDaughterCluster, m_closeHitThreshold) > m_minCloseHitFraction)
+    if (FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, m_closeHitThreshold) > m_minCloseHitFraction)
     {
         return true;
     }
@@ -211,7 +211,7 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     float contactFraction(0.);
     unsigned int nContactLayers(0);
 
-    StatusCode statusCode = FragmentRemovalHelper::GetClusterContactDetails(pParentCluster, pDaughterCluster, m_clusterContactThreshold,
+    StatusCode statusCode = FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, m_clusterContactThreshold,
         nContactLayers, contactFraction);
 
     if ((STATUS_CODE_SUCCESS == statusCode) && (contactFraction > m_minContactFraction))
@@ -239,13 +239,13 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
         // Then check average distance between helix projection and daughter cluster
         float closestDistanceToHit(std::numeric_limits<float>::max()), meanDistanceToHits(std::numeric_limits<float>::max());
 
-        if(STATUS_CODE_SUCCESS != FragmentRemovalHelper::GetClusterHelixDistance(pDaughterCluster, pHelix, daughterInnerLayer,
+        if (STATUS_CODE_SUCCESS != FragmentRemovalHelper::GetClusterHelixDistance(pDaughterCluster, pHelix, daughterInnerLayer,
             daughterInnerLayer + m_helixDistanceNLayers, m_helixDistanceMaxOccupiedLayers, closestDistanceToHit, meanDistanceToHits))
         {
             continue;
         }
 
-        if(meanDistanceToHits < m_maxClusterHelixDistance)
+        if (meanDistanceToHits < m_maxClusterHelixDistance)
         {
             return true;
         }

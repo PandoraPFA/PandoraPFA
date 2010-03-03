@@ -17,14 +17,7 @@ StatusCode BackscatteredTracksAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    // Apply preselection and order clusters by inner layer
-    ClusterVector clusterVector;
-    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
-    {
-        if (ClusterHelper::CanMergeCluster(*iter, m_canMergeMinMipFraction, m_canMergeMaxRms))
-            clusterVector.push_back(*iter);
-    }
-
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Loop over candidate daughter/parent cluster combinations
@@ -40,6 +33,9 @@ StatusCode BackscatteredTracksAlgorithm::Run()
             continue;
 
         if (!pDaughterCluster->GetFitToAllHitsResult().IsFitSuccessful() || (pDaughterCluster->GetFitToAllHitsResult().GetRms() > m_fitToAllHitsRmsCut))
+            continue;
+
+        if (!ClusterHelper::CanMergeCluster(pDaughterCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
             continue;
 
         // Fit all but the n outermost layers of the daughter cluster candidate
@@ -61,6 +57,9 @@ StatusCode BackscatteredTracksAlgorithm::Run()
 
             // Check to see if cluster has already been changed
             if ((NULL == pParentCluster) || (pParentCluster == pDaughterCluster))
+                continue;
+
+            if (!ClusterHelper::CanMergeCluster(pParentCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
                 continue;
 
             if ((pParentCluster->GetOuterPseudoLayer() <= daughterOuterLayer) || (pParentCluster->GetInnerPseudoLayer() >= daughterOuterLayer))
