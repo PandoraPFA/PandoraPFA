@@ -257,9 +257,37 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
     if (firstLayerInRadiationLengths > m_photonIdRadiationLengthsCut)
         return false;
 
-    // Cut on position of shower max layer
-    const int showerMaxLayer(static_cast<int>(pCluster->GetShowerMaxLayer()));
+    // Calculate position of shower max layer and layer by which 90% of cluster energy has been deposited
+    bool foundLayer90(false);
+    float electromagneticEnergy90(0.f), maxElectromagneticEnergyInlayer(0.f);
+    int layer90(std::numeric_limits<int>::max()), showerMaxLayer(std::numeric_limits<int>::max());
 
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        float electromagneticEnergyInlayer(0.f);
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            electromagneticEnergy90 += (*hitIter)->GetElectromagneticEnergy();
+            electromagneticEnergyInlayer += (*hitIter)->GetElectromagneticEnergy();
+        }
+
+        if (electromagneticEnergyInlayer > maxElectromagneticEnergyInlayer)
+        {
+            showerMaxLayer = static_cast<int>(iter->first);
+            maxElectromagneticEnergyInlayer = electromagneticEnergyInlayer;
+        }
+
+        if (!foundLayer90 && (electromagneticEnergy90 > 0.9 * totalElectromagneticEnergy))
+        {
+            layer90 = static_cast<int>(iter->first);
+            foundLayer90 = true;
+        }
+    }
+
+    // Cut on position of shower max layer
     float showerMaxCut1(m_photonIdShowerMaxCut1_0);
     const float showerMaxCut2(m_photonIdShowerMaxCut2);
 
@@ -276,24 +304,6 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
         return false;
 
     // Cut on layer by which 90% of cluster energy has been deposited
-    float electromagneticEnergy90(0.f);
-    int layer90(std::numeric_limits<int>::max());
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
-    {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            electromagneticEnergy90 += (*hitIter)->GetElectromagneticEnergy();
-        }
-
-        if (electromagneticEnergy90 > 0.9 * totalElectromagneticEnergy)
-        {
-            layer90 = static_cast<int>(iter->first);
-            break;
-        }
-    }
-
     const float layer90Cut1(m_photonIdLayer90Cut1);
     const float layer90Cut2(totalElectromagneticEnergy < m_photonIdLayer90Cut2Energy ? m_photonIdLayer90LowECut2 : m_photonIdLayer90HighECut2);
 

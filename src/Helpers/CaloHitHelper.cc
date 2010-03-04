@@ -40,11 +40,11 @@ bool CaloHitHelper::IsCaloHitAvailable(CaloHit *const pCaloHit)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitVector &caloHitVector)
+bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitList &caloHitList)
 {
     if (0 == m_nReclusteringProcesses)
     {
-        for (CaloHitVector::const_iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
+        for (CaloHitList::const_iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
         {
             if (!(*iter)->m_isAvailable)
                 return false;
@@ -53,7 +53,7 @@ bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitVector &caloHitVector)
         return true;
     }
 
-    for (CaloHitVector::const_iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
     {
         CaloHitUsageMap::iterator usageMapIter = m_pCurrentUsageMap->find(*iter);
 
@@ -234,17 +234,17 @@ StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHit *const pCaloHit, bool i
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHitVector &caloHitVector, bool isAvailable)
+StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHitList &caloHitList, bool isAvailable)
 {
     if (0 == m_nReclusteringProcesses)
     {
-        for (CaloHitVector::iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
+        for (CaloHitList::iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
             (*iter)->m_isAvailable = isAvailable;
 
         return STATUS_CODE_SUCCESS;
     }
 
-    for (CaloHitVector::iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
+    for (CaloHitList::iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
     {
         CaloHitUsageMap::iterator usageMapIter = m_pCurrentUsageMap->find(*iter);
 

@@ -42,7 +42,7 @@ StatusCode OrderedCaloHitList::Add(const OrderedCaloHitList &rhs)
         for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
             caloHitIter != caloHitIterEnd; ++caloHitIter)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(*caloHitIter, iter->first));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->Add(*caloHitIter, iter->first));
         }
     }
 
@@ -58,8 +58,32 @@ StatusCode OrderedCaloHitList::Remove(const OrderedCaloHitList &rhs)
         for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
             caloHitIter != caloHitIterEnd; ++caloHitIter)
         {
-            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, this->RemoveCaloHit(*caloHitIter, iter->first));
+            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, this->Remove(*caloHitIter, iter->first));
         }
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode OrderedCaloHitList::Add(const CaloHitList &caloHitList)
+{
+    for (CaloHitList::const_iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, this->Add(*iter, (*iter)->GetPseudoLayer()));
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode OrderedCaloHitList::Remove(const CaloHitList &caloHitList)
+{
+    for (CaloHitList::const_iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, this->Remove(*iter, (*iter)->GetPseudoLayer()));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -96,15 +120,11 @@ StatusCode OrderedCaloHitList::Reset()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void OrderedCaloHitList::GetCaloHitVector(CaloHitVector &caloHitVector) const
+void OrderedCaloHitList::GetCaloHitList(CaloHitList &caloHitList) const
 {
     for (OrderedCaloHitList::const_iterator iter = this->begin(), iterEnd = this->end(); iter != iterEnd; ++iter)
     {
-        for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
-            caloHitIter != caloHitIterEnd; ++caloHitIter)
-        {
-            caloHitVector.push_back(*caloHitIter);
-        }
+        caloHitList.insert(iter->second->begin(), iter->second->end());
     }
 }
 
@@ -123,7 +143,7 @@ bool OrderedCaloHitList::operator= (const OrderedCaloHitList &rhs)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer)
+StatusCode OrderedCaloHitList::Add(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer)
 {
     OrderedCaloHitList::iterator iter = this->find(pseudoLayer);
 
@@ -147,7 +167,7 @@ StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit, const PseudoL
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer)
+StatusCode OrderedCaloHitList::Remove(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer)
 {
     OrderedCaloHitList::iterator listIter = this->find(pseudoLayer);
 

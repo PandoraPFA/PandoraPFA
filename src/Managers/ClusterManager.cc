@@ -275,6 +275,20 @@ StatusCode ClusterManager::RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterManager::AddIsolatedCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
+{
+    return pCluster->AddIsolatedCaloHit(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::RemoveIsolatedCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit)
+{
+    return pCluster->RemoveIsolatedCaloHit(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ClusterManager::DeleteCluster(Cluster *pCluster, const std::string &listName)
 {
     NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(listName);
@@ -574,7 +588,7 @@ StatusCode ClusterManager::RemoveTrackAssociations(const TrackToClusterMap &trac
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template StatusCode ClusterManager::CreateCluster<CaloHit>(CaloHit *pCaloHit, Cluster *&pCluster);
-template StatusCode ClusterManager::CreateCluster<CaloHitVector>(CaloHitVector *pCaloHitVector, Cluster *&pCluster);
+template StatusCode ClusterManager::CreateCluster<CaloHitList>(CaloHitList *pCaloHitList, Cluster *&pCluster);
 template StatusCode ClusterManager::CreateCluster<Track>(Track *pTrack, Cluster *&pCluster);
 
 } // namespace pandora

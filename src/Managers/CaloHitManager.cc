@@ -65,7 +65,7 @@ StatusCode CaloHitManager::OrderInputCaloHits()
     {
         PseudoLayer pseudoLayer = pGeometryHelper->GetPseudoLayer((*iter)->GetPositionVector());
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer(pseudoLayer));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.AddCaloHit(*iter));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
     }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(orderedCaloHitList, INPUT_LIST_NAME));
@@ -172,12 +172,16 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
     if (clusterList.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    const OrderedCaloHitList &orderedCaloHitList = (*clusterList.begin())->GetOrderedCaloHitList();
+    const OrderedCaloHitList &orderedCaloHitList((*clusterList.begin())->GetOrderedCaloHitList());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CreateTemporaryListAndSetCurrent(pAlgorithm, orderedCaloHitList, temporaryListName));
+
+    OrderedCaloHitList *pTemporaryOrderedCaloHitList = m_nameToOrderedCaloHitListMap[temporaryListName];
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTemporaryOrderedCaloHitList->Add((*clusterList.begin())->GetIsolatedCaloHitList()));
 
     for (ClusterList::const_iterator iter = ++(clusterList.begin()), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_nameToOrderedCaloHitListMap[temporaryListName]->Add((*iter)->GetOrderedCaloHitList()));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTemporaryOrderedCaloHitList->Add((*iter)->GetOrderedCaloHitList()));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTemporaryOrderedCaloHitList->Add((*iter)->GetIsolatedCaloHitList()));
     }
 
     return STATUS_CODE_SUCCESS;

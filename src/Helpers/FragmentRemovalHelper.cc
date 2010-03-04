@@ -28,17 +28,17 @@ float FragmentRemovalHelper::GetFractionOfCloseHits(const Cluster *const pCluste
     if (0 == nCaloHitsI)
         return 0.;
 
-    CaloHitVector caloHitVectorI, caloHitVectorJ;
-    pClusterI->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorI);
-    pClusterJ->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorJ);
+    CaloHitList caloHitListI, caloHitListJ;
+    pClusterI->GetOrderedCaloHitList().GetCaloHitList(caloHitListI);
+    pClusterJ->GetOrderedCaloHitList().GetCaloHitList(caloHitListJ);
 
     unsigned int nCloseHits(0);
 
-    for (CaloHitVector::const_iterator iterI = caloHitVectorI.begin(), iterIEnd = caloHitVectorI.end(); iterI != iterIEnd; ++iterI)
+    for (CaloHitList::const_iterator iterI = caloHitListI.begin(), iterIEnd = caloHitListI.end(); iterI != iterIEnd; ++iterI)
     {
         const CartesianVector &positionVectorI((*iterI)->GetPositionVector());
 
-        for (CaloHitVector::const_iterator iterJ = caloHitVectorJ.begin(), iterJEnd = caloHitVectorJ.end(); iterJ != iterJEnd; ++iterJ)
+        for (CaloHitList::const_iterator iterJ = caloHitListJ.begin(), iterJEnd = caloHitListJ.end(); iterJ != iterJEnd; ++iterJ)
         {
             const float distance((positionVectorI - (*iterJ)->GetPositionVector()).GetMagnitude());
 

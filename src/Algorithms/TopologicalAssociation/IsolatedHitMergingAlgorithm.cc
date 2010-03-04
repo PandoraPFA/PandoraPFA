@@ -47,21 +47,21 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         if (pClusterToDelete->GetNCaloHits() > m_minHitsInCluster)
             continue;
 
-        CaloHitVector caloHitVector;
-        pClusterToDelete->GetOrderedCaloHitList().GetCaloHitVector(caloHitVector);
+        CaloHitList caloHitList;
+        pClusterToDelete->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
 
         combinedClusterList.erase(pClusterToDelete);
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pClusterToDelete));
         *iterI = NULL;
 
         // Redistribute hits that used to be in cluster I amongst other clusters
-        for (CaloHitVector::const_iterator hitIter = caloHitVector.begin(), hitIterEnd = caloHitVector.end(); hitIter != hitIterEnd; ++hitIter)
+        for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; ++hitIter)
         {
             // TODO should these hits be flagged as isolated?
             CaloHit *pCaloHit = *hitIter;
 
             Cluster *pBestHostCluster = NULL;
-            float minDistance(std::numeric_limits<float>::max());
+            float minDistance(m_maxRecombinationDistance);
 
             // Find the most appropriate cluster for this newly-available hit
             for (ClusterList::const_iterator iterJ = combinedClusterList.begin(), iterJEnd = combinedClusterList.end(); iterJ != iterJEnd; ++iterJ)
@@ -77,9 +77,9 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
                 }
             }
 
-            if ((NULL != pBestHostCluster) && (minDistance < m_maxRecombinationDistance))
+            if (NULL != pBestHostCluster)
             {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestHostCluster, pCaloHit));
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddIsolatedCaloHitToCluster(*this, pBestHostCluster, pCaloHit));
             }
         }
     }
@@ -98,8 +98,8 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             if (!pCaloHit->IsIsolated() || !CaloHitHelper::IsCaloHitAvailable(pCaloHit))
                 continue;
 
-            Cluster *pBestCluster = NULL;
-            float minDistance(std::numeric_limits<float>::max());
+            Cluster *pBestHostCluster = NULL;
+            float minDistance(m_maxRecombinationDistance);
 
             // Find most appropriate cluster for this isolated hit
             for (ClusterList::const_iterator iterJ = combinedClusterList.begin(), iterJEnd = combinedClusterList.end(); iterJ != iterJEnd; ++iterJ)
@@ -111,13 +111,13 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
                 if (distance < minDistance)
                 {
                     minDistance = distance;
-                    pBestCluster = pCluster;
+                    pBestHostCluster = pCluster;
                 }
             }
 
-            if ((NULL != pBestCluster) && (minDistance < m_maxRecombinationDistance))
+            if (NULL != pBestHostCluster)
             {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHit));
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddIsolatedCaloHitToCluster(*this, pBestHostCluster, pCaloHit));
             }
         }
     }
@@ -138,10 +138,6 @@ float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluste
     {
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            // Don't consider isolated hits already present in cluster
-            if ((*hitIter)->IsIsolated())
-                continue;
-
             const CartesianVector positionDifference(hitPosition - (*hitIter)->GetPositionVector());
             const float distance(positionDifference.GetMagnitude());
 
@@ -167,11 +163,11 @@ StatusCode IsolatedHitMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
             "PhotonClusterListName", m_photonClusterListName));
     }
 
-    m_minHitsInCluster = 5;
+    m_minHitsInCluster = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
 
-    m_maxRecombinationDistance = 200.f;
+    m_maxRecombinationDistance = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxRecombinationDistance", m_maxRecombinationDistance));
 

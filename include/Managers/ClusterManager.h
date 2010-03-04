@@ -169,6 +169,23 @@ private:
     StatusCode RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit);
 
     /**
+     *  @brief  Add an isolated calo hit to a cluster. This is not counted as a regular calo hit: it contributes only
+     *          towards the cluster energy and does not affect any other cluster properties.
+     *
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the hit to add
+     */
+    StatusCode AddIsolatedCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit);
+
+    /**
+     *  @brief  Remove an isolated calo hit from a cluster
+     *
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the hit to remove
+     */
+    StatusCode RemoveIsolatedCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit);
+
+    /**
      *  @brief  Delete a cluster from the current list
      * 
      *  @param  pCluster address of the cluster to delete

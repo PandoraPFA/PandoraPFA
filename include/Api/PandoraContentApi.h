@@ -269,6 +269,25 @@ public:
     static StatusCode RemoveCaloHitFromCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
 
     /**
+     *  @brief  Add an isolated calo hit to a cluster. This is not counted as a regular calo hit: it contributes only
+     *          towards the cluster energy and does not affect any other cluster properties.
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the isolated hit to add
+     */
+    static StatusCode AddIsolatedCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
+
+    /**
+     *  @brief  Remove an isolated calo hit from a cluster.
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pCluster address of the cluster to modify
+     *  @param  pCaloHit address of the isolated hit to remove
+     */
+    static StatusCode RemoveIsolatedCaloHitFromCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
+
+    /**
      *  @brief  Delete a cluster from the current list
      * 
      *  @param  algorithm the algorithm calling this function

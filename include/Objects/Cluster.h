@@ -40,9 +40,16 @@ public:
     /**
      *  @brief  Get the ordered calo hit list
      * 
-     *  @return Address of the ordered calo hit list
+     *  @return The ordered calo hit list by reference
      */
     const OrderedCaloHitList &GetOrderedCaloHitList() const;
+
+    /**
+     *  @brief  Get the isolated calo hit list
+     * 
+     *  @return The isolated calo hit list by reference
+     */
+    const CaloHitList &GetIsolatedCaloHitList() const;
 
     /**
      *  @brief  Get calo hits in specified pseudo layer
@@ -58,6 +65,13 @@ public:
      *  @return The number of calo hits
      */
     unsigned int GetNCaloHits() const;
+
+    /**
+     *  @brief  Get the number of isolated calo hits in the cluster
+     * 
+     *  @return The number of isolated calo hits
+     */
+    unsigned int GetNIsolatedCaloHits() const;
 
     /**
      *  @brief  Get the number of calo hits in the cluster that have been flagged as possible mip hits
@@ -181,13 +195,6 @@ public:
     PseudoLayer GetShowerStartLayer();
 
     /**
-     *  @brief  Get the pseudo layer at which the cluster energy deposition is greatest
-     * 
-     *  @return The pseudo layer at which the cluster energy deposition is greatest
-     */
-    PseudoLayer GetShowerMaxLayer();
-
-    /**
      *  @brief  Get the cluster shower profile start, units radiation lengths
      * 
      *  @return The cluster shower profile start
@@ -248,9 +255,9 @@ private:
     /**
      *  @brief  Constructor
      * 
-     *  @param  pCaloHitVector calo hits with which to create cluster
+     *  @param  pCaloHitList calo hits with which to create cluster
      */
-    Cluster(CaloHitVector *pCaloHitVector);
+    Cluster(CaloHitList *pCaloHitList);
 
     /**
      *  @brief  Constructor
@@ -279,6 +286,20 @@ private:
     StatusCode RemoveCaloHit(CaloHit *const pCaloHit);
 
     /**
+     *  @brief  Add an isolated calo hit to the cluster.
+     * 
+     *  @param  pCaloHit the address of the isolated calo hit
+     */
+    StatusCode AddIsolatedCaloHit(CaloHit *const pCaloHit);
+
+    /**
+     *  @brief  Remove an isolated calo hit from the cluster
+     * 
+     *  @param  pCaloHit the address of the isolated calo hit
+     */
+    StatusCode RemoveIsolatedCaloHit(CaloHit *const pCaloHit);
+
+    /**
      *  @brief  Calculate the fast photon flag
      */
     void CalculateFastPhotonFlag();
@@ -287,11 +308,6 @@ private:
      *  @brief  Calculate the pseudo layer at which shower commences
      */
     void CalculateShowerStartLayer();
-
-    /**
-     *  @brief  Calculate the pseudo layer at which the cluster energy deposition is greatest
-     */
-    void CalculateShowerMaxLayer();
 
     /**
      *  @brief  Calculate shower profile and compare it with the expected profile for a photon
@@ -362,8 +378,6 @@ private:
     ValueByPseudoLayerMap   m_sumXByPseudoLayer;        ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumYByPseudoLayer;        ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumZByPseudoLayer;        ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
-    ValueByPseudoLayerMap   m_emEnergyByPseudoLayer;    ///< The electromagnetic energy of the calo hits, stored by pseudo layer
-    ValueByPseudoLayerMap   m_hadEnergyByPseudoLayer;   ///< The hadronic energy of the calo hits, stored by pseudo layer
 
     CartesianVector         m_initialDirection;         ///< The initial direction of the cluster
     ClusterFitResult        m_currentFitResult;         ///< The current fit result, usually set by a clustering algorithm, as cluster grows
@@ -378,9 +392,10 @@ private:
 
     InputBool               m_isPhotonFast;             ///< Whether the cluster is flagged as a photon by fast photon id function
     InputPseudoLayer        m_showerStartLayer;         ///< The pseudo layer at which shower commences
-    InputPseudoLayer        m_showerMaxLayer;           ///< The pseudo layer at which the cluster energy deposition is greatest
     InputFloat              m_showerProfileStart;       ///< The cluster shower profile start, units radiation lengths
     InputFloat              m_showerProfileDiscrepancy; ///< The cluster shower profile discrepancy
+
+    CaloHitList             m_isolatedCaloHitList;      ///< The list of isolated hits, which contribute only towards cluster energy
 
     TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
 
@@ -389,7 +404,6 @@ private:
 
     ADD_TEST_CLASS_FRIENDS;
 };
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -417,6 +431,13 @@ inline const OrderedCaloHitList &Cluster::GetOrderedCaloHitList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline const CaloHitList &Cluster::GetIsolatedCaloHitList() const
+{
+    return m_isolatedCaloHitList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
 {
     return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
@@ -427,6 +448,13 @@ inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLaye
 inline unsigned int Cluster::GetNCaloHits() const
 {
     return m_nCaloHits;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int Cluster::GetNIsolatedCaloHits() const
+{
+    return m_isolatedCaloHitList.size();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -560,16 +588,6 @@ inline PseudoLayer Cluster::GetShowerStartLayer()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline PseudoLayer Cluster::GetShowerMaxLayer()
-{
-    if (!m_showerMaxLayer.IsInitialized())
-        this->CalculateShowerMaxLayer();
-
-    return m_showerMaxLayer.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline float Cluster::GetShowerProfileStart()
 {
     if (!m_showerProfileStart.IsInitialized())
@@ -638,7 +656,6 @@ inline void Cluster::ResetOutdatedProperties()
     m_fitToAllHitsResult.Reset();
     m_showerStartLayer.Reset();
     m_isPhotonFast.Reset();
-    m_showerMaxLayer.Reset();
     m_showerProfileStart.Reset();
     m_showerProfileDiscrepancy.Reset();
 }

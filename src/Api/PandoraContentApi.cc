@@ -193,6 +193,20 @@ StatusCode PandoraContentApi::RemoveCaloHitFromCluster(const pandora::Algorithm 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::AddIsolatedCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit)
+{
+    return algorithm.GetPandoraContentApiImpl()->AddIsolatedCaloHitToCluster(pCluster, pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::RemoveIsolatedCaloHitFromCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit)
+{
+    return algorithm.GetPandoraContentApiImpl()->RemoveIsolatedCaloHitFromCluster(pCluster, pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::DeleteCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster)
 {
     return algorithm.GetPandoraContentApiImpl()->DeleteCluster(pCluster);
@@ -360,9 +374,9 @@ StatusCode PandoraContentApi::SaveTrackListAndReplaceCurrent(const pandora::Algo
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHit>(const pandora::Algorithm &algorithm, pandora::CaloHit *pCaloHit);
-template StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHitVector>(const pandora::Algorithm &algorithm, pandora::CaloHitVector *pCaloHitVector);
+template StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHitList>(const pandora::Algorithm &algorithm, pandora::CaloHitList *pCaloHitList);
 template StatusCode PandoraContentApi::Cluster::Create<pandora::Track>(const pandora::Algorithm &algorithm, pandora::Track *pTrack);
 
 template StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHit>(const pandora::Algorithm &algorithm, pandora::CaloHit *pCaloHit, pandora::Cluster *&pCluster);
-template StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHitVector>(const pandora::Algorithm &algorithm, pandora::CaloHitVector *pCaloHitVector, pandora::Cluster *&pCluster);
+template StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHitList>(const pandora::Algorithm &algorithm, pandora::CaloHitList *pCaloHitList, pandora::Cluster *&pCluster);
 template StatusCode PandoraContentApi::Cluster::Create<pandora::Track>(const pandora::Algorithm &algorithm, pandora::Track *pTrack, pandora::Cluster *&pCluster);

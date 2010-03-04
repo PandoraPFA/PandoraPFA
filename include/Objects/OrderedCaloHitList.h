@@ -57,18 +57,32 @@ public:
     StatusCode Remove(const OrderedCaloHitList &rhs);
 
     /**
+     *  @brief  Add a list of calo hits to the ordered calo hit list
+     * 
+     *  @param  caloHitList the calo hit list
+     */
+    StatusCode Add(const CaloHitList &caloHitList);
+
+    /**
+     *  @brief  Remove a list of calo hits from the ordered calo hit list
+     * 
+     *  @param  caloHitList the calo hit list
+     */
+    StatusCode Remove(const CaloHitList &caloHitList);
+
+    /**
      *  @brief  Add a calo hit to the ordered calo hit list
      * 
      *  @param  pCaloHit the address of the calo hit
      */
-    StatusCode AddCaloHit(CaloHit *const pCaloHit);
+    StatusCode Add(CaloHit *const pCaloHit);
 
     /**
      *  @brief  Remove a calo hit from the ordered calo hit list
      * 
      *  @param  pCaloHit the address of the calo hit
      */
-    StatusCode RemoveCaloHit(CaloHit *const pCaloHit);
+    StatusCode Remove(CaloHit *const pCaloHit);
 
     /**
      *  @brief  Get calo hits in specified pseudo layer
@@ -84,11 +98,11 @@ public:
     StatusCode Reset();
 
     /**
-     *  @brief  Get a simple vector of all the calo hits in the ordered calo hit list (no ordering by pseudolayer)
+     *  @brief  Get a simple list of all the calo hits in the ordered calo hit list (no ordering by pseudolayer)
      * 
-     *  @param  caloHitVector to receive the simple vector of calo hits
+     *  @param  caloHitList to receive the simple list of calo hits
      */
-    void GetCaloHitVector(CaloHitVector &caloHitVector) const;
+    void GetCaloHitList(CaloHitList &caloHitList) const;
 
     /**
      *  @brief  Assignment operator
@@ -104,7 +118,7 @@ private:
      *  @param  pCaloHit the address of the calo hit
      *  @param  pseudoLayer the pesudo layer
      */
-    StatusCode AddCaloHit(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer);
+    StatusCode Add(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer);
 
     /**
      *  @brief  Remove a calo hit from a specified pseudo layer
@@ -112,21 +126,21 @@ private:
      *  @param  pCaloHit the address of the calo hit
      *  @param  pseudoLayer the pesudo layer
      */
-    StatusCode RemoveCaloHit(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer);
+    StatusCode Remove(CaloHit *const pCaloHit, const PseudoLayer pseudoLayer);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode OrderedCaloHitList::AddCaloHit(CaloHit *const pCaloHit)
+inline StatusCode OrderedCaloHitList::Add(CaloHit *const pCaloHit)
 {
-    return this->AddCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
+    return this->Add(pCaloHit, pCaloHit->GetPseudoLayer());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode OrderedCaloHitList::RemoveCaloHit(CaloHit *const pCaloHit)
+inline StatusCode OrderedCaloHitList::Remove(CaloHit *const pCaloHit)
 {
-    return this->RemoveCaloHit(pCaloHit, pCaloHit->GetPseudoLayer());
+    return this->Remove(pCaloHit, pCaloHit->GetPseudoLayer());
 }
 
 } // namespace pandora

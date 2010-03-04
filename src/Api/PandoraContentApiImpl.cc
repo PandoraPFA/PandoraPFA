@@ -44,13 +44,13 @@ StatusCode PandoraContentApiImpl::CreateCluster(CaloHit *pCaloHit, Cluster *&pCl
 }
 
 template <>
-StatusCode PandoraContentApiImpl::CreateCluster(CaloHitVector *pCaloHitVector, Cluster *&pCluster) const
+StatusCode PandoraContentApiImpl::CreateCluster(CaloHitList *pCaloHitList, Cluster *&pCluster) const
 {
-    if (!CaloHitHelper::AreCaloHitsAvailable(*pCaloHitVector))
+    if (!CaloHitHelper::AreCaloHitsAvailable(*pCaloHitList))
         return STATUS_CODE_NOT_ALLOWED;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateCluster(pCaloHitVector, pCluster));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(*pCaloHitVector, false));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateCluster(pCaloHitList, pCluster));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(*pCaloHitList, false));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -266,6 +266,29 @@ StatusCode PandoraContentApiImpl::RemoveCaloHitFromCluster(Cluster *pCluster, Ca
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::AddIsolatedCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const
+{
+    if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+        return STATUS_CODE_NOT_ALLOWED;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->AddIsolatedCaloHitToCluster(pCluster, pCaloHit));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, false));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::RemoveIsolatedCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit) const
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->RemoveIsolatedCaloHitFromCluster(pCluster, pCaloHit));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, true));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClusterForDeletion(pCluster));
@@ -308,6 +331,9 @@ StatusCode PandoraContentApiImpl::DeleteClusters(const ClusterList &clusterList,
 
 StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete) const
 {
+    if (pClusterToEnlarge == pClusterToDelete)
+        return STATUS_CODE_NOT_ALLOWED;
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(pClusterToDelete->GetAssociatedTrackList()));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete));
 
@@ -319,6 +345,9 @@ StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnla
 StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete, const std::string &enlargeListName,
     const std::string &deleteListName) const
 {
+    if (pClusterToEnlarge == pClusterToDelete)
+        return STATUS_CODE_NOT_ALLOWED;
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(pClusterToDelete->GetAssociatedTrackList()));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete,
         enlargeListName, deleteListName));
@@ -498,10 +527,13 @@ PandoraContentApiImpl::PandoraContentApiImpl(Pandora *pPandora) :
 
 StatusCode PandoraContentApiImpl::PrepareClusterForDeletion(const Cluster *const pCluster) const
 {
-    CaloHitVector caloHitVector;
-    pCluster->GetOrderedCaloHitList().GetCaloHitVector(caloHitVector);
+    CaloHitList caloHitList;
+    pCluster->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitVector, true));
+    const CaloHitList &isolatedCaloHitList(pCluster->GetIsolatedCaloHitList());
+    caloHitList.insert(isolatedCaloHitList.begin(), isolatedCaloHitList.end());
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitList, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(pCluster->GetAssociatedTrackList()));
 
     return STATUS_CODE_SUCCESS;
@@ -512,15 +544,19 @@ StatusCode PandoraContentApiImpl::PrepareClusterForDeletion(const Cluster *const
 StatusCode PandoraContentApiImpl::PrepareClustersForDeletion(const ClusterList &clusterList) const
 {
     TrackList trackList;
-    CaloHitVector caloHitVector;
+    CaloHitList caloHitList;
 
     for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
     {
-        (*iter)->GetOrderedCaloHitList().GetCaloHitVector(caloHitVector);
+        (*iter)->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
+
+        const CaloHitList &isolatedCaloHitList((*iter)->GetIsolatedCaloHitList());
+        caloHitList.insert(isolatedCaloHitList.begin(), isolatedCaloHitList.end());
+
         trackList.insert((*iter)->GetAssociatedTrackList().begin(), (*iter)->GetAssociatedTrackList().end());
     }
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitVector, true));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitList, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(trackList));
 
     return STATUS_CODE_SUCCESS;

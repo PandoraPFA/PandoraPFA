@@ -419,15 +419,15 @@ float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitR
 float ClusterHelper::GetDistanceToClosestHit(const Cluster *const pClusterI, const Cluster *const pClusterJ)
 {
     float minDistance(std::numeric_limits<float>::max());
-    CaloHitVector caloHitVectorI, caloHitVectorJ;
-    pClusterI->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorI);
-    pClusterJ->GetOrderedCaloHitList().GetCaloHitVector(caloHitVectorJ);
+    CaloHitList caloHitListI, caloHitListJ;
+    pClusterI->GetOrderedCaloHitList().GetCaloHitList(caloHitListI);
+    pClusterJ->GetOrderedCaloHitList().GetCaloHitList(caloHitListJ);
 
-    for (CaloHitVector::const_iterator iterI = caloHitVectorI.begin(), iterIEnd = caloHitVectorI.end(); iterI != iterIEnd; ++iterI)
+    for (CaloHitList::const_iterator iterI = caloHitListI.begin(), iterIEnd = caloHitListI.end(); iterI != iterIEnd; ++iterI)
     {
         const CartesianVector &positionVectorI((*iterI)->GetPositionVector());
 
-        for (CaloHitVector::const_iterator iterJ = caloHitVectorJ.begin(), iterIEnd = caloHitVectorJ.end(); iterJ != iterIEnd; ++iterJ)
+        for (CaloHitList::const_iterator iterJ = caloHitListJ.begin(), iterIEnd = caloHitListJ.end(); iterJ != iterIEnd; ++iterJ)
         {
             const float distance((positionVectorI - (*iterJ)->GetPositionVector()).GetMagnitude());
 

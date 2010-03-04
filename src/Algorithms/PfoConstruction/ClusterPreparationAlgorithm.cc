@@ -21,9 +21,7 @@ StatusCode ClusterPreparationAlgorithm::Run()
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
-
-        if (!pCluster->IsPhotonFast())
-            pCluster->SetBestEnergyEstimate(pCluster->GetHadronicEnergy());
+        pCluster->SetBestEnergyEstimate(pCluster->GetHadronicEnergy());
     }
 
     // Now make corrections to these energy estimates
@@ -99,7 +97,7 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
 
                     if (newHitHadronicEnergy < hitHadronicEnergy)
                     {
-                        pCluster->SetBestEnergyEstimate(pCluster->GetHadronicEnergy() + newHitHadronicEnergy - hitHadronicEnergy);
+                        pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() + newHitHadronicEnergy - hitHadronicEnergy);
                     }
                 }
             }
@@ -138,6 +136,9 @@ StatusCode ClusterPreparationAlgorithm::ScaleHotHadronEnergy() const
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
+
+        if (pCluster->IsPhotonFast() && pCluster->GetAssociatedTrackList().empty())
+            continue;
 
         // Perform hit hadron identification
         const unsigned int nHitsInCluster(pCluster->GetNCaloHits());
@@ -196,6 +197,9 @@ StatusCode ClusterPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     m_minHitsForHotHadron = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsForHotHadron", m_minHitsForHotHadron));
+
+    if (0 == m_minHitsForHotHadron)
+        return STATUS_CODE_INVALID_PARAMETER;
 
     m_maxHitsForHotHadron = 100;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

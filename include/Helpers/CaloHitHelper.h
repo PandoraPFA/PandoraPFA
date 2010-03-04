@@ -33,11 +33,11 @@ public:
     /**
      *  @brief  Are all calo hits in list available to add to a cluster
      * 
-     *  @param  caloHitVector the vector of calo hits
+     *  @param  caloHitList the list of calo hits
      * 
      *  @return boolean
      */
-    static bool AreCaloHitsAvailable(const CaloHitVector &caloHitVector);
+    static bool AreCaloHitsAvailable(const CaloHitList &caloHitList);
 
     /**
      *  @brief  Get contribution to a hit's density weight from a list of other hits
@@ -91,10 +91,10 @@ private:
     /**
      *  @brief  Set availability of all calo hits in list
      * 
-     *  @param  caloHitVector the vector of calo hits
+     *  @param  caloHitList the list of calo hits
      *  @param  isAvailable the calo hit availability
      */
-    static StatusCode SetCaloHitAvailability(CaloHitVector &caloHitVector, bool isAvailable);
+    static StatusCode SetCaloHitAvailability(CaloHitList &caloHitList, bool isAvailable);
 
     /**
      *  @brief  Create a calo hit usage map containing an entry for each calo hit in the ordered calo hit list
