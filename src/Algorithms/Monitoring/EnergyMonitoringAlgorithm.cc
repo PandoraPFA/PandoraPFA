@@ -26,7 +26,11 @@ EnergyMonitoringAlgorithm::EnergyMixing::EnergyMixing()
     : m_chargedCalorimetric(0),
       m_chargedTracks(0),
       m_neutralCalorimetric(0),
-      m_photonCalorimetric(0)
+      m_photonCalorimetric(0),
+      m_chargedCalorimetricClusters(0),
+      m_chargedTracksNumber(0),
+      m_neutralCalorimetricClusters(0),
+      m_photonCalorimetricClusters(0)
 {
     m_mcParticleSet.clear();
 }
@@ -35,16 +39,24 @@ EnergyMonitoringAlgorithm::EnergyMixing::EnergyMixing()
 
 float EnergyMonitoringAlgorithm::EnergyMixing::GetMcParticleSetEnergy()
 {
-    MCPARTICLESET& mcParticleSet = GetMcParticleSet();
+    McParticleSet& mcParticleSet = GetMcParticleSet();
     
     float energy = 0.f;
-    for( MCPARTICLESET::iterator itMc = mcParticleSet.begin(), itMcEnd = mcParticleSet.end(); itMc != itMcEnd; ++itMc )
+    for( McParticleSet::iterator itMc = mcParticleSet.begin(), itMcEnd = mcParticleSet.end(); itMc != itMcEnd; ++itMc )
     {
         const pandora::MCParticle *const mc = (*itMc);
         energy += mc->GetEnergy();
     }
     
     return energy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+int EnergyMonitoringAlgorithm::EnergyMixing::GetMcParticleNumber()
+{
+    McParticleSet& mcParticleSet = GetMcParticleSet();
+    return mcParticleSet.size();
 }
 
 
@@ -86,6 +98,8 @@ StatusCode EnergyMonitoringAlgorithm::Run()
     EnergyMixing trueNeutral;
     EnergyMixing truePhotons;
     
+    int clusterNumber = 0;
+    int trackNumber   = 0;
 
     for( ClusterVector::iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
     {
@@ -93,11 +107,16 @@ StatusCode EnergyMonitoringAlgorithm::Run()
         for( ClusterList::iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
         {
             const Cluster* pCluster = (*itCluster);
+            ++clusterNumber;
 
             const TrackList& pTrackList = pCluster->GetAssociatedTrackList();
             bool clusterHasTracks = !(pTrackList.empty());
             bool clusterIsPhoton  = pCluster->IsPhoton();
             
+            float energyMcPhoton  = 0.f;
+            float energyMcNeutral = 0.f;
+            float energyMcCharged = 0.f;
+
             const OrderedCaloHitList& pOrderedCaloHitList = pCluster->GetOrderedCaloHitList();
             for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
             {
@@ -115,39 +134,63 @@ StatusCode EnergyMonitoringAlgorithm::Run()
 
                     if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 
-                    bool mcIsNeutral = (mc->GetParticleId() == K0L || 
-//                                        mc->GetParticleId() == K0S ||
-                                        mc->GetParticleId() == NEUTRON ); 
-//                     bool mcIsEm      = (mc->GetParticleId() == ELECTRON || 
-//                                         mc->GetParticleId() == POSITRON);
-                    bool mcIsPhoton  = (mc->GetParticleId() == PHOTON );
+                    int particleId = mc->GetParticleId();
+                    bool mcIsNeutral = (particleId == K0L || 
+//                                        particleId == K0S ||
+                                        particleId == NEUTRON ); 
+//                     bool mcIsEm      = (particleId == ELECTRON || 
+//                                         particleId == POSITRON);
+                    bool mcIsPhoton  = (particleId == PHOTON );
  
 //                     EnergyMixing& energyMixing = (mcIsPhoton? &truePhotons : (mcIsNeutral? &trueNeutral : (mcIsEm? &trueChargedEm : &trueCharged ) ) );
                     EnergyMixing& energyMixing = (mcIsPhoton? truePhotons : (mcIsNeutral? trueNeutral : trueCharged ) );
 
                     energyMixing.AddMcParticle( mc );
 
+                    float electromagneticEnergy = pCaloHit->GetElectromagneticEnergy();
                     if( clusterHasTracks )
                     {
-                        energyMixing.AddChargedClusterCalorimetricEnergy( pCaloHit->GetElectromagneticEnergy() );
+                        energyMixing.AddChargedClusterCalorimetricEnergy( electromagneticEnergy );
                     }
                     else if( clusterIsPhoton )
                     {
-                        energyMixing.AddPhotonClusterCalorimetricEnergy( pCaloHit->GetElectromagneticEnergy() );
+                        energyMixing.AddPhotonClusterCalorimetricEnergy( electromagneticEnergy );
                     }
                     else
                     {
-                        energyMixing.AddNeutralClusterCalorimetricEnergy( pCaloHit->GetElectromagneticEnergy() );
+                        energyMixing.AddNeutralClusterCalorimetricEnergy( electromagneticEnergy );
                     }
 
+                    if( mcIsPhoton )
+                        energyMcPhoton  += electromagneticEnergy;
+                    else if( mcIsNeutral )
+                        energyMcNeutral += electromagneticEnergy;
+                    else 
+                        energyMcCharged += electromagneticEnergy;
                     
                 }
             }
-            
+
+            // add number of clusters
+            EnergyMixing& energyMixingQuantity = (energyMcPhoton>energyMcNeutral? 
+                                                  (energyMcPhoton>energyMcCharged? truePhotons : trueCharged) : 
+                                                  (energyMcNeutral>energyMcCharged? trueNeutral : trueCharged ) );
+
+            if( clusterHasTracks )
+                energyMixingQuantity.AddChargedCluster();
+            else if( clusterIsPhoton )
+                energyMixingQuantity.AddPhotonCluster();
+            else
+                energyMixingQuantity.AddNeutralCluster();
+                    
+
             // now for the tracks
             for( TrackList::const_iterator itTrack = pTrackList.begin(), itTrackEnd = pTrackList.end(); itTrack != itTrackEnd; ++itTrack )
             {
                 Track* pTrack = (*itTrack);
+                
+                ++trackNumber;
+
                 const MCParticle* mc = NULL;
                 pTrack->GetMCParticle( mc );
                 if( mc == NULL ) continue; // maybe an error should be thrown here?
@@ -163,14 +206,16 @@ StatusCode EnergyMonitoringAlgorithm::Run()
                 EnergyMixing& energyMixing = (mcIsPhoton? truePhotons : (mcIsNeutral? trueNeutral : trueCharged ) );
 
                 energyMixing.AddMcParticle( mc );
-                
+
                 energyMixing.AddChargedClusterTracksEnergy( pTrack->GetEnergyAtDca() );
+                energyMixing.AddTrack();
                 
             }
         }
     }
 
-    return MonitoringOutput( trueCharged, trueNeutral, truePhotons );
+
+    return MonitoringOutput( trueCharged, trueNeutral, truePhotons, clusterNumber, trackNumber );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -188,6 +233,9 @@ StatusCode EnergyMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "TreeName", m_treeName));
     m_print = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Print", m_print));
+
+    m_quantity = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Quantity", m_quantity));
     
     return STATUS_CODE_SUCCESS;
 }
@@ -195,9 +243,10 @@ StatusCode EnergyMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharged, EnergyMixing& trueNeutral, EnergyMixing& truePhotons )
+StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharged, EnergyMixing& trueNeutral, EnergyMixing& truePhotons, int numberClusters, int numberTracks )
 {
 
+    // get energies
     float trueCharged_recoChargedCalo   = trueCharged.GetChargedClusterCalorimetricEnergy();
     float trueCharged_recoNeutralCalo   = trueCharged.GetNeutralClusterCalorimetricEnergy();
     float trueCharged_recoPhotonCalo    = trueCharged.GetPhotonClusterCalorimetricEnergy();
@@ -216,6 +265,28 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
     float truePhotons_recoChargedTracks = truePhotons.GetChargedClusterTracksEnergy();
     float truePhotons_mc                = truePhotons.GetMcParticleSetEnergy();
 
+
+    // get quantity
+    int trueCharged_recoChargedCaloClusters   = trueCharged.GetChargedClusterCalorimetricClusters();
+    int trueCharged_recoNeutralCaloClusters   = trueCharged.GetNeutralClusterCalorimetricClusters();
+    int trueCharged_recoPhotonCaloClusters    = trueCharged.GetPhotonClusterCalorimetricClusters();
+    int trueCharged_recoChargedTracksNumber   = trueCharged.GetChargedClusterTracks();
+    int trueCharged_mcNumber                  = trueCharged.GetMcParticleNumber();
+
+    int trueNeutral_recoChargedCaloClusters   = trueNeutral.GetChargedClusterCalorimetricClusters();
+    int trueNeutral_recoNeutralCaloClusters   = trueNeutral.GetNeutralClusterCalorimetricClusters();
+    int trueNeutral_recoPhotonCaloClusters    = trueNeutral.GetPhotonClusterCalorimetricClusters();
+    int trueNeutral_recoChargedTracksNumber   = trueNeutral.GetChargedClusterTracks();
+    int trueNeutral_mcNumber                  = trueNeutral.GetMcParticleNumber();
+    
+    int truePhotons_recoChargedCaloClusters   = truePhotons.GetChargedClusterCalorimetricClusters();
+    int truePhotons_recoNeutralCaloClusters   = truePhotons.GetNeutralClusterCalorimetricClusters();
+    int truePhotons_recoPhotonCaloClusters    = truePhotons.GetPhotonClusterCalorimetricClusters();
+    int truePhotons_recoChargedTracksNumber   = truePhotons.GetChargedClusterTracks();
+    int truePhotons_mcNumber                  = truePhotons.GetMcParticleNumber();
+
+
+
     if( m_print )
     {
         std::cout << "cluster list names : ";
@@ -224,26 +295,78 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
             std::cout << (*itClusterName) << " " << std::flush;
         }
         std::cout << std::endl;
-
-        static const int width = 12;
-        static const int precision = 1;
+        std::cout << "number of clusters : " << numberClusters << std::endl;
+        std::cout << "number of tracks   : " << numberTracks << std::endl;
 
         std::ios_base::fmtflags original_flags = std::cout.flags();   // store the original flags
 
+        static const int precision = 1;
+        static const int width = 12;
+        static const int widthNum = 3;
+        
         std::cout << std::fixed;
-        std::cout << std::setw(width) << " " << std::setw(width) << "true +-" << std::setw(width) << "true 0" << std::setw(width) << "true phot" << std::endl;
         std::cout << std::setprecision(precision);
-        std::cout << std::setw(width) << "true     : " << std::setw(width) << trueCharged_mc << std::setw(width) 
-                  << trueNeutral_mc << std::setw(width) << truePhotons_mc << std::endl;
-        std::cout << std::setw(width) << "---" << std::setw(width) << "---" << std::setw(width) << "---" << std::setw(width) << "---" << std::endl;
-        std::cout << std::setw(width) << "+- calo  : " << std::setw(width) << trueCharged_recoChargedCalo << std::setw(width) 
-                  << trueNeutral_recoChargedCalo << std::setw(width) << truePhotons_recoChargedCalo << std::endl;
-        std::cout << std::setw(width) << "+- tracks: " << std::setw(width) << trueCharged_recoChargedTracks << std::setw(width) 
-                  << trueNeutral_recoChargedTracks << std::setw(width) << truePhotons_recoChargedTracks << std::endl;
-        std::cout << std::setw(width) << "0  calo  : " << std::setw(width) << trueCharged_recoNeutralCalo << std::setw(width) 
-                  << trueNeutral_recoNeutralCalo << std::setw(width) << truePhotons_recoNeutralCalo << std::endl;
-        std::cout << std::setw(width) << "phot     : " << std::setw(width) << trueCharged_recoPhotonCalo << std::setw(width) 
-                  << trueNeutral_recoPhotonCalo << std::setw(width) << truePhotons_recoPhotonCalo << std::endl;
+
+#define FORMATTEDOUTPUTSHORT(TITLE,E1,E2,E3) std::cout << std::left << std::setw(width) << TITLE \
+                                                       << std::right << std::setw(widthNum) << " " << std::setw(width) << E1 \
+                                                       << std::right << std::setw(widthNum) << " " << std::setw(width) << E2 \
+                                                       << std::right << std::setw(widthNum) << " " << std::setw(width) << E3 << std::endl
+#define FORMATTEDOUTPUTLONG(TITLE,E1,N1,E2,N2,E3,N3) std::cout << std::setw(width) << std::left << TITLE \
+                                                               << std::right << std::setw(width) << E1 << "/" << std::left << std::setw(widthNum) << N1 \
+                                                               << std::right << std::setw(width) << E2 << "/" << std::left << std::setw(widthNum) << N2 \
+                                                               << std::right << std::setw(width) << E3 << "/" << std::left << std::setw(widthNum) << N3 << std::endl
+
+#define FORMATTEDOUTPUT(TITLE,E1,E2,E3) std::cout << std::left << std::setw(width) << TITLE \
+                                                  << std::right << std::setw(width) << E1 \
+                                                  << std::right << std::setw(width) << E2 \
+                                                  << std::right << std::setw(width) << E3 << std::endl
+
+        if( m_quantity )
+        {
+
+            FORMATTEDOUTPUTSHORT( "           ", "true +-", "true 0", "true phot" );
+            FORMATTEDOUTPUTLONG( "true     : ", trueCharged_mc, trueCharged_mcNumber, trueNeutral_mc,trueNeutral_mcNumber, truePhotons_mc, truePhotons_mcNumber );
+            FORMATTEDOUTPUTSHORT( "--- ", "--- ", "--- ", "--- " );
+            FORMATTEDOUTPUTLONG( "+- calo  : ", \
+                                 trueCharged_recoChargedCalo, trueCharged_recoChargedCaloClusters, \
+                                 trueNeutral_recoChargedCalo, trueNeutral_recoChargedCaloClusters, \
+                                 truePhotons_recoChargedCalo, truePhotons_recoChargedCaloClusters );
+            FORMATTEDOUTPUTLONG( "+- tracks: ", \
+                                 trueCharged_recoChargedTracks, trueCharged_recoChargedTracksNumber, \
+                                 trueNeutral_recoChargedTracks, trueNeutral_recoChargedTracksNumber, \
+                                 truePhotons_recoChargedTracks, truePhotons_recoChargedTracksNumber );
+            FORMATTEDOUTPUTLONG( "0  calo  : ", \
+                                 trueCharged_recoNeutralCalo, trueCharged_recoNeutralCaloClusters, \
+                                 trueNeutral_recoNeutralCalo, trueNeutral_recoNeutralCaloClusters, \
+                                 truePhotons_recoNeutralCalo, truePhotons_recoNeutralCaloClusters );
+            FORMATTEDOUTPUTLONG( "phot     : ", \
+                                 trueCharged_recoPhotonCalo, trueCharged_recoPhotonCaloClusters, \
+                                 trueNeutral_recoPhotonCalo, trueNeutral_recoPhotonCaloClusters, \
+                                 truePhotons_recoPhotonCalo, truePhotons_recoPhotonCaloClusters );
+        }
+        else
+        {
+
+            FORMATTEDOUTPUT( "           ", "true +-", "true 0", "true phot" );
+            FORMATTEDOUTPUT( "true     : ", trueCharged_mc, trueNeutral_mc, truePhotons_mc );
+            FORMATTEDOUTPUT( "---", "---", "---", "---" );
+            FORMATTEDOUTPUT( "+- calo  : ", \
+                             trueCharged_recoChargedCalo, \
+                             trueNeutral_recoChargedCalo, \
+                             truePhotons_recoChargedCalo );
+            FORMATTEDOUTPUT( "+- tracks: ", \
+                             trueCharged_recoChargedTracks, \
+                             trueNeutral_recoChargedTracks, \
+                             truePhotons_recoChargedTracks );
+            FORMATTEDOUTPUT( "0  calo  : ", \
+                             trueCharged_recoNeutralCalo, \
+                             trueNeutral_recoNeutralCalo, \
+                             truePhotons_recoNeutralCalo );
+            FORMATTEDOUTPUT( "phot     : ", \
+                             trueCharged_recoPhotonCalo, \
+                             trueNeutral_recoPhotonCalo, \
+                             truePhotons_recoPhotonCalo );
+        }
 
         std::cout.flags(original_flags);                              // restore the flags
 
@@ -253,23 +376,48 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
     {
         if( m_print )
             std::cout << "energy monitoring written into tree : " << m_treeName << std::endl;
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ch2ch", trueCharged_recoChargedCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ch2ne", trueCharged_recoNeutralCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ch2ph", trueCharged_recoPhotonCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ch2tr", trueCharged_recoChargedTracks ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "chMc",  trueCharged_mc ));
 
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ne2ch", trueNeutral_recoChargedCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ne2ne",  trueNeutral_recoNeutralCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ne2ph", trueNeutral_recoPhotonCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ne2tr", trueNeutral_recoChargedTracks ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "neMc",  trueNeutral_mc ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "clusters", numberClusters ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "tracks",   numberTracks ));
 
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ph2ch", truePhotons_recoChargedCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ph2ne",  truePhotons_recoNeutralCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ph2ph", truePhotons_recoPhotonCalo ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ph2tr", truePhotons_recoChargedTracks ));
-        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "phMc",  truePhotons_mc ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "c2c", trueCharged_recoChargedCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "c2n", trueCharged_recoNeutralCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "c2p", trueCharged_recoPhotonCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "c2t", trueCharged_recoChargedTracks ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "cMc", trueCharged_mc ));
+
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "n2c", trueNeutral_recoChargedCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "n2n", trueNeutral_recoNeutralCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "n2p", trueNeutral_recoPhotonCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "n2t", trueNeutral_recoChargedTracks ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "nMc", trueNeutral_mc ));
+
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "p2c", truePhotons_recoChargedCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "p2n", truePhotons_recoNeutralCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "p2p", truePhotons_recoPhotonCalo ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "p2t", truePhotons_recoChargedTracks ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pMc", truePhotons_mc ));
+
+        if( m_quantity )
+        {
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Np2c", truePhotons_recoChargedCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Np2n", truePhotons_recoNeutralCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Np2p", truePhotons_recoPhotonCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Np2t", truePhotons_recoChargedTracksNumber ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "NpMc", truePhotons_mcNumber ));
+
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nc2c", trueCharged_recoChargedCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nc2n", trueCharged_recoNeutralCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nc2p", trueCharged_recoPhotonCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nc2t", trueCharged_recoChargedTracksNumber ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "NcMc", trueCharged_mcNumber ));
+
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nn2c", trueNeutral_recoChargedCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nn2n", trueNeutral_recoNeutralCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nn2p", trueNeutral_recoPhotonCaloClusters ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "Nn2t", trueNeutral_recoChargedTracksNumber ));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "NnMc", trueNeutral_mcNumber ));
+        }
 
 //        PANDORA_MONITORING_API(PrintTree(m_treeName));
         PANDORA_MONITORING_API(FillTree(m_treeName));

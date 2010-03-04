@@ -33,7 +33,8 @@ StatusCode ECalPhotonIdAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_photonExtractionAlgorithmName, pPhotonClusterList));
 
     if( !pPhotonClusterList->empty() )
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName));
+       PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_clusterListName));
+
 
     return STATUS_CODE_SUCCESS;
 }

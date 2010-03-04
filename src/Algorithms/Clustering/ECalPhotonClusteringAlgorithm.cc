@@ -106,6 +106,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
                 std::cout << "*** main cluster cells : " << pCluster->GetNCaloHits() << std::endl;
             if( pCluster->GetElectromagneticEnergy()<=0.2 || pCluster->GetNCaloHits() < m_minimumHitsInClusters ) 
             {
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
                 if (m_producePrintoutStatements > 0)
                     std::cout << "is photon cluster? --> NO / electromagnetic energy too small (<=0.2)" << std::endl;
                 continue;
@@ -120,7 +121,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
             GetClusterProperties( pCluster, clusterProperties );
 
             const OrderedCaloHitList pOrderedCaloHitList( pCluster->GetOrderedCaloHitList() );
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
 
 
             // cluster these hits differently ==============================
@@ -142,12 +143,11 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
 
                     if( IsPhoton( pPhotonCandidateCluster, pOrderedCaloHitList, (*itPeak), clusterProperties, useOriginalCluster ) )
                     {
+                        pPhotonCandidateCluster->SetIsPhotonFlag( true );
                         if (m_producePrintoutStatements > 0)
                             std::cout << "is photon cluster? --> YES " << std::endl;
 
                         photonClusters.insert( pPhotonCandidateCluster );
-                        pPhotonCandidateCluster->SetIsPhotonFlag( true );
-
                         if( useOriginalCluster ) // if the original cluster is used
                         {
                             break;
@@ -159,7 +159,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
                         if (m_producePrintoutStatements > 0)
                             std::cout << "is photon cluster? --> NO ";
 
-                        PANDORA_THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster ) );
+                        PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster ) );
                     }
 
                     if (m_producePrintoutStatements > 0)
