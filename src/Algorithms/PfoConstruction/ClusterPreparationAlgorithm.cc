@@ -14,16 +14,31 @@ using namespace pandora;
 
 StatusCode ClusterPreparationAlgorithm::Run()
 {
-    // Set best energy estimates for input clusters
-    const ClusterList *pClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+    // Create pfo cluster list, containing all candidate clusters for use in final pfo creation
+    for (StringVector::const_iterator iter = m_candidateListNames.begin(), iterEnd = m_candidateListNames.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, *iter, m_finalPfoListName));
+    }
 
-    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    // Save the filtered list and set it to be the current list for next algorithms
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentClusterList(*this, m_finalPfoListName));
+
+    const ClusterList *pFinalClusterList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pFinalClusterList));
+
+    // Set best energy estimates for output clusters
+    for (ClusterList::const_iterator iter = pFinalClusterList->begin(), iterEnd = pFinalClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
 
-        if (!pCluster->IsPhotonFast())
+        if (pCluster->IsPhotonFast())
+        {
+            pCluster->SetBestEnergyEstimate(pCluster->GetElectromagneticEnergy());
+        }
+        else
+        {
             pCluster->SetBestEnergyEstimate(pCluster->GetHadronicEnergy());
+        }
     }
 
     // Now make corrections to these energy estimates
@@ -45,7 +60,9 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
-        const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+        if (pCluster->IsPhotonFast())
+            continue;
 
         const float clusterHadronicEnergy(pCluster->GetHadronicEnergy());
 
@@ -53,6 +70,7 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
             return STATUS_CODE_FAILURE;
 
         bool isOutsideECal(false);
+        const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
         // Loop over all constituent ecal hits, looking for 
         for (OrderedCaloHitList::const_iterator layerIter = orderedCaloHitList.begin(), layerIterEnd = orderedCaloHitList.end();
@@ -139,7 +157,7 @@ StatusCode ClusterPreparationAlgorithm::ScaleHotHadronEnergy() const
     {
         Cluster *pCluster = *iter;
 
-        if (pCluster->IsPhotonFast() && pCluster->GetAssociatedTrackList().empty())
+        if (pCluster->IsPhotonFast())
             continue;
 
         // Perform hit hadron identification
@@ -184,6 +202,16 @@ StatusCode ClusterPreparationAlgorithm::ScaleHotHadronEnergy() const
 
 StatusCode ClusterPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "CandidateListNames", m_candidateListNames));
+
+    if (m_candidateListNames.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    m_finalPfoListName = "pfoCreation";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "FinalPfoListName", m_finalPfoListName));
+
     m_minCleanHitEnergy = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCleanHitEnergy", m_minCleanHitEnergy));

@@ -267,7 +267,7 @@ public:
     StatusCode RemoveAllTrackClusterAssociations() const;
 
     /**
-     *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
+     *  @brief  Save the current cluster list in a list with the specified new name
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
@@ -275,14 +275,33 @@ public:
     StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &newClusterListName) const;
 
     /**
-     *  @brief  Save the current cluster list and remove the constituent hits from the current ordered calo hit list
+     *  @brief  Save elements of the current cluster list in a list with the specified new name
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
-     *  @param  clustersToSave a subset of the algorithm input cluster list - only clusters in both this and the current
-     *          cluster lists will be saved
+     *  @param  clustersToSave a subset of the current cluster list - only clusters in both this and the current list will be saved
      */
     StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &newClusterListName, const ClusterList &clustersToSave) const;
+
+    /**
+     *  @brief  Save a named cluster list in a list with the specified new name
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  oldClusterListName the old cluster list name
+     *  @param  newClusterListName the new cluster list name
+     */
+    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName,  const std::string &newClusterListName) const;
+
+    /**
+     *  @brief  Save elements of a named cluster list in a list with the specified new name
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  oldClusterListName the old cluster list name
+     *  @param  newClusterListName the new cluster list name
+     *  @param  clustersToSave a subset of the old cluster list - only clusters in both this and the old cluster list will be saved
+     */
+    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName, const std::string &newClusterListName,
+        const ClusterList &clustersToSave) const;
 
     /**
      *  @brief  Replace the current cluster list with a pre-saved list; use this new list as a permanent replacement

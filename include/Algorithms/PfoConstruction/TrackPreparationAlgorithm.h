@@ -56,9 +56,10 @@ private:
      */
     bool IsLowPt(const pandora::Track *const pTrack) const;
 
-    std::string             m_inputTrackListName;           ///< The name of the input track list to prepare
-    std::string             m_outputTrackListName;          ///< The name of the output track list, containing parent tracks of charged pfos
+    pandora::StringVector   m_candidateListNames;           ///< The list of track list names to use
+    std::string             m_mergedCandidateListName;      ///< The name under which to save the full, merged, list of candidate tracks
     pandora::StringVector   m_associationAlgorithms;        ///< The ordered list of track-cluster associations algorithm to run
+    std::string             m_finalPfoListName;             ///< The name of the output track list, containing parent tracks of charged pfos
 
     float                   m_lowPtEnergy;                  ///< Low pt track energy threshold
     float                   m_lowPtTrackStartDeltaZ;        ///< Low pt max z separation between interaction point and track start

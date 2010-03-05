@@ -12,25 +12,34 @@ using namespace pandora;
 
 StatusCode TrackPreparationAlgorithm::Run()
 {
-    // Revert current track list back to a named-list, typically the full input list
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentTrackList(*this, m_inputTrackListName));
+    // Create candidate track list, containing all tracks that could be associated to clusters and so used in final pfo creation
+    TrackList candidateTrackList;
 
-    const TrackList *pInputTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pInputTrackList));
+    for (StringVector::const_iterator iter = m_candidateListNames.begin(), iterEnd = m_candidateListNames.end(); iter != iterEnd; ++iter)
+    {
+        const TrackList *pTrackList = NULL;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetTrackList(*this, *iter, pTrackList));
+        candidateTrackList.insert(pTrackList->begin(), pTrackList->end());
+    }
 
-    // Run track-cluster association daughter algorithms
-    for (StringVector::const_iterator iter = m_associationAlgorithms.begin(), iterEnd = m_associationAlgorithms.end(); iter != iterEnd; ++iter)
+    // Set this list of candidate pfo tracks to be the current track list for a number of track-cluster association algorithms
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveAllTrackClusterAssociations(*this));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, candidateTrackList,
+        m_mergedCandidateListName));
+
+    for (StringVector::const_iterator iter = m_associationAlgorithms.begin(), iterEnd = m_associationAlgorithms.end();
+        iter != iterEnd; ++iter)
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, *iter));
     }
 
-    // Filter input track list to identify parent tracks of charged pfos
-    TrackList pfoTrackList;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreatePfoTrackList(*pInputTrackList, pfoTrackList));
+    // Filter the candidate track list to identify the parent tracks of charged pfos
+    TrackList finalPfoTrackList;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreatePfoTrackList(candidateTrackList, finalPfoTrackList));
 
     // Save the filtered list and set it to be the current list for next algorithms
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, pfoTrackList,
-        m_outputTrackListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, finalPfoTrackList,
+        m_finalPfoListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -120,13 +129,19 @@ bool TrackPreparationAlgorithm::IsLowPt(const Track *const pTrack) const
 
 StatusCode TrackPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_inputTrackListName = "input";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "InputTrackListName", m_inputTrackListName));
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "CandidateListNames", m_candidateListNames));
 
-    m_outputTrackListName = "pfoCreation";
+    if (m_candidateListNames.empty())
+        m_candidateListNames.push_back("input");
+
+    m_mergedCandidateListName = "pfoCandidates";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "OutputTrackListName", m_outputTrackListName));
+        "MergedCandidateListName", m_mergedCandidateListName));
+
+    m_finalPfoListName = "pfoCreation";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "FinalPfoListName", m_finalPfoListName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "trackClusterAssociationAlgorithms",
         m_associationAlgorithms));

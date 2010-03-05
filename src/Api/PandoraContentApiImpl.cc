@@ -427,10 +427,23 @@ StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, co
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetCurrentListName(currentClusterListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveClusters(&algorithm, newClusterListName, currentClusterListName, clustersToSave));
 
-    const ClusterList *pNewClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetList(newClusterListName, pNewClusterList));
-
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName,
+    const std::string &newClusterListName) const
+{
+    return m_pPandora->m_pClusterManager->SaveClusters(&algorithm, newClusterListName, oldClusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName,
+    const std::string &newClusterListName, const ClusterList &clustersToSave) const
+{
+    return m_pPandora->m_pClusterManager->SaveClusters(&algorithm, newClusterListName, oldClusterListName, clustersToSave);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -553,7 +566,8 @@ StatusCode PandoraContentApiImpl::PrepareClustersForDeletion(const ClusterList &
         const CaloHitList &isolatedCaloHitList((*iter)->GetIsolatedCaloHitList());
         caloHitList.insert(isolatedCaloHitList.begin(), isolatedCaloHitList.end());
 
-        trackList.insert((*iter)->GetAssociatedTrackList().begin(), (*iter)->GetAssociatedTrackList().end());
+        const TrackList &associatedTrackList((*iter)->GetAssociatedTrackList());
+        trackList.insert(associatedTrackList.begin(), associatedTrackList.end());
     }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitList, true));

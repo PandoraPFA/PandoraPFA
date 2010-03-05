@@ -131,21 +131,11 @@ StatusCode PfoCreationAlgorithm::PopulateTrackBasedPfo(Track *const pTrack, PfoP
 
 StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
 {
-    // Create a list containing both input and photon clusters
-    const ClusterList *pInputClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList));
-
-    ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
-
-    if (m_shouldUsePhotonClusters)
-    {
-        const ClusterList *pPhotonClusterList = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_photonClusterListName, pPhotonClusterList));
-        combinedClusterList.insert(pPhotonClusterList->begin(), pPhotonClusterList->end());
-    }
+    const ClusterList *pClusterList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     // Examine clusters with no associated tracks to form neutral pfos
-    for (ClusterList::const_iterator iter = combinedClusterList.begin(), iterEnd = combinedClusterList.end(); iter != iterEnd; ++iter)
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
 
@@ -155,9 +145,8 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         if (pCluster->GetNCaloHits() < m_minHitsInCluster)
             continue;
 
-        // TODO use BestEnergyEstimate, if energy corrections are made
         const bool isPhoton(pCluster->IsPhotonFast());
-        float clusterEnergy(isPhoton ? pCluster->GetElectromagneticEnergy() : pCluster->GetBestEnergyEstimate());
+        float clusterEnergy(pCluster->GetBestEnergyEstimate());
 
         // Veto non-photon clusters below hadronic energy threshold and those occupying a single layer
         if (!isPhoton)
@@ -194,16 +183,6 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
 
 StatusCode PfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_shouldUsePhotonClusters = true;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShouldUsePhotonClusters", m_shouldUsePhotonClusters));
-
-    if (m_shouldUsePhotonClusters)
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
-            "PhotonClusterListName", m_photonClusterListName));
-    }
-
     m_minClusterHadronicEnergy = 0.25f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterHadronicEnergy", m_minClusterHadronicEnergy));

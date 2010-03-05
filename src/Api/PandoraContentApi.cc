@@ -249,7 +249,6 @@ StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &a
     return algorithm.GetPandoraContentApiImpl()->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete, enlargeListName, deleteListName);
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApi::AddTrackClusterAssociation(const pandora::Algorithm &algorithm, pandora::Track *const pTrack,
@@ -282,7 +281,7 @@ StatusCode PandoraContentApi::RemoveAllTrackClusterAssociations(const pandora::A
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string newClusterListName)
+StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName)
 {
     return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName);
 }
@@ -293,6 +292,22 @@ StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorith
     const pandora::ClusterList &clustersToSave)
 {
     return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, newClusterListName, clustersToSave);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string &oldClusterListName,
+    const std::string &newClusterListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, oldClusterListName, newClusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::SaveClusterList(const pandora::Algorithm &algorithm, const std::string &oldClusterListName,
+    const std::string &newClusterListName, const pandora::ClusterList &clustersToSave)
+{
+    return algorithm.GetPandoraContentApiImpl()->SaveClusterList(algorithm, oldClusterListName, newClusterListName, clustersToSave);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

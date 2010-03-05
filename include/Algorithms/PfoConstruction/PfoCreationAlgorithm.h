@@ -60,9 +60,6 @@ private:
      */
     StatusCode CreateNeutralPfos() const;
 
-    bool            m_shouldUsePhotonClusters;              ///< Whether to create neutral pfos from clusters tagged as photons
-    std::string     m_photonClusterListName;                ///< The name of the photon cluster list to use
-
     float           m_minClusterHadronicEnergy;             ///< Min hadronic energy for neutral (non-photon) clusters to be added to pfos
     unsigned int    m_minHitsInCluster;                     ///< Min number of calo hits for neutral cluster to be added to pfos
 };
