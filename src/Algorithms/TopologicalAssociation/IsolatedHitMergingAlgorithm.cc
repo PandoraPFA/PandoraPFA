@@ -47,6 +47,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         if (pClusterToDelete->GetNCaloHits() > m_minHitsInCluster)
             continue;
 
+        // TODO should these hits be flagged as isolated?
         CaloHitList caloHitList;
         pClusterToDelete->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
 
@@ -57,16 +58,18 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         // Redistribute hits that used to be in cluster I amongst other clusters
         for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; ++hitIter)
         {
-            // TODO should these hits be flagged as isolated?
             CaloHit *pCaloHit = *hitIter;
 
-            Cluster *pBestHostCluster = NULL;
+            Cluster *pBestHostCluster(NULL);
             float minDistance(m_maxRecombinationDistance);
 
             // Find the most appropriate cluster for this newly-available hit
             for (ClusterList::const_iterator iterJ = combinedClusterList.begin(), iterJEnd = combinedClusterList.end(); iterJ != iterJEnd; ++iterJ)
             {
                 Cluster *pNewHostCluster = *iterJ;
+
+                if (pNewHostCluster->GetNCaloHits() <= m_minHitsInCluster)
+                    continue;
 
                 const float distance(this->GetDistanceToHit(pNewHostCluster, pCaloHit));
 
@@ -98,7 +101,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             if (!pCaloHit->IsIsolated() || !CaloHitHelper::IsCaloHitAvailable(pCaloHit))
                 continue;
 
-            Cluster *pBestHostCluster = NULL;
+            Cluster *pBestHostCluster(NULL);
             float minDistance(m_maxRecombinationDistance);
 
             // Find most appropriate cluster for this isolated hit

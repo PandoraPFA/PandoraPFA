@@ -20,6 +20,8 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_nPossibleMipHits(0),
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
+    m_isolatedElectromagneticEnergy(0),
+    m_isolatedHadronicEnergy(0),
     m_isPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
@@ -39,6 +41,8 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     m_nPossibleMipHits(0),
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
+    m_isolatedElectromagneticEnergy(0),
+    m_isolatedHadronicEnergy(0),
     m_isPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
@@ -60,6 +64,8 @@ Cluster::Cluster(Track *pTrack) :
     m_nPossibleMipHits(0),
     m_electromagneticEnergy(0),
     m_hadronicEnergy(0),
+    m_isolatedElectromagneticEnergy(0),
+    m_isolatedHadronicEnergy(0),
     m_isPhoton(false),
     m_isMipTrack(true),
     m_isFitUpToDate(false)
@@ -168,8 +174,13 @@ StatusCode Cluster::AddIsolatedCaloHit(CaloHit *const pCaloHit)
     if (!m_isolatedCaloHitList.insert(pCaloHit).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
-    m_electromagneticEnergy += pCaloHit->GetElectromagneticEnergy();
-    m_hadronicEnergy += pCaloHit->GetHadronicEnergy();
+    const float electromagneticEnergy(pCaloHit->GetElectromagneticEnergy());
+    const float hadronicEnergy(pCaloHit->GetHadronicEnergy());
+
+    m_electromagneticEnergy += electromagneticEnergy;
+    m_hadronicEnergy += hadronicEnergy;
+    m_isolatedElectromagneticEnergy += electromagneticEnergy;
+    m_isolatedHadronicEnergy += hadronicEnergy;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -184,8 +195,14 @@ StatusCode Cluster::RemoveIsolatedCaloHit(CaloHit *const pCaloHit)
         return STATUS_CODE_NOT_FOUND;
 
     m_isolatedCaloHitList.erase(iter);
-    m_electromagneticEnergy -= pCaloHit->GetElectromagneticEnergy();
-    m_hadronicEnergy -= pCaloHit->GetHadronicEnergy();
+
+    const float electromagneticEnergy(pCaloHit->GetElectromagneticEnergy());
+    const float hadronicEnergy(pCaloHit->GetHadronicEnergy());
+
+    m_electromagneticEnergy -= electromagneticEnergy;
+    m_hadronicEnergy -= hadronicEnergy;
+    m_isolatedElectromagneticEnergy -= electromagneticEnergy;
+    m_isolatedHadronicEnergy -= hadronicEnergy;
 
     return STATUS_CODE_SUCCESS;
 }

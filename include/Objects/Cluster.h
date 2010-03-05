@@ -88,18 +88,32 @@ public:
     float GetMipFraction() const;
 
     /**
-     *  @brief  Get the sum of electromagnetic energy measures of constituent calo hits, units GeV
+     *  @brief  Get the sum of electromagnetic energy measures of all constituent calo hits, units GeV
      * 
      *  @return The electromagnetic energy measure
      */
     float GetElectromagneticEnergy() const;
 
     /**
-     *  @brief  Get the sum of hadronic energy measures of constituent calo hits, units GeV
+     *  @brief  Get the sum of hadronic energy measures of all constituent calo hits, units GeV
      * 
      *  @return The hadronic energy measure
      */
     float GetHadronicEnergy() const;
+
+    /**
+     *  @brief  Get the sum of electromagnetic energy measures of isolated constituent calo hits, units GeV
+     * 
+     *  @return The electromagnetic energy measure
+     */
+    float GetIsolatedElectromagneticEnergy() const;
+
+    /**
+     *  @brief  Get the sum of hadronic energy measures of isolated constituent calo hits, units GeV
+     * 
+     *  @return The hadronic energy measure
+     */
+    float GetIsolatedHadronicEnergy() const;
 
     /**
      *  @brief  Whether the cluster has been flagged as a photon
@@ -365,39 +379,42 @@ private:
     typedef std::map<PseudoLayer, float> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
     typedef ClusterHelper::ClusterFitResult ClusterFitResult;   ///< The cluster fit result typedef
 
-    OrderedCaloHitList      m_orderedCaloHitList;       ///< The ordered calo hit list
+    OrderedCaloHitList      m_orderedCaloHitList;           ///< The ordered calo hit list
+    CaloHitList             m_isolatedCaloHitList;          ///< The list of isolated hits, which contribute only towards cluster energy
 
-    unsigned int            m_nCaloHits;                ///< The number of calo hits
-    unsigned int            m_nPossibleMipHits;         ///< The number of calo hits that have been flagged as possible mip hits
-    float                   m_electromagneticEnergy;    ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
-    float                   m_hadronicEnergy;           ///< The sum of hadronic energy measures of constituent calo hits, units GeV
-    bool                    m_isPhoton;                 ///< Whether the cluster has been flagged as a photon cluster
-    bool                    m_isMipTrack;               ///< Whether the cluster has been flagged as a section of mip track
-    const Track            *m_pTrackSeed;               ///< Address of the track with which the cluster is seeded
+    unsigned int            m_nCaloHits;                    ///< The number of calo hits
+    unsigned int            m_nPossibleMipHits;             ///< The number of calo hits that have been flagged as possible mip hits
 
-    ValueByPseudoLayerMap   m_sumXByPseudoLayer;        ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
-    ValueByPseudoLayerMap   m_sumYByPseudoLayer;        ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
-    ValueByPseudoLayerMap   m_sumZByPseudoLayer;        ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
+    float                   m_electromagneticEnergy;        ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
+    float                   m_hadronicEnergy;               ///< The sum of hadronic energy measures of constituent calo hits, units GeV
+    float                   m_isolatedElectromagneticEnergy;///< Sum of electromagnetic energy measures of isolated calo hits, units GeV
+    float                   m_isolatedHadronicEnergy;       ///< Sum of hadronic energy measures of isolated calo hits, units GeV
 
-    CartesianVector         m_initialDirection;         ///< The initial direction of the cluster
-    ClusterFitResult        m_currentFitResult;         ///< The current fit result, usually set by a clustering algorithm, as cluster grows
+    bool                    m_isPhoton;                     ///< Whether the cluster has been flagged as a photon cluster
+    bool                    m_isMipTrack;                   ///< Whether the cluster has been flagged as a section of mip track
+    const Track            *m_pTrackSeed;                   ///< Address of the track with which the cluster is seeded
 
-    ClusterFitResult        m_fitToAllHitsResult;       ///< The result of a linear fit to all calo hits in the cluster
-    bool                    m_isFitUpToDate;            ///< Whether the fit to all calo hits is up to date
+    ValueByPseudoLayerMap   m_sumXByPseudoLayer;            ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap   m_sumYByPseudoLayer;            ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap   m_sumZByPseudoLayer;            ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
 
-    InputPseudoLayer        m_innerPseudoLayer;         ///< The innermost pseudo layer in the cluster
-    InputPseudoLayer        m_outerPseudoLayer;         ///< The outermost pseudo layer in the cluster
+    CartesianVector         m_initialDirection;             ///< The initial direction of the cluster
+    ClusterFitResult        m_currentFitResult;             ///< The current fit result, usually set by clustering algorithm, as cluster grows
 
-    InputFloat              m_bestEnergyEstimate;       ///< The best estimate of the cluster energy, units GeV
+    ClusterFitResult        m_fitToAllHitsResult;           ///< The result of a linear fit to all calo hits in the cluster
+    bool                    m_isFitUpToDate;                ///< Whether the fit to all calo hits is up to date
 
-    InputBool               m_isPhotonFast;             ///< Whether the cluster is flagged as a photon by fast photon id function
-    InputPseudoLayer        m_showerStartLayer;         ///< The pseudo layer at which shower commences
-    InputFloat              m_showerProfileStart;       ///< The cluster shower profile start, units radiation lengths
-    InputFloat              m_showerProfileDiscrepancy; ///< The cluster shower profile discrepancy
+    InputPseudoLayer        m_innerPseudoLayer;             ///< The innermost pseudo layer in the cluster
+    InputPseudoLayer        m_outerPseudoLayer;             ///< The outermost pseudo layer in the cluster
 
-    CaloHitList             m_isolatedCaloHitList;      ///< The list of isolated hits, which contribute only towards cluster energy
+    InputFloat              m_bestEnergyEstimate;           ///< The best estimate of the cluster energy, units GeV
 
-    TrackList               m_associatedTrackList;      ///< The list of tracks associated with the cluster
+    InputBool               m_isPhotonFast;                 ///< Whether the cluster is flagged as a photon by fast photon id function
+    InputPseudoLayer        m_showerStartLayer;             ///< The pseudo layer at which shower commences
+    InputFloat              m_showerProfileStart;           ///< The cluster shower profile start, units radiation lengths
+    InputFloat              m_showerProfileDiscrepancy;     ///< The cluster shower profile discrepancy
+
+    TrackList               m_associatedTrackList;          ///< The list of tracks associated with the cluster
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
@@ -488,6 +505,20 @@ inline float Cluster::GetElectromagneticEnergy() const
 inline float Cluster::GetHadronicEnergy() const
 {
     return m_hadronicEnergy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetIsolatedElectromagneticEnergy() const
+{
+    return m_isolatedElectromagneticEnergy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetIsolatedHadronicEnergy() const
+{
+    return m_isolatedHadronicEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

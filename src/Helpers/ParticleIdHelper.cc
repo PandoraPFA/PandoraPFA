@@ -18,7 +18,7 @@ namespace pandora
 StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy)
 {
     // 1. Construct cluster profile.
-    const float clusterEnergy(pCluster->GetElectromagneticEnergy());
+    const float clusterEnergy(pCluster->GetElectromagneticEnergy() - pCluster->GetIsolatedElectromagneticEnergy());
 
     if(clusterEnergy <= 0.f || (pCluster->GetNCaloHits() < 1))
         return STATUS_CODE_INVALID_PARAMETER;
@@ -188,7 +188,7 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
         return false;
 
     // Cut on cluster mip fraction
-    const float totalElectromagneticEnergy(pCluster->GetElectromagneticEnergy());
+    const float totalElectromagneticEnergy(pCluster->GetElectromagneticEnergy() - pCluster->GetIsolatedElectromagneticEnergy());
 
     float mipCut(m_photonIdMipCut_0);
 
