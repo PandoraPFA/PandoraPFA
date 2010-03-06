@@ -61,6 +61,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             CaloHit *pCaloHit = *hitIter;
 
             Cluster *pBestHostCluster(NULL);
+            PseudoLayer bestHostInnerLayer(0);
             float minDistance(m_maxRecombinationDistance);
 
             // Find the most appropriate cluster for this newly-available hit
@@ -73,10 +74,11 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
                 const float distance(this->GetDistanceToHit(pNewHostCluster, pCaloHit));
 
-                if (distance < minDistance)
+                if ((distance < minDistance) || ((distance == minDistance) && (pNewHostCluster->GetInnerPseudoLayer() > bestHostInnerLayer)))
                 {
                     minDistance = distance;
                     pBestHostCluster = pNewHostCluster;
+                    bestHostInnerLayer = pNewHostCluster->GetInnerPseudoLayer();
                 }
             }
 
@@ -102,6 +104,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
                 continue;
 
             Cluster *pBestHostCluster(NULL);
+            PseudoLayer bestHostInnerLayer(0);
             float minDistance(m_maxRecombinationDistance);
 
             // Find most appropriate cluster for this isolated hit
@@ -111,10 +114,11 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
                 const float distance(this->GetDistanceToHit(pCluster, pCaloHit));
 
-                if (distance < minDistance)
+                if ((distance < minDistance) || ((distance == minDistance) && (pCluster->GetInnerPseudoLayer() > bestHostInnerLayer)))
                 {
                     minDistance = distance;
                     pBestHostCluster = pCluster;
+                    bestHostInnerLayer = pCluster->GetInnerPseudoLayer();
                 }
             }
 

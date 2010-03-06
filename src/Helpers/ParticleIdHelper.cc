@@ -221,7 +221,7 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
 
     if (clusterFitResult.IsFitSuccessful())
     {
-        dCosR = innerLayerCentroid.GetUnitVector().GetDotProduct(clusterFitResult.GetDirection());
+        dCosR = clusterFitResult.GetRadialDirectionCosine();
         clusterRms = clusterFitResult.GetRms();
     }
 
