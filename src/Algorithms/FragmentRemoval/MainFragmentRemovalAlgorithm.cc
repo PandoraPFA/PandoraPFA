@@ -171,6 +171,7 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
 bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector,
     float &globalDeltaChi2) const
 {
+    bool passesPreselection(false);
     float totalTrackEnergy(0.f), totalClusterEnergy(0.f);
     const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
 
@@ -189,7 +190,7 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
         const float newChi2(newChi * newChi);
 
         if ((newChi2 < m_maxChi2) || (newChi2 < oldChi2))
-            return true;
+            passesPreselection = true;
 
         totalTrackEnergy += clusterContact.GetParentTrackEnergy();
         totalClusterEnergy += clusterContact.GetParentClusterEnergy();
@@ -205,9 +206,9 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
     globalDeltaChi2 = oldChi2Total - newChi2Total;
 
     if ((newChi2Total < m_maxGlobalChi2) || (newChi2Total < oldChi2Total))
-        return true;
+        passesPreselection = true;
 
-    return false;
+    return passesPreselection;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
