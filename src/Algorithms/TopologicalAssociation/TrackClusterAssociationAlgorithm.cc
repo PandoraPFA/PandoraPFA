@@ -32,9 +32,9 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
     {
         Track *pTrack = *trackIter;
 
-        // TODO decide whether to use only tracks that are flagged as reaching ECal
-        //    if (!pTrack->ReachesECal())
-        //        continue;
+        // Use only tracks that can be used to form a pfo
+        if (!pTrack->CanFormPfo())
+            continue;
 
         if (!pTrack->GetDaughterTrackList().empty())
             continue;

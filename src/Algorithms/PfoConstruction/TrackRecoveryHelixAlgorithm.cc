@@ -39,9 +39,8 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
     {
         Track *pTrack = *iterT;
 
-        // Use only unassociated tracks that are flagged as reaching ECal
-        // TODO decide whether to use only tracks that are flagged as reaching ECal
-        if (pTrack->HasAssociatedCluster())// || !pTrack->ReachesECal())
+        // Use only unassociated tracks that can be used to form a pfo
+        if (pTrack->HasAssociatedCluster() || !pTrack->CanFormPfo())
             continue;
 
         if (!pTrack->GetDaughterTrackList().empty())

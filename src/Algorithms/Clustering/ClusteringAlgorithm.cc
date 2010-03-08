@@ -61,6 +61,10 @@ StatusCode ClusteringAlgorithm::Run()
 
 StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVector) const
 {
+    // m_clusterSeedStrategy:   0, no track seeding;
+    //                          1, non-radial barrel tracks; 2, non-radial barrel and endcap tracks;
+    //                          3, all tracks; 4, all tracks that can be used to form a pfo;
+
     if (0 == m_clusterSeedStrategy)
         return STATUS_CODE_SUCCESS;
 
@@ -70,7 +74,7 @@ StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVec
     for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
         Track *pTrack = *iter;
-        bool useTrack = (3 == m_clusterSeedStrategy);
+        bool useTrack = ((3 == m_clusterSeedStrategy) || ((4 == m_clusterSeedStrategy) && pTrack->CanFormPfo()));
 
         if (!useTrack)
         {
@@ -585,7 +589,7 @@ StatusCode ClusteringAlgorithm::RemoveEmptyClusters(ClusterVector &clusterVector
 StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Track seeding parameters
-    m_clusterSeedStrategy = 3;
+    m_clusterSeedStrategy = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterSeedStrategy", m_clusterSeedStrategy));
 

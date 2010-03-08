@@ -27,6 +27,8 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_trackStateAtEnd(trackParameters.m_trackStateAtEnd.Get()),
     m_trackStateAtECal(trackParameters.m_trackStateAtECal.Get()),
     m_reachesECal(trackParameters.m_reachesECal.Get()),
+    m_canFormPfo(trackParameters.m_canFormPfo.Get()),
+    m_canFormClusterlessPfo(trackParameters.m_canFormClusterlessPfo.Get()),
     m_pAssociatedCluster(NULL),
     m_pMCParticle(NULL),
     m_pParentAddress(trackParameters.m_pParentAddress.Get())

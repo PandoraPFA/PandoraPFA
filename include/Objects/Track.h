@@ -107,6 +107,20 @@ public:
     bool ReachesECal() const;
 
     /**
+     *  @brief  Whether track should form a pfo, if it has an associated cluster
+     * 
+     *  @return boolean
+     */
+    bool CanFormPfo() const;
+
+    /**
+     *  @brief  Whether track should form a pfo, even if it has no associated cluster
+     * 
+     *  @return boolean
+     */
+    bool CanFormClusterlessPfo() const;
+
+    /**
      *  @brief  Get the list of calorimeter track state projections
      * 
      *  @return address of the list of calorimeter track state projections
@@ -238,6 +252,9 @@ private:
     const TrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
 
     const bool              m_reachesECal;              ///< Whether the track reaches the ecal
+    const bool              m_canFormPfo;               ///< Whether track should form a pfo, if it has an associated cluster
+    const bool              m_canFormClusterlessPfo;    ///< Whether track should form a pfo, even if it has no associated cluster
+
     TrackStateList          m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
 
     const Helix             *m_pHelixFitAtECal;         ///< Helix fit to the ecal track state
@@ -356,6 +373,20 @@ inline const TrackState &Track::GetTrackStateAtECal() const
 inline bool Track::ReachesECal() const
 {
     return m_reachesECal;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::CanFormPfo() const
+{
+    return m_canFormPfo;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::CanFormClusterlessPfo() const
+{
+    return m_canFormClusterlessPfo;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

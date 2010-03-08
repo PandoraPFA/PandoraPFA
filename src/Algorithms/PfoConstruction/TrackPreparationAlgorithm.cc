@@ -63,14 +63,14 @@ StatusCode TrackPreparationAlgorithm::CreatePfoTrackList(const TrackList &inputT
             if (siblingTracks.end() != siblingTracks.find(pTrack))
                 continue;
 
-            if (this->HasAssociatedClusters(pTrack))
+            if ((pTrack->CanFormPfo() && this->HasAssociatedClusters(pTrack)) || (pTrack->CanFormClusterlessPfo()))
             {
                 pfoTrackList.insert(pTrack);
                 siblingTracks.insert(pTrack);
             }
         }
         // Single parent track as pfo target
-        else if (this->HasAssociatedClusters(pTrack) || this->IsLowPt(pTrack))
+        else if ((pTrack->CanFormPfo() && this->HasAssociatedClusters(pTrack)) || (pTrack->CanFormClusterlessPfo()))
         {
             pfoTrackList.insert(pTrack);
         }
@@ -112,21 +112,6 @@ bool TrackPreparationAlgorithm::HasAssociatedClusters(const Track *const pTrack,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool TrackPreparationAlgorithm::IsLowPt(const Track *const pTrack) const
-{
-    if (!pTrack->GetParentTrackList().empty() || !pTrack->GetSiblingTrackList().empty())
-        return false;
-
-    static const float mainTrackerZExtent(GeometryHelper::GetInstance()->GetMainTrackerZExtent());
-
-    const float zEnd(std::fabs(pTrack->GetTrackStateAtEnd().GetPosition().GetZ()));
-    const float zStart(std::fabs(pTrack->GetTrackStateAtStart().GetPosition().GetZ()));
-
-    return ((zStart < m_lowPtTrackStartDeltaZ) && ((mainTrackerZExtent - zEnd) < m_lowPtTrackEndDeltaZ) && (pTrack->GetEnergyAtDca() < m_lowPtEnergy));
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode TrackPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
@@ -145,18 +130,6 @@ StatusCode TrackPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithmList(*this, xmlHandle, "trackClusterAssociationAlgorithms",
         m_associationAlgorithms));
-
-    m_lowPtEnergy = 1.5f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LowPtEnergy", m_lowPtEnergy));
-
-    m_lowPtTrackStartDeltaZ = 100.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LowPtTrackStartDeltaZ", m_lowPtTrackStartDeltaZ));
-
-    m_lowPtTrackEndDeltaZ = 100.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LowPtTrackEndDeltaZ", m_lowPtTrackEndDeltaZ));
 
     return STATUS_CODE_SUCCESS;
 }

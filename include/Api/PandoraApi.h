@@ -82,7 +82,9 @@ public:
         pandora::InputTrackState        m_trackStateAtStart;        ///< Track state at the start of the track, units mm and GeV
         pandora::InputTrackState        m_trackStateAtEnd;          ///< Track state at the end of the track, units mm and GeV
         pandora::InputTrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal, units mm and GeV
-        pandora::InputBool              m_reachesECal;              ///< Whether the track has reaches the ecal
+        pandora::InputBool              m_reachesECal;              ///< Whether the track reaches the ecal
+        pandora::InputBool              m_canFormPfo;               ///< Whether track should form a pfo, if it has an associated cluster
+        pandora::InputBool              m_canFormClusterlessPfo;    ///< Whether track should form a pfo, even if it has no associated cluster
         pandora::InputTrackStateList    m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
         pandora::InputAddress           m_pParentAddress;           ///< Address of the parent track in the user framework
     };
