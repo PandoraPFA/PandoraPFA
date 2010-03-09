@@ -26,9 +26,9 @@ StatusCode PerfectClusteringAlgorithm::Run()
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
-    // match calohitvectors to their MCParticles
-    std::map< const MCParticle*, CaloHitVector* > hitsPerMcParticle;
-    std::map< const MCParticle*, CaloHitVector* >::iterator itHitsPerMcParticle;
+    // match calohitlists to their MCParticles
+    std::map< const MCParticle*, CaloHitList* > hitsPerMcParticle;
+    std::map< const MCParticle*, CaloHitList* >::iterator itHitsPerMcParticle;
 
     int selected = 0, notSelected = 0;
 
@@ -44,7 +44,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
         CaloHitList::iterator itCaloHit    = itLyr->second->begin();
         CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
 
-        CaloHitVector* currentHits = NULL;
+        CaloHitList* currentHits = NULL;
         for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
         {
             CaloHit* pCaloHit = (*itCaloHit);
@@ -78,20 +78,20 @@ StatusCode PerfectClusteringAlgorithm::Run()
             }
 
 
-            // add hit to calohitvector
+            // add hit to calohitlist
             itHitsPerMcParticle = hitsPerMcParticle.find( mc );
             if( itHitsPerMcParticle == hitsPerMcParticle.end() )
             {
-                // if there is no calohitvector for the MCParticle yet, create one
-                currentHits = new CaloHitVector();
+                // if there is no calohitlist for the MCParticle yet, create one
+                currentHits = new CaloHitList();
                 hitsPerMcParticle.insert( std::make_pair( mc, currentHits ) );
             }
             else
             {
-                currentHits = itHitsPerMcParticle->second; // take the calohitvector corresponding to the MCParticle
+                currentHits = itHitsPerMcParticle->second; // take the calohitlist corresponding to the MCParticle
             }
 
-            currentHits->push_back( pCaloHit ); // add the calohit
+            currentHits->insert( pCaloHit ); // add the calohit
         }
     }
 
@@ -106,16 +106,16 @@ StatusCode PerfectClusteringAlgorithm::Run()
     ClusterList clusterList;
     pandora::Cluster *pCluster;
 
-    for( std::map< const MCParticle*, CaloHitVector* >::const_iterator itCHList = hitsPerMcParticle.begin(), itCHListEnd = hitsPerMcParticle.end(); 
+    for( std::map< const MCParticle*, CaloHitList* >::const_iterator itCHList = hitsPerMcParticle.begin(), itCHListEnd = hitsPerMcParticle.end(); 
          itCHList != itCHListEnd; ++itCHList )
     {
         const MCParticle* mc = itCHList->first;
 
         if( itCHList->first == NULL ) continue; // hits without MCParticle are not clustered
-        CaloHitVector* pCaloHitVector = itCHList->second;
-        if( !pCaloHitVector->empty() )
+        CaloHitList* pCaloHitList = itCHList->second;
+        if( !pCaloHitList->empty() )
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitVector, pCluster ));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitList, pCluster ));
             if( mc->GetParticleId() == 22 ) // set photon flag for photon clusters
                 pCluster->SetIsPhotonFlag(true);
         
@@ -123,8 +123,8 @@ StatusCode PerfectClusteringAlgorithm::Run()
                 return STATUS_CODE_FAILURE;
         }
 
-        // delete the created CaloHitVectors
-        delete pCaloHitVector;
+        // delete the created CaloHitLists
+        delete pCaloHitList;
     }
 
     if( !m_clusterListName.empty() && !clusterList.empty())

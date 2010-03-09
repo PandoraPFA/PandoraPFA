@@ -400,8 +400,6 @@ public:
 				   pandora::CartesianVector& transverseUnitVectorU, 
 				   pandora::CartesianVector& transverseUnitVectorV );
 
-    pandora::CaloHitVector* MakeCaloHitVectorFromOrderedCaloHitList( const pandora::OrderedCaloHitList& pOrderedCaloHitList );
-
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 

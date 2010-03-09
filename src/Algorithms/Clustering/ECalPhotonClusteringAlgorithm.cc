@@ -477,11 +477,12 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
             std::cout << "Use original cluster " << std::endl;
 
         // we don't need the photon candidate any more
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster));
 
         // re-create the cluster which get's all the hits from the original cluster
-        CaloHitVector* pCaloHitVector = MakeCaloHitVectorFromOrderedCaloHitList( pOriginalOrderedCaloHitList );
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitVector, pPhotonCandidateCluster ));
+        CaloHitList caloHitList;
+        pOriginalOrderedCaloHitList.GetCaloHitList( caloHitList );
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &caloHitList, pPhotonCandidateCluster ));
     }
 
 
@@ -1044,12 +1045,12 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
             // for the peak we actually want make a protocluster
             if(npeaks==peakForProtoCluster+1){
 
-                CaloHitVector* pCaloHitVector = new CaloHitVector();
+                CaloHitList* pCaloHitList = new CaloHitList();
 
                 for(unsigned int i=0;i<=maxLayers+extraLayers;i++){
                     for(unsigned int ihit = 0; ihit<longitudinalProfile[i].size();ihit++){
                         CaloHit* caloHit = longitudinalProfile[i][ihit];
-                        pCaloHitVector->push_back( caloHit );
+                        pCaloHitList->insert( caloHit );
                     }
                 }
 
@@ -1057,7 +1058,7 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
                 if (m_producePrintoutStatements > 0)
                     std::cout << "create new cluster " << std::endl;
 
-                PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitVector, newCluster ));
+                PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitList, newCluster ));
 
             }
         }
@@ -1336,21 +1337,4 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
 }
 
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CaloHitVector* ECalPhotonClusteringAlgorithm::MakeCaloHitVectorFromOrderedCaloHitList( const OrderedCaloHitList& pOrderedCaloHitList )
-{
-    CaloHitVector* pCaloHitVector = new CaloHitVector;
-    for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); 
-         itLyr != itLyrEnd; ++itLyr )
-    {
-        CaloHitList::iterator itCaloHit    = itLyr->second->begin();
-        CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
-        
-        pCaloHitVector->insert( pCaloHitVector->begin(), itCaloHit, itCaloHitEnd );
-    }
-
-    return pCaloHitVector;
-}
 

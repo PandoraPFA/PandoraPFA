@@ -1,7 +1,7 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/Cheating/EnergyMonitoringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/Monitoring/EnergyMonitoringAlgorithm.h
  * 
- *  @brief  Header file for the cheating clustering algorithm class.
+ *  @brief  Header file for the energy monitoring algorithm
  * 
  *  $Log: $
  */
