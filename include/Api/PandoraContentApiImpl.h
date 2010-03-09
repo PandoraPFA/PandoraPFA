@@ -396,6 +396,13 @@ public:
      */
     StatusCode SaveTrackListAndReplaceCurrent(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const;
 
+    /**
+     *  @brief  Get the list of mc pfo targets
+     *
+     *  @param  mcParticleList to receive the mc particle list
+     */
+    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
+
 private:
     /**
      *  @brief  Constructor

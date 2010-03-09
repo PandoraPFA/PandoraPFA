@@ -510,6 +510,14 @@ public:
      */
     static StatusCode SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
         const std::string &newListName);
+
+    /**
+     *  @brief  Get the list of mc pfo targets
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  mcParticleList to receive the mc particle list
+     */
+    static StatusCode GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList);
 };
 
 #endif // #ifndef PANDORA_CONTENT_API_H

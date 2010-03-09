@@ -138,9 +138,23 @@ private:
     StatusCode CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTargetMap, const UidRelationMap &uidRelationMap) const;
 
     /**
+     *  @brief  Get the list of mc pfo targets
+     *
+     *  @param  mcParticleList to receive the mc particle list
+     */
+    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
+
+    /**
      *  @brief  Delete non pfo targets
      */
     StatusCode DeleteNonPfoTargets();
+
+    /**
+     *  @brief  Remove all parent/daughter particle links from a mc particle and from its (previously) linked particles
+     * 
+     *  @param  pMCParticle address of the mc particle
+     */
+    StatusCode RemoveMCParticleRelationships(MCParticle *const pMCParticle);
 
     /**
      *  @brief  Reset the mc manager
@@ -151,8 +165,9 @@ private:
     UidRelationMap          m_caloHitToMCParticleMap;   ///< The calo hit to mc particle relation map
     UidRelationMap          m_trackToMCParticleMap;     ///< The track to mc particle relation map
 
-    friend class PandoraApiImpl;
     friend class PandoraImpl;
+    friend class PandoraApiImpl;
+    friend class PandoraContentApiImpl;
 
     ADD_TEST_CLASS_FRIENDS;
 };

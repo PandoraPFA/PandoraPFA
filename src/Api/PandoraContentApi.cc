@@ -386,6 +386,13 @@ StatusCode PandoraContentApi::SaveTrackListAndReplaceCurrent(const pandora::Algo
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetMCParticleList(mcParticleList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHit>(const pandora::Algorithm &algorithm, pandora::CaloHit *pCaloHit);

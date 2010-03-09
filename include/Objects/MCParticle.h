@@ -130,21 +130,35 @@ private:
      * 
      *  @param  mcParticle the daughter particle
      */
-    StatusCode AddDaughter(MCParticle* mcParticle);
+    StatusCode AddDaughter(MCParticle *pMCParticle);
 
     /**
      *  @brief  Add parent particle
      * 
      *  @param  mcParticle the parent particle
      */
-    StatusCode AddParent(MCParticle *mcParticle);
+    StatusCode AddParent(MCParticle *pMCParticle);
+
+    /**
+     *  @brief  Remove daughter particle
+     * 
+     *  @param  mcParticle the daughter particle
+     */
+    StatusCode RemoveDaughter(MCParticle *pMCParticle);
+
+    /**
+     *  @brief  Remove parent particle
+     * 
+     *  @param  mcParticle the parent particle
+     */
+    StatusCode RemoveParent(MCParticle *pMCParticle);
 
     /**
      *  @brief  Set pfo target particle
      * 
      *  @param  mcParticle the pfo target particle
      */
-    StatusCode SetPfoTarget(MCParticle *mcParticle);
+    StatusCode SetPfoTarget(MCParticle *pMCParticle);
 
     /**
      *  @brief  Set pfo target for a mc tree
@@ -153,7 +167,7 @@ private:
      *  @param  onlyDaughters if "true" go through daughters only, if false
      *          go through parents as well
      */
-    StatusCode SetPfoTargetInTree(MCParticle* mcParticle, bool onlyDaughters = false);
+    StatusCode SetPfoTargetInTree(MCParticle *pMCParticle, bool onlyDaughters = false);
 
     Uid                 m_uid;              ///< Unique ID of the particle
 
@@ -204,7 +218,7 @@ inline bool MCParticle::IsPfoTargetSet() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode MCParticle::GetPfoTarget(MCParticle*& pMCParticle) const
+inline StatusCode MCParticle::GetPfoTarget(MCParticle *&pMCParticle) const
 {
     if (NULL == m_pPfoTarget)
         return STATUS_CODE_NOT_INITIALIZED;
@@ -223,9 +237,9 @@ inline Uid MCParticle::GetUid() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode MCParticle::AddDaughter(MCParticle* mcParticle)
+inline StatusCode MCParticle::AddDaughter(MCParticle *pMCParticle)
 {
-    if (!m_daughterList.insert(mcParticle).second)
+    if (!m_daughterList.insert(pMCParticle).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
@@ -233,9 +247,9 @@ inline StatusCode MCParticle::AddDaughter(MCParticle* mcParticle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode MCParticle::AddParent(MCParticle *mcParticle)
+inline StatusCode MCParticle::AddParent(MCParticle *pMCParticle)
 {
-    if (!m_parentList.insert(mcParticle).second)
+    if (!m_parentList.insert(pMCParticle).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
@@ -243,12 +257,40 @@ inline StatusCode MCParticle::AddParent(MCParticle *mcParticle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode MCParticle::SetPfoTarget(MCParticle *mcParticle)
+inline StatusCode MCParticle::RemoveDaughter(MCParticle *pMCParticle)
 {
-    if (NULL == mcParticle)
+    MCParticleList::iterator iter = m_daughterList.find(pMCParticle);
+
+    if (m_daughterList.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+    m_daughterList.erase(iter);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode MCParticle::RemoveParent(MCParticle *pMCParticle)
+{
+    MCParticleList::iterator iter = m_parentList.find(pMCParticle);
+
+    if (m_parentList.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+    m_parentList.erase(iter);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode MCParticle::SetPfoTarget(MCParticle *pMCParticle)
+{
+    if (NULL == pMCParticle)
         return STATUS_CODE_FAILURE;
 
-    m_pPfoTarget = mcParticle;
+    m_pPfoTarget = pMCParticle;
 
     return STATUS_CODE_SUCCESS;
 }

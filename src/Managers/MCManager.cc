@@ -175,13 +175,31 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode MCManager::GetMCParticleList(MCParticleList &mcParticleList) const
+{
+    if (m_uidToMCParticleMap.empty())
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    for(UidToMCParticleMap::const_iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
+    {
+        mcParticleList.insert(iter->second);
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode MCManager::DeleteNonPfoTargets()
 {
     for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(); iter != m_uidToMCParticleMap.end();)
     {
-        if (!iter->second->IsPfoTarget())
+        MCParticle *pMCParticle = iter->second;
+
+        if (!pMCParticle->IsPfoTarget())
         {
-            delete iter->second;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RemoveMCParticleRelationships(pMCParticle));
+            delete pMCParticle;
             m_uidToMCParticleMap.erase(iter++);
         }
         else
@@ -189,6 +207,28 @@ StatusCode MCManager::DeleteNonPfoTargets()
             ++iter;
         }
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode MCManager::RemoveMCParticleRelationships(MCParticle *const pMCParticle)
+{
+    MCParticleList &parentList(pMCParticle->m_parentList);
+    for (MCParticleList::const_iterator iter = parentList.begin(), iterEnd = parentList.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->RemoveDaughter(pMCParticle));
+    }
+
+    MCParticleList &daughterList(pMCParticle->m_daughterList);
+    for (MCParticleList::const_iterator iter = daughterList.begin(), iterEnd = daughterList.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->RemoveParent(pMCParticle));
+    }
+
+    parentList.clear();
+    daughterList.clear();
 
     return STATUS_CODE_SUCCESS;
 }

@@ -531,6 +531,13 @@ StatusCode PandoraContentApiImpl::SaveTrackListAndReplaceCurrent(const Algorithm
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::GetMCParticleList(MCParticleList &mcParticleList) const
+{
+    return m_pPandora->m_pMCManager->GetMCParticleList(mcParticleList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 PandoraContentApiImpl::PandoraContentApiImpl(Pandora *pPandora) :
     m_pPandora(pPandora)
 {
