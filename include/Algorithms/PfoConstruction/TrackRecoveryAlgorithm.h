@@ -29,9 +29,6 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    float           m_maxAbsoluteTrackD0;               ///< Max absolute track d0 value to allow association with a cluster
-    float           m_maxAbsoluteTrackZ0;               ///< Max absolute track z0 value to allow association with a cluster
-
     float           m_maxTrackZStart;                   ///< Max track start z coordinate for track without parent to be considered
     float           m_maxAbsoluteTrackClusterChi;       ///< Max absolute value of track-cluster consistency chi for non-leaving cluster
 

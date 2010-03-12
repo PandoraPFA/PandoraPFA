@@ -88,9 +88,6 @@ private:
      */
     StatusCode MakeTrackClusterAssociations(TrackAssociationInfoMap &trackAssociationInfoMap) const;
 
-    float           m_maxAbsoluteTrackD0;               ///< Max absolute track d0 value to allow association with a cluster
-    float           m_maxAbsoluteTrackZ0;               ///< Max absolute track z0 value to allow association with a cluster
-
     float           m_maxTrackClusterDeltaZ;            ///< Max z separation between track ecal projection and cluster to allow association
     float           m_maxAbsoluteTrackClusterChi;       ///< Max absolute track-cluster consistency chi value to allow association
     unsigned int    m_maxLayersCrossed;                 ///< Max number of layers crossed by track helix between ecal projection and cluster

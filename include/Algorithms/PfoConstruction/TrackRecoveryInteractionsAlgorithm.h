@@ -29,9 +29,6 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    float           m_maxAbsoluteTrackD0;               ///< Max absolute track d0 value to allow association with a cluster
-    float           m_maxAbsoluteTrackZ0;               ///< Max absolute track z0 value to allow association with a cluster
-
     float           m_maxTrackClusterDistance;          ///< Max distance between track and cluster to allow track-cluster association
 
     float           m_trackClusterDistanceCut;          ///< Must pass 1 / 3 cuts: max distance between track and cluster

@@ -46,9 +46,6 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
         if (!pTrack->GetDaughterTrackList().empty())
             continue;
 
-        if ((std::fabs(pTrack->GetD0()) > m_maxAbsoluteTrackD0) || (std::fabs(pTrack->GetZ0()) > m_maxAbsoluteTrackZ0))
-            continue;
-
         // Extract track information
         const Helix *const pHelix(pTrack->GetHelixFitAtECal());
         const float trackEnergy(pTrack->GetEnergyAtDca());
@@ -189,14 +186,6 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
 
 StatusCode TrackRecoveryHelixAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_maxAbsoluteTrackD0 = 50.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxAbsoluteTrackD0", m_maxAbsoluteTrackD0));
-
-    m_maxAbsoluteTrackZ0 = 50.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxAbsoluteTrackZ0", m_maxAbsoluteTrackZ0));
-
     m_maxTrackClusterDeltaZ = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackClusterDeltaZ", m_maxTrackClusterDeltaZ));

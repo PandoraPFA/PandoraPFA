@@ -30,15 +30,11 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
     {
         Track *pTrack = *iterT;
 
-        // Use only unassociated tracks that are flagged as reaching ECal
-        // TODO decide whether to use only tracks that are flagged as reaching ECal
-        if (pTrack->HasAssociatedCluster())// || !pTrack->ReachesECal())
+        // Use only unassociated tracks that can be used to form a pfo
+        if (pTrack->HasAssociatedCluster() || !pTrack->CanFormPfo())
             continue;
 
         if (!pTrack->GetDaughterTrackList().empty())
-            continue;
-
-        if ((std::fabs(pTrack->GetD0()) > m_maxAbsoluteTrackD0) || (std::fabs(pTrack->GetZ0()) > m_maxAbsoluteTrackZ0))
             continue;
 
         // Use only tracks that reach the ecal endcap, not barrel
@@ -49,11 +45,18 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
 
         // Extract information from the track
         const Helix *const pHelix(pTrack->GetHelixFitAtECal());
+        const float helixOmega(pHelix->GetOmega());
 
-        const float helixXCentre(pHelix->GetXCentre());
-        const float helixYCentre(pHelix->GetYCentre());
-        const float helixRadius(pHelix->GetRadius());
+        if (0.f == helixOmega)
+            continue;
+
+        const float helixRadius(1.f / helixOmega);
         const float helixTanLambda(pHelix->GetTanLambda());
+        const float helixPhi0(pHelix->GetPhi0());
+
+        static const float pi_2(0.5f * std::acos(-1));
+        const float helixXCentre(helixRadius * std::cos(helixPhi0 - pi_2));
+        const float helixYCentre(helixRadius * std::sin(helixPhi0 - pi_2));
 
         const float helixDCosZ(helixTanLambda / std::sqrt(1.f + helixTanLambda * helixTanLambda));
         const float trackEnergy(pTrack->GetEnergyAtDca());
@@ -220,14 +223,6 @@ float LoopingTrackAssociationAlgorithm::GetMeanDeltaR(Cluster *const pCluster, c
 
 StatusCode LoopingTrackAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_maxAbsoluteTrackD0 = 100.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxAbsoluteTrackD0", m_maxAbsoluteTrackD0));
-
-    m_maxAbsoluteTrackZ0 = 100.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxAbsoluteTrackZ0", m_maxAbsoluteTrackZ0));
-
     m_maxEndCapDeltaZ = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxEndCapDeltaZ", m_maxEndCapDeltaZ));

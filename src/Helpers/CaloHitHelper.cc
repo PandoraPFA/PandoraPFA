@@ -160,7 +160,7 @@ unsigned int CaloHitHelper::IsolationCountNearbyHits(const CaloHit *const pCaloH
         const CartesianVector positionDifference(positionVector - (*iter)->GetPositionVector());
         const CartesianVector crossProduct(positionVector.GetCrossProduct(positionDifference));
 
-        if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
+        if (positionDifference.GetMagnitude() > (10. * caloHitMaxSeparation))
             continue;
 
         if((crossProduct.GetMagnitude() / positionMagnitude) < isolationCutDistance)
