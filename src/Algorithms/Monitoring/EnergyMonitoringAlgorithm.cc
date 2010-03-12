@@ -1,7 +1,7 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/Cheating/EnergyMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Monitoring/EnergyMonitoringAlgorithm.cc
  * 
- *  @brief  Implementation of the cheating clustering algorithm class
+ *  @brief  Implementation of the energy monitoring algorithm class 
  * 
  *  $Log: $
  */

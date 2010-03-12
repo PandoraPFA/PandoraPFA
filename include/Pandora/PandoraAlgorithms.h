@@ -32,6 +32,7 @@
 
 #include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/EnergyMonitoringAlgorithm.h"
+#include "Algorithms/Monitoring/McParticlesMonitoringAlgorithm.h"
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
@@ -81,6 +82,7 @@
     d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                   \
     d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
     d("EnergyMonitoring",                       EnergyMonitoringAlgorithm::Factory)                         \
+    d("McParticlesMonitoring",                  McParticlesMonitoringAlgorithm::Factory)                    \
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
     d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                  \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \

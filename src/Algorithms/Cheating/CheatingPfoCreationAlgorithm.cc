@@ -75,8 +75,8 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
         pfo.m_clusterList.insert((*itCluster)); // insert cluster into pfo
 
         //       insert tracks into pfo
-        TrackList trackList = (*itCluster)->GetAssociatedTrackList();
-        for (TrackList::iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
+        const TrackList& trackList = (*itCluster)->GetAssociatedTrackList();
+        for (TrackList::const_iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
         {
             pfo.m_trackList.insert((*itTrack));
         }

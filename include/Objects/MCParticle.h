@@ -98,6 +98,20 @@ public:
      */
     Uid GetUid() const;
 
+    /**
+     *  @brief  Get list of parents of mcparticle
+     * 
+     *  @return the mc particle list
+     */
+    const MCParticleList GetParentList() const;
+
+    /**
+     *  @brief  Get list of daughters of mcparticle
+     * 
+     *  @return the mc particle list
+     */
+    const MCParticleList GetDaughterList() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -328,6 +342,20 @@ inline float MCParticle::GetOuterRadius() const
 inline int MCParticle::GetParticleId() const
 {
     return m_particleId;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const MCParticleList MCParticle::GetParentList() const
+{
+    return m_parentList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const MCParticleList MCParticle::GetDaughterList() const
+{
+    return m_daughterList;
 }
 
 } // namespace pandora
