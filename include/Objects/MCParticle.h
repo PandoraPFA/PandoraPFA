@@ -99,18 +99,18 @@ public:
     Uid GetUid() const;
 
     /**
-     *  @brief  Get list of parents of mcparticle
+     *  @brief  Get list of parents of mc particle
      * 
-     *  @return the mc particle list
+     *  @return the mc parent particle list
      */
-    const MCParticleList GetParentList() const;
+    const MCParticleList &GetParentList() const;
 
     /**
-     *  @brief  Get list of daughters of mcparticle
+     *  @brief  Get list of daughters of mc particle
      * 
-     *  @return the mc particle list
+     *  @return the mc daughter particle list
      */
-    const MCParticleList GetDaughterList() const;
+    const MCParticleList &GetDaughterList() const;
 
 private:
     /**
@@ -346,14 +346,14 @@ inline int MCParticle::GetParticleId() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const MCParticleList MCParticle::GetParentList() const
+inline const MCParticleList &MCParticle::GetParentList() const
 {
     return m_parentList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const MCParticleList MCParticle::GetDaughterList() const
+inline const MCParticleList &MCParticle::GetDaughterList() const
 {
     return m_daughterList;
 }

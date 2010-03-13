@@ -67,6 +67,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
             const float openingAngle((*hitIter)->GetNormalVector().GetOpeningAngle(clusterDirection));
             float cosOpeningAngle(std::fabs(std::cos(openingAngle)));
 
+            // ATTN: This direction measure introduces a difference wrt old Pandora
             cosOpeningAngle = std::max(cosOpeningAngle, m_showerProfileMinCosAngle);
 
             energyInLayer += (*hitIter)->GetElectromagneticEnergy();

@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/Monitoring/McParticlesMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Monitoring/MCParticlesMonitoringAlgorithm.cc
  * 
  *  @brief  Implementation of an algorithm to monitor the mc particles
  * 
  *  $Log: $
  */
 
-#include "Algorithms/Monitoring/McParticlesMonitoringAlgorithm.h"
+#include "Algorithms/Monitoring/MCParticlesMonitoringAlgorithm.h"
 
 #include "Api/PandoraContentApi.h"
 
@@ -23,7 +23,7 @@ using namespace pandora;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode McParticlesMonitoringAlgorithm::Initialize()
+StatusCode MCParticlesMonitoringAlgorithm::Initialize()
 {
     m_energy = NULL;
     m_momentumX = NULL;
@@ -50,7 +50,7 @@ StatusCode McParticlesMonitoringAlgorithm::Initialize()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-McParticlesMonitoringAlgorithm::~McParticlesMonitoringAlgorithm()
+MCParticlesMonitoringAlgorithm::~MCParticlesMonitoringAlgorithm()
 {
     if( !m_monitoringFileName.empty() && !m_treeName.empty() )
     {
@@ -69,14 +69,14 @@ McParticlesMonitoringAlgorithm::~McParticlesMonitoringAlgorithm()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode McParticlesMonitoringAlgorithm::Run()
+StatusCode MCParticlesMonitoringAlgorithm::Run()
 {
     MCParticleList mcParticleList;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetMCParticleList(*this, mcParticleList));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, FillListOfUsedMcParticles());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, FillListOfUsedMCParticles());
 
-    MonitorMcParticleList(mcParticleList);
+    MonitorMCParticleList(mcParticleList);
 
     ++m_eventCounter;
 
@@ -85,7 +85,7 @@ StatusCode McParticlesMonitoringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode McParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
 
@@ -136,7 +136,7 @@ StatusCode McParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHan
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void McParticlesMonitoringAlgorithm::MonitorMcParticleList( const MCParticleList& mcParticleList ) 
+void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList& mcParticleList ) 
 {
 
     if( m_print )
@@ -163,22 +163,22 @@ void McParticlesMonitoringAlgorithm::MonitorMcParticleList( const MCParticleList
 
     for( MCParticleList::const_iterator itMc = mcParticleList.begin(), itMcEnd = mcParticleList.end(); itMc != itMcEnd; ++itMc )
     {
-        const MCParticle* pMcParticle = (*itMc);
+        const MCParticle* pMCParticle = (*itMc);
         
-        if( TakeMcParticle(pMcParticle) )
+        if( TakeMCParticle(pMCParticle) )
         {
-            mcParticleVector.push_back(pMcParticle);
+            mcParticleVector.push_back(pMCParticle);
 
-            float energy = pMcParticle->GetEnergy();
+            float energy = pMCParticle->GetEnergy();
             sortIndex[energy] = mcParticleNumber;
             m_energy->push_back( energy );
-            const CartesianVector& momentum = pMcParticle->GetMomentum();
+            const CartesianVector& momentum = pMCParticle->GetMomentum();
             m_momentumX->push_back( momentum.GetX() );
             m_momentumY->push_back( momentum.GetY() );
             m_momentumZ->push_back( momentum.GetZ() );
-            m_particleId->push_back( pMcParticle->GetParticleId() );
-            m_outerRadius->push_back( pMcParticle->GetOuterRadius() );
-            m_innerRadius->push_back( pMcParticle->GetInnerRadius() );
+            m_particleId->push_back( pMCParticle->GetParticleId() );
+            m_outerRadius->push_back( pMCParticle->GetOuterRadius() );
+            m_innerRadius->push_back( pMCParticle->GetInnerRadius() );
 
             ++mcParticleNumber;
         }
@@ -267,7 +267,7 @@ void McParticlesMonitoringAlgorithm::MonitorMcParticleList( const MCParticleList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void McParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcParticle, std::ostream & o )
+void MCParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcParticle, std::ostream & o )
 {
     static const char* whiteongreen = "\033[1;42m";  // white on green background
     static const char* reset  = "\033[0m";     // reset
@@ -303,7 +303,7 @@ void McParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcPartic
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode McParticlesMonitoringAlgorithm::FillListOfUsedMcParticles()
+StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
 {
 
     if( m_clusterListNames.empty() )
@@ -423,16 +423,16 @@ StatusCode McParticlesMonitoringAlgorithm::FillListOfUsedMcParticles()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool McParticlesMonitoringAlgorithm::TakeMcParticle(const MCParticle* pMcParticle)
+bool MCParticlesMonitoringAlgorithm::TakeMCParticle(const MCParticle* pMCParticle)
 {
-    if( m_onlyFinal && !pMcParticle->GetDaughterList().empty() )
+    if( m_onlyFinal && !pMCParticle->GetDaughterList().empty() )
     {
         return false;
     }
 
     if( m_haveCaloHits || m_haveTracks )
     {
-        ConstMCParticleList::iterator itMc = m_mcParticleList.find( pMcParticle );
+        ConstMCParticleList::iterator itMc = m_mcParticleList.find( pMCParticle );
         if( itMc == m_mcParticleList.end() )
         {
             return false;

@@ -316,7 +316,7 @@ void ClusterContact::ClusterHelixComparison(Cluster *const pDaughterCluster, Clu
     // Configure range of layers in which daughter cluster will be compared to helix fits
     const PseudoLayer startLayer(pDaughterCluster->GetInnerPseudoLayer());
 
-    const PseudoLayer endLayer((pParentCluster->GetMipFraction() > mipFractionCut) ?
+    const PseudoLayer endLayer((pParentCluster->GetMipFraction() - mipFractionCut > std::numeric_limits<float>::epsilon()) ?
         std::max(startLayer + startLayerOffset, pParentCluster->GetOuterPseudoLayer() + startLayerOffsetMip) : startLayer + startLayerOffset);
 
     const unsigned int maxOccupiedLayers((pParentCluster->GetMipFraction() > mipFractionCut) ?

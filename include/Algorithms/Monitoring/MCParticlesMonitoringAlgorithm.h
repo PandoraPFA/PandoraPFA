@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/Algorithms/Monitoring/McParticlesMonitoringAlgorithm.h
+ *  @file   PandoraPFANew/include/Algorithms/Monitoring/MCParticlesMonitoringAlgorithm.h
  * 
  *  @brief  monitoring of the MC Particles
  * 
@@ -12,9 +12,9 @@
 
 
 /**
- *  @brief McParticlesMonitoringAlgorithm class
+ *  @brief MCParticlesMonitoringAlgorithm class
  */
-class McParticlesMonitoringAlgorithm : public pandora::Algorithm
+class MCParticlesMonitoringAlgorithm : public pandora::Algorithm
 {
 private:
 public:
@@ -31,16 +31,16 @@ public:
     };
 
     virtual StatusCode Initialize();
-    virtual ~McParticlesMonitoringAlgorithm();
+    virtual ~MCParticlesMonitoringAlgorithm();
 
 
 private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    void       MonitorMcParticleList( const pandora::MCParticleList& mcParticleList );
-    StatusCode FillListOfUsedMcParticles();
-    bool       TakeMcParticle(const pandora::MCParticle* pMcParticle);
+    void       MonitorMCParticleList( const pandora::MCParticleList& mcParticleList );
+    StatusCode FillListOfUsedMCParticles();
+    bool       TakeMCParticle(const pandora::MCParticle* pMCParticle);
 
     /**
      *  @brief  Print the MCParticle's parameters
@@ -49,8 +49,6 @@ private:
      *  @param o output-stream where the information is written to
      */
     void PrintMCParticle(const pandora::MCParticle* mcParticle, std::ostream & o );
-
-
 
     pandora::StringVector m_clusterListNames;            ///< list of strings denoting clusternames 
     std::string  m_monitoringFileName;                   ///< filename for storing the monitoring information (ROOT)
@@ -64,19 +62,18 @@ private:
     bool         m_haveCaloHits;                         ///< monitor PFOs which have calohits
     bool         m_haveTracks;                           ///< monitor PFOs which have tracks
 
-
     typedef std::vector<float> FloatVector;
     typedef std::vector<int>   IntVector;
-    FloatVector* m_energy;                                      ///< energy of mc particle
-    FloatVector* m_momentumX;                                   ///< x component of momentum of mc particle
-    FloatVector* m_momentumY;                                   ///< y component of momentum of mc particle
-    FloatVector* m_momentumZ;                                   ///< z component of momentum of mc particle
-    IntVector*   m_particleId;                                  ///< particle id of mc particle
-    FloatVector* m_outerRadius;                                 ///< outer radius of mcparticle
-    FloatVector* m_innerRadius;                                 ///< inner radius of mcparticle
+    FloatVector* m_energy;                               ///< energy of mc particle
+    FloatVector* m_momentumX;                            ///< x component of momentum of mc particle
+    FloatVector* m_momentumY;                            ///< y component of momentum of mc particle
+    FloatVector* m_momentumZ;                            ///< z component of momentum of mc particle
+    IntVector*   m_particleId;                           ///< particle id of mc particle
+    FloatVector* m_outerRadius;                          ///< outer radius of mcparticle
+    FloatVector* m_innerRadius;                          ///< inner radius of mcparticle
 
     typedef std::set<const pandora::MCParticle*> ConstMCParticleList;
-    ConstMCParticleList     m_mcParticleList;                   ///< list of mc particles from calohits and tracks
+    ConstMCParticleList     m_mcParticleList;            ///< list of mc particles from calohits and tracks
 
     int m_eventCounter;                                  ///< event counter; only necessary for older ROOT versions where the tree is written "flat"
 };
@@ -84,9 +81,9 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *McParticlesMonitoringAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *MCParticlesMonitoringAlgorithm::Factory::CreateAlgorithm() const
 {
-    return new McParticlesMonitoringAlgorithm();
+    return new MCParticlesMonitoringAlgorithm();
 }
 
 #endif // #ifndef MC_PARTICLES_MONITORING_ALGORITHM_H

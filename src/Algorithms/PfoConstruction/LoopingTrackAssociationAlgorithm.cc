@@ -235,7 +235,7 @@ StatusCode LoopingTrackAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlH
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinOccupiedLayersInCluster", m_minOccupiedLayersInCluster));
 
-    m_maxClusterInnerLayer = 10;
+    m_maxClusterInnerLayer = 9;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxClusterInnerLayer", m_maxClusterInnerLayer));
 

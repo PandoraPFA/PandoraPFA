@@ -641,7 +641,7 @@ bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFractio
     if (!(pCluster->IsPhotonFast()))
         return true;
 
-    if (pCluster->GetMipFraction() > minMipFraction)
+    if (pCluster->GetMipFraction() - minMipFraction > std::numeric_limits<float>::epsilon())
         return true;
 
     return (pCluster->GetFitToAllHitsResult().IsFitSuccessful() && (pCluster->GetFitToAllHitsResult().GetRms() < maxAllHitsFitRms));
@@ -691,7 +691,7 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(Cluster *const pCluster)
             mipFraction = static_cast<float>(nMipHits) / static_cast<float>(iter->second->size());
         }
 
-        if (mipFraction > showerStartMipFraction)
+        if (mipFraction - showerStartMipFraction > std::numeric_limits<float>::epsilon())
         {
             currentShowerLayers = 0;
         }
@@ -730,7 +730,7 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(Cluster *const pCluster)
 
         const float mipFraction(static_cast<float>(nMipHits) / static_cast<float>(iter->second->size()));
 
-        if (mipFraction < showerStartMipFraction)
+        if (mipFraction - showerStartMipFraction < std::numeric_limits<float>::epsilon())
         {
             currentMipLayers = 0;
             showerStartLayer = iLayer;
