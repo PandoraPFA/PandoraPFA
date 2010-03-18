@@ -22,7 +22,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
     // Create a vector of input clusters, ordered by inner layer
     ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());
-    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayer);
+    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayerIncEnergy);
 
     // Create a list containing both input and photon clusters
     ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
