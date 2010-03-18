@@ -385,7 +385,7 @@ private:
      */
     void RemoveTrackSeed();
 
-    typedef std::map<PseudoLayer, float> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
+    typedef std::map<PseudoLayer, double> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
     typedef ClusterHelper::ClusterFitResult ClusterFitResult;   ///< The cluster fit result typedef
 
     OrderedCaloHitList      m_orderedCaloHitList;           ///< The ordered calo hit list
@@ -394,10 +394,10 @@ private:
     unsigned int            m_nCaloHits;                    ///< The number of calo hits
     unsigned int            m_nPossibleMipHits;             ///< The number of calo hits that have been flagged as possible mip hits
 
-    float                   m_electromagneticEnergy;        ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
-    float                   m_hadronicEnergy;               ///< The sum of hadronic energy measures of constituent calo hits, units GeV
-    float                   m_isolatedElectromagneticEnergy;///< Sum of electromagnetic energy measures of isolated calo hits, units GeV
-    float                   m_isolatedHadronicEnergy;       ///< Sum of hadronic energy measures of isolated calo hits, units GeV
+    double                  m_electromagneticEnergy;        ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
+    double                  m_hadronicEnergy;               ///< The sum of hadronic energy measures of constituent calo hits, units GeV
+    double                  m_isolatedElectromagneticEnergy;///< Sum of electromagnetic energy measures of isolated calo hits, units GeV
+    double                  m_isolatedHadronicEnergy;       ///< Sum of hadronic energy measures of isolated calo hits, units GeV
 
     bool                    m_isPhoton;                     ///< Whether the cluster has been flagged as a photon cluster
     bool                    m_isMipTrack;                   ///< Whether the cluster has been flagged as a section of mip track
