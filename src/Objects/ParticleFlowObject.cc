@@ -50,6 +50,9 @@ void ParticleFlowObject::ExtractAndStoreCaloHits(const PandoraContentApi::Partic
     {
         CaloHitAddressList caloHitAddressList;
 
+        OrderedCaloHitList orderedCaloHitList((*clusterIter)->GetOrderedCaloHitList());
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add((*clusterIter)->GetIsolatedCaloHitList()));
+
         for (OrderedCaloHitList::const_iterator orderedListIter = (*clusterIter)->GetOrderedCaloHitList().begin(),
             orderedListIterEnd = (*clusterIter)->GetOrderedCaloHitList().end(); orderedListIter != orderedListIterEnd; ++orderedListIter)
         {

@@ -145,7 +145,7 @@ bool NeutralFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterCont
 StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
     Cluster *&pBestDaughterCluster) const
 {
-    float highestEvidence(0.f);
+    float highestEvidence(m_minEvidence);
 
     for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
@@ -160,7 +160,7 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Cl
 
             const float evidence(this->GetEvidenceForMerge(clusterContact));
 
-            if ((evidence > highestEvidence) && (evidence > m_minEvidence))
+            if (evidence > highestEvidence)
             {
                 highestEvidence = evidence;
                 pBestDaughterCluster = pDaughterCluster;

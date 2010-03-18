@@ -171,7 +171,7 @@ StatusCode ProximityBasedMergingAlgorithm::GetGenericDistanceBetweenClusters(con
             const PseudoLayer firstExaminationLayer((iLayer > m_nAdjacentLayersToExamine) ? iLayer - m_nAdjacentLayersToExamine : 0);
             const PseudoLayer lastExaminationLayer(iLayer + m_nAdjacentLayersToExamine);
 
-            for (PseudoLayer iExaminationLayer = firstExaminationLayer; iExaminationLayer < lastExaminationLayer; ++iExaminationLayer)
+            for (PseudoLayer iExaminationLayer = firstExaminationLayer; iExaminationLayer <= lastExaminationLayer; ++iExaminationLayer)
             {
                 OrderedCaloHitList::const_iterator iterD = orderedCaloHitListD.find(iExaminationLayer);
 
@@ -209,7 +209,9 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     // Must meet one of following criteria if we are to identify daughter cluster as a fragment of parent:
 
     // 1. Large fraction of hits in clusters that are deemed to be "close"
-    if (FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, m_closeHitThreshold) > m_minCloseHitFraction)
+    const float closeHitFraction(FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, m_closeHitThreshold));
+
+    if (closeHitFraction >= m_minCloseHitFraction)
     {
         return true;
     }
@@ -221,7 +223,7 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     StatusCode statusCode = FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, m_clusterContactThreshold,
         nContactLayers, contactFraction);
 
-    if ((STATUS_CODE_SUCCESS == statusCode) && (contactFraction > m_minContactFraction))
+    if ((STATUS_CODE_SUCCESS == statusCode) && (contactFraction >= m_minContactFraction))
     {
         return true;
     }

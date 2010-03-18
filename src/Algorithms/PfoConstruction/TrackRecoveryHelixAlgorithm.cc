@@ -55,10 +55,7 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
         {
             Cluster *pCluster = *iterC;
 
-            if (0 == pCluster->GetNCaloHits())
-                continue;
-
-            if (!pCluster->GetAssociatedTrackList().empty() || pCluster->IsPhotonFast())
+            if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()) || pCluster->IsPhotonFast())
                 continue;
 
             // Cut on z-coordinate separation between track ecal projection and the cluster

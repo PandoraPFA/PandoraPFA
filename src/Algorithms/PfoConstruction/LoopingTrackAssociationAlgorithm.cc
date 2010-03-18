@@ -40,7 +40,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         // Use only tracks that reach the ecal endcap, not barrel
         const float trackECalZPosition(pTrack->GetTrackStateAtECal().GetPosition().GetZ());
 
-        if (endCapZPosition - std::fabs(trackECalZPosition) > m_maxEndCapDeltaZ)
+        if (std::fabs(trackECalZPosition) > endCapZPosition - m_maxEndCapDeltaZ)
             continue;
 
         // Extract information from the track
@@ -50,7 +50,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         if (0.f == helixOmega)
             continue;
 
-        const float helixRadius(1.f / helixOmega);
+        const float helixRadius(1. / helixOmega);
         const float helixTanLambda(pHelix->GetTanLambda());
         const float helixPhi0(pHelix->GetPhi0());
 
@@ -136,7 +136,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
 
                 helixDirection.SetValues(0.f, helixDCosY, helixDCosZ);
             }
-
+ 
             // Calculate direction of first n layers of cluster
             ClusterHelper::ClusterFitResult clusterFitResult;
             if (STATUS_CODE_SUCCESS != ClusterHelper::FitStart(pCluster, m_nClusterFitLayers, clusterFitResult))

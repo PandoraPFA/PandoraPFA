@@ -23,7 +23,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
     // Create a vector of input clusters, ordered by inner layer
     ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());
-    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayer);
+    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayerIncEnergy);
 
     // Create a list containing both input and photon clusters
     ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
@@ -48,6 +48,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
             continue;
 
         Cluster *pBestParentCluster = NULL;
+        PseudoLayer bestParentInnerLayer(0);
         float closestDistance(std::numeric_limits<float>::max());
 
         // Find best candidate parent cluster: that with closest distance between a pair of hits in the daughter and parent
@@ -66,10 +67,12 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
             const float distance(ClusterHelper::GetDistanceToClosestHit(pParentCluster, pDaughterCluster));
 
-            if (distance < closestDistance)
+            // In event of equidistant parent candidates, choose innermost cluster
+            if ((distance < closestDistance) || ((distance == closestDistance) && (pParentCluster->GetInnerPseudoLayer() < bestParentInnerLayer)))
             {
                 closestDistance = distance;
                 pBestParentCluster = pParentCluster;
+                bestParentInnerLayer = pParentCluster->GetInnerPseudoLayer();
             }
         }
 

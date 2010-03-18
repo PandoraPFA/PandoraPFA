@@ -61,8 +61,8 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
     {
         Cluster *pCluster = *iter;
 
-        if (pCluster->IsPhotonFast())
-            continue;
+//        if (pCluster->IsPhotonFast())
+//            continue;
 
         const float clusterHadronicEnergy(pCluster->GetHadronicEnergy());
 
@@ -117,7 +117,15 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
 
                     if (newHitHadronicEnergy < hitHadronicEnergy)
                     {
-                        pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() + newHitHadronicEnergy - hitHadronicEnergy);
+                        // TODO remove this, once it has been demonstrated as unimportant
+                        if (!pCluster->IsPhotonFast())
+                        {
+                            pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() + newHitHadronicEnergy - hitHadronicEnergy);
+                        }
+                        else
+                        {
+                            pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() + newHitHadronicEnergy - pCaloHit->GetElectromagneticEnergy());
+                        }
                     }
                 }
             }

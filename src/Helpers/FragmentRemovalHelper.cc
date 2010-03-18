@@ -314,15 +314,14 @@ void ClusterContact::ClusterHelixComparison(Cluster *const pDaughterCluster, Clu
     static const float maxTrackClusterDeltaZ(pPandoraSettings->GetContactMaxTrackClusterDeltaZ());
     
     // Configure range of layers in which daughter cluster will be compared to helix fits
+    const bool passMipFractionCut(pParentCluster->GetMipFraction() - mipFractionCut > std::numeric_limits<float>::epsilon());
+
     const PseudoLayer startLayer(pDaughterCluster->GetInnerPseudoLayer());
-
-    const PseudoLayer endLayer((pParentCluster->GetMipFraction() - mipFractionCut > std::numeric_limits<float>::epsilon()) ?
-        std::max(startLayer + startLayerOffset, pParentCluster->GetOuterPseudoLayer() + startLayerOffsetMip) : startLayer + startLayerOffset);
-
-    const unsigned int maxOccupiedLayers((pParentCluster->GetMipFraction() > mipFractionCut) ?
-        std::numeric_limits<unsigned int>::max() : nHelixComparisonLayers);
+    const PseudoLayer endLayer(passMipFractionCut ? std::max(startLayer + startLayerOffset, pParentCluster->GetOuterPseudoLayer() + startLayerOffsetMip) :
+        startLayer + startLayerOffset);
 
     const float clusterZPosition(pDaughterCluster->GetCentroid(startLayer).GetZ());
+    const unsigned int maxOccupiedLayers(passMipFractionCut ? std::numeric_limits<unsigned int>::max() : nHelixComparisonLayers);
 
     // Calculate closest distance between daughter cluster and helix fits to parent associated tracks
     float trackEnergySum(0.);

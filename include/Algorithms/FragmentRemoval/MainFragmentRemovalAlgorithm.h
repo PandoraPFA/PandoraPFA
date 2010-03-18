@@ -175,6 +175,9 @@ private:
     float               m_layerCorrection4;                         ///< Layer correction contribution 4
     float               m_layerCorrection5;                         ///< Layer correction contribution 5
     float               m_layerCorrection6;                         ///< Layer correction contribution 6
+
+    unsigned int        m_nDeepInHCalLayers;                        ///< First hcal layer that can be considered as "deep" in the hcal
+
     float               m_layerCorrectionLayerSpan;                 ///< Daughter layer span for layer correction contribution 5
     float               m_layerCorrectionMinInnerLayer;             ///< Daughter min inner layer for layer correction contribution 5
     float               m_layerCorrectionLayersFromECal;            ///< Daughter layers from ecal for layer correction contribution 6

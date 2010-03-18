@@ -255,8 +255,7 @@ float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContac
         if(clusterContact.GetClosestDistanceToHelix() < m_closestTrackEvidence2)
             trackExtrapolationEvidence += (m_closestTrackEvidence2 - clusterContact.GetClosestDistanceToHelix()) / m_closestTrackEvidence2d;
 
-        if(clusterContact.GetMeanDistanceToHelix() < m_meanTrackEvidence1)
-            trackExtrapolationEvidence += (m_meanTrackEvidence1 - clusterContact.GetMeanDistanceToHelix()) / m_meanTrackEvidence1d;
+        trackExtrapolationEvidence += (m_meanTrackEvidence1 - clusterContact.GetMeanDistanceToHelix()) / m_meanTrackEvidence1d;
 
         if(clusterContact.GetMeanDistanceToHelix() < m_meanTrackEvidence2)
             trackExtrapolationEvidence += (m_meanTrackEvidence2 - clusterContact.GetClosestDistanceToHelix()) / m_meanTrackEvidence2d;
@@ -300,7 +299,6 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     float layerCorrection(0.f);
 
     static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    static const unsigned int halfHCal(GeometryHelper::GetInstance()->GetHCalBarrelParameters().GetNLayers() / 2);
     static const unsigned int halfECal(nECalLayers / 2);
 
     const PseudoLayer innerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -310,15 +308,18 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     {
         layerCorrection = m_layerCorrection1;
     }
-    else if ((correctionLayer > halfECal) && (correctionLayer <= nECalLayers))
+
+    if ((correctionLayer > halfECal) && (correctionLayer <= nECalLayers))
     {
         layerCorrection = m_layerCorrection2;
     }
-    else if (correctionLayer > nECalLayers)
+
+    if (correctionLayer > nECalLayers)
     {
         layerCorrection = m_layerCorrection3;
     }
-    else if (correctionLayer > nECalLayers + halfHCal)
+
+    if (correctionLayer > nECalLayers + m_nDeepInHCalLayers)
     {
         layerCorrection = m_layerCorrection4;
     }
@@ -680,6 +681,10 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     m_layerCorrection6 = -3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerCorrection6", m_layerCorrection6));
+
+    m_nDeepInHCalLayers = 20;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NDeepInHCalLayers", m_nDeepInHCalLayers));
 
     m_layerCorrectionLayerSpan = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

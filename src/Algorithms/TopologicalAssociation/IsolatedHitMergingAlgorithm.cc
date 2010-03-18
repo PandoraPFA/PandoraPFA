@@ -44,7 +44,9 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         if (NULL == pClusterToDelete)
             continue;
 
-        if (pClusterToDelete->GetNCaloHits() > m_minHitsInCluster)
+        const unsigned int nCaloHits(pClusterToDelete->GetNCaloHits());
+
+        if (nCaloHits > m_minHitsInCluster)
             continue;
 
         // TODO should these hits be flagged as isolated?
@@ -69,11 +71,12 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             {
                 Cluster *pNewHostCluster = *iterJ;
 
-                if (pNewHostCluster->GetNCaloHits() <= m_minHitsInCluster)
+                if (pNewHostCluster->GetNCaloHits() < nCaloHits)
                     continue;
 
                 const float distance(this->GetDistanceToHit(pNewHostCluster, pCaloHit));
 
+                // In event of equidistant host candidates, choose outermost cluster
                 if ((distance < minDistance) || ((distance == minDistance) && (pNewHostCluster->GetInnerPseudoLayer() > bestHostInnerLayer)))
                 {
                     minDistance = distance;

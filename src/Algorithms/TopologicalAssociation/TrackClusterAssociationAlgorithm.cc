@@ -42,8 +42,8 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         Cluster *pBestCluster = NULL;
         Cluster *pBestLowEnergyCluster = NULL;
 
-        float minDistance(std::numeric_limits<float>::max());
-        float minLowEnergyDistance(std::numeric_limits<float>::max());
+        float minDistance(m_maxTrackClusterDistance);
+        float minLowEnergyDistance(m_maxTrackClusterDistance);
 
         // Identify the closest cluster and also the closest cluster below a specified hadronic energy threshold
         for (ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
@@ -51,7 +51,7 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         {
             Cluster *pCluster = *clusterIter;
 
-            if (0 == pCluster->GetNCaloHits() || pCluster->IsPhoton())
+            if (0 == pCluster->GetNCaloHits())
                 continue;
 
             float trackClusterDistance(std::numeric_limits<float>::max());
@@ -79,11 +79,11 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         // Apply a final track-cluster association distance cut
         Cluster *pMatchedCluster = NULL;
 
-        if ((minDistance < m_maxTrackClusterDistance) && (NULL != pBestCluster))
+        if (NULL != pBestCluster)
         {
             pMatchedCluster = pBestCluster;
         }
-        else if ((minLowEnergyDistance < m_maxTrackClusterDistance) && (NULL != pBestLowEnergyCluster))
+        else if (NULL != pBestLowEnergyCluster)
         {
             pMatchedCluster = pBestLowEnergyCluster;
         }

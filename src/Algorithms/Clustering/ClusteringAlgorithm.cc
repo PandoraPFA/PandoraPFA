@@ -74,7 +74,13 @@ StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVec
     for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
         Track *pTrack = *iter;
-        bool useTrack = ((3 == m_clusterSeedStrategy) || ((4 == m_clusterSeedStrategy) && pTrack->CanFormPfo()));
+        bool useTrack(false);
+
+        if (3 == m_clusterSeedStrategy)
+            useTrack = true;
+
+        if ((4 == m_clusterSeedStrategy) && pTrack->CanFormPfo())
+            useTrack = true;
 
         if (!useTrack)
         {
