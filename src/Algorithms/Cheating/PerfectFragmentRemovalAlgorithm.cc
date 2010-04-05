@@ -32,7 +32,7 @@ StatusCode PerfectFragmentRemovalAlgorithm::Run()
         if( STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, clusterName, pClusterList))
             continue;
 
-        for( ClusterList::iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
+        for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
         {
             Cluster* pCluster = (*itCluster);
 

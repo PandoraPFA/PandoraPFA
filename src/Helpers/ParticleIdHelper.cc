@@ -11,6 +11,7 @@
 #include "Helpers/ParticleIdHelper.h"
 
 #include <cmath>
+#include <limits>
 
 namespace pandora
 {
@@ -24,10 +25,10 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
         return STATUS_CODE_INVALID_PARAMETER;
 
     // Initialize profile
-    float profile[m_showerProfileNBins];
+    float *pProfile = new float[m_showerProfileNBins];
     for(unsigned int iBin = 0; iBin < m_showerProfileNBins; ++iBin)
     {
-        profile[iBin] = 0.f;
+        pProfile[iBin] = 0.f;
     }
 
     // Extract information from the cluster
@@ -106,7 +107,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
                 delta -= 1.f - endPosition + endBin;
             }
 
-            profile[iBin] += energyInLayer * (delta / deltaPosition);
+            pProfile[iBin] += energyInLayer * (delta / deltaPosition);
         }
 
         profileEndBin = endBin;
@@ -117,15 +118,21 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
 
     // 2. Construct expected cluster profile
     const double a(m_showerProfileParameter0 + m_showerProfileParameter1 * std::log(clusterEnergy / m_showerProfileCriticalEnergy));
+#ifdef __GNUC__
     const double gammaA(std::exp(gamma(a)));
+#else
+    const double gammaA(0.);
+    std::cout << " PandoraPFANew, ParticleIdHelper: TODO - implement gamma function " << std::endl;
+    throw StatusCodeException(STATUS_CODE_FAILURE);
+#endif
 
-    float t(0.);
-    float expectedProfile[m_showerProfileNBins];
+    float t(0.f);
+    float *pExpectedProfile = new float[m_showerProfileNBins];
 
     for (unsigned int iBin = 0; iBin < m_showerProfileNBins; ++iBin)
     {
         t += m_showerProfileBinWidth;
-        expectedProfile[iBin] = static_cast<float>(clusterEnergy / 2. * std::pow(t / 2.f, static_cast<float>(a - 1.)) *
+        pExpectedProfile[iBin] = static_cast<float>(clusterEnergy / 2. * std::pow(t / 2.f, static_cast<float>(a - 1.)) *
             std::exp(-t / 2.) * m_showerProfileBinWidth / gammaA);
     }
 
@@ -141,11 +148,11 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
         {
             if (iBin < iBinOffset)
             {
-                profileDifference += profile[iBin];
+                profileDifference += pProfile[iBin];
             }
             else
             {
-                profileDifference += std::fabs(expectedProfile[iBin - iBinOffset] - profile[iBin]);
+                profileDifference += std::fabs(pExpectedProfile[iBin - iBinOffset] - pProfile[iBin]);
             }
         }
 
@@ -161,6 +168,9 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
 
     showerProfileStart =  binOffsetAtMinDifference * m_showerProfileBinWidth;
     showerProfileDiscrepancy = minProfileDifference / eCalEnergy;
+
+    delete [] pProfile;
+    delete [] pExpectedProfile;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -241,7 +251,7 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
     const bool isEndCap((std::fabs(innerLayerCentroid.GetZ()) > eCalEndCapInnerZ - m_photonIdEndCapZSeparation));
 
     const float cosTheta(std::fabs(innerLayerCentroid.GetZ()) / innerLayerCentroid.GetMagnitude());
-    const float rDotN(isEndCap ? cosTheta : std::sqrt(1. - cosTheta * cosTheta));
+    const float rDotN(isEndCap ? cosTheta : std::sqrt(1.f - cosTheta * cosTheta));
 
     if (0 == rDotN)
         throw StatusCodeException(STATUS_CODE_FAILURE);

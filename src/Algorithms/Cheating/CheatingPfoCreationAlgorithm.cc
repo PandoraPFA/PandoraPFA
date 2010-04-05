@@ -15,8 +15,9 @@
 #include "Objects/Cluster.h"
 #include "Objects/CartesianVector.h"
 
-#include <sstream>
+#include <algorithm>
 #include <cmath>
+#include <sstream>
 
 using namespace pandora;
 
@@ -172,7 +173,7 @@ void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter( pandora::Cluster* clu
         {
             energy = cluster->GetHadronicEnergy();
             particleId = 2112; // assume it's a neutron
-            mass = 0.9396;
+            mass = 0.9396f;
             charge = 0;
 
             CartesianVector energyWeightedClusterPosition(0.0,0.0,0.0);
@@ -189,7 +190,7 @@ void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter( pandora::Cluster* clu
         // energy
         energy = cluster->GetHadronicEnergy();
         particleId = 211; // assume it's a pion
-        mass = 0.1396;    // -- " --
+        mass = 0.1396f;    // -- " --
 
         charge = 1;
 

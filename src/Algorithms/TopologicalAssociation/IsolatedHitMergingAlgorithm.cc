@@ -10,6 +10,7 @@
 
 #include "Helpers/CaloHitHelper.h"
 
+#include <algorithm>
 #include <limits>
 
 using namespace pandora;

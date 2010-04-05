@@ -365,10 +365,10 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
                 clusterListVector.push_back( pClusterList ); // add the cluster list
         }
     
-        for( ClusterVector::iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
+        for( ClusterVector::const_iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
         {
             const ClusterList* pClusterList = (*itClusterList);
-            for( ClusterList::iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
+            for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
             {
                 const Cluster* pCluster = (*itCluster);
 

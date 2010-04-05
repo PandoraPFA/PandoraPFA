@@ -228,7 +228,8 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
     if ((m_sumXByPseudoLayer.end() == xValueIter) || (m_sumYByPseudoLayer.end() == yValueIter) || (m_sumZByPseudoLayer.end() == zValueIter))
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
-    return CartesianVector(xValueIter->second / nHitsInLayer, yValueIter->second / nHitsInLayer, zValueIter->second / nHitsInLayer);
+    return CartesianVector(static_cast<float>(xValueIter->second / nHitsInLayer), static_cast<float>(yValueIter->second / nHitsInLayer),
+        static_cast<float>(zValueIter->second / nHitsInLayer));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

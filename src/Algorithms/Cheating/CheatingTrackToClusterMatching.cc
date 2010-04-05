@@ -33,7 +33,7 @@ StatusCode CheatingTrackToClusterMatching::Run()
 
     EnergyPerMcParticleInClusters energyPerMcParticleInClusters;
 
-    for( ClusterList::iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
+    for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
     {
         Cluster *const pCluster = (*itCluster);
 

@@ -8,6 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/SoftClusterMergingAlgorithm.h"
 
+#include <algorithm>
 #include <limits>
 
 using namespace pandora;

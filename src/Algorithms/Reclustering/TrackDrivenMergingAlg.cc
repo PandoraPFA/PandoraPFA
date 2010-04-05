@@ -10,6 +10,8 @@
 
 #include "Helpers/FragmentRemovalHelper.h"
 
+#include <limits>
+
 using namespace pandora;
 
 StatusCode TrackDrivenMergingAlg::Run()
@@ -62,7 +64,7 @@ StatusCode TrackDrivenMergingAlg::Run()
         ConeFractionToClusterMap coneFractionToClusterMap;
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
 
-        for (ClusterList::iterator iterJ = pClusterList->begin(), iterJEnd = pClusterList->end(); iterJ != iterJEnd; ++iterJ)
+        for (ClusterList::const_iterator iterJ = pClusterList->begin(), iterJEnd = pClusterList->end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pDaughterCluster = *iterJ;
 

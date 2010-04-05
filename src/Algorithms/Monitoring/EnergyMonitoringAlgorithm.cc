@@ -101,10 +101,10 @@ StatusCode EnergyMonitoringAlgorithm::Run()
     int clusterNumber = 0;
     int trackNumber   = 0;
 
-    for( ClusterVector::iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
+    for( ClusterVector::const_iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
     {
         const ClusterList* pClusterList = (*itClusterList);
-        for( ClusterList::iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
+        for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
         {
             const Cluster* pCluster = (*itCluster);
             ++clusterNumber;

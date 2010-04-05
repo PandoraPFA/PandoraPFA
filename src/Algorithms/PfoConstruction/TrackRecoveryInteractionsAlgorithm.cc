@@ -10,6 +10,9 @@
 
 #include "Helpers/ReclusterHelper.h"
 
+#include <algorithm>
+#include <limits>
+
 using namespace pandora;
 
 StatusCode TrackRecoveryInteractionsAlgorithm::Run()

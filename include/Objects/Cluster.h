@@ -528,28 +528,28 @@ inline float Cluster::GetMipFraction() const
 
 inline float Cluster::GetElectromagneticEnergy() const
 {
-    return m_electromagneticEnergy;
+    return static_cast<float>(m_electromagneticEnergy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float Cluster::GetHadronicEnergy() const
 {
-    return m_hadronicEnergy;
+    return static_cast<float>(m_hadronicEnergy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float Cluster::GetIsolatedElectromagneticEnergy() const
 {
-    return m_isolatedElectromagneticEnergy;
+    return static_cast<float>(m_isolatedElectromagneticEnergy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float Cluster::GetIsolatedHadronicEnergy() const
 {
-    return m_isolatedHadronicEnergy;
+    return static_cast<float>(m_isolatedHadronicEnergy);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

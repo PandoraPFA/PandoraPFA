@@ -8,6 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 

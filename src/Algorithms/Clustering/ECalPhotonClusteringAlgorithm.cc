@@ -9,13 +9,13 @@
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
 #include "Objects/MCParticle.h"
 
-#include <functional>
 #include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <functional>
 #include <iostream>
 #include <iomanip>
-#include <cmath>
-
-#include <assert.h>
+#include <limits>
 
 using namespace pandora;
 
@@ -477,12 +477,12 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
             std::cout << "Use original cluster " << std::endl;
 
         // we don't need the photon candidate any more
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster));
 
         // re-create the cluster which get's all the hits from the original cluster
         CaloHitList caloHitList;
         pOriginalOrderedCaloHitList.GetCaloHitList( caloHitList );
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &caloHitList, pPhotonCandidateCluster ));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &caloHitList, pPhotonCandidateCluster ));
     }
 
 
@@ -944,7 +944,7 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
 
 
     // mask low ph region
-    float threshold = 0.025;
+    float threshold = 0.025f;
     for(int i=0; i<nbins; i++){
         for(int j=0; j<nbins; j++){
             if(tprofile[i][j]<threshold)assigned[i][j]=true;
@@ -1000,8 +1000,7 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
             xxbar=(ipeak-ioffset)*(ipeak-ioffset)*tprofile[ipeak][jpeak];
             yybar=(jpeak-ioffset)*(jpeak-ioffset)*tprofile[ipeak][jpeak];
             assigned[ipeak][jpeak]=true;
-            dmin = sqrt(   (ipeak-ioffset)*(ipeak-ioffset)+
-                           (jpeak-ioffset)*(jpeak-ioffset));
+            dmin = std::sqrt(static_cast<float>((ipeak-ioffset)*(ipeak-ioffset)+ (jpeak-ioffset)*(jpeak-ioffset)));
             npeaks++;
             float stillgoing = true;
             while(stillgoing){
@@ -1029,7 +1028,7 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
                                         pcurrent++;
                                         point[pcurrent][0] = is;
                                         point[pcurrent][1] = js;
-                                        float d = sqrt((is-ioffset)*(is-ioffset)+(js-ioffset)*(js-ioffset));
+                                        float d = std::sqrt(static_cast<float>((is-ioffset)*(is-ioffset)+(js-ioffset)*(js-ioffset)));
                                         if(d<dmin)dmin=d;
                                     }
                                 }

@@ -8,6 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/BackscatteredTracks2Algorithm.h"
 
+#include <algorithm>
 #include <limits>
 
 using namespace pandora;

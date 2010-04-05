@@ -8,6 +8,9 @@
 
 #include "Algorithms/PfoConstruction/TrackRecoveryAlgorithm.h"
 
+#include <algorithm>
+#include <limits>
+
 using namespace pandora;
 
 StatusCode TrackRecoveryAlgorithm::Run()

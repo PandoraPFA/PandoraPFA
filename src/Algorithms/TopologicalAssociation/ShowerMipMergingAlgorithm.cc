@@ -8,6 +8,8 @@
 
 #include "Algorithms/TopologicalAssociation/ShowerMipMergingAlgorithm.h"
 
+#include <algorithm>
+
 using namespace pandora;
 
 StatusCode ShowerMipMergingAlgorithm::Run()

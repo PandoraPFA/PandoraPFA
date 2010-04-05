@@ -10,6 +10,9 @@
 
 #include "Helpers/ReclusterHelper.h"
 
+#include <algorithm>
+#include <limits>
+
 using namespace pandora;
 
 StatusCode LoopingTrackAssociationAlgorithm::Run()
@@ -50,11 +53,11 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         if (0.f == helixOmega)
             continue;
 
-        const float helixRadius(1. / helixOmega);
+        const float helixRadius(1.f / helixOmega);
         const float helixTanLambda(pHelix->GetTanLambda());
         const float helixPhi0(pHelix->GetPhi0());
 
-        static const float pi_2(0.5f * std::acos(-1));
+        static const float pi_2(0.5f * std::acos(-1.f));
         const float helixXCentre(helixRadius * std::cos(helixPhi0 - pi_2));
         const float helixYCentre(helixRadius * std::sin(helixPhi0 - pi_2));
 

@@ -8,6 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/ShowerMipMerging3Algorithm.h"
 
+#include <algorithm>
 #include <limits>
 
 using namespace pandora;

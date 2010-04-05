@@ -10,6 +10,7 @@
 
 #include "Helpers/GeometryHelper.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
