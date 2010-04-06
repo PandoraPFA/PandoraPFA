@@ -143,15 +143,6 @@ StatusCode TrackDrivenAssociationAlg::Run()
             if (!pReclusterList->empty())
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
 
-            // Remove any track projection clusters remaining at this stage
-            for (ClusterList::const_iterator reclusterIter = pReclusterList->begin(); reclusterIter != pReclusterList->end();)
-            {
-                Cluster *pReclusterCandidate = *(reclusterIter++);
-
-                if (0 == pReclusterCandidate->GetNCaloHits())
-                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pReclusterCandidate));
-            }
-
             // Calculate final track-cluster associations for these recluster candidates
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
