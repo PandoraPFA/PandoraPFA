@@ -32,6 +32,8 @@ StatusCode MCParticlesMonitoringAlgorithm::Initialize()
     m_particleId = NULL;
     m_outerRadius = NULL;
     m_innerRadius = NULL;
+    m_caloHitEnergy = NULL;
+    m_trackEnergy = NULL;
 
     if( !m_monitoringFileName.empty() && !m_treeName.empty() )
     {
@@ -42,6 +44,8 @@ StatusCode MCParticlesMonitoringAlgorithm::Initialize()
         m_particleId = new IntVector();                    
         m_outerRadius = new FloatVector();                   
         m_innerRadius = new FloatVector();                   
+        m_caloHitEnergy = new FloatVector();                   
+        m_trackEnergy = new FloatVector();                   
     }
     m_eventCounter = 0;
 
@@ -64,6 +68,8 @@ MCParticlesMonitoringAlgorithm::~MCParticlesMonitoringAlgorithm()
     delete m_particleId;
     delete m_outerRadius;
     delete m_innerRadius;
+    delete m_caloHitEnergy;
+    delete m_trackEnergy;
 }
 
 
@@ -109,6 +115,9 @@ StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     m_haveCaloHits = false;
     m_haveTracks = false;
 
+    m_excludeRootParticles = false;
+    m_onlyRootParticles = false;   
+
     for( StringVector::iterator itStr = mcParticleSelection.begin(), itStrEnd = mcParticleSelection.end(); itStr != itStrEnd; ++itStr )
     {
         std::string currentString = (*itStr);
@@ -118,9 +127,13 @@ StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHan
             m_haveCaloHits = true;
         else if( currentString == "Tracks" ) 
             m_haveTracks = true;
+        else if( currentString == "ExcludeRoot" ) 
+            m_excludeRootParticles = true;
+        else if( currentString == "OnlyRoot" ) 
+            m_onlyRootParticles = true;
         else
         {
-            std::cout << "<Selection> '" << currentString << "' unknown." << std::endl;
+            std::cout << "<Selection> '" << currentString << "' unknown in algorithm 'MCParticlesMonitoring'." << std::endl;
             return STATUS_CODE_NOT_FOUND;
         }
     }
@@ -153,8 +166,10 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
     m_particleId->clear();
     m_outerRadius->clear();
     m_innerRadius->clear();
+    m_caloHitEnergy->clear();
+    m_trackEnergy->clear();
 
-    typedef std::map<float, int, std::greater<float> > SortIndex;
+    typedef std::multimap<float, int, std::greater<float> > SortIndex;
     SortIndex sortIndex;
     int mcParticleNumber = 0;
 
@@ -165,25 +180,28 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
     {
         const MCParticle* pMCParticle = (*itMc);
         
-        if( TakeMCParticle(pMCParticle) )
+        float caloHitEnergy = 0.f, trackEnergy = 0.f;
+        if( TakeMCParticle(pMCParticle, caloHitEnergy, trackEnergy) )
         {
             mcParticleVector.push_back(pMCParticle);
 
             float energy = pMCParticle->GetEnergy();
-            sortIndex[energy] = mcParticleNumber;
+            sortIndex.insert( std::pair<float,int>(energy, mcParticleNumber) );
             m_energy->push_back( energy );
             const CartesianVector& momentum = pMCParticle->GetMomentum();
             m_momentumX->push_back( momentum.GetX() );
             m_momentumY->push_back( momentum.GetY() );
             m_momentumZ->push_back( momentum.GetZ() );
-            m_particleId->push_back( pMCParticle->GetParticleId() );
+            m_particleId->push_back ( pMCParticle->GetParticleId()  );
             m_outerRadius->push_back( pMCParticle->GetOuterRadius() );
             m_innerRadius->push_back( pMCParticle->GetInnerRadius() );
+
+            m_caloHitEnergy->push_back( caloHitEnergy );
+            m_trackEnergy->push_back(   trackEnergy   );
 
             ++mcParticleNumber;
         }
     }
-
     if( m_sort )
     {
         for( SortIndex::iterator itIdx = sortIndex.begin(), itIdxEnd = sortIndex.end(); itIdx != itIdxEnd; ++itIdx )
@@ -200,6 +218,9 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
             m_outerRadius->push_back( m_outerRadius->at(idx) );
             m_innerRadius->push_back( m_innerRadius->at(idx) );
 
+            m_caloHitEnergy->push_back( m_caloHitEnergy->at(idx) );
+            m_trackEnergy->push_back  ( m_trackEnergy->at(idx)   );
+
             mcParticleVector.push_back( mcParticleVector.at(idx) );
         }
         size_t sortIndexSize = sortIndex.size();
@@ -207,21 +228,31 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
         m_momentumX->erase( m_momentumX->begin(), m_momentumX->begin() + sortIndexSize );
         m_momentumY->erase( m_momentumY->begin(), m_momentumY->begin() + sortIndexSize );
         m_momentumZ->erase( m_momentumZ->begin(), m_momentumZ->begin() + sortIndexSize );
-        m_particleId->erase( m_particleId->begin(), m_particleId->begin() + sortIndexSize );
+        m_particleId->erase ( m_particleId->begin(),   m_particleId->begin() + sortIndexSize );
         m_outerRadius->erase( m_outerRadius->begin(), m_outerRadius->begin() + sortIndexSize );
         m_innerRadius->erase( m_innerRadius->begin(), m_innerRadius->begin() + sortIndexSize );
+
+        m_caloHitEnergy->erase( m_caloHitEnergy->begin(), m_caloHitEnergy->begin() + sortIndexSize );
+        m_trackEnergy->erase  ( m_trackEnergy->begin(),   m_trackEnergy->begin()   + sortIndexSize );
 
         mcParticleVector.erase( mcParticleVector.begin(), mcParticleVector.begin() + sortIndexSize );
     }
         
     if( m_print )
     {
+        int idx = 0;
         for( MCParticleVector::iterator itMc = mcParticleVector.begin(), itMcEnd = mcParticleVector.end(); itMc != itMcEnd; ++itMc )
         {
             const MCParticle* pMcParticle = (*itMc);
-            PrintMCParticle(pMcParticle,std::cout);
-            std::cout << "Total number of MCPFOs : " << mcParticleNumber << std::endl;
+
+            float caloHitEnergy = m_caloHitEnergy->at(idx);
+            float trackEnergy = m_trackEnergy->at(idx);
+
+            PrintMCParticle(pMcParticle,caloHitEnergy, trackEnergy, std::cout);
+            std::cout << std::endl;
+            ++idx;
         }
+        std::cout << "Total number of MCPFOs : " << mcParticleNumber << std::endl;
     }
 
 
@@ -240,6 +271,11 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
                 PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ro", m_outerRadius->at(i) ));
                 PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ri", m_innerRadius->at(i) ));
 
+                if( m_haveCaloHits )
+                    PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECalo", m_caloHitEnergy->at(i) ));
+                if( m_haveTracks )
+                    PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy->at(i) ));
+
                 PANDORA_MONITORING_API(FillTree(m_treeName));
             }
         }
@@ -252,6 +288,12 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
             PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pdg", m_particleId ));
             PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ro", m_outerRadius ));
             PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ri", m_innerRadius ));
+
+            if( m_haveCaloHits )
+                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECalo", m_caloHitEnergy ));
+            if( m_haveTracks ) 
+                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy ));
+
 
             PANDORA_MONITORING_API(FillTree(m_treeName));
         }
@@ -267,7 +309,7 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void MCParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcParticle, std::ostream & o )
+void MCParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcParticle, float& caloHitEnergy, float& trackEnergy, std::ostream & o )
 {
     static const char* whiteongreen = "\033[1;42m";  // white on green background
     static const char* reset  = "\033[0m";     // reset
@@ -295,6 +337,10 @@ void MCParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcPartic
       << std::fixed << std::setprecision(1)
       << " r_i=" << mcParticle->GetInnerRadius()
       << " r_o=" << mcParticle->GetOuterRadius();
+    if( m_haveCaloHits )
+        o << " ECalo=" << caloHitEnergy;
+    if( m_haveTracks )
+        o << " ETrack=" << trackEnergy;
 //     << " uid=" << mcParticle->GetUid();
 //    o << " dghtrs: " << mcParticle->GetDaughterList().size();
 }
@@ -329,7 +375,14 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
 
                     if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 
-                    m_mcParticleList.insert( mc );
+                    float energy = pCaloHit->GetElectromagneticEnergy();
+                    ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
+                    if( itMc == m_mcParticleToEnergyMap.end() )
+                        m_mcParticleToEnergyMap.insert( std::make_pair( mc, std::make_pair(energy, 0.f)) );
+                    else
+                    {
+                        itMc->second.first += energy;
+                    }
                 }
             }
         }
@@ -349,7 +402,16 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
                 pTrack->GetMCParticle( mc );
                 if( mc == NULL ) continue; // maybe an error should be thrown here?
 
-                m_mcParticleList.insert( mc );
+                float energy = pTrack->GetEnergyAtDca();
+
+                ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
+                if( itMc == m_mcParticleToEnergyMap.end() )
+                    m_mcParticleToEnergyMap.insert( std::make_pair(mc, std::make_pair(0.f, energy)) );
+                else
+                {
+                    if( itMc->second.second < energy )
+                        itMc->second.second = energy;
+                }
             }
         }
     }
@@ -391,7 +453,14 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
 
                             if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 
-                            m_mcParticleList.insert( mc );
+                            float energy = pCaloHit->GetElectromagneticEnergy();
+                            ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
+                            if( itMc == m_mcParticleToEnergyMap.end() )
+                                m_mcParticleToEnergyMap.insert( std::make_pair( mc, std::make_pair(energy, 0.f)) );
+                            else
+                            {
+                                itMc->second.first += energy;
+                            }
                         }
                     }
                 }
@@ -409,7 +478,16 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
                         pTrack->GetMCParticle( mc );
                         if( mc == NULL ) continue; // maybe an error should be thrown here?
 
-                        m_mcParticleList.insert( mc );
+                        float energy = pTrack->GetEnergyAtDca();
+
+                        ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
+                        if( itMc == m_mcParticleToEnergyMap.end() )
+                            m_mcParticleToEnergyMap.insert( std::make_pair(mc, std::make_pair(0.f, energy)) );
+                        else
+                        {
+                            if( itMc->second.second < energy )
+                                itMc->second.second = energy;
+                        }
                     }
                 }
             }
@@ -423,20 +501,29 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool MCParticlesMonitoringAlgorithm::TakeMCParticle(const MCParticle* pMCParticle)
+bool MCParticlesMonitoringAlgorithm::TakeMCParticle(const MCParticle* pMCParticle, float& caloHitEnergy, float& trackEnergy)
 {
     if( m_onlyFinal && !pMCParticle->GetDaughterList().empty() )
-    {
         return false;
-    }
 
-    if( m_haveCaloHits || m_haveTracks )
+    if( m_excludeRootParticles && pMCParticle->GetParentList().empty() )
+        return false;
+
+    if( m_onlyRootParticles && !pMCParticle->GetParentList().empty() )
+        return false;
+
+    ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find( pMCParticle );
+    if( itMc == m_mcParticleToEnergyMap.end() )
     {
-        ConstMCParticleList::iterator itMc = m_mcParticleList.find( pMCParticle );
-        if( itMc == m_mcParticleList.end() )
-        {
+        caloHitEnergy = 0.f;
+        trackEnergy = 0.f;
+        if( m_haveCaloHits || m_haveTracks )
             return false;
-        }
+    }
+    else
+    {
+        caloHitEnergy = itMc->second.first;
+        trackEnergy   = itMc->second.second;
         return true;
     }
 

@@ -40,7 +40,7 @@ private:
 
     void       MonitorMCParticleList( const pandora::MCParticleList& mcParticleList );
     StatusCode FillListOfUsedMCParticles();
-    bool       TakeMCParticle(const pandora::MCParticle* pMCParticle);
+    bool       TakeMCParticle(const pandora::MCParticle* pMCParticle, float& caloHitEnergy, float& trackEnergy);
 
     /**
      *  @brief  Print the MCParticle's parameters
@@ -48,7 +48,7 @@ private:
      *  @param mcParticle mcparticle of which the information is printed
      *  @param o output-stream where the information is written to
      */
-    void PrintMCParticle(const pandora::MCParticle* mcParticle, std::ostream & o );
+    void PrintMCParticle(const pandora::MCParticle* mcParticle, float& caloHitEnergy, float& trackEnergy, std::ostream & o );
 
     pandora::StringVector m_clusterListNames;            ///< list of strings denoting clusternames 
     std::string  m_monitoringFileName;                   ///< filename for storing the monitoring information (ROOT)
@@ -59,6 +59,8 @@ private:
     bool         m_indent;                               ///< indent mc particles at printout according to their outer radius
 
     bool         m_onlyFinal;                            ///< monitor only the final PFOs (those without daughters)
+    bool         m_excludeRootParticles;                 ///< exclude MC particles with no parents from monitoring
+    bool         m_onlyRootParticles;                    ///< monitor only MC particles with no parents (root of the mcparticle tree)
     bool         m_haveCaloHits;                         ///< monitor PFOs which have calohits
     bool         m_haveTracks;                           ///< monitor PFOs which have tracks
 
@@ -72,8 +74,11 @@ private:
     FloatVector* m_outerRadius;                          ///< outer radius of mcparticle
     FloatVector* m_innerRadius;                          ///< inner radius of mcparticle
 
-    typedef std::set<const pandora::MCParticle*> ConstMCParticleList;
-    ConstMCParticleList     m_mcParticleList;            ///< list of mc particles from calohits and tracks
+    FloatVector* m_caloHitEnergy;                        ///< outer radius of mcparticle
+    FloatVector* m_trackEnergy;                          ///< inner radius of mcparticle
+
+    typedef std::map<const pandora::MCParticle*,std::pair<float,float> > ConstMCParticleToEnergyMap;
+    ConstMCParticleToEnergyMap     m_mcParticleToEnergyMap;            ///< list of mc particles from calohits and tracks
 
     int m_eventCounter;                                  ///< event counter; only necessary for older ROOT versions where the tree is written "flat"
 };

@@ -50,6 +50,13 @@ public:
     float GetMCPfoSelectionRadius() const;
 
     /**
+     *  @brief  Get the momentum magnitude used to select the pfo target from a mc particle decay chain, units GeV
+     * 
+     *  @return The pfo selection momentum magnitude
+     */
+    float GetMCPfoSelectionMomentum() const;
+
+    /**
      *  @brief  Get the maximum separation for associations between hits to be considered, units mm
      * 
      *  @return The maximum separation
@@ -259,6 +266,7 @@ private:
     bool                    m_isInitialized;                    ///< Whether the pandora settings have been initialized
 
     float                   m_mcPfoSelectionRadius;             ///< Radius used to select the pfo target from a mc decay chain, units mm
+    float                   m_mcPfoSelectionMomentum;           ///< Momentum magnitude used to select the pfo target from a mc decay chain, units mm
 
     static bool             m_instanceFlag;                     ///< The geometry helper instance flag
     static PandoraSettings *m_pPandoraSettings;                 ///< The geometry helper instance
@@ -326,6 +334,13 @@ inline float PandoraSettings::GetHadronicEnergyResolution() const
 inline float PandoraSettings::GetMCPfoSelectionRadius() const
 {
     return m_mcPfoSelectionRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetMCPfoSelectionMomentum() const
+{
+    return m_mcPfoSelectionMomentum;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

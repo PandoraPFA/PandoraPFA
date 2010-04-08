@@ -127,9 +127,12 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
     if (!mcParticle->IsInitialized())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    static const float selectionRadius(PandoraSettings::GetInstance()->GetMCPfoSelectionRadius());
+    static const float selectionRadius  (PandoraSettings::GetInstance()->GetMCPfoSelectionRadius()  );
+    static const float selectionMomentum(PandoraSettings::GetInstance()->GetMCPfoSelectionMomentum());
 
-    if((mcParticle->GetOuterRadius() > selectionRadius) && (mcParticle->GetInnerRadius() <= selectionRadius))
+    if(   mcParticle->GetOuterRadius() > selectionRadius 
+       && mcParticle->GetInnerRadius() <= selectionRadius
+       && mcParticle->GetMomentum().GetMagnitude() > selectionMomentum )
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree(mcParticle, true));
     }
