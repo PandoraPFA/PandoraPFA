@@ -420,7 +420,7 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
                 positionVector.GetMagnitude() / std::sqrt(pow(positionVector.GetX(), 2) + pow(positionVector.GetY(), 2)) :
                 positionVector.GetMagnitude() / std::fabs(positionVector.GetZ()) );
 
-            if (pCaloHit->GetMipEquivalentEnergy() <= (mipLikeMipCut * angularCorrection) &&
+            if ((pCaloHit->GetMipEquivalentEnergy() <= (mipLikeMipCut * angularCorrection) || pCaloHit->IsDigital()) &&
                 (mipMaxNearbyHits >= CaloHitHelper::MipCountNearbyHits(pCaloHit, pCaloHitList)))
             {
                 pCaloHit->SetPossibleMipFlag(true);

@@ -130,16 +130,17 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
     static const float selectionRadius  (PandoraSettings::GetInstance()->GetMCPfoSelectionRadius()  );
     static const float selectionMomentum(PandoraSettings::GetInstance()->GetMCPfoSelectionMomentum());
 
-    if(   mcParticle->GetOuterRadius() > selectionRadius 
-       && mcParticle->GetInnerRadius() <= selectionRadius
-       && mcParticle->GetMomentum().GetMagnitude() > selectionMomentum )
+    if ((mcParticle->GetOuterRadius() > selectionRadius) &&
+        (mcParticle->GetInnerRadius() <= selectionRadius) &&
+        (mcParticle->GetMomentum().GetMagnitude() > selectionMomentum))
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree(mcParticle, true));
     }
     else
     {
-        // MC particle has not yet crossed boundary - set it as its own pfo target --> don't do this any more (follows discussion with Mark: only MCParticles which cross the boundary can be MCPFOs)
-        //  PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget(mcParticle));
+        // MC particle has not yet crossed boundary - set it as its own pfo target.
+        // --> don't do this any more (only MCParticles which cross the boundary can be MCPFOs)
+        // PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget(mcParticle));
 
         for(MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
             iter != iterEnd; ++iter)
@@ -169,9 +170,11 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
         MCParticle *pMCParticle = NULL;
         PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, mcParticleIter->second->GetPfoTarget(pMCParticle));
 
-        if( pMCParticle != NULL )
+        if (pMCParticle != NULL)
+        {
             if (!uidToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
                 return STATUS_CODE_ALREADY_PRESENT;
+        }
     }
 
     return STATUS_CODE_SUCCESS;

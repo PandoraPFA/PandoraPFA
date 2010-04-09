@@ -65,6 +65,7 @@ public:
         pandora::InputHitType           m_hitType;                  ///< The type of calorimeter hit
         pandora::InputDetectorRegion    m_detectorRegion;           ///< Region of the detector in which the calo hit is located
         pandora::InputUInt              m_layer;                    ///< The subdetector readout layer number
+        pandora::InputBool              m_isInOuterSamplingLayer;   ///< Whether cell is in one of the outermost detector sampling layers
         pandora::InputAddress           m_pParentAddress;           ///< Address of the parent calo hit in the user framework
     };
 

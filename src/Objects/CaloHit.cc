@@ -32,6 +32,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_hitType(caloHitParameters.m_hitType.Get()),
     m_detectorRegion(caloHitParameters.m_detectorRegion.Get()),
     m_layer(caloHitParameters.m_layer.Get()),
+    m_isInOuterSamplingLayer(caloHitParameters.m_isInOuterSamplingLayer.Get()),
     m_surroundingEnergy(0),
     m_isPossibleMip(false),
     m_isIsolated(false),

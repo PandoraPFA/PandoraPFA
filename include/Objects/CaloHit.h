@@ -138,6 +138,13 @@ public:
     PseudoLayer GetPseudoLayer() const;
 
     /**
+     *  @brief  Whether cell is in one of the outermost detector sampling layers
+     * 
+     *  @return boolean
+     */
+    bool IsInOuterSamplingLayer() const;
+
+    /**
      *  @brief  Get the calibrated mip equivalent energy
      * 
      *  @return the calibrated mip equivalent energy
@@ -277,6 +284,7 @@ private:
 
     const unsigned int      m_layer;                    ///< The subdetector readout layer number
     InputPseudoLayer        m_pseudoLayer;              ///< The pseudo layer to which the calo hit has been assigned
+    const bool              m_isInOuterSamplingLayer;   ///< Whether cell is in one of the outermost detector sampling layers
 
     InputFloat              m_densityWeight;            ///< The density weight
     float                   m_surroundingEnergy;        ///< The surrounding energy, units GeV
@@ -421,6 +429,13 @@ inline unsigned int CaloHit::GetLayer() const
 inline PseudoLayer CaloHit::GetPseudoLayer() const
 {
     return m_pseudoLayer.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CaloHit::IsInOuterSamplingLayer() const
+{
+    return m_isInOuterSamplingLayer;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
