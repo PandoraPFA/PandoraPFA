@@ -138,8 +138,8 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
     }
     else
     {
-        // MC particle has not yet crossed boundary - set it as its own pfo target
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget(mcParticle));
+        // MC particle has not yet crossed boundary - set it as its own pfo target --> don't do this any more (follows discussion with Mark: only MCParticles which cross the boundary can be MCPFOs)
+        //  PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget(mcParticle));
 
         for(MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
             iter != iterEnd; ++iter)
@@ -167,10 +167,11 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
             continue;
 
         MCParticle *pMCParticle = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticleIter->second->GetPfoTarget(pMCParticle));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, mcParticleIter->second->GetPfoTarget(pMCParticle));
 
-        if (!uidToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
-            return STATUS_CODE_ALREADY_PRESENT;
+        if( pMCParticle != NULL )
+            if (!uidToPfoTargetMap.insert(UidToMCParticleMap::value_type(relationIter->first, pMCParticle)).second)
+                return STATUS_CODE_ALREADY_PRESENT;
     }
 
     return STATUS_CODE_SUCCESS;

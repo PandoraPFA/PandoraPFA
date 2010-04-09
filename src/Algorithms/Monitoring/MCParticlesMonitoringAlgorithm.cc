@@ -108,7 +108,7 @@ StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHan
 
 
     StringVector mcParticleSelection;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "Selection", mcParticleSelection));
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "Selection", mcParticleSelection)); ///< "Final" takes only particles without daughters; "ExcludeRoot" excludes particles which don't have parents; "OnlyRoot" takes only particles which don't have parents; "CalorimeterHits"/"Tracks" takes only particles which have caused Tracks or Calorimeterhits. With the current set of rules for the MCPFO selection only particles which cross the spherical boundary around the IP are retained. All particles are therefore ROOT-particles, the ExcludeRoot, the OnlyRoot and the Final options are therefore nonsensical (this might change if a different set of rules is implemented). The CalorimeterHits and the Tracks options are still useful.
 
 
     m_onlyFinal = false;
@@ -311,18 +311,19 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
 
 void MCParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcParticle, float& caloHitEnergy, float& trackEnergy, std::ostream & o )
 {
-    static const char* whiteongreen = "\033[1;42m";  // white on green background
-    static const char* reset  = "\033[0m";     // reset
+//    static const char* whiteongreen = "\033[1;42m";  // white on green background
+//    static const char* reset  = "\033[0m";     // reset
 
     if( m_indent )
     {
         int printDepth = (int)(mcParticle->GetOuterRadius()/100); // this can be changed if the printout doesn't look good
         o << std::setw (printDepth) << " ";
     }
-    if( mcParticle->IsRootParticle() )
-    {
-        o << whiteongreen << "/ROOT/" << reset;
-    }
+//  -- indication of ROOT particles is nonsensical for the used set of MCPFO selection rules.
+//     if( mcParticle->IsRootParticle() )
+//     {
+//         o << whiteongreen << "/ROOT/" << reset;
+//     }
 
     const CartesianVector& momentum = mcParticle->GetMomentum();
 //   o << "[" << mcParticle << "]"
