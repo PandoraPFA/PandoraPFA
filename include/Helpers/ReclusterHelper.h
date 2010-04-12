@@ -151,6 +151,13 @@ inline float ReclusterHelper::ReclusterResult::GetChi2PerDof() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline float ReclusterHelper::ReclusterResult::GetUnassociatedEnergy() const
+{
+    return m_unassociatedEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline float ReclusterHelper::ReclusterResult::GetMinTrackAssociationEnergy() const
 {
     return m_minTrackAssociationEnergy.Get();
@@ -176,6 +183,14 @@ inline void ReclusterHelper::ReclusterResult::SetChi(float chi)
 inline void ReclusterHelper::ReclusterResult::SetChi2PerDof(float chi2PerDof)
 {
     if (!(m_chi2PerDof = chi2PerDof))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ReclusterHelper::ReclusterResult::SetUnassociatedEnergy(float unassociatedEnergy)
+{
+    if (!(m_unassociatedEnergy = unassociatedEnergy))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 
