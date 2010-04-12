@@ -57,7 +57,7 @@ float ReclusterHelper::GetTrackClusterCompatibility(const float clusterEnergy, c
 StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pReclusterCandidatesList, ReclusterResult &reclusterResult)
 {
     unsigned int nExcessTrackAssociations(0);
-    float chi(0.), chi2(0.), dof(0.), minTrackAssociationEnergy(std::numeric_limits<float>::max());
+    float chi(0.), chi2(0.), dof(0.), unassociatedEnergy(0.), minTrackAssociationEnergy(std::numeric_limits<float>::max());
 
     for (ClusterList::const_iterator iter = pReclusterCandidatesList->begin(), iterEnd = pReclusterCandidatesList->end(); iter != iterEnd; ++iter)
     {
@@ -65,11 +65,13 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
 
         const TrackList &trackList(pCluster->GetAssociatedTrackList());
         const unsigned int nTrackAssociations(trackList.size());
+        const float clusterEnergy(pCluster->GetHadronicEnergy());
 
         if (0 == nTrackAssociations)
+        {
+            unassociatedEnergy += clusterEnergy;
             continue;
-
-        const float clusterEnergy(pCluster->GetHadronicEnergy());
+        }
 
         if (clusterEnergy < minTrackAssociationEnergy)
             minTrackAssociationEnergy = clusterEnergy;
@@ -88,6 +90,7 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
 
     reclusterResult.SetChi(chi);
     reclusterResult.SetChi2PerDof(chi2 /= dof);
+    reclusterResult.SetUnassociatedEnergy(unassociatedEnergy);
     reclusterResult.SetMinTrackAssociationEnergy(minTrackAssociationEnergy);
     reclusterResult.SetNExcessTrackAssociations(nExcessTrackAssociations);
 

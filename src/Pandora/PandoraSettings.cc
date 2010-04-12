@@ -69,18 +69,6 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         if (0.f == m_hadronicEnergyResolution)
             return STATUS_CODE_INVALID_PARAMETER;
 
-        m_mcPfoSelectionRadius = 500.f;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "MCPfoSelectionRadius", m_mcPfoSelectionRadius));
-
-        m_mcPfoSelectionMomentum = 0.01;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "MCPfoSelectionMomentum", m_mcPfoSelectionMomentum));
-
-        m_mcPfoSelectionLowEnergyNPCutOff = 1.2;
-        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "MCPfoSelectionProtonNeutronEnergyCutOff", m_mcPfoSelectionLowEnergyNPCutOff));
-
         m_caloHitMaxSeparation = 100.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "CaloHitMaxSeparation", m_caloHitMaxSeparation));
@@ -206,6 +194,18 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         m_leavingShowerLikeEnergyInOuterLayers = 1.0f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "LeavingShowerLikeEnergyInOuterLayers", m_leavingShowerLikeEnergyInOuterLayers));
+
+        m_mcPfoSelectionRadius = 500.f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "MCPfoSelectionRadius", m_mcPfoSelectionRadius));
+
+        m_mcPfoSelectionMomentum = 0.01;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "MCPfoSelectionMomentum", m_mcPfoSelectionMomentum));
+
+        m_mcPfoSelectionLowEnergyNPCutOff = 1.2;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "MCPfoSelectionProtonNeutronEnergyCutOff", m_mcPfoSelectionLowEnergyNPCutOff));
 
         m_isInitialized = true;
 

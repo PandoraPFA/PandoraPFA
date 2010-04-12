@@ -81,6 +81,7 @@ StatusCode TrackDrivenMergingAlg::Run()
 
             // Identify best daughter candidate: that with highest cone fraction
             const float coneFraction(FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, m_coneCosineHalfAngle));
+
             if ((std::fabs(newChi) < std::fabs(m_chiToAttemptMerging)) && (coneFraction > highestConeFraction))
             {
                 highestConeFraction = coneFraction;
@@ -89,6 +90,7 @@ StatusCode TrackDrivenMergingAlg::Run()
 
             // Store all cone fraction values in order to consider multiple merges
             const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
+
             if (coneFraction > m_minConeFractionMultiple)
             {
                 if ((daughterInnerLayer < parentOuterLayer) || (daughterInnerLayer - parentOuterLayer > m_maxLayerSeparationMultiple))
@@ -141,11 +143,11 @@ StatusCode TrackDrivenMergingAlg::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "TrackClusterAssociation",
         m_trackClusterAssociationAlgName));
 
-    m_minTrackAssociations = 2;
+    m_minTrackAssociations = 1;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinTrackAssociations", m_minTrackAssociations));
 
-    if (m_minTrackAssociations < 2)
+    if (m_minTrackAssociations < 1)
         return STATUS_CODE_INVALID_PARAMETER;
 
     m_maxTrackAssociations = std::numeric_limits<unsigned int>::max();

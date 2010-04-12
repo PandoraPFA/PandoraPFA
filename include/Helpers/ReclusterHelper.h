@@ -41,6 +41,13 @@ public:
         float GetChi2PerDof() const;
 
         /**
+         *  @brief  Get the total hadronic energy in clusters that have no track associations
+         * 
+         *  @return the total hadronic energy in clusters that have no track associations
+         */
+        float GetUnassociatedEnergy() const;
+
+        /**
          *  @brief  Get the minimum energy of a cluster associated with a track
          * 
          *  @return the minimum energy of a cluster associated with a track
@@ -69,6 +76,13 @@ public:
         void SetChi2PerDof(float chi2PerDof);
 
         /**
+         *  @brief  Set the total hadronic energy in clusters that have no track associations
+         * 
+         *  @param  unassociatedEnergy the total hadronic energy in clusters that have no track associations
+         */
+        void SetUnassociatedEnergy(float unassociatedEnergy);
+
+        /**
          *  @brief  Set the minimum energy of a cluster associated with a track
          * 
          *  @param  minTrackAssociationEnergy the minimum energy of a cluster associated with a track
@@ -85,6 +99,7 @@ public:
     private:
         InputFloat      m_chi;                          ///< Total chi value for the suitability of all track/cluster associations
         InputFloat      m_chi2PerDof;                   ///< Chi2 per degree of freedom value for suitability of track/cluster associations
+        InputFloat      m_unassociatedEnergy;           ///< Total hadronic energy in clusters that have no track associations
         InputFloat      m_minTrackAssociationEnergy;    ///< Minimum energy of a cluster associated with a track
         InputUInt       m_nExcessTrackAssociations;     ///< Number of excess track-cluster associations
     };

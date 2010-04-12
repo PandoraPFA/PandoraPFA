@@ -42,8 +42,9 @@
 #include "Algorithms/PfoConstruction/TrackRecoveryHelixAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackRecoveryInteractionsAlgorithm.h"
 
-#include "Algorithms/Reclustering/SplitTrackAssociationsAlg.h"
+#include "Algorithms/Reclustering/ExitingTrackAlg.h"
 #include "Algorithms/Reclustering/ResolveTrackAssociationsAlg.h"
+#include "Algorithms/Reclustering/SplitTrackAssociationsAlg.h"
 #include "Algorithms/Reclustering/TrackDrivenAssociationAlg.h"
 #include "Algorithms/Reclustering/TrackDrivenMergingAlg.h"
 
@@ -90,6 +91,7 @@
     d("TrackRecovery",                          TrackRecoveryAlgorithm::Factory)                            \
     d("TrackRecoveryHelix",                     TrackRecoveryHelixAlgorithm::Factory)                       \
     d("TrackRecoveryInteractions",              TrackRecoveryInteractionsAlgorithm::Factory)                \
+    d("ExitingTrack",                           ExitingTrackAlg::Factory)                                   \
     d("ResolveTrackAssociations",               ResolveTrackAssociationsAlg::Factory)                       \
     d("SplitTrackAssociations",                 SplitTrackAssociationsAlg::Factory)                         \
     d("TrackDrivenAssociation",                 TrackDrivenAssociationAlg::Factory)                         \
