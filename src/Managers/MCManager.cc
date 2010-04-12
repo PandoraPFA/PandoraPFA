@@ -123,7 +123,7 @@ StatusCode MCManager::SelectPfoTargets()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle, MCParticleList& mcPfoList) const
+StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle, MCParticleList &mcPfoList) const
 {
     static const int PROTON  = 2212;
     static const int NEUTRON = 2112;
@@ -137,10 +137,12 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle, MCPar
 
     int particleId = mcParticle->GetParticleId();
 
+    // ATTN: don't take particles from previously used decay chains; could happen because mc particles can have multiple parents.
+    // Of those, some don't know the daughter.
     if ((mcParticle->GetOuterRadius() > selectionRadius) &&
         (mcParticle->GetInnerRadius() <= selectionRadius) &&
         (mcParticle->GetMomentum().GetMagnitude() > selectionMomentum) &&
-        (mcPfoList.find(mcParticle)==mcPfoList.end()) && // don't take particles of which particles earlier in the decay chain have already been taken as MCPFOs ; can happen because mc particles can have multiple parents. Of those, some don't know the daughter.
+        (mcPfoList.find(mcParticle) == mcPfoList.end()) &&
         !((particleId == PROTON || particleId == NEUTRON) && mcParticle->GetEnergy() < selectionEnergyCutOffProtonsNeutrons )
         )
     {
@@ -156,7 +158,7 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle, MCPar
         for(MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
             iter != iterEnd; ++iter)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplyPfoSelectionRules(*iter,mcPfoList));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplyPfoSelectionRules(*iter, mcPfoList));
         }
     }
 

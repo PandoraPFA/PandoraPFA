@@ -77,9 +77,9 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MCPfoSelectionMomentum", m_mcPfoSelectionMomentum));
 
-        m_mcPfoSelectionLowEnergyNeutronProtonCutOff = 1.2;
+        m_mcPfoSelectionLowEnergyNPCutOff = 1.2;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-            "MCPfoSelectionProtonNeutronEnergyCutOff", m_mcPfoSelectionLowEnergyNeutronProtonCutOff));
+            "MCPfoSelectionProtonNeutronEnergyCutOff", m_mcPfoSelectionLowEnergyNPCutOff));
 
         m_caloHitMaxSeparation = 100.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
@@ -190,6 +190,22 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         m_showerStartNonMipLayers = 2;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ShowerStartNonMipLayers", m_showerStartNonMipLayers));
+
+        m_leavingNOuterLayersToExamine = 4;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "LeavingNOuterLayersToExamine", m_leavingNOuterLayersToExamine));
+
+        m_leavingMipLikeNOccupiedLayers = 4;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "LeavingMipLikeNOccupiedLayers", m_leavingMipLikeNOccupiedLayers));
+
+        m_leavingShowerLikeNOccupiedLayers = 3;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "LeavingShowerLikeNOccupiedLayers", m_leavingShowerLikeNOccupiedLayers));
+
+        m_leavingShowerLikeEnergyInOuterLayers = 1.0f;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "LeavingShowerLikeEnergyInOuterLayers", m_leavingShowerLikeEnergyInOuterLayers));
 
         m_isInitialized = true;
 

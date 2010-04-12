@@ -167,6 +167,13 @@ public:
     PseudoLayer GetOuterPseudoLayer() const;
 
     /**
+     *  @brief  Whether the cluster contains a calo hit flagged as being in an outer sampling layer
+     * 
+     *  @return boolean
+     */
+    bool ContainsHitInOuterSamplingLayer() const;
+
+    /**
      *  @brief  Get the centroid for the cluster at a particular pseudo layer
      * 
      *  @param  pseudoLayer the pseudo layer of interest

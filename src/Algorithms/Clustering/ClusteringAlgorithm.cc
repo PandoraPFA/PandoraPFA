@@ -52,6 +52,16 @@ StatusCode ClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
     }
 
+    std::cout << "****************** DONE"<< std::endl;
+    for (ClusterVector::const_iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
+    {
+        Cluster *pCluster = *iter;
+        std::cout << "Cluster " << pCluster->GetElectromagneticEnergy() << ", " << pCluster->GetHadronicEnergy() << " nhits " << pCluster->GetNCaloHits();
+        if (pCluster->IsTrackSeeded()) std::cout << ", track seed x dir " << pCluster->GetInitialDirection().GetX();
+        if (ClusterHelper::IsClusterLeavingDetector(pCluster)) std::cout << ", LEAVING ";
+        std::cout << std::endl;
+    }
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RemoveEmptyClusters(clusterVector));
 
     return STATUS_CODE_SUCCESS;

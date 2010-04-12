@@ -651,7 +651,46 @@ bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFractio
 
 bool ClusterHelper::IsClusterLeavingDetector(Cluster *const pCluster)
 {
-    // TODO implement IsClusterLeavingDetector function
+    if (!pCluster->ContainsHitInOuterSamplingLayer())
+        return false;
+
+    // Examine occupancy and energy content of outer layers
+    const PseudoLayer outerLayer(pCluster->GetOuterPseudoLayer());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    static const PandoraSettings *const pPandoraSettings(PandoraSettings::GetInstance());
+    static const PseudoLayer nOuterLayersToExamine(pPandoraSettings->GetLeavingNOuterLayersToExamine());
+
+    if (nOuterLayersToExamine > outerLayer)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    unsigned int nOccupiedOuterLayers(0);
+    float hadronicEnergyInOuterLayers(0.f);
+
+    for (PseudoLayer iLayer = outerLayer - nOuterLayersToExamine; iLayer <= outerLayer; ++iLayer)
+    {
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+
+        if (orderedCaloHitList.end() != iter)
+        {
+            nOccupiedOuterLayers++;
+
+            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            {
+                hadronicEnergyInOuterLayers += (*hitIter)->GetHadronicEnergy();
+            }
+        }
+    }
+
+    static const unsigned int mipLikeNOccupiedOuterLayers(pPandoraSettings->GetLeavingNMipLikeOccupiedLayers());
+    static const unsigned int showerLikeNOccupiedOuterLayers(pPandoraSettings->GetLeavingNShowerLikeOccupiedLayers());
+    static const float showerLikeHadronicEnergyInOuterLayers(pPandoraSettings->GetLeavingShowerLikeEnergyInOuterLayers());
+
+    if ((nOccupiedOuterLayers >= mipLikeNOccupiedOuterLayers) ||
+        ((nOccupiedOuterLayers == showerLikeNOccupiedOuterLayers) && (hadronicEnergyInOuterLayers > showerLikeHadronicEnergyInOuterLayers)))
+    {
+        return true;
+    }
 
     return false;
 }

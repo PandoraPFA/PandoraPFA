@@ -209,6 +209,24 @@ StatusCode Cluster::RemoveIsolatedCaloHit(CaloHit *const pCaloHit)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool Cluster::ContainsHitInOuterSamplingLayer() const
+{
+    for (OrderedCaloHitList::const_reverse_iterator iter = m_orderedCaloHitList.rbegin(), iterEnd = m_orderedCaloHitList.rend();
+        iter != iterEnd; ++iter)
+    {
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd;
+            ++hitIter)
+        {
+            if ((*hitIter)->IsInOuterSamplingLayer())
+                return true;
+        }
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 {
     OrderedCaloHitList::const_iterator iter = m_orderedCaloHitList.find(pseudoLayer);

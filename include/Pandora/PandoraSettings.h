@@ -43,27 +43,6 @@ public:
     float GetHadronicEnergyResolution() const;
 
     /**
-     *  @brief  Get the radius used to select the pfo target from a mc particle decay chain, units mm
-     * 
-     *  @return The pfo selection radius
-     */
-    float GetMCPfoSelectionRadius() const;
-
-    /**
-     *  @brief  Get the momentum magnitude used to select the pfo target from a mc particle decay chain, units GeV
-     * 
-     *  @return The pfo selection momentum magnitude
-     */
-    float GetMCPfoSelectionMomentum() const;
-
-    /**
-     *  @brief  Get the energy below low energetic neutrons and protons are not taken as MCPFOs any more
-     * 
-     *  @return The energy below neutrons and protons are not taken any more as MCPFOs
-     */
-    float GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const;
-
-    /**
      *  @brief  Get the maximum separation for associations between hits to be considered, units mm
      * 
      *  @return The maximum separation
@@ -252,6 +231,55 @@ public:
      */
     unsigned int GetShowerStartNonMipLayers() const;
 
+    /**
+     *  @brief  Get number of outer cluster layers to examine to identify a leaving cluster
+     * 
+     *  @return The number of outer cluster layers to examine
+     */
+    unsigned int GetLeavingNOuterLayersToExamine() const;
+
+    /**
+     *  @brief  Get the number of occupied outer layers for a mip-like leaving cluster
+     * 
+     *  @return The number of occupied outer layers for a mip-like leaving cluster
+     */
+    unsigned int GetLeavingNMipLikeOccupiedLayers() const;
+
+    /**
+     *  @brief  Get the number of occupied outer layers for a shower-like leaving cluster
+     * 
+     *  @return The number of occupied outer layers for a shower-like leaving cluster
+     */
+    unsigned int GetLeavingNShowerLikeOccupiedLayers() const;
+
+    /**
+     *  @brief  Get the energy deposited in outer layers by a shower-like leaving cluster
+     * 
+     *  @return The energy deposited in outer layers by a shower-like leaving cluster
+     */
+    float GetLeavingShowerLikeEnergyInOuterLayers() const;
+
+    /**
+     *  @brief  Get the radius used to select the pfo target from a mc particle decay chain, units mm
+     * 
+     *  @return The pfo selection radius
+     */
+    float GetMCPfoSelectionRadius() const;
+
+    /**
+     *  @brief  Get the momentum magnitude used to select the pfo target from a mc particle decay chain, units GeV
+     * 
+     *  @return The pfo selection momentum magnitude
+     */
+    float GetMCPfoSelectionMomentum() const;
+
+    /**
+     *  @brief  Get the low energy cut-off for selection of protons/neutrons as MCPFOs
+     * 
+     *  @return The low energy cut-off for selection of protons/neutrons as MCPFOs
+     */
+    float GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -270,55 +298,60 @@ private:
      */
     StatusCode Initialize(const TiXmlHandle *const pXmlHandle);
 
-    bool                    m_isInitialized;                    ///< Whether the pandora settings have been initialized
+    static PandoraSettings *m_pPandoraSettings;             ///< The pandora settings instance
 
-    float                   m_mcPfoSelectionRadius;             ///< Radius used to select the pfo target from a mc decay chain, units mm
-    float                   m_mcPfoSelectionMomentum;           ///< Momentum magnitude used to select the pfo target from a mc decay chain, units GeV/c
-    float                   m_mcPfoSelectionLowEnergyNeutronProtonCutOff;  ///< cut-off energy used to not select p and n below this energy as MCPFOs
+    bool            m_isInitialized;                        ///< Whether the pandora settings have been initialized
+    static bool     m_instanceFlag;                         ///< The pandora settings instance flag
 
-    static bool             m_instanceFlag;                     ///< The geometry helper instance flag
-    static PandoraSettings *m_pPandoraSettings;                 ///< The geometry helper instance
+    bool            m_isMonitoringEnabled;                  ///< Whether monitoring is enabled
 
-    bool                    m_isMonitoringEnabled;              ///< Whether monitoring is enabled
+    float           m_hadronicEnergyResolution;             ///< Hadronic energy resolution, X, such that sigmaE = ( X * E / sqrt(E) )
 
-    float                   m_hadronicEnergyResolution;         ///< Hadronic energy resolution, X, such that sigmaE = ( X * E / sqrt(E) )
+    float           m_caloHitMaxSeparation;                 ///< Max separation for associations between hits to be considered, units mm
 
-    float                   m_caloHitMaxSeparation;             ///< Max separation for associations between hits to be considered, units mm
+    unsigned int    m_densityWeightPower;                   ///< The density weighting power
+    unsigned int    m_densityWeightNLayers;                 ///< Number of adjacent layers to use in density weight calculation
 
-    unsigned int            m_densityWeightPower;               ///< The density weighting power
-    unsigned int            m_densityWeightNLayers;             ///< Number of adjacent layers to use in density weight calculation
+    bool            m_shouldUseSimpleIsolationScheme;       ///< Whether to use the simple (density weight cut) isolation scheme
+    float           m_isolationDensityWeightCutECal;        ///< ECal isolation density weight cut
+    float           m_isolationDensityWeightCutHCal;        ///< HCal isolation density weight cut
 
-    bool                    m_shouldUseSimpleIsolationScheme;   ///< Whether to use the simple (density weight cut) isolation scheme
-    float                   m_isolationDensityWeightCutECal;    ///< ECal isolation density weight cut
-    float                   m_isolationDensityWeightCutHCal;    ///< HCal isolation density weight cut
+    unsigned int    m_isolationNLayers;                     ///< Number of adjacent layers to use in isolation calculation
+    float           m_isolationCutDistanceECal;             ///< ECal isolation cut distance, units mm
+    float           m_isolationCutDistanceHCal;             ///< HCal isolation cut distance, units mm
+    unsigned int    m_isolationMaxNearbyHits;               ///< Max number of "nearby" hits for a hit to be considered isolated
 
-    unsigned int            m_isolationNLayers;                 ///< Number of adjacent layers to use in isolation calculation
-    float                   m_isolationCutDistanceECal;         ///< ECal isolation cut distance, units mm
-    float                   m_isolationCutDistanceHCal;         ///< HCal isolation cut distance, units mm
-    unsigned int            m_isolationMaxNearbyHits;           ///< Max number of "nearby" hits for a hit to be considered isolated
+    float           m_mipLikeMipCut;                        ///< Mip equivalent energy cut for a hit to be flagged as a possible mip
+    unsigned int    m_mipNCellsForNearbyHit;                ///< Separation (in calorimeter cells) for hits to be declared "nearby"
+    unsigned int    m_mipMaxNearbyHits;                     ///< Max number of "nearby" hits for a hit to be flagged as a possible mip
 
-    float                   m_mipLikeMipCut;                    ///< Mip equivalent energy cut for a hit to be flagged as a possible mip
-    unsigned int            m_mipNCellsForNearbyHit;            ///< Separation (in calorimeter cells) for hits to be declared "nearby"
-    unsigned int            m_mipMaxNearbyHits;                 ///< Max number of "nearby" hits for a hit to be flagged as a possible mip
+    float           m_contactConeCosineHalfAngle1;          ///< Cosine half angle for first cone comparison in cluster contact object
+    float           m_contactConeCosineHalfAngle2;          ///< Cosine half angle for second cone comparison in cluster contact object
+    float           m_contactConeCosineHalfAngle3;          ///< Cosine half angle for third cone comparison in cluster contact object
+    float           m_contactCloseHitDistance1;             ///< First distance used to identify close hits in cluster contact object
+    float           m_contactCloseHitDistance2;             ///< Second distance used to identify close hits in cluster contact object
 
-    float                   m_contactConeCosineHalfAngle1;      ///< Cosine half angle for first cone comparison in cluster contact object
-    float                   m_contactConeCosineHalfAngle2;      ///< Cosine half angle for second cone comparison in cluster contact object
-    float                   m_contactConeCosineHalfAngle3;      ///< Cosine half angle for third cone comparison in cluster contact object
-    float                   m_contactCloseHitDistance1;         ///< First distance used to identify close hits in cluster contact object
-    float                   m_contactCloseHitDistance2;         ///< Second distance used to identify close hits in cluster contact object
+    float           m_contactDistanceThreshold;             ///< Number of calorimeter cell-widths used to identify cluster contact layers
 
-    float                   m_contactDistanceThreshold;         ///< Number of calorimeter cell-widths used to identify cluster contact layers
+    float           m_contactHelixComparisonMipFractionCut; ///< Mip fraction cut used in cluster contact helix comparison
+    unsigned int    m_contactHelixComparisonStartOffset;    ///< Start layer offset used in cluster contact helix comparison
+    unsigned int    m_contactHelixComparisonStartOffsetMip; ///< Start layer offset used for mip-like clusters in helix comparison
+    unsigned int    m_contactNHelixComparisonLayers;        ///< Max number of layers used in helix comparison for non mip-like clusters
 
-    float                   m_contactHelixComparisonMipFractionCut; ///< Mip fraction cut used in cluster contact helix comparison
-    unsigned int            m_contactHelixComparisonStartOffset;    ///< Start layer offset used in cluster contact helix comparison
-    unsigned int            m_contactHelixComparisonStartOffsetMip; ///< Start layer offset used for mip-like clusters in helix comparison
-    unsigned int            m_contactNHelixComparisonLayers;        ///< Max number of layers used in helix comparison for non mip-like clusters
+    unsigned int    m_contactMaxLayersCrossedByHelix;       ///< Max no. of layers crossed by helix between track projection and cluster
+    float           m_contactMaxTrackClusterDeltaZ;         ///< Max z separation between track projection and cluster
 
-    unsigned int            m_contactMaxLayersCrossedByHelix;   ///< Max no. of layers crossed by helix between track projection and cluster
-    float                   m_contactMaxTrackClusterDeltaZ;     ///< Max z separation between track projection and cluster
+    float           m_showerStartMipFraction;               ///< Max layer mip-fraction to declare a layer as shower-like
+    unsigned int    m_showerStartNonMipLayers;              ///< Number of successive shower-like layers required to identify shower start
 
-    float                   m_showerStartMipFraction;           ///< Max layer mip-fraction to declare a layer as shower-like
-    unsigned int            m_showerStartNonMipLayers;          ///< Number of successive shower-like layers required to identify shower start
+    unsigned int    m_leavingNOuterLayersToExamine;         ///< Number of outer cluster layers to examine to identify a leaving cluster
+    unsigned int    m_leavingMipLikeNOccupiedLayers;        ///< Number of occupied outer layers for a mip-like leaving cluster
+    unsigned int    m_leavingShowerLikeNOccupiedLayers;     ///< Number of occupied outer layers for a shower-like leaving cluster
+    float           m_leavingShowerLikeEnergyInOuterLayers; ///< Energy deposited in outer layers by a shower-like leaving cluster
+
+    float           m_mcPfoSelectionRadius;                 ///< Radius used to select pfo target from a mc decay chain, units mm
+    float           m_mcPfoSelectionMomentum;               ///< Momentum magnitude used to select pfo target from a mc decay chain, units GeV/c
+    float           m_mcPfoSelectionLowEnergyNPCutOff;      ///< Low energy cut-off for selection of protons/neutrons as MCPFOs
 
     friend class Pandora;
 };
@@ -335,27 +368,6 @@ inline bool PandoraSettings::IsMonitoringEnabled() const
 inline float PandoraSettings::GetHadronicEnergyResolution() const
 {
     return m_hadronicEnergyResolution;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetMCPfoSelectionRadius() const
-{
-    return m_mcPfoSelectionRadius;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetMCPfoSelectionMomentum() const
-{
-    return m_mcPfoSelectionMomentum;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float PandoraSettings::GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const
-{
-    return m_mcPfoSelectionLowEnergyNeutronProtonCutOff;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -545,6 +557,55 @@ inline float PandoraSettings::GetShowerStartMipFraction() const
 inline unsigned int PandoraSettings::GetShowerStartNonMipLayers() const
 {
     return m_showerStartNonMipLayers;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetLeavingNOuterLayersToExamine() const
+{
+    return m_leavingNOuterLayersToExamine;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetLeavingNMipLikeOccupiedLayers() const
+{
+    return m_leavingMipLikeNOccupiedLayers;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int PandoraSettings::GetLeavingNShowerLikeOccupiedLayers() const
+{
+    return m_leavingShowerLikeNOccupiedLayers;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetLeavingShowerLikeEnergyInOuterLayers() const
+{
+    return m_leavingShowerLikeEnergyInOuterLayers;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetMCPfoSelectionRadius() const
+{
+    return m_mcPfoSelectionRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetMCPfoSelectionMomentum() const
+{
+    return m_mcPfoSelectionMomentum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const
+{
+    return m_mcPfoSelectionLowEnergyNPCutOff;
 }
 
 } // namespace pandora

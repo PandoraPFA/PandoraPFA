@@ -114,7 +114,7 @@ private:
     *  @params mcRootParticle address of the mc root particle
     *  @params mcPfoList reference to list with all MCPFOs which have been selected so far
     */
-    StatusCode ApplyPfoSelectionRules(MCParticle *const mcRootParticle, MCParticleList& mcPfoList ) const;
+    StatusCode ApplyPfoSelectionRules(MCParticle *const mcRootParticle, MCParticleList &mcPfoList) const;
 
    /**
      *  @brief  Create a map relating calo hit uid to mc pfo target
