@@ -1133,7 +1133,9 @@ float ECalPhotonClusteringAlgorithm::GetTrueEnergyContribution(const Cluster* cl
 
             if( countedMcParticles.find( mc ) == countedMcParticles.end() ) 
             {
-                double trueEnergy             = mc->GetEnergy();
+                double trueEnergy             = 0.0;
+                if( mc != NULL )
+                    trueEnergy = mc->GetEnergy();
 
                 // add up the true energy
                 itTrueEnergyPerMCParticleId = trueEnergyPerMCParticleId.find( particleId );

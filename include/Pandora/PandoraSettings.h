@@ -57,6 +57,13 @@ public:
     float GetMCPfoSelectionMomentum() const;
 
     /**
+     *  @brief  Get the energy below low energetic neutrons and protons are not taken as MCPFOs any more
+     * 
+     *  @return The energy below neutrons and protons are not taken any more as MCPFOs
+     */
+    float GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const;
+
+    /**
      *  @brief  Get the maximum separation for associations between hits to be considered, units mm
      * 
      *  @return The maximum separation
@@ -266,7 +273,8 @@ private:
     bool                    m_isInitialized;                    ///< Whether the pandora settings have been initialized
 
     float                   m_mcPfoSelectionRadius;             ///< Radius used to select the pfo target from a mc decay chain, units mm
-    float                   m_mcPfoSelectionMomentum;           ///< Momentum magnitude used to select the pfo target from a mc decay chain, units mm
+    float                   m_mcPfoSelectionMomentum;           ///< Momentum magnitude used to select the pfo target from a mc decay chain, units GeV/c
+    float                   m_mcPfoSelectionLowEnergyNeutronProtonCutOff;  ///< cut-off energy used to not select p and n below this energy as MCPFOs
 
     static bool             m_instanceFlag;                     ///< The geometry helper instance flag
     static PandoraSettings *m_pPandoraSettings;                 ///< The geometry helper instance
@@ -341,6 +349,13 @@ inline float PandoraSettings::GetMCPfoSelectionRadius() const
 inline float PandoraSettings::GetMCPfoSelectionMomentum() const
 {
     return m_mcPfoSelectionMomentum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const
+{
+    return m_mcPfoSelectionLowEnergyNeutronProtonCutOff;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

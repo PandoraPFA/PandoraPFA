@@ -113,8 +113,9 @@ StatusCode MCManager::SelectPfoTargets()
 {
     for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
     {
+        MCParticleList mcPfoList;
         if (iter->second->IsRootParticle())
-            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, this->ApplyPfoSelectionRules(iter->second));
+            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, this->ApplyPfoSelectionRules(iter->second, mcPfoList));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -122,19 +123,29 @@ StatusCode MCManager::SelectPfoTargets()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
+StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle, MCParticleList& mcPfoList) const
 {
+    static const int PROTON  = 2212;
+    static const int NEUTRON = 2112;
+
     if (!mcParticle->IsInitialized())
         return STATUS_CODE_NOT_INITIALIZED;
 
     static const float selectionRadius  (PandoraSettings::GetInstance()->GetMCPfoSelectionRadius()  );
     static const float selectionMomentum(PandoraSettings::GetInstance()->GetMCPfoSelectionMomentum());
+    static const float selectionEnergyCutOffProtonsNeutrons(PandoraSettings::GetInstance()->GetMCPfoSelectionLowEnergyNeutronProtonCutOff());
+
+    int particleId = mcParticle->GetParticleId();
 
     if ((mcParticle->GetOuterRadius() > selectionRadius) &&
         (mcParticle->GetInnerRadius() <= selectionRadius) &&
-        (mcParticle->GetMomentum().GetMagnitude() > selectionMomentum))
+        (mcParticle->GetMomentum().GetMagnitude() > selectionMomentum) &&
+        (mcPfoList.find(mcParticle)==mcPfoList.end()) && // don't take particles of which particles earlier in the decay chain have already been taken as MCPFOs ; can happen because mc particles can have multiple parents. Of those, some don't know the daughter.
+        !((particleId == PROTON || particleId == NEUTRON) && mcParticle->GetEnergy() < selectionEnergyCutOffProtonsNeutrons )
+        )
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree(mcParticle, true));
+        mcPfoList.insert(mcParticle);
     }
     else
     {
@@ -145,7 +156,7 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle) const
         for(MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
             iter != iterEnd; ++iter)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplyPfoSelectionRules(*iter));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplyPfoSelectionRules(*iter,mcPfoList));
         }
     }
 
