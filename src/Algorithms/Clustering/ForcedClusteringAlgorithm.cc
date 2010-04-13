@@ -45,10 +45,13 @@ StatusCode ForcedClusteringAlgorithm::Run()
 
     for (CaloHitList::const_iterator iter = inputCaloHitList.begin(), iterEnd = inputCaloHitList.end(); iter != iterEnd; ++iter)
     {
-        float distanceToTrackSeed(std::numeric_limits<float>::max());
+        if (CaloHitHelper::IsCaloHitAvailable(*iter) && (m_shouldClusterIsolatedHits || !(*iter)->IsIsolated()))
+        {
+            float distanceToTrackSeed(std::numeric_limits<float>::max());
 
-        if (STATUS_CODE_SUCCESS == this->GetDistanceToTrackSeed(pCluster, *iter, distanceToTrackSeed))
-            caloHitDistanceVector.push_back(std::make_pair(*iter, distanceToTrackSeed));
+            if (STATUS_CODE_SUCCESS == this->GetDistanceToTrackSeed(pCluster, *iter, distanceToTrackSeed))
+                caloHitDistanceVector.push_back(std::make_pair(*iter, distanceToTrackSeed));
+        }
     }
 
     std::sort(caloHitDistanceVector.begin(), caloHitDistanceVector.end(), ForcedClusteringAlgorithm::SortByDistanceToTrackSeed);
@@ -71,17 +74,17 @@ StatusCode ForcedClusteringAlgorithm::Run()
     {
         CaloHitList remnantCaloHitList;
 
-         for (CaloHitList::const_iterator iter = inputCaloHitList.begin(), iterEnd = inputCaloHitList.end(); iter != iterEnd; ++iter)
-         {
-             if (CaloHitHelper::IsCaloHitAvailable(*iter))
+        for (CaloHitList::const_iterator iter = inputCaloHitList.begin(), iterEnd = inputCaloHitList.end(); iter != iterEnd; ++iter)
+        {
+            if (CaloHitHelper::IsCaloHitAvailable(*iter) && (m_shouldClusterIsolatedHits || !(*iter)->IsIsolated()))
                 remnantCaloHitList.insert(*iter);
-         }
+        }
 
         Cluster *pRemnantCluster = NULL;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &remnantCaloHitList, pRemnantCluster));
     }
 
-    // If specified, associate isolated hits to newly formed clusters
+    // If specified, associate isolated hits with the newly formed clusters
     if (m_shouldAssociateIsolatedHits)
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_isolatedHitAssociationAlgorithmName));
@@ -158,6 +161,10 @@ StatusCode ForcedClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "StandardClustering",
             m_standardClusteringAlgorithmName));
     }
+
+    m_shouldClusterIsolatedHits = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldClusterIsolatedHits", m_shouldClusterIsolatedHits));
 
     m_shouldAssociateIsolatedHits = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

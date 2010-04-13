@@ -57,6 +57,7 @@ private:
     bool            m_shouldRunStandardClusteringAlgorithm; ///< Whether to run a standard clustering algorithm to deal with remnants
     std::string     m_standardClusteringAlgorithmName;      ///< The name of the standard clustering algorithm to run
 
+    bool            m_shouldClusterIsolatedHits;            ///< Whether to directly include isolated hits in newly formed clusters
     bool            m_shouldAssociateIsolatedHits;          ///< Whether to associate isolated hits to newly formed clusters
     std::string     m_isolatedHitAssociationAlgorithmName;  ///< The name of isolated hit association algorithm
 };
