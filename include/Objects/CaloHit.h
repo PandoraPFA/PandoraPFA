@@ -205,6 +205,13 @@ public:
      */
      const void *GetParentCaloHitAddress() const;
 
+    /**
+     *  @brief  Set the isolated hit flag
+     * 
+     *  @param  isolatedFlag the isolated hit flag
+     */
+    void SetIsolatedFlag(bool isolatedFlag);
+
 private:
     /**
      *  @brief  Constructor
@@ -245,13 +252,6 @@ private:
      *  @param  possibleMipFlag the possible mip flag
      */
     void SetPossibleMipFlag(bool possibleMipFlag);
-
-    /**
-     *  @brief  Set the isolated hit flag
-     * 
-     *  @param  isolatedFlag the isolated hit flag
-     */
-    void SetIsolatedFlag(bool isolatedFlag);
 
     /**
      *  @brief  Set the mc particle associated with the calo hit

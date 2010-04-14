@@ -44,6 +44,13 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void CaloHit::SetIsolatedFlag(bool isolatedFlag)
+{
+    m_isIsolated = isolatedFlag;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode CaloHit::SetPseudoLayer(PseudoLayer pseudoLayer)
 {
     if (!(m_pseudoLayer = pseudoLayer))
@@ -74,13 +81,6 @@ void CaloHit::AddSurroundingEnergy(float surroundingEnergy)
 void CaloHit::SetPossibleMipFlag(bool possibleMipFlag)
 {
     m_isPossibleMip = possibleMipFlag;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void CaloHit::SetIsolatedFlag(bool isolatedFlag)
-{
-    m_isIsolated = isolatedFlag;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

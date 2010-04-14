@@ -89,6 +89,8 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
         return STATUS_CODE_FAILURE;
 
     reclusterResult.SetChi(chi);
+    reclusterResult.SetChi2(chi2);
+    reclusterResult.SetChiPerDof(chi /= dof);
     reclusterResult.SetChi2PerDof(chi2 /= dof);
     reclusterResult.SetUnassociatedEnergy(unassociatedEnergy);
     reclusterResult.SetMinTrackAssociationEnergy(minTrackAssociationEnergy);

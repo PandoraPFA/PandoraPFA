@@ -34,6 +34,20 @@ public:
         float GetChi() const;
 
         /**
+         *  @brief  Get the total chi2 value for the suitability of all track/cluster associations
+         * 
+         *  @return the total chi2 value
+         */
+        float GetChi2() const;
+
+        /**
+         *  @brief  Get the chi per degree of freedom value for suitability of track/cluster associations
+         * 
+         *  @return the chi per degree of freedom value
+         */
+        float GetChiPerDof() const;
+
+        /**
          *  @brief  Get the chi2 per degree of freedom value for suitability of track/cluster associations
          * 
          *  @return the chi2 per degree of freedom value
@@ -69,6 +83,20 @@ public:
         void SetChi(float chi);
 
         /**
+         *  @brief  Set the total chi2 value for the suitability of all track/cluster associations
+         * 
+         *  @param  chi the total chi2 value
+         */
+        void SetChi2(float chi2);
+
+        /**
+         *  @brief  Set the chi per degree of freedom value for suitability of track/cluster associations
+         * 
+         *  @param  chiPerDof the chi per degree of freedom value
+         */
+        void SetChiPerDof(float chiPerDof);
+
+        /**
          *  @brief  Set the chi2 per degree of freedom value for suitability of track/cluster associations
          * 
          *  @param  chi2PerDof the chi2 per degree of freedom value
@@ -98,6 +126,8 @@ public:
 
     private:
         InputFloat      m_chi;                          ///< Total chi value for the suitability of all track/cluster associations
+        InputFloat      m_chi2;                         ///< Total chi2 value for the suitability of all track/cluster associations
+        InputFloat      m_chiPerDof;                    ///< Chi per degree of freedom value for suitability of track/cluster associations
         InputFloat      m_chi2PerDof;                   ///< Chi2 per degree of freedom value for suitability of track/cluster associations
         InputFloat      m_unassociatedEnergy;           ///< Total hadronic energy in clusters that have no track associations
         InputFloat      m_minTrackAssociationEnergy;    ///< Minimum energy of a cluster associated with a track
@@ -144,6 +174,20 @@ inline float ReclusterHelper::ReclusterResult::GetChi() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline float ReclusterHelper::ReclusterResult::GetChi2() const
+{
+    return m_chi2.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ReclusterHelper::ReclusterResult::GetChiPerDof() const
+{
+    return m_chiPerDof.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline float ReclusterHelper::ReclusterResult::GetChi2PerDof() const
 {
     return m_chi2PerDof.Get();
@@ -175,6 +219,22 @@ inline unsigned int ReclusterHelper::ReclusterResult::GetNExcessTrackAssociation
 inline void ReclusterHelper::ReclusterResult::SetChi(float chi)
 {
     if (!(m_chi = chi))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ReclusterHelper::ReclusterResult::SetChi2(float chi2)
+{
+    if (!(m_chi2 = chi2))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ReclusterHelper::ReclusterResult::SetChiPerDof(float chiPerDof)
+{
+    if (!(m_chiPerDof = chiPerDof))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 

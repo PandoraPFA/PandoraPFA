@@ -44,6 +44,7 @@
 
 #include "Algorithms/Reclustering/ExitingTrackAlg.h"
 #include "Algorithms/Reclustering/ResolveTrackAssociationsAlg.h"
+#include "Algorithms/Reclustering/SplitMergedClustersAlg.h"
 #include "Algorithms/Reclustering/SplitTrackAssociationsAlg.h"
 #include "Algorithms/Reclustering/TrackDrivenAssociationAlg.h"
 #include "Algorithms/Reclustering/TrackDrivenMergingAlg.h"
@@ -93,6 +94,7 @@
     d("TrackRecoveryInteractions",              TrackRecoveryInteractionsAlgorithm::Factory)                \
     d("ExitingTrack",                           ExitingTrackAlg::Factory)                                   \
     d("ResolveTrackAssociations",               ResolveTrackAssociationsAlg::Factory)                       \
+    d("SplitMergedClusters",                    SplitMergedClustersAlg::Factory)                            \
     d("SplitTrackAssociations",                 SplitTrackAssociationsAlg::Factory)                         \
     d("TrackDrivenAssociation",                 TrackDrivenAssociationAlg::Factory)                         \
     d("TrackDrivenMerging",                     TrackDrivenMergingAlg::Factory)                             \

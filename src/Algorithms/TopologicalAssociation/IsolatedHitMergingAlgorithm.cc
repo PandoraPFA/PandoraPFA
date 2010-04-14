@@ -50,7 +50,6 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         if (nCaloHits > m_minHitsInCluster)
             continue;
 
-        // TODO should these hits be flagged as isolated?
         CaloHitList caloHitList;
         pClusterToDelete->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
 
@@ -62,6 +61,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
+            pCaloHit->SetIsolatedFlag(true);
 
             Cluster *pBestHostCluster(NULL);
             PseudoLayer bestHostInnerLayer(0);
