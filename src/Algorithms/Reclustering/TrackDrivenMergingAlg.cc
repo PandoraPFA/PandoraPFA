@@ -34,9 +34,6 @@ StatusCode TrackDrivenMergingAlg::Run()
         if ((nTrackAssociations < m_minTrackAssociations) || (nTrackAssociations > m_maxTrackAssociations))
             continue;
 
-        if (ClusterHelper::IsClusterLeavingDetector(pParentCluster))
-            continue;
-
         // Check compatibility of cluster with its associated tracks
         float trackEnergySum(0.);
         for (TrackList::const_iterator trackIter = parentTrackList.begin(), trackIterEnd = parentTrackList.end(); trackIter != trackIterEnd; ++trackIter)
@@ -55,6 +52,9 @@ StatusCode TrackDrivenMergingAlg::Run()
         const float originalChi((parentClusterEnergy - trackEnergySum) / sigmaTrackEnergy);
 
         if (originalChi > m_chiToAttemptMerging)
+            continue;
+
+        if (ClusterHelper::IsClusterLeavingDetector(pParentCluster))
             continue;
 
         // Examine pairs of clusters to evaluate merging suitability.

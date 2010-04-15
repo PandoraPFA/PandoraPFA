@@ -48,6 +48,9 @@ StatusCode ResolveTrackAssociationsAlg::Run()
         if (chi > m_chiToAttemptReclustering)
             continue;
 
+        if (ClusterHelper::IsClusterLeavingDetector(pParentCluster))
+            continue;
+
         // Specify tracks and clusters to be used in reclustering
         TrackList reclusterTrackList(trackList.begin(), trackList.end());
 

@@ -61,7 +61,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
-            pCaloHit->SetIsolatedFlag(true);
+            //pCaloHit->SetIsolatedFlag(true);
 
             Cluster *pBestHostCluster(NULL);
             PseudoLayer bestHostInnerLayer(0);
