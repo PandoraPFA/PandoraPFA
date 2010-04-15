@@ -77,7 +77,10 @@ StatusCode TrackDrivenAssociationAlg::Run()
             for (TrackList::const_iterator iter = daughterTrackList.begin(), iterEnd = daughterTrackList.end(); iter != iterEnd; ++iter)
             {
                 daughterTrackEnergy += (*iter)->GetEnergyAtDca();
+            }
 
+            for (TrackList::const_iterator iter = parentTrackList.begin(), iterEnd = parentTrackList.end(); iter != iterEnd; ++iter)
+            {
                 const float fraction(FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, *iter, m_coneCosineHalfAngle));
 
                 if (fraction > bestFraction)

@@ -93,7 +93,7 @@ StatusCode TrackDrivenMergingAlg::Run()
 
             if (coneFraction > m_minConeFractionMultiple)
             {
-                if ((daughterInnerLayer < parentOuterLayer) || (daughterInnerLayer - parentOuterLayer > m_maxLayerSeparationMultiple))
+                if ((daughterInnerLayer < parentOuterLayer) || (daughterInnerLayer - parentOuterLayer < m_maxLayerSeparationMultiple))
                     coneFractionToClusterMap.insert(ConeFractionToClusterMap::value_type(coneFraction, pDaughterCluster));
             }
         }
@@ -109,6 +109,7 @@ StatusCode TrackDrivenMergingAlg::Run()
         float lastChi(originalChi);
         float daughterClusterEnergySum(0.);
         ClusterVector daughterClusters;
+        bool performMultipleMerge(false);
 
         for (ConeFractionToClusterMap::const_reverse_iterator iter = coneFractionToClusterMap.rbegin(), iterEnd = coneFractionToClusterMap.rend();
             iter != iterEnd; ++iter)
@@ -119,9 +120,15 @@ StatusCode TrackDrivenMergingAlg::Run()
             if ((std::fabs(newChi) > std::fabs(lastChi)) || (newChi > std::fabs(m_chiToAttemptMerging)))
                 break;
 
+            if (std::fabs(newChi) < std::fabs(m_chiToAttemptMerging))
+                performMultipleMerge = true;
+
             lastChi = newChi;
             daughterClusters.push_back(iter->second);
         }
+
+        if (!performMultipleMerge)
+            continue;
 
         // Finally, merge parent with the selected daughter clusters
         for (ClusterVector::const_iterator iter = daughterClusters.begin(), iterEnd = daughterClusters.end(); iter != iterEnd; ++iter)
