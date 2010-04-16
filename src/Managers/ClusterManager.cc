@@ -335,6 +335,26 @@ StatusCode ClusterManager::DeleteClusters(const ClusterList &clusterList, const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterManager::DeleteClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName)
+{
+    NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(clusterListName);
+
+    if (m_nameToClusterListMap.end() == clusterListIter)
+        return STATUS_CODE_NOT_FOUND;
+
+    for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
+        clusterIter != clusterIterEnd; ++clusterIter)
+    {
+        delete (*clusterIter);
+    }
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RemoveEmptyClusterList(pAlgorithm, clusterListName));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete)
 {
     if (pClusterToEnlarge == pClusterToDelete)

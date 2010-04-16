@@ -211,9 +211,17 @@ private:
      *  @brief  Delete a list of clusters from a specified list
      * 
      *  @param  clusterList the list of addresses of clusters to delete
-     *  @param  listName the name of the list containing the cluster
+     *  @param  listName the name of the list containing the clusters
      */
     StatusCode DeleteClusters(const ClusterList &clusterList, const std::string &listName);
+
+    /**
+     *  @brief  Delete the contents of a cluster list and remove the list
+     * 
+     *  @param  pAlgorithm address of the algorithm calling this function
+     *  @param  clusterListName the name of the cluster list
+     */
+    StatusCode DeleteClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName);
 
     /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second

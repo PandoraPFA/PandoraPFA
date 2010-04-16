@@ -97,11 +97,20 @@ private:
     static StatusCode SetCaloHitAvailability(CaloHitList &caloHitList, bool isAvailable);
 
     /**
-     *  @brief  Create a calo hit usage map containing an entry for each calo hit in the ordered calo hit list
-     *          specifying whether the calo hit is available to be added to a cluster.
+     *  @brief  Create a calo hit usage map containing an entry for each calo hit in a cluster list
+     *          specifying whether the calo hit is available to be added to a cluster
      * 
-     *  @param  usageMapName 
-     *  @param  pOrderedCaloHitList 
+     *  @param  usageMapName the usage map name
+     *  @param  clusterList the cluster list
+     */
+    static StatusCode CreateInitialCaloHitUsageMap(const std::string &usageMapName, const ClusterList &clusterList);
+
+    /**
+     *  @brief  Create a calo hit usage map containing an entry for each calo hit in an ordered calo hit list
+     *          specifying whether the calo hit is available to be added to a cluster
+     * 
+     *  @param  usageMapName the usage map name
+     *  @param  pOrderedCaloHitList the address of the ordered calo hit list
      */
     static StatusCode CreateInitialCaloHitUsageMap(const std::string &usageMapName, const OrderedCaloHitList *pOrderedCaloHitList);
 

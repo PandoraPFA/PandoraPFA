@@ -9,6 +9,7 @@
 #include "Helpers/CaloHitHelper.h"
 
 #include "Objects/CaloHit.h"
+#include "Objects/Cluster.h"
 #include "Objects/OrderedCaloHitList.h"
 
 #include "Pandora/PandoraSettings.h"
@@ -253,6 +254,23 @@ StatusCode CaloHitHelper::SetCaloHitAvailability(CaloHitList &caloHitList, bool 
 
         usageMapIter->second = isAvailable;
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitHelper::CreateInitialCaloHitUsageMap(const std::string &usageMapName, const ClusterList &clusterList)
+{
+    OrderedCaloHitList orderedCaloHitList;
+
+    for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add((*iter)->GetOrderedCaloHitList()));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add((*iter)->GetIsolatedCaloHitList()));
+    }
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::CreateInitialCaloHitUsageMap(usageMapName, &orderedCaloHitList));
 
     return STATUS_CODE_SUCCESS;
 }

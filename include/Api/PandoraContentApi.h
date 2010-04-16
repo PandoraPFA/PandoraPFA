@@ -210,6 +210,27 @@ public:
     static StatusCode GetTrackList(const pandora::Algorithm &algorithm, const std::string &trackListName, const pandora::TrackList *&pTrackList);
 
     /**
+     *  @brief  Initialize cluster fragmentation operations, allowing hits in a list of clusters to be redistributed
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  inputClusterList the input cluster list
+     *  @param  originalClustersListName to receive the name of the list in which the original clusters are stored
+     *  @param  fragmentClustersListName to receive the name of the list in which the fragment clusters are stored
+     */
+    static StatusCode InitializeFragmentation(const pandora::Algorithm &algorithm, const pandora::ClusterList &inputClusterList,
+        std::string &originalClustersListName, std::string &fragmentClustersListName);
+
+    /**
+     *  @brief  End cluster fragmentation operations
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  clusterListToSaveName the name of the list containing the clusters chosen to be saved (original or fragments)
+     *  @param  clusterListToDeleteName the name of the list containing the clusters chosen to be deleted (original or fragments)
+     */
+    static StatusCode EndFragmentation(const pandora::Algorithm &algorithm, const std::string &clusterListToSaveName,
+        const std::string &clusterListToDeleteName);
+
+    /**
      *  @brief  Initialize reclustering operations
      * 
      *  @param  algorithm the algorithm calling this function

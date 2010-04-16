@@ -147,6 +147,23 @@ StatusCode PandoraContentApi::GetTrackList(const pandora::Algorithm &algorithm, 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::InitializeFragmentation(const pandora::Algorithm &algorithm, const pandora::ClusterList &inputClusterList,
+    std::string &originalClustersListName, std::string &fragmentClustersListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->InitializeFragmentation(algorithm, inputClusterList, originalClustersListName,
+        fragmentClustersListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::EndFragmentation(const pandora::Algorithm &algorithm, const std::string &clusterListToSaveName,
+    const std::string &clusterListToDeleteName)
+{
+    return algorithm.GetPandoraContentApiImpl()->EndFragmentation(algorithm, clusterListToSaveName, clusterListToDeleteName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::InitializeReclustering(const pandora::Algorithm &algorithm, const pandora::TrackList &inputTrackList,
     const pandora::ClusterList &inputClusterList, std::string &originalClustersListName)
 {

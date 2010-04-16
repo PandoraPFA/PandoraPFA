@@ -127,6 +127,27 @@ public:
     StatusCode GetTrackList(const std::string &trackListName, const TrackList *&pTrackList) const;
 
     /**
+     *  @brief  Initialize cluster fragmentation operations, allowing hits in a list of clusters to be redistributed
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  inputClusterList the input cluster list
+     *  @param  originalClustersListName to receive the name of the list in which the original clusters are stored
+     *  @param  fragmentClustersListName to receive the name of the list in which the fragment clusters are stored
+     */
+    StatusCode InitializeFragmentation(const Algorithm &algorithm, const ClusterList &inputClusterList,
+        std::string &originalClustersListName, std::string &fragmentClustersListName) const;
+
+    /**
+     *  @brief  End cluster fragmentation operations
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  clusterListToSaveName the name of the list containing the clusters chosen to be saved (original or fragments)
+     *  @param  clusterListToDeleteName the name of the list containing the clusters chosen to be deleted (original or fragments)
+     */
+    StatusCode EndFragmentation(const Algorithm &algorithm, const std::string &clusterListToSaveName,
+        const std::string &clusterListToDeleteName) const;
+
+    /**
      *  @brief  Initialize reclustering operations
      * 
      *  @param  algorithm the algorithm calling this function

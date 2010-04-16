@@ -43,6 +43,15 @@ public:
      */
     static bool IsPhotonFast(Cluster *const pCluster);
 
+    /**
+     *  @brief  Provide fast identification of whether a cluster is a electron
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsElectronFast(Cluster *const pCluster);
+
 private:
     /**
      *  @brief  Read the particle id helper settings
@@ -97,6 +106,13 @@ private:
     static float        m_photonIdLayer90HighECut2;         ///< High energy cut on max number of layers between layer 90 and inner layer
 
     static int          m_photonIdLayer90MaxLayersFromECal; ///< Max number of layers between cluster layer 90 and last ecal layer
+
+    static unsigned int m_electronIdMaxInnerLayer;          ///< Max inner psuedo layer for fast electron id
+    static float        m_electronIdMaxEnergy;              ///< Max electromagnetic energy for fast electron id
+    static float        m_electronIdMaxProfileStart;        ///< Max shower profile start for fast electron id
+    static float        m_electronIdMaxProfileDiscrepancy;  ///< Max shower profile discrepancy for fast electron id
+    static float        m_electronIdProfileDiscrepancyForAutoId;    ///< Shower profile discrepancy for automatic fast electron selection
+    static float        m_electronIdMaxResidualEOverP;      ///< Max absolute difference between unity and ratio em energy / track momentum
 
     friend class PandoraSettings;
 };

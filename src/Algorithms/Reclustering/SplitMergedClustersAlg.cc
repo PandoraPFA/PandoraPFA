@@ -117,13 +117,15 @@ StatusCode SplitMergedClustersAlg::Run()
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
                 ReclusterHelper::ReclusterResult forcedClusterResult;
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ExtractReclusterResults(pForcedClusterList, forcedClusterResult));
 
-                const float forcedChi2(forcedClusterResult.GetChi2PerDof());
-                const float originalChi2(chi * chi);
+                if (STATUS_CODE_SUCCESS == ReclusterHelper::ExtractReclusterResults(pForcedClusterList, forcedClusterResult))
+                {
+                    const float forcedChi2(forcedClusterResult.GetChi2PerDof());
+                    const float originalChi2(chi * chi);
 
-                if ((originalChi2 - forcedChi2 > m_minForcedChi2Improvement) && (forcedChi2 < m_maxForcedChi2))
-                    bestReclusterListName = forcedListName;
+                    if ((originalChi2 - forcedChi2 > m_minForcedChi2Improvement) && (forcedChi2 < m_maxForcedChi2))
+                        bestReclusterListName = forcedListName;
+                }
             }
         }
 

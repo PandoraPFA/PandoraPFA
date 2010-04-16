@@ -330,6 +330,45 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool ParticleIdHelper::IsElectronFast(Cluster *const pCluster)
+{
+    const TrackList &associatedTrackList(pCluster->GetAssociatedTrackList());
+
+    if (associatedTrackList.empty())
+        return false;
+
+    const float electromagneticEnergy(pCluster->GetElectromagneticEnergy());
+
+    if (!pCluster->IsPhotonFast() && ((pCluster->GetInnerPseudoLayer() > m_electronIdMaxInnerLayer) || (electromagneticEnergy > m_electronIdMaxEnergy)))
+        return false;
+
+    const float showerProfileStart(pCluster->GetShowerProfileStart());
+    const float showerProfileDiscrepancy(pCluster->GetShowerProfileDiscrepancy());
+
+    if ((showerProfileStart > m_electronIdMaxProfileStart) || (showerProfileDiscrepancy > m_electronIdMaxProfileDiscrepancy))
+        return false;
+
+    if (showerProfileDiscrepancy < m_electronIdProfileDiscrepancyForAutoId)
+        return true;
+
+    for (TrackList::const_iterator iter = associatedTrackList.begin(), iterEnd = associatedTrackList.end(); iter != iterEnd; ++iter)
+    {
+        const float momentumAtDca((*iter)->GetMomentumAtDca().GetMagnitude());
+
+        if (0.f == momentumAtDca)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
+
+        const float eOverP(electromagneticEnergy / momentumAtDca);
+
+        if (std::fabs(eOverP - 1.f) < m_electronIdMaxResidualEOverP)
+            return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 // Parameter default values
 float ParticleIdHelper::m_showerProfileBinWidth = 0.5f;
 unsigned int ParticleIdHelper::m_showerProfileNBins = 100;
@@ -367,6 +406,13 @@ float ParticleIdHelper::m_photonIdLayer90Cut2Energy = 40.f;
 float ParticleIdHelper::m_photonIdLayer90LowECut2 = 40.f;
 float ParticleIdHelper::m_photonIdLayer90HighECut2 = 50.f;
 int ParticleIdHelper::m_photonIdLayer90MaxLayersFromECal = 10;
+
+unsigned int ParticleIdHelper::m_electronIdMaxInnerLayer = 4;
+float ParticleIdHelper::m_electronIdMaxEnergy = 5.f;
+float ParticleIdHelper::m_electronIdMaxProfileStart = 2.5f;
+float ParticleIdHelper::m_electronIdMaxProfileDiscrepancy = 0.6f;
+float ParticleIdHelper::m_electronIdProfileDiscrepancyForAutoId = 0.5f;
+float ParticleIdHelper::m_electronIdMaxResidualEOverP = 0.2f;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -481,6 +527,25 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "PhotonIdLayer90MaxLayersFromECal", m_photonIdLayer90MaxLayersFromECal));
+
+    // Fast electron id settings
+   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "ElectronIdMaxInnerLayer", m_electronIdMaxInnerLayer));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "ElectronIdMaxEnergy", m_electronIdMaxEnergy));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "ElectronIdMaxProfileStart", m_electronIdMaxProfileStart));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "ElectronIdMaxProfileDiscrepancy", m_electronIdMaxProfileDiscrepancy));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "ElectronIdProfileDiscrepancyForAutoId", m_electronIdProfileDiscrepancyForAutoId));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "ElectronIdMaxResidualEOverP", m_electronIdMaxResidualEOverP));
 
     return STATUS_CODE_SUCCESS;
 }

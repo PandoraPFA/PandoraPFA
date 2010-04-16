@@ -80,8 +80,11 @@ StatusCode ForcedClusteringAlgorithm::Run()
                 remnantCaloHitList.insert(*iter);
         }
 
-        Cluster *pRemnantCluster = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &remnantCaloHitList, pRemnantCluster));
+        if (!remnantCaloHitList.empty())
+        {
+            Cluster *pRemnantCluster = NULL;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &remnantCaloHitList, pRemnantCluster));
+        }
     }
 
     // If specified, associate isolated hits with the newly formed clusters
