@@ -42,8 +42,11 @@ StatusCode ClusterPreparationAlgorithm::Run()
     }
 
     // Now make corrections to these energy estimates
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CleanClusters());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ScaleHotHadronEnergy());
+    if (m_shouldCleanClusters)
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CleanClusters());
+
+    if (m_shouldScaleHotHadrons)
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ScaleHotHadronEnergy());
 
     return STATUS_CODE_SUCCESS;
 }
@@ -219,6 +222,14 @@ StatusCode ClusterPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     m_finalPfoListName = "pfoCreation";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FinalPfoListName", m_finalPfoListName));
+
+    m_shouldCleanClusters = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldCleanClusters", m_shouldCleanClusters));
+
+    m_shouldScaleHotHadrons = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldScaleHotHadrons", m_shouldScaleHotHadrons));
 
     m_minCleanHitEnergy = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

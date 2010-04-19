@@ -52,6 +52,9 @@ private:
     pandora::StringVector   m_candidateListNames;           ///< The list of cluster list names to use
     std::string             m_finalPfoListName;             ///< The name of the output cluster list
 
+    bool                    m_shouldCleanClusters;          ///< Whether to make cluster cleaning energy corrections
+    bool                    m_shouldScaleHotHadrons;        ///< Whether to make hot hadron energy corrections
+
     float                   m_minCleanHitEnergy;            ///< Min calo hit hadronic energy to consider cleaning hit/cluster
     float                   m_minCleanHitEnergyFraction;    ///< Min fraction of cluster energy represented by hit to consider cleaning
     float                   m_minCleanCorrectedHitEnergy;   ///< Min value of new hit hadronic energy estimate after cleaning
