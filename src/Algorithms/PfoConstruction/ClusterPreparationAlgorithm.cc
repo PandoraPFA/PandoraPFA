@@ -8,6 +8,8 @@
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 
+#include "Helpers/ParticleIdHelper.h"
+
 #include <limits>
 
 using namespace pandora;
@@ -26,11 +28,21 @@ StatusCode ClusterPreparationAlgorithm::Run()
     const ClusterList *pFinalClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pFinalClusterList));
 
+    //    // Perform full photon id on output clusters
+    //    for (ClusterList::const_iterator iter = pFinalClusterList->begin(), iterEnd = pFinalClusterList->end(); iter != iterEnd; ++iter)
+    //    {
+    //        Cluster *pCluster = *iter;
+    //
+    //        if (ParticleIdHelper::IsPhotonFull(pCluster))
+    //            pCluster->SetIsPhotonFlag(true);
+    //    }
+
     // Set best energy estimates for output clusters
     for (ClusterList::const_iterator iter = pFinalClusterList->begin(), iterEnd = pFinalClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
 
+        // ATTN: Fast photon id defers to any previous algorithm that has flagged the cluster as a photon
         if (pCluster->IsPhotonFast())
         {
             pCluster->SetBestEnergyEstimate(pCluster->GetElectromagneticEnergy());
@@ -64,8 +76,8 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
     {
         Cluster *pCluster = *iter;
 
-//        if (pCluster->IsPhotonFast())
-//            continue;
+        if (pCluster->IsPhotonFast())
+            continue;
 
         const float clusterHadronicEnergy(pCluster->GetHadronicEnergy());
 
@@ -120,15 +132,7 @@ StatusCode ClusterPreparationAlgorithm::CleanClusters() const
 
                     if (newHitHadronicEnergy < hitHadronicEnergy)
                     {
-                        // TODO remove this, once it has been demonstrated as unimportant
-                        if (!pCluster->IsPhotonFast())
-                        {
-                            pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() + newHitHadronicEnergy - hitHadronicEnergy);
-                        }
-                        else
-                        {
-                            pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() + newHitHadronicEnergy - pCaloHit->GetElectromagneticEnergy());
-                        }
+                        pCluster->SetBestEnergyEstimate(pCluster->GetBestEnergyEstimate() + newHitHadronicEnergy - hitHadronicEnergy);
                     }
                 }
             }
@@ -187,9 +191,11 @@ StatusCode ClusterPreparationAlgorithm::ScaleHotHadronEnergy() const
         float clusterMipEnergy(0.);
         const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-        for (OrderedCaloHitList::const_iterator layerIter = orderedCaloHitList.begin(), layerIterEnd = orderedCaloHitList.end(); layerIter != layerIterEnd; ++layerIter)
+        for (OrderedCaloHitList::const_iterator layerIter = orderedCaloHitList.begin(), layerIterEnd = orderedCaloHitList.end();
+            layerIter != layerIterEnd; ++layerIter)
         {
-            for (CaloHitList::const_iterator hitIter = layerIter->second->begin(), hitIterEnd = layerIter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            for (CaloHitList::const_iterator hitIter = layerIter->second->begin(), hitIterEnd = layerIter->second->end();
+                hitIter != hitIterEnd; ++hitIter)
             {
                 clusterMipEnergy += (*hitIter)->GetMipEquivalentEnergy();
             }

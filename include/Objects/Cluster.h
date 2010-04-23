@@ -686,6 +686,7 @@ inline const TrackList &Cluster::GetAssociatedTrackList() const
 
 inline void Cluster::SetIsPhotonFlag(bool isPhotonFlag)
 {
+    m_isPhotonFast.Reset();
     m_isPhoton = isPhotonFlag;
 }
 
@@ -721,6 +722,7 @@ inline Cluster::~Cluster()
 
 inline void Cluster::ResetOutdatedProperties()
 {
+    m_isPhoton = false;
     m_isFitUpToDate = false;
     m_fitToAllHitsResult.Reset();
     m_showerStartLayer.Reset();
