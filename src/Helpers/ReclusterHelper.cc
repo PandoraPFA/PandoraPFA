@@ -19,7 +19,7 @@
 namespace pandora
 {
 
-float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList)
+float ReclusterHelper::GetTrackClusterCompatibility(Cluster *const pCluster, const TrackList &trackList)
 {
     float trackEnergySum(0.);
 
@@ -32,7 +32,7 @@ float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluste
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
     const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
-    const float chi((pCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
+    const float chi((pCluster->GetCorrectedHadronicEnergy() - trackEnergySum) / sigmaE);
 
     return chi;
 }

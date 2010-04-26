@@ -47,7 +47,7 @@ StatusCode TrackDrivenMergingAlg::Run()
             return STATUS_CODE_FAILURE;
 
         const float sigmaTrackEnergy(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
-        const float parentClusterEnergy(pParentCluster->GetHadronicEnergy());
+        const float parentClusterEnergy(pParentCluster->GetCorrectedHadronicEnergy());
 
         const float originalChi((parentClusterEnergy - trackEnergySum) / sigmaTrackEnergy);
 
@@ -74,7 +74,7 @@ StatusCode TrackDrivenMergingAlg::Run()
             if (!pDaughterCluster->GetAssociatedTrackList().empty())
                 continue;
 
-            const float newChi((parentClusterEnergy + pDaughterCluster->GetHadronicEnergy() - trackEnergySum) / sigmaTrackEnergy);
+            const float newChi((parentClusterEnergy + pDaughterCluster->GetCorrectedHadronicEnergy() - trackEnergySum) / sigmaTrackEnergy);
 
             if (std::fabs(newChi) > m_coarseDaughterChiCut)
                 continue;
@@ -114,7 +114,7 @@ StatusCode TrackDrivenMergingAlg::Run()
         for (ConeFractionToClusterMap::const_reverse_iterator iter = coneFractionToClusterMap.rbegin(), iterEnd = coneFractionToClusterMap.rend();
             iter != iterEnd; ++iter)
         {
-            daughterClusterEnergySum += iter->second->GetHadronicEnergy();
+            daughterClusterEnergySum += iter->second->GetCorrectedHadronicEnergy();
             const float newChi((parentClusterEnergy + daughterClusterEnergySum - trackEnergySum) / sigmaTrackEnergy);
 
             if ((std::fabs(newChi) > std::fabs(lastChi)) || (newChi > std::fabs(m_chiToAttemptMerging)))

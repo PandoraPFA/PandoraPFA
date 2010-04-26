@@ -143,7 +143,7 @@ public:
      * 
      *  @return the chi value for the suitability of the track/cluster associations
      */
-    static float GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList);
+    static float GetTrackClusterCompatibility(Cluster *const pCluster, const TrackList &trackList);
 
         /**
      *  @brief  Evaluate the compatibility of a cluster with its associated tracks. Reclustering can be used to split up a

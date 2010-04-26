@@ -68,7 +68,7 @@ StatusCode TrackRecoveryInteractionsAlgorithm::Run()
             continue;
 
         // Should track be associated with "best" cluster?
-        const float clusterEnergy(pBestCluster->GetHadronicEnergy());
+        const float clusterEnergy(pBestCluster->GetCorrectedHadronicEnergy());
 
         if ((smallestTrackClusterDistance > m_trackClusterDistanceCut) && (clusterEnergy > m_clusterEnergyCut))
         {

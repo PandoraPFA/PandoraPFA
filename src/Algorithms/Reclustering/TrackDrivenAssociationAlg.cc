@@ -96,7 +96,7 @@ StatusCode TrackDrivenAssociationAlg::Run()
                 }
                 else
                 {
-                    excessEnergy += pDaughterCluster->GetHadronicEnergy() - daughterTrackEnergy;
+                    excessEnergy += pDaughterCluster->GetCorrectedHadronicEnergy() - daughterTrackEnergy;
                 }
             }
             else
@@ -120,7 +120,7 @@ StatusCode TrackDrivenAssociationAlg::Run()
                 }
                 else
                 {
-                    excessEnergy += pDaughterCluster->GetHadronicEnergy() - daughterTrackEnergy;
+                    excessEnergy += pDaughterCluster->GetCorrectedHadronicEnergy() - daughterTrackEnergy;
                 }
             }
         }
@@ -190,7 +190,7 @@ StatusCode TrackDrivenAssociationAlg::Run()
                 for (ClusterList::const_iterator iter = pBestReclusterList->begin(), iterEnd = pBestReclusterList->end(); iter != iterEnd; ++iter)
                 {
                     if (!(*iter)->GetAssociatedTrackList().empty())
-                        clusterEnergy += (*iter)->GetHadronicEnergy();
+                        clusterEnergy += (*iter)->GetCorrectedHadronicEnergy();
                 }
 
                 float trackEnergy(0.);
