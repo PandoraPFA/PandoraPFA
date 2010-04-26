@@ -204,11 +204,18 @@ public:
     const ClusterHelper::ClusterFitResult &GetFitToAllHitsResult();
 
     /**
-     *  @brief  Get the best estimate of the cluster energy, units GeV
+     *  @brief  Get the corrected electromagnetic estimate of the cluster energy, units GeV
      * 
-     *  @return The best energy estimate
+     *  @return The corrected electromagnetic energy estimate
      */
-    float GetBestEnergyEstimate() const;
+    float GetCorrectedElectromagneticEnergy();
+
+    /**
+     *  @brief  Get the corrected hadronic estimate of the cluster energy, units GeV
+     * 
+     *  @return The corrected hadronic energy estimate
+     */
+    float GetCorrectedHadronicEnergy();
 
     /**
      *  @brief  Whether the cluster has been flagged as a photon by fast photon id function
@@ -258,13 +265,6 @@ public:
      *  @param  isMipTrackFlag the is mip track flag
      */
     void SetIsMipTrackFlag(bool isMipTrackFlag);
-
-    /**
-     *  @brief  Set the best estimate of the cluster energy, units GeV
-     * 
-     *  @param  bestEnergyEstimate the best energy estimate
-     */
-    void SetBestEnergyEstimate(float bestEnergyEstimate);
 
     /**
      *  @brief  Set the result of the current linear fit to the cluster. This function is usually called by a clustering
@@ -328,6 +328,11 @@ private:
      *  @param  pCaloHit the address of the isolated calo hit
      */
     StatusCode RemoveIsolatedCaloHit(CaloHit *const pCaloHit);
+
+    /**
+     *  @brief  PerformClusterEnergyCorrections
+     */
+    void PerformEnergyCorrections();
 
     /**
      *  @brief  Calculate the fast photon flag
@@ -423,7 +428,8 @@ private:
     InputPseudoLayer        m_innerPseudoLayer;             ///< The innermost pseudo layer in the cluster
     InputPseudoLayer        m_outerPseudoLayer;             ///< The outermost pseudo layer in the cluster
 
-    InputFloat              m_bestEnergyEstimate;           ///< The best estimate of the cluster energy, units GeV
+    InputFloat              m_correctedElectromagneticEnergy;///< The corrected electromagnetic estimate of the cluster energy, units GeV
+    InputFloat              m_correctedHadronicEnergy;      ///< The corrected hadronic estimate of the cluster energy, units GeV
 
     InputBool               m_isPhotonFast;                 ///< Whether the cluster is flagged as a photon by fast photon id function
     InputPseudoLayer        m_showerStartLayer;             ///< The pseudo layer at which shower commences
@@ -630,9 +636,22 @@ inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetBestEnergyEstimate() const
+inline float Cluster::GetCorrectedElectromagneticEnergy()
 {
-    return m_bestEnergyEstimate.Get();
+    if (!m_correctedElectromagneticEnergy.IsInitialized())
+        this->PerformEnergyCorrections();
+
+    return m_correctedElectromagneticEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Cluster::GetCorrectedHadronicEnergy()
+{
+    if (!m_correctedHadronicEnergy.IsInitialized())
+        this->PerformEnergyCorrections();
+
+    return m_correctedHadronicEnergy.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -699,14 +718,6 @@ inline void Cluster::SetIsMipTrackFlag(bool isMipTrackFlag)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void Cluster::SetBestEnergyEstimate(float bestEnergyEstimate)
-{
-    if (!(m_bestEnergyEstimate = bestEnergyEstimate))
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline void Cluster::SetCurrentFitResult(const ClusterHelper::ClusterFitResult &currentFitResult)
 {
     m_currentFitResult = currentFitResult;
@@ -729,6 +740,8 @@ inline void Cluster::ResetOutdatedProperties()
     m_isPhotonFast.Reset();
     m_showerProfileStart.Reset();
     m_showerProfileDiscrepancy.Reset();
+    m_correctedElectromagneticEnergy.Reset();
+    m_correctedHadronicEnergy.Reset();
 }
 
 } // namespace pandora

@@ -8,6 +8,7 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Helpers/EnergyCorrectionsHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 
 #include "Pandora/PandoraSettings.h"
@@ -55,6 +56,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
             return STATUS_CODE_ALREADY_INITIALIZED;
 
         // Helper function settings
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, EnergyCorrectionsHelper::ReadSettings(pXmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ParticleIdHelper::ReadSettings(pXmlHandle));
 
         // Global pandora settings

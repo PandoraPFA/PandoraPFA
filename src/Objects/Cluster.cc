@@ -6,6 +6,7 @@
  *  $Log: $
  */
 
+#include "Helpers/EnergyCorrectionsHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 
 #include "Objects/CaloHit.h"
@@ -252,6 +253,19 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void Cluster::PerformEnergyCorrections()
+{
+    float correctedElectromagneticEnergy(0.f), correctedHadronicEnergy(0.f);
+
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, EnergyCorrectionsHelper::EnergyCorrection(this, correctedElectromagneticEnergy,
+        correctedHadronicEnergy));
+
+    if (!(m_correctedElectromagneticEnergy = correctedElectromagneticEnergy) || !(m_correctedHadronicEnergy = correctedHadronicEnergy))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void Cluster::CalculateFastPhotonFlag()
 {
     const bool fastPhotonFlag(ParticleIdHelper::IsPhotonFast(this));
@@ -310,7 +324,6 @@ StatusCode Cluster::ResetProperties()
     m_electromagneticEnergy = 0;
     m_hadronicEnergy = 0;
 
-    m_bestEnergyEstimate.Reset();
     m_innerPseudoLayer.Reset();
     m_outerPseudoLayer.Reset();
 
