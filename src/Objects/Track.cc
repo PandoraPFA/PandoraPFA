@@ -20,6 +20,7 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_d0(trackParameters.m_d0.Get()),
     m_z0(trackParameters.m_z0.Get()),
     m_mass(trackParameters.m_mass.Get()),
+    m_particleId(trackParameters.m_particleId.Get()),
     m_momentumAtDca(trackParameters.m_momentumAtDca.Get()),
     m_momentumMagnitudeAtDca(m_momentumAtDca.GetMagnitude()),
     m_energyAtDca(std::sqrt(m_mass * m_mass + m_momentumMagnitudeAtDca * m_momentumMagnitudeAtDca)),

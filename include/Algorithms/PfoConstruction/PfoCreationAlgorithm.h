@@ -38,6 +38,15 @@ private:
     StatusCode CreateTrackBasedPfos() const;
 
     /**
+     *  @brief  Add relevant tracks and clusters to a track-based pfo
+     * 
+     *  @param  pTrack address of the track to consider
+     *  @param  pfoParameters the pfo parameters to populate
+     *  @param  readSiblingInfo whether to read sibling track information (set to false to avoid multiple counting)
+     */
+    StatusCode PopulateTrackBasedPfo(pandora::Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo = true) const;
+
+    /**
      *  @brief  Set the basic parameters for a track-based pfo
      * 
      *  @param  pTrack address of the track to consider
@@ -46,13 +55,28 @@ private:
     StatusCode SetTrackBasedPfoParameters(pandora::Track *const pTrack, PfoParameters &pfoParameters) const;
 
     /**
-     *  @brief  Add relevant tracks and clusters to a track-based pfo
+     *  @brief  Set the parameters for a track-based pfo, where pfo target consists of two or more sibling tracks
      * 
      *  @param  pTrack address of the track to consider
      *  @param  pfoParameters the pfo parameters to populate
-     *  @param  readSiblingInfo whether to read sibling track information (set to false to avoid multiple counting)
      */
-    StatusCode PopulateTrackBasedPfo(pandora::Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo = true) const;
+    StatusCode SetSiblingTrackBasedPfoParameters(pandora::Track *const pTrack, PfoParameters &pfoParameters) const;
+
+    /**
+     *  @brief  Set the parameters for a track-based pfo, where the pfo target has one or more daughter tracks
+     * 
+     *  @param  pTrack address of the track to consider
+     *  @param  pfoParameters the pfo parameters to populate
+     */
+    StatusCode SetDaughterTrackBasedPfoParameters(pandora::Track *const pTrack, PfoParameters &pfoParameters) const;
+
+    /**
+     *  @brief  Set the parameters for a simple track-based pfo, where the track has no associations with other tracks
+     * 
+     *  @param  pTrack address of the track to consider
+     *  @param  pfoParameters the pfo parameters to populate
+     */
+    StatusCode SetSimpleTrackBasedPfoParameters(pandora::Track *const pTrack, PfoParameters &pfoParameters) const;
 
     /**
      *  @brief  Create particle flow objects corresponding to neutral particles, These pfos consist only of clusters that have no

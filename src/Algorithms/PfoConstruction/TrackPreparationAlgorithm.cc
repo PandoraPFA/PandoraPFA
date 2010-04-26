@@ -58,19 +58,21 @@ StatusCode TrackPreparationAlgorithm::CreatePfoTrackList(const TrackList &inputT
             continue;
 
         // Sibling tracks as first evidence of pfo target
-        if (!pTrack->GetSiblingTrackList().empty())
+        const TrackList &siblingTrackList(pTrack->GetSiblingTrackList());
+
+        if (!siblingTrackList.empty())
         {
             if (siblingTracks.end() != siblingTracks.find(pTrack))
                 continue;
 
-            if ((pTrack->CanFormPfo() && this->HasAssociatedClusters(pTrack)) || (pTrack->CanFormClusterlessPfo()))
+            if (this->HasAssociatedClusters(pTrack))
             {
                 pfoTrackList.insert(pTrack);
-                siblingTracks.insert(pTrack);
+                siblingTracks.insert(siblingTrackList.begin(), siblingTrackList.end());
             }
         }
         // Single parent track as pfo target
-        else if ((pTrack->CanFormPfo() && this->HasAssociatedClusters(pTrack)) || (pTrack->CanFormClusterlessPfo()))
+        else if (this->HasAssociatedClusters(pTrack))
         {
             pfoTrackList.insert(pTrack);
         }
@@ -83,7 +85,7 @@ StatusCode TrackPreparationAlgorithm::CreatePfoTrackList(const TrackList &inputT
 
 bool TrackPreparationAlgorithm::HasAssociatedClusters(const Track *const pTrack, const bool readSiblingInfo) const
 {
-    if (pTrack->HasAssociatedCluster())
+    if ((pTrack->CanFormPfo() && pTrack->HasAssociatedCluster()) || (pTrack->CanFormClusterlessPfo()))
         return true;
 
     // Consider any sibling tracks

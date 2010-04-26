@@ -79,6 +79,7 @@ public:
         pandora::InputFloat             m_z0;                       ///< The z coordinate at the 2D distance of closest approach, units mm
         pandora::InputInt               m_chargeSign;               ///< The charge sign of the tracked particle
         pandora::InputFloat             m_mass;                     ///< The mass of the tracked particle, units GeV
+        pandora::InputInt               m_particleId;               ///< The PDG code of the tracked particle
         pandora::InputCartesianVector   m_momentumAtDca;            ///< Track momentum at the 2D distance of closest approach, units GeV
         pandora::InputTrackState        m_trackStateAtStart;        ///< Track state at the start of the track, units mm and GeV
         pandora::InputTrackState        m_trackStateAtEnd;          ///< Track state at the end of the track, units mm and GeV

@@ -29,60 +29,17 @@ StatusCode PfoCreationAlgorithm::CreateTrackBasedPfos() const
     for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
         Track *pTrack = *iter;
-
-        // Specify the pfo parameters
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SetTrackBasedPfoParameters(pTrack, pfoParameters));
 
         // Walk along list of associated daughter/sibling tracks and their cluster associations
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateTrackBasedPfo(pTrack, pfoParameters));
 
+        // Specify the pfo parameters
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SetTrackBasedPfoParameters(pTrack, pfoParameters));
+
         // Create the pfo
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfoParameters));
     }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PfoCreationAlgorithm::SetTrackBasedPfoParameters(Track *const pTrack, PfoParameters &pfoParameters) const
-{
-    // TODO More sophisticated particle id - currently assumes pion or photon conversion
-
-    const TrackList &siblingTrackList(pTrack->GetSiblingTrackList());
-
-    // Single parent track as pfo target
-    if (siblingTrackList.empty())
-    {
-        pfoParameters.m_charge = pTrack->GetChargeSign();
-        pfoParameters.m_particleId = ((pTrack->GetChargeSign() > 0) ? 211 : -211);
-        pfoParameters.m_mass = pTrack->GetMass();
-        pfoParameters.m_energy = pTrack->GetEnergyAtDca();
-        pfoParameters.m_momentum = pTrack->GetMomentumAtDca();
-
-        return STATUS_CODE_SUCCESS;
-    }
-
-    // Sibling tracks as first evidence of pfo target
-    int charge(0);
-    float energy(0.f);
-    CartesianVector momentum(0.f, 0.f, 0.f);
-
-    for (TrackList::const_iterator iter = siblingTrackList.begin(), iterEnd = siblingTrackList.end(); iter != iterEnd; ++iter)
-    {
-        Track *pSiblingTrack = *iter;
-
-        charge += pSiblingTrack->GetChargeSign();
-        energy += pSiblingTrack->GetEnergyAtDca();
-        momentum += pSiblingTrack->GetMomentumAtDca();
-    }
-
-    pfoParameters.m_charge = charge;
-    pfoParameters.m_energy = energy;
-    pfoParameters.m_momentum = momentum;
-    pfoParameters.m_mass = std::sqrt(std::max(energy * energy - momentum.GetDotProduct(momentum), 0.f));
-    pfoParameters.m_particleId = 22;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -123,6 +80,109 @@ StatusCode PfoCreationAlgorithm::PopulateTrackBasedPfo(Track *const pTrack, PfoP
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PopulateTrackBasedPfo(*iter, pfoParameters));
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PfoCreationAlgorithm::SetTrackBasedPfoParameters(Track *const pTrack, PfoParameters &pfoParameters) const
+{
+    const bool hasParent(!pTrack->GetParentTrackList().empty());
+
+    if (hasParent)
+        return STATUS_CODE_NOT_ALLOWED;
+
+    const bool hasSibling(!pTrack->GetSiblingTrackList().empty());
+    const bool hasDaughter(!pTrack->GetDaughterTrackList().empty());
+
+    if (hasSibling && hasDaughter)
+        return STATUS_CODE_NOT_ALLOWED;
+
+    if (hasSibling)
+        return this->SetSiblingTrackBasedPfoParameters(pTrack, pfoParameters);
+
+    if (hasDaughter)
+        return this->SetDaughterTrackBasedPfoParameters(pTrack, pfoParameters);
+
+    return this->SetSimpleTrackBasedPfoParameters(pTrack, pfoParameters);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+// TODO Use track energy at start, rather than dca. Complete particle id.
+
+StatusCode PfoCreationAlgorithm::SetSiblingTrackBasedPfoParameters(Track *const pTrack, PfoParameters &pfoParameters) const
+{
+    int charge(0);
+    float energy(0.f);
+    CartesianVector momentum(0.f, 0.f, 0.f);
+
+    TrackList fullSiblingTrackList(pTrack->GetSiblingTrackList());
+    fullSiblingTrackList.insert(pTrack);
+
+    for (TrackList::const_iterator iter = fullSiblingTrackList.begin(), iterEnd = fullSiblingTrackList.end(); iter != iterEnd; ++iter)
+    {
+        Track *pSiblingTrack = *iter;
+        charge += pSiblingTrack->GetChargeSign();
+
+        if (!pSiblingTrack->CanFormPfo() && !pSiblingTrack->CanFormClusterlessPfo())
+            continue;
+
+        energy += pSiblingTrack->GetEnergyAtDca();
+        momentum += pSiblingTrack->GetMomentumAtDca();
+    }
+
+    pfoParameters.m_energy = energy;
+    pfoParameters.m_momentum = momentum;
+    pfoParameters.m_mass = std::sqrt(std::max(energy * energy - momentum.GetDotProduct(momentum), 0.f));
+    pfoParameters.m_charge = charge;
+    pfoParameters.m_particleId = 22;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PfoCreationAlgorithm::SetDaughterTrackBasedPfoParameters(Track *const pTrack, PfoParameters &pfoParameters) const
+{
+    int daughterCharge(0);
+    float energy(0.f);
+    CartesianVector momentum(0.f, 0.f, 0.f);
+
+    const TrackList &daughterTrackList(pTrack->GetDaughterTrackList());
+    const unsigned int nDaughters(daughterTrackList.size());
+
+    for (TrackList::const_iterator iter = daughterTrackList.begin(), iterEnd = daughterTrackList.end(); iter != iterEnd; ++iter)
+    {
+        Track *pDaughterTrack = *iter;
+
+        if (!pDaughterTrack->CanFormPfo() && !pDaughterTrack->CanFormClusterlessPfo())
+            continue;
+
+        daughterCharge += pDaughterTrack->GetChargeSign();
+        energy += pDaughterTrack->GetEnergyAtDca();
+        momentum += pDaughterTrack->GetMomentumAtDca();
+    }
+
+    pfoParameters.m_energy = energy;
+    pfoParameters.m_momentum = momentum;
+    pfoParameters.m_mass = std::sqrt(std::max(energy * energy - momentum.GetDotProduct(momentum), 0.f));
+    pfoParameters.m_charge = (nDaughters > 1) ? pTrack->GetChargeSign() : daughterCharge;
+    pfoParameters.m_particleId = (pfoParameters.m_charge.Get() > 0) ? 211 : -211;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PfoCreationAlgorithm::SetSimpleTrackBasedPfoParameters(Track *const pTrack, PfoParameters &pfoParameters) const
+{
+    pfoParameters.m_energy = pTrack->GetEnergyAtDca();
+    pfoParameters.m_momentum = pTrack->GetMomentumAtDca();
+    pfoParameters.m_mass = pTrack->GetMass();
+    pfoParameters.m_charge = pTrack->GetChargeSign();
+    pfoParameters.m_particleId = (pTrack->GetChargeSign() > 0) ? 211 : -211;
 
     return STATUS_CODE_SUCCESS;
 }

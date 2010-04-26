@@ -151,15 +151,21 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
         if (pGeometryHelper->IsOutsideHCal(intersectionPoint))
             continue;
 
-        const PseudoLayer iLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
-
-        if (iLayer != currentLayer)
+        try
         {
-            if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
+            const PseudoLayer iLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
+
+            if (iLayer != currentLayer)
             {
-                layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
+                if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
+                {
+                    layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
+                }
+                currentLayer = iLayer;
             }
-            currentLayer = iLayer;
+        }
+        catch (StatusCodeException &)
+        {
         }
     }
 
