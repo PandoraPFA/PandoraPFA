@@ -37,9 +37,6 @@ StatusCode MipPhotonSeparationAlgorithm::Run()
         Cluster *pOriginalCluster = *iter;
 
         // Apply preliminary cuts
-        if (!pOriginalCluster->IsTrackSeeded())
-            continue;
-
         const TrackList &trackList(pOriginalCluster->GetAssociatedTrackList());
 
         if (trackList.empty() || (trackList.size() > 1))
@@ -107,6 +104,7 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
     PseudoLayer mipRegion1StartLayer(LAYER_MAX), mipRegion1EndLayer(LAYER_MAX);
     PseudoLayer mipRegion2StartLayer(LAYER_MAX), mipRegion2EndLayer(LAYER_MAX);
 
+    Track *pTrack = *(pCluster->GetAssociatedTrackList().begin());
     const PseudoLayer lastPseudoLayer(pCluster->GetOuterPseudoLayer());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
@@ -128,7 +126,7 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
                 CaloHit *pCaloHit = *iter;
                 float distance(FLOAT_MAX);
 
-                if (STATUS_CODE_SUCCESS != this->GetDistanceToTrackSeed(pCluster, pCaloHit, iLayer, distance))
+                if (STATUS_CODE_SUCCESS != this->GetDistanceToTrack(pCluster, pTrack, pCaloHit, distance))
                     continue;
 
                 if (distance < m_genericDistanceCut)
@@ -173,7 +171,7 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
 
             if (showerRegion)
             {
-                if (++mipCount == 2)
+                if (++mipCount == 2) // TODO remove harcoded numbers
                 {
                     mipRegion2 = true;
                     showerRegion = false;
@@ -212,19 +210,24 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
             }
         }
 
-        if (layersMissed > 2)
+        if (layersMissed > 1)
             shouldContinue = false;
     }
 
-    // Use above findings to determine whether to fragment cluster
+    // Use above findings to determine whether to fragment cluster // TODO remove harcoded numbers
     if (mipRegion2EndLayer == LAYER_MAX)
         return false;
 
     if ((showerEndLayer != LAYER_MAX) && (showerStartLayer == LAYER_MAX))
         return true;
 
-    if ((mipRegion2EndLayer - mipRegion2StartLayer > m_minMipRegion2Span) ||
-        ((showerEndLayer - showerStartLayer > m_minShowerRegionSpan) && (showerStartLayer < m_maxShowerStartLayer)) )
+    if (((mipRegion2EndLayer != LAYER_MAX) && (mipRegion2EndLayer - mipRegion2StartLayer > m_minMipRegion2Span)) &&
+        ((showerStartLayer < 20) && (((showerEndLayer != LAYER_MAX) && (showerEndLayer - showerStartLayer > 4)))) )
+    {
+        return true;
+    }
+
+    if (((showerStartLayer < 5) && (((showerEndLayer != LAYER_MAX) && (showerEndLayer - showerStartLayer > 200)))) )
     {
         return true;
     }
@@ -237,6 +240,7 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
 StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer showerStartLayer, const PseudoLayer showerEndLayer,
     Cluster *const pOriginalCluster, Cluster *&pMipCluster, Cluster *&pPhotonCluster) const
 {
+    Track *pTrack = *(pOriginalCluster->GetAssociatedTrackList().begin());
     OrderedCaloHitList orderedCaloHitList(pOriginalCluster->GetOrderedCaloHitList());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(pOriginalCluster->GetIsolatedCaloHitList()));
 
@@ -247,17 +251,17 @@ StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
-            float distance(FLOAT_MAX);
+            float distance(0.f);
 
-            if (STATUS_CODE_SUCCESS != this->GetDistanceToTrackSeed(pOriginalCluster, pCaloHit, iLayer, distance))
-                continue;
+            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrack(pOriginalCluster, 
+                pTrack, pCaloHit, distance));
 
             if ((distance < m_genericDistanceCut) || (iLayer < showerStartLayer) || (iLayer > showerEndLayer))
             {
                 if (NULL == pMipCluster)
                 {
-                    Track *pTrack = *(pOriginalCluster->GetAssociatedTrackList().begin());
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pTrack, pMipCluster));
+                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pMipCluster, pCaloHit));
                 }
                 else
                 {
@@ -283,54 +287,22 @@ StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
+StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pCluster, Track *const pTrack, CaloHit *const pCaloHit,
     float &distance) const
 {
-    if (searchLayer < m_maxLayersToTrackSeed)
-        return this->GetDistanceToTrackSeed(pCluster, pCaloHit, distance);
-
-    const int searchLayerInt(static_cast<int>(searchLayer));
-    const int startLayer(std::max(0, searchLayerInt - static_cast<int>(m_maxLayersToTrackLikeHit)));
-
-    const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
-
-    for (int iLayer = startLayer; iLayer < searchLayerInt; ++iLayer)
-    {
-        OrderedCaloHitList::const_iterator listIter = orderedCaloHitList.find(iLayer);
-        if (orderedCaloHitList.end() == listIter)
-            continue;
-
-        for (CaloHitList::const_iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
-        {
-            float tempDistance(FLOAT_MAX);
-            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrackSeed(pCluster, *iter,
-                tempDistance));
-
-            if (tempDistance < m_genericDistanceCut)
-                return this->GetDistanceToTrackSeed(pCluster, pCaloHit, distance);
-        }
-    }
-
-    return STATUS_CODE_UNCHANGED;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, float &distance) const
-{
-    if (0 == m_maxTrackSeedSeparation)
+    if (0 == m_maxTrackSeparation)
         return STATUS_CODE_FAILURE;
 
     const CartesianVector hitPosition(pCaloHit->GetPositionVector());
 
-    const CartesianVector &trackSeedPosition(pCluster->GetTrackSeed()->GetTrackStateAtECal().GetPosition());
+    const CartesianVector &trackSeedPosition(pTrack->GetTrackStateAtECal().GetPosition());
     const CartesianVector positionDifference(hitPosition - trackSeedPosition);
     const float separation(positionDifference.GetMagnitude());
 
-    if (separation < m_maxTrackSeedSeparation)
+    if (separation < m_maxTrackSeparation)
     {
         const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
-        const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
+        const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeparation)));
 
         const float dCut ((ECAL == pCaloHit->GetHitType()) ?
             flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
@@ -352,7 +324,7 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_trackClusterAssociationAlgName));
 
-    // 
+    // Parameters aiding decision whether to proceed with fragmentation
     m_minMipRegion2Span = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinMipRegion2Span", m_minMipRegion2Span));
@@ -378,26 +350,18 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInPhotonCluster", m_minHitsInPhotonCluster));
 
-    // Generic distance to track seed parameters
+    // Generic distance to track parameters
     m_genericDistanceCut = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GenericDistanceCut", m_genericDistanceCut));
-
-    m_maxLayersToTrackSeed = 3;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxLayersToTrackSeed", m_maxLayersToTrackSeed));
-
-    m_maxLayersToTrackLikeHit = 3;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxLayersToTrackLikeHit", m_maxLayersToTrackLikeHit));
 
     m_trackPathWidth = 2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackPathWidth", m_trackPathWidth));
 
-    m_maxTrackSeedSeparation = 250.f;
+    m_maxTrackSeparation = 1000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxTrackSeedSeparation", m_maxTrackSeedSeparation));
+        "MaxTrackSeparation", m_maxTrackSeparation));
 
     m_additionalPadWidthsECal = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

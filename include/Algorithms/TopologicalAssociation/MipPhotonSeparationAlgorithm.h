@@ -55,25 +55,14 @@ private:
         Cluster *&pMipCluster, Cluster *&pPhotonCluster) const;
 
     /**
-     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface, ONLY calculated if:
-     *          1) the calo hit is within the first m_maxLayersToTrackSeed OR
-     *          2) cluster contains a hit consistent with the track seed within the last m_maxLayersToTrackLikeHit
-     * 
-     *  @param  pCluster address of the cluster
-     *  @param  pCaloHit address of the calo hit
-     *  @param  the pseudolayer currently being examined
-     *  @param  to receive the distance
-     */
-    StatusCode GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer, float &distance) const;
-
-    /**
      *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface
      * 
      *  @param  pCluster address of the cluster
+     *  @param  pTrack address of the track
      *  @param  pCaloHit address of the calo hit
      *  @param  distance to receive the distance
      */
-    StatusCode GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, float &distance) const;
+    StatusCode GetDistanceToTrack(Cluster *const pCluster, Track *const pTrack, CaloHit *const pCaloHit, float &distance) const;
 
     static const float FLOAT_MAX;
     static const unsigned int LAYER_MAX;
@@ -90,10 +79,8 @@ private:
 
     float           m_genericDistanceCut;           ///< Generic distance cut to apply throughout algorithm
 
-    unsigned int    m_maxLayersToTrackSeed;         ///< Max number of layers to the track seed for trackSeedDistance to be calculated
-    unsigned int    m_maxLayersToTrackLikeHit;      ///< Max number of layers to a "track-like" hit for trackSeedDistance to be calculated
     float           m_trackPathWidth;               ///< Track path width, used to determine whether hits are associated with seed track
-    float           m_maxTrackSeedSeparation;       ///< Maximum distance between a calo hit and track seed
+    float           m_maxTrackSeparation;           ///< Maximum distance between a calo hit and track seed
     float           m_additionalPadWidthsECal;      ///< ECal adjacent pad widths used to calculate cone approach distance
     float           m_additionalPadWidthsHCal;      ///< HCal adjacent pad widths used to calculate cone approach distance
 };
