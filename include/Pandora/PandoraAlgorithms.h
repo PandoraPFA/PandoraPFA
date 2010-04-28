@@ -55,6 +55,7 @@
 #include "Algorithms/TopologicalAssociation/ConeBasedMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/IsolatedHitMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/LoopingTracksAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/MipPhotonSeparationAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ProximityBasedMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ShowerMipMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ShowerMipMerging2Algorithm.h"
@@ -104,6 +105,7 @@
     d("ConeBasedMerging",                       ConeBasedMergingAlgorithm::Factory)                         \
     d("IsolatedHitMerging",                     IsolatedHitMergingAlgorithm::Factory)                       \
     d("LoopingTracks",                          LoopingTracksAlgorithm::Factory)                            \
+    d("MipPhotonSeparation",                    MipPhotonSeparationAlgorithm::Factory)                      \
     d("ProximityBasedMerging",                  ProximityBasedMergingAlgorithm::Factory)                    \
     d("ShowerMipMerging",                       ShowerMipMergingAlgorithm::Factory)                         \
     d("ShowerMipMerging2",                      ShowerMipMerging2Algorithm::Factory)                        \

@@ -348,6 +348,7 @@ StatusCode ClusterManager::DeleteClusterList(const Algorithm *const pAlgorithm, 
         delete (*clusterIter);
     }
 
+    clusterListIter->second->clear();
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RemoveEmptyClusterList(pAlgorithm, clusterListName));
 
     return STATUS_CODE_SUCCESS;

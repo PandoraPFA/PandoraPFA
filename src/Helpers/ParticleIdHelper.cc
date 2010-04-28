@@ -345,7 +345,7 @@ bool ParticleIdHelper::IsPhotonFull(Cluster *const pCluster)
     if (electromagneticEnergy > m_photonFullMaxEnergy)
         return false;
 
-    if (pCluster->GetInnerPseudoLayer() >= m_photonFullMaxInnerLayer)
+    if (pCluster->GetInnerPseudoLayer() > m_photonFullMaxInnerLayer)
         return false;
 
     const ClusterHelper::ClusterFitResult &clusterFitResult(pCluster->GetFitToAllHitsResult());
@@ -446,7 +446,7 @@ int ParticleIdHelper::m_photonIdLayer90MaxLayersFromECal = 10;
 unsigned int ParticleIdHelper::m_photonFullMinCaloHits = 0;
 unsigned int ParticleIdHelper::m_photonFullMaxCaloHits = 25;
 float ParticleIdHelper::m_photonFullMaxEnergy = 1.f;
-unsigned int ParticleIdHelper::m_photonFullMaxInnerLayer = 14;
+unsigned int ParticleIdHelper::m_photonFullMaxInnerLayer = 15;
 float ParticleIdHelper::m_photonFullMaxDCosR = 0.9f;
 float ParticleIdHelper::m_photonFullLowEnergyCut = 0.5f;
 float ParticleIdHelper::m_photonFullLowEnergyMaxDCosR = 0.8f;
