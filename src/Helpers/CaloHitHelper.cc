@@ -22,6 +22,7 @@ namespace pandora
 unsigned int CaloHitHelper::m_nReclusteringProcesses = 0;
 CaloHitHelper::CaloHitUsageMap *CaloHitHelper::m_pCurrentUsageMap = NULL;
 CaloHitHelper::UsageMapVector CaloHitHelper::m_parentCaloHitUsageMaps;
+CaloHitHelper::NestedUsageMapNames CaloHitHelper::m_nestedUsageMapNames;
 CaloHitHelper::NameToCaloHitUsageMap CaloHitHelper::m_nameToCaloHitUsageMap;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -297,6 +298,8 @@ StatusCode CaloHitHelper::CreateInitialCaloHitUsageMap(const std::string &usageM
         }
     }
 
+    m_nestedUsageMapNames.push_back(new StringVector(1, usageMapName));
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -316,6 +319,7 @@ StatusCode CaloHitHelper::CreateAdditionalCaloHitUsageMap(const std::string &usa
         iter->second = true;
 
     m_pCurrentUsageMap = pCaloHitUsageMap;
+    m_nestedUsageMapNames.back()->push_back(usageMapName);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -340,7 +344,7 @@ StatusCode CaloHitHelper::ApplyCaloHitUsageMap(const std::string &usageMapName)
             caloHitIter->first->m_isAvailable = caloHitIter->second;
         }
 
-        CaloHitHelper::ClearCaloHitUsageMaps();
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ClearCaloHitUsageMaps());
     }
     else
     {
@@ -357,6 +361,8 @@ StatusCode CaloHitHelper::ApplyCaloHitUsageMap(const std::string &usageMapName)
 
             currentMapIter->second = caloHitIter->second;
         }
+
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ClearMostRecentCaloHitUsageMaps());
     }
 
     return STATUS_CODE_SUCCESS;
@@ -369,14 +375,41 @@ StatusCode CaloHitHelper::ClearCaloHitUsageMaps()
     for (NameToCaloHitUsageMap::iterator iter = m_nameToCaloHitUsageMap.begin(), iterEnd = m_nameToCaloHitUsageMap.end(); iter != iterEnd; ++iter)
         delete iter->second;
 
+    for (NestedUsageMapNames::iterator iter = m_nestedUsageMapNames.begin(), iterEnd = m_nestedUsageMapNames.end(); iter != iterEnd; ++iter)
+        delete *iter;
+
     m_nameToCaloHitUsageMap.clear();
     m_parentCaloHitUsageMaps.clear();
+    m_nestedUsageMapNames.clear();
 
-    if (!m_nameToCaloHitUsageMap.empty() || !m_parentCaloHitUsageMaps.empty())
+    if (!m_nameToCaloHitUsageMap.empty() || !m_parentCaloHitUsageMaps.empty() || !m_nestedUsageMapNames.empty())
         return STATUS_CODE_FAILURE;
 
     m_pCurrentUsageMap = NULL;
     m_nReclusteringProcesses = 0;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitHelper::ClearMostRecentCaloHitUsageMaps()
+{
+    StringVector *pUsageMapNames(m_nestedUsageMapNames.back());
+
+    for (StringVector::const_iterator iter = pUsageMapNames->begin(), iterEnd = pUsageMapNames->end(); iter != iterEnd; ++iter)
+    {
+        NameToCaloHitUsageMap::iterator usageMapIter = m_nameToCaloHitUsageMap.find(*iter);
+
+        if (m_nameToCaloHitUsageMap.end() == usageMapIter)
+            return STATUS_CODE_NOT_FOUND;
+
+        delete usageMapIter->second;
+        m_nameToCaloHitUsageMap.erase(usageMapIter);
+    }
+
+    delete pUsageMapNames;
+    m_nestedUsageMapNames.pop_back();
 
     return STATUS_CODE_SUCCESS;
 }

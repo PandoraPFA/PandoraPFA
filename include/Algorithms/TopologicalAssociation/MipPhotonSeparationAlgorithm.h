@@ -69,16 +69,21 @@ private:
 
     std::string     m_trackClusterAssociationAlgName;///< The name of the track-cluster association algorithm to run
 
+    unsigned int    m_nLayersForMipRegion;          ///< To identify mip region: number of layers with mip hit, but no shower hit
+    unsigned int    m_nLayersForShowerRegion;       ///< To identify shower region: number of layers with shower hit, but no mip hit
+    unsigned int    m_maxLayersMissed;              ///< Maximum number of successive layers in which no track hit is found
+
     unsigned int    m_minMipRegion2Span;            ///< Minimum number of layers spanned by mip 2 region to allow fragmentation
-    unsigned int    m_minShowerRegionSpan;          ///< Minimum number of layers spanned by shower region to allow fragmentation
-    unsigned int    m_maxShowerStartLayer;          ///< Maximum shower start layer to allow fragmentation
+    unsigned int    m_maxShowerStartLayer;          ///< 1st pair of cuts: Maximum shower start layer to allow fragmentation
+    unsigned int    m_minShowerRegionSpan;          ///< 1st pair of cuts: Minimum layers spanned by shower region to allow fragmentation
+    unsigned int    m_maxShowerStartLayer2;         ///< 2nd pair of cuts: Maximum shower start layer to allow fragmentation
+    unsigned int    m_minShowerRegionSpan2;         ///< 2nd pair of cuts: Minimum layers spanned by shower region to allow fragmentation
 
     float           m_nonPhotonDeltaChi2Cut;        ///< Delta chi2 cut for case when photon cluster fragment fails photon id
     float           m_photonDeltaChi2Cut;           ///< Delta chi2 cut for case when photon cluster fragment passes photon id
     unsigned int    m_minHitsInPhotonCluster;       ///< Minimum number of hit in photon cluster fragment
 
     float           m_genericDistanceCut;           ///< Generic distance cut to apply throughout algorithm
-
     float           m_trackPathWidth;               ///< Track path width, used to determine whether hits are associated with seed track
     float           m_maxTrackSeparation;           ///< Maximum distance between a calo hit and track seed
     float           m_additionalPadWidthsECal;      ///< ECal adjacent pad widths used to calculate cone approach distance

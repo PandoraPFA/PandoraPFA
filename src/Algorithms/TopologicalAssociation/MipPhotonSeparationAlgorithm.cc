@@ -171,7 +171,7 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
 
             if (showerRegion)
             {
-                if (++mipCount == 2) // TODO remove harcoded numbers
+                if (++mipCount == m_nLayersForMipRegion)
                 {
                     mipRegion2 = true;
                     showerRegion = false;
@@ -191,7 +191,7 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
 
             if (mipRegion1 || mipRegion2)
             {
-                if (++showerCount == 2)
+                if (++showerCount == m_nLayersForShowerRegion)
                 {
                     if (mipRegion1)
                     {
@@ -210,11 +210,11 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
             }
         }
 
-        if (layersMissed > 1)
+        if (layersMissed > m_maxLayersMissed)
             shouldContinue = false;
     }
 
-    // Use above findings to determine whether to fragment cluster // TODO remove harcoded numbers
+    // Use above findings to determine whether to fragment cluster
     if (mipRegion2EndLayer == LAYER_MAX)
         return false;
 
@@ -222,12 +222,12 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
         return true;
 
     if (((mipRegion2EndLayer != LAYER_MAX) && (mipRegion2EndLayer - mipRegion2StartLayer > m_minMipRegion2Span)) &&
-        ((showerStartLayer < 20) && (((showerEndLayer != LAYER_MAX) && (showerEndLayer - showerStartLayer > 4)))) )
+        ((showerStartLayer < m_maxShowerStartLayer) && (((showerEndLayer != LAYER_MAX) && (showerEndLayer - showerStartLayer > m_minShowerRegionSpan)))) )
     {
         return true;
     }
 
-    if (((showerStartLayer < 5) && (((showerEndLayer != LAYER_MAX) && (showerEndLayer - showerStartLayer > 200)))) )
+    if (((showerStartLayer < m_maxShowerStartLayer2) && (((showerEndLayer != LAYER_MAX) && (showerEndLayer - showerStartLayer > m_minShowerRegionSpan2)))) )
     {
         return true;
     }
@@ -325,17 +325,37 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_trackClusterAssociationAlgName));
 
     // Parameters aiding decision whether to proceed with fragmentation
+    m_nLayersForMipRegion = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NLayersForMipRegion", m_nLayersForMipRegion));
+
+    m_nLayersForShowerRegion = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NLayersForShowerRegion", m_nLayersForShowerRegion));
+
+    m_maxLayersMissed = 1;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxLayersMissed", m_maxLayersMissed));
+
     m_minMipRegion2Span = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinMipRegion2Span", m_minMipRegion2Span));
+
+    m_maxShowerStartLayer = 20;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxShowerStartLayer", m_maxShowerStartLayer));
 
     m_minShowerRegionSpan = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinShowerRegionSpan", m_minShowerRegionSpan));
 
-    m_maxShowerStartLayer = 20;
+    m_maxShowerStartLayer2 = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxShowerStartLayer", m_maxShowerStartLayer));
+        "MaxShowerStartLayer2", m_maxShowerStartLayer2));
+
+    m_minShowerRegionSpan2 = 200;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinShowerRegionSpan2", m_minShowerRegionSpan2));
 
     // Parameters aiding selection of original clusters or new fragments
     m_nonPhotonDeltaChi2Cut = 0.f;

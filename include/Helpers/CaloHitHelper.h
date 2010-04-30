@@ -135,6 +135,11 @@ private:
     static StatusCode ClearCaloHitUsageMaps();
 
     /**
+     *  @brief  Clear the calo hit usage maps used by the most recent reclustering process
+     */
+    static StatusCode ClearMostRecentCaloHitUsageMaps();
+
+    /**
      *  @brief  Calculate calo hit properties for a particular calo hit, through comparison with an ordered list of other hits.
      *          Calculates density weights, isolation flags, possible mip flags and surrounding energy
      * 
@@ -153,10 +158,12 @@ private:
     typedef std::map<CaloHit *, bool> CaloHitUsageMap;
     typedef std::map<std::string, CaloHitUsageMap *> NameToCaloHitUsageMap;
     typedef std::vector<CaloHitUsageMap *> UsageMapVector;
+    typedef std::vector<StringVector *> NestedUsageMapNames;
 
     static unsigned int                 m_nReclusteringProcesses;   ///< The number of reclustering algorithms currently in use
     static CaloHitUsageMap             *m_pCurrentUsageMap;         ///< Address of the current calo hit usage map
     static UsageMapVector               m_parentCaloHitUsageMaps;   ///< List of current usage maps for all reclustering algorithms in use
+    static NestedUsageMapNames          m_nestedUsageMapNames;      ///< List of usage maps names, ordered by recluster process
     static NameToCaloHitUsageMap        m_nameToCaloHitUsageMap;    ///< The name to calo hit availability map
 
     friend class CaloHitManager;
