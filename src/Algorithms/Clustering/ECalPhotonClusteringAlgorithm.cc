@@ -17,9 +17,14 @@
 #include <iomanip>
 #include <limits>
 
+#include <sstream>
+
+#include <assert.h>
+
 using namespace pandora;
 
 PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::_instance = 0;
+bool PhotonIDLikelihoodCalculator::fromXml = false;
 
 const unsigned int ECalPhotonClusteringAlgorithm::m_maximumNumberOfLayers = 150; // TODO remove this, as we no longer fix number of layers
 
@@ -29,7 +34,7 @@ PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance()
 {
     if(_instance==0)
     {
-        _instance = new PhotonIDLikelihoodCalculator;
+        _instance = new PhotonIDLikelihoodCalculator();
     }
 
     return _instance;
@@ -61,6 +66,39 @@ StatusCode ECalPhotonClusteringAlgorithm::Initialize()
 
     // set object variables:
     m_nECalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
+
+
+
+    if( m_produceConfigurationFiles <= -1 )
+    {
+        PhotonIDLikelihoodCalculator::Instance()->LoadXml( m_configurationFileNameSig, m_configurationFileNameBkg );
+    }
+    else
+    {
+        std::vector<float> eBinBorders;
+        eBinBorders.push_back(0.2);
+        eBinBorders.push_back(0.5);
+        eBinBorders.push_back(1.0);
+        eBinBorders.push_back(1.5);
+        eBinBorders.push_back(2.5);
+        eBinBorders.push_back(5.0);
+        eBinBorders.push_back(10.0);
+        eBinBorders.push_back(20.0);
+        eBinBorders.push_back(50.0);
+
+        PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
+        plc->energySig.SetDimensions( "energySig", eBinBorders );
+        plc->rmsSig.SetDimensions  ( "rmsSig",     eBinBorders, 20, 0.f, 5.f  );
+        plc->fracSig.SetDimensions ( "fracSig",    eBinBorders, 20, 0.f, 1.f  );
+        plc->startSig.SetDimensions( "startSig",   eBinBorders, 20, 0.f, 10.f );
+
+        plc->energyBkg.SetDimensions( "energyBkg", eBinBorders );
+        plc->rmsBkg.SetDimensions  ( "rmsBkg",     eBinBorders, 20, 0.f, 5.f  );
+        plc->fracBkg.SetDimensions ( "fracBkg",    eBinBorders, 20, 0.f, 1.f  );
+        plc->startBkg.SetDimensions( "startBkg",   eBinBorders, 20, 0.f, 10.f );
+    }
+
+
 
 
     return STATUS_CODE_SUCCESS;
@@ -169,7 +207,6 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
                 ++peakForProtoCluster;
             }
         }
-
     }
 
 
@@ -204,6 +241,21 @@ StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     m_monitoringFileName = "photonIdMonitoring.root";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
                                                                                                          "MonitoringFileName", m_monitoringFileName));
+    // xml configuration input filename background
+    m_configurationFileNameBkg = "photonClusteringConfiguration_Bkg.xml";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+                                                                                                         "ConfigurationFileNameBkg", m_configurationFileNameBkg));
+
+    // xml configuration input filename signal
+    m_configurationFileNameSig = "photonClusteringConfiguration_Sig.xml";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+                                                                                                         "ConfigurationFileNameSig", m_configurationFileNameSig));
+
+    // produce configuration file
+    // 0... signal events, 1 ... background events, 2 ... signal and background events (to be split by "fraction" always : >=0.5 for signal, < 0.5 for background )
+    m_produceConfigurationFiles = -1;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+                                                                                                         "ProduceConfiguration", m_produceConfigurationFiles));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -268,6 +320,31 @@ void ECalPhotonClusteringAlgorithm::CreateOrSaveLikelihoodHistograms(bool create
             std::cout << "Tree 'photonId' could not be saved!" << std::endl;
         }
     }
+
+
+    if( !create )
+    {
+        PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
+        if( m_produceConfigurationFiles==0 || m_produceConfigurationFiles==2 ) // write signal file
+        {
+            //            plc->energySig.Scale( plc->energySig.GetSumOfEntries() );
+            plc->rmsSig.Scale( plc->rmsSig.GetSumOfEntries() );
+            plc->fracSig.Scale( plc->fracSig.GetSumOfEntries() );
+            plc->startSig.Scale( plc->startSig.GetSumOfEntries() );
+
+            plc->WriteXmlSig( m_configurationFileNameSig );
+        }
+
+        if( m_produceConfigurationFiles==1 || m_produceConfigurationFiles==2 ) // write background file
+        {
+            //            plc->energyBkg.Scale( plc->energyBkg.GetSumOfEntries() );
+            plc->rmsBkg.Scale( plc->rmsBkg.GetSumOfEntries() );
+            plc->fracBkg.Scale( plc->fracBkg.GetSumOfEntries() );
+            plc->startBkg.Scale( plc->startBkg.GetSumOfEntries() );
+
+            plc->WriteXmlBkg( m_configurationFileNameBkg );
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -315,12 +392,16 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
 
     if (m_producePrintoutStatements > 0)
     {
-        std::cout << "electromagneticE " << electromagneticE << "electromagneticEContrib " << electromagneticEContribution
+        std::cout << "electromagneticE " << electromagneticE << "  electromagneticEContrib " << electromagneticEContribution
                   << " truePhotonE " << truePhotonE << " trueE " << trueE << std::endl;
     }
 
     assert( electromagneticE - electromagneticEContribution < 0.0001 );
-    float fraction = electromagneticPhotonEContribution / electromagneticEContribution;
+
+    //    float fraction = electromagneticPhotonEContribution / electromagneticEContribution;
+    float fraction = electromagneticPhotonEContribution / electromagneticE; 
+
+
 //    float fraction = truePhotonE / trueE;
 
     ClusterProperties clusterProperties;
@@ -483,6 +564,29 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
         CaloHitList caloHitList;
         pOriginalOrderedCaloHitList.GetCaloHitList( caloHitList );
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &caloHitList, pPhotonCandidateCluster ));
+    }
+
+
+    if(m_produceConfigurationFiles >= 0)
+    {
+        PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
+        if( (peak.energy>0.2) && photonFraction<1.0 && showerStart<10. && peak.rms<5.)
+        {
+            if( fraction>0.5 ) 
+            {
+                plc->energySig.Fill( peak.energy );
+                plc->rmsSig.Fill( peak.energy, peak.rms );
+                plc->fracSig.Fill( peak.energy, photonFraction );
+                plc->startSig.Fill( peak.energy, showerStart );
+            }
+            else
+            {
+                plc->energyBkg.Fill( peak.energy );
+                plc->rmsBkg.Fill( peak.energy, peak.rms );
+                plc->fracBkg.Fill( peak.energy, photonFraction );
+                plc->startBkg.Fill( peak.energy, showerStart );
+            }
+        }
     }
 
 
@@ -1278,53 +1382,182 @@ void ECalPhotonClusteringAlgorithm::DistanceToPositionAndDirection(const Cartesi
     perpendicularComponent = (relativePosition - referenceDirection*longitudinalComponent).GetMagnitude();
 }
 
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float start)
+void PhotonIDLikelihoodCalculator::WriteXmlSig( const std::string& fileName )
+{
+     TiXmlDocument doc("PhotonLikelihoodData_Sig");
+     TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );
+     doc.LinkEndChild( decl );
+
+     TiXmlElement * element = NULL;
+     energySig.WriteToXml( element );
+     doc.LinkEndChild( element );
+
+     rmsSig.WriteToXml( element );
+     doc.LinkEndChild( element );
+     
+     fracSig.WriteToXml( element );
+     doc.LinkEndChild( element );
+     
+     startSig.WriteToXml( element );
+     doc.LinkEndChild( element );
+
+     doc.SaveFile( fileName );
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PhotonIDLikelihoodCalculator::WriteXmlBkg( const std::string& fileName )
+{
+     TiXmlDocument doc("PhotonLikelihoodData_Bkg");
+     TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );
+     doc.LinkEndChild( decl );
+
+     TiXmlElement * element = NULL;
+     energyBkg.WriteToXml( element );
+     doc.LinkEndChild( element );
+
+     rmsBkg.WriteToXml( element );
+     doc.LinkEndChild( element );
+     
+     fracBkg.WriteToXml( element );
+     doc.LinkEndChild( element );
+     
+     startBkg.WriteToXml( element );
+     doc.LinkEndChild( element );
+
+     doc.SaveFile( fileName );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PhotonIDLikelihoodCalculator::LoadXml( const std::string& fileNameSig, const std::string& fileNameBkg )
+{
+    std::cout << "Load photon clustering configuration / loadXml" << std::endl;
+    ReadXmlSignal( fileNameSig );
+    ReadXmlBackground( fileNameBkg );
+
+    PhotonIDLikelihoodCalculator::fromXml = true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PhotonIDLikelihoodCalculator::ReadXmlSignal( const std::string& fileNameSig )
+{
+    std::cout << "Load photon clustering signal data" << std::endl;
+    TiXmlDocument docSig(fileNameSig);
+    docSig.LoadFile();
+
+    TiXmlElement * loadElement = docSig.FirstChildElement();
+
+    energySig.ReadFromXml( *loadElement );
+    rmsSig.ReadFromXml   ( *(loadElement->NextSiblingElement()) );
+    fracSig.ReadFromXml  ( *(loadElement->NextSiblingElement()) );
+    startSig.ReadFromXml ( *(loadElement->NextSiblingElement()) );
+
+    energySig.Print( std::cout );
+
+    rmsSig.Print(std::cout);
+    fracSig.Print(std::cout);
+    startSig.Print(std::cout);
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PhotonIDLikelihoodCalculator::ReadXmlBackground( const std::string& fileNameBkg )
+{
+    std::cout << "Load photon clustering background data" << std::endl;
+    TiXmlDocument docBkg(fileNameBkg);
+    docBkg.LoadFile();
+    TiXmlElement * loadElementBkg = docBkg.FirstChildElement();
+    
+    energyBkg.ReadFromXml( *loadElementBkg );
+    rmsBkg.ReadFromXml   ( *(loadElementBkg->NextSiblingElement()) );
+    fracBkg.ReadFromXml  ( *(loadElementBkg->NextSiblingElement()) );
+    startBkg.ReadFromXml ( *(loadElementBkg->NextSiblingElement()) );
+
+    energyBkg.Print( std::cout );
+
+    rmsBkg.Print(std::cout);
+    fracBkg.Print(std::cout);
+    startBkg.Print(std::cout);
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float start )
 {
     float pid = 0;
+    float yes = 0, no = 0;
 
-    int ien = 0;
-    if( E >  0.2 && E <=  0.5)ien=0;
-    if( E >  0.5 && E <=  1.0)ien=1;
-    if( E >  1.0 && E <=  1.5)ien=2;
-    if( E >  1.5 && E <=  2.5)ien=3;
-    if( E >  2.5 && E <=  5.0)ien=4;
-    if( E >  5.0 && E <= 10.0)ien=5;
-    if( E > 10.0 && E <= 20.0)ien=6;
-    if( E > 20.0 && E <= 50.0)ien=7;
-    if( E > 50.0)ien=8;
-    int irmsbin = int(rms*4)+1;
-    if(irmsbin<0)irmsbin  =  0;
-    if(irmsbin>21)irmsbin = 21;
-    int ifracbin = int(frac*20)+1;
-    if(ifracbin<0)ifracbin  =  0;
-    if(ifracbin>21)ifracbin = 21;
-    int istartbin = int(start*2)+1;
-    if(istartbin<0)istartbin  =  0;
-    if(istartbin>21)istartbin = 21;
-
-    if(0) // TODO make m_producePrintoutStatements from main algorithm (public and) static so can access here
+    if( PhotonIDLikelihoodCalculator::fromXml )
     {
-        std::cout << " E     = " << E     << " -> " << ien       << std::endl;
-        std::cout << " rms   = " << rms   << " -> " << irmsbin   << std::endl;
-        std::cout << " frac  = " << frac  << " -> " << ifracbin  << std::endl;
-        std::cout << " start = " << start << " -> " << istartbin << std::endl;
-        std::cout << " likeSig[ie]  = " << likeSig[ien] << std::endl;
-        std::cout << " likeBack[ie] = " << likeBack[ien] << std::endl;
+        PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
 
-        std::cout << " likesrms[ie][irmsbin] = " << likesrms[ien][irmsbin] << std::endl;
-        std::cout << " likebrms[ie][irmsbin] = " << likebrms[ien][irmsbin] << std::endl;
+        float lhSig      = plc->energySig.Get(E);
 
-        std::cout << " likesfrac[ie][irmsbin] = " << likesfrac[ien][ifracbin] << std::endl;
-        std::cout << " likebfrac[ie][irmsbin] = " << likebfrac[ien][ifracbin] << std::endl;
-
-        std::cout << " likesstart[ie][irmsbin] = " << likesstart[ien][istartbin] << std::endl;
-        std::cout << " likebstart[ie][irmsbin] = " << likebstart[ien][istartbin] << std::endl;
+        float lhRmsSig   = plc->rmsSig.Get  (E, rms  );
+        float lhFracSig  = plc->fracSig.Get (E, frac );
+        float lhStartSig = plc->startSig.Get(E, start);
+        
+        float lhBkg      = plc->energyBkg.Get(E);
+        float lhRmsBkg   = plc->rmsBkg.Get  (E, rms  );
+        float lhFracBkg  = plc->fracBkg.Get (E, frac );
+        float lhStartBkg = plc->startBkg.Get(E, start);
+        
+        yes = lhSig*lhRmsSig*lhFracSig*lhStartSig;
+        no  = lhBkg*lhRmsBkg*lhFracBkg*lhStartBkg;
     }
-    float yes = static_cast<float>(likeSig[ien]*likesrms[ien][irmsbin]*likesfrac[ien][ifracbin]*likesstart[ien][istartbin]);
-    float no  = static_cast<float>(likeBack[ien]*likebrms[ien][irmsbin]*likebfrac[ien][ifracbin]*likebstart[ien][istartbin]);
+    else
+    {
+        int ien = 0;
+        if( E >  0.2 && E <=  0.5)ien=0;
+        if( E >  0.5 && E <=  1.0)ien=1;
+        if( E >  1.0 && E <=  1.5)ien=2;
+        if( E >  1.5 && E <=  2.5)ien=3;
+        if( E >  2.5 && E <=  5.0)ien=4;
+        if( E >  5.0 && E <= 10.0)ien=5;
+        if( E > 10.0 && E <= 20.0)ien=6;
+        if( E > 20.0 && E <= 50.0)ien=7;
+        if( E > 50.0)ien=8;
+        int irmsbin = int(rms*4)+1;
+        if(irmsbin<0)irmsbin  =  0;
+        if(irmsbin>21)irmsbin = 21;
+        int ifracbin = int(frac*20)+1;
+        if(ifracbin<0)ifracbin  =  0;
+        if(ifracbin>21)ifracbin = 21;
+        int istartbin = int(start*2)+1;
+        if(istartbin<0)istartbin  =  0;
+        if(istartbin>21)istartbin = 21;
 
+        if(0) // TODO make m_producePrintoutStatements from main algorithm (public and) static so can access here
+        {
+            std::cout << " E     = " << E     << " -> " << ien       << std::endl;
+            std::cout << " rms   = " << rms   << " -> " << irmsbin   << std::endl;
+            std::cout << " frac  = " << frac  << " -> " << ifracbin  << std::endl;
+            std::cout << " start = " << start << " -> " << istartbin << std::endl;
+            std::cout << " likeSig[ie]  = " << likeSig[ien] << std::endl;
+            std::cout << " likeBack[ie] = " << likeBack[ien] << std::endl;
+
+            std::cout << " likesrms[ie][irmsbin] = " << likesrms[ien][irmsbin] << std::endl;
+            std::cout << " likebrms[ie][irmsbin] = " << likebrms[ien][irmsbin] << std::endl;
+
+            std::cout << " likesfrac[ie][irmsbin] = " << likesfrac[ien][ifracbin] << std::endl;
+            std::cout << " likebfrac[ie][irmsbin] = " << likebfrac[ien][ifracbin] << std::endl;
+
+            std::cout << " likesstart[ie][irmsbin] = " << likesstart[ien][istartbin] << std::endl;
+            std::cout << " likebstart[ie][irmsbin] = " << likebstart[ien][istartbin] << std::endl;
+        }
+
+
+        yes = static_cast<float>(likeSig[ien]*likesrms[ien][irmsbin]*likesfrac[ien][ifracbin]*likesstart[ien][istartbin]);
+        no  = static_cast<float>(likeBack[ien]*likebrms[ien][irmsbin]*likebfrac[ien][ifracbin]*likebstart[ien][istartbin]);
+    }
     
     if(0)
     {
@@ -1336,6 +1569,762 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
 
     return pid;
 }
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Axis::Axis( int bins, float from, float to )
+{
+    SetDimensions( bins, from, to );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+ Axis::Axis( const std::vector<float>& binBorders )
+{
+    SetDimensions( binBorders );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Axis::SetDimensions( int bins, float from, float to )
+{
+    numberBins = bins;
+    minValue = from;
+    maxValue = to;
+
+    if( numberBins <= 0 )
+        throw WrongBinNumber();
+    if( maxValue <= minValue )
+        throw WrongLimits();
+
+    k = numberBins/(maxValue-minValue);
+
+    regularBins = true;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Axis::SetDimensions( const std::vector<float>& binBorders ) 
+{
+    std::vector<float> tmpBorders;
+    tmpBorders.assign( binBorders.begin(), binBorders.end() );
+    std::sort( tmpBorders.begin(), tmpBorders.end() );
+
+    numberBins = tmpBorders.size();
+    minValue   = tmpBorders.front();
+    maxValue   = tmpBorders.back();
+    
+    int idx = -1;
+    for( std::vector<float>::const_iterator itBinBorder = tmpBorders.begin(), itBinBorderEnd = tmpBorders.end(); itBinBorder != itBinBorderEnd; ++itBinBorder )
+    {
+        const float border = (*itBinBorder);
+        bins.insert( std::make_pair(border, idx) );
+
+        ++idx;
+    }
+
+    regularBins = false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Axis::Axis()
+    : numberBins(0),
+      minValue(0),
+      maxValue(0)
+{
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+int Axis::GetBinForValue( float value )
+{
+    if( regularBins )
+    {
+        int bin = 0;
+        if( value < minValue )
+            return -1;
+        if( value >= maxValue )
+            return numberBins;
+
+        bin = int(k*(value-minValue));
+        return bin;
+    }
+
+    BinMap::iterator itBin = bins.upper_bound( value );
+    if( itBin == bins.end() ) // overflow
+    {
+        return numberBins;
+    }
+
+    return itBin->second;
+}
+	
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+int Axis::GetNumberBins()
+{
+    return numberBins;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Axis::WriteToXml( TiXmlElement *xmlElement ) 
+{
+    TiXmlElement * pXmlElementAxis = new TiXmlElement("Axis");
+
+    if( regularBins )
+    {
+        pXmlElementAxis->SetAttribute( "RegularBins", 1 );
+
+        pXmlElementAxis->SetAttribute( "Bins", GetNumberBins() );
+        pXmlElementAxis->SetDoubleAttribute( "From", GetMinValue() );
+        pXmlElementAxis->SetDoubleAttribute( "To",   GetMaxValue() );
+    }
+    else
+    {
+        pXmlElementAxis->SetAttribute( "RegularBins", 0 );
+
+        std::stringstream sstr;
+        for( BinMap::iterator itBin = bins.begin(), itBinEnd = bins.end(); itBin != itBinEnd; ++itBin )
+        {
+            float value = itBin->first;
+
+            if( itBin != bins.begin() )
+                sstr << " ";
+            sstr << value;
+        }
+        pXmlElementAxis->SetAttribute( "Bins", sstr.str() );
+    }
+
+    if( !xmlElement->LinkEndChild(pXmlElementAxis) )
+        throw Axis::XmlError();
+
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Axis::ReadFromXml( const TiXmlElement &xmlElement ) 
+{
+    std::string value = xmlElement.ValueStr();
+
+    if( value != "Axis" )
+        throw NotAxis();
+
+    int rb = 1;
+    xmlElement.QueryIntAttribute( "RegularBins", &rb );
+    regularBins = false;
+    if( rb == 1 )
+        regularBins = true;
+
+    if( regularBins )
+    {
+        xmlElement.QueryIntAttribute  ( "Bins", &numberBins );
+        xmlElement.QueryFloatAttribute( "From", &minValue );
+        xmlElement.QueryFloatAttribute( "To",   &maxValue );
+
+        SetDimensions( numberBins, minValue, maxValue );
+    }
+    else
+    {
+        std::string binsString = "";
+        binsString = xmlElement.Attribute( "Bins" );
+
+        StringVector binsStringVector;
+
+        TokenizeString( binsString, binsStringVector, " " );
+
+        // transform the strings to float and fill the bins
+        std::vector<float> binBorders;
+        for( StringVector::iterator itBin = binsStringVector.begin(), itBinEnd = binsStringVector.end(); itBin != itBinEnd; ++itBin )
+        {
+            std::stringstream binStr;
+            binStr << (*itBin);
+            float binValue;
+            binStr >> binValue;
+            binBorders.push_back( binValue );
+        }
+        std::sort( binBorders.begin(), binBorders.end() );
+        SetDimensions( binBorders );
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Axis::Print( std::ostream& os )
+{
+    os << "Axis : ";
+    if( regularBins )
+        os << "bins = " << numberBins << " from = " << minValue <<  " to = " << maxValue << std::endl;
+    else
+    {
+        std::stringstream sstr;
+        for( BinMap::iterator itBin = bins.begin(), itBinEnd = bins.end(); itBin != itBinEnd; ++itBin )
+        {
+            float value = itBin->first;
+            if( itBin != bins.begin() )
+                sstr << ", ";
+            sstr << value;
+        }
+        os << "Bin-borders = " << sstr.str() << std::endl;
+    }
+} 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Axis::TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter)
+{
+    // tokenize the string
+    std::string::size_type lastPos = inputString.find_first_not_of(delimiter, 0);
+    std::string::size_type pos     = inputString.find_first_of(delimiter, lastPos);
+
+    while ((std::string::npos != pos) || (std::string::npos != lastPos))
+    {
+        tokens.push_back(inputString.substr(lastPos, pos - lastPos));
+        lastPos = inputString.find_first_not_of(delimiter, pos);
+        pos = inputString.find_first_of(delimiter, lastPos);
+    }
+}
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram1D::Histogram1D( const std::string& histogramName, int numberBins, float from, float to )
+{
+    // create empty bins
+
+    SetDimensions( histogramName, numberBins, from, to );
+
+    CreateEmptyBins();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::SetDimensions( const std::string& histogramName, int numberBins, float from, float to )
+{
+    // create empty bins
+    name = histogramName;
+    axis.SetDimensions( numberBins, from, to );
+
+    CreateEmptyBins();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders )
+{
+    // create empty bins
+    name = histogramName;
+    axis.SetDimensions( binBorders );
+
+    CreateEmptyBins();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::CreateEmptyBins()
+{
+    for( int ibin = -1; ibin <= axis.GetNumberBins(); ++ibin ) // add -1 as underflow and numberBins as overflow bin
+    {
+        bins.insert( std::make_pair<int,float>(ibin,0.f) );
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram1D::Histogram1D( const TiXmlElement &xmlElement )
+{
+    ReadFromXml( xmlElement );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram1D::Histogram1D()
+    : axis()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::Fill( float value, float weight )
+{
+    bins[axis.GetBinForValue(value)] += weight;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float Histogram1D::GetBinContent( int bin )
+{
+    MapOfBins::iterator itBin = bins.find( bin );
+    if( itBin == bins.end() )
+        throw Axis::WrongBinNumber();
+
+    return itBin->second;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float Histogram1D::Get( float value )
+{
+    int bin = axis.GetBinForValue(value);
+    
+    return GetBinContent( bin );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float Histogram1D::GetSumOfEntries()
+{
+    float sum = 0.f;
+    for( MapOfBins::iterator itBin = bins.begin(), itBinEnd = bins.end(); itBin != itBinEnd; ++itBin )
+    {
+        float value = itBin->second;
+        sum += value;
+    }
+    return sum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::Scale( float value )
+{
+    for( MapOfBins::iterator itBin = bins.begin(), itBinEnd = bins.end(); itBin != itBinEnd; ++itBin )
+    {
+        float binValue = itBin->second;
+        itBin->second = binValue/value;
+    }
+}
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::WriteToXml ( TiXmlElement * &xmlElement ) 
+{
+    xmlElement = new TiXmlElement( name );
+    xmlElement->SetAttribute( "Type", "Histogram1D" );
+
+    axis.WriteToXml( xmlElement );
+
+    TiXmlElement * pXmlElementBins = new TiXmlElement("Bins");
+    TiXmlText *    pXmlText        = new TiXmlText("Bins");
+
+    std::stringstream sstr;
+    for( MapOfBins::iterator itBin = bins.begin(), itBinEnd = bins.end(); itBin != itBinEnd; ++itBin )
+    {
+        float value = itBin->second;
+        if( itBin != bins.begin() )
+            sstr << " ";
+        sstr << value;
+    }
+    pXmlText->SetValue( sstr.str() );
+    pXmlElementBins->LinkEndChild(pXmlText);
+
+    if( !xmlElement->LinkEndChild(pXmlElementBins) )
+        throw Histogram1D::XmlError();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::ReadFromXml( const TiXmlElement&  xmlElement )
+{
+    name = xmlElement.Value();
+
+    std::string type = "";
+    if( (type = xmlElement.Attribute( "Type" )) != "Histogram1D" )
+    {
+        std::cout << "Error at reading Xml file: You tried to load a Histogram1D, but Xml element is of type '" << type << "'." << std::endl;
+        std::cout << "The name of the Xml element is : " << name << std::endl;
+        throw NotHistogram1D();
+    }
+
+    const TiXmlElement* pXmlAxisElement = xmlElement.FirstChildElement();
+
+    axis.ReadFromXml( *(pXmlAxisElement) );
+
+    const TiXmlElement* pXmlBins = pXmlAxisElement->NextSiblingElement();
+    if( !pXmlBins )
+        throw XmlError();
+
+    std::string binsString = pXmlBins->GetText();
+
+    StringVector binsStringVector;
+
+    Axis::TokenizeString( binsString, binsStringVector, " " );
+
+    // transform the strings to float and fill the bins
+    bins.clear();
+    int bin = -1; // start with the underflow bin
+    for( StringVector::iterator itBin = binsStringVector.begin(), itBinEnd = binsStringVector.end(); itBin != itBinEnd; ++itBin )
+    {
+        std::stringstream binStr;
+        binStr << (*itBin);
+        float binValue;
+        binStr >> binValue;
+        bins.insert( std::make_pair(bin,binValue) );
+        ++bin;
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::Print( std::ostream& os )
+{
+    std::cout << "=== Histogram1D === [" << name << "] " << std::endl;
+    axis.Print( os );
+
+    std::stringstream binValuesString;
+    for( MapOfBins::iterator itBin = bins.begin(), itBinEnd = bins.end(); itBin != itBinEnd; ++itBin )
+    {
+        int   bin   = itBin->first;
+        float value = itBin->second;
+        if( itBin != bins.begin() )
+            binValuesString << "  ";
+        binValuesString << "[" << bin << "]=" << value << " ";
+    }
+    os << binValuesString.str() << std::endl;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram2D::Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
+{
+    // create empty bins
+    SetDimensions( histogramName, numberBinsX, fromX, toX, numberBinsY, fromY, toY );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram2D::Histogram2D( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
+{
+    SetDimensions( histogramName, binBorders, numberBinsY, fromY, toY );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram2D::Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
+{
+    SetDimensions( histogramName, numberBinsX, fromX, toX, binBorders );
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
+{
+    // create empty bins
+    name = histogramName;
+    axisX.SetDimensions( numberBinsX, fromX, toX );
+    axisY.SetDimensions( numberBinsY, fromY, toY );
+
+    CreateEmptyBins();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
+{
+    // create empty bins
+    name = histogramName;
+    axisX.SetDimensions( binBorders );
+    axisY.SetDimensions( numberBinsY, fromY, toY );
+
+    CreateEmptyBins();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
+{
+    // create empty bins
+    name = histogramName;
+    axisX.SetDimensions( numberBinsX, fromX, toX );
+    axisY.SetDimensions( binBorders );
+
+    CreateEmptyBins();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::SetDimensions( const std::string& histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
+{
+    // create empty bins
+    name = histogramName;
+    axisX.SetDimensions( binBordersX );
+    axisY.SetDimensions( binBordersY );
+
+    CreateEmptyBins();
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::CreateEmptyBins()
+{
+    for( int ibinY = -1; ibinY <= axisY.GetNumberBins(); ++ibinY ) // add -1 as underflow and numberBins as overflow bin
+    {
+        bins.insert( std::make_pair(ibinY,MapOfBins()) );
+        
+        MapOfMapOfBins::iterator itMoMoB = bins.find( ibinY );
+        if( itMoMoB == bins.end() )
+            throw DataStructureError();
+
+        for( int ibinX = -1; ibinX <= axisX.GetNumberBins(); ++ibinX ) // add -1 as underflow and numberBins as overflow bin
+        {
+            itMoMoB->second.insert( std::make_pair<int,float>(ibinX,0.f) );
+        }
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram2D::Histogram2D( const TiXmlElement &xmlElement )
+{
+    ReadFromXml( xmlElement );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram2D::Histogram2D()
+    : axisX(),
+      axisY()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::Fill( float valueX, float valueY, float weight )
+{
+    bins[axisY.GetBinForValue(valueY)][axisX.GetBinForValue(valueX)] += weight;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float Histogram2D::GetBinContent( int binX, int binY )
+{
+    MapOfMapOfBins::iterator itBinY = bins.find( binY );
+    if( itBinY == bins.end() )
+        throw Axis::WrongBinNumber();
+
+    MapOfBins& binXMap = itBinY->second;
+    MapOfBins::iterator itBinX = binXMap.find( binX );
+    if( itBinX == binXMap.end() )
+        throw Axis::WrongBinNumber();
+
+    return itBinX->second;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float Histogram2D::Get( float valueX, float valueY )
+{
+    int binX = axisX.GetBinForValue(valueX);
+    int binY = axisY.GetBinForValue(valueY);
+
+    return GetBinContent(binX, binY);
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float Histogram2D::GetSumOfEntries()
+{
+    float sum = 0.f;
+    for( MapOfMapOfBins::iterator itBinY = bins.begin(), itBinYEnd = bins.end(); itBinY != itBinYEnd; ++itBinY )
+    {
+        MapOfBins& binsX = itBinY->second;
+        
+        for( MapOfBins::iterator itBinX = binsX.begin(), itBinXEnd = binsX.end(); itBinX != itBinXEnd; ++itBinX )
+        {
+            float value = itBinX->second;
+            sum += value;
+        }
+    }
+
+    return sum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::Scale( float value )
+{
+    for( MapOfMapOfBins::iterator itBinY = bins.begin(), itBinYEnd = bins.end(); itBinY != itBinYEnd; ++itBinY )
+    {
+        MapOfBins& binsX = itBinY->second;
+        
+        for( MapOfBins::iterator itBinX = binsX.begin(), itBinXEnd = binsX.end(); itBinX != itBinXEnd; ++itBinX )
+        {
+            float binValue = itBinX->second;
+            itBinX->second = binValue/value;
+        }
+    }
+}
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::WriteToXml ( TiXmlElement * &xmlElement ) 
+{
+    xmlElement = new TiXmlElement( name );
+    xmlElement->SetAttribute( "Type", "Histogram2D" );
+
+    axisX.WriteToXml( xmlElement );
+    axisY.WriteToXml( xmlElement );
+
+    TiXmlElement * pXmlElementBins;
+    TiXmlText *    pXmlText;
+
+    for( MapOfMapOfBins::iterator itBinY = bins.begin(), itBinYEnd = bins.end(); itBinY != itBinYEnd; ++itBinY )
+    {
+        std::stringstream sstr;
+
+        int        iBinY = itBinY->first;
+        MapOfBins& binsX = itBinY->second;
+        
+        pXmlElementBins = new TiXmlElement("Bins");
+        pXmlText = new TiXmlText("Bins");
+        pXmlElementBins->SetAttribute( "BinY", iBinY );
+
+        for( MapOfBins::iterator itBinX = binsX.begin(), itBinXEnd = binsX.end(); itBinX != itBinXEnd; ++itBinX )
+        {
+            float value = itBinX->second;
+
+            if( itBinX != binsX.begin() )
+                sstr << " ";
+            sstr << value;
+        }
+        pXmlText->SetValue( sstr.str() );
+        pXmlElementBins->LinkEndChild(pXmlText);
+        if( !xmlElement->LinkEndChild(pXmlElementBins) )
+            throw Histogram2D::XmlError();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::ReadFromXml( const TiXmlElement&  xmlElement )
+{
+    name = xmlElement.Value();
+    
+    std::string type = "";
+    if( (type = xmlElement.Attribute( "Type" )) != "Histogram2D" )
+    {
+        std::cout << "Error at reading Xml file: You tried to load a Histogram2D, but Xml element is of type '" << type << "'." << std::endl;
+        std::cout << "The name of the Xml element is : " << name << std::endl;
+        throw NotHistogram2D();
+    }
+
+    const TiXmlElement* pXmlAxisXElement = xmlElement.FirstChildElement();
+    axisX.ReadFromXml( *(pXmlAxisXElement) );
+
+    const TiXmlElement* pXmlAxisYElement = pXmlAxisXElement->NextSiblingElement();
+    axisY.ReadFromXml( *(pXmlAxisYElement) );
+
+    const TiXmlElement* pXmlBins = pXmlAxisYElement;
+
+    bins.clear();
+    while( (pXmlBins = pXmlBins->NextSiblingElement()) != NULL )
+    {
+        if( !pXmlBins )
+            throw XmlError();
+
+        int iBinY = 0;
+        pXmlBins->QueryIntAttribute( "BinY", &iBinY );
+
+        std::string binsString = pXmlBins->GetText();
+
+        StringVector binsStringVector;
+
+        // tokenize the string
+        Axis::TokenizeString( binsString, binsStringVector, " " );
+
+        // transform the strings to float and fill the bins
+        int iBinX = -1; // start with the underflow bin
+        
+        for( StringVector::iterator itBinX = binsStringVector.begin(), itBinXEnd = binsStringVector.end(); itBinX != itBinXEnd; ++itBinX )
+        {
+            std::stringstream binStr;
+            binStr << (*itBinX);
+            float binValue;
+            binStr >> binValue;
+            bins[iBinY][iBinX] = binValue; 
+            ++iBinX;
+        }
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::Print( std::ostream& os )
+{
+    std::cout << "=== Histogram2D === [" << name << "] " << std::endl;
+    axisX.Print( os );
+    axisY.Print( os );
+
+    for( MapOfMapOfBins::iterator itBinY = bins.begin(), itBinYEnd = bins.end(); itBinY != itBinYEnd; ++itBinY )
+    {
+        std::stringstream binValuesString;
+
+        int        iBinY = itBinY->first;
+        MapOfBins& binsX = itBinY->second;
+
+        for( MapOfBins::iterator itBinX = binsX.begin(), itBinXEnd = binsX.end(); itBinX != itBinXEnd; ++itBinX )
+        {
+            int   iBinX = itBinX->first;
+            float value = itBinX->second;
+
+            if( itBinX != binsX.begin() )
+                binValuesString << "  ";
+            binValuesString << "[" << iBinX << "," << iBinY << "]=" << value;
+        }
+        os << binValuesString.str() << std::endl;
+    }
+}
+
+
+
+
 
 
 

@@ -16,6 +16,148 @@
 
 namespace pandora
 {
+    class Axis {
+    public:
+	typedef std::map<float,int> BinMap;
+
+	class WrongBinNumber {};
+	class WrongLimits    {};
+	class XmlError {};
+	class NotAxis {};
+
+	Axis();
+	Axis( int bins, float from, float to );
+	Axis( const std::vector<float>& binBorders );
+
+	void SetDimensions( int bins, float from, float to );
+	void SetDimensions( const std::vector<float>& binBorders );
+
+	int GetBinForValue( float value );
+	
+	int GetNumberBins();
+	float GetMinValue();
+	float GetMaxValue();
+
+	void WriteToXml ( TiXmlElement * xmlElement );
+	void ReadFromXml( const TiXmlElement &xmlElement );
+
+	void Print( std::ostream& );
+
+	static void TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter);
+
+    private:
+	int numberBins;
+	float minValue;
+	float maxValue;
+	float k;
+       
+	bool regularBins;
+
+	BinMap bins;
+
+	friend class Histogram1D;
+	friend class Histogram2D;
+    };
+
+    inline float Axis::GetMinValue()
+    {
+	return minValue;
+    }
+
+    inline float Axis::GetMaxValue()
+    {
+	return maxValue;
+    }
+
+
+    class Histogram2D;
+
+    class Histogram1D {
+    public:
+	typedef std::map<int,float> MapOfBins;
+
+	class XmlError {};
+	class NotHistogram1D {};
+
+
+	Histogram1D();
+	Histogram1D( const TiXmlElement &xmlElement );
+	Histogram1D( const std::string& histogramName, int numberBins, float from, float to );
+	Histogram1D( const std::string& histogramName, const std::vector<float>& binBorders );
+
+	void SetDimensions( const std::string& histogramName, int numberBins, float from, float to );
+	void SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders );
+
+	void Fill( float value, float weight = 1.0 );
+
+	float GetBinContent( int bin );
+	float Get( float value );
+
+	float GetSumOfEntries();
+	void Scale( float value );
+
+	void WriteToXml ( TiXmlElement * &xmlElement );
+	void ReadFromXml( const TiXmlElement &xmlElement );
+
+	void Print( std::ostream& );
+
+	static void TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter);
+
+    private:
+	void CreateEmptyBins();
+
+	std::string name;
+	Axis axis;
+	
+	MapOfBins bins;
+    };
+
+
+    class Histogram2D {
+    public:
+	typedef std::map<int,float> MapOfBins;
+	typedef std::map<int,MapOfBins> MapOfMapOfBins;
+
+	class XmlError {};
+	class NotHistogram2D {};
+	class DataStructureError {};
+
+
+	Histogram2D();
+	Histogram2D( const TiXmlElement &xmlElement );
+	Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+	Histogram2D( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY );
+	Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+	Histogram2D( const std::string& histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+
+	void SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+	void SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+	void SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsX, float fromX, float toX );
+	void SetDimensions( const std::string& histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+
+	void Fill( float x, float y, float weight = 1.0 );
+
+	float GetBinContent( int binX, int binY );
+	float Get( float valueX, float valueY );
+
+	float GetSumOfEntries();
+	void Scale( float value );
+
+	void WriteToXml ( TiXmlElement * &xmlElement );
+	void ReadFromXml( const TiXmlElement &xmlElement );
+
+	void Print( std::ostream& );
+
+    private:
+	void CreateEmptyBins();
+
+	std::string name;
+	Axis axisX, axisY;
+	
+	MapOfMapOfBins bins;
+
+    };
+
 // TODO to be extracted from xml file
 #ifndef LIKELIHOOD_DATA
 #define LIKELIHOOD_DATA
@@ -150,6 +292,43 @@ namespace pandora
     };
 #endif
 
+    class PhotonIDLikelihoodCalculator
+    {
+    public:
+	static PhotonIDLikelihoodCalculator* Instance();
+	float  PID(float E, float rms, float frac, float start);
+	void Delete();
+
+	void WriteXmlSig( const std::string& fileName );
+	void WriteXmlBkg( const std::string& fileName );
+	void LoadXml(  const std::string& fileNameSig, const std::string& fileNameBkg );
+
+	Histogram1D energySig;
+	Histogram1D energyBkg;
+
+	Histogram2D rmsSig;
+	Histogram2D fracSig;
+	Histogram2D startSig;
+	Histogram2D rmsBkg;
+	Histogram2D fracBkg;
+	Histogram2D startBkg;
+
+
+    protected:
+        PhotonIDLikelihoodCalculator() {  }
+
+    private:
+        static PhotonIDLikelihoodCalculator* _instance;
+	
+	static bool fromXml;
+
+	void ReadXmlSignal(      const std::string& fileNameSig );
+	void ReadXmlBackground(  const std::string& fileNameBkg );
+
+    };
+
+
+
     typedef struct
     {
         float energy;
@@ -163,19 +342,6 @@ namespace pandora
         int peakNumber;
     } protoClusterPeaks_t;
 
-    class PhotonIDLikelihoodCalculator
-    {
-    public:
-	static PhotonIDLikelihoodCalculator* Instance();
-	float  PID(float E, float rms, float frac, float start);
-	void Delete();
-
-    protected:
-        PhotonIDLikelihoodCalculator() {}
-
-    private:
-        static PhotonIDLikelihoodCalculator* _instance;
-    };
 } // namespace pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -413,7 +579,12 @@ public:
     std::string     m_clusterListName;              ///< name of the initial cluster list
 
     std::string     m_monitoringFileName;           ///< filename for file where for monitoring information is stored
+    std::string     m_configurationFileNameBkg;     ///< filename for file where the configuration of the photon clustering is stored : background
+    std::string     m_configurationFileNameSig;     ///< filename for file where the configuration of the photon clustering is stored : signal
     std::string     m_strategy;                     ///< The strategy used for photon recognition
+
+    int             m_produceConfigurationFiles;     ///< produce the configuration file (using the provided events) (0... signal events, 1 ... background events, 2 ... signal and background events, to be split by "fraction"
+
 
     bool m_isAlreadyInitialized;                    ///< set to true if initialisation has taken place
 };
