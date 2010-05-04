@@ -11,6 +11,7 @@
 #include "Algorithms/ECalPhotonIdAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
 #include "Algorithms/PfoConstructionAlgorithm.h"
+#include "Algorithms/PhotonRecoveryAlgorithm.h"
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
 #include "Algorithms/ReclusteringAlgorithm.h"
 #include "Algorithms/TopologicalAssociationAlgorithm.h"
@@ -68,6 +69,7 @@
     d("ECalPhotonId",                           ECalPhotonIdAlgorithm::Factory)                             \
     d("FragmentRemoval",                        FragmentRemovalAlgorithm::Factory)                          \
     d("PfoConstruction",                        PfoConstructionAlgorithm::Factory)                          \
+    d("PhotonRecovery",                         PhotonRecoveryAlgorithm::Factory)                           \
     d("PrimaryClustering",                      PrimaryClusteringAlgorithm::Factory)                        \
     d("Reclustering",                           ReclusteringAlgorithm::Factory)                             \
     d("TopologicalAssociation",                 TopologicalAssociationAlgorithm::Factory)                   \

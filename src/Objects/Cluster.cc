@@ -328,6 +328,7 @@ StatusCode Cluster::ResetProperties()
     m_outerPseudoLayer.Reset();
 
     m_currentFitResult.Reset();
+    m_isPhoton = false;
     this->ResetOutdatedProperties();
 
     return STATUS_CODE_SUCCESS;
