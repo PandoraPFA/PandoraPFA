@@ -69,7 +69,6 @@ StatusCode PerfectFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHa
 
 StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval( Cluster* pCluster, float& removedCaloHitEnergy ) 
 {
-    
     const OrderedCaloHitList& pOrderedCaloHitList = pCluster->GetOrderedCaloHitList();
 
     // match calohitvectors and energy to their MCParticles
@@ -92,7 +91,7 @@ StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval( Cluster* pCluster, 
             // fetch the MCParticle
             const MCParticle* mc = NULL; 
             pCaloHit->GetMCParticle( mc );
-            if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
+//            if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 
 
             // add hit to calohitvector
@@ -117,9 +116,9 @@ StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval( Cluster* pCluster, 
 
     // select the mcparticle which contributed most of the calohit-energy to the cluster
     CALOHITSPERMCPARTICLE::iterator itHitsPerMcParticleMostEnergy = hitsPerMcParticle.begin();
-    CALOHITSPERMCPARTICLE::iterator itHits = hitsPerMcParticle.begin();
+    CALOHITSPERMCPARTICLE::iterator itHits =                        hitsPerMcParticle.begin();
     ++itHits;
-    CALOHITSPERMCPARTICLE::iterator itHitsEnd = hitsPerMcParticle.end();
+    CALOHITSPERMCPARTICLE::iterator itHitsEnd =                     hitsPerMcParticle.end();
 
     float removedEnergy  = 0.f;
 
@@ -132,13 +131,11 @@ StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval( Cluster* pCluster, 
 
         if( currentEnergy > mostEnergy )
         { // remove the hits of the mcparticle which had be the one with the largest energy contribution
-            std::cout << "curr >  most " << std::endl;
             pCaloHitVectorToRemove = itHitsPerMcParticleMostEnergy->second.second;
             itHitsPerMcParticleMostEnergy = itHits;
         }
         else
         { // remove the hits of the mcpfo which has less energy contribution
-            std::cout << "curr <= most " << std::endl;
             pCaloHitVectorToRemove = itHits->second.second;
         }
 
