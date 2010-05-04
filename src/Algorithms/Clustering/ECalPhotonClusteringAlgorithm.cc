@@ -1454,9 +1454,12 @@ void PhotonIDLikelihoodCalculator::ReadXmlSignal( const std::string& fileNameSig
     TiXmlElement * loadElement = docSig.FirstChildElement();
 
     energySig.ReadFromXml( *loadElement );
-    rmsSig.ReadFromXml   ( *(loadElement->NextSiblingElement()) );
-    fracSig.ReadFromXml  ( *(loadElement->NextSiblingElement()) );
-    startSig.ReadFromXml ( *(loadElement->NextSiblingElement()) );
+    loadElement = loadElement->NextSiblingElement();
+    rmsSig.ReadFromXml   ( *loadElement );
+    loadElement = loadElement->NextSiblingElement();
+    fracSig.ReadFromXml  ( *loadElement );
+    loadElement = loadElement->NextSiblingElement();
+    startSig.ReadFromXml ( *loadElement );
 
     energySig.Print( std::cout );
 
@@ -1473,12 +1476,15 @@ void PhotonIDLikelihoodCalculator::ReadXmlBackground( const std::string& fileNam
     std::cout << "Load photon clustering background data" << std::endl;
     TiXmlDocument docBkg(fileNameBkg);
     docBkg.LoadFile();
-    TiXmlElement * loadElementBkg = docBkg.FirstChildElement();
+    TiXmlElement * loadElement = docBkg.FirstChildElement();
     
-    energyBkg.ReadFromXml( *loadElementBkg );
-    rmsBkg.ReadFromXml   ( *(loadElementBkg->NextSiblingElement()) );
-    fracBkg.ReadFromXml  ( *(loadElementBkg->NextSiblingElement()) );
-    startBkg.ReadFromXml ( *(loadElementBkg->NextSiblingElement()) );
+    energyBkg.ReadFromXml( *loadElement );
+    loadElement = loadElement->NextSiblingElement();
+    rmsBkg.ReadFromXml   ( *loadElement );
+    loadElement = loadElement->NextSiblingElement();
+    fracBkg.ReadFromXml  ( *loadElement );
+    loadElement = loadElement->NextSiblingElement();
+    startBkg.ReadFromXml ( *loadElement );
 
     energyBkg.Print( std::cout );
 
