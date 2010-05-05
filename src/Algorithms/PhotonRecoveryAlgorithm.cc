@@ -8,6 +8,8 @@
 
 #include "Algorithms/PhotonRecoveryAlgorithm.h"
 
+#include "Helpers/ParticleIdHelper.h"
+
 #include <limits>
 
 using namespace pandora;
@@ -78,6 +80,17 @@ StatusCode PhotonRecoveryAlgorithm::Run()
 
         // Tag the cluster as a fixed photon
         if (isPhoton)
+        {
+            pCluster->SetIsPhotonFlag(true);
+        }
+    }
+
+    // Soft photon id
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    {
+        Cluster *pCluster = *iter;
+
+        if (ParticleIdHelper::IsPhotonFull(pCluster))
         {
             pCluster->SetIsPhotonFlag(true);
         }
