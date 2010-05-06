@@ -241,7 +241,7 @@ StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
                                                                                                          "MakePhotonIDLikelihoodHistograms", m_makingPhotonIdLikelihoodHistograms));
 
     // monitoring filename
-    m_monitoringFileName = "photonIdMonitoring.root";
+    m_monitoringFileName = "";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
                                                                                                          "MonitoringFileName", m_monitoringFileName));
     // xml configuration input filename background
@@ -293,12 +293,15 @@ void ECalPhotonClusteringAlgorithm::CreateOrSaveLikelihoodHistograms(bool create
         }
         else // if not create --> save them
         {
-            PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistrms,  m_monitoringFileName, "UPDATE"));
-            PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistrms, m_monitoringFileName, "UPDATE"));
-            PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistfrac, m_monitoringFileName, "UPDATE"));
-            PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistfrac, m_monitoringFileName, "UPDATE"));
-            PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighiststart, m_monitoringFileName, "UPDATE"));
-            PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhiststart, m_monitoringFileName, "UPDATE"));
+            if( !m_monitoringFileName.empty() )
+            {
+                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistrms,  m_monitoringFileName, "UPDATE"));
+                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistrms, m_monitoringFileName, "UPDATE"));
+                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistfrac, m_monitoringFileName, "UPDATE"));
+                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistfrac, m_monitoringFileName, "UPDATE"));
+                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighiststart, m_monitoringFileName, "UPDATE"));
+                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhiststart, m_monitoringFileName, "UPDATE"));
+            }
         }
     }
 
@@ -310,17 +313,19 @@ void ECalPhotonClusteringAlgorithm::CreateOrSaveLikelihoodHistograms(bool create
     }
     else
     {
-        PANDORA_MONITORING_API(SaveAndCloseHistogram("energyVsPhotonE", m_monitoringFileName, "UPDATE" ));
-        PANDORA_MONITORING_API(SaveAndCloseHistogram("pidVsPhotonEFraction", m_monitoringFileName, "UPDATE" ));
+        if( !m_monitoringFileName.empty() )
+        {
+            PANDORA_MONITORING_API(SaveAndCloseHistogram("energyVsPhotonE", m_monitoringFileName, "UPDATE" ));
+            PANDORA_MONITORING_API(SaveAndCloseHistogram("pidVsPhotonEFraction", m_monitoringFileName, "UPDATE" ));
 
-        try
-        {
-//            PANDORA_MONITORING_API(PrintTree("photonId"));
-            PANDORA_MONITORING_API(SaveTree("photonId", m_monitoringFileName, "UPDATE" ));
-        }
-        catch(...)
-        {
-            std::cout << "Tree 'photonId' could not be saved!" << std::endl;
+            try
+            {
+                PANDORA_MONITORING_API(SaveTree("photonId", m_monitoringFileName, "UPDATE" ));
+            }
+            catch(...)
+            {
+                std::cout << "Tree 'photonId' could not be saved!" << std::endl;
+            }
         }
     }
 
