@@ -17,9 +17,8 @@ using namespace pandora;
 
 StatusCode IsolatedHitMergingAlgorithm::Run()
 {
-    std::string inputClusterListName;
     const ClusterList *pInputClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList, inputClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList));
 
     // Create a vector of input clusters, ordered by inner layer
     ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());

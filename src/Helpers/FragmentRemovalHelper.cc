@@ -138,34 +138,36 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     const CartesianVector &referencePoint(pHelix->GetReferencePoint());
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(zStart, referencePoint, intersectionPoint));
 
+    static const PseudoLayer MAX_LAYER = std::numeric_limits<unsigned int>::max();
     static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
-    const PseudoLayer startLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
 
-    PseudoLayer currentLayer(startLayer);
-    PseudoLayer layerCount(0);
+    PseudoLayer startLayer(MAX_LAYER);
+
+    if ((pGeometryHelper->IsOutsideHCal(intersectionPoint)) || (STATUS_CODE_SUCCESS != pGeometryHelper->GetPseudoLayer(intersectionPoint, startLayer)))
+    {
+        return MAX_LAYER;
+    }
+
+    PseudoLayer currentLayer(startLayer), layerCount(0);
 
     for (float z = zStart; std::fabs(z) < std::fabs(zEnd + 0.5 * deltaZ); z += deltaZ)
     {
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(z, referencePoint, intersectionPoint));
 
-        if (pGeometryHelper->IsOutsideHCal(intersectionPoint))
+        PseudoLayer iLayer(MAX_LAYER);
+
+        if ((pGeometryHelper->IsOutsideHCal(intersectionPoint)) || (STATUS_CODE_SUCCESS != pGeometryHelper->GetPseudoLayer(intersectionPoint, iLayer)))
+        {
             continue;
-
-        try
-        {
-            const PseudoLayer iLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
-
-            if (iLayer != currentLayer)
-            {
-                if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
-                {
-                    layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
-                }
-                currentLayer = iLayer;
-            }
         }
-        catch (StatusCodeException &)
+
+        if (iLayer != currentLayer)
         {
+            if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
+            {
+                layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
+            }
+            currentLayer = iLayer;
         }
     }
 

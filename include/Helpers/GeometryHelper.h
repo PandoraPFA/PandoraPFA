@@ -281,6 +281,14 @@ public:
     PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
 
     /**
+     *  @brief  Get the appropriate pseudolayer for a specified position vector
+     * 
+     *  @param  positionVector the specified position
+     *  @param  pseudoLayer to receive the appropriate pseudolayer
+     */
+    StatusCode GetPseudoLayer(const CartesianVector &positionVector, PseudoLayer &pseudoLayer) const;
+
+    /**
      *  @brief  Whether a specified position is outside of the ecal region
      * 
      *  @param  position the specified position
@@ -552,6 +560,23 @@ inline float GeometryHelper::GetNInteractionLengthsInRadialGap() const
 inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditionalSubDetectors() const
 {
     return m_additionalSubDetectors;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector, PseudoLayer &pseudoLayer) const
+{
+    try
+    {
+        pseudoLayer = this->GetPseudoLayer(positionVector);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        return statusCodeException.GetStatusCode();
+    }
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

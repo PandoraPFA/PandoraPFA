@@ -90,12 +90,17 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
         }
 
         // Check barrel-endcap overlap
-        if (!isPhoton && (innerPseudoLayer < m_maxInnerLayer) &&
-            (pCluster->GetMipFraction() - m_maxMipFraction < std::numeric_limits<float>::epsilon()) &&
-            (this->GetBarrelEndCapEnergySplit(pCluster) < m_maxBarrelEndCapSplit) &&
-            (pCluster->GetCurrentFitResult().GetRadialDirectionCosine() > m_minRadialDirectionCosine))
+        if (!isPhoton)
         {
-            isPhoton = true;
+            const ClusterHelper::ClusterFitResult &currentFitResult(pCluster->GetCurrentFitResult());
+
+            if ((innerPseudoLayer < m_maxInnerLayer) &&
+                (pCluster->GetMipFraction() - m_maxMipFraction < std::numeric_limits<float>::epsilon()) &&
+                (this->GetBarrelEndCapEnergySplit(pCluster) < m_maxBarrelEndCapSplit) &&
+                (currentFitResult.IsFitSuccessful()) && (currentFitResult.GetRadialDirectionCosine() > m_minRadialDirectionCosine))
+            {
+                isPhoton = true;
+            }
         }
 
         // Tag the cluster as a fixed photon
