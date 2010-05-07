@@ -332,34 +332,7 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
 
 bool ParticleIdHelper::IsPhotonFull(Cluster *const pCluster)
 {
-    // ATTN This is only a simple placeholder photon id function. The full photon id is a likelihood-based method, to be extracted
-    //      from the Photon Clustering algorithm.
-
-    const unsigned int nCaloHits(pCluster->GetNCaloHits());
-
-    if ((nCaloHits <= m_photonFullMinCaloHits) || (nCaloHits >= m_photonFullMaxCaloHits))
-        return false;
-
-    const float electromagneticEnergy(pCluster->GetElectromagneticEnergy());
-
-    if (electromagneticEnergy > m_photonFullMaxEnergy)
-        return false;
-
-    if (pCluster->GetInnerPseudoLayer() > m_photonFullMaxInnerLayer)
-        return false;
-
-    const ClusterHelper::ClusterFitResult &clusterFitResult(pCluster->GetFitToAllHitsResult());
-
-    if (clusterFitResult.IsFitSuccessful())
-    {
-        const float radialDirectionCosine(clusterFitResult.GetRadialDirectionCosine());
-
-        if (radialDirectionCosine > m_photonFullMaxDCosR)
-            return true;
-
-        if ((electromagneticEnergy < m_photonFullLowEnergyCut) && (radialDirectionCosine > m_photonFullLowEnergyMaxDCosR))
-            return true;
-    }
+    // TODO Extract full likelihood-based photon id from photon clustering algorithm
 
     return false;
 }
@@ -442,14 +415,6 @@ float ParticleIdHelper::m_photonIdLayer90Cut2Energy = 40.f;
 float ParticleIdHelper::m_photonIdLayer90LowECut2 = 40.f;
 float ParticleIdHelper::m_photonIdLayer90HighECut2 = 50.f;
 int ParticleIdHelper::m_photonIdLayer90MaxLayersFromECal = 10;
-
-unsigned int ParticleIdHelper::m_photonFullMinCaloHits = 0;
-unsigned int ParticleIdHelper::m_photonFullMaxCaloHits = 25;
-float ParticleIdHelper::m_photonFullMaxEnergy = 1.f;
-unsigned int ParticleIdHelper::m_photonFullMaxInnerLayer = 15;
-float ParticleIdHelper::m_photonFullMaxDCosR = 0.9f;
-float ParticleIdHelper::m_photonFullLowEnergyCut = 0.5f;
-float ParticleIdHelper::m_photonFullLowEnergyMaxDCosR = 0.8f;
 
 unsigned int ParticleIdHelper::m_electronIdMaxInnerLayer = 4;
 float ParticleIdHelper::m_electronIdMaxEnergy = 5.f;
@@ -571,28 +536,6 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "PhotonIdLayer90MaxLayersFromECal", m_photonIdLayer90MaxLayersFromECal));
-
-    // Full photon id settings
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullMinCaloHits", m_photonFullMinCaloHits));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullMaxCaloHits", m_photonFullMaxCaloHits));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullMaxEnergy", m_photonFullMaxEnergy));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullMaxInnerLayer", m_photonFullMaxInnerLayer));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullMaxDCosR", m_photonFullMaxDCosR));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullLowEnergyCut", m_photonFullLowEnergyCut));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullLowEnergyMaxDCosR", m_photonFullLowEnergyMaxDCosR));
 
     // Fast electron id settings
    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,

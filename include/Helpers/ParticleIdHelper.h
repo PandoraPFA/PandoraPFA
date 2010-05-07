@@ -116,14 +116,6 @@ private:
 
     static int          m_photonIdLayer90MaxLayersFromECal; ///< Max number of layers between cluster layer 90 and last ecal layer
 
-    static unsigned int m_photonFullMinCaloHits;            ///< Fast photon id min number of calo hits in cluster
-    static unsigned int m_photonFullMaxCaloHits;            ///< Fast photon id max number of calo hits in cluster
-    static float        m_photonFullMaxEnergy;              ///< Fast photon id max cluster electromagnetic energy
-    static unsigned int m_photonFullMaxInnerLayer;          ///< Fast photon id max cluster inner pseudolayer
-    static float        m_photonFullMaxDCosR;               ///< Fast photon id max cluster radial direction cosine
-    static float        m_photonFullLowEnergyCut;           ///< Fast photon id low electromagnetic energy cut
-    static float        m_photonFullLowEnergyMaxDCosR;      ///< Fast photon id max radial direction cosine for low energy cluster
-
     static unsigned int m_electronIdMaxInnerLayer;          ///< Max inner psuedo layer for fast electron id
     static float        m_electronIdMaxEnergy;              ///< Max electromagnetic energy for fast electron id
     static float        m_electronIdMaxProfileStart;        ///< Max shower profile start for fast electron id
