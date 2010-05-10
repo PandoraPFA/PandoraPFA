@@ -25,6 +25,8 @@ StatusCode ForcedClusteringAlgorithm::Run()
 
     Track *pTrack = *(pTrackList->begin());
     const float trackEnergy(pTrack->GetEnergyAtDca());
+    const CartesianVector &trackPosition(pTrack->GetTrackStateAtECal().GetPosition());
+    const CartesianVector trackDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector());
 
     // Read current ordered calo hit list
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
@@ -36,10 +38,6 @@ StatusCode ForcedClusteringAlgorithm::Run()
     CaloHitList inputCaloHitList;
     pOrderedCaloHitList->GetCaloHitList(inputCaloHitList);
 
-    // Create single track seeded cluster
-    Cluster *pCluster = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pTrack, pCluster));
-
     // Order all available calo hits by distance to track seed
     CaloHitDistanceVector caloHitDistanceVector;
 
@@ -49,12 +47,22 @@ StatusCode ForcedClusteringAlgorithm::Run()
         {
             float distanceToTrackSeed(std::numeric_limits<float>::max());
 
-            if (STATUS_CODE_SUCCESS == this->GetDistanceToTrackSeed(pCluster, *iter, distanceToTrackSeed))
+            if (STATUS_CODE_SUCCESS == this->GetDistanceToTrackSeed(trackPosition, trackDirection, *iter, distanceToTrackSeed))
+            {
                 caloHitDistanceVector.push_back(std::make_pair(*iter, distanceToTrackSeed));
+            }
         }
     }
 
     std::sort(caloHitDistanceVector.begin(), caloHitDistanceVector.end(), ForcedClusteringAlgorithm::SortByDistanceToTrackSeed);
+
+    // Return if there are no suitable calo hits to cluster
+    if (caloHitDistanceVector.empty())
+        return STATUS_CODE_SUCCESS;
+
+    // Create a single track seeded cluster
+    Cluster *pCluster = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pTrack, pCluster));
 
     // Work along ordered list of calo hits, adding to the cluster until cluster energy matches track energy.
     for (CaloHitDistanceVector::const_iterator iter = caloHitDistanceVector.begin(), iterEnd = caloHitDistanceVector.end(); iter != iterEnd; ++iter)
@@ -98,20 +106,20 @@ StatusCode ForcedClusteringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ForcedClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, float &distance) const
+StatusCode ForcedClusteringAlgorithm::GetDistanceToTrackSeed(const CartesianVector &trackPosition, const CartesianVector &trackDirection,
+    CaloHit *const pCaloHit, float &distance) const
 {
     if (0 == m_maxTrackSeedSeparation)
         return STATUS_CODE_FAILURE;
 
     const CartesianVector hitPosition(pCaloHit->GetPositionVector());
 
-    const CartesianVector &trackSeedPosition(pCluster->GetTrackSeed()->GetTrackStateAtECal().GetPosition());
-    const CartesianVector positionDifference(hitPosition - trackSeedPosition);
+    const CartesianVector positionDifference(hitPosition - trackPosition);
     const float separation(positionDifference.GetMagnitude());
 
     if (separation < m_maxTrackSeedSeparation)
     {
-        const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
+        const float dPerp((trackDirection.GetCrossProduct(positionDifference)).GetMagnitude());
         const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
 
         const float dCut ((ECAL == pCaloHit->GetHitType()) ?
@@ -126,13 +134,6 @@ StatusCode ForcedClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pClu
     }
 
     return STATUS_CODE_UNCHANGED;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool ForcedClusteringAlgorithm::SortByDistanceToTrackSeed(const CaloHitDistancePair &lhs, const CaloHitDistancePair &rhs)
-{
-    return (lhs.second < rhs.second);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

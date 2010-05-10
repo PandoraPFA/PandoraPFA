@@ -33,21 +33,23 @@ private:
     typedef std::vector<CaloHitDistancePair> CaloHitDistanceVector;
 
     /**
+     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface
+     * 
+     *  @param  trackPosition the seed track position at the ecal
+     *  @param  trackDirection the seed track direction at the ecal
+     *  @param  pCaloHit address of the calo hit
+     *  @param  distance to receive the distance
+     */
+    StatusCode GetDistanceToTrackSeed(const pandora::CartesianVector &trackPosition, const pandora::CartesianVector &trackDirection,
+        pandora::CaloHit *const pCaloHit, float &distance) const;
+
+    /**
      *  @brief  Sort calo hit distance pairs by increasing distance from track seed
      * 
      *  @param  lhs the first calo hit distance pair
      *  @param  rhs the second calo hit distance pair
      */
     static bool SortByDistanceToTrackSeed(const CaloHitDistancePair &lhs, const CaloHitDistancePair &rhs);
-
-    /**
-     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface
-     * 
-     *  @param  pCluster address of the cluster
-     *  @param  pCaloHit address of the calo hit
-     *  @param  distance to receive the distance
-     */
-    StatusCode GetDistanceToTrackSeed(pandora::Cluster *const pCluster, pandora::CaloHit *const pCaloHit, float &distance) const;
 
     float           m_trackPathWidth;                       ///< Track path width, to determine whether hits are associated with seed track
     float           m_maxTrackSeedSeparation;               ///< Maximum distance between a calo hit and track seed
@@ -62,6 +64,14 @@ private:
     std::string     m_isolatedHitAssociationAlgorithmName;  ///< The name of isolated hit association algorithm
 };
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ForcedClusteringAlgorithm::SortByDistanceToTrackSeed(const CaloHitDistancePair &lhs, const CaloHitDistancePair &rhs)
+{
+    return (lhs.second < rhs.second);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline pandora::Algorithm *ForcedClusteringAlgorithm::Factory::CreateAlgorithm() const
