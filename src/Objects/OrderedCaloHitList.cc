@@ -105,6 +105,18 @@ StatusCode OrderedCaloHitList::GetCaloHitsInPseudoLayer(const PseudoLayer pseudo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+unsigned int OrderedCaloHitList::GetNCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer) const
+{
+    OrderedCaloHitList::const_iterator iter = this->find(pseudoLayer);
+
+    if (this->end() == iter)
+        return 0;
+
+    return iter->second->size();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode OrderedCaloHitList::Reset()
 {
     for (OrderedCaloHitList::iterator iter = this->begin(), iterEnd = this->end(); iter != iterEnd; ++iter)

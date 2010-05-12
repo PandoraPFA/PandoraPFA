@@ -93,6 +93,15 @@ public:
     StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
 
     /**
+     *  @brief  Get the number of calo hits in a specified pseudo layer
+     * 
+     *  @param  pseudoLayer the pseudo layer
+     * 
+     *  @return The number of calo hits in the specified pseudo layer
+     */
+    unsigned int GetNCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer) const;
+
+    /**
      *  @brief  Reset the ordered calo hit list, emptying its contents
      */
     StatusCode Reset();

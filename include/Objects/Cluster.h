@@ -76,6 +76,15 @@ public:
     unsigned int GetNCaloHits() const;
 
     /**
+     *  @brief  Get the number of calo hits in a specified pseudo layer
+     * 
+     *  @param  pseudoLayer the pseudo layer
+     * 
+     *  @return The number of calo hits in the specified pseudo layer
+     */
+    unsigned int GetNCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer) const;
+
+    /**
      *  @brief  Get the number of isolated calo hits in the cluster
      * 
      *  @return The number of isolated calo hits
@@ -509,6 +518,13 @@ inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLaye
 inline unsigned int Cluster::GetNCaloHits() const
 {
     return m_nCaloHits;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int Cluster::GetNCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer) const
+{
+    return m_orderedCaloHitList.GetNCaloHitsInPseudoLayer(pseudoLayer);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
