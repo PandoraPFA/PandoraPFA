@@ -53,7 +53,7 @@ StatusCode ClusterPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     if (m_candidateListNames.empty())
         return STATUS_CODE_INVALID_PARAMETER;
 
-    m_finalPfoListName = "pfoCreation";
+    m_finalPfoListName = "PfoCreation";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FinalPfoListName", m_finalPfoListName));
 

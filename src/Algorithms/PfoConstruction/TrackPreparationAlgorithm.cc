@@ -120,13 +120,13 @@ StatusCode TrackPreparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "CandidateListNames", m_candidateListNames));
 
     if (m_candidateListNames.empty())
-        m_candidateListNames.push_back("input");
+        m_candidateListNames.push_back("Input");
 
-    m_mergedCandidateListName = "pfoCandidates";
+    m_mergedCandidateListName = "PfoCandidates";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MergedCandidateListName", m_mergedCandidateListName));
 
-    m_finalPfoListName = "pfoCreation";
+    m_finalPfoListName = "PfoCreation";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FinalPfoListName", m_finalPfoListName));
 

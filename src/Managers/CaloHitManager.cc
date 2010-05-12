@@ -21,7 +21,8 @@
 namespace pandora
 {
 
-const std::string CaloHitManager::INPUT_LIST_NAME = "input";
+const std::string CaloHitManager::INPUT_LIST_NAME = "Input";
+const std::string CaloHitManager::MUON_LIST_NAME = "Muon";
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -59,16 +60,26 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 {
     static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
 
-    OrderedCaloHitList orderedCaloHitList;
+    OrderedCaloHitList orderedCaloHitList, muonOrderedCaloHitList;
 
     for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
         PseudoLayer pseudoLayer = pGeometryHelper->GetPseudoLayer((*iter)->GetPositionVector());
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer(pseudoLayer));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
+
+        if (MUON == (*iter)->GetHitType())
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, muonOrderedCaloHitList.Add(*iter));
+        }
+        else
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
+        }
     }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(orderedCaloHitList, INPUT_LIST_NAME));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(muonOrderedCaloHitList, MUON_LIST_NAME));
+
     m_currentListName = INPUT_LIST_NAME;
 
     return STATUS_CODE_SUCCESS;
@@ -78,12 +89,25 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 
 StatusCode CaloHitManager::CalculateCaloHitProperties() const
 {
-    NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(INPUT_LIST_NAME);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CalculateCaloHitProperties(INPUT_LIST_NAME));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CalculateCaloHitProperties(MUON_LIST_NAME));
+
+    static const bool useSimpleIsolationScheme(PandoraSettings::GetInstance()->ShouldUseSimpleIsolationScheme());
+
+    if (useSimpleIsolationScheme)
+        CaloHitHelper::ApplySimpleIsolationScheme(m_inputCaloHitVector);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitManager::CalculateCaloHitProperties(const std::string &listName) const
+{
+    NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);
 
     if (m_nameToOrderedCaloHitListMap.end() == iter)
         return STATUS_CODE_NOT_INITIALIZED;
-
-    static const bool useSimpleIsolationScheme(PandoraSettings::GetInstance()->ShouldUseSimpleIsolationScheme());
 
     for (OrderedCaloHitList::const_iterator pseudoLayerIter = iter->second->begin(), pseudoLayerIterEnd = iter->second->end();
         pseudoLayerIter != pseudoLayerIterEnd; ++pseudoLayerIter)
@@ -94,9 +118,6 @@ StatusCode CaloHitManager::CalculateCaloHitProperties() const
             CaloHitHelper::CalculateCaloHitProperties(*caloHitIter, iter->second);
         }
     }
-
-    if (useSimpleIsolationScheme)
-        CaloHitHelper::ApplySimpleIsolationScheme(m_inputCaloHitVector);
 
     return STATUS_CODE_SUCCESS;
 }

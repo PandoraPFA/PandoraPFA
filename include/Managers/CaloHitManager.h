@@ -44,10 +44,18 @@ private:
     StatusCode OrderInputCaloHits();
 
     /**
-     *  @brief  Calculate calo hit properties, including density weights, isolation flags, possible mip flags
-     *          and surrounding energy
+     *  @brief  Calculate calo hit properties for the muon and input ordered calo hit lists. The properties include
+     *          density weights, isolation flags, possible mip flags and surrounding energy
      */
     StatusCode CalculateCaloHitProperties() const;
+
+    /**
+     *  @brief  Calculate calo hit properties for a specified ordered calo hit list. The properties include density weights,
+     *          isolation flags, possible mip flags and surrounding energy
+     * 
+     *  @param  listName the specified ordered calo hit list name
+     */
+    StatusCode CalculateCaloHitProperties(const std::string &listName) const;
 
     /**
      *  @brief  Get the current ordered calo hit list name
@@ -215,6 +223,7 @@ private:
     StringSet                       m_savedLists;                       ///< The set of saved ordered calo hit lists
 
     static const std::string        INPUT_LIST_NAME;                    ///< The name of the input ordered calo hit list
+    static const std::string        MUON_LIST_NAME;                     ///< The name of the muon ordered calo hit list
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;

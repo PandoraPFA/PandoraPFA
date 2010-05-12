@@ -465,6 +465,12 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
         {
             pCaloHit->AddSurroundingEnergy(CaloHitHelper::GetSurroundingEnergyContribution(pCaloHit, pCaloHitList));
 
+            if (MUON == pCaloHit->GetHitType())
+            {
+                pCaloHit->SetPossibleMipFlag(true);
+                continue;
+            }
+
             const CartesianVector &positionVector(pCaloHit->GetPositionVector());
 
             const float angularCorrection( (BARREL == pCaloHit->GetDetectorRegion()) ?

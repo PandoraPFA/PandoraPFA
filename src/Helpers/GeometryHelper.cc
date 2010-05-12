@@ -68,8 +68,11 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
 
         m_eCalBarrelParameters.Initialize(geometryParameters.m_eCalBarrelParameters, &m_barrelLayerPositions);
         m_hCalBarrelParameters.Initialize(geometryParameters.m_hCalBarrelParameters, &m_barrelLayerPositions);
+        m_muonBarrelParameters.Initialize(geometryParameters.m_muonBarrelParameters, &m_barrelLayerPositions);
+
         m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters, &m_endCapLayerPositions);
         m_hCalEndCapParameters.Initialize(geometryParameters.m_hCalEndCapParameters, &m_endCapLayerPositions);
+        m_muonEndCapParameters.Initialize(geometryParameters.m_muonEndCapParameters, &m_endCapLayerPositions);
 
         for (PandoraApi::GeometryParameters::SubDetectorParametersMap::const_iterator iter = geometryParameters.m_additionalSubDetectors.begin(),
             iterEnd = geometryParameters.m_additionalSubDetectors.end(); iter != iterEnd; ++iter)
@@ -93,6 +96,9 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         {
             m_geometryType = ENCLOSING_BARREL;
         }
+
+        std::sort(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end());
+        std::sort(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end());
 
         m_isInitialized = true;
 

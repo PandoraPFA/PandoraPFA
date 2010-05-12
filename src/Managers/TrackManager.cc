@@ -13,7 +13,7 @@
 namespace pandora
 {
 
-const std::string TrackManager::INPUT_LIST_NAME = "input";
+const std::string TrackManager::INPUT_LIST_NAME = "Input";
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

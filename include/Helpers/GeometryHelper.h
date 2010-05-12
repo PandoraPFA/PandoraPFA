@@ -167,13 +167,6 @@ public:
     const SubDetectorParameters &GetECalBarrelParameters() const;
 
     /**
-     *  @brief  Get the hcal barrel parameters
-     * 
-     *  @return The hcal barrel parameters
-     */
-    const SubDetectorParameters &GetHCalBarrelParameters() const;
-
-    /**
      *  @brief  Get the ecal end cap parameters
      * 
      *  @return The ecal end cap parameters
@@ -181,11 +174,32 @@ public:
     const SubDetectorParameters &GetECalEndCapParameters() const;
 
     /**
+     *  @brief  Get the hcal barrel parameters
+     * 
+     *  @return The hcal barrel parameters
+     */
+    const SubDetectorParameters &GetHCalBarrelParameters() const;
+
+    /**
      *  @brief  Get the hcal end cap parameters
      * 
      *  @return The hcal end cap parameters
      */
     const SubDetectorParameters &GetHCalEndCapParameters() const;
+
+    /**
+     *  @brief  Get the muon detector barrel parameters
+     * 
+     *  @return The muon detector barrel parameters
+     */
+    const SubDetectorParameters &GetMuonBarrelParameters() const;
+
+    /**
+     *  @brief  Get the muon detector end cap parameters
+     * 
+     *  @return The muon detector end cap parameters
+     */
+    const SubDetectorParameters &GetMuonEndCapParameters() const;
 
     /**
      *  @brief  Get the main tracker inner radius, units mm
@@ -366,9 +380,11 @@ private:
     GeometryType                m_geometryType;             ///< The geometry type
 
     SubDetectorParameters       m_eCalBarrelParameters;     ///< The ecal barrel parameters
-    SubDetectorParameters       m_hCalBarrelParameters;     ///< The hcal barrel parameters
     SubDetectorParameters       m_eCalEndCapParameters;     ///< The ecal end cap parameters
-    SubDetectorParameters       m_hCalEndCapParameters;     ///< The hcal end cap parameter
+    SubDetectorParameters       m_hCalBarrelParameters;     ///< The hcal barrel parameters
+    SubDetectorParameters       m_hCalEndCapParameters;     ///< The hcal end cap parameters
+    SubDetectorParameters       m_muonBarrelParameters;     ///< The muon detector barrel parameters
+    SubDetectorParameters       m_muonEndCapParameters;     ///< The muon detector end cap parameters
 
     float                       m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
     float                       m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
@@ -420,16 +436,6 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalBarre
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarrelParameters() const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_hCalBarrelParameters;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCapParameters() const
 {
     if (!m_isInitialized)
@@ -440,12 +446,42 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarrelParameters() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_hCalBarrelParameters;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalEndCapParameters() const
 {
     if (!m_isInitialized)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_hCalEndCapParameters;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonBarrelParameters() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_muonBarrelParameters;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonEndCapParameters() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_muonEndCapParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

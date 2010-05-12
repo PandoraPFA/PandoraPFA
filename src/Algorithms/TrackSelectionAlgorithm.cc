@@ -36,7 +36,7 @@ StatusCode TrackSelectionAlgorithm::Run()
 
 StatusCode TrackSelectionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_selectedTrackListName = "clustering";
+    m_selectedTrackListName = "Clustering";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "SelectedTrackListName", m_selectedTrackListName));
 

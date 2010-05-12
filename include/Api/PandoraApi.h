@@ -145,9 +145,11 @@ public:
         typedef std::map<std::string, SubDetectorParameters> SubDetectorParametersMap;
 
         SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
-        SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
         SubDetectorParameters           m_eCalEndCapParameters;     ///< the ecal end cap parameters
-        SubDetectorParameters           m_hCalEndCapParameters;     ///< The hcal end cap parameter
+        SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
+        SubDetectorParameters           m_hCalEndCapParameters;     ///< The hcal end cap parameters
+        SubDetectorParameters           m_muonBarrelParameters;     ///< the muon detector barrel parameters
+        SubDetectorParameters           m_muonEndCapParameters;     ///< The muon detector end cap parameters
 
         pandora::InputFloat             m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
         pandora::InputFloat             m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
