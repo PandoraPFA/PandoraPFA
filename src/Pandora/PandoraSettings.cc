@@ -87,11 +87,11 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ShouldUseSimpleIsolationScheme", m_shouldUseSimpleIsolationScheme));
 
-        m_isolationDensityWeightCutECal = 0.5f;
+        m_isolationDensityWeightCutECal = 0.1f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationDensityWeightCutECal", m_isolationDensityWeightCutECal));
 
-        m_isolationDensityWeightCutHCal = 0.25f;
+        m_isolationDensityWeightCutHCal = 0.1f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationDensityWeightCutHCal", m_isolationDensityWeightCutHCal));
 
@@ -99,11 +99,11 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationNLayers", m_isolationNLayers));
 
-        m_isolationCutDistanceECal = 50.f;
+        m_isolationCutDistanceECal = 25.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationCutDistanceECal", m_isolationCutDistanceECal));
 
-        m_isolationCutDistanceHCal = 250.f;
+        m_isolationCutDistanceHCal = 200.f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsolationCutDistanceHCal", m_isolationCutDistanceHCal));
 
@@ -115,7 +115,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MipLikeMipCut", m_mipLikeMipCut));
 
-        m_mipNCellsForNearbyHit = 1;
+        m_mipNCellsForNearbyHit = 2;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MipNCellsForNearbyHit", m_mipNCellsForNearbyHit));
 

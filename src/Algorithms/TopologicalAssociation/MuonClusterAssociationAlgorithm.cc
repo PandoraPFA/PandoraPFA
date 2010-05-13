@@ -25,7 +25,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
     ClusterList standaloneMuonClusters;
 
     // Loop over muon cluster list, looking for muon clusters containing sufficient hits
-    for (ClusterList::const_iterator iterI = pMuonClusterList->begin(), iterIEnd = pMuonClusterList->end(); iterI != iterIEnd;)
+    for (ClusterList::const_iterator iterI = pMuonClusterList->begin(); iterI != pMuonClusterList->end();)
     {
         Cluster *pMuonCluster = *iterI;
         ++iterI;
@@ -46,7 +46,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
         if (m_shouldEstimateEnergyLostInCoil)
         {
             const float muonInnerX(muonInnerCentroid.GetX()), muonInnerY(muonInnerCentroid.GetY());
-            const float innerRadius(muonInnerX * muonInnerX + muonInnerY * muonInnerY);
+            const float innerRadius(std::sqrt(muonInnerX * muonInnerX + muonInnerY * muonInnerY));
 
             const unsigned int nHitsInInnerLayer(pMuonCluster->GetNCaloHitsInPseudoLayer(muonClusterInnerLayer));
 
@@ -155,8 +155,11 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
     }
 
     // Merge any identified standalone muon clusters into the input cluster list
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_muonClusterListName, inputClusterListName,
-        standaloneMuonClusters));
+    if (!standaloneMuonClusters.empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_muonClusterListName,
+            inputClusterListName, standaloneMuonClusters));
+    }
 
     return STATUS_CODE_SUCCESS;
 }

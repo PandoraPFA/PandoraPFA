@@ -64,16 +64,23 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 
     for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
-        PseudoLayer pseudoLayer = pGeometryHelper->GetPseudoLayer((*iter)->GetPositionVector());
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer(pseudoLayer));
+        try
+        {
+            PseudoLayer pseudoLayer = pGeometryHelper->GetPseudoLayer((*iter)->GetPositionVector());
+            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer(pseudoLayer));
 
-        if (MUON == (*iter)->GetHitType())
-        {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, muonOrderedCaloHitList.Add(*iter));
+            if (MUON == (*iter)->GetHitType())
+            {
+                PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, muonOrderedCaloHitList.Add(*iter));
+            }
+            else
+            {
+                PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
+            }
         }
-        else
+        catch (StatusCodeException &statusCodeException)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
+            std::cout << "Failed to assign hit to pseudolayer, " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
         }
     }
 

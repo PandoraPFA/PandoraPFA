@@ -286,7 +286,9 @@ StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer, bo
         }
     }
 
-    if (m_hCalBarrelParameters.GetOuterRCoordinate() > radius)
+    static const float maxRCoordinate(std::max(m_hCalBarrelParameters.GetOuterRCoordinate(), m_muonBarrelParameters.GetOuterRCoordinate()));
+
+    if (maxRCoordinate > radius)
     {
         layer = m_barrelLayerPositions.size() - 1;
         return STATUS_CODE_SUCCESS;
@@ -320,7 +322,9 @@ StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &laye
         }
     }
 
-    if (m_hCalEndCapParameters.GetOuterZCoordinate() > zCoordinate)
+    static const float maxZCoordinate(std::max(m_hCalEndCapParameters.GetOuterZCoordinate(), m_muonEndCapParameters.GetOuterZCoordinate()));
+
+    if (maxZCoordinate > zCoordinate)
     {
         layer = m_endCapLayerPositions.size() - 1;
         return STATUS_CODE_SUCCESS;
