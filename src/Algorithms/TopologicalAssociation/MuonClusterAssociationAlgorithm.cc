@@ -15,12 +15,20 @@ using namespace pandora;
 
 StatusCode MuonClusterAssociationAlgorithm::Run()
 {
+    // Get the muon cluster list, which will only exist if there are muon hits to cluster
+    const ClusterList *pMuonClusterList = NULL;
+    StatusCode statusCode = PandoraContentApi::GetClusterList(*this, m_muonClusterListName, pMuonClusterList);
+
+    if (STATUS_CODE_NOT_INITIALIZED == statusCode)
+        return STATUS_CODE_SUCCESS;
+
+    if (STATUS_CODE_SUCCESS != statusCode)
+        return statusCode;
+
+    // Get the current cluster list, with which muon clusters will be associated
     std::string inputClusterListName;
     const ClusterList *pInputClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList, inputClusterListName));
-
-    const ClusterList *pMuonClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_muonClusterListName, pMuonClusterList));
 
     ClusterList standaloneMuonClusters;
 
