@@ -62,6 +62,14 @@ private:
     static float GetHadronicEnergyInLayer(const OrderedCaloHitList &orderedCaloHitList, const PseudoLayer pseudoLayer);
 
     /**
+     *  @brief  Correct energy of clusters containing muon hits, by addressing issue of energy loss in the coil
+     * 
+     *  @param  pCluster address of the cluster
+     *  @param  correctedHadronicEnergy the current corrected hadronic energy measure, which may be modified by this function
+     */
+    static void ApplyMuonEnergyCorrection(Cluster *const pCluster, float &correctedHadronicEnergy);
+
+    /**
      *  @brief  Read the energy corrections helper settings
      * 
      *  @param  pXmlHandle address of the relevant xml handle
@@ -84,6 +92,11 @@ private:
 
     static float            m_hotHadronMipsPerHit;          ///< Min number of mips per hit for a hot hadron cluster
     static float            m_scaledHotHadronMipsPerHit;    ///< Scale factor (new mips per hit value) to correct hot hadron energies
+
+    static float            m_muonHitEnergy;                ///< The energy for a digital muon calorimeter hit, units GeV
+    static float            m_coilEnergyLossCorrection;     ///< Energy correction due to missing energy deposited in coil, units GeV
+    static unsigned int     m_minMuonHitsInInnerLayer;      ///< Min muon hits in muon inner layer to correct charged cluster energy
+    static float            m_coilEnergyCorrectionChi;      ///< Track-cluster chi value used to assess need for coil energy correction
 
     friend class PandoraSettings;
 };

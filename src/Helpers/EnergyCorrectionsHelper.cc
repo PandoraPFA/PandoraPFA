@@ -9,6 +9,8 @@
 #include "Algorithms/Algorithm.h"
 
 #include "Helpers/EnergyCorrectionsHelper.h"
+#include "Helpers/GeometryHelper.h"
+#include "Helpers/ReclusterHelper.h"
 
 #include "Objects/Cluster.h"
 
@@ -24,6 +26,7 @@ StatusCode EnergyCorrectionsHelper::EnergyCorrection(Cluster *const pCluster, fl
     // TODO EnergyCorrectionsHelper will later redirect to user-configured energy correction functions
     EnergyCorrectionsHelper::CleanCluster(pCluster, correctedHadronicEnergy);
     EnergyCorrectionsHelper::ScaleHotHadronEnergy(pCluster, correctedHadronicEnergy);
+    EnergyCorrectionsHelper::ApplyMuonEnergyCorrection(pCluster, correctedHadronicEnergy);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -149,6 +152,83 @@ float EnergyCorrectionsHelper::GetHadronicEnergyInLayer(const OrderedCaloHitList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void EnergyCorrectionsHelper::ApplyMuonEnergyCorrection(Cluster *const pCluster, float &correctedHadronicEnergy)
+{
+    bool containsMuonHit(false);
+    unsigned int nMuonHitsInInnerLayer(0);
+    PseudoLayer muonInnerLayer(std::numeric_limits<unsigned int>::max());
+
+    // Extract muon-based properties from the cluster
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            if ((*hitIter)->GetHitType() == MUON)
+            {
+                containsMuonHit = true;
+                ++nMuonHitsInInnerLayer;
+            }
+        }
+
+        if (containsMuonHit)
+        {
+            muonInnerLayer = iter->first;
+            break;
+        }
+    }
+
+    if (!containsMuonHit)
+        return;
+
+    // Check whether energy deposits are likely to have been lost in coil region
+    const CartesianVector muonInnerLayerCentroid(pCluster->GetCentroid(muonInnerLayer));
+    const float centroidX(muonInnerLayerCentroid.GetX()), centroidY(muonInnerLayerCentroid.GetY());
+
+    const float muonInnerLayerRadius(std::sqrt(centroidX * centroidX + centroidY * centroidY));
+    static const float coilInnerRadius(GeometryHelper::GetInstance()->GetCoilInnerRadius());
+
+    if (muonInnerLayerRadius < coilInnerRadius)
+        return;
+
+    const TrackList &trackList(pCluster->GetAssociatedTrackList());
+
+    if (pCluster->GetInnerPseudoLayer() == muonInnerLayer)
+    {
+        // Energy correction for standalone muon cluster
+        correctedHadronicEnergy += m_muonHitEnergy * static_cast<float>(nMuonHitsInInnerLayer);
+    }
+    else if (trackList.empty())
+    {
+        // Energy correction for neutral hadron cluster spilling into coil and muon detectors
+        correctedHadronicEnergy += m_coilEnergyLossCorrection;
+    }
+    else
+    {
+        // Energy correction for charged hadron cluster spilling into coil and muon detectors
+        if (nMuonHitsInInnerLayer < m_minMuonHitsInInnerLayer)
+            return;
+
+        float trackEnergySum(0.);
+
+        for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+        {
+            trackEnergySum += (*iter)->GetEnergyAtDca();
+        }
+
+        const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(correctedHadronicEnergy, trackEnergySum));
+        const float newChi(ReclusterHelper::GetTrackClusterCompatibility(correctedHadronicEnergy + m_coilEnergyLossCorrection, trackEnergySum));
+
+        if ((oldChi < m_coilEnergyCorrectionChi) && (std::fabs(newChi) < std::fabs(oldChi)))
+        {
+            correctedHadronicEnergy += m_coilEnergyLossCorrection;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 // Parameter default values
 bool EnergyCorrectionsHelper::m_shouldCleanClusters = true;
 bool EnergyCorrectionsHelper::m_shouldScaleHotHadrons = true;
@@ -163,6 +243,11 @@ float EnergyCorrectionsHelper::m_hotHadronMipFractionCut = 0.4f;
 unsigned int EnergyCorrectionsHelper::m_hotHadronNHitsCut = 50;
 float EnergyCorrectionsHelper::m_hotHadronMipsPerHit = 15.f;
 float EnergyCorrectionsHelper::m_scaledHotHadronMipsPerHit = 5.f;
+
+float EnergyCorrectionsHelper::m_muonHitEnergy = 0.5f;
+float EnergyCorrectionsHelper::m_coilEnergyLossCorrection = 10.f;
+unsigned int EnergyCorrectionsHelper::m_minMuonHitsInInnerLayer = 3;
+float EnergyCorrectionsHelper::m_coilEnergyCorrectionChi = 3.f;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -206,6 +291,18 @@ StatusCode EnergyCorrectionsHelper::ReadSettings(const TiXmlHandle *const pXmlHa
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "ScaledHotHadronMipsPerHit", m_scaledHotHadronMipsPerHit));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "MuonHitEnergy", m_muonHitEnergy));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "CoilEnergyLossCorrection", m_coilEnergyLossCorrection));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "MinMuonHitsInInnerLayer", m_minMuonHitsInInnerLayer));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        "CoilEnergyCorrectionChi", m_coilEnergyCorrectionChi));
 
     return STATUS_CODE_SUCCESS;
 }
