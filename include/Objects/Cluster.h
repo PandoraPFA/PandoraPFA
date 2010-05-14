@@ -183,6 +183,24 @@ public:
     bool ContainsHitInOuterSamplingLayer() const;
 
     /**
+     *  @brief  Whether the cluster contains a calo hit of the specified hit type
+     * 
+     *  @param  hitType the hit type
+     * 
+     *  @return boolean
+     */
+    bool ContainsHitType(const HitType hitType) const;
+
+    /**
+     *  @brief  Whether the cluster contains a calo hit of a type other than the specified hit type
+     * 
+     *  @param  hitType the hit type
+     * 
+     *  @return boolean
+     */
+    bool ContainsAlternativeHitType(const HitType hitType) const;
+
+    /**
      *  @brief  Get the centroid for the cluster at a particular pseudo layer
      * 
      *  @param  pseudoLayer the pseudo layer of interest

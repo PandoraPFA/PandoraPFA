@@ -60,7 +60,7 @@ private:
      *  @param  pBestDaughterCluster to receive the address of the best daughter cluster candidate
      */
     StatusCode GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
-        Cluster *&pBestDaughterCluster) const;
+        Cluster *&pBestDaughterCluster);
 
     /**
      *  @brief  Whether the candidate parent and daughter clusters pass quick preselection for fragment removal merging
@@ -95,7 +95,7 @@ private:
      *  @return the required evidence
      */
     float GetRequiredEvidenceForMerge(Cluster *const pDaughterCluster, const ClusterContact &clusterContact, const PseudoLayer correctionLayer,
-        const float globalDeltaChi2) const;
+        const float globalDeltaChi2);
 
     /**
      *  @brief  Get the cluster correction layer. Working from innermost to outermost layer, the correction layer is that in which:
@@ -109,6 +109,16 @@ private:
     PseudoLayer GetClusterCorrectionLayer(const Cluster *const pDaughterCluster) const;
 
     /**
+     *  @brief  Get the number of muon hits deemed to be compatible with a parent candidate cluster. Compatibility is assessed
+     *          via comparison between cluster and hit directions w.r.t. the interaction point
+     * 
+     *  @param  pCluster address of the parent candidate cluster
+     * 
+     *  @return the number of muon hits compatible with the parent cluster
+     */
+    unsigned int GetNCompatibleMuonHits(const Cluster *const pParentCluster);
+
+    /**
      *  @brief  Get the list of clusters for which cluster contact information will be affected by a specified cluster merge
      * 
      *  @param  clusterContactMap the cluster contact map
@@ -118,6 +128,10 @@ private:
      */
     StatusCode GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
         Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
+
+    typedef std::vector<CartesianVector> DirectionVector;
+
+    DirectionVector     m_muonDirectionVector;                      ///< The muon calo hit direction vector
 
     unsigned int        m_minDaughterCaloHits;                      ///< Min number of calo hits in daughter candidate clusters
     float               m_minDaughterHadronicEnergy;                ///< Min hadronic energy for daughter candidate clusters
@@ -183,6 +197,8 @@ private:
     float               m_layerCorrectionLayersFromECal;            ///< Daughter layers from ecal for layer correction contribution 6
 
     float               m_leavingCorrection;                        ///< Correction for clusters leaving calorimeters
+    bool                m_useMuonHitsInLeavingCorrection;           ///< Whether to use muon hits in calculation of leaving correction
+    std::string         m_muonHitListName;                          ///< The name of the muon ordered calo hit list
 
     float               m_energyCorrectionThreshold;                ///< Energy correction threshold
 

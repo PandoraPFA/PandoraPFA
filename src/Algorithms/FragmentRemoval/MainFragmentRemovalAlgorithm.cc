@@ -42,6 +42,8 @@ StatusCode MainFragmentRemovalAlgorithm::Run()
         }
     }
 
+    m_muonDirectionVector.clear();
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -127,7 +129,7 @@ bool MainFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
-    Cluster *&pBestDaughterCluster) const
+    Cluster *&pBestDaughterCluster)
 {
     float highestExcessEvidence(0.f);
 
@@ -277,7 +279,7 @@ float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ClusterContac
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const pDaughterCluster, const ClusterContact &clusterContact,
-    const PseudoLayer correctionLayer, const float globalDeltaChi2) const
+    const PseudoLayer correctionLayer, const float globalDeltaChi2)
 {
     // Primary evidence requirement is obtained from change in chi2.
     const float daughterCorrectedClusterEnergy(pDaughterCluster->GetCorrectedHadronicEnergy());
@@ -334,7 +336,23 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     float leavingCorrection(0.f);
 
     if (ClusterHelper::IsClusterLeavingDetector(clusterContact.GetParentCluster()))
+    {
         leavingCorrection = m_leavingCorrection;
+
+        if (m_useMuonHitsInLeavingCorrection)
+        {
+            const unsigned int nCompatibleMuonHits(this->GetNCompatibleMuonHits(clusterContact.GetParentCluster()));
+
+            if (!m_muonDirectionVector.empty())
+            {
+                if (nCompatibleMuonHits > 5)
+                    leavingCorrection = 10.f;
+
+                if (nCompatibleMuonHits == 0)
+                    leavingCorrection = 2.f;
+            }
+        }
+    }
 
     // 3. Energy correction
     float energyCorrection(0.f);
@@ -429,6 +447,41 @@ PseudoLayer MainFragmentRemovalAlgorithm::GetClusterCorrectionLayer(const Cluste
     }
 
     return pDaughterCluster->GetInnerPseudoLayer();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+unsigned int MainFragmentRemovalAlgorithm::GetNCompatibleMuonHits(const Cluster *const pParentCluster)
+{
+    if (m_muonDirectionVector.empty())
+    {
+        const OrderedCaloHitList *pMuonOrderedCaloHitList = NULL;
+
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetOrderedCaloHitList(*this, m_muonHitListName, pMuonOrderedCaloHitList))
+            return 0;
+
+        CaloHitList muonHitList;
+        pMuonOrderedCaloHitList->GetCaloHitList(muonHitList);
+        m_muonDirectionVector.reserve(muonHitList.size());
+
+        for (CaloHitList::const_iterator iter = muonHitList.begin(), iterEnd = muonHitList.end(); iter != iterEnd; ++iter)
+        {
+            m_muonDirectionVector.push_back((*iter)->GetPositionVector().GetUnitVector());
+        }
+    }
+
+    unsigned int nCompatibleMuonHits(0);
+    const CartesianVector clusterDirection(pParentCluster->GetCentroid(pParentCluster->GetOuterPseudoLayer()).GetUnitVector());
+
+    for (DirectionVector::const_iterator iter = m_muonDirectionVector.begin(), iterEnd = m_muonDirectionVector.end(); iter != iterEnd; ++iter)
+    {
+        if (iter->GetDotProduct(clusterDirection) > 0.8)
+        {
+            ++nCompatibleMuonHits;
+        }
+    }
+
+    return nCompatibleMuonHits;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -703,6 +756,14 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     m_leavingCorrection = 5.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LeavingCorrection", m_leavingCorrection));
+
+    m_leavingCorrection = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LeavingCorrection", m_leavingCorrection));
+
+    m_useMuonHitsInLeavingCorrection = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "UseMuonHitsInLeavingCorrection", m_useMuonHitsInLeavingCorrection));
 
     // Energy correction
     m_energyCorrectionThreshold = 3.f;

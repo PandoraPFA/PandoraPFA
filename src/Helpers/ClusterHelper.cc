@@ -654,6 +654,9 @@ bool ClusterHelper::IsClusterLeavingDetector(Cluster *const pCluster)
     if (!pCluster->ContainsHitInOuterSamplingLayer())
         return false;
 
+    if (pCluster->ContainsHitType(MUON))
+        return true;
+
     // Examine occupancy and energy content of outer layers
     const PseudoLayer outerLayer(pCluster->GetOuterPseudoLayer());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
