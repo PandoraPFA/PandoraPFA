@@ -200,6 +200,11 @@ private:
     bool                m_useMuonHitsInLeavingCorrection;           ///< Whether to use muon hits in calculation of leaving correction
     std::string         m_muonHitListName;                          ///< The name of the muon ordered calo hit list
 
+    unsigned int        m_minCompatibleMuonHits;                    ///< Number of required muon hits to apply muon hit leaving correction
+    float               m_muonHitLeavingCorrection;                 ///< The leaving correction if there are sufficient compatible muon hits
+    float               m_noMuonHitLeavingCorrection;               ///< The leaving correction if there are no compatible muon hits
+    float               m_minDCosForCompatibleMuon;                 ///< Min direction cosine between cluster and compatible muon direction
+
     float               m_energyCorrectionThreshold;                ///< Energy correction threshold
 
     float               m_lowEnergyCorrectionThreshold;             ///< Low energy correction threshold

@@ -345,11 +345,11 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
 
             if (!m_muonDirectionVector.empty())
             {
-                if (nCompatibleMuonHits > 5)
-                    leavingCorrection = 10.f;
+                if (nCompatibleMuonHits > m_minCompatibleMuonHits)
+                    leavingCorrection = m_muonHitLeavingCorrection;
 
                 if (nCompatibleMuonHits == 0)
-                    leavingCorrection = 2.f;
+                    leavingCorrection = m_noMuonHitLeavingCorrection;
             }
         }
     }
@@ -475,7 +475,7 @@ unsigned int MainFragmentRemovalAlgorithm::GetNCompatibleMuonHits(const Cluster 
 
     for (DirectionVector::const_iterator iter = m_muonDirectionVector.begin(), iterEnd = m_muonDirectionVector.end(); iter != iterEnd; ++iter)
     {
-        if (iter->GetDotProduct(clusterDirection) > 0.8)
+        if (iter->GetDotProduct(clusterDirection) > m_minDCosForCompatibleMuon)
         {
             ++nCompatibleMuonHits;
         }
@@ -764,6 +764,22 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     m_useMuonHitsInLeavingCorrection = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "UseMuonHitsInLeavingCorrection", m_useMuonHitsInLeavingCorrection));
+
+    m_minCompatibleMuonHits = 5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCompatibleMuonHits", m_minCompatibleMuonHits));
+
+    m_muonHitLeavingCorrection = 10.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MuonHitLeavingCorrection", m_muonHitLeavingCorrection));
+
+    m_noMuonHitLeavingCorrection = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NoMuonHitLeavingCorrection", m_noMuonHitLeavingCorrection));
+
+    m_minDCosForCompatibleMuon = 0.8f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinDCosForCompatibleMuon", m_minDCosForCompatibleMuon));
 
     // Energy correction
     m_energyCorrectionThreshold = 3.f;
