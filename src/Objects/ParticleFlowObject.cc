@@ -25,46 +25,49 @@ ParticleFlowObject::ParticleFlowObject(const PandoraContentApi::ParticleFlowObje
 {
     if (particleFlowObjectParameters.m_clusterList.empty() && particleFlowObjectParameters.m_trackList.empty())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    this->ExtractAndStoreTracks(particleFlowObjectParameters);
-    this->ExtractAndStoreCaloHits(particleFlowObjectParameters);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void ParticleFlowObject::ExtractAndStoreTracks(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters)
+TrackAddressList ParticleFlowObject::GetTrackAddressList() const
 {
-    for (TrackList::const_iterator iter = particleFlowObjectParameters.m_trackList.begin(),
-        iterEnd = particleFlowObjectParameters.m_trackList.end(); iter != iterEnd; ++iter)
+    TrackAddressList trackAddressList;
+
+    for (TrackList::const_iterator iter = m_trackList.begin(), iterEnd = m_trackList.end(); iter != iterEnd; ++iter)
     {
-        m_trackAddressList.push_back((*iter)->GetParentTrackAddress());
+        trackAddressList.push_back((*iter)->GetParentTrackAddress());
     }
+
+    return trackAddressList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void ParticleFlowObject::ExtractAndStoreCaloHits(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters)
+ClusterAddressList ParticleFlowObject::GetClusterAddressList() const
 {
-    for (ClusterList::const_iterator clusterIter = particleFlowObjectParameters.m_clusterList.begin(),
-        clusterIterEnd = particleFlowObjectParameters.m_clusterList.end(); clusterIter != clusterIterEnd; ++clusterIter)
+    ClusterAddressList clusterAddressList;
+
+    for (ClusterList::const_iterator iter = m_clusterList.begin(), iterEnd = m_clusterList.end(); iter != iterEnd; ++iter)
     {
         CaloHitAddressList caloHitAddressList;
 
-        OrderedCaloHitList orderedCaloHitList((*clusterIter)->GetOrderedCaloHitList());
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add((*clusterIter)->GetIsolatedCaloHitList()));
+        OrderedCaloHitList orderedCaloHitList((*iter)->GetOrderedCaloHitList());
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add((*iter)->GetIsolatedCaloHitList()));
 
-        for (OrderedCaloHitList::const_iterator orderedListIter = (*clusterIter)->GetOrderedCaloHitList().begin(),
-            orderedListIterEnd = (*clusterIter)->GetOrderedCaloHitList().end(); orderedListIter != orderedListIterEnd; ++orderedListIter)
+        for (OrderedCaloHitList::const_iterator layerIter = orderedCaloHitList.begin(), layerIterEnd = orderedCaloHitList.end();
+            layerIter != layerIterEnd; ++layerIter)
         {
-            for (CaloHitList::const_iterator caloHitIter = orderedListIter->second->begin(),
-                caloHitIterEnd = orderedListIter->second->end(); caloHitIter != caloHitIterEnd; ++caloHitIter)
+            for (CaloHitList::const_iterator hitIter = layerIter->second->begin(), hitIterEnd = layerIter->second->end();
+                hitIter != hitIterEnd; ++hitIter)
             {
-                caloHitAddressList.push_back((*caloHitIter)->GetParentCaloHitAddress());
+                caloHitAddressList.push_back((*hitIter)->GetParentCaloHitAddress());
             }
         }
 
-        m_clusterAddressList.push_back(caloHitAddressList);
+        clusterAddressList.push_back(caloHitAddressList);
     }
+
+    return clusterAddressList;
 }
 
 } // namespace pandora

@@ -182,6 +182,13 @@ StatusCode PandoraContentApiImpl::GetTrackList(const std::string &trackListName,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::GetCurrentPfoList(const ParticleFlowObjectList *&pParticleFlowObjectList) const
+{
+    return m_pPandora->m_pParticleFlowObjectManager->GetCurrentList(pParticleFlowObjectList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::InitializeFragmentation(const Algorithm &algorithm, const ClusterList &inputClusterList,
     std::string &originalClustersListName, std::string &fragmentClustersListName) const
 {
@@ -389,6 +396,47 @@ StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnla
         enlargeListName, deleteListName));
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::AddClusterToPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster) const
+{
+    return m_pPandora->m_pParticleFlowObjectManager->AddClusterToPfo(pParticleFlowObject, pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::AddTrackToPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack) const
+{
+    return m_pPandora->m_pParticleFlowObjectManager->AddTrackToPfo(pParticleFlowObject, pTrack);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::RemoveClusterFromPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster) const
+{
+    if ((pParticleFlowObject->GetNClusters() <= 1) && (pParticleFlowObject->GetNTracks() == 0))
+        return STATUS_CODE_NOT_ALLOWED;
+
+    return m_pPandora->m_pParticleFlowObjectManager->RemoveClusterFromPfo(pParticleFlowObject, pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::RemoveTrackFromPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack) const
+{
+    if ((pParticleFlowObject->GetNTracks() <= 1) && (pParticleFlowObject->GetNClusters() == 0))
+        return STATUS_CODE_NOT_ALLOWED;
+
+    return m_pPandora->m_pParticleFlowObjectManager->RemoveTrackFromPfo(pParticleFlowObject, pTrack);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::DeletePfo(ParticleFlowObject *pParticleFlowObject) const
+{
+    return m_pPandora->m_pParticleFlowObjectManager->DeletePfo(pParticleFlowObject);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

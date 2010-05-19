@@ -147,6 +147,13 @@ StatusCode PandoraContentApi::GetTrackList(const pandora::Algorithm &algorithm, 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::GetCurrentPfoList(const pandora::Algorithm &algorithm, const pandora::ParticleFlowObjectList *&pParticleFlowObjectList)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentPfoList(pParticleFlowObjectList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::InitializeFragmentation(const pandora::Algorithm &algorithm, const pandora::ClusterList &inputClusterList,
     std::string &originalClustersListName, std::string &fragmentClustersListName)
 {
@@ -264,6 +271,45 @@ StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &a
     pandora::Cluster *pClusterToDelete, const std::string &enlargeListName, const std::string &deleteListName)
 {
     return algorithm.GetPandoraContentApiImpl()->MergeAndDeleteClusters(pClusterToEnlarge, pClusterToDelete, enlargeListName, deleteListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::AddClusterToPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+    pandora::Cluster *pCluster)
+{
+    return algorithm.GetPandoraContentApiImpl()->AddClusterToPfo(pParticleFlowObject, pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::AddTrackToPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+    pandora::Track *pTrack)
+{
+    return algorithm.GetPandoraContentApiImpl()->AddTrackToPfo(pParticleFlowObject, pTrack);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::RemoveClusterFromPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+    pandora::Cluster *pCluster)
+{
+    return algorithm.GetPandoraContentApiImpl()->RemoveClusterFromPfo(pParticleFlowObject, pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::RemoveTrackFromPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+    pandora::Track *pTrack)
+{
+    return algorithm.GetPandoraContentApiImpl()->RemoveTrackFromPfo(pParticleFlowObject, pTrack);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApi::DeletePfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject)
+{
+    return algorithm.GetPandoraContentApiImpl()->DeletePfo(pParticleFlowObject);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -73,14 +73,63 @@ public:
      * 
      *  @return The track address list
      */
-    const TrackAddressList &GetTrackAddressList() const;
+    TrackAddressList GetTrackAddressList() const;
 
     /**
      *  @brief  Get the cluster address list
      * 
      *  @return The cluster address list
      */
-    const ClusterAddressList &GetClusterAddressList() const;
+    ClusterAddressList GetClusterAddressList() const;
+
+    /**
+     *  @brief  Get the number of tracks in the particle flow object
+     * 
+     *  @return The number of tracks in the particle flow object
+     */
+    unsigned int GetNTracks() const;
+
+    /**
+     *  @brief  Get the number of clusters in the particle flow object
+     * 
+     *  @return The number of clusters in the particle flow object
+     */
+    unsigned int GetNClusters() const;
+
+    /**
+     *  @brief  Set the particle flow object id (PDG code)
+     * 
+     *  @param  particleId the particle flow object id
+     */
+    void SetParticleId(const int particleId);
+
+    /**
+     *  @brief  Set particle flow object charge
+     * 
+     *  @param  charge particle flow object charge
+     */
+    void SetCharge(const int charge);
+
+    /**
+     *  @brief  Set particle flow object mass
+     * 
+     *  @param  mass particle flow object mass
+     */
+    void SetMass(const float mass);
+
+    /**
+     *  @brief  Set the particle flow object energy
+     * 
+     *  @param  energy particle flow object energy
+     */
+    void SetEnergy(const float energy);
+
+    /**
+     *  @brief  Set particle flow object momentum vector
+     * 
+     *  @param  momentum the particle flow object momentum vector
+     */
+    void SetMomentum(const CartesianVector &momentum);
 
 private:
     /**
@@ -89,30 +138,18 @@ private:
     ParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters);
 
     /**
-     *  @brief  Extract tracks from parameters and store in the particle flow object
-     * 
-     *  @param  particleFlowObjectParameters the particle flow object parameters
+     *  @brief  Destructor
      */
-    void ExtractAndStoreTracks(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters);
+    ~ParticleFlowObject();
 
-    /**
-     *  @brief  Extract calo hits from parameters and store (grouped into clusters) in the particle flow object
-     * 
-     *  @param  particleFlowObjectParameters the particle flow object parameters
-     */
-    void ExtractAndStoreCaloHits(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters);
+    int                     m_particleId;               ///< The particle flow object id (PDG code)
+    int                     m_charge;                   ///< The particle flow object charge
+    float                   m_mass;                     ///< The particle flow object mass
+    float                   m_energy;                   ///< The particle flow object energy
+    CartesianVector         m_momentum;                 ///< The particle flow object momentum
 
-    const int               m_particleId;               ///< The particle flow object id (PDG code)
-    const int               m_charge;                   ///< The particle flow object charge
-    const float             m_mass;                     ///< The particle flow object mass
-    const float             m_energy;                   ///< The particle flow object energy
-    const CartesianVector   m_momentum;                 ///< The particle flow object momentum
-
-    const TrackList         m_trackList;                ///< The track list
-    const ClusterList       m_clusterList;              ///< The cluster list
-
-    TrackAddressList        m_trackAddressList;         ///< The track address list
-    ClusterAddressList      m_clusterAddressList;       ///< The cluster address list
+    TrackList               m_trackList;                ///< The track list
+    ClusterList             m_clusterList;              ///< The cluster list
 
     friend class ParticleFlowObjectManager;
 
@@ -170,16 +207,57 @@ inline const ClusterList &ParticleFlowObject::GetClusterList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackAddressList &ParticleFlowObject::GetTrackAddressList() const
+inline unsigned int ParticleFlowObject::GetNTracks() const
 {
-    return m_trackAddressList;
+    return m_trackList.size();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const ClusterAddressList &ParticleFlowObject::GetClusterAddressList() const
+inline unsigned int ParticleFlowObject::GetNClusters() const
 {
-    return m_clusterAddressList;
+    return m_clusterList.size();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ParticleFlowObject::SetParticleId(const int particleId)
+{
+    m_particleId = particleId;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ParticleFlowObject::SetCharge(const int charge)
+{
+    m_charge = charge;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ParticleFlowObject::SetMass(const float mass)
+{
+    m_mass = mass;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ParticleFlowObject::SetEnergy(const float energy)
+{
+    m_energy = energy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void ParticleFlowObject::SetMomentum(const CartesianVector &momentum)
+{
+    m_momentum = momentum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline ParticleFlowObject::~ParticleFlowObject()
+{
 }
 
 } // namespace pandora

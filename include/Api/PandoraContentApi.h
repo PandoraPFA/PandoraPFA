@@ -210,6 +210,14 @@ public:
     static StatusCode GetTrackList(const pandora::Algorithm &algorithm, const std::string &trackListName, const pandora::TrackList *&pTrackList);
 
     /**
+     *  @brief  Get the current particle flow object list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pParticleFlowObjectList to receive the address of the current particle flow object list
+     */
+    static StatusCode GetCurrentPfoList(const pandora::Algorithm &algorithm, const pandora::ParticleFlowObjectList *&pParticleFlowObjectList);
+
+    /**
      *  @brief  Initialize cluster fragmentation operations, allowing hits in a list of clusters to be redistributed
      * 
      *  @param  algorithm the algorithm calling this function
@@ -363,6 +371,56 @@ public:
      */
     static StatusCode MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
         pandora::Cluster *pClusterToDelete, const std::string &enlargeListName, const std::string &deleteListName);
+
+    /**
+     *  @brief  Add a cluster to a particle flow object
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pParticleFlowObject address of the particle flow object to modify
+     *  @param  pCluster address of the cluster to add
+     */
+    static StatusCode AddClusterToPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+        pandora::Cluster *pCluster);
+
+    /**
+     *  @brief  Add a track to a particle flow object
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pParticleFlowObject address of the particle flow object to modify
+     *  @param  pTrack address of the track to add
+     */
+    static StatusCode AddTrackToPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+        pandora::Track *pTrack);
+
+    /**
+     *  @brief  Remove a cluster from a particle flow object. Note this function will not remove the final object (track or cluster)
+     *          from a particle flow object, and will instead return status code "not allowed" as a prompt to delete the cluster
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pParticleFlowObject address of the particle flow object to modify
+     *  @param  pCluster address of the cluster to remove
+     */
+    static StatusCode RemoveClusterFromPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+        pandora::Cluster *pCluster);
+
+    /**
+     *  @brief  Remove a track from a particle flow object. Note this function will not remove the final object (track or cluster)
+     *          from a particle flow object, and will instead return status code "not allowed" as a prompt to delete the cluster
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pParticleFlowObject address of the particle flow object to modify
+     *  @param  pTrack address of the track to remove
+     */
+    static StatusCode RemoveTrackFromPfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject,
+        pandora::Track *pTrack);
+
+    /**
+     *  @brief  Delete a particle flow object from the current list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pParticleFlowObject address of the particle flow object to delete
+     */
+    static StatusCode DeletePfo(const pandora::Algorithm &algorithm, pandora::ParticleFlowObject *pParticleFlowObject);
 
     /**
      *  @brief  Add an association between a track and a cluster
