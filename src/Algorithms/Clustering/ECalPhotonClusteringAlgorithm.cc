@@ -135,6 +135,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
     {
 //        PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, BLUE  ) );
 //        PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, BLUE  ) );
+//        PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "all", BLUE  ) );
 
         std::vector<Cluster*> temporaryClusterList(pClusterList->begin(), pClusterList->end() );
 
@@ -215,6 +216,13 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
 //    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,&photonClusters, DARKYELLOW  ) );
 //    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,&photonClusters, DARKYELLOW  ) );
 //    PANDORA_MONITORING_API(ViewEvent() );
+//     PANDORA_MONITORING_API(VisualizeClusters(&photonClusters, "photons", DARKYELLOW  ) );
+
+//     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
+//     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+
+//     PANDORA_MONITORING_API(VisualizeCaloHits(pOrderedCaloHitList, "currentHits", BLUE  ) );
+//     PANDORA_MONITORING_API(View());
 
 
     return STATUS_CODE_SUCCESS;

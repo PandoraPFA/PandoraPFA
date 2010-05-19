@@ -51,7 +51,7 @@ public:
     float GetZ0() const;
 
     /**
-     *  @brief  Get the charge sign of the tracked particle, units GeV
+     *  @brief  Get the charge sign of the tracked particle
      * 
      *  @return the charge sign of the tracked particle
      */

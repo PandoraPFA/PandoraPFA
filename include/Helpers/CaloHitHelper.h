@@ -40,6 +40,24 @@ public:
     static bool AreCaloHitsAvailable(const CaloHitList &caloHitList);
 
     /**
+     *  @brief  Remove all CaloHits from caloHitList which are not available
+     * 
+     *  @param  caloHitList the list of calo hits where non-available calohits are removed from
+     * 
+     *  @return boolean
+     */
+    static bool RemoveNonAvailableCaloHits(CaloHitList &caloHitList);
+
+    /**
+     *  @brief  Remove all CaloHits from OrderedCaloHitList which are not available
+     * 
+     *  @param  orderedCaloHitList the list of calo hits where non-available calohits are removed from
+     * 
+     *  @return boolean
+     */
+    static bool RemoveNonAvailableCaloHits(OrderedCaloHitList &orderedCaloHitList);
+
+    /**
      *  @brief  Get contribution to a hit's density weight from a list of other hits
      * 
      *  @param  pCaloHit the calo hit

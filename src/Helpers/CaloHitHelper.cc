@@ -66,6 +66,40 @@ bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitList &caloHitList)
     return true;
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool CaloHitHelper::RemoveNonAvailableCaloHits(CaloHitList &pCaloHitList)
+{
+    // delete all non-available calohits from set
+    for( CaloHitList::iterator itCaloHit = pCaloHitList.begin(); itCaloHit != pCaloHitList.end(); ) // be careful: iterators of set change when erasing elements
+    {
+        CaloHit* pCaloHit = (*itCaloHit);
+        if( ! CaloHitHelper::IsCaloHitAvailable(pCaloHit) )
+            pCaloHitList.erase(itCaloHit++);
+        else
+            ++itCaloHit;
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool CaloHitHelper::RemoveNonAvailableCaloHits(OrderedCaloHitList &orderedCaloHitList)
+{
+    bool returnValue = true;
+
+    for( OrderedCaloHitList::iterator itLayer = orderedCaloHitList.begin(), itLayerEnd = orderedCaloHitList.end(); itLayer != itLayerEnd; ++itLayer )
+    {
+        CaloHitList* pCaloHitList = itLayer->second;
+
+        returnValue &= RemoveNonAvailableCaloHits(*pCaloHitList);
+    }
+
+    return true;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
