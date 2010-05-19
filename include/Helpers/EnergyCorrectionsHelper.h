@@ -77,7 +77,8 @@ private:
      */
     static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
-    static EnergyCorrectionFunctionVector m_energyCorrectionFunctionVector;     ///< The energy correction function vector
+    static EnergyCorrectionFunctionVector m_hadEnergyCorrectionFunctions;   ///< The hadronic energy correction function vector
+    static EnergyCorrectionFunctionVector m_emEnergyCorrectionFunctions;    ///< The electromagnetic energy correction function vector
 
     static bool             m_shouldCleanClusters;          ///< Whether to make cluster cleaning energy corrections
     static bool             m_shouldScaleHotHadrons;        ///< Whether to make hot hadron energy corrections

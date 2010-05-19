@@ -106,9 +106,11 @@ public:
      *  @brief  Register an energy correction function
      * 
      *  @param  functionName the name/label associated with the energy correction function
+     *  @param  energyCorrectionType the energy correction type
      *  @param  energyCorrectionFunction pointer to an energy correction function
      */
-    StatusCode RegisterEnergyCorrectionFunction(const std::string &functionName, EnergyCorrectionFunction *pEnergyCorrectionFunction) const;
+    StatusCode RegisterEnergyCorrectionFunction(const std::string &functionName, const EnergyCorrectionType energyCorrectionType,
+        EnergyCorrectionFunction *pEnergyCorrectionFunction) const;
 
     /**
      *  @brief  Register a particle id function

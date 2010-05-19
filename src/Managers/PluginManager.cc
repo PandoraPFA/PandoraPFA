@@ -24,15 +24,19 @@ PluginManager::PluginManager()
 
 PluginManager::~PluginManager()
 {
-    m_energyCorrectionFunctionMap.clear();
+    m_hadEnergyCorrectionFunctionMap.clear();
+    m_emEnergyCorrectionFunctionMap.clear();
     m_particleIdFunctionMap.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PluginManager::RegisterEnergyCorrectionFunction(const std::string &functionName, EnergyCorrectionFunction *pEnergyCorrectionFunction)
+StatusCode PluginManager::RegisterEnergyCorrectionFunction(const std::string &functionName, const EnergyCorrectionType energyCorrectionType,
+    EnergyCorrectionFunction *pEnergyCorrectionFunction)
 {
-    if (!m_energyCorrectionFunctionMap.insert(EnergyCorrectionFunctionMap::value_type(functionName, pEnergyCorrectionFunction)).second)
+    EnergyCorrectionFunctionMap &energyCorrectionFunctionMap(this->GetEnergyCorrectionFunctionMap(energyCorrectionType));
+
+    if (!energyCorrectionFunctionMap.insert(EnergyCorrectionFunctionMap::value_type(functionName, pEnergyCorrectionFunction)).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
@@ -50,13 +54,16 @@ StatusCode PluginManager::RegisterParticleIdFunction(const std::string &function
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PluginManager::AssignEnergyCorrectionFunctions(const StringVector &functionNames, EnergyCorrectionFunctionVector &energyCorrectionFunctionVector) const
+StatusCode PluginManager::AssignEnergyCorrectionFunctions(const StringVector &functionNames, const EnergyCorrectionType energyCorrectionType,
+    EnergyCorrectionFunctionVector &energyCorrectionFunctionVector)
 {
+    EnergyCorrectionFunctionMap &energyCorrectionFunctionMap(this->GetEnergyCorrectionFunctionMap(energyCorrectionType));
+
     for (StringVector::const_iterator nameIter = functionNames.begin(), nameIterEnd = functionNames.end(); nameIter != nameIterEnd; ++nameIter)
     {
-        EnergyCorrectionFunctionMap::const_iterator iter = m_energyCorrectionFunctionMap.find(*nameIter);
+        EnergyCorrectionFunctionMap::const_iterator iter = energyCorrectionFunctionMap.find(*nameIter);
 
-        if (m_energyCorrectionFunctionMap.end() == iter)
+        if (energyCorrectionFunctionMap.end() == iter)
             return STATUS_CODE_NOT_FOUND;
 
         energyCorrectionFunctionVector.push_back(iter->second);
@@ -81,21 +88,50 @@ StatusCode PluginManager::AssignParticleIdFunction(const std::string &functionNa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+PluginManager::EnergyCorrectionFunctionMap &PluginManager::GetEnergyCorrectionFunctionMap(const EnergyCorrectionType energyCorrectionType)
+{
+    switch (energyCorrectionType)
+    {
+    case HADRONIC:
+        return m_hadEnergyCorrectionFunctionMap;
+
+    case ELECTROMAGNETIC:
+        return m_emEnergyCorrectionFunctionMap;
+
+    default:
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 {
-    StringVector energyCorrectionFunctionNames;
+    // Energy correction functions
+    StringVector hadEnergyCorrectionFunctionNames;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(*pXmlHandle,
-        "EnergyCorrectionFunctionNames", energyCorrectionFunctionNames));
+        "HadronicEnergyCorrectionFunctions", hadEnergyCorrectionFunctionNames));
 
-    if (!energyCorrectionFunctionNames.empty())
+    if (!hadEnergyCorrectionFunctionNames.empty())
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignEnergyCorrectionFunctions(energyCorrectionFunctionNames,
-            EnergyCorrectionsHelper::m_energyCorrectionFunctionVector));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignEnergyCorrectionFunctions(hadEnergyCorrectionFunctionNames,
+            HADRONIC, EnergyCorrectionsHelper::m_hadEnergyCorrectionFunctions));
     }
 
+    StringVector emEnergyCorrectionFunctionNames;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(*pXmlHandle,
+        "ElectromagneticEnergyCorrectionFunctions", emEnergyCorrectionFunctionNames));
+
+    if (!emEnergyCorrectionFunctionNames.empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignEnergyCorrectionFunctions(emEnergyCorrectionFunctionNames,
+            ELECTROMAGNETIC, EnergyCorrectionsHelper::m_emEnergyCorrectionFunctions));
+    }
+
+    // Particle id functions
     std::string photonFastFunctionName;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFastFunctionName", photonFastFunctionName));
+        "PhotonFastFunction", photonFastFunctionName));
 
     if (!photonFastFunctionName.empty())
     {
@@ -105,7 +141,7 @@ StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 
     std::string photonFullFunctionName;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullFunctionName", photonFullFunctionName));
+        "PhotonFullFunction", photonFullFunctionName));
 
     if (!photonFullFunctionName.empty())
     {
@@ -115,7 +151,7 @@ StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 
     std::string electronFastFunctionName;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "ElectronFastFunctionName", electronFastFunctionName));
+        "ElectronFastFunction", electronFastFunctionName));
 
     if (!electronFastFunctionName.empty())
     {
@@ -125,7 +161,7 @@ StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 
     std::string electronFullFunctionName;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "ElectronFullFunctionName", electronFullFunctionName));
+        "ElectronFullFunction", electronFullFunctionName));
 
     if (!electronFullFunctionName.empty())
     {
@@ -135,7 +171,7 @@ StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 
     std::string muonFastFunctionName;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "MuonFastFunctionName", muonFastFunctionName));
+        "MuonFastFunction", muonFastFunctionName));
 
     if (!muonFastFunctionName.empty())
     {
@@ -145,7 +181,7 @@ StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 
     std::string muonFullFunctionName;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "MuonFullFunctionName", muonFullFunctionName));
+        "MuonFullFunction", muonFullFunctionName));
 
     if (!muonFullFunctionName.empty())
     {

@@ -35,13 +35,18 @@ public:
     ~PluginManager();
 
 private:
+    typedef std::map<std::string, EnergyCorrectionFunction *> EnergyCorrectionFunctionMap;
+    typedef std::map<std::string, ParticleIdFunction *> ParticleIdFunctionMap;
+
     /**
      *  @brief  Register an energy correction function
      * 
      *  @param  functionName the name/label associated with the energy correction function
+     *  @param  energyCorrectionType the energy correction type
      *  @param  energyCorrectionFunction pointer to an energy correction function
      */
-    StatusCode RegisterEnergyCorrectionFunction(const std::string &functionName, EnergyCorrectionFunction *pEnergyCorrectionFunction);
+    StatusCode RegisterEnergyCorrectionFunction(const std::string &functionName, const EnergyCorrectionType energyCorrectionType,
+        EnergyCorrectionFunction *pEnergyCorrectionFunction);
 
     /**
      *  @brief  Register a particle id function
@@ -55,9 +60,11 @@ private:
      *  @brief  Match a vector of names/labels to energy correction functions and store pointers to these functions in a vector
      * 
      *  @param  functionNames the vector of names/labels associated with energy correction functions
+     *  @param  energyCorrectionType the energy correction type
      *  @param  energyCorrectionFunctionVector to receive the addresses of the energy correction functions
      */
-    StatusCode AssignEnergyCorrectionFunctions(const StringVector &functionNames, EnergyCorrectionFunctionVector &energyCorrectionFunctionVector) const;
+    StatusCode AssignEnergyCorrectionFunctions(const StringVector &functionNames, const EnergyCorrectionType energyCorrectionType,
+        EnergyCorrectionFunctionVector &energyCorrectionFunctionVector);
 
     /**
      *  @brief  Match a name/label to a particle id function and assign address of the function to a function pointer
@@ -68,16 +75,23 @@ private:
     StatusCode AssignParticleIdFunction(const std::string &functionName, ParticleIdFunction *&pParticleIdFunction) const;
 
     /**
+     *  @brief  Get the energy correction function map corresponding to the specified energy correction type
+     * 
+     *  @param  energyCorrectionType the energy correction type
+     * 
+     *  @return reference to the relevant energy correction function map
+     */
+    EnergyCorrectionFunctionMap &GetEnergyCorrectionFunctionMap(const EnergyCorrectionType energyCorrectionType);
+
+    /**
      *  @brief  Initialize plugins
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
     StatusCode InitializePlugins(const TiXmlHandle *const pXmlHandle);
 
-    typedef std::map<std::string, EnergyCorrectionFunction *> EnergyCorrectionFunctionMap;
-    typedef std::map<std::string, ParticleIdFunction *> ParticleIdFunctionMap;
-
-    EnergyCorrectionFunctionMap     m_energyCorrectionFunctionMap;      ///< The energy correction function map
+    EnergyCorrectionFunctionMap     m_hadEnergyCorrectionFunctionMap;   ///< The hadronic energy correction function map
+    EnergyCorrectionFunctionMap     m_emEnergyCorrectionFunctionMap;    ///< The electromagnetic energy correction function map
     ParticleIdFunctionMap           m_particleIdFunctionMap;            ///< The particle id function map
 
     friend class PandoraApiImpl;

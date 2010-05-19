@@ -264,10 +264,11 @@ public:
      * 
      *  @param  pandora the pandora instance with which to register the energy correction function
      *  @param  functionName the name/label associated with the energy correction function
+     *  @param  energyCorrectionType the energy correction type
      *  @param  energyCorrectionFunction pointer to an energy correction function
      */
     static StatusCode RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
-        pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction);
+        const pandora::EnergyCorrectionType energyCorrectionType, pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction);
 
     /**
      *  @brief  Register a particle id function

@@ -44,6 +44,17 @@ enum DetectorRegion
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
+ *  @brief  EnergyCorrectionType enum
+ */
+enum EnergyCorrectionType
+{
+    HADRONIC,
+    ELECTROMAGNETIC
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
  *  @brief  PandoraInputType template class
  */
 template <typename T>

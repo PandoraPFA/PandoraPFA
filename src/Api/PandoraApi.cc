@@ -85,9 +85,9 @@ StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, p
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraApi::RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
-    pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction)
+    const pandora::EnergyCorrectionType energyCorrectionType, pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction)
 {
-    return pandora.GetPandoraApiImpl()->RegisterEnergyCorrectionFunction(functionName, pEnergyCorrectionFunction);
+    return pandora.GetPandoraApiImpl()->RegisterEnergyCorrectionFunction(functionName, energyCorrectionType, pEnergyCorrectionFunction);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

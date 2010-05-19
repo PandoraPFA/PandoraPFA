@@ -20,13 +20,22 @@ namespace pandora
 StatusCode EnergyCorrectionsHelper::EnergyCorrection(Cluster *const pCluster, float &correctedElectromagneticEnergy,
     float &correctedHadronicEnergy)
 {
-    correctedElectromagneticEnergy = pCluster->GetElectromagneticEnergy();
+    // Hadronic energy corrections
     correctedHadronicEnergy = pCluster->GetHadronicEnergy();
 
-    for (EnergyCorrectionFunctionVector::const_iterator iter = m_energyCorrectionFunctionVector.begin(),
-        iterEnd = m_energyCorrectionFunctionVector.end(); iter != iterEnd; ++iter)
+    for (EnergyCorrectionFunctionVector::const_iterator iter = m_hadEnergyCorrectionFunctions.begin(),
+        iterEnd = m_hadEnergyCorrectionFunctions.end(); iter != iterEnd; ++iter)
     {
         (*(*iter))(pCluster, correctedHadronicEnergy);
+    }
+
+    // Electromagnetic energy corrections
+    correctedElectromagneticEnergy = pCluster->GetElectromagneticEnergy();
+
+    for (EnergyCorrectionFunctionVector::const_iterator iter = m_emEnergyCorrectionFunctions.begin(),
+        iterEnd = m_emEnergyCorrectionFunctions.end(); iter != iterEnd; ++iter)
+    {
+        (*(*iter))(pCluster, correctedElectromagneticEnergy);
     }
 
     return STATUS_CODE_SUCCESS;
@@ -231,7 +240,8 @@ void EnergyCorrectionsHelper::ApplyMuonEnergyCorrection(Cluster *const pCluster,
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 // Container for energy correction function pointers
-EnergyCorrectionFunctionVector EnergyCorrectionsHelper::m_energyCorrectionFunctionVector;
+EnergyCorrectionFunctionVector EnergyCorrectionsHelper::m_hadEnergyCorrectionFunctions;
+EnergyCorrectionFunctionVector EnergyCorrectionsHelper::m_emEnergyCorrectionFunctions;
 
 // Parameter default values
 bool EnergyCorrectionsHelper::m_shouldCleanClusters = true;
