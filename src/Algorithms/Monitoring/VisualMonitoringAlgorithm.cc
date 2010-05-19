@@ -14,9 +14,6 @@
 
 using namespace pandora;
 
-
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode VisualMonitoringAlgorithm::Run()
@@ -29,7 +26,7 @@ StatusCode VisualMonitoringAlgorithm::Run()
         OrderedCaloHitList caloHitList( *pOrderedCaloHitList ); 
         if( m_onlyAvailable )
         {
-            pandora::CaloHitHelper::RemoveNonAvailableCaloHits(caloHitList);
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::RemoveUnavailableCaloHits(caloHitList));
         }
 
         if( m_eve )
@@ -142,4 +139,3 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
     return STATUS_CODE_SUCCESS;
 }
-

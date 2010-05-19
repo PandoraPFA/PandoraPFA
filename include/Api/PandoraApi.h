@@ -260,6 +260,26 @@ public:
     static StatusCode GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList);
 
     /**
+     *  @brief  Register an energy correction function
+     * 
+     *  @param  pandora the pandora instance with which to register the energy correction function
+     *  @param  functionName the name/label associated with the energy correction function
+     *  @param  energyCorrectionFunction pointer to an energy correction function
+     */
+    static StatusCode RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
+        pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction);
+
+    /**
+     *  @brief  Register a particle id function
+     * 
+     *  @param  pandora the pandora instance with which to register the particle id function
+     *  @param  functionName the name/label associated with the particle id function
+     *  @param  particleIdFunction pointer to a particle id function
+     */
+    static StatusCode RegisterParticleIdFunction(const pandora::Pandora &pandora, const std::string &functionName,
+        pandora::ParticleIdFunction *pParticleIdFunction);
+
+    /**
      *  @brief  Reset pandora to process another event
      * 
      *  @param  pandora the pandora instance to reset

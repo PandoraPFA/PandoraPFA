@@ -84,6 +84,22 @@ StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApi::RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
+    pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction)
+{
+    return pandora.GetPandoraApiImpl()->RegisterEnergyCorrectionFunction(functionName, pEnergyCorrectionFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraApi::RegisterParticleIdFunction(const pandora::Pandora &pandora, const std::string &functionName,
+    pandora::ParticleIdFunction *pParticleIdFunction)
+{
+    return pandora.GetPandoraApiImpl()->RegisterParticleIdFunction(functionName, pParticleIdFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApi::Reset(const pandora::Pandora &pandora)
 {
     return pandora.GetPandoraApiImpl()->ResetForNextEvent();

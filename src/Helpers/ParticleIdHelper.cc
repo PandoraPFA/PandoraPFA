@@ -177,7 +177,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
+bool ParticleIdHelper::IsPhotonFastDefault(Cluster *const pCluster)
 {
     // Already flagged as a photon by full photon id algorithm? - overrides fast photon id
     if (pCluster->IsPhoton())
@@ -330,16 +330,7 @@ bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ParticleIdHelper::IsPhotonFull(Cluster *const pCluster)
-{
-    // TODO Extract full likelihood-based photon id from photon clustering algorithm
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool ParticleIdHelper::IsElectronFast(Cluster *const pCluster)
+bool ParticleIdHelper::IsElectronFastDefault(Cluster *const pCluster)
 {
     const TrackList &associatedTrackList(pCluster->GetAssociatedTrackList());
 
@@ -377,6 +368,14 @@ bool ParticleIdHelper::IsElectronFast(Cluster *const pCluster)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+// Particle id function pointers
+ParticleIdFunction *ParticleIdHelper::m_pPhotonFastFunction = NULL;
+ParticleIdFunction *ParticleIdHelper::m_pPhotonFullFunction = NULL;
+ParticleIdFunction *ParticleIdHelper::m_pElectronFastFunction = NULL;
+ParticleIdFunction *ParticleIdHelper::m_pElectronFullFunction = NULL;
+ParticleIdFunction *ParticleIdHelper::m_pMuonFastFunction = NULL;
+ParticleIdFunction *ParticleIdHelper::m_pMuonFullFunction = NULL;
 
 // Parameter default values
 float ParticleIdHelper::m_showerProfileBinWidth = 0.5f;

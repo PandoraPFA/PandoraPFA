@@ -9,6 +9,7 @@
 #define PARTICLE_ID_HELPER_H 1
 
 #include "Pandora/PandoraInternal.h"
+#include "Pandora/PandoraInputTypes.h"
 
 #include "StatusCodes.h"
 
@@ -53,7 +54,7 @@ public:
     static bool IsPhotonFull(Cluster *const pCluster);
 
     /**
-     *  @brief  Provide fast identification of whether a cluster is a electron
+     *  @brief  Provide fast identification of whether a cluster is an electron
      * 
      *  @param  pCluster address of the cluster
      * 
@@ -61,13 +62,65 @@ public:
      */
     static bool IsElectronFast(Cluster *const pCluster);
 
+    /**
+     *  @brief  Provide a more detailed identification of whether a cluster is an electron
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsElectronFull(Cluster *const pCluster);
+
+    /**
+     *  @brief  Provide fast identification of whether a cluster is a muon
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsMuonFast(Cluster *const pCluster);
+
+    /**
+     *  @brief  Provide a more detailed identification of whether a cluster is a muon
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsMuonFull(Cluster *const pCluster);
+
 private:
+    /**
+     *  @brief  Default pandora fast photon identification function
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsPhotonFastDefault(Cluster *const pCluster);
+
+    /**
+     *  @brief  Default pandora fast electron identification function
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsElectronFastDefault(Cluster *const pCluster);
+
     /**
      *  @brief  Read the particle id helper settings
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
     static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
+
+    static ParticleIdFunction *m_pPhotonFastFunction;       ///< The fast photon id function pointer
+    static ParticleIdFunction *m_pPhotonFullFunction;       ///< The full photon id function pointer
+    static ParticleIdFunction *m_pElectronFastFunction;     ///< The fast electron id function pointer
+    static ParticleIdFunction *m_pElectronFullFunction;     ///< The full electron id function pointer
+    static ParticleIdFunction *m_pMuonFastFunction;         ///< The fast muon id function pointer
+    static ParticleIdFunction *m_pMuonFullFunction;         ///< The full muon id function pointer
 
     static float        m_showerProfileBinWidth;            ///< Bin width used to construct shower profiles, units radiation lengths
     static unsigned int m_showerProfileNBins;               ///< Number of bins used to construct shower profiles
@@ -124,7 +177,68 @@ private:
     static float        m_electronIdMaxResidualEOverP;      ///< Max absolute difference between unity and ratio em energy / track momentum
 
     friend class PandoraSettings;
+    friend class PluginManager;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
+{
+    if (NULL == m_pPhotonFastFunction)
+        return false;
+
+    return (*m_pPhotonFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsPhotonFull(Cluster *const pCluster)
+{
+    if (NULL == m_pPhotonFullFunction)
+        return false;
+
+    return (*m_pPhotonFullFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsElectronFast(Cluster *const pCluster)
+{
+    if (NULL == m_pElectronFastFunction)
+        return false;
+
+    return (*m_pElectronFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsElectronFull(Cluster *const pCluster)
+{
+    if (NULL == m_pElectronFullFunction)
+        return false;
+
+    return (*m_pElectronFullFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsMuonFast(Cluster *const pCluster)
+{
+    if (NULL == m_pMuonFastFunction)
+        return false;
+
+    return (*m_pMuonFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsMuonFull(Cluster *const pCluster)
+{
+    if (NULL == m_pMuonFullFunction)
+        return false;
+
+    return (*m_pMuonFullFunction)(pCluster);
+}
 
 } // namespace pandora
 

@@ -18,6 +18,7 @@
 #include "Managers/ClusterManager.h"
 #include "Managers/MCManager.h"
 #include "Managers/ParticleFlowObjectManager.h"
+#include "Managers/PluginManager.h"
 #include "Managers/TrackManager.h"
 
 #include "Pandora/Pandora.h"
@@ -35,6 +36,7 @@ Pandora::Pandora() :
     m_pGeometryHelper(GeometryHelper::GetInstance()),
     m_pMCManager(new MCManager),
     m_pParticleFlowObjectManager(new ParticleFlowObjectManager),
+    m_pPluginManager(new PluginManager),
     m_pTrackManager(new TrackManager),
     m_pPandoraSettings(PandoraSettings::GetInstance())
 {
@@ -54,6 +56,7 @@ Pandora::~Pandora()
     delete m_pGeometryHelper;
     delete m_pMCManager;
     delete m_pParticleFlowObjectManager;
+    delete m_pPluginManager;
     delete m_pTrackManager;
     delete m_pPandoraSettings;
     delete m_pPandoraApiImpl;
@@ -100,6 +103,7 @@ StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
 
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraSettings->Initialize(&xmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializeAlgorithms(&xmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializePlugins(&xmlHandle));
     }
     catch (StatusCodeException &statusCodeException)
     {

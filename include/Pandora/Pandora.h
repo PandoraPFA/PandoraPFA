@@ -24,6 +24,7 @@ class PandoraContentApiImpl;
 class PandoraImpl;
 class ParticleFlowObjectManager;
 class PandoraSettings;
+class PluginManager;
 class TrackManager;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,6 +78,7 @@ private:
     GeometryHelper              *m_pGeometryHelper;             ///< The geometry helper
     MCManager                   *m_pMCManager;                  ///< The MC manager
     ParticleFlowObjectManager   *m_pParticleFlowObjectManager;  ///< The particle flow object manager
+    PluginManager               *m_pPluginManager;              ///< The pandora plugin manager
     TrackManager                *m_pTrackManager;               ///< The track manager
 
     PandoraSettings             *m_pPandoraSettings;            ///< The pandora settings

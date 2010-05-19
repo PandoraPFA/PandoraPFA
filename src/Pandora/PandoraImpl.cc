@@ -11,6 +11,7 @@
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/MCManager.h"
+#include "Managers/PluginManager.h"
 #include "Managers/TrackManager.h"
 
 #include "Pandora/Pandora.h"
@@ -58,6 +59,13 @@ StatusCode PandoraImpl::PrepareCaloHits() const
 StatusCode PandoraImpl::InitializeAlgorithms(const TiXmlHandle *const pXmlHandle) const
 {
     return m_pPandora->m_pAlgorithmManager->InitializeAlgorithms(pXmlHandle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraImpl::InitializePlugins(const TiXmlHandle *const pXmlHandle) const
+{
+    return m_pPandora->m_pPluginManager->InitializePlugins(pXmlHandle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

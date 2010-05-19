@@ -66,38 +66,46 @@ bool CaloHitHelper::AreCaloHitsAvailable(const CaloHitList &caloHitList)
     return true;
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool CaloHitHelper::RemoveNonAvailableCaloHits(CaloHitList &pCaloHitList)
+void CaloHitHelper::RemoveUnavailableCaloHits(CaloHitList &caloHitList)
 {
-    // delete all non-available calohits from set
-    for( CaloHitList::iterator itCaloHit = pCaloHitList.begin(); itCaloHit != pCaloHitList.end(); ) // be careful: iterators of set change when erasing elements
+    for (CaloHitList::iterator iter = caloHitList.begin(); iter != caloHitList.end();)
     {
-        CaloHit* pCaloHit = (*itCaloHit);
-        if( ! CaloHitHelper::IsCaloHitAvailable(pCaloHit) )
-            pCaloHitList.erase(itCaloHit++);
+        if (!CaloHitHelper::IsCaloHitAvailable(*iter))
+        {
+            caloHitList.erase(iter++);
+        }
         else
-            ++itCaloHit;
+        {
+            ++iter;
+        }
     }
-
-    return true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool CaloHitHelper::RemoveNonAvailableCaloHits(OrderedCaloHitList &orderedCaloHitList)
+StatusCode CaloHitHelper::RemoveUnavailableCaloHits(OrderedCaloHitList &orderedCaloHitList)
 {
-    bool returnValue = true;
+    CaloHitList unavailableHits;
 
-    for( OrderedCaloHitList::iterator itLayer = orderedCaloHitList.begin(), itLayerEnd = orderedCaloHitList.end(); itLayer != itLayerEnd; ++itLayer )
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
-        CaloHitList* pCaloHitList = itLayer->second;
-
-        returnValue &= RemoveNonAvailableCaloHits(*pCaloHitList);
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            if (!CaloHitHelper::IsCaloHitAvailable(*hitIter))
+            {
+                unavailableHits.insert(*hitIter);
+            }
+        }
     }
 
-    return true;
+    if (!unavailableHits.empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Remove(unavailableHits))
+    }
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

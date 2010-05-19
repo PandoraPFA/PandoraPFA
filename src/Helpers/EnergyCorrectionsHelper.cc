@@ -23,10 +23,11 @@ StatusCode EnergyCorrectionsHelper::EnergyCorrection(Cluster *const pCluster, fl
     correctedElectromagneticEnergy = pCluster->GetElectromagneticEnergy();
     correctedHadronicEnergy = pCluster->GetHadronicEnergy();
 
-    // TODO EnergyCorrectionsHelper will later redirect to user-configured energy correction functions
-    EnergyCorrectionsHelper::CleanCluster(pCluster, correctedHadronicEnergy);
-    EnergyCorrectionsHelper::ScaleHotHadronEnergy(pCluster, correctedHadronicEnergy);
-    EnergyCorrectionsHelper::ApplyMuonEnergyCorrection(pCluster, correctedHadronicEnergy);
+    for (EnergyCorrectionFunctionVector::const_iterator iter = m_energyCorrectionFunctionVector.begin(),
+        iterEnd = m_energyCorrectionFunctionVector.end(); iter != iterEnd; ++iter)
+    {
+        (*(*iter))(pCluster, correctedHadronicEnergy);
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -228,6 +229,9 @@ void EnergyCorrectionsHelper::ApplyMuonEnergyCorrection(Cluster *const pCluster,
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+// Container for energy correction function pointers
+EnergyCorrectionFunctionVector EnergyCorrectionsHelper::m_energyCorrectionFunctionVector;
 
 // Parameter default values
 bool EnergyCorrectionsHelper::m_shouldCleanClusters = true;

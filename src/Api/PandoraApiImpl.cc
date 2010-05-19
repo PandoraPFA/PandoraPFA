@@ -19,6 +19,7 @@
 #include "Managers/ClusterManager.h"
 #include "Managers/MCManager.h"
 #include "Managers/ParticleFlowObjectManager.h"
+#include "Managers/PluginManager.h"
 #include "Managers/TrackManager.h"
 
 namespace pandora
@@ -117,6 +118,20 @@ StatusCode PandoraApiImpl::SetTrackToMCParticleRelationship(const void *pTrackPa
 StatusCode PandoraApiImpl::GetParticleFlowObjects(ParticleFlowObjectList &particleFlowObjectList) const
 {
     return m_pPandora->m_pParticleFlowObjectManager->GetParticleFlowObjects(particleFlowObjectList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraApiImpl::RegisterEnergyCorrectionFunction(const std::string &functionName, EnergyCorrectionFunction *pEnergyCorrectionFunction) const
+{
+    return m_pPandora->m_pPluginManager->RegisterEnergyCorrectionFunction(functionName, pEnergyCorrectionFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraApiImpl::RegisterParticleIdFunction(const std::string &functionName, ParticleIdFunction *pParticleIdFunction) const
+{
+    return m_pPandora->m_pPluginManager->RegisterParticleIdFunction(functionName, pParticleIdFunction);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

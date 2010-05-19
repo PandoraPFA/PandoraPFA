@@ -9,6 +9,7 @@
 #define ENERGY_CORRECTIONS_HELPER_H 1
 
 #include "Pandora/PandoraInternal.h"
+#include "Pandora/PandoraInputTypes.h"
 
 #include "StatusCodes.h"
 
@@ -76,6 +77,8 @@ private:
      */
     static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
+    static EnergyCorrectionFunctionVector m_energyCorrectionFunctionVector;     ///< The energy correction function vector
+
     static bool             m_shouldCleanClusters;          ///< Whether to make cluster cleaning energy corrections
     static bool             m_shouldScaleHotHadrons;        ///< Whether to make hot hadron energy corrections
 
@@ -99,6 +102,7 @@ private:
     static float            m_coilEnergyCorrectionChi;      ///< Track-cluster chi value used to assess need for coil energy correction
 
     friend class PandoraSettings;
+    friend class PluginManager;
 };
 
 } // namespace pandora

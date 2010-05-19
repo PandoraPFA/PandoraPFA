@@ -11,6 +11,8 @@
 #include "Objects/CartesianVector.h"
 #include "Objects/TrackState.h"
 
+#include "Pandora/PandoraInternal.h"
+
 #include "StatusCodes.h"
 
 #include <vector>
@@ -134,6 +136,11 @@ typedef std::vector<TrackState> InputTrackStateList;
 
 typedef std::vector<const void *> CaloHitAddressList, TrackAddressList;
 typedef std::vector<CaloHitAddressList> ClusterAddressList;
+
+typedef void (EnergyCorrectionFunction)(Cluster *, float &);
+typedef bool (ParticleIdFunction)(Cluster *);
+
+typedef std::vector<EnergyCorrectionFunction *> EnergyCorrectionFunctionVector;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
