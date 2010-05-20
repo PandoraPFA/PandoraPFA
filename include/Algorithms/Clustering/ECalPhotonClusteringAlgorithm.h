@@ -583,7 +583,10 @@ public:
     std::string     m_configurationFileNameSig;     ///< filename for file where the configuration of the photon clustering is stored : signal
     std::string     m_strategy;                     ///< The strategy used for photon recognition
 
-    int             m_produceConfigurationFiles;     ///< produce the configuration file (using the provided events) (0... signal events, 1 ... background events, 2 ... signal and background events, to be split by "fraction"
+    std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
+
+
+    int             m_produceConfigurationFiles;    ///< produce the configuration file (using the provided events) (0... signal events, 1 ... background events, 2 ... signal and background events, to be split by "fraction"
 
 
     bool m_isAlreadyInitialized;                    ///< set to true if initialisation has taken place
