@@ -205,7 +205,10 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const
     m_savedLists.insert(targetListName);
 
     sourceClusterListIter->second->clear();
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
+
+    // ATTN: Previously used to delete the emptied cluster list immediately, but algorithm users often tended to try to
+    //       access deleted cluster list via a dangling pointer. Now they simply continue to access an empty list (preferable).
+    // PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -253,8 +256,10 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const
 
     m_savedLists.insert(targetListName);
 
-    if (sourceClusterListIter->second->empty())
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
+    // ATTN: Previously used to delete the emptied cluster list immediately, but algorithm users often tended to try to
+    //       access deleted cluster list via a dangling pointer. Now they simply continue to access an empty list (preferable).
+    // if (sourceClusterListIter->second->empty())
+    //     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
 
     return STATUS_CODE_SUCCESS;
 }
