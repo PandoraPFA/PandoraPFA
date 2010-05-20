@@ -216,7 +216,7 @@ StatusCode PandoraContentApiImpl::EndFragmentation(const Algorithm &algorithm, c
     const ClusterList *pClustersToBeDeleted = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetList(clusterListToDeleteName, pClustersToBeDeleted));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareReclusterCandidatesForDeletion(*pClustersToBeDeleted));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteClusterList(&algorithm, clusterListToDeleteName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteTemporaryClusterList(&algorithm, clusterListToDeleteName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ApplyCaloHitUsageMap(clusterListToSaveName));
 
@@ -366,6 +366,18 @@ StatusCode PandoraContentApiImpl::DeleteClusters(const ClusterList &clusterList,
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClustersForDeletion(clusterList));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteClusters(clusterList, clusterListName));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::DeleteSavedClusterList(const std::string &clusterListName) const
+{
+    const ClusterList *pClustersToBeDeleted = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetList(clusterListName, pClustersToBeDeleted));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClustersForDeletion(*pClustersToBeDeleted));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteSavedClusterList(clusterListName));
 
     return STATUS_CODE_SUCCESS;
 }

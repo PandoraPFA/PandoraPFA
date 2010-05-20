@@ -218,7 +218,8 @@ public:
     static StatusCode GetCurrentPfoList(const pandora::Algorithm &algorithm, const pandora::ParticleFlowObjectList *&pParticleFlowObjectList);
 
     /**
-     *  @brief  Initialize cluster fragmentation operations, allowing hits in a list of clusters to be redistributed
+     *  @brief  Initialize cluster fragmentation operations on clusters in the algorithm input list. This allows hits in a list
+     *          of clusters (a subset of the algorithm input list) to be redistributed.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  inputClusterList the input cluster list
@@ -229,7 +230,7 @@ public:
         std::string &originalClustersListName, std::string &fragmentClustersListName);
 
     /**
-     *  @brief  End cluster fragmentation operations
+     *  @brief  End cluster fragmentation operations on clusters in the algorithm input list
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  clusterListToSaveName the name of the list containing the clusters chosen to be saved (original or fragments)
@@ -239,7 +240,8 @@ public:
         const std::string &clusterListToDeleteName);
 
     /**
-     *  @brief  Initialize reclustering operations
+     *  @brief  Initialize reclustering operations on clusters in the algorithm input list. This allows hits in a list
+     *          of clusters (a subset of the algorithm input list) to be redistributed.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  inputTrackList the input track list
@@ -250,7 +252,7 @@ public:
         const pandora::ClusterList &inputClusterList, std::string &originalClustersListName);
 
     /**
-     *  @brief  End reclustering operations
+     *  @brief  End reclustering operations on clusters in the algorithm input list
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  selectedClusterListName the name of the list containing the chosen recluster candidates (or the original candidates)
@@ -349,6 +351,14 @@ public:
      *  @param  clusterListName name of the list containing the clusters
      */
     static StatusCode DeleteClusters(const pandora::Algorithm &algorithm, const pandora::ClusterList &clusterList, const std::string &clusterListName);
+
+    /**
+     *  @brief  Delete a named list of saved clusters
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  clusterListName name of the cluster list to delete
+     */
+    static StatusCode DeleteSavedClusterList(const pandora::Algorithm &algorithm, const std::string &clusterListName);
 
     /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
@@ -457,7 +467,8 @@ public:
     static StatusCode RemoveAllTrackClusterAssociations(const pandora::Algorithm &algorithm);
 
     /**
-     *  @brief  Save the current cluster list in a list with the specified new name
+     *  @brief  Save the current cluster list in a list with the specified new name. Note that this will empty the current
+     *          cluster list; the clusters will all be moved to the new named list.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
@@ -465,7 +476,8 @@ public:
     static StatusCode SaveClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName);
 
     /**
-     *  @brief  Save elements of the current cluster list in a list with the specified new name
+     *  @brief  Save elements of the current cluster list in a list with the specified new name. If all the clusters in the
+     *          current list are saved, this will empty the current list; the clusters will all be moved to the new named list.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
@@ -475,7 +487,8 @@ public:
         const pandora::ClusterList &clustersToSave);
 
     /**
-     *  @brief  Save a named cluster list in a list with the specified new name
+     *  @brief  Save a named cluster list in a list with the specified new name. Note that this will empty the old cluster list;
+     *          the clusters will all be moved to the new named list.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  oldClusterListName the old cluster list name
@@ -485,7 +498,8 @@ public:
         const std::string &newClusterListName);
 
     /**
-     *  @brief  Save elements of a named cluster list in a list with the specified new name
+     *  @brief  Save elements of a named cluster list in a list with the specified new name. If all the clusters in the old
+     *          list are saved, this will empty the old cluster list; the clusters will all be moved to the new named list.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  oldClusterListName the old cluster list name
@@ -506,7 +520,9 @@ public:
 
     /**
      *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm)
+     *          list (will persist outside the current algorithm). Note that the old cluster list (current at the time of calling
+     *          this function) will be emptied; the clusters will all be moved to the new named list. Note also that any pointers
+     *          to the current cluster list will need to be refreshed.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name
@@ -515,7 +531,9 @@ public:
 
     /**
      *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm)
+     *          list (will persist outside the current algorithm). If all the clusters are saved, the old cluster list (current
+     *          at the time of calling this function) will be emptied; the clusters will all be moved to the new named list.
+     *          Note also that any pointers to the current cluster list will need to be refreshed.
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  newClusterListName the new cluster list name

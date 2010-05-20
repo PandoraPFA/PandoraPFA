@@ -259,6 +259,13 @@ StatusCode PandoraContentApi::DeleteClusters(const pandora::Algorithm &algorithm
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApi::DeleteSavedClusterList(const pandora::Algorithm &algorithm, const std::string &clusterListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->DeleteSavedClusterList(clusterListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApi::MergeAndDeleteClusters(const pandora::Algorithm &algorithm, pandora::Cluster *pClusterToEnlarge,
     pandora::Cluster *pClusterToDelete)
 {
