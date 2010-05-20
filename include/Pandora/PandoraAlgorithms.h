@@ -8,7 +8,6 @@
 #ifndef PANDORA_ALGORITHMS_H
 #define PANDORA_ALGORITHMS_H 1
 
-#include "Algorithms/ECalPhotonIdAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
 #include "Algorithms/PhotonRecoveryAlgorithm.h"
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
@@ -67,7 +66,6 @@
 #include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
 #define PANDORA_ALGORITHM_LIST(d)                                                                           \
-    d("ECalPhotonId",                           ECalPhotonIdAlgorithm::Factory)                             \
     d("FragmentRemoval",                        FragmentRemovalAlgorithm::Factory)                          \
     d("PhotonRecovery",                         PhotonRecoveryAlgorithm::Factory)                           \
     d("PrimaryClustering",                      PrimaryClusteringAlgorithm::Factory)                        \
