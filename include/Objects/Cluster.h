@@ -301,6 +301,13 @@ public:
      */
     void SetCurrentFitResult(const ClusterHelper::ClusterFitResult &currentFitResult);
 
+    /**
+     *  @brief  Whether the cluster is available to be added to a particle flow object
+     * 
+     *  @return boolean
+     */
+    bool IsAvailable() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -424,6 +431,13 @@ private:
      */
     void RemoveTrackSeed();
 
+    /**
+     *  @brief  Set availability of cluster to be added to a particle flow object
+     * 
+     *  @param  isAvailable the cluster availability
+     */
+    void SetAvailability(bool isAvailable);
+
     typedef std::map<PseudoLayer, double> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
     typedef ClusterHelper::ClusterFitResult ClusterFitResult;   ///< The cluster fit result typedef
 
@@ -464,6 +478,8 @@ private:
     InputFloat              m_showerProfileDiscrepancy;     ///< The cluster shower profile discrepancy
 
     TrackList               m_associatedTrackList;          ///< The list of tracks associated with the cluster
+
+    bool                    m_isAvailable;                  ///< Whether the cluster is available to be added to a particle flow object
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
@@ -775,6 +791,20 @@ inline void Cluster::ResetOutdatedProperties()
     m_showerProfileDiscrepancy.Reset();
     m_correctedElectromagneticEnergy.Reset();
     m_correctedHadronicEnergy.Reset();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Cluster::IsAvailable() const
+{
+    return m_isAvailable;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void Cluster::SetAvailability(bool isAvailable)
+{
+    m_isAvailable = isAvailable;
 }
 
 } // namespace pandora

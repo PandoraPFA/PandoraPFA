@@ -32,7 +32,8 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_canFormClusterlessPfo(trackParameters.m_canFormClusterlessPfo.Get()),
     m_pAssociatedCluster(NULL),
     m_pMCParticle(NULL),
-    m_pParentAddress(trackParameters.m_pParentAddress.Get())
+    m_pParentAddress(trackParameters.m_pParentAddress.Get()),
+    m_isAvailable(true)
 {
     for (InputTrackStateList::const_iterator iter = trackParameters.m_calorimeterProjections.begin(),
         iterEnd = trackParameters.m_calorimeterProjections.end(); iter != iterEnd; ++iter)

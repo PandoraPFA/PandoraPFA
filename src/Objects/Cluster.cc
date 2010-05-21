@@ -27,7 +27,8 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_initialDirection(pCaloHit->GetPositionVector().GetUnitVector()),
-    m_isFitUpToDate(false)
+    m_isFitUpToDate(false),
+    m_isAvailable(true)
 {
     if (NULL == pCaloHit)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -47,7 +48,8 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     m_isPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
-    m_isFitUpToDate(false)
+    m_isFitUpToDate(false),
+    m_isAvailable(true)
 {
     if (NULL == pCaloHitList)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -69,7 +71,8 @@ Cluster::Cluster(Track *pTrack) :
     m_isolatedHadronicEnergy(0),
     m_isPhoton(false),
     m_isMipTrack(true),
-    m_isFitUpToDate(false)
+    m_isFitUpToDate(false),
+    m_isAvailable(true)
 {
     if (NULL == pTrack)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);

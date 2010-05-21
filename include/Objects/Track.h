@@ -190,6 +190,13 @@ public:
      */
     const TrackList &GetDaughterTrackList() const;
 
+    /**
+     *  @brief  Whether the track is available to be added to a particle flow object
+     * 
+     *  @return boolean
+     */
+    bool IsAvailable() const;
+
 private:
     /**
      *  @brief  Constructor
@@ -245,6 +252,13 @@ private:
      */
     StatusCode AddSibling(Track *const pTrack);
 
+    /**
+     *  @brief  Set availability of track to be added to a particle flow object
+     * 
+     *  @param  isAvailable the track availability
+     */
+    void SetAvailability(bool isAvailable);
+
     const float             m_d0;                       ///< The 2D impact parameter wrt (0,0), units mm
     const float             m_z0;                       ///< The z coordinate at the 2D distance of closest approach, units mm
     int                     m_chargeSign;               ///< The charge sign of the tracked particle
@@ -274,6 +288,8 @@ private:
     TrackList               m_parentTrackList;          ///< The list of parent track addresses
     TrackList               m_siblingTrackList;         ///< The list of sibling track addresses
     TrackList               m_daughterTrackList;        ///< The list of daughter track addresses
+
+    bool                    m_isAvailable;              ///< Whether the track is available to be added to a particle flow object
 
     friend class PandoraContentApiImpl;
     friend class TrackManager;
@@ -475,6 +491,20 @@ inline const TrackList &Track::GetSiblingTrackList() const
 inline const TrackList &Track::GetDaughterTrackList() const
 {
     return m_daughterTrackList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::IsAvailable() const
+{
+    return m_isAvailable;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void Track::SetAvailability(bool isAvailable)
+{
+    m_isAvailable = isAvailable;
 }
 
 } // namespace pandora

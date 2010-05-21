@@ -65,7 +65,30 @@ StatusCode PandoraContentApiImpl::CreateCluster(Track *pTrack, Cluster *&pCluste
 
 StatusCode PandoraContentApiImpl::CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) const
 {
-    return m_pPandora->m_pParticleFlowObjectManager->CreateParticleFlowObject(particleFlowObjectParameters);
+    const TrackList &trackList(particleFlowObjectParameters.m_trackList);
+    const ClusterList &clusterList(particleFlowObjectParameters.m_clusterList);
+
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+    {
+        if (!(*iter)->IsAvailable())
+            return STATUS_CODE_NOT_ALLOWED;
+    }
+
+    for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
+    {
+        if (!(*iter)->IsAvailable())
+            return STATUS_CODE_NOT_ALLOWED;
+    }
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->CreateParticleFlowObject(particleFlowObjectParameters));
+
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+        (*iter)->SetAvailability(false);
+
+    for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
+        (*iter)->SetAvailability(false);
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -402,14 +425,26 @@ StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnla
 
 StatusCode PandoraContentApiImpl::AddClusterToPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster) const
 {
-    return m_pPandora->m_pParticleFlowObjectManager->AddClusterToPfo(pParticleFlowObject, pCluster);
+    if (!pCluster->IsAvailable())
+        return STATUS_CODE_NOT_ALLOWED;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->AddClusterToPfo(pParticleFlowObject, pCluster));
+    pCluster->SetAvailability(false);
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApiImpl::AddTrackToPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack) const
 {
-    return m_pPandora->m_pParticleFlowObjectManager->AddTrackToPfo(pParticleFlowObject, pTrack);
+    if (!pTrack->IsAvailable())
+        return STATUS_CODE_NOT_ALLOWED;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->AddTrackToPfo(pParticleFlowObject, pTrack));
+    pTrack->SetAvailability(false);
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -419,7 +454,10 @@ StatusCode PandoraContentApiImpl::RemoveClusterFromPfo(ParticleFlowObject *pPart
     if ((pParticleFlowObject->GetNClusters() <= 1) && (pParticleFlowObject->GetNTracks() == 0))
         return STATUS_CODE_NOT_ALLOWED;
 
-    return m_pPandora->m_pParticleFlowObjectManager->RemoveClusterFromPfo(pParticleFlowObject, pCluster);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->RemoveClusterFromPfo(pParticleFlowObject, pCluster));
+    pCluster->SetAvailability(true);
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -429,14 +467,28 @@ StatusCode PandoraContentApiImpl::RemoveTrackFromPfo(ParticleFlowObject *pPartic
     if ((pParticleFlowObject->GetNTracks() <= 1) && (pParticleFlowObject->GetNClusters() == 0))
         return STATUS_CODE_NOT_ALLOWED;
 
-    return m_pPandora->m_pParticleFlowObjectManager->RemoveTrackFromPfo(pParticleFlowObject, pTrack);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->RemoveTrackFromPfo(pParticleFlowObject, pTrack));
+    pTrack->SetAvailability(true);
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraContentApiImpl::DeletePfo(ParticleFlowObject *pParticleFlowObject) const
 {
-    return m_pPandora->m_pParticleFlowObjectManager->DeletePfo(pParticleFlowObject);
+    const TrackList trackList(pParticleFlowObject->GetTrackList());
+    const ClusterList clusterList(pParticleFlowObject->GetClusterList());
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->DeletePfo(pParticleFlowObject));
+
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+        (*iter)->SetAvailability(true);
+
+    for (ClusterList::const_iterator iter = clusterList.begin(), iterEnd = clusterList.end(); iter != iterEnd; ++iter)
+        (*iter)->SetAvailability(true);
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
