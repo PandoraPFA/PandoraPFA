@@ -252,14 +252,6 @@ public:
      StatusCode DeleteClusters(const ClusterList &clusterList, const std::string &clusterListName) const;
 
     /**
-     *  @brief  Delete a named list of saved clusters
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  clusterListName name of the cluster list to delete
-     */
-    StatusCode DeleteSavedClusterList(const std::string &clusterListName) const;
-
-    /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
      * 
      *  @param  pClusterToEnlarge address of the cluster to enlarge

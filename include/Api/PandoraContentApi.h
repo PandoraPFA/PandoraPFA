@@ -353,14 +353,6 @@ public:
     static StatusCode DeleteClusters(const pandora::Algorithm &algorithm, const pandora::ClusterList &clusterList, const std::string &clusterListName);
 
     /**
-     *  @brief  Delete a named list of saved clusters
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  clusterListName name of the cluster list to delete
-     */
-    static StatusCode DeleteSavedClusterList(const pandora::Algorithm &algorithm, const std::string &clusterListName);
-
-    /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
      * 
      *  @param  algorithm the algorithm calling this function

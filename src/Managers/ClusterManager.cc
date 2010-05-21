@@ -364,35 +364,6 @@ StatusCode ClusterManager::DeleteTemporaryClusterList(const Algorithm *const pAl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::DeleteSavedClusterList(const std::string &clusterListName)
-{
-    NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(clusterListName);
-
-    if (m_nameToClusterListMap.end() == clusterListIter)
-        return STATUS_CODE_NOT_FOUND;
-
-    StringSet::iterator savedListIter = m_savedLists.find(clusterListName);
-
-    if (m_savedLists.end() == savedListIter)
-        return STATUS_CODE_NOT_ALLOWED;
-
-    for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
-        clusterIter != clusterIterEnd; ++clusterIter)
-    {
-        delete (*clusterIter);
-    }
-
-    clusterListIter->second->clear();
-    delete clusterListIter->second;
-
-    m_nameToClusterListMap.erase(clusterListIter);
-    m_savedLists.erase(savedListIter);
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete)
 {
     if (pClusterToEnlarge == pClusterToDelete)

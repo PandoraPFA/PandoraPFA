@@ -224,13 +224,6 @@ private:
     StatusCode DeleteTemporaryClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName);
 
     /**
-     *  @brief  Delete the contents of a saved cluster list and remove the list from all relevant containers
-     * 
-     *  @param  clusterListName the name of the saved cluster list
-     */
-    StatusCode DeleteSavedClusterList(const std::string &clusterListName);
-
-    /**
      *  @brief  Merge two clusters in the current list, enlarging one cluster and deleting the second
      * 
      *  @param  pClusterToEnlarge address of the cluster to enlarge

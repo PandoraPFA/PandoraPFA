@@ -372,18 +372,6 @@ StatusCode PandoraContentApiImpl::DeleteClusters(const ClusterList &clusterList,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::DeleteSavedClusterList(const std::string &clusterListName) const
-{
-    const ClusterList *pClustersToBeDeleted = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetList(clusterListName, pClustersToBeDeleted));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClustersForDeletion(*pClustersToBeDeleted));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteSavedClusterList(clusterListName));
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode PandoraContentApiImpl::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete) const
 {
     if (pClusterToEnlarge == pClusterToDelete)
