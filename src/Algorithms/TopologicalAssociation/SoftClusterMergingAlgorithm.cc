@@ -107,6 +107,10 @@ bool SoftClusterMergingAlgorithm::IsSoftCluster(Cluster *const pDaughterCluster)
     if (0 == nCaloHits)
         return false;
 
+    // ATTN: Added this cut to prevent merging multiple track-seeded clusters
+    if (!pDaughterCluster->GetAssociatedTrackList().empty())
+        return false;
+
     bool isSoftCluster(false);
 
     if (nCaloHits <= m_maxHitsInSoftCluster)
@@ -121,10 +125,6 @@ bool SoftClusterMergingAlgorithm::IsSoftCluster(Cluster *const pDaughterCluster)
     {
         isSoftCluster = true;
     }
-
-    // Alter cuts if candidate cluster has an associated track
-    if (!pDaughterCluster->GetAssociatedTrackList().empty())
-        isSoftCluster = false;
 
     if (pDaughterCluster->GetHadronicEnergy() < m_minClusterHadEnergy)
         isSoftCluster = true;
