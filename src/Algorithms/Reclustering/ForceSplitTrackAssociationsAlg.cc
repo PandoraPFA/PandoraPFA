@@ -93,7 +93,14 @@ StatusCode ForceSplitTrackAssociationsAlg::Run()
                     return STATUS_CODE_FAILURE;
                 }
 
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHit));
+                if (!pCaloHit->IsIsolated())
+                {
+                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pBestCluster, pCaloHit));
+                }
+                else
+                {
+                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddIsolatedCaloHitToCluster(*this, pBestCluster, pCaloHit));
+                }
             }
         }
 
