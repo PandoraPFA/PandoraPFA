@@ -18,7 +18,7 @@ StatusCode ForceSplitTrackAssociationsAlg::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     // Loop over clusters in the algorithm input list, looking for those with excess track associations
-    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd;)
+    for (ClusterList::const_iterator iter = pClusterList->begin(); iter != pClusterList->end();)
     {
         Cluster *pOriginalCluster = *iter;
         ++iter;
@@ -105,7 +105,7 @@ StatusCode ForceSplitTrackAssociationsAlg::Run()
         }
 
         // Check for any "empty" clusters and create new track-cluster associations
-        for (TrackToClusterMap::iterator mapIter = trackToClusterMap.begin(), mapIterEnd = trackToClusterMap.end(); mapIter != mapIterEnd;)
+        for (TrackToClusterMap::iterator mapIter = trackToClusterMap.begin(); mapIter != trackToClusterMap.end();)
         {
             Cluster *pCluster = mapIter->second;
 
