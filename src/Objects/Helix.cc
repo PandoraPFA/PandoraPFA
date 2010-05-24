@@ -8,6 +8,8 @@
 
 #include "Objects/Helix.h"
 
+#include <iostream>
+
 namespace pandora
 {
 

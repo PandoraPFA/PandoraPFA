@@ -142,21 +142,21 @@ float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluste
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    float minDistance(std::numeric_limits<float>::max());
+    float minDistanceSquared(std::numeric_limits<float>::max());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             const CartesianVector positionDifference(hitPosition - (*hitIter)->GetPositionVector());
-            const float distance(positionDifference.GetMagnitude());
+            const float distanceSquared(positionDifference.GetMagnitudeSquared());
 
-            if (distance < minDistance)
-                minDistance = distance;
+            if (distanceSquared < minDistanceSquared)
+                minDistanceSquared = distanceSquared;
         }
     }
 
-    return minDistance;
+    return std::sqrt(minDistanceSquared);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

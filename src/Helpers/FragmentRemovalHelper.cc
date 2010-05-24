@@ -24,28 +24,41 @@ namespace pandora
 float FragmentRemovalHelper::GetFractionOfCloseHits(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float distanceThreshold)
 {
     const unsigned int nCaloHitsI(pClusterI->GetNCaloHits());
+    const float distanceThresholdSquared(distanceThreshold * distanceThreshold);
 
     if (0 == nCaloHitsI)
         return 0.;
 
-    CaloHitList caloHitListI, caloHitListJ;
-    pClusterI->GetOrderedCaloHitList().GetCaloHitList(caloHitListI);
-    pClusterJ->GetOrderedCaloHitList().GetCaloHitList(caloHitListJ);
+    const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
 
     unsigned int nCloseHits(0);
 
-    for (CaloHitList::const_iterator iterI = caloHitListI.begin(), iterIEnd = caloHitListI.end(); iterI != iterIEnd; ++iterI)
+    // Loop over hits in cluster I
+    for (OrderedCaloHitList::const_iterator iterI = orderedCaloHitListI.begin(), iterIEnd = orderedCaloHitListI.end(); iterI != iterIEnd; ++iterI)
     {
-        const CartesianVector &positionVectorI((*iterI)->GetPositionVector());
-
-        for (CaloHitList::const_iterator iterJ = caloHitListJ.begin(), iterJEnd = caloHitListJ.end(); iterJ != iterJEnd; ++iterJ)
+        for (CaloHitList::const_iterator hitIterI = iterI->second->begin(), hitIterIEnd = iterI->second->end(); hitIterI != hitIterIEnd; ++hitIterI)
         {
-            const float distance((positionVectorI - (*iterJ)->GetPositionVector()).GetMagnitude());
+            bool isCloseHit(false);
+            const CartesianVector &positionVectorI((*hitIterI)->GetPositionVector());
 
-            if (distance < distanceThreshold)
+            // For each hit in cluster I, check whether there is a sufficiently close hit in cluster J
+            for (OrderedCaloHitList::const_iterator iterJ = orderedCaloHitListJ.begin(), iterJEnd = orderedCaloHitListJ.end(); iterJ != iterJEnd; ++iterJ)
             {
-                nCloseHits++;
-                break;
+                for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
+                {
+                    const float distanceSquared((positionVectorI - (*hitIterJ)->GetPositionVector()).GetMagnitudeSquared());
+
+                    if (distanceSquared < distanceThresholdSquared)
+                    {
+                        isCloseHit = true;
+                        nCloseHits++;
+                        break;
+                    }
+                }
+
+                if (isCloseHit)
+                    break;
             }
         }
     }
@@ -247,14 +260,15 @@ StatusCode FragmentRemovalHelper::GetClusterContactDetails(const Cluster *const 
         {
             const CartesianVector &positionI((*hitIterI)->GetPositionVector());
             const float separationCut(1.5f * (*hitIterI)->GetCellLengthScale() * distanceThreshold);
+            const float separationCutSquared(separationCut * separationCut);
 
             for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
             {
                 const CartesianVector &positionJ((*hitIterJ)->GetPositionVector());
                 const CartesianVector positionDifference(positionI - positionJ);
-                const float separation(positionDifference.GetMagnitude());
+                const float separationSquared(positionDifference.GetMagnitudeSquared());
 
-                if (separation < separationCut)
+                if (separationSquared < separationCutSquared)
                 {
                     nLayersInContact++;
                     isLayerDone = true;
@@ -286,41 +300,105 @@ ClusterContact::ClusterContact(Cluster *const pDaughterCluster, Cluster *const p
     m_parentClusterEnergy(pParentCluster->GetHadronicEnergy()),
     m_nContactLayers(0),
     m_contactFraction(0.f),
+    m_closeHitFraction1(0.f),
+    m_closeHitFraction2(0.f),
+    m_distanceToClosestHit(std::numeric_limits<float>::max()),
     m_meanDistanceToHelix(std::numeric_limits<float>::max()),
     m_closestDistanceToHelix(std::numeric_limits<float>::max())
 {
-    static const PandoraSettings *const pPandoraSettings(PandoraSettings::GetInstance());
-    static const float coneCosineHalfAngle1(pPandoraSettings->GetContactConeCosineHalfAngle1());
-    static const float coneCosineHalfAngle2(pPandoraSettings->GetContactConeCosineHalfAngle2());
-    static const float coneCosineHalfAngle3(pPandoraSettings->GetContactConeCosineHalfAngle3());
-    static const float closeHitDistance1(pPandoraSettings->GetContactCloseHitDistance1());
-    static const float closeHitDistance2(pPandoraSettings->GetContactCloseHitDistance2());
+    static const float coneCosineHalfAngle1(PandoraSettings::GetInstance()->GetContactConeCosineHalfAngle1());
+    static const float coneCosineHalfAngle2(PandoraSettings::GetInstance()->GetContactConeCosineHalfAngle2());
+    static const float coneCosineHalfAngle3(PandoraSettings::GetInstance()->GetContactConeCosineHalfAngle3());
 
-    m_distanceToClosestHit = ClusterHelper::GetDistanceToClosestHit(pDaughterCluster, pParentCluster);
     m_coneFraction1 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, coneCosineHalfAngle1);
     m_coneFraction2 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, coneCosineHalfAngle2);
     m_coneFraction3 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, coneCosineHalfAngle3);
-    m_closeHitFraction1 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, closeHitDistance1);
-    m_closeHitFraction2 = FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, closeHitDistance2);
 
-    static const float distanceThreshold(pPandoraSettings->GetContactDistanceThreshold());
+    static const float distanceThreshold(PandoraSettings::GetInstance()->GetContactDistanceThreshold());
     (void) FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, distanceThreshold, m_nContactLayers, m_contactFraction);
 
+    this->HitDistanceComparison(pDaughterCluster, pParentCluster);
     this->ClusterHelixComparison(pDaughterCluster, pParentCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void ClusterContact::HitDistanceComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster)
+{
+    static const float closeHitDistance1(PandoraSettings::GetInstance()->GetContactCloseHitDistance1());
+    static const float closeHitDistance2(PandoraSettings::GetInstance()->GetContactCloseHitDistance2());
+    static const float minCosOpeningAngle(PandoraSettings::GetInstance()->GetContactMinCosOpeningAngle());
+    static const float closeHitDistance1Squared(closeHitDistance1 * closeHitDistance1);
+    static const float closeHitDistance2Squared(closeHitDistance2 * closeHitDistance2);
+
+    // Apply simple preselection to cosine of opening angle between the clusters
+    const float cosOpeningAngle(pDaughterCluster->GetInitialDirection().GetCosOpeningAngle(pParentCluster->GetInitialDirection()));
+
+    if (cosOpeningAngle < minCosOpeningAngle)
+        return;
+
+    // Calculate all hit distance properties in a single loop, for efficiency
+    unsigned int nCloseHits1(0), nCloseHits2(0);
+    float minDistanceSquared(std::numeric_limits<float>::max());
+
+    const OrderedCaloHitList &orderedCaloHitListI(pDaughterCluster->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitListJ(pParentCluster->GetOrderedCaloHitList());
+
+    // Loop over hits in daughter cluster
+    for (OrderedCaloHitList::const_iterator iterI = orderedCaloHitListI.begin(), iterIEnd = orderedCaloHitListI.end(); iterI != iterIEnd; ++iterI)
+    {
+        for (CaloHitList::const_iterator hitIterI = iterI->second->begin(), hitIterIEnd = iterI->second->end(); hitIterI != hitIterIEnd; ++hitIterI)
+        {
+            bool isCloseHit1(false), isCloseHit2(false);
+            const CartesianVector &positionVectorI((*hitIterI)->GetPositionVector());
+
+            // Compare each hit in daughter cluster with those in parent cluster
+            for (OrderedCaloHitList::const_iterator iterJ = orderedCaloHitListJ.begin(), iterJEnd = orderedCaloHitListJ.end(); iterJ != iterJEnd; ++iterJ)
+            {
+                for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
+                {
+                    const float distanceSquared((positionVectorI - (*hitIterJ)->GetPositionVector()).GetMagnitudeSquared());
+
+                    if (!isCloseHit1 && (distanceSquared < closeHitDistance1Squared))
+                        isCloseHit1 = true;
+
+                    if (!isCloseHit2 && (distanceSquared < closeHitDistance2Squared))
+                        isCloseHit2 = true;
+
+                    if (distanceSquared < minDistanceSquared)
+                        minDistanceSquared = distanceSquared;
+                }
+            }
+
+            if (isCloseHit1)
+                nCloseHits1++;
+
+            if (isCloseHit2)
+                nCloseHits2++;
+        }
+    }
+
+    const unsigned int nDaughterCaloHits(pDaughterCluster->GetNCaloHits());
+
+    if (0 == nDaughterCaloHits)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    m_distanceToClosestHit = std::sqrt(minDistanceSquared);
+    m_closeHitFraction1 = static_cast<float>(nCloseHits1) / static_cast<float>(nDaughterCaloHits);
+    m_closeHitFraction2 = static_cast<float>(nCloseHits2) / static_cast<float>(nDaughterCaloHits);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void ClusterContact::ClusterHelixComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster)
 {
-    static const PandoraSettings *const pPandoraSettings(PandoraSettings::GetInstance());
-    static const float mipFractionCut(pPandoraSettings->GetContactHelixComparisonMipFractionCut());
-    static const unsigned int startLayerOffset(pPandoraSettings->GetContactHelixComparisonStartOffset());
-    static const unsigned int startLayerOffsetMip(pPandoraSettings->GetContactHelixComparisonStartOffsetMip());
-    static const unsigned int nHelixComparisonLayers(pPandoraSettings->GetContactNHelixComparisonLayers());
-    static const unsigned int maxLayersCrossedByHelix(pPandoraSettings->GetContactMaxLayersCrossedByHelix());
-    static const float maxTrackClusterDeltaZ(pPandoraSettings->GetContactMaxTrackClusterDeltaZ());
-    
+    static const float mipFractionCut(PandoraSettings::GetInstance()->GetContactHelixComparisonMipFractionCut());
+    static const unsigned int startLayerOffset(PandoraSettings::GetInstance()->GetContactHelixComparisonStartOffset());
+    static const unsigned int startLayerOffsetMip(PandoraSettings::GetInstance()->GetContactHelixComparisonStartOffsetMip());
+    static const unsigned int nHelixComparisonLayers(PandoraSettings::GetInstance()->GetContactNHelixComparisonLayers());
+    static const unsigned int maxLayersCrossedByHelix(PandoraSettings::GetInstance()->GetContactMaxLayersCrossedByHelix());
+    static const float maxTrackClusterDeltaZ(PandoraSettings::GetInstance()->GetContactMaxTrackClusterDeltaZ());
+
     // Configure range of layers in which daughter cluster will be compared to helix fits
     const bool passMipFractionCut(pParentCluster->GetMipFraction() - mipFractionCut > std::numeric_limits<float>::epsilon());
 
@@ -364,6 +442,7 @@ void ClusterContact::ClusterHelixComparison(Cluster *const pDaughterCluster, Clu
             m_closestDistanceToHelix = closestDistanceToHelix;
         }
     }
+
     m_parentTrackEnergy = trackEnergySum;
 }
 

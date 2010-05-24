@@ -169,6 +169,13 @@ public:
     float GetContactCloseHitDistance2() const;
 
     /**
+     *  @brief  Get the minimum opening angle between two clusters to perform contact hit comparisons
+     * 
+     *  @return The minimum opening angle
+     */
+    float GetContactMinCosOpeningAngle() const;
+
+    /**
      *  @brief  Get the number of calorimeter cell-widths used to identify cluster contact layers
      * 
      *  @return The number of calorimeter cell-widths
@@ -331,6 +338,7 @@ private:
     float           m_contactCloseHitDistance1;             ///< First distance used to identify close hits in cluster contact object
     float           m_contactCloseHitDistance2;             ///< Second distance used to identify close hits in cluster contact object
 
+    float           m_contactMinCosOpeningAngle;            ///< Min opening angle between two clusters to perform contact hit comparisons
     float           m_contactDistanceThreshold;             ///< Number of calorimeter cell-widths used to identify cluster contact layers
 
     float           m_contactHelixComparisonMipFractionCut; ///< Mip fraction cut used in cluster contact helix comparison
@@ -494,6 +502,13 @@ inline float PandoraSettings::GetContactCloseHitDistance1() const
 inline float PandoraSettings::GetContactCloseHitDistance2() const
 {
     return m_contactCloseHitDistance2;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float PandoraSettings::GetContactMinCosOpeningAngle() const
+{
+    return m_contactMinCosOpeningAngle;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

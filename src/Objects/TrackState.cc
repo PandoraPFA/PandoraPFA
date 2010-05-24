@@ -8,6 +8,8 @@
 
 #include "Objects/TrackState.h"
 
+#include <iostream>
+
 namespace pandora
 {
 

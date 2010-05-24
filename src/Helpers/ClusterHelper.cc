@@ -387,7 +387,7 @@ float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitR
     if (startLayer > endLayer)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-    float minDistance(std::numeric_limits<float>::max());
+    float minDistanceSquared(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
@@ -402,43 +402,48 @@ float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitR
             CaloHit *pCaloHit = *hitIter;
 
             const CartesianVector interceptDifference(pCaloHit->GetPositionVector() - clusterFitResult.GetIntercept());
-            const float distance(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitude());
+            const float distanceSquared(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitudeSquared());
 
-            if (distance < minDistance)
+            if (distanceSquared < minDistanceSquared)
             {
-                minDistance = distance;
+                minDistanceSquared = distanceSquared;
             }
         }
     }
 
-    return minDistance;
+    return std::sqrt(minDistanceSquared);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 float ClusterHelper::GetDistanceToClosestHit(const Cluster *const pClusterI, const Cluster *const pClusterJ)
 {
-    float minDistance(std::numeric_limits<float>::max());
-    CaloHitList caloHitListI, caloHitListJ;
-    pClusterI->GetOrderedCaloHitList().GetCaloHitList(caloHitListI);
-    pClusterJ->GetOrderedCaloHitList().GetCaloHitList(caloHitListJ);
+    float minDistanceSquared(std::numeric_limits<float>::max());
+    const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
+    const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
 
-    for (CaloHitList::const_iterator iterI = caloHitListI.begin(), iterIEnd = caloHitListI.end(); iterI != iterIEnd; ++iterI)
+    // Loop over hits in cluster I
+    for (OrderedCaloHitList::const_iterator iterI = orderedCaloHitListI.begin(), iterIEnd = orderedCaloHitListI.end(); iterI != iterIEnd; ++iterI)
     {
-        const CartesianVector &positionVectorI((*iterI)->GetPositionVector());
-
-        for (CaloHitList::const_iterator iterJ = caloHitListJ.begin(), iterIEnd = caloHitListJ.end(); iterJ != iterIEnd; ++iterJ)
+        for (CaloHitList::const_iterator hitIterI = iterI->second->begin(), hitIterIEnd = iterI->second->end(); hitIterI != hitIterIEnd; ++hitIterI)
         {
-            const float distance((positionVectorI - (*iterJ)->GetPositionVector()).GetMagnitude());
+            const CartesianVector &positionVectorI((*hitIterI)->GetPositionVector());
 
-            if (distance < minDistance)
+            // For each hit in cluster I, find closest distance to a hit in cluster J
+            for (OrderedCaloHitList::const_iterator iterJ = orderedCaloHitListJ.begin(), iterJEnd = orderedCaloHitListJ.end(); iterJ != iterJEnd; ++iterJ)
             {
-                minDistance = distance;
+                for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
+                {
+                    const float distanceSquared((positionVectorI - (*hitIterJ)->GetPositionVector()).GetMagnitudeSquared());
+
+                    if (distanceSquared < minDistanceSquared)
+                        minDistanceSquared = distanceSquared;
+                }
             }
         }
     }
 
-    return minDistance;
+    return std::sqrt(minDistanceSquared);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -449,7 +454,7 @@ float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &cluste
     if (startLayer > endLayer)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-    float minDistance(std::numeric_limits<float>::max());
+    float minDistanceSquared(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (PseudoLayer iLayer = startLayer; iLayer <= endLayer; ++iLayer)
@@ -460,15 +465,15 @@ float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &cluste
             continue;
 
         const CartesianVector interceptDifference(pCluster->GetCentroid(iLayer) - clusterFitResult.GetIntercept());
-        const float distance(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitude());
+        const float distanceSquared(interceptDifference.GetCrossProduct(clusterFitResult.GetDirection()).GetMagnitudeSquared());
 
-        if (distance < minDistance)
+        if (distanceSquared < minDistanceSquared)
         {
-            minDistance = distance;
+            minDistanceSquared = distanceSquared;
         }
     }
 
-    return minDistance;
+    return std::sqrt(minDistanceSquared);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -480,7 +485,7 @@ StatusCode ClusterHelper::GetDistanceToClosestCentroid(const Cluster *const pClu
         return STATUS_CODE_NOT_FOUND;
 
     bool distanceFound(false);
-    float minDistance(std::numeric_limits<float>::max());
+    float minDistanceSquared(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
     const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
 
@@ -495,10 +500,11 @@ StatusCode ClusterHelper::GetDistanceToClosestCentroid(const Cluster *const pClu
 
             const CartesianVector centroidJ(pClusterJ->GetCentroid(iterJ->first));
 
-            const float distance((centroidI - centroidJ).GetMagnitude());
-            if (distance < minDistance)
+            const float distanceSquared((centroidI - centroidJ).GetMagnitudeSquared());
+
+            if (distanceSquared < minDistanceSquared)
             {
-                minDistance = distance;
+                minDistanceSquared = distanceSquared;
                 distanceFound = true;
             }
         }
@@ -507,7 +513,7 @@ StatusCode ClusterHelper::GetDistanceToClosestCentroid(const Cluster *const pClu
     if (!distanceFound)
         return STATUS_CODE_NOT_FOUND;
 
-    centroidDistance = minDistance;
+    centroidDistance = std::sqrt(minDistanceSquared);
     return STATUS_CODE_SUCCESS;
 }
 
@@ -520,7 +526,7 @@ StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClu
         return STATUS_CODE_NOT_FOUND;
 
     bool distanceFound(false);
-    float minDistance(std::numeric_limits<float>::max());
+    float minDistanceSquared(std::numeric_limits<float>::max());
     const OrderedCaloHitList &orderedCaloHitListI(pClusterI->GetOrderedCaloHitList());
     const OrderedCaloHitList &orderedCaloHitListJ(pClusterJ->GetOrderedCaloHitList());
 
@@ -535,10 +541,11 @@ StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClu
         const CartesianVector centroidI(pClusterI->GetCentroid(pseudoLayer));
         const CartesianVector centroidJ(pClusterJ->GetCentroid(pseudoLayer));
 
-        const float distance((centroidI - centroidJ).GetMagnitude());
-        if (distance < minDistance)
+        const float distanceSquared((centroidI - centroidJ).GetMagnitudeSquared());
+
+        if (distanceSquared < minDistanceSquared)
         {
-            minDistance = distance;
+            minDistanceSquared = distanceSquared;
             distanceFound = true;
         }
     }
@@ -546,7 +553,7 @@ StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClu
     if (!distanceFound)
         return STATUS_CODE_NOT_FOUND;
 
-    intraLayerDistance = minDistance;
+    intraLayerDistance = std::sqrt(minDistanceSquared);
     return STATUS_CODE_SUCCESS;
 }
 
@@ -599,7 +606,7 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
     const CartesianVector trackDirection(trackState.GetMomentum().GetUnitVector());
 
     bool distanceFound(false);
-    float minDistance(std::numeric_limits<float>::max());
+    float minDistanceSquared(std::numeric_limits<float>::max());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
@@ -614,11 +621,11 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
             if (std::fabs(parallelDistance) > parallelDistanceCut)
                 continue;
 
-            const float perpendicularDistance((trackDirection.GetCrossProduct(positionDifference)).GetMagnitude());
+            const float perpendicularDistanceSquared((trackDirection.GetCrossProduct(positionDifference)).GetMagnitudeSquared());
 
-            if (perpendicularDistance < minDistance)
+            if (perpendicularDistanceSquared < minDistanceSquared)
             {
-                minDistance = perpendicularDistance;
+                minDistanceSquared = perpendicularDistanceSquared;
                 distanceFound = true;
             }
         }
@@ -627,7 +634,7 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
     if (!distanceFound)
         return STATUS_CODE_NOT_FOUND;
 
-    trackClusterDistance = minDistance;
+    trackClusterDistance = std::sqrt(minDistanceSquared);
     return STATUS_CODE_SUCCESS;
 }
 

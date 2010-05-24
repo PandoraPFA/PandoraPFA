@@ -8,7 +8,9 @@
 #ifndef CARTESIAN_VECTOR_H
 #define CARTESIAN_VECTOR_H 1
 
-#include <iostream>
+#include "StatusCodes.h"
+
+#include <cmath>
 
 namespace pandora
 {
@@ -116,6 +118,15 @@ public:
     CartesianVector GetCrossProduct(const CartesianVector &rhs) const;
 
     /**
+     *  @brief  Get the cosine of the opening angle of the cartesian vector with respect to a second cartesian vector
+     * 
+     *  @param  rhs the second cartesian vector
+     * 
+     *  @return The cosine of the opening angle
+     */
+    float GetCosOpeningAngle(const CartesianVector &rhs) const;
+
+    /**
      *  @brief  Get the opening angle of the cartesian vector with respect to a second cartesian vector
      * 
      *  @param  rhs the second cartesian vector
@@ -210,6 +221,33 @@ std::ostream &operator<<(std::ostream & stream, const CartesianVector& cartesian
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline CartesianVector::CartesianVector() :
+    m_isInitialized(false)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CartesianVector::CartesianVector(float x, float y, float z) :
+    m_x(x),
+    m_y(y),
+    m_z(z),
+    m_isInitialized(true)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CartesianVector::CartesianVector(const CartesianVector &rhs) :
+    m_x(rhs.GetX()),
+    m_y(rhs.GetY()),
+    m_z(rhs.GetZ()),
+    m_isInitialized(true)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline bool CartesianVector::IsInitialized() const
 {
     return m_isInitialized;
@@ -220,6 +258,17 @@ inline bool CartesianVector::IsInitialized() const
 inline void CartesianVector::Reset()
 {
     m_isInitialized = false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void CartesianVector::SetValues(float x, float y, float z)
+{
+    m_x = x;
+    m_y = y;
+    m_z = z;
+
+    m_isInitialized = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -241,6 +290,119 @@ inline float CartesianVector::GetY() const
 inline float CartesianVector::GetZ() const
 {
     return m_z;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CartesianVector::GetMagnitude() const
+{
+    return std::sqrt(this->GetMagnitudeSquared());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CartesianVector::GetMagnitudeSquared() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return ((m_x * m_x) + (m_y * m_y) + (m_z * m_z));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CartesianVector::GetDotProduct(const CartesianVector &rhs) const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return ((m_x * rhs.GetX()) + (m_y * rhs.GetY()) + (m_z * rhs.GetZ()));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CartesianVector CartesianVector::GetCrossProduct(const CartesianVector &rhs) const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return CartesianVector( (m_y * rhs.GetZ()) - (rhs.GetY() * m_z),
+                            (m_z * rhs.GetX()) - (rhs.GetZ() * m_x),
+                            (m_x * rhs.GetY()) - (rhs.GetX() * m_y));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CartesianVector::GetOpeningAngle(const CartesianVector &rhs) const
+{
+    return std::acos(this->GetCosOpeningAngle(rhs));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CartesianVector::operator=(const CartesianVector &rhs)
+{
+    this->SetValues(rhs.GetX(), rhs.GetY(), rhs.GetZ());
+
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CartesianVector::operator+=(const CartesianVector &rhs)
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    this->SetValues(m_x + rhs.GetX(), m_y + rhs.GetY(), m_z + rhs.GetZ());
+
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CartesianVector::operator-=(const CartesianVector &rhs)
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    this->SetValues(m_x - rhs.GetX(), m_y - rhs.GetY(), m_z - rhs.GetZ());
+
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CartesianVector::operator*=(const double scalar)
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    this->SetValues(static_cast<float>(m_x * scalar), static_cast<float>(m_y * scalar), static_cast<float>(m_z * scalar));
+
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CartesianVector operator+(const CartesianVector &lhs, const CartesianVector &rhs)
+{
+    return CartesianVector(lhs.GetX() + rhs.GetX(), lhs.GetY() + rhs.GetY(), lhs.GetZ() + rhs.GetZ());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs)
+{
+    return CartesianVector(lhs.GetX() - rhs.GetX(), lhs.GetY() - rhs.GetY(), lhs.GetZ() - rhs.GetZ());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CartesianVector operator*(const CartesianVector &lhs, const double scalar)
+{
+    return CartesianVector(static_cast<float>(lhs.GetX() * scalar), static_cast<float>(lhs.GetY() * scalar), static_cast<float>(lhs.GetZ() * scalar));
 }
 
 } // namespace pandora

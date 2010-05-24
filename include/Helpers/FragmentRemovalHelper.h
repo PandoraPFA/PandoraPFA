@@ -227,6 +227,15 @@ public:
 
 private:
     /**
+     *  @brief  Compare hits in daughter cluster with those in parent cluster to calculate minimum hit separation
+     *          and close hit fractions. Calculate these properties in a single loop, for efficiency.
+     * 
+     *  @param  pDaughterCluster address of the daughter candidate cluster
+     *  @param  pParentCluster address of the parent candidate cluster
+     */
+    void HitDistanceComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster);
+
+    /**
      *  @brief  Compare daughter cluster with helix fits to parent associated tracks
      * 
      *  @param  pDaughterCluster address of the daughter candidate cluster
@@ -243,9 +252,9 @@ private:
     unsigned int    m_nContactLayers;               ///< The number of contact layers for parent and daughter clusters two clusters
     float           m_contactFraction;              ///< The ratio of the number of contact layers to the number of overlap layers
 
-    float           m_distanceToClosestHit;         ///< Distance between closest hits in parent and daughter clusters, units mm
     float           m_closeHitFraction1;            ///< Fraction of daughter hits that lie within sepcified distance 1 of parent cluster
     float           m_closeHitFraction2;            ///< Fraction of daughter hits that lie within sepcified distance 2 of parent cluster
+    float           m_distanceToClosestHit;         ///< Distance between closest hits in parent and daughter clusters, units mm
 
     float           m_coneFraction1;                ///< Fraction of daughter hits that lie within specified cone 1 along parent direction
     float           m_coneFraction2;                ///< Fraction of daughter hits that lie within specified cone 2 along parent direction

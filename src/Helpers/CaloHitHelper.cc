@@ -113,6 +113,7 @@ StatusCode CaloHitHelper::RemoveUnavailableCaloHits(OrderedCaloHitList &orderedC
 float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList)
 {
     static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
+    static const float caloHitMaxSeparationSquared(caloHitMaxSeparation * caloHitMaxSeparation);
     static const float densityWeightPower(static_cast<float>(PandoraSettings::GetInstance()->GetDensityWeightPower()));
 
     float densityWeightContribution = 0.;
@@ -127,7 +128,7 @@ float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit,
         const CartesianVector positionDifference(positionVector - (*iter)->GetPositionVector());
         const CartesianVector crossProduct(positionVector.GetCrossProduct(positionDifference));
 
-        if (positionDifference.GetMagnitude() > caloHitMaxSeparation)
+        if (positionDifference.GetMagnitudeSquared() > caloHitMaxSeparationSquared)
             continue;
 
         const float rN(pow(crossProduct.GetMagnitude() / positionMagnitude, densityWeightPower));

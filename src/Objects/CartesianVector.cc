@@ -8,113 +8,30 @@
 
 #include "Objects/CartesianVector.h"
 
-#include "StatusCodes.h"
-
-#include <cmath>
+#include <iostream>
 
 namespace pandora
 {
 
-CartesianVector::CartesianVector() :
-    m_isInitialized(false)
+float CartesianVector::GetCosOpeningAngle(const CartesianVector &rhs) const
 {
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector::CartesianVector(float x, float y, float z) :
-    m_x(x),
-    m_y(y),
-    m_z(z),
-    m_isInitialized(true)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector::CartesianVector(const CartesianVector &rhs) :
-    m_x(rhs.GetX()),
-    m_y(rhs.GetY()),
-    m_z(rhs.GetZ()),
-    m_isInitialized(true)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void CartesianVector::SetValues(float x, float y, float z)
-{
-    m_x = x;
-    m_y = y;
-    m_z = z;
-
-    m_isInitialized = true;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float CartesianVector::GetMagnitude() const
-{
-    return std::sqrt(this->GetMagnitudeSquared());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float CartesianVector::GetMagnitudeSquared() const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return ((m_x * m_x) + (m_y * m_y) + (m_z * m_z));
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float CartesianVector::GetDotProduct(const CartesianVector &rhs) const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return ((m_x * rhs.GetX()) + (m_y * rhs.GetY()) + (m_z * rhs.GetZ()));
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector CartesianVector::GetCrossProduct(const CartesianVector &rhs) const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return CartesianVector( (m_y * rhs.GetZ()) - (rhs.GetY() * m_z),
-                            (m_z * rhs.GetX()) - (rhs.GetZ() * m_x),
-                            (m_x * rhs.GetY()) - (rhs.GetX() * m_y));
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float CartesianVector::GetOpeningAngle(const CartesianVector &rhs) const
-{
-    float magnitudesSquared = this->GetMagnitudeSquared() * rhs.GetMagnitudeSquared();
+    const float magnitudesSquared(this->GetMagnitudeSquared() * rhs.GetMagnitudeSquared());
 
     if (magnitudesSquared <= 0)
-    {
-        return 0.;
-    }
-    else
-    {
-        float cosTheta = this->GetDotProduct(rhs) / std::sqrt(magnitudesSquared);
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-        if (cosTheta > 1.)
-        {
-            cosTheta = 1.;
-        }
-        else if (cosTheta < -1.)
-        {
-            cosTheta = -1.;
-        }
+    float cosTheta = this->GetDotProduct(rhs) / std::sqrt(magnitudesSquared);
 
-        return acos(cosTheta);
+    if (cosTheta > 1.)
+    {
+        cosTheta = 1.;
     }
+    else if (cosTheta < -1.)
+    {
+        cosTheta = -1.;
+    }
+
+    return cosTheta;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,72 +67,6 @@ CartesianVector CartesianVector::GetUnitVector() const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-
-bool CartesianVector::operator=(const CartesianVector &rhs)
-{
-    this->SetValues(rhs.GetX(), rhs.GetY(), rhs.GetZ());
-
-    return m_isInitialized;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool CartesianVector::operator+=(const CartesianVector &rhs)
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    this->SetValues(m_x + rhs.GetX(), m_y + rhs.GetY(), m_z + rhs.GetZ());
-
-    return m_isInitialized;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool CartesianVector::operator-=(const CartesianVector &rhs)
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    this->SetValues(m_x - rhs.GetX(), m_y - rhs.GetY(), m_z - rhs.GetZ());
-
-    return m_isInitialized;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool CartesianVector::operator*=(const double scalar)
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    this->SetValues(static_cast<float>(m_x * scalar), static_cast<float>(m_y * scalar), static_cast<float>(m_z * scalar));
-
-    return m_isInitialized;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector operator+(const CartesianVector &lhs, const CartesianVector &rhs)
-{
-    return CartesianVector(lhs.GetX() + rhs.GetX(), lhs.GetY() + rhs.GetY(), lhs.GetZ() + rhs.GetZ());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector operator-(const CartesianVector &lhs, const CartesianVector &rhs)
-{
-    return CartesianVector(lhs.GetX() - rhs.GetX(), lhs.GetY() - rhs.GetY(), lhs.GetZ() - rhs.GetZ());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-CartesianVector operator*(const CartesianVector &lhs, const double scalar)
-{
-    return CartesianVector(static_cast<float>(lhs.GetX() * scalar), static_cast<float>(lhs.GetY() * scalar), static_cast<float>(lhs.GetZ() * scalar));
-}
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 std::ostream &operator<<(std::ostream & stream, const CartesianVector& cartesianVector)
