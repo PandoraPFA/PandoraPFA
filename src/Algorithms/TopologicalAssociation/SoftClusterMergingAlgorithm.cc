@@ -52,6 +52,8 @@ StatusCode SoftClusterMergingAlgorithm::Run()
         PseudoLayer bestParentInnerLayer(0);
         float closestDistance(std::numeric_limits<float>::max());
 
+        const CartesianVector &daughterInitialDirection(pDaughterCluster->GetInitialDirection());
+
         // Find best candidate parent cluster: that with closest distance between a pair of hits in the daughter and parent
         for (ClusterList::const_iterator iterJ = combinedClusterList.begin(); iterJ != combinedClusterList.end(); ++iterJ)
         {
@@ -64,6 +66,12 @@ StatusCode SoftClusterMergingAlgorithm::Run()
                 continue;
 
             if (pParentCluster->GetHadronicEnergy() < m_minClusterHadEnergy)
+                continue;
+
+            // Apply simple preselection using cosine of opening angle between the clusters
+            const float cosOpeningAngle(pParentCluster->GetInitialDirection().GetCosOpeningAngle(daughterInitialDirection));
+
+            if (cosOpeningAngle < m_minCosOpeningAngle)
                 continue;
 
             const float distance(ClusterHelper::GetDistanceToClosestHit(pParentCluster, pDaughterCluster));
@@ -194,6 +202,10 @@ StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     m_minClusterEMEnergy = 0.025f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterEMEnergy", m_minClusterEMEnergy));
+
+    m_minCosOpeningAngle = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCosOpeningAngle", m_minCosOpeningAngle));
 
     m_closestDistanceCut0 = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

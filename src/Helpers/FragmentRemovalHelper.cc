@@ -331,7 +331,7 @@ void ClusterContact::HitDistanceComparison(Cluster *const pDaughterCluster, Clus
     static const float closeHitDistance1Squared(closeHitDistance1 * closeHitDistance1);
     static const float closeHitDistance2Squared(closeHitDistance2 * closeHitDistance2);
 
-    // Apply simple preselection to cosine of opening angle between the clusters
+    // Apply simple preselection using cosine of opening angle between the clusters
     const float cosOpeningAngle(pDaughterCluster->GetInitialDirection().GetCosOpeningAngle(pParentCluster->GetInitialDirection()));
 
     if (cosOpeningAngle < minCosOpeningAngle)

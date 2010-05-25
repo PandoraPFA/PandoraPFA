@@ -59,6 +59,8 @@ private:
 
     float           m_minClusterHadEnergy;                  ///< The minimum hadronic energy in an "acceptable" cluster
     float           m_minClusterEMEnergy;                   ///< The minimum electromagnetic energy in an "acceptable" cluster
+
+    float           m_minCosOpeningAngle;                   ///< Min cosine of angle between cluster directions to consider merging clusters
     unsigned int    m_minHitsInCluster;                     ///< The minimum number of hits in an "acceptable" cluster
 
     float           m_closestDistanceCut0;                  ///< Single cut: max distance at which can automatically merge parent/daughter

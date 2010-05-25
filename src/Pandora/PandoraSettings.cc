@@ -144,7 +144,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ContactCloseHitDistance2", m_contactCloseHitDistance2));
 
-        m_contactMinCosOpeningAngle = 0.f;
+        m_contactMinCosOpeningAngle = 0.5f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "ContactMinCosOpeningAngle", m_contactMinCosOpeningAngle));
 

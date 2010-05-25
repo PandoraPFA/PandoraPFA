@@ -138,20 +138,28 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
 float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluster, const CaloHit *const pCaloHit) const
 {
-    const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
     float minDistanceSquared(std::numeric_limits<float>::max());
+    const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
 
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    // Apply simple preselection using cosine of opening angle between the hit and cluster directions
+    const float cosOpeningAngle(hitPosition.GetCosOpeningAngle(pCluster->GetInitialDirection()));
+
+    if (cosOpeningAngle >= m_minCosOpeningAngle)
     {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            const CartesianVector positionDifference(hitPosition - (*hitIter)->GetPositionVector());
-            const float distanceSquared(positionDifference.GetMagnitudeSquared());
+        const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-            if (distanceSquared < minDistanceSquared)
-                minDistanceSquared = distanceSquared;
+        for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+        {
+            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            {
+                const CartesianVector positionDifference(hitPosition - (*hitIter)->GetPositionVector());
+                const float distanceSquared(positionDifference.GetMagnitudeSquared());
+
+                if (distanceSquared < minDistanceSquared)
+                {
+                    minDistanceSquared = distanceSquared;
+                }
+            }
         }
     }
 
@@ -179,6 +187,10 @@ StatusCode IsolatedHitMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     m_maxRecombinationDistance = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxRecombinationDistance", m_maxRecombinationDistance));
+
+    m_minCosOpeningAngle = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCosOpeningAngle", m_minCosOpeningAngle));
 
     return STATUS_CODE_SUCCESS;
 }
