@@ -55,7 +55,6 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
         if ((orderedCaloHitList.end() == iter) || (iter->second->empty()))
         {
             nRadiationLengths += nRadiationLengthsInLastLayer;
-            profileEndBin = std::min(static_cast<unsigned int>(nRadiationLengths / m_showerProfileBinWidth), m_showerProfileNBins);
             continue;
         }
 
@@ -84,7 +83,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
 
         // Finally, create the profile
         const float endPosition(nRadiationLengths / m_showerProfileBinWidth);
-        const unsigned int endBin(std::min(static_cast<unsigned int>(endPosition), m_showerProfileNBins));
+        const unsigned int endBin(std::min(static_cast<unsigned int>(endPosition), m_showerProfileNBins - 1));
 
         const float deltaPosition(nRadiationLengthsInLayer / m_showerProfileBinWidth);
 
@@ -107,9 +106,9 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
 
             pProfile[iBin] += energyInLayer * (delta / deltaPosition);
         }
-
-        profileEndBin = endBin;
     }
+
+    profileEndBin = std::min(static_cast<unsigned int>(nRadiationLengths / m_showerProfileBinWidth), m_showerProfileNBins);
 
     if (eCalEnergy <= 0.f)
         return STATUS_CODE_FAILURE;
@@ -433,6 +432,9 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "ShowerProfileNBins", m_showerProfileNBins));
+
+    if (0 == m_showerProfileNBins)
+        return STATUS_CODE_INVALID_PARAMETER;
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "ShowerProfileMinCosAngle", m_showerProfileMinCosAngle));
