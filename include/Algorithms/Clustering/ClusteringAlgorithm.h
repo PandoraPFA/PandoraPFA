@@ -193,7 +193,6 @@ private:
 
     unsigned int    m_clusterSeedStrategy;          ///< Flag determining if and how clusters should be seeded with tracks
     float           m_trackSeedMaxCosTheta;         ///< Cut off for seeding clusters with tracks (unless all tracks requested)
-    float           m_minCosOpeningAngle;           ///< Min cosine of angle between hit/cluster initial directions to consider adding hit
 
     bool            m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm
     bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm

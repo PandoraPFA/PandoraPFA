@@ -318,12 +318,6 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(PseudoLayer pseudoLayer,
 StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
     float &genericDistance) const
 {
-    // Apply simple preselection using cosine of opening angle between the hit and cluster directions
-    const float cosOpeningAngle(pCaloHit->GetPositionVector().GetCosOpeningAngle(pCluster->GetInitialDirection()));
-
-    if (cosOpeningAngle < m_minCosOpeningAngle)
-        return STATUS_CODE_UNCHANGED;
-
     // Cone approach measurement to track projections
     if ((searchLayer == TRACK_PROJECTION_LAYER) && (pCluster->IsTrackSeeded()))
     {
@@ -608,10 +602,6 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_trackSeedMaxCosTheta = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackSeedMaxCosTheta", m_trackSeedMaxCosTheta));
-
-    m_minCosOpeningAngle = 0.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinCosOpeningAngle", m_minCosOpeningAngle));
 
     // High level clustering parameters
     CustomHitOrder::m_hitSortingStrategy = 0;
