@@ -114,7 +114,7 @@ float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit,
 {
     static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
     static const float caloHitMaxSeparationSquared(caloHitMaxSeparation * caloHitMaxSeparation);
-    static const float densityWeightPower(static_cast<float>(PandoraSettings::GetInstance()->GetDensityWeightPower()));
+    static const float densityWeightPower(PandoraSettings::GetInstance()->GetDensityWeightPower());
 
     float densityWeightContribution = 0.;
     const CartesianVector &positionVector(pCaloHit->GetPositionVector());
@@ -126,12 +126,17 @@ float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit,
             continue;
 
         const CartesianVector positionDifference(positionVector - (*iter)->GetPositionVector());
-        const CartesianVector crossProduct(positionVector.GetCrossProduct(positionDifference));
 
         if (positionDifference.GetMagnitudeSquared() > caloHitMaxSeparationSquared)
             continue;
 
-        const float rN(pow(crossProduct.GetMagnitude() / positionMagnitude, densityWeightPower));
+        const CartesianVector crossProduct(positionVector.GetCrossProduct(positionDifference));
+
+        const float r(crossProduct.GetMagnitude() / positionMagnitude);
+        float rN(1.);
+
+        for (unsigned int i = 0; i < densityWeightPower; ++i)
+            rN *= r;
 
         if (0 == rN)
             throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -164,8 +169,10 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
 
         if(isHitInBarrelRegion)
         {
+            const float dX(fabs(positionDifference.GetX()));
+            const float dY(fabs(positionDifference.GetY()));
             const float dZ(fabs(positionDifference.GetZ()));
-            const float dPhi(std::sqrt(pow(positionDifference.GetX(), 2) + pow(positionDifference.GetY(), 2)));
+            const float dPhi(std::sqrt(dX * dX + dY * dY));
 
             if( (dZ < (1.5 * pCaloHit->GetCellSizeU())) && (dPhi < (1.5 * pCaloHit->GetCellSizeV())) )
                 surroundingEnergyContribution += (*iter)->GetHadronicEnergy();
@@ -238,8 +245,10 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
 
         if(isHitInBarrelRegion)
         {
+            const float dX(fabs(positionDifference.GetX()));
+            const float dY(fabs(positionDifference.GetY()));
             const float dZ(fabs(positionDifference.GetZ()));
-            const float dPhi(std::sqrt(pow(positionDifference.GetX(), 2) + pow(positionDifference.GetY(), 2)));
+            const float dPhi(std::sqrt(dX * dX + dY * dY));
 
             if( (dZ < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeU())) && (dPhi < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeV())) )
                 ++nearbyHitsFound;
@@ -516,8 +525,11 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
 
             const CartesianVector &positionVector(pCaloHit->GetPositionVector());
 
+            const float x(positionVector.GetX());
+            const float y(positionVector.GetY());
+
             const float angularCorrection( (BARREL == pCaloHit->GetDetectorRegion()) ?
-                positionVector.GetMagnitude() / std::sqrt(pow(positionVector.GetX(), 2) + pow(positionVector.GetY(), 2)) :
+                positionVector.GetMagnitude() / std::sqrt(x * x + y * y) :
                 positionVector.GetMagnitude() / std::fabs(positionVector.GetZ()) );
 
             if ((pCaloHit->GetMipEquivalentEnergy() <= (mipLikeMipCut * angularCorrection) || pCaloHit->IsDigital()) &&

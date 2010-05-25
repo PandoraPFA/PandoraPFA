@@ -369,8 +369,11 @@ StatusCode Helix::GetDistanceToPoint(const CartesianVector &point, CartesianVect
     const float dPhi(TWO_PI * (static_cast<float>(nCircles)) + phi - phi0);
     const float zOnHelix(m_referencePoint.GetZ() - m_charge * m_radius * m_tanLambda * dPhi);
 
+    const float distX(std::fabs(m_xCentre - point.GetX()));
+    const float distY(std::fabs(m_yCentre - point.GetY()));
     const float distZ(std::fabs(zOnHelix - point.GetZ()));
-    float distXY(std::sqrt(std::pow(m_xCentre - point.GetX(), 2) + std::pow(m_yCentre - point.GetY(), 2)));
+
+    float distXY(std::sqrt(distX * distX + distY * distY));
     distXY = std::fabs(distXY - m_radius);
 
     distance.SetValues(distXY, distZ, std::sqrt(distXY * distXY + distZ * distZ));

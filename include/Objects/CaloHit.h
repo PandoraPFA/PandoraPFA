@@ -205,13 +205,6 @@ public:
      */
      const void *GetParentCaloHitAddress() const;
 
-    /**
-     *  @brief  Set the isolated hit flag
-     * 
-     *  @param  isolatedFlag the isolated hit flag
-     */
-    void SetIsolatedFlag(bool isolatedFlag);
-
 private:
     /**
      *  @brief  Constructor
@@ -245,6 +238,13 @@ private:
      *  @param  surroundingEnergy the surrounding energy contribution
      */
     void AddSurroundingEnergy(float surroundingEnergy);
+
+    /**
+     *  @brief  Set the isolated hit flag
+     * 
+     *  @param  isolatedFlag the isolated hit flag
+     */
+    void SetIsolatedFlag(bool isolatedFlag);
 
     /**
      *  @brief  Set the possible mip flag
