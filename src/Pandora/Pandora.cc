@@ -68,8 +68,6 @@ Pandora::~Pandora()
 
 StatusCode Pandora::ProcessEvent()
 {
-    std::cout << "Pandora process event" << std::endl;
-
     // Prepare event
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->PrepareMCParticles());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->PrepareCaloHits());

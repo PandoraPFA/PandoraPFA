@@ -36,6 +36,13 @@ public:
     bool IsMonitoringEnabled() const;
 
     /**
+     *  @brief  Whether to display algorithm information during processing
+     * 
+     *  @return boolean
+     */
+    bool ShouldDisplayAlgorithmInfo() const;
+
+    /**
      *  @brief  Get the hadronic energy resolution as a fraction, X, such that sigmaE = ( X * E / sqrt(E) )
      * 
      *  @return The hadronic energy resolution
@@ -311,6 +318,7 @@ private:
     static bool     m_instanceFlag;                         ///< The pandora settings instance flag
 
     bool            m_isMonitoringEnabled;                  ///< Whether monitoring is enabled
+    bool            m_shouldDisplayAlgorithmInfo;           ///< Whether to display algorithm information during processing
 
     float           m_hadronicEnergyResolution;             ///< Hadronic energy resolution, X, such that sigmaE = ( X * E / sqrt(E) )
 
@@ -369,6 +377,13 @@ private:
 inline bool PandoraSettings::IsMonitoringEnabled() const
 {
     return m_isMonitoringEnabled;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool PandoraSettings::ShouldDisplayAlgorithmInfo() const
+{
+    return m_shouldDisplayAlgorithmInfo;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

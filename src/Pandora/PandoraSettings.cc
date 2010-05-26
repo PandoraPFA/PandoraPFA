@@ -64,6 +64,10 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "IsMonitoringEnabled", m_isMonitoringEnabled));
 
+        m_shouldDisplayAlgorithmInfo = false;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ShouldDisplayAlgorithmInfo", m_shouldDisplayAlgorithmInfo));
+
         m_hadronicEnergyResolution = 0.6f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "HadronicEnergyResolution", m_hadronicEnergyResolution));

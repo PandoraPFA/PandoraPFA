@@ -113,10 +113,16 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 
     try
     {
-        for (unsigned int i = 1; i < m_pPandora->m_pCaloHitManager->m_algorithmInfoMap.size(); ++i)
-            std::cout << "----";
+        static const bool shouldDisplayAlgorithmInfo(PandoraSettings::GetInstance()->ShouldDisplayAlgorithmInfo());
 
-        std::cout << "> Running Algorithm: " << iter->first << ", " << iter->second->GetAlgorithmType() << std::endl;
+        if (shouldDisplayAlgorithmInfo)
+        {
+            for (unsigned int i = 1; i < m_pPandora->m_pCaloHitManager->m_algorithmInfoMap.size(); ++i)
+                std::cout << "----";
+
+            std::cout << "> Running Algorithm: " << iter->first << ", " << iter->second->GetAlgorithmType() << std::endl;
+        }
+
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, iter->second->Run());
     }
     catch (StatusCodeException &statusCodeException)
