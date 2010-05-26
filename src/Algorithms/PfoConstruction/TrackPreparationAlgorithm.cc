@@ -67,17 +67,14 @@ StatusCode TrackPreparationAlgorithm::CreatePfoTrackList(const TrackList &inputT
 
             if (this->HasAssociatedClusters(pTrack))
             {
-                if (!pfoTrackList.insert(pTrack).second)
-                    return STATUS_CODE_FAILURE;
-
+                pfoTrackList.insert(pTrack);
                 siblingTracks.insert(siblingTrackList.begin(), siblingTrackList.end());
             }
         }
         // Single parent track as pfo target
         else if (this->HasAssociatedClusters(pTrack))
         {
-            if (!pfoTrackList.insert(pTrack).second)
-                return STATUS_CODE_FAILURE;
+            pfoTrackList.insert(pTrack);
         }
     }
 

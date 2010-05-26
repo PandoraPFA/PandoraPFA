@@ -49,8 +49,7 @@ StatusCode PfoCreationAlgorithm::CreateTrackBasedPfos() const
 StatusCode PfoCreationAlgorithm::PopulateTrackBasedPfo(Track *const pTrack, PfoParameters &pfoParameters, const bool readSiblingInfo) const
 {
     // Add track to the pfo
-    if (!pfoParameters.m_trackList.insert(pTrack).second)
-        return STATUS_CODE_FAILURE;
+    pfoParameters.m_trackList.insert(pTrack);
 
     // Add any cluster associated with this track to the pfo
     Cluster *pAssociatedCluster = NULL;
@@ -60,8 +59,7 @@ StatusCode PfoCreationAlgorithm::PopulateTrackBasedPfo(Track *const pTrack, PfoP
         if (NULL == pAssociatedCluster)
             return STATUS_CODE_FAILURE;
 
-        if (!pfoParameters.m_clusterList.insert(pAssociatedCluster).second)
-            return STATUS_CODE_FAILURE;
+        pfoParameters.m_clusterList.insert(pAssociatedCluster);
     }
 
     // Consider any sibling tracks
