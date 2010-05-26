@@ -10,18 +10,14 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Pandora/PandoraInternal.h"
+
 /**
  *  @brief PerfectFragmentRemovalAlgorithm class
  */
 class PerfectFragmentRemovalAlgorithm : public pandora::Algorithm
 {
-private:
 public:
-
-
-    class pandora::MCParticle;
-
-
     /**
      *  @brief  Factory class for instantiating algorithm
      */
@@ -31,20 +27,21 @@ public:
         Algorithm *CreateAlgorithm() const;
     };
 
-
 private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    StatusCode FragmentRemoval( pandora::Cluster* pCluster, float& removedEnergy );
+    /**
+     *  @brief  FragmentRemoval
+     * 
+     *  @param  pCluster
+     *  @param  removedEnergy
+     */
+    StatusCode FragmentRemoval(pandora::Cluster *pCluster, float &removedEnergy) const;
 
-    typedef std::vector<std::string> STRINGVECTOR;
-
-    STRINGVECTOR    m_clusterListNames;                 ///< names of the clusterlists of which fragments should be removed
-
-    bool            m_debug;                            ///< turn on additional debugging output
+    pandora::StringVector   m_clusterListNames;             ///< names of the clusterlists of which fragments should be removed
+    bool                    m_debug;                        ///< turn on additional debugging output
 };
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

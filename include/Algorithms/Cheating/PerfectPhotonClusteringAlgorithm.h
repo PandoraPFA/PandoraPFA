@@ -15,13 +15,7 @@
  */
 class PerfectPhotonClusteringAlgorithm : public PerfectClusteringAlgorithm
 {
-private:
 public:
-
-
-    class pandora::MCParticle;
-
-
     /**
      *  @brief  Factory class for instantiating algorithm
      */
@@ -32,13 +26,8 @@ public:
     };
 
 protected:
-    virtual bool SelectCaloHitsOfMcParticleForClustering( const pandora::MCParticle* pMcParticle ) const;
-
-
-private:
-
+    virtual bool SelectMCParticlesForClustering(const pandora::MCParticle *pMCParticle) const;
 };
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

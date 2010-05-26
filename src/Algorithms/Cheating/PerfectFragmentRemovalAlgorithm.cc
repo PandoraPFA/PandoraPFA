@@ -8,42 +8,37 @@
 
 #include "Algorithms/Cheating/PerfectFragmentRemovalAlgorithm.h"
 
-#include "Api/PandoraContentApi.h"
-
-#include "Objects/CaloHit.h"
 #include "Objects/MCParticle.h"
 
 using namespace pandora;
 
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode PerfectFragmentRemovalAlgorithm::Run()
 {
-    ClusterList cleanedClusters;
+    float removedEnergy(0.f);
 
-    float removedEnergy = 0.f;
-
-    for( STRINGVECTOR::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
+    for (StringVector::const_iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end();
+        itClusterName != itClusterNameEnd; ++itClusterName)
     {
-        std::string& clusterName = (*itClusterName);
+        const std::string &clusterName(*itClusterName);
+
         const ClusterList* pClusterList = NULL;
-        if( STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, clusterName, pClusterList))
+
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, clusterName, pClusterList))
             continue;
 
-        for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
+        for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd;
+            ++itCluster )
         {
             Cluster* pCluster = (*itCluster);
 
             float removedCaloHitEnergy;
-            PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, FragmentRemoval( pCluster, removedCaloHitEnergy ) );
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemoval(pCluster, removedCaloHitEnergy));
 
             removedEnergy += removedCaloHitEnergy;
         }
     }
     
-    if( m_debug )
+    if (m_debug)
     {
         std::cout << "total removed Energy : " << removedEnergy << std::endl;
     }
@@ -53,128 +48,142 @@ StatusCode PerfectFragmentRemovalAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PerfectFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval(Cluster *pCluster, float &removedCaloHitEnergy) const
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
+    const OrderedCaloHitList &pOrderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    m_debug = false;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Debug", m_debug));
+    // Match calohitvectors and energy to their MCParticles
+    typedef std::map< const MCParticle*, std::pair<float, CaloHitVector*> > CaloHitsPerMCParticle;
+    CaloHitsPerMCParticle hitsPerMCParticle;
+    CaloHitsPerMCParticle::iterator itHitsPerMCParticle;
 
-    return STATUS_CODE_SUCCESS;
-}
-
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval( Cluster* pCluster, float& removedCaloHitEnergy ) 
-{
-    const OrderedCaloHitList& pOrderedCaloHitList = pCluster->GetOrderedCaloHitList();
-
-    // match calohitvectors and energy to their MCParticles
-    typedef std::map< const MCParticle*, std::pair<float, CaloHitVector*> > CALOHITSPERMCPARTICLE;
-    CALOHITSPERMCPARTICLE hitsPerMcParticle;
-    CALOHITSPERMCPARTICLE::iterator itHitsPerMcParticle;
-
-    for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
+    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
     {
-        // int pseudoLayer = itLyr->first;
-        CaloHitList::iterator itCaloHit    = itLyr->second->begin();
-        CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
+        CaloHitVector *pCurrentHits = NULL;
 
-        CaloHitVector* currentHits = NULL;
-        float energy = 0.f;
-        for( ; itCaloHit != itCaloHitEnd; ++itCaloHit )
+        for(CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            CaloHit* pCaloHit = (*itCaloHit);
+            CaloHit* pCaloHit = *hitIter;
+            float energy(0.f);
 
-            // fetch the MCParticle
-            const MCParticle* mc = NULL; 
-            pCaloHit->GetMCParticle( mc );
-//            if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
+            const MCParticle *pMCParticle = NULL; 
+            pCaloHit->GetMCParticle(pMCParticle);
 
+            // Some CalorimeterHits don't have a MCParticle (e.g. noise)
+            if (NULL == pMCParticle)
+                continue;
 
-            // add hit to calohitvector
-            itHitsPerMcParticle = hitsPerMcParticle.find( mc );
-            if( itHitsPerMcParticle == hitsPerMcParticle.end() )
+            // Add hit to calohitvector
+            itHitsPerMCParticle = hitsPerMCParticle.find(pMCParticle);
+
+            if (itHitsPerMCParticle == hitsPerMCParticle.end())
             {
-                // if there is no calohitvector for the MCParticle yet, create one
-                currentHits = new CaloHitVector();
-                hitsPerMcParticle.insert( std::make_pair( mc, std::make_pair(0.f, currentHits) ) );
+                // If there is no calohitvector for the MCParticle yet, create one
+                pCurrentHits = new CaloHitVector();
+                hitsPerMCParticle.insert(std::make_pair(pMCParticle, std::make_pair(0.f, pCurrentHits)));
             }
             else
             {
-                currentHits = itHitsPerMcParticle->second.second; // take the calohitvector corresponding to the MCParticle
-                energy = itHitsPerMcParticle->second.first;               // get the sum of energy of the CaloHits collected so far
+                // Take the CaloHitVector corresponding to the MCParticle
+                pCurrentHits = itHitsPerMCParticle->second.second; 
+
+                // Get the sum of energy of the CaloHits collected so far
+                energy = itHitsPerMCParticle->second.first;
             }
 
-            currentHits->push_back( pCaloHit ); // add the calohit
+            // Add the calohit
+            pCurrentHits->push_back(pCaloHit);
             energy += pCaloHit->GetElectromagneticEnergy();
-            itHitsPerMcParticle->second.first = energy;
+            itHitsPerMCParticle->second.first = energy;
         }
     }
 
-    // select the mcparticle which contributed most of the calohit-energy to the cluster
-    CALOHITSPERMCPARTICLE::iterator itHitsPerMcParticleMostEnergy = hitsPerMcParticle.begin();
-    CALOHITSPERMCPARTICLE::iterator itHits =                        hitsPerMcParticle.begin();
+    // Select the mc particle which contributed most of the calohit-energy to the cluster
+    CaloHitsPerMCParticle::const_iterator itHitsPerMCParticleMostEnergy = hitsPerMCParticle.begin();
+
+    CaloHitsPerMCParticle::const_iterator itHits = hitsPerMCParticle.begin();
+    CaloHitsPerMCParticle::const_iterator itHitsEnd = hitsPerMCParticle.end();
+
     ++itHits;
-    CALOHITSPERMCPARTICLE::iterator itHitsEnd =                     hitsPerMcParticle.end();
 
-    float removedEnergy  = 0.f;
+    float removedEnergy = 0.f;
 
-    for( ; itHits != itHitsEnd; ++itHits )
+    for(; itHits != itHitsEnd; ++itHits)
     {
-        float& mostEnergy    = itHitsPerMcParticleMostEnergy->second.first;
-        float& currentEnergy = itHits->second.first;
+        float mostEnergy = itHitsPerMCParticleMostEnergy->second.first;
+        float currentEnergy = itHits->second.first;
 
-        CaloHitVector* pCaloHitVectorToRemove = NULL;
+        CaloHitVector *pCaloHitVectorToRemove = NULL;
 
-        if( currentEnergy > mostEnergy )
-        { // remove the hits of the mcparticle which had be the one with the largest energy contribution
-            pCaloHitVectorToRemove = itHitsPerMcParticleMostEnergy->second.second;
-            itHitsPerMcParticleMostEnergy = itHits;
+        if (currentEnergy > mostEnergy)
+        {
+            // Remove the hits of the mc particle which had largest energy contribution
+            pCaloHitVectorToRemove = itHitsPerMCParticleMostEnergy->second.second;
+            itHitsPerMCParticleMostEnergy = itHits;
         }
         else
-        { // remove the hits of the mcpfo which has less energy contribution
+        {
+            // Remove the hits of the mcpfo which had lower energy contribution
             pCaloHitVectorToRemove = itHits->second.second;
         }
 
-        if( !pCaloHitVectorToRemove )
+        if (NULL == pCaloHitVectorToRemove)
             continue;
 
-        std::cout << "size to remove  : " << pCaloHitVectorToRemove->size() << std::endl;
-        std::cout << "size most energy: " << itHitsPerMcParticleMostEnergy->second.second->size() << std::endl;
+        if (m_debug)
+        {
+            std::cout << "size to remove  : " << pCaloHitVectorToRemove->size() << std::endl;
+            std::cout << "size most energy: " << itHitsPerMCParticleMostEnergy->second.second->size() << std::endl;
+        }
 
-        // remove the calorimeter hits
-        for( CaloHitVector::iterator itCaloHit = pCaloHitVectorToRemove->begin(), itCaloHitEnd = pCaloHitVectorToRemove->end(); itCaloHit != itCaloHitEnd; ++itCaloHit )
+        // Remove the calorimeter hits
+        for (CaloHitVector::const_iterator itCaloHit = pCaloHitVectorToRemove->begin(), itCaloHitEnd = pCaloHitVectorToRemove->end();
+            itCaloHit != itCaloHitEnd; ++itCaloHit)
         {
             CaloHit* pCaloHit = (*itCaloHit);
             removedEnergy += pCaloHit->GetElectromagneticEnergy();
-            PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCaloHitFromCluster(*this, pCluster, pCaloHit ));
+            PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCaloHitFromCluster(*this, pCluster, pCaloHit));
         }
     }
 
-    if( m_debug && removedEnergy>0.f )
-//     if( m_debug )
+    if (m_debug && (removedEnergy > 0.f))
     {
-        const MCParticle *pMcPfo = itHitsPerMcParticleMostEnergy->first;
-        CaloHitVector* pCaloHitVectorTo = itHitsPerMcParticleMostEnergy->second.second;
-        
-        float retainedEnergy = 0.f;
-        
-        for( CaloHitVector::iterator itCaloHit = pCaloHitVectorTo->begin(), itCaloHitEnd = pCaloHitVectorTo->end(); itCaloHit != itCaloHitEnd; ++itCaloHit )
+        const MCParticle *pMCPfo = itHitsPerMCParticleMostEnergy->first;
+        CaloHitVector *pCaloHitVector = itHitsPerMCParticleMostEnergy->second.second;
+
+        float retainedEnergy(0.f);
+
+        for (CaloHitVector::const_iterator itCaloHit = pCaloHitVector->begin(), itCaloHitEnd = pCaloHitVector->end(); itCaloHit != itCaloHitEnd;
+            ++itCaloHit)
         {
-            CaloHit* pCaloHit = (*itCaloHit);
-            retainedEnergy += pCaloHit->GetElectromagneticEnergy();
+            retainedEnergy += (*itCaloHit)->GetElectromagneticEnergy();
         }
 
-        std::cout << "cluster " << pCluster << ", largest MCPFO contribution from : " << pMcPfo << " with PDG code " << pMcPfo->GetParticleId() 
+        std::cout << "Cluster " << pCluster << ", largest MCPFO contribution from : " << pMCPfo << " with PDG code " << pMCPfo->GetParticleId() 
                   << " removed energy : " << removedEnergy << " retained energy : " << retainedEnergy << std::endl;
     }
 
-
     removedCaloHitEnergy = removedEnergy;
+
+    // Tidy up CaloHitVectors
+    for (CaloHitsPerMCParticle::const_iterator iter = hitsPerMCParticle.begin(), iterEnd = hitsPerMCParticle.end(); iter != iterEnd; ++iter)
+    {
+        delete iter->second.second;
+    }
 
     return STATUS_CODE_SUCCESS;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PerfectFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "ClusterListNames", m_clusterListNames));
+
+    m_debug = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Debug", m_debug));
+
+    return STATUS_CODE_SUCCESS;
+}

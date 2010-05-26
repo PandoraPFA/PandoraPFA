@@ -12,20 +12,13 @@
 
 using namespace pandora;
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool PerfectNeutralHadronClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( const MCParticle* pMcParticle ) const
+bool PerfectNeutralHadronClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle *pMCParticle) const
 {
-    #define K0L 130
-    #define K0S 310
-    #define NEUTRON 2112
+    static const int K0L(130);
+    static const int NEUTRON(2112);
 
+    if ((pMCParticle->GetParticleId() == K0L) || (pMCParticle->GetParticleId() == NEUTRON))
+        return true;
 
-    if( pMcParticle->GetParticleId() == K0L ||
-//        pMcParticle->GetParticleId() == K0S ||
-        pMcParticle->GetParticleId() == NEUTRON )
-	return true;
     return false;
 }
-

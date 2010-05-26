@@ -10,9 +10,6 @@
 
 #include "Algorithms/Algorithm.h"
 
-class pandora::Cluster;
-class pandora::CartesianVector;
-
 namespace pandora 
 {
 
@@ -54,12 +51,65 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    void       ComputeEnergyWeightedClusterPosition( pandora::Cluster* cluster, pandora::CartesianVector& energyWeightedClusterPosition );
+    /**
+     *  @brief  ComputeEnergyWeightedClusterPosition
+     * 
+     *  @param  pCluster
+     *  @param  energyWeightedClusterPosition
+     */
+    void ComputeEnergyWeightedClusterPosition(pandora::Cluster *pCluster, pandora::CartesianVector &energyWeightedClusterPosition) const;
 
-    void       ComputeFromCalorimeter         ( pandora::Cluster* cluster, float& energy, pandora::CartesianVector& momentum, float& mass, int& particleId, int& charge );
-    void       ComputeFromMc                  ( pandora::Cluster* cluster, float& energy, pandora::CartesianVector& momentum, float& mass, int& particleId, int& charge );
-    void       ComputeFromTracks              ( pandora::Cluster* cluster, float& energy, pandora::CartesianVector& momentum, float& mass, int& particleId, int& charge );
-    void       ComputeFromCalorimeterAndTracks( pandora::Cluster* cluster, float& energy, pandora::CartesianVector& momentum, float& mass, int& particleId, int& charge );
+    /**
+     *  @brief  ComputeFromCalorimeter
+     * 
+     *  @param  pCluster
+     *  @param  energy
+     *  @param  momentum
+     *  @param  mass
+     *  @param  particleId
+     *  @param  charge
+     */
+    void ComputeFromCalorimeter(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge) const;
+
+    /**
+     *  @brief  ComputeFromMC
+     * 
+     *  @param  pCluster
+     *  @param  energy
+     *  @param  momentum
+     *  @param  mass
+     *  @param  particleId
+     *  @param  charge
+     */
+    void ComputeFromMC(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge) const;
+
+    /**
+     *  @brief  ComputeFromTracks
+     * 
+     *  @param  pCluster
+     *  @param  energy
+     *  @param  momentum
+     *  @param  mass
+     *  @param  particleId
+     *  @param  charge
+     */
+    void ComputeFromTracks(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge) const;
+
+    /**
+     *  @brief  ComputeFromCalorimeterAndTracks
+     * 
+     *  @param  pCluster
+     *  @param  energy
+     *  @param  momentum
+     *  @param  mass
+     *  @param  particleId
+     *  @param  charge
+     */
+    void ComputeFromCalorimeterAndTracks(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge) const;
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_inputClusterListName;         ///< if a clusterlistname is given, take the clusters from there instead of running a clustering algorithm

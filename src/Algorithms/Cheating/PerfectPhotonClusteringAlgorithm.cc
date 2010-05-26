@@ -12,15 +12,12 @@
 
 using namespace pandora;
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool PerfectPhotonClusteringAlgorithm::SelectCaloHitsOfMcParticleForClustering( const MCParticle* pMcParticle ) const
+bool PerfectPhotonClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle *pMCParticle) const
 {
-    static const int PHOTON = 22;
+    static const int PHOTON(22);
 
-    if( pMcParticle->GetParticleId() == PHOTON )
-	return true;
+    if (pMCParticle->GetParticleId() == PHOTON)
+        return true;
+
     return false;
 }
-

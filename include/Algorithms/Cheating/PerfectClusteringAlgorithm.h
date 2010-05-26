@@ -15,13 +15,7 @@
  */
 class PerfectClusteringAlgorithm : public pandora::Algorithm
 {
-private:
 public:
-
-
-    class pandora::MCParticle;
-
-
     /**
      *  @brief  Factory class for instantiating algorithm
      */
@@ -32,21 +26,19 @@ public:
     };
 
 protected:
-    virtual bool SelectCaloHitsOfMcParticleForClustering( const pandora::MCParticle* pMcParticle ) const;
-
+    virtual bool SelectMCParticlesForClustering(const pandora::MCParticle *pMcParticle) const;
 
 private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    std::string     m_clusterListName;                  ///< if clusterListName is set, cluster-list are stored with this name
-    std::string     m_orderedCaloHitListName;           ///< if orderedCaloHitListName is set, the orderedCaloHitList containing the remaining hits are stored and set current
+    std::string         m_clusterListName;              ///< if clusterListName is set, cluster-list are stored with this name
+    std::string         m_orderedCaloHitListName;       ///< if orderedCaloHitListName is set, the orderedCaloHitList containing the remaining hits are stored and set current
 
-    pandora::IntVector m_particleIdList;                ///< list of particle ids of MCPFOs to be selected
+    pandora::IntVector  m_particleIdList;               ///< list of particle ids of MCPFOs to be selected
 
-    bool            m_debug;                            ///< turn on additional debugging output
+    bool                m_debug;                        ///< turn on additional debugging output
 };
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

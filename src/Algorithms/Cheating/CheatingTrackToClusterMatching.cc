@@ -8,176 +8,181 @@
 
 #include "Algorithms/Cheating/CheatingTrackToClusterMatching.h"
 
-#include "Api/PandoraContentApi.h"
-
-#include "Objects/CaloHit.h"
 #include "Objects/MCParticle.h"
-
-#include <sstream>
 
 using namespace pandora;
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode CheatingTrackToClusterMatching::Run()
 {
-    const TrackList *pTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
-
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList( *this, pClusterList ) );
 
-    // get the energy of the CaloHits classified by their creating MCParticle for each of the clusters
-    typedef std::map< const MCParticle*, float > EnergyPerMcParticle;
-    typedef std::map< Cluster *const, EnergyPerMcParticle > EnergyPerMcParticleInClusters;
+    // Consider each cluster in the list and identify mc particle sources
+    typedef std::map< const MCParticle*, float > EnergyPerMCParticle;
+    typedef std::map< Cluster *const, EnergyPerMCParticle > EnergyPerMCParticleInClusters;
 
-    EnergyPerMcParticleInClusters energyPerMcParticleInClusters;
+    EnergyPerMCParticleInClusters energyPerMCParticleInClusters;
 
-    for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
+    for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster)
     {
         Cluster *const pCluster = (*itCluster);
 
-        // add the new cluster to the map
-        std::pair<EnergyPerMcParticleInClusters::iterator,bool> pairMcInClusterBool = energyPerMcParticleInClusters.insert( EnergyPerMcParticleInClusters::value_type(pCluster, EnergyPerMcParticle()) );
-        if( !pairMcInClusterBool.second )
+        // Add cluster to the map
+        std::pair<EnergyPerMCParticleInClusters::iterator, bool> pairMCInClusterBool;
+        pairMCInClusterBool = energyPerMCParticleInClusters.insert(EnergyPerMCParticleInClusters::value_type(pCluster, EnergyPerMCParticle()));
+
+        if (!pairMCInClusterBool.second)
             return STATUS_CODE_FAILURE;
-        EnergyPerMcParticleInClusters::iterator itMcInCluster = pairMcInClusterBool.first;
 
+        EnergyPerMCParticle &energyPerMCParticle(pairMCInClusterBool.first->second);
 
-        const OrderedCaloHitList pOrderedCaloHitList = pCluster->GetOrderedCaloHitList();
-        for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
+        const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+        for (OrderedCaloHitList::const_iterator itLyr = orderedCaloHitList.begin(), itLyrEnd = orderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
         {
-            // int pseudoLayer = itLyr->first;
-            CaloHitList::const_iterator itCaloHit    = itLyr->second->begin();
-            CaloHitList::const_iterator itCaloHitEnd = itLyr->second->end();
-
-            for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
+            for(CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
             {
-                CaloHit* pCaloHit = (*itCaloHit);
-                
-                // get the energy of the hit
-                float energy = pCaloHit->GetElectromagneticEnergy(); // ??? option to take hadronic energy as instead?
+                CaloHit* pCaloHit = *hitIter;
 
-                // fetch the MCParticle
-                const MCParticle* mc = NULL; 
-                pCaloHit->GetMCParticle( mc );
-                if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
+                // TODO option to take hadronic energy as instead?
+                float energy = pCaloHit->GetElectromagneticEnergy();
 
-                EnergyPerMcParticle::iterator itEPerMcParticle = itMcInCluster->second.find( mc );
-                if( itEPerMcParticle == itMcInCluster->second.end() )
+                const MCParticle *pMCParticle = NULL; 
+                pCaloHit->GetMCParticle(pMCParticle);
+
+                // Some CalorimeterHits don't have a MCParticle (e.g. noise)
+                if (NULL == pMCParticle)
+                    continue;
+
+                EnergyPerMCParticle::iterator itEPerMCParticle = energyPerMCParticle.find(pMCParticle);
+
+                if (itEPerMCParticle == energyPerMCParticle.end())
                 {
-                    std::pair< EnergyPerMcParticle::iterator, bool > pairEPerMcParticle_bool = itMcInCluster->second.insert( EnergyPerMcParticle::value_type(mc, 0.f) );
-                    if( !pairEPerMcParticle_bool.second )
+                    std::pair< EnergyPerMCParticle::iterator, bool > pairEPerMCParticle_bool;
+                    pairEPerMCParticle_bool = energyPerMCParticle.insert(EnergyPerMCParticle::value_type(pMCParticle, 0.f));
+
+                    if (!pairEPerMCParticle_bool.second)
                         return STATUS_CODE_FAILURE;
-                    itEPerMcParticle = pairEPerMcParticle_bool.first;
+
+                    itEPerMCParticle = pairEPerMCParticle_bool.first;
                 }
-                
-                itEPerMcParticle->second += energy;
+
+                itEPerMCParticle->second += energy;
             }
         }
 
     }
 
 
-    // do the MCParticle to Cluster association
-    typedef std::map< const MCParticle*, Cluster *const > McParticleToCluster;
-    typedef std::map< const MCParticle*, float >          McParticleToEnergy;
-    
-    McParticleToCluster mcParticleToCluster;
-    McParticleToEnergy  mcParticleToEnergy;
+    // Make the MCParticle to Cluster associations
+    typedef std::map< const MCParticle*, Cluster *const > MCParticleToCluster;
+    typedef std::map< const MCParticle*, float > MCParticleToEnergy;
+    MCParticleToCluster mcParticleToCluster;
+    MCParticleToEnergy mcParticleToEnergy;
 
-    for( EnergyPerMcParticleInClusters::iterator itCluster = energyPerMcParticleInClusters.begin(), itClusterEnd = energyPerMcParticleInClusters.end(); itCluster != itClusterEnd; ++itCluster )
+    for (EnergyPerMCParticleInClusters::const_iterator itCluster = energyPerMCParticleInClusters.begin(), itClusterEnd = energyPerMCParticleInClusters.end();
+        itCluster != itClusterEnd; ++itCluster)
     {
         Cluster *const pCluster = itCluster->first;
-        EnergyPerMcParticle& energyPerMcParticle = itCluster->second;
+        const EnergyPerMCParticle &energyPerMCParticle = itCluster->second;
 
-        for( EnergyPerMcParticle::iterator itEPerMc = energyPerMcParticle.begin(), itEPerMcEnd = energyPerMcParticle.end(); itEPerMc != itEPerMcEnd; ++itEPerMc )
+        for (EnergyPerMCParticle::const_iterator itEPerMC = energyPerMCParticle.begin(), itEPerMCEnd = energyPerMCParticle.end();
+            itEPerMC != itEPerMCEnd; ++itEPerMC)
         {
-            const MCParticle* mc = itEPerMc->first;
-            float energy = itEPerMc->second;
+            const MCParticle *pMCParticle = itEPerMC->first;
+            const float energy = itEPerMC->second;
 
-            McParticleToEnergy::const_iterator itMcParticleToEnergy = mcParticleToEnergy.find( mc ); 
-            if( itMcParticleToEnergy == mcParticleToEnergy.end() )
+            MCParticleToEnergy::const_iterator itMCParticleToEnergy = mcParticleToEnergy.find(pMCParticle);
+
+            if (itMCParticleToEnergy == mcParticleToEnergy.end())
             {
-                std::pair< McParticleToEnergy::iterator, bool > mcPtclToEBool = mcParticleToEnergy.insert( McParticleToEnergy::value_type(mc, energy) );
-                if( !mcPtclToEBool.second )
+                std::pair<MCParticleToEnergy::iterator, bool> mcPtclToEBool;
+                mcPtclToEBool = mcParticleToEnergy.insert(MCParticleToEnergy::value_type(pMCParticle, energy));
+
+                if(!mcPtclToEBool.second)
                     return STATUS_CODE_FAILURE;
 
-                if( !mcParticleToCluster.insert( McParticleToCluster::value_type(mc, pCluster) ).second )
+                if(!mcParticleToCluster.insert(MCParticleToCluster::value_type(pMCParticle, pCluster)).second)
                     return STATUS_CODE_FAILURE;
-            
+
                 continue;
             }
         
-            if( itMcParticleToEnergy->second > energy )
+            if (itMCParticleToEnergy->second > energy)
                 continue;
 
-            // if the energy deposited in the calohits of this MCParticle is larger than of the old one, replace the old by this.
-            mcParticleToCluster.erase( mc );
-            mcParticleToEnergy.erase(  mc );
+            // If the energy deposited in the calohits of this MCParticle is larger than of the old one, replace the old by this.
+            mcParticleToCluster.erase(pMCParticle);
+            mcParticleToEnergy.erase(pMCParticle);
 
-            if( !mcParticleToEnergy.insert ( McParticleToEnergy::value_type ( mc, energy   ) ).second )
+            if (!mcParticleToEnergy.insert(MCParticleToEnergy::value_type(pMCParticle, energy)).second)
                 return STATUS_CODE_FAILURE;
-            if( !mcParticleToCluster.insert( McParticleToCluster::value_type( mc, pCluster ) ).second )
+
+            if (!mcParticleToCluster.insert( MCParticleToCluster::value_type(pMCParticle, pCluster)).second)
                 return STATUS_CODE_FAILURE;
         }
     }
 
 
+    // Make the MCParticle to track associations
+    const TrackList *pTrackList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
+    typedef std::map< const MCParticle*, TrackList* > TracksPerMCParticle;
+    TracksPerMCParticle tracksPerMCParticle;
+    TracksPerMCParticle::iterator itTracksPerMCParticle;
 
-
-    // do the MCParticle to track association
-    typedef std::map< const MCParticle*, TrackList* > TracksPerMcParticle;
-
-    TracksPerMcParticle tracksPerMcParticle;
-    TracksPerMcParticle::iterator itTracksPerMcParticle;
-
-    for( TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
+    for (TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack)
     {
-        const MCParticle* mc = NULL;
-        (*itTrack)->GetMCParticle( mc );
-        if( mc == NULL ) continue; // maybe an error should be thrown here?
-        
-        TrackList* currentTracks = NULL;
-        itTracksPerMcParticle = tracksPerMcParticle.find( mc );
-        if( itTracksPerMcParticle == tracksPerMcParticle.end() )
+        const MCParticle *pMCParticle = NULL;
+        (*itTrack)->GetMCParticle(pMCParticle);
+
+        // Maybe an error should be thrown here?
+        if (NULL == pMCParticle)
+            continue;
+
+        TrackList *pCurrentTrackList = NULL;
+
+        itTracksPerMCParticle = tracksPerMCParticle.find(pMCParticle);
+
+        if (itTracksPerMCParticle == tracksPerMCParticle.end())
         {
-            currentTracks = new TrackList();
-            tracksPerMcParticle.insert( std::make_pair( mc, currentTracks ) );
+            pCurrentTrackList = new TrackList();
+            tracksPerMCParticle.insert(std::make_pair(pMCParticle, pCurrentTrackList));
         }
         else
         {
-            currentTracks = itTracksPerMcParticle->second;
+            pCurrentTrackList = itTracksPerMCParticle->second;
         }
-        currentTracks->insert( (*itTrack) );
+
+        pCurrentTrackList->insert((*itTrack));
     }
 
 
-
-    // associate the tracks to the clusters on the base of their MCParticles
-    for( TracksPerMcParticle::iterator itMcToTracks = tracksPerMcParticle.begin(), itMcToTracksEnd = tracksPerMcParticle.end(); itMcToTracks != itMcToTracksEnd; ++itMcToTracks )
+    // Associate the tracks to the clusters on the basis of their MCParticles
+    for(TracksPerMCParticle::iterator itMCToTracks = tracksPerMCParticle.begin(), itMCToTracksEnd = tracksPerMCParticle.end();
+        itMCToTracks != itMCToTracksEnd; ++itMCToTracks)
     {
-        const MCParticle *pMc = itMcToTracks->first;
-        TrackList *pTrackList = itMcToTracks->second;
+        const MCParticle *pMCParticle = itMCToTracks->first;
+        TrackList *pTrackList = itMCToTracks->second;
 
-        McParticleToCluster::iterator itMcParticleToCluster = mcParticleToCluster.find( pMc );
-        if( itMcParticleToCluster == mcParticleToCluster.end() )
+        MCParticleToCluster::const_iterator itMCParticleToCluster = mcParticleToCluster.find(pMCParticle);
+
+        if (itMCParticleToCluster == mcParticleToCluster.end())
             continue;
 
-        Cluster *const pCluster = itMcParticleToCluster->second;
+        Cluster *const pCluster = itMCParticleToCluster->second;
 
-        for( TrackList::iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
+        for (TrackList::iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack)
         {
             Track* pTrack = (*itTrack);
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation( *this, pTrack, pCluster ) );
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pTrack, pCluster));
         }
-        
     }
 
 
-    // delete the created TrackLists
-    for( TracksPerMcParticle::iterator itTrackList = tracksPerMcParticle.begin(), itTrackListEnd = tracksPerMcParticle.end(); 
+    // Delete the created TrackLists
+    for( TracksPerMCParticle::iterator itTrackList = tracksPerMCParticle.begin(), itTrackListEnd = tracksPerMCParticle.end(); 
          itTrackList != itTrackListEnd; ++itTrackList )
     {
         delete (*itTrackList).second;
