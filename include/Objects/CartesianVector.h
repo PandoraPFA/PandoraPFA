@@ -179,6 +179,13 @@ public:
      */
     bool operator*=(const double scalar);
 
+    /**
+     *  @brief  Cartesian vector == operator
+     * 
+     *  @param  rhs the cartesian vector to compare
+     */
+    bool operator==(const CartesianVector &rhs) const;
+
 private:
     float   m_x;                ///< The x coordinate
     float   m_y;                ///< The y coordinate
@@ -381,6 +388,16 @@ inline bool CartesianVector::operator*=(const double scalar)
     this->SetValues(static_cast<float>(m_x * scalar), static_cast<float>(m_y * scalar), static_cast<float>(m_z * scalar));
 
     return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CartesianVector::operator==(const CartesianVector &rhs) const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return ((m_x == rhs.GetX()) && (m_y == rhs.GetY()) && (m_z == rhs.GetZ()));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

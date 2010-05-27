@@ -124,10 +124,18 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
             const CartesianVector &hitPosition((*hitIter)->GetPositionVector());
             const CartesianVector positionDifference(hitPosition - coneApex);
 
-            const float cosTheta(coneDirection.GetDotProduct(positionDifference.GetUnitVector()));
+            try
+            {
+                const float cosTheta(coneDirection.GetDotProduct(positionDifference.GetUnitVector()));
 
-            if (cosTheta > coneCosineHalfAngle)
-                nHitsInCone++;
+                if (cosTheta > coneCosineHalfAngle)
+                    nHitsInCone++;
+            }
+            catch (StatusCodeException &)
+            {
+                if (hitPosition == coneApex)
+                    nHitsInCone++;
+            }
         }
     }
 

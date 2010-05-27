@@ -222,7 +222,7 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
         pfoParameters.m_particleId = (isPhoton ? 22 : 2112);
         pfoParameters.m_charge = 0;
-        pfoParameters.m_mass = 0;
+        pfoParameters.m_mass = (isPhoton ? 0 : 0.9396f);
         pfoParameters.m_energy = clusterEnergy;
         pfoParameters.m_clusterList.insert(pCluster);
 
