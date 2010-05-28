@@ -33,6 +33,7 @@ private:
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     pandora::StringVector m_clusterListNames;            ///< list of strings denoting clusternames 
+    bool         m_clusters;                             ///< show current cluster list
     bool         m_hits;                                 ///< show current ordered calohitlist
     bool         m_tracks;                               ///< show current tracklist
     bool         m_onlyAvailable;                        ///< show only available  (i.e. non-clustered) calohits and tracks

@@ -93,7 +93,8 @@ private:
 
     StatusCode MonitoringOutput( EnergyMixing& trueChargedHadrons, EnergyMixing& trueNeutral, EnergyMixing& truePhotons, int numberClusters, int numberTracks );
 
-    pandora::StringVector m_clusterListNames;                     ///< list of strings denoting clusternames 
+    pandora::StringVector m_clusterListNames;            ///< list of strings denoting clusternames 
+    bool         m_clusters;                             ///< show current clusters
     std::string  m_monitoringFileName;                   ///< filename for storing the monitoring information (ROOT)
     std::string  m_treeName;                             ///< tree name for the monitoring output
     bool         m_print;                                ///< print the monitoring info

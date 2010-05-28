@@ -93,6 +93,14 @@ StatusCode EnergyMonitoringAlgorithm::Run()
             clusterListVector.push_back( pClusterList ); // add the cluster list
     }
     
+
+    if(m_clusters) // show current cluster list as well
+    {
+        const ClusterList* pClusterList = NULL;
+        if( STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentClusterList(*this, pClusterList) )
+            clusterListVector.push_back( pClusterList ); // add the cluster list
+    }
+
     EnergyMixing trueCharged;
 //     EnergyMixing trueChargedEm;
     EnergyMixing trueNeutral;
@@ -226,6 +234,9 @@ StatusCode EnergyMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
     if( m_clusterListNames.empty() )
         return STATUS_CODE_NOT_INITIALIZED;
+
+    m_clusters = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowCurrentClusters", m_clusters));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
 

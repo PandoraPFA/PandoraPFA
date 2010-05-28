@@ -77,11 +77,36 @@ StatusCode VisualMonitoringAlgorithm::Run()
     {
         const ClusterList* pClusterList = NULL;
         std::string clusterListName = (*itClusterName);
-        std::cout << "    " << clusterListName << std::endl;
+        std::cout << "visualize: " << clusterListName << std::flush;
         if( STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, clusterListName, pClusterList))
+        {
             if( m_eve )
             {
                 PANDORA_MONITORING_API(VisualizeClusters(pClusterList, clusterListName, AUTO  ) );
+            }
+            else
+                if( m_detectorView == "XZ" )
+                {
+                    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, AUTO  ) );
+                }
+                else
+                {
+                    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, AUTO  ) );
+                }
+            std::cout << " ... done" << std::endl;
+        }
+        else
+            std::cout << " ... cluster-list not found" << std::endl;
+    }
+
+    // show current clusters
+    if(m_clusters)
+    {
+        const ClusterList* pClusterList = NULL;
+        if( STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentClusterList(*this, pClusterList))
+            if( m_eve )
+            {
+                PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "current", AUTO  ) );
             }
             else
                 if( m_detectorView == "XZ" )
@@ -113,13 +138,13 @@ StatusCode VisualMonitoringAlgorithm::Run()
 
 StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
-
-    if( m_clusterListNames.empty() )
-        return STATUS_CODE_NOT_INITIALIZED;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
 
     m_eve = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "UseROOTEve", m_eve));
+
+    m_clusters = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowCurrentClusters", m_clusters));
 
     m_hits = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowCurrentCaloHits", m_hits));

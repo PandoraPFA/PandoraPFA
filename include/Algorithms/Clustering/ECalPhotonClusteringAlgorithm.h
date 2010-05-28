@@ -361,7 +361,7 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
         /**
          * @brief Constructor
          */
-        RunningMeanRMS()
+	RunningMeanRMS() : m_mean(0), m_nEvents(0), m_weights(0), m_s2(0),m_Rms(0)
         {
         }
 
@@ -460,7 +460,9 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
          * @return
          */
         double CalcMean( double meanOld, double n, double valNew, double weightsumOld, double evweight ){
-            if( n == 0. ) return valNew;
+	    const double epsilon = 1e-7;
+	    if( fabs(n - 0.)<epsilon ) 
+		    return valNew;
             //        double meanNew = meanOld + ( valNew - meanOld )/(n +1 );
             double meanNew = (weightsumOld*meanOld + evweight*valNew) / (weightsumOld + evweight);
             return meanNew;
@@ -478,7 +480,8 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
          */
         double CalcS2( double meanOld, double meanNew, double nNew, double s2Old, double valNew )
         {
-            if( nNew == 0. ) return 0.;
+	    const double epsilon = 1e-7;
+            if( fabs(nNew - 0.)<epsilon ) return 0.;
             double s2New = ( (nNew-1)*s2Old + (valNew-meanNew)*(valNew-meanOld) )/nNew;
             return s2New;
         }
@@ -549,7 +552,7 @@ public:
 			 bool& useOriginalCluster ); 
 
     StatusCode TransverseProfile(const pandora::Cluster* cluster, std::vector<pandora::protoClusterPeaks_t> &peaks, int maxLayers);
-    pandora::Cluster* TransverseProfile( ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, int peakForProtoCluster, unsigned int maxLayers, int extraLayers = 0);
+    pandora::Cluster* TransverseProfile( const ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, const int peakForProtoCluster, const unsigned int maxLayers, const int extraLayers = 0);
 
     float      GetTrueEnergyContribution(const pandora::Cluster* cluster, float& electromagneticEnergyContribution, int pid = 0 );
     void       GetClusterProperties(const pandora::Cluster* cluster, ClusterProperties& clusterProperties );

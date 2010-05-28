@@ -44,6 +44,9 @@ PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ECalPhotonClusteringAlgorithm::ECalPhotonClusteringAlgorithm()
+    : m_nECalLayers(0),
+      m_producePrintoutStatements(0),
+      m_produceConfigurationFiles(-1)
 {
     if (m_producePrintoutStatements > 0)
         std::cout << "constructor" << std::endl;
@@ -60,8 +63,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Initialize()
     }
 
     // create monitoring histograms for likelihood
-    if(m_makingPhotonIdLikelihoodHistograms)
-        CreateOrSaveLikelihoodHistograms(true);
+    CreateOrSaveLikelihoodHistograms(true);
 
 
     // set object variables:
@@ -115,8 +117,7 @@ ECalPhotonClusteringAlgorithm::~ECalPhotonClusteringAlgorithm()
     }
 
     // create monitoring histograms for likelihood
-    if(m_makingPhotonIdLikelihoodHistograms)
-        CreateOrSaveLikelihoodHistograms(false);
+    CreateOrSaveLikelihoodHistograms(false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +130,16 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
     // Run clustering algorithm
     const ClusterList* pInitialClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pInitialClusterList));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_clusterListName, *pInitialClusterList));
+    if( pInitialClusterList->empty() )
+    {
+        std::cout << "emtpy initial cluster list" << std::endl;
+        return STATUS_CODE_SUCCESS;
+    }
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_clusterListName));
+
+//    return STATUS_CODE_SUCCESS; // debug
+
+//    const ClusterList* pClusterList = pInitialClusterList;
     const ClusterList* pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
@@ -259,7 +269,8 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
             {
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
             }
-                
+            
+            photonClusters.clear();
             
        
 
@@ -289,7 +300,6 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
 StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_clusteringAlgorithmName));
-//    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "ClusterFormation", m_clusteringAlgorithmName   ));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "ClusterListName", m_clusterListName));
 
@@ -334,69 +344,73 @@ StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
 
 void ECalPhotonClusteringAlgorithm::CreateOrSaveLikelihoodHistograms(bool create)
 {
-    int nHistograms = 8;
-
-    for( int i = 0; i <= nHistograms; ++i )
+    if(m_makingPhotonIdLikelihoodHistograms)
     {
-        const std::string iHist(TypeToString(i));
-        const std::string hName_sighistrms("sighistrms" + iHist);
-        const std::string hName_backhistrms("backhistrms" + iHist);
-        const std::string hName_sighistfrac("sighistfrac" + iHist);
-        const std::string hName_backhistfrac("backhistfrac" + iHist);
-        const std::string hName_sighiststart("sighiststart" + iHist);
-        const std::string hName_backhiststart("backhiststart" + iHist);
-        const std::string hTitle_rms(" rms  ");
-        const std::string hTitle_frac(" frac  ");
-        const std::string hTitle_start(" start  ");
+        int nHistograms = 8;
+
+        for( int i = 0; i <= nHistograms; ++i )
+        {
+            const std::string iHist(TypeToString(i));
+            const std::string hName_sighistrms("sighistrms" + iHist);
+            const std::string hName_backhistrms("backhistrms" + iHist);
+            const std::string hName_sighistfrac("sighistfrac" + iHist);
+            const std::string hName_backhistfrac("backhistfrac" + iHist);
+            const std::string hName_sighiststart("sighiststart" + iHist);
+            const std::string hName_backhiststart("backhiststart" + iHist);
+            const std::string hTitle_rms(" rms  ");
+            const std::string hTitle_frac(" frac  ");
+            const std::string hTitle_start(" start  ");
+
+            if( create )
+            {
+                PANDORA_MONITORING_API(Create1DHistogram(hName_sighistrms, hTitle_rms, 20, 0.0, 5.0));
+                PANDORA_MONITORING_API(Create1DHistogram(hName_backhistrms, hTitle_rms, 20, 0.0, 5.0));
+                PANDORA_MONITORING_API(Create1DHistogram(hName_sighistfrac, hTitle_frac, 20, 0.0, 1.0));
+                PANDORA_MONITORING_API(Create1DHistogram(hName_backhistfrac, hTitle_frac, 20, 0.0, 1.0));
+                PANDORA_MONITORING_API(Create1DHistogram(hName_sighiststart, hTitle_start, 20, 0.0, 10.0));
+                PANDORA_MONITORING_API(Create1DHistogram(hName_backhiststart, hTitle_start, 20, 0.0, 10.0));
+            }
+            else // if not create --> save them
+            {
+                if( !m_monitoringFileName.empty() )
+                {
+                    PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistrms,  m_monitoringFileName, "UPDATE"));
+                    PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistrms, m_monitoringFileName, "UPDATE"));
+                    PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistfrac, m_monitoringFileName, "UPDATE"));
+                    PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistfrac, m_monitoringFileName, "UPDATE"));
+                    PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighiststart, m_monitoringFileName, "UPDATE"));
+                    PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhiststart, m_monitoringFileName, "UPDATE"));
+                }
+            }
+        }
 
         if( create )
         {
-            PANDORA_MONITORING_API(Create1DHistogram(hName_sighistrms, hTitle_rms, 20, 0.0, 5.0));
-            PANDORA_MONITORING_API(Create1DHistogram(hName_backhistrms, hTitle_rms, 20, 0.0, 5.0));
-            PANDORA_MONITORING_API(Create1DHistogram(hName_sighistfrac, hTitle_frac, 20, 0.0, 1.0));
-            PANDORA_MONITORING_API(Create1DHistogram(hName_backhistfrac, hTitle_frac, 20, 0.0, 1.0));
-            PANDORA_MONITORING_API(Create1DHistogram(hName_sighiststart, hTitle_start, 20, 0.0, 10.0));
-            PANDORA_MONITORING_API(Create1DHistogram(hName_backhiststart, hTitle_start, 20, 0.0, 10.0));
+            PANDORA_MONITORING_API(Create2DHistogram("energyVsPhotonE", "E vs. photonE", 100, 0.0, 100.0, 100, 0.0 ,100.0));
+            PANDORA_MONITORING_API(Create2DHistogram("pidVsPhotonEFraction", "pid vs. photonEFraction", 100, 0.0, 1.0, 100, 0.0 ,10.0));
+        
         }
-        else // if not create --> save them
+        else
         {
             if( !m_monitoringFileName.empty() )
             {
-                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistrms,  m_monitoringFileName, "UPDATE"));
-                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistrms, m_monitoringFileName, "UPDATE"));
-                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighistfrac, m_monitoringFileName, "UPDATE"));
-                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhistfrac, m_monitoringFileName, "UPDATE"));
-                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_sighiststart, m_monitoringFileName, "UPDATE"));
-                PANDORA_MONITORING_API(SaveAndCloseHistogram(hName_backhiststart, m_monitoringFileName, "UPDATE"));
+                PANDORA_MONITORING_API(SaveAndCloseHistogram("energyVsPhotonE", m_monitoringFileName, "UPDATE" ));
+                PANDORA_MONITORING_API(SaveAndCloseHistogram("pidVsPhotonEFraction", m_monitoringFileName, "UPDATE" ));
+
+                try
+                {
+                    PANDORA_MONITORING_API(SaveTree("photonId", m_monitoringFileName, "UPDATE" ));
+                }
+                catch(...)
+                {
+                    std::cout << "Tree 'photonId' could not be saved!" << std::endl;
+                }
             }
         }
+
     }
 
-    if( create )
-    {
-        PANDORA_MONITORING_API(Create2DHistogram("energyVsPhotonE", "E vs. photonE", 100, 0.0, 100.0, 100, 0.0 ,100.0));
-        PANDORA_MONITORING_API(Create2DHistogram("pidVsPhotonEFraction", "pid vs. photonEFraction", 100, 0.0, 1.0, 100, 0.0 ,10.0));
-        
-    }
-    else
-    {
-        if( !m_monitoringFileName.empty() )
-        {
-            PANDORA_MONITORING_API(SaveAndCloseHistogram("energyVsPhotonE", m_monitoringFileName, "UPDATE" ));
-            PANDORA_MONITORING_API(SaveAndCloseHistogram("pidVsPhotonEFraction", m_monitoringFileName, "UPDATE" ));
-
-            try
-            {
-                PANDORA_MONITORING_API(SaveTree("photonId", m_monitoringFileName, "UPDATE" ));
-            }
-            catch(...)
-            {
-                std::cout << "Tree 'photonId' could not be saved!" << std::endl;
-            }
-        }
-    }
-
-
+    // write config files (if enabled)
     if( !create )
     {
         PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
@@ -471,7 +485,7 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
                   << " truePhotonE " << truePhotonE << " trueE " << trueE << std::endl;
     }
 
-    assert( electromagneticE - electromagneticEContribution < 0.0001 );
+    //    assert( electromagneticE - electromagneticEContribution < 0.0001 );
 
     //    float fraction = electromagneticPhotonEContribution / electromagneticEContribution;
     float fraction = electromagneticPhotonEContribution / electromagneticE; 
@@ -631,14 +645,6 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     if(useOriginalCluster){
         if (m_producePrintoutStatements > 0)
             std::cout << "Use original cluster " << std::endl;
-
-//         // we don't need the photon candidate any more
-//         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster));
-
-//         // re-create the cluster which get's all the hits from the original cluster
-//         CaloHitList caloHitList;
-//         pOriginalOrderedCaloHitList.GetCaloHitList( caloHitList );
-//         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &caloHitList, pPhotonCandidateCluster ));
     }
 
 
@@ -1042,7 +1048,9 @@ StatusCode ECalPhotonClusteringAlgorithm::TransverseProfile(const Cluster* clust
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, int peakForProtoCluster, unsigned int maxLayers, int extraLayers){
+pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( const ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, 
+                                                                    const int peakForProtoCluster, const unsigned int maxLayers, const int extraLayers)
+{
 
     pandora::Cluster* newCluster=NULL;
 
@@ -1237,7 +1245,7 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( ClusterPrope
                     std::cout << "create new cluster " << std::endl;
 
                 PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitList, newCluster ));
-
+                delete pCaloHitList;
             }
         }
         if(npeaks>3)stillfindingpeaks=false;
