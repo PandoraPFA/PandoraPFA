@@ -27,10 +27,6 @@
 
 #include "Xml/tinyxml.h"
 
-#ifdef MONITORING
-#include "PandoraMonitoringApi.h"
-#endif
-
 namespace pandora
 {
 
@@ -66,8 +62,6 @@ Pandora::~Pandora()
     delete m_pPandoraApiImpl;
     delete m_pPandoraContentApiImpl;
     delete m_pPandoraImpl;
-
-    PANDORA_MONITORING_API(Delete());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
