@@ -288,11 +288,18 @@ public:
     float GetMCPfoSelectionMomentum() const;
 
     /**
-     *  @brief  Get the low energy cut-off for selection of protons/neutrons as MCPFOs
+     *  @brief  Get the low energy cut-off for selection of protons/neutrons as mc pfos
      * 
-     *  @return The low energy cut-off for selection of protons/neutrons as MCPFOs
+     *  @return The low energy cut-off for selection of protons/neutrons as mc pfos
      */
     float GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const;
+
+    /**
+     *  @brief  Whether to collapse mc particle decay chains down to just the pfo target
+     * 
+     *  @return boolean
+     */
+    bool ShouldCollapseMCParticlesToPfoTarget() const;
 
 private:
     /**
@@ -368,6 +375,7 @@ private:
     float           m_mcPfoSelectionRadius;                 ///< Radius used to select pfo target from a mc decay chain, units mm
     float           m_mcPfoSelectionMomentum;               ///< Momentum magnitude used to select pfo target from a mc decay chain, units GeV/c
     float           m_mcPfoSelectionLowEnergyNPCutOff;      ///< Low energy cut-off for selection of protons/neutrons as MCPFOs
+    bool            m_shouldCollapseMCParticlesToPfoTarget; ///< Whether to collapse mc particle decay chains down to just the pfo target
 
     friend class Pandora;
 };
@@ -636,6 +644,13 @@ inline float PandoraSettings::GetMCPfoSelectionMomentum() const
 inline float PandoraSettings::GetMCPfoSelectionLowEnergyNeutronProtonCutOff() const
 {
     return m_mcPfoSelectionLowEnergyNPCutOff;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool PandoraSettings::ShouldCollapseMCParticlesToPfoTarget() const
+{
+    return m_shouldCollapseMCParticlesToPfoTarget;
 }
 
 } // namespace pandora

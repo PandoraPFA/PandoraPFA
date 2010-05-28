@@ -123,39 +123,39 @@ StatusCode MCManager::SelectPfoTargets()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const mcParticle, MCParticleList &mcPfoList) const
+StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const pMCParticle, MCParticleList &mcPfoList) const
 {
     static const int PROTON  = 2212;
     static const int NEUTRON = 2112;
 
-    if (!mcParticle->IsInitialized())
+    if (!pMCParticle->IsInitialized())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    static const float selectionRadius  (PandoraSettings::GetInstance()->GetMCPfoSelectionRadius()  );
+    static const float selectionRadius(PandoraSettings::GetInstance()->GetMCPfoSelectionRadius());
     static const float selectionMomentum(PandoraSettings::GetInstance()->GetMCPfoSelectionMomentum());
     static const float selectionEnergyCutOffProtonsNeutrons(PandoraSettings::GetInstance()->GetMCPfoSelectionLowEnergyNeutronProtonCutOff());
 
-    int particleId = mcParticle->GetParticleId();
+    int particleId = pMCParticle->GetParticleId();
 
     // ATTN: don't take particles from previously used decay chains; could happen because mc particles can have multiple parents.
     // Of those, some don't know the daughter.
-    if ((mcParticle->GetOuterRadius() > selectionRadius) &&
-        (mcParticle->GetInnerRadius() <= selectionRadius) &&
-        (mcParticle->GetMomentum().GetMagnitude() > selectionMomentum) &&
-        (mcPfoList.find(mcParticle) == mcPfoList.end()) &&
-        !((particleId == PROTON || particleId == NEUTRON) && mcParticle->GetEnergy() < selectionEnergyCutOffProtonsNeutrons )
+    if ((pMCParticle->GetOuterRadius() > selectionRadius) &&
+        (pMCParticle->GetInnerRadius() <= selectionRadius) &&
+        (pMCParticle->GetMomentum().GetMagnitude() > selectionMomentum) &&
+        (mcPfoList.find(pMCParticle) == mcPfoList.end()) &&
+        !((particleId == PROTON || particleId == NEUTRON) && pMCParticle->GetEnergy() < selectionEnergyCutOffProtonsNeutrons )
         )
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTargetInTree(mcParticle, true));
-        mcPfoList.insert(mcParticle);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMCParticle->SetPfoTargetInTree(pMCParticle, true));
+        mcPfoList.insert(pMCParticle);
     }
     else
     {
         // MC particle has not yet crossed boundary - set it as its own pfo target.
         // --> don't do this any more (only MCParticles which cross the boundary can be MCPFOs)
-        // PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mcParticle->SetPfoTarget(mcParticle));
+        // PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMCParticle->SetPfoTarget(pMCParticle));
 
-        for(MCParticleList::iterator iter = mcParticle->m_daughterList.begin(), iterEnd = mcParticle->m_daughterList.end();
+        for(MCParticleList::iterator iter = pMCParticle->m_daughterList.begin(), iterEnd = pMCParticle->m_daughterList.end();
             iter != iterEnd; ++iter)
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ApplyPfoSelectionRules(*iter, mcPfoList));
@@ -172,6 +172,8 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
     if (m_uidToMCParticleMap.empty())
         return STATUS_CODE_SUCCESS;
 
+    static const bool shouldCollapseMCParticlesToPfoTarget(PandoraSettings::GetInstance()->ShouldCollapseMCParticlesToPfoTarget());
+
     for (UidRelationMap::const_iterator relationIter = uidRelationMap.begin(), relationIterEnd = uidRelationMap.end();
         relationIter != relationIterEnd; ++relationIter)
     {
@@ -181,7 +183,16 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
             continue;
 
         MCParticle *pMCParticle = NULL;
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, mcParticleIter->second->GetPfoTarget(pMCParticle));
+
+        if (!shouldCollapseMCParticlesToPfoTarget)
+        {
+            pMCParticle = mcParticleIter->second;
+        }
+        else
+        {
+            if (STATUS_CODE_SUCCESS != mcParticleIter->second->GetPfoTarget(pMCParticle))
+                continue;
+        }
 
         if (pMCParticle != NULL)
         {
@@ -212,6 +223,11 @@ StatusCode MCManager::GetMCParticleList(MCParticleList &mcParticleList) const
 
 StatusCode MCManager::DeleteNonPfoTargets()
 {
+    static const bool shouldCollapseMCParticlesToPfoTarget(PandoraSettings::GetInstance()->ShouldCollapseMCParticlesToPfoTarget());
+
+    if (!shouldCollapseMCParticlesToPfoTarget)
+        return STATUS_CODE_SUCCESS;
+
     for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(); iter != m_uidToMCParticleMap.end();)
     {
         MCParticle *pMCParticle = iter->second;
@@ -270,6 +286,4 @@ StatusCode MCManager::ResetForNextEvent()
     return STATUS_CODE_SUCCESS;
 }
 
-
 } // namespace pandora
-

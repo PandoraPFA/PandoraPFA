@@ -217,6 +217,10 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MCPfoSelectionProtonNeutronEnergyCutOff", m_mcPfoSelectionLowEnergyNPCutOff));
 
+        m_shouldCollapseMCParticlesToPfoTarget = true;
+        PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+            "ShouldCollapseMCParticlesToPfoTarget", m_shouldCollapseMCParticlesToPfoTarget));
+
         m_isInitialized = true;
 
         return STATUS_CODE_SUCCESS;
