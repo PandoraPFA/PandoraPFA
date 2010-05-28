@@ -240,10 +240,12 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const
             return STATUS_CODE_FAILURE;
     }
 
-    for (ClusterList::const_iterator clusterIter = clustersToSave.begin(), clusterIterEnd = clustersToSave.end();
-        clusterIter != clusterIterEnd; ++clusterIter)
+    for (ClusterList::const_iterator clusterIter = clustersToSave.begin(); clusterIter != clustersToSave.end();)
     {
-        ClusterList::iterator sourceClusterIter = sourceClusterListIter->second->find(*clusterIter);
+        Cluster *pCluster = *clusterIter;
+        ++clusterIter;
+
+        ClusterList::iterator sourceClusterIter = sourceClusterListIter->second->find(pCluster);
 
         if (sourceClusterListIter->second->end() == sourceClusterIter)
             return STATUS_CODE_NOT_FOUND;
