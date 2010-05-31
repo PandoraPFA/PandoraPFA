@@ -131,165 +131,120 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
     const ClusterList* pInitialClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pInitialClusterList));
     if( pInitialClusterList->empty() )
-    {
-        std::cout << "emtpy initial cluster list" << std::endl;
         return STATUS_CODE_SUCCESS;
-    }
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterListAndReplaceCurrent(*this, m_clusterListName));
 
-//    return STATUS_CODE_SUCCESS; // debug
-
-//    const ClusterList* pClusterList = pInitialClusterList;
     const ClusterList* pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
+    if( pClusterList == NULL || pClusterList->empty() )
+        return STATUS_CODE_SUCCESS;
 
-    if( pClusterList != NULL )
+
+    std::vector<Cluster*> temporaryClusterList(pClusterList->begin(), pClusterList->end() );
+
+    for( std::vector<Cluster*>::const_iterator itCluster = temporaryClusterList.begin(), itClusterEnd = temporaryClusterList.end(); itCluster != itClusterEnd; ++itCluster )
     {
-//        PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, BLUE  ) );
-//        PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, BLUE  ) );
-//        PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "all", BLUE  ) );
+        Cluster* pCluster = (*itCluster);
 
-        std::vector<Cluster*> temporaryClusterList(pClusterList->begin(), pClusterList->end() );
-
-        for( std::vector<Cluster*>::const_iterator itCluster = temporaryClusterList.begin(), itClusterEnd = temporaryClusterList.end(); itCluster != itClusterEnd; ++itCluster )
+        if (m_producePrintoutStatements > 0)
+            std::cout << "*** main cluster cells : " << pCluster->GetNCaloHits() << std::endl;
+        if( pCluster->GetElectromagneticEnergy()<=0.2 || pCluster->GetNCaloHits() < m_minimumHitsInClusters ) 
         {
-            Cluster* pCluster = (*itCluster);
-
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
             if (m_producePrintoutStatements > 0)
-                std::cout << "*** main cluster cells : " << pCluster->GetNCaloHits() << std::endl;
-            if( pCluster->GetElectromagneticEnergy()<=0.2 || pCluster->GetNCaloHits() < m_minimumHitsInClusters ) 
-            {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
-                if (m_producePrintoutStatements > 0)
-                    std::cout << "is photon cluster? --> NO / electromagnetic energy too small (<=0.2)" << std::endl;
-                continue;
-            }
-
-            std::vector<protoClusterPeaks_t> peaks;
-            TransverseProfile( pCluster, peaks,m_nECalLayers); 
-
-            // get the ordered calohits of the cluster
-
-            ClusterProperties clusterProperties;
-            GetClusterProperties( pCluster, clusterProperties );
-
-            // Initialize cluster fragmentation operations
-            ClusterList clusterList;
-            clusterList.insert(pCluster);
-            std::string originalClustersListName, fragmentClustersListName;
-
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeFragmentation(*this, clusterList,
-                                                                                                         originalClustersListName, fragmentClustersListName));
-
-
-            OrderedCaloHitList pOrderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-
-
-//             PANDORA_MONITORING_API(VisualizeClusters(&clusterList, "original", GREEN  ) );
-
-
-            // cluster these hits differently ==============================
-
-            int peakForProtoCluster = 0;
-            bool useOriginalCluster = false;
-            if( peaks.size() == 1 ) // if only one peak and this peak is identified as photon, use the original cluster
-                useOriginalCluster = true;
-
-            for( std::vector<pandora::protoClusterPeaks_t>::iterator itPeak = peaks.begin(), itPeakEnd = peaks.end(); 
-                 itPeak != itPeakEnd; ++itPeak )
-            {
-                Cluster* pPhotonCandidateCluster = TransverseProfile( clusterProperties, pOrderedCaloHitList, peakForProtoCluster, m_nECalLayers);
-
-                if( pPhotonCandidateCluster != NULL )
-                {
-//                     ClusterList cand;
-//                     cand.insert(pPhotonCandidateCluster);
-//                     PANDORA_MONITORING_API(VisualizeClusters(&cand, "candidate", RED  ) );
-
-                    if (m_producePrintoutStatements > 0)
-                        std::cout << "*** sub  cluster size : " << pPhotonCandidateCluster->GetNCaloHits() << std::endl;
-
-                    if( IsPhoton( pPhotonCandidateCluster, pOrderedCaloHitList, (*itPeak), clusterProperties, useOriginalCluster ) )
-                    {
-                        pPhotonCandidateCluster->SetIsPhotonFlag( true );
-                        if (m_producePrintoutStatements > 0)
-                            std::cout << "is photon cluster? --> YES " << std::endl;
-
-                        if( useOriginalCluster ) // if the original cluster is used
-                        {
-                            break;
-                        }
-                        photonClusters.insert( pPhotonCandidateCluster );
-                    }
-                    else
-                    {
-                        if (m_producePrintoutStatements > 0)
-                            std::cout << "is photon cluster? --> NO ";
-
-                        PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster ) );
-                    }
-
-                    if (m_producePrintoutStatements > 0)
-                        std::cout << std::endl;
-
-                }
-                ++peakForProtoCluster;
-            }
-
-            // Decide whether to keep original cluster or the fragments
-            std::string clusterListToSaveName(fragmentClustersListName);
-            std::string clusterListToDeleteName(originalClustersListName);
-
-            if( useOriginalCluster || photonClusters.empty() )
-            {
-                clusterListToSaveName = originalClustersListName;
-                clusterListToDeleteName = fragmentClustersListName;
-
-                pCluster->SetIsPhotonFlag( true );
-            }
-
-//             if( useOriginalCluster )
-//             {
-//                 PANDORA_MONITORING_API(VisualizeClusters(&clusterList, "originalIsPhoton", ORANGE  ) );
-//             }
-//             else
-//             {
-//                 PANDORA_MONITORING_API(VisualizeClusters(&photonClusters, "phot", ORANGE  ) );
-//             }
-//             PANDORA_MONITORING_API(View());
-
-
-            // End cluster fragmentation operations
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndFragmentation(*this, clusterListToSaveName, clusterListToDeleteName));
-
-            // if no fragments have been identified as photons and the original cluster is not to be used, delete the original cluster
-            if( photonClusters.empty() && !useOriginalCluster )
-            {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
-            }
-            
-            photonClusters.clear();
-            
-       
-
-
+                std::cout << "is photon cluster? --> NO / electromagnetic energy too small (<=0.2)" << std::endl;
+            continue;
         }
+
+        std::vector<protoClusterPeaks_t> peaks;
+        TransverseProfile( pCluster, peaks,m_nECalLayers); 
+
+        // get the ordered calohits of the cluster
+
+        ClusterProperties clusterProperties;
+        GetClusterProperties( pCluster, clusterProperties );
+
+        // Initialize cluster fragmentation operations
+        ClusterList clusterList;
+        clusterList.insert(pCluster);
+        std::string originalClustersListName, fragmentClustersListName;
+
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeFragmentation(*this, clusterList,
+                                                                                                     originalClustersListName, fragmentClustersListName));
+
+
+        OrderedCaloHitList pOrderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+        // cluster these hits differently ==============================
+
+        int peakForProtoCluster = 0;
+        bool useOriginalCluster = false;
+
+        for( std::vector<pandora::protoClusterPeaks_t>::iterator itPeak = peaks.begin(), itPeakEnd = peaks.end(); 
+             itPeak != itPeakEnd; ++itPeak )
+        {
+            Cluster* pPhotonCandidateCluster = TransverseProfile( clusterProperties, pOrderedCaloHitList, peakForProtoCluster, m_nECalLayers);
+
+            if( pPhotonCandidateCluster != NULL )
+            {
+
+                if (m_producePrintoutStatements > 0)
+                    std::cout << "*** sub  cluster size : " << pPhotonCandidateCluster->GetNCaloHits() << std::endl;
+
+                if( IsPhoton( pPhotonCandidateCluster, pOrderedCaloHitList, (*itPeak), clusterProperties, useOriginalCluster ) )
+                {
+                    pPhotonCandidateCluster->SetIsPhotonFlag( true );
+                    if (m_producePrintoutStatements > 0)
+                        std::cout << "is photon cluster? --> YES " << std::endl;
+
+                    if( useOriginalCluster ) // if the original cluster is used
+                    {
+                        break;
+                    }
+                    photonClusters.insert( pPhotonCandidateCluster );
+                }
+                else
+                {
+                    if (m_producePrintoutStatements > 0)
+                        std::cout << "is photon cluster? --> NO ";
+
+                    PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pPhotonCandidateCluster, fragmentClustersListName ) );
+                }
+
+                if (m_producePrintoutStatements > 0)
+                    std::cout << std::endl;
+
+            }
+            ++peakForProtoCluster;
+        }
+
+        // Decide whether to keep original cluster or the fragments
+        std::string clusterListToSaveName(fragmentClustersListName);
+        std::string clusterListToDeleteName(originalClustersListName);
+
+        if( useOriginalCluster || photonClusters.empty() )
+        {
+            clusterListToSaveName = originalClustersListName;
+            clusterListToDeleteName = fragmentClustersListName;
+
+            if( useOriginalCluster )
+                pCluster->SetIsPhotonFlag( true );
+        }
+
+
+        // End cluster fragmentation operations
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndFragmentation(*this, clusterListToSaveName, clusterListToDeleteName));
+
+        // if no fragments have been identified as photons and the original cluster is not to be used, delete the original cluster
+        if( photonClusters.empty() && !useOriginalCluster )
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS,!=,PandoraContentApi::DeleteCluster(*this, pCluster, m_clusterListName));
+        }
+            
+        photonClusters.clear();
     }
-
-
-
-//    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,&photonClusters, DARKYELLOW  ) );
-//    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,&photonClusters, DARKYELLOW  ) );
-//    PANDORA_MONITORING_API(ViewEvent() );
-//     PANDORA_MONITORING_API(VisualizeClusters(&photonClusters, "photons", DARKYELLOW  ) );
-
-//     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-//     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
-
-//     PANDORA_MONITORING_API(VisualizeCaloHits(pOrderedCaloHitList, "currentHits", BLUE  ) );
-//     PANDORA_MONITORING_API(View());
 
 
     return STATUS_CODE_SUCCESS;
