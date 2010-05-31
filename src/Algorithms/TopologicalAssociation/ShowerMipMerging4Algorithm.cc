@@ -37,6 +37,7 @@ StatusCode ShowerMipMerging4Algorithm::Run()
             continue;
 
         Cluster *pBestParentCluster(NULL);
+        float bestParentClusterEnergy(0.);
         float minProjectionDistance(m_maxProjectionDistance);
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -63,10 +64,14 @@ StatusCode ShowerMipMerging4Algorithm::Run()
             // Get the smallest distance between a hit in the daughter cluster and the projected initial direction of the parent cluster
             const float projectionDistance(this->GetDistanceFromInitialProjection(pParentCluster, pDaughterCluster));
 
-            if (projectionDistance < minProjectionDistance)
+            const float parentClusterEnergy(pParentCluster->GetHadronicEnergy());
+
+            if ((projectionDistance < minProjectionDistance) ||
+                ((projectionDistance == minProjectionDistance) && (parentClusterEnergy > bestParentClusterEnergy)))
             {
                 minProjectionDistance = projectionDistance;
                 pBestParentCluster = pParentCluster;
+                bestParentClusterEnergy = parentClusterEnergy;
             }
         }
 

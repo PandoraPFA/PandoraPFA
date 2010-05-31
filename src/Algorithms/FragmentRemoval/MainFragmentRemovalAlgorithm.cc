@@ -132,6 +132,7 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
     Cluster *&pBestDaughterCluster)
 {
     float highestExcessEvidence(0.f);
+    float highestEvidenceParentEnergy(0.);
 
     for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
@@ -156,11 +157,14 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Clust
                 globalDeltaChi2));
             const float excessEvidence(totalEvidence - requiredEvidence);
 
-            if (excessEvidence > highestExcessEvidence)
+            const float parentEnergy(clusterContact.GetParentCluster()->GetHadronicEnergy());
+
+            if ((excessEvidence > highestExcessEvidence) || ((excessEvidence == highestExcessEvidence) && (parentEnergy > highestEvidenceParentEnergy)))
             {
                 highestExcessEvidence = excessEvidence;
                 pBestDaughterCluster = pDaughterCluster;
                 pBestParentCluster = clusterContact.GetParentCluster();
+                highestEvidenceParentEnergy = parentEnergy;
             }
         }
     }

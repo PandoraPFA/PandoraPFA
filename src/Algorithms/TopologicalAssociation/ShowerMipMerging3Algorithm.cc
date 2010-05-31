@@ -48,6 +48,7 @@ StatusCode ShowerMipMerging3Algorithm::Run()
             continue;
 
         Cluster *pBestParentCluster(NULL);
+        float bestParentClusterEnergy(0.);
         float minFitDistanceToClosestHit(m_maxFitDistanceToClosestHit);
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -80,10 +81,14 @@ StatusCode ShowerMipMerging3Algorithm::Run()
             const PseudoLayer fitProjectionInnerLayer((parentOuterLayer > m_nFitProjectionLayers) ? parentOuterLayer - m_nFitProjectionLayers : 0);
             const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, fitProjectionInnerLayer, parentOuterLayer));
 
-            if (fitDistanceToClosestHit < minFitDistanceToClosestHit)
+            const float parentClusterEnergy(pParentCluster->GetHadronicEnergy());
+
+            if ((fitDistanceToClosestHit < minFitDistanceToClosestHit) ||
+                ((fitDistanceToClosestHit == minFitDistanceToClosestHit) && (parentClusterEnergy > bestParentClusterEnergy)))
             {
                 minFitDistanceToClosestHit = fitDistanceToClosestHit;
                 pBestParentCluster = pParentCluster;
+                bestParentClusterEnergy = parentClusterEnergy;
             }
         }
 

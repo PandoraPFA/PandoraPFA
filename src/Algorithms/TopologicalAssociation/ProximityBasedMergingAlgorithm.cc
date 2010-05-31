@@ -54,6 +54,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
         const float daughterHadronicEnergy(pDaughterCluster->GetHadronicEnergy());
 
         Cluster *pBestParentCluster(NULL);
+        float bestParentHadronicEnergy(0.);
         float minGenericDistance(m_maxGenericDistance);
 
         for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
@@ -89,6 +90,8 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
             for (TrackList::const_iterator trackIter = trackList.begin(), trackIterEnd = trackList.end(); trackIter != trackIterEnd; ++trackIter)
                 trackEnergySum += (*trackIter)->GetEnergyAtDca();
 
+            const float parentHadronicEnergy(pParentCluster->GetHadronicEnergy());
+
             if (trackEnergySum > 0.)
             {
                 static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
@@ -97,10 +100,10 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
                 if (0. == sigmaE)
                     return STATUS_CODE_FAILURE;
 
-                const float clusterEnergySum = (daughterHadronicEnergy + pParentCluster->GetHadronicEnergy());
+                const float clusterEnergySum = (daughterHadronicEnergy + parentHadronicEnergy);
 
                 const float chi((clusterEnergySum - trackEnergySum) / sigmaE);
-                const float chi0((pParentCluster->GetHadronicEnergy() - trackEnergySum) / sigmaE);
+                const float chi0((parentHadronicEnergy - trackEnergySum) / sigmaE);
 
                 if ((chi > m_maxTrackClusterChi) || ((chi * chi - chi0 * chi0) > m_maxTrackClusterDChi2))
                     continue;
@@ -114,10 +117,11 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
             if (STATUS_CODE_SUCCESS != this->GetGenericDistanceBetweenClusters(pParentCluster, pDaughterCluster, startLayer, endLayer, genericDistance))
                 continue;
 
-            if (genericDistance < minGenericDistance)
+            if ((genericDistance < minGenericDistance) || ((genericDistance == minGenericDistance) && (parentHadronicEnergy > bestParentHadronicEnergy)))
             {
                 minGenericDistance = genericDistance;
                 pBestParentCluster = pParentCluster;
+                bestParentHadronicEnergy = parentHadronicEnergy;
             }
         }
 

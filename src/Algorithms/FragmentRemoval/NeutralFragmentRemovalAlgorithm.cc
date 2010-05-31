@@ -146,6 +146,7 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Cl
     Cluster *&pBestDaughterCluster) const
 {
     float highestEvidence(m_minEvidence);
+    float highestEvidenceParentEnergy(0.);
 
     for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
@@ -160,11 +161,14 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Cl
 
             const float evidence(this->GetEvidenceForMerge(clusterContact));
 
-            if (evidence > highestEvidence)
+            const float parentEnergy(clusterContact.GetParentCluster()->GetHadronicEnergy());
+
+            if ((evidence > highestEvidence) || ((evidence == highestEvidence) && (parentEnergy > highestEvidenceParentEnergy)))
             {
                 highestEvidence = evidence;
                 pBestDaughterCluster = pDaughterCluster;
                 pBestParentCluster = clusterContact.GetParentCluster();
+                highestEvidenceParentEnergy = parentEnergy;
             }
         }
     }

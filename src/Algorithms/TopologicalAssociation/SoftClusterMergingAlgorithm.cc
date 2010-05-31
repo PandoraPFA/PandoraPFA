@@ -24,7 +24,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
     // Create a vector of input clusters, ordered by inner layer
     ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());
-    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayerIncEnergy);
+    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayer);
 
     // Create a list containing both input and photon clusters
     ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
@@ -49,7 +49,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
             continue;
 
         Cluster *pBestParentCluster = NULL;
-        PseudoLayer bestParentInnerLayer(0);
+        float bestParentClusterEnergy(0.);
         float closestDistance(std::numeric_limits<float>::max());
 
         const CartesianVector &daughterInitialDirection(pDaughterCluster->GetInitialDirection());
@@ -65,7 +65,9 @@ StatusCode SoftClusterMergingAlgorithm::Run()
             if (pParentCluster->GetNCaloHits() <= m_maxHitsInSoftCluster)
                 continue;
 
-            if (pParentCluster->GetHadronicEnergy() < m_minClusterHadEnergy)
+            const float parentClusterEnergy(pParentCluster->GetHadronicEnergy());
+
+            if (parentClusterEnergy < m_minClusterHadEnergy)
                 continue;
 
             // Apply simple preselection using cosine of opening angle between the clusters
@@ -76,12 +78,12 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
             const float distance(ClusterHelper::GetDistanceToClosestHit(pParentCluster, pDaughterCluster));
 
-            // In event of equidistant parent candidates, choose innermost cluster
-            if ((distance < closestDistance) || ((distance == closestDistance) && (pParentCluster->GetInnerPseudoLayer() < bestParentInnerLayer)))
+            // In event of equidistant parent candidates, choose highest energy cluster
+            if ((distance < closestDistance) || ((distance == closestDistance) && (parentClusterEnergy > bestParentClusterEnergy)))
             {
                 closestDistance = distance;
                 pBestParentCluster = pParentCluster;
-                bestParentInnerLayer = pParentCluster->GetInnerPseudoLayer();
+                bestParentClusterEnergy = parentClusterEnergy;
             }
         }
 

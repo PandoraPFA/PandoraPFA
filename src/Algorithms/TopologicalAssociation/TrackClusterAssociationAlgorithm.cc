@@ -46,6 +46,9 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
         float minDistance(m_maxTrackClusterDistance);
         float minLowEnergyDistance(m_maxTrackClusterDistance);
 
+        float minEnergyDifference(std::numeric_limits<float>::max());
+        float minLowEnergyDifference(std::numeric_limits<float>::max());
+
         // Identify the closest cluster and also the closest cluster below a specified hadronic energy threshold
         for (ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end();
             clusterIter != clusterIterEnd; ++clusterIter)
@@ -59,20 +62,24 @@ StatusCode TrackClusterAssociationAlgorithm::Run()
             if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack, pCluster, m_maxSearchLayer, m_parallelDistanceCut, trackClusterDistance))
                 continue;
 
+            const float energyDifference(std::fabs(pCluster->GetHadronicEnergy() - pTrack->GetEnergyAtDca()));
+
             if (pCluster->GetHadronicEnergy() > m_lowEnergyCut)
             {
-                if (trackClusterDistance < minDistance)
+                if ((trackClusterDistance < minDistance) || ((trackClusterDistance == minDistance) && (energyDifference < minEnergyDifference)))
                 {
                     minDistance = trackClusterDistance;
                     pBestCluster = pCluster;
+                    minEnergyDifference = energyDifference;
                 }
             }
             else
             {
-                if (trackClusterDistance < minLowEnergyDistance)
+                if ((trackClusterDistance < minLowEnergyDistance) || ((trackClusterDistance == minLowEnergyDistance) && (energyDifference < minLowEnergyDifference)))
                 {
                     minLowEnergyDistance = trackClusterDistance;
                     pBestLowEnergyCluster = pCluster;
+                    minLowEnergyDifference = energyDifference;
                 }
             }
         }

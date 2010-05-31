@@ -66,6 +66,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
 
         // Identify best cluster to be associated with this track, using projection of track helix onto endcap
         Cluster *pBestCluster(NULL);
+        float minEnergyDifference(std::numeric_limits<float>::max());
         float smallestDeltaR(std::numeric_limits<float>::max());
 
         for (ClusterList::const_iterator iterC = pClusterList->begin(), iterCEnd = pClusterList->end(); iterC != iterCEnd; ++iterC)
@@ -171,10 +172,16 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
                 isPossibleMatch = true;
             }
 
-            if (isPossibleMatch && (deltaR < smallestDeltaR))
+            if (isPossibleMatch)
             {
-                smallestDeltaR = deltaR;
-                pBestCluster = pCluster;
+                const float energyDifference(std::fabs(pCluster->GetHadronicEnergy() - pTrack->GetEnergyAtDca()));
+
+                if ((deltaR < smallestDeltaR) || ((deltaR == smallestDeltaR) && (energyDifference < minEnergyDifference)))
+                {
+                    smallestDeltaR = deltaR;
+                    pBestCluster = pCluster;
+                    minEnergyDifference = energyDifference;
+                }
             }
         }
 

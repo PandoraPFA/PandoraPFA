@@ -29,7 +29,9 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    typedef std::multimap<float, pandora::Cluster *> ConeFractionToClusterMap;
+    typedef std::pair<pandora::Cluster *, unsigned int> ClusterIndexPair;
+    typedef std::multimap<float, ClusterIndexPair> ConeFractionToClusterMap;
+    typedef std::vector<ClusterIndexPair> ClusterIndexPairList;
 
     std::string             m_trackClusterAssociationAlgName;       ///< The name of the track-cluster association algorithm to run
 

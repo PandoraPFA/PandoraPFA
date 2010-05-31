@@ -43,6 +43,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
 
         Cluster *pBestHadron(NULL), *pBestLeavingTrack(NULL), *pBestNonLeavingTrack(NULL);
         float bestDCosHadron(m_dCosCut), bestDCosLeavingTrack(m_dCosCut), bestDCosNonLeavingTrack(m_dCosCut);
+        float bestEnergyHadron(0.), bestEnergyLeavingTrack(0.), bestEnergyNonLeavingTrack(0.);
 
         // Calculate muon cluster properties
         const PseudoLayer muonClusterInnerLayer(pMuonCluster->GetInnerPseudoLayer());
@@ -68,7 +69,9 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
             Cluster *pCluster = *iterJ;
 
             // Apply basic threshold cuts to cluster candidate
-            if (pCluster->GetHadronicEnergy() < m_minClusterHadronicEnergy)
+            const float clusterEnergy(pCluster->GetHadronicEnergy());
+
+            if (clusterEnergy < m_minClusterHadronicEnergy)
                 continue;
 
             if (pCluster->GetNCaloHits() < m_minHitsInCluster)
@@ -93,17 +96,18 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
             // Identify best association with a leaving, non-track-associated cluster
             if (isLeavingDetector && !hasAssociatedTrack)
             {
-                if (dCos > bestDCosHadron)
+                if ((dCos > bestDCosHadron) || ((dCos == bestDCosHadron) && (clusterEnergy > bestEnergyHadron)))
                 {
                     bestDCosHadron = dCos;
                     pBestHadron = pCluster;
+                    bestEnergyHadron = clusterEnergy;
                 }
             }
 
             // Identify best association with a leaving, track-associated cluster
             if (isLeavingDetector && hasAssociatedTrack)
             {
-                if (dCos > bestDCosLeavingTrack)
+                if ((dCos > bestDCosLeavingTrack) || ((dCos == bestDCosLeavingTrack) && (clusterEnergy > bestEnergyLeavingTrack)))
                 {
                     const float chi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetCorrectedHadronicEnergy() + energyLostInCoil,
                         trackEnergySum));
@@ -112,6 +116,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
                     {
                         bestDCosLeavingTrack = dCos;
                         pBestLeavingTrack = pCluster;
+                        bestEnergyLeavingTrack = clusterEnergy;
                     }
                 }
             }
@@ -119,7 +124,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
             // Identify best association with a non-leaving, track-associated cluster
             if (!isLeavingDetector && hasAssociatedTrack)
             {
-                if (dCos > bestDCosNonLeavingTrack)
+                if ((dCos > bestDCosNonLeavingTrack) || ((dCos == bestDCosNonLeavingTrack) && (clusterEnergy > bestEnergyNonLeavingTrack)))
                 {
                     const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetCorrectedHadronicEnergy(), trackEnergySum));
                     const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetCorrectedHadronicEnergy() + energyLostInCoil,
@@ -129,6 +134,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
                     {
                         bestDCosNonLeavingTrack = dCos;
                         pBestNonLeavingTrack = pCluster;
+                        bestEnergyNonLeavingTrack = clusterEnergy;
                     }
                 }
             }

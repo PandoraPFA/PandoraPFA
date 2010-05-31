@@ -56,6 +56,7 @@ StatusCode BackscatteredTracksAlgorithm::Run()
             continue;
 
         Cluster *pBestParentCluster(NULL);
+        float bestParentClusterEnergy(0.);
         float minFitDistanceToClosestHit(m_maxFitDistanceToClosestHit);
 
         // Find the most plausible parent cluster, with the smallest distance to the projection of the daughter cluster fit
@@ -87,10 +88,14 @@ StatusCode BackscatteredTracksAlgorithm::Run()
 
             const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(daughterClusterFitResult, pParentCluster, fitProjectionInnerLayer, fitProjectionOuterLayer));
 
-            if (fitDistanceToClosestHit < minFitDistanceToClosestHit)
+            const float parentClusterEnergy(pParentCluster->GetHadronicEnergy());
+
+            if ((fitDistanceToClosestHit < minFitDistanceToClosestHit) ||
+                ((fitDistanceToClosestHit == minFitDistanceToClosestHit) && (parentClusterEnergy > bestParentClusterEnergy)))
             {
                 minFitDistanceToClosestHit = fitDistanceToClosestHit;
                 pBestParentCluster = pParentCluster;
+                bestParentClusterEnergy = parentClusterEnergy;
             }
         }
 

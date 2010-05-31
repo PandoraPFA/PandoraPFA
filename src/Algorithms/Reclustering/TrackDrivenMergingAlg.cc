@@ -23,9 +23,17 @@ StatusCode TrackDrivenMergingAlg::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(), iterIEnd = pClusterList->end(); iterI != iterIEnd; ++iterI)
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
+
+    const unsigned int nClusters(clusterVector.size());
+
+    for (unsigned int i = 0; i < nClusters; ++i)
     {
-        Cluster *pParentCluster = *iterI;
+        Cluster *pParentCluster = clusterVector[i];
+
+        if (NULL == pParentCluster)
+            continue;
 
         // Only consider contained clusters with specific range of track associations
         const TrackList &parentTrackList(pParentCluster->GetAssociatedTrackList());
@@ -61,14 +69,18 @@ StatusCode TrackDrivenMergingAlg::Run()
         float highestConeFraction(0.);
         Cluster *pBestDaughterCluster(NULL);
 
+        static const unsigned int MAX_INDEX(std::numeric_limits<unsigned int>::max());
+        unsigned int bestDaughterClusterIndex(MAX_INDEX);
+
         ConeFractionToClusterMap coneFractionToClusterMap;
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
 
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(), iterJEnd = pClusterList->end(); iterJ != iterJEnd; ++iterJ)
+        for (unsigned int j = 0; j < nClusters; ++j)
         {
-            Cluster *pDaughterCluster = *iterJ;
+            Cluster *pDaughterCluster = clusterVector[j];
 
-            if (pParentCluster == pDaughterCluster)
+            // Check to see if cluster has already been changed
+            if ((NULL == pDaughterCluster) || (pParentCluster == pDaughterCluster))
                 continue;
 
             if (!pDaughterCluster->GetAssociatedTrackList().empty())
@@ -86,6 +98,7 @@ StatusCode TrackDrivenMergingAlg::Run()
             {
                 highestConeFraction = coneFraction;
                 pBestDaughterCluster = pDaughterCluster;
+                bestDaughterClusterIndex = j;
             }
 
             // Store all cone fraction values in order to consider multiple merges
@@ -94,13 +107,16 @@ StatusCode TrackDrivenMergingAlg::Run()
             if (coneFraction > m_minConeFractionMultiple)
             {
                 if ((daughterInnerLayer < parentOuterLayer) || (daughterInnerLayer - parentOuterLayer < m_maxLayerSeparationMultiple))
-                    coneFractionToClusterMap.insert(ConeFractionToClusterMap::value_type(coneFraction, pDaughterCluster));
+                {
+                    coneFractionToClusterMap.insert(ConeFractionToClusterMap::value_type(coneFraction, std::make_pair(pDaughterCluster, j)));
+                }
             }
         }
 
         // If able to find match to a single cluster do so
-        if ((highestConeFraction > m_minConeFractionSingle) && (NULL != pBestDaughterCluster))
+        if ((highestConeFraction > m_minConeFractionSingle) && (NULL != pBestDaughterCluster) && (MAX_INDEX != bestDaughterClusterIndex))
         {
+            clusterVector[bestDaughterClusterIndex] = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestDaughterCluster));
             continue;
         }
@@ -108,13 +124,13 @@ StatusCode TrackDrivenMergingAlg::Run()
         // If single merge unsuccessful, consider multiple merges: work through the cone fraction map, starting with highest fractions
         float lastChi(originalChi);
         float daughterClusterEnergySum(0.);
-        ClusterVector daughterClusters;
+        ClusterIndexPairList daughterClusters;
         bool performMultipleMerge(false);
 
         for (ConeFractionToClusterMap::const_reverse_iterator iter = coneFractionToClusterMap.rbegin(), iterEnd = coneFractionToClusterMap.rend();
             iter != iterEnd; ++iter)
         {
-            daughterClusterEnergySum += iter->second->GetCorrectedHadronicEnergy();
+            daughterClusterEnergySum += iter->second.first->GetCorrectedHadronicEnergy();
             const float newChi((parentClusterEnergy + daughterClusterEnergySum - trackEnergySum) / sigmaTrackEnergy);
 
             if ((std::fabs(newChi) > std::fabs(lastChi)) || (newChi > std::fabs(m_chiToAttemptMerging)))
@@ -131,9 +147,10 @@ StatusCode TrackDrivenMergingAlg::Run()
             continue;
 
         // Finally, merge parent with the selected daughter clusters
-        for (ClusterVector::const_iterator iter = daughterClusters.begin(), iterEnd = daughterClusters.end(); iter != iterEnd; ++iter)
+        for (ClusterIndexPairList::const_iterator iter = daughterClusters.begin(), iterEnd = daughterClusters.end(); iter != iterEnd; ++iter)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, *iter));
+            clusterVector[iter->second] = NULL;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, iter->first));
         }
 
         // ATTN: haven't implemented the "dubious partial merge" present in old Pandora. This would merge daughter cluster with highest

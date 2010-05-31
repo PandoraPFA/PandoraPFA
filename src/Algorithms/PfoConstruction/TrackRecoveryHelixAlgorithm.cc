@@ -129,6 +129,7 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
 
         Track *pBestTrack(NULL);
         Cluster *pBestCluster(NULL);
+        float minEnergyDifference(std::numeric_limits<float>::max());
         float closestApproach(std::numeric_limits<float>::max());
 
         // Find the closest track-cluster pairing
@@ -139,12 +140,14 @@ StatusCode TrackRecoveryHelixAlgorithm::MakeTrackClusterAssociations(TrackAssoci
                 infoIter != infoIterEnd; ++infoIter)
             {
                 const float approach(infoIter->GetClosestApproach());
+                const float energyDifference(std::fabs(infoIter->GetCluster()->GetHadronicEnergy() - iter->first->GetEnergyAtDca()));
 
-                if (approach < closestApproach)
+                if ((approach < closestApproach) || ((approach == closestApproach) && (energyDifference < minEnergyDifference)))
                 {
                     closestApproach = approach;
                     pBestTrack = iter->first;
                     pBestCluster = infoIter->GetCluster();
+                    minEnergyDifference = energyDifference;
                 }
             }
         }

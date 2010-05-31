@@ -35,6 +35,7 @@ StatusCode ConeBasedMergingAlgorithm::Run()
             continue;
 
         Cluster *pBestParentCluster(NULL);
+        float bestParentClusterEnergy(0.);
         float highestConeFraction(m_minConeFraction);
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -69,10 +70,13 @@ StatusCode ConeBasedMergingAlgorithm::Run()
             const ClusterFitResult &mipFitResult = iterJ->second;
             const float fractionInCone(this->GetFractionInCone(pParentCluster, pDaughterCluster, mipFitResult));
 
-            if (fractionInCone > highestConeFraction)
+            const float parentClusterEnergy(pParentCluster->GetHadronicEnergy());
+
+            if ((fractionInCone > highestConeFraction) || ((fractionInCone == highestConeFraction) && (parentClusterEnergy > bestParentClusterEnergy)))
             {
                 highestConeFraction = fractionInCone;
                 pBestParentCluster = pParentCluster;
+                bestParentClusterEnergy = parentClusterEnergy;
             }
         }
 

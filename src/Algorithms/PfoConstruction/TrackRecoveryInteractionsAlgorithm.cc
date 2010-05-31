@@ -40,6 +40,7 @@ StatusCode TrackRecoveryInteractionsAlgorithm::Run()
 
         // Identify best cluster to be associated with this track, based on energy consistency and proximity
         Cluster *pBestCluster(NULL);
+        float minEnergyDifference(std::numeric_limits<float>::max());
         float smallestTrackClusterDistance(std::numeric_limits<float>::max());
 
         for (ClusterList::const_iterator iterC = pClusterList->begin(), iterCEnd = pClusterList->end(); iterC != iterCEnd; ++iterC)
@@ -57,10 +58,14 @@ StatusCode TrackRecoveryInteractionsAlgorithm::Run()
                 continue;
             }
 
-            if (trackClusterDistance < smallestTrackClusterDistance)
+            const float energyDifference(std::fabs(pCluster->GetHadronicEnergy() - pTrack->GetEnergyAtDca()));
+
+            if ((trackClusterDistance < smallestTrackClusterDistance) ||
+                ((trackClusterDistance == smallestTrackClusterDistance) && (energyDifference < minEnergyDifference)))
             {
                 smallestTrackClusterDistance = trackClusterDistance;
                 pBestCluster = pCluster;
+                minEnergyDifference = energyDifference;
             }
         }
 

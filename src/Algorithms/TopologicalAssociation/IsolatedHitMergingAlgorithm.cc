@@ -22,7 +22,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
     // Create a vector of input clusters, ordered by inner layer
     ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());
-    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayerIncEnergy);
+    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayer);
 
     // Create a list containing both input and photon clusters
     ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
@@ -62,7 +62,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             CaloHit *pCaloHit = *hitIter;
 
             Cluster *pBestHostCluster(NULL);
-            PseudoLayer bestHostInnerLayer(0);
+            float bestHostClusterEnergy(0.);
             float minDistance(m_maxRecombinationDistance);
 
             // Find the most appropriate cluster for this newly-available hit
@@ -74,13 +74,14 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
                     continue;
 
                 const float distance(this->GetDistanceToHit(pNewHostCluster, pCaloHit));
+                const float hostClusterEnergy(pNewHostCluster->GetHadronicEnergy());
 
-                // In event of equidistant host candidates, choose outermost cluster
-                if ((distance < minDistance) || ((distance == minDistance) && (pNewHostCluster->GetInnerPseudoLayer() > bestHostInnerLayer)))
+                // In event of equidistant host candidates, choose highest energy cluster
+                if ((distance < minDistance) || ((distance == minDistance) && (hostClusterEnergy > bestHostClusterEnergy)))
                 {
                     minDistance = distance;
                     pBestHostCluster = pNewHostCluster;
-                    bestHostInnerLayer = pNewHostCluster->GetInnerPseudoLayer();
+                    bestHostClusterEnergy = hostClusterEnergy;
                 }
             }
 
@@ -106,7 +107,7 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
                 continue;
 
             Cluster *pBestHostCluster(NULL);
-            PseudoLayer bestHostInnerLayer(0);
+            float bestHostClusterEnergy(0.);
             float minDistance(m_maxRecombinationDistance);
 
             // Find most appropriate cluster for this isolated hit
@@ -115,12 +116,13 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
                 Cluster *pCluster = *iterJ;
 
                 const float distance(this->GetDistanceToHit(pCluster, pCaloHit));
+                const float hostClusterEnergy(pCluster->GetHadronicEnergy());
 
-                if ((distance < minDistance) || ((distance == minDistance) && (pCluster->GetInnerPseudoLayer() > bestHostInnerLayer)))
+                if ((distance < minDistance) || ((distance == minDistance) && (hostClusterEnergy > bestHostClusterEnergy)))
                 {
                     minDistance = distance;
                     pBestHostCluster = pCluster;
-                    bestHostInnerLayer = pCluster->GetInnerPseudoLayer();
+                    bestHostClusterEnergy = hostClusterEnergy;
                 }
             }
 

@@ -69,6 +69,7 @@ StatusCode ForceSplitTrackAssociationsAlg::Run()
 
                 // Identify most suitable cluster for calo hit, using distance to helix fit as figure of merit
                 Cluster *pBestCluster = NULL;
+                float bestClusterEnergy(0.);
                 float minDistanceToTrack(std::numeric_limits<float>::max());
 
                 for (TrackToClusterMap::const_iterator mapIter = trackToClusterMap.begin(), mapIterEnd = trackToClusterMap.end();
@@ -80,11 +81,13 @@ StatusCode ForceSplitTrackAssociationsAlg::Run()
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint(hitPosition, helixSeparation));
 
                     const float distanceToTrack(helixSeparation.GetMagnitude());
+                    const float clusterEnergy(mapIter->second->GetHadronicEnergy());
 
-                    if (distanceToTrack < minDistanceToTrack)
+                    if ((distanceToTrack < minDistanceToTrack) || ((distanceToTrack == minDistanceToTrack) && (clusterEnergy > bestClusterEnergy)))
                     {
                         minDistanceToTrack = distanceToTrack;
                         pBestCluster = mapIter->second;
+                        bestClusterEnergy = clusterEnergy;
                     }
                 }
 

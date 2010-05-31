@@ -38,15 +38,6 @@ public:
     static bool SortByInnerLayer(const pandora::Cluster *const pLhs, const pandora::Cluster *const pRhs);
 
     /**
-     *  @brief  Sort clusters by ascending inner layer, and by descending mip fraction within a layer, using
-     *          hadronic energy as a final discrimant to enable a unique ordering
-     * 
-     *  @param  pLhs address of first cluster
-     *  @param  pRhs address of second cluster
-     */
-    static bool SortByInnerLayerIncEnergy(const pandora::Cluster *const pLhs, const pandora::Cluster *const pRhs);
-
-    /**
      *  @brief  Get the ordered calo hit list
      * 
      *  @return The ordered calo hit list by reference
@@ -490,23 +481,6 @@ private:
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline bool Cluster::SortByInnerLayer(const Cluster *const pLhs, const Cluster *const pRhs)
-{
-    const PseudoLayer innerLayerLhs(pLhs->GetInnerPseudoLayer()), innerLayerRhs(pRhs->GetInnerPseudoLayer());
-
-    if (innerLayerLhs != innerLayerRhs)
-        return (innerLayerLhs < innerLayerRhs);
-
-    const float mipFractionLhs(pLhs->GetMipFraction()), mipFractionRhs(pRhs->GetMipFraction());
-
-    if (mipFractionLhs != mipFractionRhs)
-        return (mipFractionLhs > mipFractionRhs);
-
-    return (pLhs->GetNCaloHits() > pRhs->GetNCaloHits());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool Cluster::SortByInnerLayerIncEnergy(const Cluster *const pLhs, const Cluster *const pRhs)
 {
     const PseudoLayer innerLayerLhs(pLhs->GetInnerPseudoLayer()), innerLayerRhs(pRhs->GetInnerPseudoLayer());
 
