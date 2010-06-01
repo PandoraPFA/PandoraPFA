@@ -17,27 +17,16 @@ using namespace pandora;
 
 StatusCode IsolatedHitMergingAlgorithm::Run()
 {
-    const ClusterList *pInputClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pInputClusterList));
+    const ClusterList *pClusterList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     // Create a vector of input clusters, ordered by inner layer
-    ClusterVector inputClusterVector(pInputClusterList->begin(), pInputClusterList->end());
-    std::sort(inputClusterVector.begin(), inputClusterVector.end(), Cluster::SortByInnerLayer);
-
-    // Create a list containing both input and photon clusters
-    ClusterList combinedClusterList(pInputClusterList->begin(), pInputClusterList->end());
-
-    const ClusterList *pPhotonClusterList = NULL;
-
-    if (m_shouldUsePhotonClusters)
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_photonClusterListName, pPhotonClusterList));
-        combinedClusterList.insert(pPhotonClusterList->begin(), pPhotonClusterList->end());
-    }
+    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
 
     // FIRST PART - find "small" clusters, below threshold number of calo hits, delete them and associate hits with other clusters
-    for (ClusterVector::iterator iterI = inputClusterVector.begin(), iterIEnd = inputClusterVector.end(); iterI != iterIEnd; ++iterI)
+    for (ClusterVector::iterator iterI = clusterVector.begin(), iterIEnd = clusterVector.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pClusterToDelete = *iterI;
 
@@ -52,7 +41,6 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
         CaloHitList caloHitList;
         pClusterToDelete->GetOrderedCaloHitList().GetCaloHitList(caloHitList);
 
-        combinedClusterList.erase(pClusterToDelete);
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pClusterToDelete));
         *iterI = NULL;
 
@@ -66,9 +54,12 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             float minDistance(m_maxRecombinationDistance);
 
             // Find the most appropriate cluster for this newly-available hit
-            for (ClusterList::const_iterator iterJ = combinedClusterList.begin(), iterJEnd = combinedClusterList.end(); iterJ != iterJEnd; ++iterJ)
+            for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
             {
                 Cluster *pNewHostCluster = *iterJ;
+
+                if (NULL == pNewHostCluster)
+                    continue;
 
                 if (pNewHostCluster->GetNCaloHits() < nCaloHits)
                     continue;
@@ -111,9 +102,12 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
             float minDistance(m_maxRecombinationDistance);
 
             // Find most appropriate cluster for this isolated hit
-            for (ClusterList::const_iterator iterJ = combinedClusterList.begin(), iterJEnd = combinedClusterList.end(); iterJ != iterJEnd; ++iterJ)
+            for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
             {
                 Cluster *pCluster = *iterJ;
+
+                if (NULL == pCluster)
+                    continue;
 
                 const float distance(this->GetDistanceToHit(pCluster, pCaloHit));
                 const float hostClusterEnergy(pCluster->GetHadronicEnergy());
@@ -172,16 +166,6 @@ float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluste
 
 StatusCode IsolatedHitMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_shouldUsePhotonClusters = false;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShouldUsePhotonClusters", m_shouldUsePhotonClusters));
-
-    if (m_shouldUsePhotonClusters)
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
-            "PhotonClusterListName", m_photonClusterListName));
-    }
-
     m_minHitsInCluster = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));

@@ -39,9 +39,6 @@ private:
      */
     float GetDistanceToHit(const pandora::Cluster *const pCluster, const pandora::CaloHit *const pCaloHit) const;
 
-    bool            m_shouldUsePhotonClusters;          ///< Whether to match soft cluster candidates to both input and photon clusters
-    std::string     m_photonClusterListName;            ///< The name of the photon cluster list to use
-
     unsigned int    m_minHitsInCluster;                 ///< The min number of hits allowed in a cluster - smaller clusters will be split up
     float           m_maxRecombinationDistance;         ///< The max distance between calo hit and cluster to allow addition of hit
     float           m_minCosOpeningAngle;               ///< Min cosine of angle between hit and cluster directions to allow addition of hit

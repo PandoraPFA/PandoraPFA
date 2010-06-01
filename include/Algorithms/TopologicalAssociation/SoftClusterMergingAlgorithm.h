@@ -50,9 +50,6 @@ private:
 
     std::string     m_trackClusterAssociationAlgName;       ///< The name of the track-cluster association algorithm to run
 
-    bool            m_shouldUsePhotonClusters;              ///< Whether to match soft cluster candidates to both input and photon clusters
-    std::string     m_photonClusterListName;                ///< The name of the photon cluster list to use
-
     unsigned int    m_maxHitsInSoftCluster;                 ///< The maximum number of hits in a soft cluster
     unsigned int    m_maxLayersSpannedBySoftCluster;        ///< The maximum number of pseudo layers spanned by a soft cluster
     float           m_maxHadEnergyForSoftClusterNoTrack;    ///< The maximum hadronic energy for a soft cluster with no track associations
