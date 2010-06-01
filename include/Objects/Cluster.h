@@ -451,7 +451,7 @@ private:
     ValueByPseudoLayerMap   m_sumYByPseudoLayer;            ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
     ValueByPseudoLayerMap   m_sumZByPseudoLayer;            ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
 
-    CartesianVector         m_initialDirection;             ///< The initial direction of the cluster
+    mutable CartesianVector m_initialDirection;             ///< The initial direction of the cluster
     ClusterFitResult        m_currentFitResult;             ///< The current fit result, usually set by clustering algorithm, as cluster grows
 
     ClusterFitResult        m_fitToAllHitsResult;           ///< The result of a linear fit to all calo hits in the cluster
@@ -633,6 +633,9 @@ inline PseudoLayer Cluster::GetOuterPseudoLayer() const
 
 inline const CartesianVector &Cluster::GetInitialDirection() const
 {
+    if (!m_initialDirection.IsInitialized())
+        m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
+
     return m_initialDirection;
 }
 
@@ -753,6 +756,7 @@ inline Cluster::~Cluster()
 inline void Cluster::ResetOutdatedProperties()
 {
     m_isFitUpToDate = false;
+    m_initialDirection.Reset();
     m_fitToAllHitsResult.Reset();
     m_showerStartLayer.Reset();
     m_isPhotonFast.Reset();

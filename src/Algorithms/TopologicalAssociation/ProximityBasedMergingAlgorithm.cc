@@ -117,7 +117,8 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
             if (STATUS_CODE_SUCCESS != this->GetGenericDistanceBetweenClusters(pParentCluster, pDaughterCluster, startLayer, endLayer, genericDistance))
                 continue;
 
-            if ((genericDistance < minGenericDistance) || ((genericDistance == minGenericDistance) && (parentHadronicEnergy > bestParentHadronicEnergy)))
+            if ((genericDistance < minGenericDistance) ||
+                ((genericDistance == minGenericDistance) && (parentHadronicEnergy > bestParentHadronicEnergy)))
             {
                 minGenericDistance = genericDistance;
                 pBestParentCluster = pParentCluster;
@@ -134,7 +135,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
 
         const float innerLayerSeparation((parentInnerLayerCentroid - daughterInnerLayerCentroid).GetMagnitude());
 
-        if(innerLayerSeparation > m_maxInnerLayerSeparation)
+        if (innerLayerSeparation > m_maxInnerLayerSeparation)
             continue;
 
         // Finally, check to see if daughter cluster is likely to be a fragment of the parent cluster
@@ -216,7 +217,7 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     // 1. Large fraction of hits in clusters that are deemed to be "close"
     const float closeHitFraction(FragmentRemovalHelper::GetFractionOfCloseHits(pDaughterCluster, pParentCluster, m_closeHitThreshold));
 
-    if (closeHitFraction >= m_minCloseHitFraction)
+    if ((closeHitFraction - m_minCloseHitFraction) > std::numeric_limits<float>::epsilon())
     {
         return true;
     }
@@ -228,7 +229,7 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
     StatusCode statusCode = FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, m_clusterContactThreshold,
         nContactLayers, contactFraction);
 
-    if ((STATUS_CODE_SUCCESS == statusCode) && (contactFraction >= m_minContactFraction))
+    if ((STATUS_CODE_SUCCESS == statusCode) && ((contactFraction - m_minContactFraction) > std::numeric_limits<float>::epsilon()))
     {
         return true;
     }
