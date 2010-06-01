@@ -36,7 +36,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
         if(!this->IsSoftCluster(pDaughterCluster))
             continue;
 
-        ClusterVector::iterator bestParentClusterIter(clusterVector.end());
+        Cluster *pBestParentCluster(NULL);
         float bestParentClusterEnergy(0.);
         float closestDistance(std::numeric_limits<float>::max());
 
@@ -70,18 +70,18 @@ StatusCode SoftClusterMergingAlgorithm::Run()
             if ((distance < closestDistance) || ((distance == closestDistance) && (parentClusterEnergy > bestParentClusterEnergy)))
             {
                 closestDistance = distance;
-                bestParentClusterIter = iterJ;
+                pBestParentCluster = pParentCluster;
                 bestParentClusterEnergy = parentClusterEnergy;
             }
         }
 
-        if (bestParentClusterIter != clusterVector.end())
+        if (NULL == pBestParentCluster)
             continue;
 
         if (this->CanMergeSoftCluster(pDaughterCluster, closestDistance))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, *bestParentClusterIter, pDaughterCluster));
-            *bestParentClusterIter = NULL;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+            *iterI = NULL;
         }
     }
 

@@ -43,7 +43,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
         if (NULL == pParentCluster)
             continue;
 
-        if (pParentCluster->GetMipFraction() <= m_mipFractionCut)
+        if ((pParentCluster->GetMipFraction() - m_mipFractionCut) < std::numeric_limits<float>::epsilon())
             continue;
 
         if (pParentCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster)
@@ -63,6 +63,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
 
         float minDistanceToCentroid(m_maxDistanceToClosestCentroid);
         ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
+        float bestDaughterClusterEnergy(std::numeric_limits<float>::max());
 
         // Compare this mip candidate cluster with all other clusters
         for (ClusterVector::iterator iterJ = clusterVector.begin(); iterJ != clusterVector.end(); ++iterJ)
@@ -96,10 +97,14 @@ StatusCode ShowerMipMergingAlgorithm::Run()
             const float distanceToClosestCentroid(ClusterHelper::GetDistanceToClosestCentroid(parentClusterFitResult, pDaughterCluster,
                 parentOuterLayer, parentOuterLayer + m_nFitProjectionLayers));
 
-            if (distanceToClosestCentroid < minDistanceToCentroid)
+            const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
+
+            if ((distanceToClosestCentroid < minDistanceToCentroid) ||
+                ((distanceToClosestCentroid == minDistanceToCentroid) && (daughterClusterEnergy < bestDaughterClusterEnergy)))
             {
                 bestDaughterClusterIter = iterJ;
                 minDistanceToCentroid = distanceToClosestCentroid;
+                bestDaughterClusterEnergy = daughterClusterEnergy;
             }
         }
 

@@ -53,6 +53,7 @@ StatusCode BackscatteredTracks2Algorithm::Run()
 
         float minFitDistanceToClosestHit(m_maxFitDistanceToClosestHit);
         ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
+        float bestDaughterClusterEnergy(std::numeric_limits<float>::max());
 
         // Find a compatible daughter cluster
         for (ClusterVector::iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
@@ -87,11 +88,14 @@ StatusCode BackscatteredTracks2Algorithm::Run()
             const float fitDistanceToClosestHit(ClusterHelper::GetDistanceToClosestHit(parentClusterFitResult, pDaughterCluster,
                 daughterInnerLayer, fitProjectionOuterLayer));
 
-            if (fitDistanceToClosestHit < minFitDistanceToClosestHit)
-            {
+            const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
 
+            if ((fitDistanceToClosestHit < minFitDistanceToClosestHit) ||
+                ((fitDistanceToClosestHit == minFitDistanceToClosestHit) && (daughterClusterEnergy < bestDaughterClusterEnergy)))
+            {
                 bestDaughterClusterIter = iterJ;
                 minFitDistanceToClosestHit = fitDistanceToClosestHit;
+                bestDaughterClusterEnergy = daughterClusterEnergy;
             }
         }
 

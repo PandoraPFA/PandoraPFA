@@ -487,11 +487,6 @@ inline bool Cluster::SortByInnerLayer(const Cluster *const pLhs, const Cluster *
     if (innerLayerLhs != innerLayerRhs)
         return (innerLayerLhs < innerLayerRhs);
 
-    const float mipFractionLhs(pLhs->GetMipFraction()), mipFractionRhs(pRhs->GetMipFraction());
-
-    if (mipFractionLhs != mipFractionRhs)
-        return (mipFractionLhs > mipFractionRhs);
-
     const unsigned int nCaloHitsLhs(pLhs->GetNCaloHits()), nCaloHitsRhs(pRhs->GetNCaloHits());
 
     if (nCaloHitsLhs != nCaloHitsRhs)

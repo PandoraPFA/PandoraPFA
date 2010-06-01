@@ -55,6 +55,7 @@ StatusCode ShowerMipMerging2Algorithm::Run()
 
         float minPerpendicularDistance(std::numeric_limits<float>::max());
         ClusterVector::iterator bestDaughterClusterIter(clusterVector.end());
+        float bestDaughterClusterEnergy(std::numeric_limits<float>::max());
 
         // Compare this successfully fitted cluster with all others
         for (ClusterVector::iterator iterJ = clusterVector.begin(); iterJ != clusterVector.end(); ++iterJ)
@@ -89,10 +90,17 @@ StatusCode ShowerMipMerging2Algorithm::Run()
             const CartesianVector parentCrossProduct(parentClusterFitResult.GetDirection().GetCrossProduct(centroidDifference));
             const float perpendicularDistance(parentCrossProduct.GetMagnitude());
 
-            if ((perpendicularDistance < perpendicularDistanceCut) && (perpendicularDistance < minPerpendicularDistance))
+            if (perpendicularDistance > perpendicularDistanceCut)
+                continue;
+
+            const float daughterClusterEnergy(pDaughterCluster->GetHadronicEnergy());
+
+            if ((perpendicularDistance < minPerpendicularDistance) ||
+                ((perpendicularDistance == minPerpendicularDistance) && (daughterClusterEnergy < bestDaughterClusterEnergy)))
             {
                 bestDaughterClusterIter = iterJ;
                 minPerpendicularDistance = perpendicularDistance;
+                bestDaughterClusterEnergy = daughterClusterEnergy;
             }
         }
 
