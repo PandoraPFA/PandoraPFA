@@ -109,6 +109,15 @@ private:
     static bool IsElectronFastDefault(const Cluster *const pCluster);
 
     /**
+     *  @brief  Default pandora fast muon identification function
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsMuonFastDefault(const Cluster *const pCluster);
+
+    /**
      *  @brief  Read the particle id helper settings
      * 
      *  @param  pXmlHandle address of the relevant xml handle
@@ -125,11 +134,9 @@ private:
     static float        m_showerProfileBinWidth;            ///< Bin width used to construct shower profiles, units radiation lengths
     static unsigned int m_showerProfileNBins;               ///< Number of bins used to construct shower profiles
     static float        m_showerProfileMinCosAngle;         ///< Min angular correction used to adjust radiation length measures
-
     static float        m_showerProfileCriticalEnergy;      ///< Critical energy, used to calculate argument for gamma function
     static float        m_showerProfileParameter0;          ///< Parameter0, used to calculate argument for gamma function
     static float        m_showerProfileParameter1;          ///< Parameter1, used to calculate argument for gamma function
-
     static float        m_showerProfileMaxDifference;       ///< Max difference between current and best shower profile comparisons
 
     static float        m_photonIdMipCut_0;                 ///< Default cluster mip fraction cut for photon id
@@ -141,32 +148,24 @@ private:
     static float        m_photonIdMipCut_3;                 ///< Cluster mip fraction cut value 3
     static float        m_photonIdMipCutEnergy_4;           ///< Energy above which mip fraction cut value 4 is applied
     static float        m_photonIdMipCut_4;                 ///< Cluster mip fraction cut value 4
-
     static float        m_photonIdDCosRCutEnergy;           ///< Energy at which photon id cut (on cluster fit result dCosR) changes
     static float        m_photonIdDCosRLowECut;             ///< Low energy cut on cluster fit result dCosR
     static float        m_photonIdDCosRHighECut;            ///< High energy cut on cluster fit result dCosR
-
     static float        m_photonIdRmsCutEnergy;             ///< Energy at which photon id cut (on cluster fit result rms) changes
     static float        m_photonIdRmsLowECut;               ///< Low energy cut on cluster fit result rms
     static float        m_photonIdRmsHighECut;              ///< High energy cut on cluster fit result rms
-
     static float        m_photonIdEndCapZSeparation;        ///< To determine whether cluster strikes endcap: max z distance to inner centroid
     static float        m_photonIdRadiationLengthsCut;      ///< Max number of radiation lengths before cluster inner layer
-
     static float        m_photonIdShowerMaxCut1_0;          ///< Default value for shower max cut 1: min number of layers from inner layer
     static float        m_photonIdShowerMaxCut1Energy_1;    ///< Energy above which shower max cut 1 value 1 is applied
     static float        m_photonIdShowerMaxCut1_1;          ///< Shower max cut 1 value 1
     static float        m_photonIdShowerMaxCut1Energy_2;    ///< Energy above which shower max cut 1 value 2 is applied
     static float        m_photonIdShowerMaxCut1_2;          ///< Shower max cut 1 value 2
-
     static float        m_photonIdShowerMaxCut2;            ///< Shower max cut 2: max number of layers from inner layer
-
     static float        m_photonIdLayer90Cut1;              ///< Cut on cluster layer 90: min number of layers from inner layer
-
     static float        m_photonIdLayer90Cut2Energy;        ///< Energy at which photon id cut (on cluster layer 90) changes
     static float        m_photonIdLayer90LowECut2;          ///< Low energy cut on max number of layers between layer 90 and inner layer
     static float        m_photonIdLayer90HighECut2;         ///< High energy cut on max number of layers between layer 90 and inner layer
-
     static int          m_photonIdLayer90MaxLayersFromECal; ///< Max number of layers between cluster layer 90 and last ecal layer
 
     static unsigned int m_electronIdMaxInnerLayer;          ///< Max inner psuedo layer for fast electron id
@@ -175,6 +174,52 @@ private:
     static float        m_electronIdMaxProfileDiscrepancy;  ///< Max shower profile discrepancy for fast electron id
     static float        m_electronIdProfileDiscrepancyForAutoId;    ///< Shower profile discrepancy for automatic fast electron selection
     static float        m_electronIdMaxResidualEOverP;      ///< Max absolute difference between unity and ratio em energy / track momentum
+
+    static unsigned int m_muonIdMaxInnerLayer;              ///< Max inner psuedo layer for fast muon id
+    static float        m_muonIdMinTrackEnergy;             ///< Min energy of associated track for fast muon id
+    static float        m_muonIdMaxCosThetaTrack;           ///< Max cos theta value for associated track at dca
+    static unsigned int m_muonIdMinECalLayers;              ///< Min number of ecal layers for fast muon id
+    static unsigned int m_muonIdMinHCalLayers;              ///< Min number of hcal layers for fast muon id
+    static float        m_muonIdECalEnergyCut0;             ///< Parameter 0 for ecal energy cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdECalEnergyCut1;             ///< Parameter 1 for ecal energy cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdHCalEnergyCut0;             ///< Parameter 0 for hcal energy cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdHCalEnergyCut1;             ///< Parameter 1 for hcal energy cut: cut = par0 + (par1 * trackEnergy)
+    static unsigned int m_muonIdMinECalLayersForFit;        ///< Min number of ecal layers to perform fit to ecal section of cluster
+    static unsigned int m_muonIdMinHCalLayersForFit;        ///< Min number of hcal layers to perform fit to hcal section of cluster
+    static unsigned int m_muonIdMinMuonLayersForFit;        ///< Min number of muon layers to perform fit to muon section of cluster
+    static unsigned int m_muonIdECalFitInnerLayer;          ///< Inner layer used for fit to ecal section of cluster
+    static unsigned int m_muonIdECalFitOuterLayer;          ///< Outer layer used for fit to ecal section of cluster
+    static unsigned int m_muonIdHCalFitInnerLayer;          ///< Inner layer used for fit to hcal section of cluster
+    static unsigned int m_muonIdHCalFitOuterLayer;          ///< Outer layer used for fit to hcal section of cluster
+    static float        m_muonIdECalRmsCut0;                ///< Parameter 0 for ecal rms cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdECalRmsCut1;                ///< Parameter 1 for ecal rms cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdECalMaxRmsCut;              ///< Max value of ecal rms cut
+    static float        m_muonIdHCalRmsCut0;                ///< Parameter 0 for hcal rms cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdHCalRmsCut1;                ///< Parameter 0 for hcal rms cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdHCalMaxRmsCut;              ///< Max value of hcal rms cut
+    static float        m_muonIdECalMipFractionCut0;        ///< Parameter 0 for ecal mip fraction cut: cut = par0 - (par1 * trackEnergy)
+    static float        m_muonIdECalMipFractionCut1;        ///< Parameter 1 for ecal mip fraction cut: cut = par0 - (par1 * trackEnergy)
+    static float        m_muonIdECalMaxMipFractionCut;      ///< Max value of ecal mip fraction cut
+    static float        m_muonIdHCalMipFractionCut0;        ///< Parameter 0 for hcal mip fraction cut: cut = par0 - (par1 * trackEnergy)
+    static float        m_muonIdHCalMipFractionCut1;        ///< Parameter 1 for hcal mip fraction cut: cut = par0 - (par1 * trackEnergy)
+    static float        m_muonIdHCalMaxMipFractionCut;      ///< Max value of hcal mip fraction cut
+    static float        m_muonIdECalHitsPerLayerCut0;       ///< Parameter 0 for ecal hits per layer cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdECalHitsPerLayerCut1;       ///< Parameter 1 for ecal hits per layer cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdECalMaxHitsPerLayerCut;     ///< Max value of ecal hits per layer cut
+    static float        m_muonIdHCalHitsPerLayerCut0;       ///< Parameter 0 for hcal hits per layer cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdHCalHitsPerLayerCut1;       ///< Parameter 1 for hcal hits per layer cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdHCalMaxHitsPerLayerCut;     ///< Max value of hcal hits per layer cut
+    static float        m_muonIdCurlingTrackEnergy;         ///< Max energy for associated track to be considered as curling
+    static float        m_muonIdInBarrelHitFraction;        ///< Min fraction of hcal hits in barrel region to identify "barrel cluster"
+    static float        m_muonIdTightMipFractionCut;        ///< Tight mip fraction cut
+    static float        m_muonIdTightMipFractionECalCut;    ///< Tight ecal mip fraction cut
+    static float        m_muonIdTightMipFractionHCalCut;    ///< Tight hcal mip fraction cut
+    static unsigned int m_muonIdMinMuonHitsCut;             ///< Min number of hits in muon region
+    static unsigned int m_muonIdMinMuonTrackSegmentHitsCut; ///< Min number of muon track segment hits
+    static float        m_muonIdMuonRmsCut;                 ///< Muon rms cut
+    static float        m_muonIdMaxMuonHitsCut0;            ///< Parameter 0 for max muon hits cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdMaxMuonHitsCut1;            ///< Parameter 1 for max muon hits cut: cut = par0 + (par1 * trackEnergy)
+    static float        m_muonIdMaxMuonHitsCutMinValue;     ///< Min value of max muon hits cut
 
     friend class PandoraSettings;
     friend class PluginManager;

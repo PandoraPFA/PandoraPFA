@@ -18,7 +18,8 @@
 
 #define PANDORA_PARTICLE_ID_LIST(d)                                                                                         \
     d("PhotonFastDefault",                                  &ParticleIdHelper::IsPhotonFastDefault)                         \
-    d("ElectronFastDefault",                                &ParticleIdHelper::IsElectronFastDefault)
+    d("ElectronFastDefault",                                &ParticleIdHelper::IsElectronFastDefault)                       \
+    d("MuonFastDefault",                                    &ParticleIdHelper::IsMuonFastDefault)
 
 #define PANDORA_REGISTER_ENERGY_CORRECTION(a, b, c)                                                                         \
     {                                                                                                                       \
