@@ -17,7 +17,7 @@
 namespace pandora
 {
 
-StatusCode EnergyCorrectionsHelper::EnergyCorrection(Cluster *const pCluster, float &correctedElectromagneticEnergy,
+StatusCode EnergyCorrectionsHelper::EnergyCorrection(const Cluster *const pCluster, float &correctedElectromagneticEnergy,
     float &correctedHadronicEnergy)
 {
     // Hadronic energy corrections
@@ -43,7 +43,7 @@ StatusCode EnergyCorrectionsHelper::EnergyCorrection(Cluster *const pCluster, fl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void EnergyCorrectionsHelper::CleanCluster(Cluster *const pCluster, float &correctedHadronicEnergy)
+void EnergyCorrectionsHelper::CleanCluster(const Cluster *const pCluster, float &correctedHadronicEnergy)
 {
     static const PseudoLayer firstPseudoLayer(TRACK_PROJECTION_LAYER + 1);
 
@@ -107,7 +107,7 @@ void EnergyCorrectionsHelper::CleanCluster(Cluster *const pCluster, float &corre
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void EnergyCorrectionsHelper::ScaleHotHadronEnergy(Cluster *const pCluster, float &correctedHadronicEnergy)
+void EnergyCorrectionsHelper::ScaleHotHadronEnergy(const Cluster *const pCluster, float &correctedHadronicEnergy)
 {
     const unsigned int nHitsInCluster(pCluster->GetNCaloHits());
 
@@ -162,7 +162,7 @@ float EnergyCorrectionsHelper::GetHadronicEnergyInLayer(const OrderedCaloHitList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void EnergyCorrectionsHelper::ApplyMuonEnergyCorrection(Cluster *const pCluster, float &correctedHadronicEnergy)
+void EnergyCorrectionsHelper::ApplyMuonEnergyCorrection(const Cluster *const pCluster, float &correctedHadronicEnergy)
 {
     bool containsMuonHit(false);
     unsigned int nMuonHitsInInnerLayer(0);

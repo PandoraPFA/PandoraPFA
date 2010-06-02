@@ -33,7 +33,7 @@ public:
      *  @param  correctedElectromagneticEnergy to receive the corrected electromagnetic energy
      *  @param  correctedHadronicEnergy to receive the corrected hadronic energy
      */
-    static StatusCode EnergyCorrection(Cluster *const pCluster, float &correctedElectromagneticEnergy, float &correctedHadronicEnergy);
+    static StatusCode EnergyCorrection(const Cluster *const pCluster, float &correctedElectromagneticEnergy, float &correctedHadronicEnergy);
 
 private:
     /**
@@ -43,7 +43,7 @@ private:
      *  @param  pCluster address of the cluster
      *  @param  correctedHadronicEnergy the current corrected hadronic energy measure, which may be modified by this function
      */
-    static void CleanCluster(Cluster *const pCluster, float &correctedHadronicEnergy);
+    static void CleanCluster(const Cluster *const pCluster, float &correctedHadronicEnergy);
 
     /**
      *  @brief  Correct cluster energy by searching for clusters with anomalously high mip energies per constituent calo hit.
@@ -52,7 +52,7 @@ private:
      *  @param  pCluster address of the cluster
      *  @param  correctedHadronicEnergy the current corrected hadronic energy measure, which may be modified by this function
      */
-    static void ScaleHotHadronEnergy(Cluster *const pCluster, float &correctedHadronicEnergy);
+    static void ScaleHotHadronEnergy(const Cluster *const pCluster, float &correctedHadronicEnergy);
 
     /**
      *  @brief  Get the sum of the hadronic energies of all calo hits in a specified layer of an ordered calo hit list
@@ -68,7 +68,7 @@ private:
      *  @param  pCluster address of the cluster
      *  @param  correctedHadronicEnergy the current corrected hadronic energy measure, which may be modified by this function
      */
-    static void ApplyMuonEnergyCorrection(Cluster *const pCluster, float &correctedHadronicEnergy);
+    static void ApplyMuonEnergyCorrection(const Cluster *const pCluster, float &correctedHadronicEnergy);
 
     /**
      *  @brief  Read the energy corrections helper settings

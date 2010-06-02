@@ -19,7 +19,7 @@
 namespace pandora
 {
 
-float ReclusterHelper::GetTrackClusterCompatibility(Cluster *const pCluster, const TrackList &trackList)
+float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList)
 {
     float trackEnergySum(0.);
 

@@ -640,7 +640,7 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
+bool ClusterHelper::CanMergeCluster(const Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
 {
     if (0 == pCluster->GetNCaloHits())
         return false;
@@ -656,7 +656,7 @@ bool ClusterHelper::CanMergeCluster(Cluster *const pCluster, float minMipFractio
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ClusterHelper::IsClusterLeavingDetector(Cluster *const pCluster)
+bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
 {
     if (!pCluster->ContainsHitInOuterSamplingLayer())
         return false;
@@ -707,7 +707,7 @@ bool ClusterHelper::IsClusterLeavingDetector(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer ClusterHelper::GetShowerStartLayer(Cluster *const pCluster)
+PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
 {
     static const float showerStartMipFraction(PandoraSettings::GetInstance()->GetShowerStartMipFraction());
     static const unsigned int showerStartNonMipLayers(PandoraSettings::GetInstance()->GetShowerStartNonMipLayers());

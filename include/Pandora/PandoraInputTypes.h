@@ -148,8 +148,8 @@ typedef std::vector<TrackState> InputTrackStateList;
 typedef std::vector<const void *> CaloHitAddressList, TrackAddressList;
 typedef std::vector<CaloHitAddressList> ClusterAddressList;
 
-typedef void (EnergyCorrectionFunction)(Cluster *, float &);
-typedef bool (ParticleIdFunction)(Cluster *);
+typedef void (EnergyCorrectionFunction)(const Cluster *const, float &);
+typedef bool (ParticleIdFunction)(const Cluster *const);
 
 typedef std::vector<EnergyCorrectionFunction *> EnergyCorrectionFunctionVector;
 

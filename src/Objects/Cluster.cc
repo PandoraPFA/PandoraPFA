@@ -295,7 +295,7 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Cluster::PerformEnergyCorrections()
+void Cluster::PerformEnergyCorrections() const
 {
     float correctedElectromagneticEnergy(0.f), correctedHadronicEnergy(0.f);
 
@@ -308,7 +308,7 @@ void Cluster::PerformEnergyCorrections()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Cluster::CalculateFastPhotonFlag()
+void Cluster::CalculateFastPhotonFlag() const
 {
     const bool fastPhotonFlag(ParticleIdHelper::IsPhotonFast(this));
 
@@ -318,7 +318,7 @@ void Cluster::CalculateFastPhotonFlag()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Cluster::CalculateShowerStartLayer()
+void Cluster::CalculateShowerStartLayer() const
 {
     const PseudoLayer showerStartLayer(ClusterHelper::GetShowerStartLayer(this));
 
@@ -328,7 +328,7 @@ void Cluster::CalculateShowerStartLayer()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Cluster::CalculateShowerProfile()
+void Cluster::CalculateShowerProfile() const
 {
     float showerProfileStart(0.), showerProfileDiscrepancy(0.);
 
@@ -341,7 +341,7 @@ void Cluster::CalculateShowerProfile()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Cluster::CalculateFitToAllHitsResult()
+void Cluster::CalculateFitToAllHitsResult() const
 {
     (void) ClusterHelper::FitPoints(this, m_fitToAllHitsResult);
     m_isFitUpToDate = true;

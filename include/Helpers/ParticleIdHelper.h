@@ -33,7 +33,7 @@ public:
      *  @param  showerProfileStart to receive the shower profile start, in radiation lengths
      *  @param  showerProfileDiscrepancy to receive the shower profile discrepancy
      */
-    static StatusCode CalculateShowerProfile(Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy);
+    static StatusCode CalculateShowerProfile(const Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy);
 
     /**
      *  @brief  Provide fast identification of whether a cluster is a photon
@@ -42,7 +42,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool IsPhotonFast(Cluster *const pCluster);
+    static bool IsPhotonFast(const Cluster *const pCluster);
 
     /**
      *  @brief  Provide a more detailed identification of whether a cluster is a photon
@@ -51,7 +51,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool IsPhotonFull(Cluster *const pCluster);
+    static bool IsPhotonFull(const Cluster *const pCluster);
 
     /**
      *  @brief  Provide fast identification of whether a cluster is an electron
@@ -60,7 +60,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool IsElectronFast(Cluster *const pCluster);
+    static bool IsElectronFast(const Cluster *const pCluster);
 
     /**
      *  @brief  Provide a more detailed identification of whether a cluster is an electron
@@ -69,7 +69,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool IsElectronFull(Cluster *const pCluster);
+    static bool IsElectronFull(const Cluster *const pCluster);
 
     /**
      *  @brief  Provide fast identification of whether a cluster is a muon
@@ -78,7 +78,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool IsMuonFast(Cluster *const pCluster);
+    static bool IsMuonFast(const Cluster *const pCluster);
 
     /**
      *  @brief  Provide a more detailed identification of whether a cluster is a muon
@@ -87,7 +87,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool IsMuonFull(Cluster *const pCluster);
+    static bool IsMuonFull(const Cluster *const pCluster);
 
 private:
     /**
@@ -97,7 +97,7 @@ private:
      * 
      *  @return boolean
      */
-    static bool IsPhotonFastDefault(Cluster *const pCluster);
+    static bool IsPhotonFastDefault(const Cluster *const pCluster);
 
     /**
      *  @brief  Default pandora fast electron identification function
@@ -106,7 +106,7 @@ private:
      * 
      *  @return boolean
      */
-    static bool IsElectronFastDefault(Cluster *const pCluster);
+    static bool IsElectronFastDefault(const Cluster *const pCluster);
 
     /**
      *  @brief  Read the particle id helper settings
@@ -182,7 +182,7 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
+inline bool ParticleIdHelper::IsPhotonFast(const Cluster *const pCluster)
 {
     if (NULL == m_pPhotonFastFunction)
         return false;
@@ -192,7 +192,7 @@ inline bool ParticleIdHelper::IsPhotonFast(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool ParticleIdHelper::IsPhotonFull(Cluster *const pCluster)
+inline bool ParticleIdHelper::IsPhotonFull(const Cluster *const pCluster)
 {
     if (NULL == m_pPhotonFullFunction)
         return false;
@@ -202,7 +202,7 @@ inline bool ParticleIdHelper::IsPhotonFull(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool ParticleIdHelper::IsElectronFast(Cluster *const pCluster)
+inline bool ParticleIdHelper::IsElectronFast(const Cluster *const pCluster)
 {
     if (NULL == m_pElectronFastFunction)
         return false;
@@ -212,7 +212,7 @@ inline bool ParticleIdHelper::IsElectronFast(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool ParticleIdHelper::IsElectronFull(Cluster *const pCluster)
+inline bool ParticleIdHelper::IsElectronFull(const Cluster *const pCluster)
 {
     if (NULL == m_pElectronFullFunction)
         return false;
@@ -222,7 +222,7 @@ inline bool ParticleIdHelper::IsElectronFull(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool ParticleIdHelper::IsMuonFast(Cluster *const pCluster)
+inline bool ParticleIdHelper::IsMuonFast(const Cluster *const pCluster)
 {
     if (NULL == m_pMuonFastFunction)
         return false;
@@ -232,7 +232,7 @@ inline bool ParticleIdHelper::IsMuonFast(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool ParticleIdHelper::IsMuonFull(Cluster *const pCluster)
+inline bool ParticleIdHelper::IsMuonFull(const Cluster *const pCluster)
 {
     if (NULL == m_pMuonFullFunction)
         return false;

@@ -16,7 +16,7 @@
 namespace pandora
 {
 
-StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy)
+StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy)
 {
     // 1. Construct cluster profile.
     const float clusterEnergy(pCluster->GetElectromagneticEnergy() - pCluster->GetIsolatedElectromagneticEnergy());
@@ -174,7 +174,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(Cluster *const pCluster, flo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ParticleIdHelper::IsPhotonFastDefault(Cluster *const pCluster)
+bool ParticleIdHelper::IsPhotonFastDefault(const Cluster *const pCluster)
 {
     // Already flagged as a photon by full photon id algorithm? - overrides fast photon id
     if (pCluster->IsPhoton())
@@ -327,7 +327,7 @@ bool ParticleIdHelper::IsPhotonFastDefault(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ParticleIdHelper::IsElectronFastDefault(Cluster *const pCluster)
+bool ParticleIdHelper::IsElectronFastDefault(const Cluster *const pCluster)
 {
     const TrackList &associatedTrackList(pCluster->GetAssociatedTrackList());
 

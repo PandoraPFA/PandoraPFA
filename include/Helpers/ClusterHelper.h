@@ -323,7 +323,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool CanMergeCluster(Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms);
+    static bool CanMergeCluster(const Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms);
 
     /**
      *  @brief  Whether a cluster should be considered as leaving the calorimeters, leading to leakage of its energy
@@ -332,7 +332,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool IsClusterLeavingDetector(Cluster *const pCluster);
+    static bool IsClusterLeavingDetector(const Cluster *const pCluster);
 
     /**
      *  @brief  Get the layer at which shower can be considered to start; this function evaluates the the starting point of
@@ -342,7 +342,7 @@ public:
      * 
      *  @return The shower start layer
      */
-    static PseudoLayer GetShowerStartLayer(Cluster *const pCluster);
+    static PseudoLayer GetShowerStartLayer(const Cluster *const pCluster);
 
 private:
     /**

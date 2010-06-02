@@ -219,49 +219,49 @@ public:
      * 
      *  @return The cluster fit result
      */
-    const ClusterHelper::ClusterFitResult &GetFitToAllHitsResult();
+    const ClusterHelper::ClusterFitResult &GetFitToAllHitsResult() const;
 
     /**
      *  @brief  Get the corrected electromagnetic estimate of the cluster energy, units GeV
      * 
      *  @return The corrected electromagnetic energy estimate
      */
-    float GetCorrectedElectromagneticEnergy();
+    float GetCorrectedElectromagneticEnergy() const;
 
     /**
      *  @brief  Get the corrected hadronic estimate of the cluster energy, units GeV
      * 
      *  @return The corrected hadronic energy estimate
      */
-    float GetCorrectedHadronicEnergy();
+    float GetCorrectedHadronicEnergy() const;
 
     /**
      *  @brief  Whether the cluster has been flagged as a photon by fast photon id function
      * 
      *  @return boolean
      */
-    bool IsPhotonFast();
+    bool IsPhotonFast() const;
 
     /**
      *  @brief  Get the pseudo layer at which shower commences
      * 
      *  @return The pseudo layer at which shower commences
      */
-    PseudoLayer GetShowerStartLayer();
+    PseudoLayer GetShowerStartLayer() const;
 
     /**
      *  @brief  Get the cluster shower profile start, units radiation lengths
      * 
      *  @return The cluster shower profile start
      */
-    float GetShowerProfileStart();
+    float GetShowerProfileStart() const;
 
     /**
      *  @brief  Get the cluster shower profile discrepancy
      * 
      *  @return The cluster shower profile discrepancy
      */
-    float GetShowerProfileDiscrepancy();
+    float GetShowerProfileDiscrepancy() const;
 
     /**
      *  @brief  Get the list of tracks associated with the cluster
@@ -357,27 +357,27 @@ private:
     /**
      *  @brief  PerformClusterEnergyCorrections
      */
-    void PerformEnergyCorrections();
+    void PerformEnergyCorrections() const;
 
     /**
      *  @brief  Calculate the fast photon flag
      */
-    void CalculateFastPhotonFlag();
+    void CalculateFastPhotonFlag() const;
 
     /**
      *  @brief  Calculate the pseudo layer at which shower commences
      */
-    void CalculateShowerStartLayer();
+    void CalculateShowerStartLayer() const;
 
     /**
      *  @brief  Calculate shower profile and compare it with the expected profile for a photon
      */
-    void CalculateShowerProfile();
+    void CalculateShowerProfile() const;
 
     /**
      *  @brief  Calculate result of a linear fit to all calo hits in the cluster
      */
-    void CalculateFitToAllHitsResult();
+    void CalculateFitToAllHitsResult() const;
 
     /**
      *  @brief  Reset all cluster properties
@@ -429,48 +429,48 @@ private:
      */
     void SetAvailability(bool isAvailable);
 
-    typedef std::map<PseudoLayer, double> ValueByPseudoLayerMap; ///< The value by pseudo layer typedef
+    typedef std::map<PseudoLayer, double> ValueByPseudoLayerMap;///< The value by pseudo layer typedef
     typedef ClusterHelper::ClusterFitResult ClusterFitResult;   ///< The cluster fit result typedef
 
-    OrderedCaloHitList      m_orderedCaloHitList;           ///< The ordered calo hit list
-    CaloHitList             m_isolatedCaloHitList;          ///< The list of isolated hits, which contribute only towards cluster energy
+    OrderedCaloHitList          m_orderedCaloHitList;           ///< The ordered calo hit list
+    CaloHitList                 m_isolatedCaloHitList;          ///< The list of isolated hits, which contribute only towards cluster energy
 
-    unsigned int            m_nCaloHits;                    ///< The number of calo hits
-    unsigned int            m_nPossibleMipHits;             ///< The number of calo hits that have been flagged as possible mip hits
+    unsigned int                m_nCaloHits;                    ///< The number of calo hits
+    unsigned int                m_nPossibleMipHits;             ///< The number of calo hits that have been flagged as possible mip hits
 
-    double                  m_electromagneticEnergy;        ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
-    double                  m_hadronicEnergy;               ///< The sum of hadronic energy measures of constituent calo hits, units GeV
-    double                  m_isolatedElectromagneticEnergy;///< Sum of electromagnetic energy measures of isolated calo hits, units GeV
-    double                  m_isolatedHadronicEnergy;       ///< Sum of hadronic energy measures of isolated calo hits, units GeV
+    double                      m_electromagneticEnergy;        ///< The sum of electromagnetic energy measures of constituent calo hits, units GeV
+    double                      m_hadronicEnergy;               ///< The sum of hadronic energy measures of constituent calo hits, units GeV
+    double                      m_isolatedElectromagneticEnergy;///< Sum of electromagnetic energy measures of isolated calo hits, units GeV
+    double                      m_isolatedHadronicEnergy;       ///< Sum of hadronic energy measures of isolated calo hits, units GeV
 
-    bool                    m_isPhoton;                     ///< Whether the cluster has been flagged as a photon cluster
-    bool                    m_isMipTrack;                   ///< Whether the cluster has been flagged as a section of mip track
-    const Track            *m_pTrackSeed;                   ///< Address of the track with which the cluster is seeded
+    bool                        m_isPhoton;                     ///< Whether the cluster has been flagged as a photon cluster
+    bool                        m_isMipTrack;                   ///< Whether the cluster has been flagged as a section of mip track
+    const Track                *m_pTrackSeed;                   ///< Address of the track with which the cluster is seeded
 
-    ValueByPseudoLayerMap   m_sumXByPseudoLayer;            ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
-    ValueByPseudoLayerMap   m_sumYByPseudoLayer;            ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
-    ValueByPseudoLayerMap   m_sumZByPseudoLayer;            ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap       m_sumXByPseudoLayer;            ///< The sum of the x coordinates of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap       m_sumYByPseudoLayer;            ///< The sum of the y coordinates of the calo hits, stored by pseudo layer
+    ValueByPseudoLayerMap       m_sumZByPseudoLayer;            ///< The sum of the z coordinates of the calo hits, stored by pseudo layer
 
-    mutable CartesianVector m_initialDirection;             ///< The initial direction of the cluster
-    ClusterFitResult        m_currentFitResult;             ///< The current fit result, usually set by clustering algorithm, as cluster grows
+    mutable CartesianVector     m_initialDirection;             ///< The initial direction of the cluster
+    mutable ClusterFitResult    m_currentFitResult;             ///< The current fit result, usually set by clustering algorithm, as cluster grows
 
-    ClusterFitResult        m_fitToAllHitsResult;           ///< The result of a linear fit to all calo hits in the cluster
-    bool                    m_isFitUpToDate;                ///< Whether the fit to all calo hits is up to date
+    mutable ClusterFitResult    m_fitToAllHitsResult;           ///< The result of a linear fit to all calo hits in the cluster
+    mutable bool                m_isFitUpToDate;                ///< Whether the fit to all calo hits is up to date
 
-    InputPseudoLayer        m_innerPseudoLayer;             ///< The innermost pseudo layer in the cluster
-    InputPseudoLayer        m_outerPseudoLayer;             ///< The outermost pseudo layer in the cluster
+    mutable InputPseudoLayer    m_innerPseudoLayer;             ///< The innermost pseudo layer in the cluster
+    mutable InputPseudoLayer    m_outerPseudoLayer;             ///< The outermost pseudo layer in the cluster
 
-    InputFloat              m_correctedElectromagneticEnergy;///< The corrected electromagnetic estimate of the cluster energy, units GeV
-    InputFloat              m_correctedHadronicEnergy;      ///< The corrected hadronic estimate of the cluster energy, units GeV
+    mutable InputFloat          m_correctedElectromagneticEnergy;///< The corrected electromagnetic estimate of the cluster energy, units GeV
+    mutable InputFloat          m_correctedHadronicEnergy;      ///< The corrected hadronic estimate of the cluster energy, units GeV
 
-    InputBool               m_isPhotonFast;                 ///< Whether the cluster is flagged as a photon by fast photon id function
-    InputPseudoLayer        m_showerStartLayer;             ///< The pseudo layer at which shower commences
-    InputFloat              m_showerProfileStart;           ///< The cluster shower profile start, units radiation lengths
-    InputFloat              m_showerProfileDiscrepancy;     ///< The cluster shower profile discrepancy
+    mutable InputBool           m_isPhotonFast;                 ///< Whether the cluster is flagged as a photon by fast photon id function
+    mutable InputPseudoLayer    m_showerStartLayer;             ///< The pseudo layer at which shower commences
+    mutable InputFloat          m_showerProfileStart;           ///< The cluster shower profile start, units radiation lengths
+    mutable InputFloat          m_showerProfileDiscrepancy;     ///< The cluster shower profile discrepancy
 
-    TrackList               m_associatedTrackList;          ///< The list of tracks associated with the cluster
+    TrackList                   m_associatedTrackList;          ///< The list of tracks associated with the cluster
 
-    bool                    m_isAvailable;                  ///< Whether the cluster is available to be added to a particle flow object
+    bool                        m_isAvailable;                  ///< Whether the cluster is available to be added to a particle flow object
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
@@ -648,7 +648,7 @@ inline const ClusterHelper::ClusterFitResult &Cluster::GetCurrentFitResult() con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult()
+inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult() const
 {
     if (!m_isFitUpToDate)
         this->CalculateFitToAllHitsResult();
@@ -658,7 +658,7 @@ inline const ClusterHelper::ClusterFitResult &Cluster::GetFitToAllHitsResult()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetCorrectedElectromagneticEnergy()
+inline float Cluster::GetCorrectedElectromagneticEnergy() const
 {
     if (!m_correctedElectromagneticEnergy.IsInitialized())
         this->PerformEnergyCorrections();
@@ -668,7 +668,7 @@ inline float Cluster::GetCorrectedElectromagneticEnergy()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetCorrectedHadronicEnergy()
+inline float Cluster::GetCorrectedHadronicEnergy() const
 {
     if (!m_correctedHadronicEnergy.IsInitialized())
         this->PerformEnergyCorrections();
@@ -678,7 +678,7 @@ inline float Cluster::GetCorrectedHadronicEnergy()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool Cluster::IsPhotonFast()
+inline bool Cluster::IsPhotonFast() const
 {
     if (!m_isPhotonFast.IsInitialized())
         this->CalculateFastPhotonFlag();
@@ -688,7 +688,7 @@ inline bool Cluster::IsPhotonFast()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline PseudoLayer Cluster::GetShowerStartLayer()
+inline PseudoLayer Cluster::GetShowerStartLayer() const
 {
     if (!m_showerStartLayer.IsInitialized())
         this->CalculateShowerStartLayer();
@@ -698,7 +698,7 @@ inline PseudoLayer Cluster::GetShowerStartLayer()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetShowerProfileStart()
+inline float Cluster::GetShowerProfileStart() const
 {
     if (!m_showerProfileStart.IsInitialized())
         this->CalculateShowerProfile();
@@ -708,7 +708,7 @@ inline float Cluster::GetShowerProfileStart()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetShowerProfileDiscrepancy()
+inline float Cluster::GetShowerProfileDiscrepancy() const
 {
     if (!m_showerProfileDiscrepancy.IsInitialized())
         this->CalculateShowerProfile();
@@ -756,7 +756,6 @@ inline Cluster::~Cluster()
 inline void Cluster::ResetOutdatedProperties()
 {
     m_isFitUpToDate = false;
-    m_initialDirection.Reset();
     m_fitToAllHitsResult.Reset();
     m_showerStartLayer.Reset();
     m_isPhotonFast.Reset();
@@ -764,6 +763,9 @@ inline void Cluster::ResetOutdatedProperties()
     m_showerProfileDiscrepancy.Reset();
     m_correctedElectromagneticEnergy.Reset();
     m_correctedHadronicEnergy.Reset();
+
+    if (!this->IsTrackSeeded())
+        m_initialDirection.Reset();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
