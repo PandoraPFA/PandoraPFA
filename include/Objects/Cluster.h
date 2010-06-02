@@ -763,9 +763,7 @@ inline void Cluster::ResetOutdatedProperties()
     m_showerProfileDiscrepancy.Reset();
     m_correctedElectromagneticEnergy.Reset();
     m_correctedHadronicEnergy.Reset();
-
-    if (!this->IsTrackSeeded())
-        m_initialDirection.Reset();
+    m_initialDirection.Reset();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
