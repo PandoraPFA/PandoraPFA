@@ -10,6 +10,8 @@
 
 #include "Objects/MCParticle.h"
 
+#include <algorithm>
+
 using namespace pandora;
 
 StatusCode CheatingPfoCreationAlgorithm::Run()
@@ -240,7 +242,7 @@ void CheatingPfoCreationAlgorithm::ComputeFromTracks(Cluster *pCluster, float &e
 {
     const TrackList &trackList(pCluster->GetAssociatedTrackList());
 
-    for (TrackList::iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
+    for (TrackList::const_iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
     {
         mass += (*itTrack)->GetMass();
         energy += (*itTrack)->GetEnergyAtDca();

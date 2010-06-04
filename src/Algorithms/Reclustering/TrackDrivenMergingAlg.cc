@@ -10,6 +10,7 @@
 
 #include "Helpers/FragmentRemovalHelper.h"
 
+#include <algorithm>
 #include <limits>
 
 using namespace pandora;

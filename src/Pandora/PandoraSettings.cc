@@ -209,11 +209,11 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MCPfoSelectionRadius", m_mcPfoSelectionRadius));
 
-        m_mcPfoSelectionMomentum = 0.01;
+        m_mcPfoSelectionMomentum = 0.01f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MCPfoSelectionMomentum", m_mcPfoSelectionMomentum));
 
-        m_mcPfoSelectionLowEnergyNPCutOff = 1.2;
+        m_mcPfoSelectionLowEnergyNPCutOff = 1.2f;
         PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
             "MCPfoSelectionProtonNeutronEnergyCutOff", m_mcPfoSelectionLowEnergyNPCutOff));
 

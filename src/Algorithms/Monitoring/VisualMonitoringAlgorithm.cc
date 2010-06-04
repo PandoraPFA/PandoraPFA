@@ -51,7 +51,7 @@ StatusCode VisualMonitoringAlgorithm::Run()
 
         
         TrackList trackList; 
-        for( TrackList::iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
+        for( TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
         {
             Track* pTrack = (*itTrack);
             if( !(pTrack->HasAssociatedCluster() && m_onlyAvailable ) )

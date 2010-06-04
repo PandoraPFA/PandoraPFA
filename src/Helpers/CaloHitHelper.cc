@@ -114,7 +114,7 @@ float CaloHitHelper::GetDensityWeightContribution(const CaloHit *const pCaloHit,
 {
     static const float caloHitMaxSeparation(PandoraSettings::GetInstance()->GetCaloHitMaxSeparation());
     static const float caloHitMaxSeparationSquared(caloHitMaxSeparation * caloHitMaxSeparation);
-    static const float densityWeightPower(PandoraSettings::GetInstance()->GetDensityWeightPower());
+    static const unsigned int densityWeightPower(PandoraSettings::GetInstance()->GetDensityWeightPower());
 
     float densityWeightContribution = 0.;
     const CartesianVector &positionVector(pCaloHit->GetPositionVector());

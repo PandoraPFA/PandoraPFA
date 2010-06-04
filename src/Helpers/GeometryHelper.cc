@@ -8,6 +8,7 @@
  
 #include "Helpers/GeometryHelper.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace pandora

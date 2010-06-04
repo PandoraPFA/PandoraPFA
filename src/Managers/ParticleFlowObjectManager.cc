@@ -73,7 +73,7 @@ StatusCode ParticleFlowObjectManager::GetCurrentList(const ParticleFlowObjectLis
 
 StatusCode ParticleFlowObjectManager::AddClusterToPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster) const
 {
-    ParticleFlowObjectList::iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
+    ParticleFlowObjectList::const_iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
 
     if (m_particleFlowObjectList.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -90,7 +90,7 @@ StatusCode ParticleFlowObjectManager::AddClusterToPfo(ParticleFlowObject *pParti
 
 StatusCode ParticleFlowObjectManager::AddTrackToPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack) const
 {
-    ParticleFlowObjectList::iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
+    ParticleFlowObjectList::const_iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
 
     if (m_particleFlowObjectList.end() == iter)
         return STATUS_CODE_NOT_FOUND;

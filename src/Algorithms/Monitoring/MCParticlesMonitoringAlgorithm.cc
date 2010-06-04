@@ -272,9 +272,14 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
                 PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ri", m_innerRadius->at(i) ));
 
                 if( m_haveCaloHits )
+                {
                     PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECalo", m_caloHitEnergy->at(i) ));
+                }
+
                 if( m_haveTracks )
+                {
                     PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy->at(i) ));
+                }
 
                 PANDORA_MONITORING_API(FillTree(m_treeName));
             }
@@ -290,10 +295,14 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
             PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ri", m_innerRadius ));
 
             if( m_haveCaloHits )
+            {
                 PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECalo", m_caloHitEnergy ));
-            if( m_haveTracks ) 
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy ));
+            }
 
+            if( m_haveTracks )
+            {
+                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy ));
+            }
 
             PANDORA_MONITORING_API(FillTree(m_treeName));
         }

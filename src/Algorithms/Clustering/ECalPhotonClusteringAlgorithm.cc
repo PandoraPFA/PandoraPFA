@@ -78,15 +78,15 @@ StatusCode ECalPhotonClusteringAlgorithm::Initialize()
     else
     {
         std::vector<float> eBinBorders;
-        eBinBorders.push_back(0.2);
-        eBinBorders.push_back(0.5);
-        eBinBorders.push_back(1.0);
-        eBinBorders.push_back(1.5);
-        eBinBorders.push_back(2.5);
-        eBinBorders.push_back(5.0);
-        eBinBorders.push_back(10.0);
-        eBinBorders.push_back(20.0);
-        eBinBorders.push_back(50.0);
+        eBinBorders.push_back(0.2f);
+        eBinBorders.push_back(0.5f);
+        eBinBorders.push_back(1.f);
+        eBinBorders.push_back(1.5f);
+        eBinBorders.push_back(2.5f);
+        eBinBorders.push_back(5.f);
+        eBinBorders.push_back(10.f);
+        eBinBorders.push_back(20.f);
+        eBinBorders.push_back(50.f);
 
         PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
         plc->energySig.SetDimensions( "energySig", eBinBorders );
