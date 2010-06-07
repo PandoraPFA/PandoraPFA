@@ -10,16 +10,71 @@
 
 #include "Algorithms/Algorithm.h"
 
+using namespace pandora;
+
+/**
+ *  @brief  ClusterConeFraction class
+ */
+class ClusterConeFraction
+{
+public:
+    /**
+     *  @brief  Constructor
+     * 
+     *  @param  coneFraction the cone fraction
+     *  @param  pCluster address of the cluster associated with the specified cone fraction
+     *  @param  clusterIndex the index of the cluster in the associated cluster vector (needed for tidying up in this algorithm)
+     */
+    ClusterConeFraction(float coneFraction, Cluster *const pCluster, unsigned int clusterIndex);
+
+    /**
+     *  @brief  Operator < for determining cluster cone fraction ordering.
+     * 
+     *  @param  rhs cluster cone fraction for comparison
+     */
+    bool operator< (const ClusterConeFraction &rhs) const;
+
+    /**
+     *  @brief  Get the cone fraction
+     * 
+     *  @return The cone fraction
+     */
+    float GetConeFraction() const;
+
+    /**
+     *  @brief  Get the address of the cluster
+     * 
+     *  @return The address of the cluster
+     */
+    Cluster *const GetCluster() const;
+
+    /**
+     *  @brief  Get the index of the cluster in the associated cluster vector
+     * 
+     *  @return The index of the cluster in the associated cluster vector
+     */
+    unsigned int GetClusterIndex() const;
+
+private:
+    const float         m_coneFraction;         ///< The cone fraction
+    Cluster *const      m_pCluster;             ///< The address of the cluster
+    const unsigned int  m_clusterIndex;         ///< The index of the cluster in the associated cluster vector
+};
+
+typedef std::multiset<ClusterConeFraction> ClusterConeFractionList;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  TrackDrivenMergingAlg class
  */
-class TrackDrivenMergingAlg : public pandora::Algorithm
+class TrackDrivenMergingAlg : public Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public pandora::AlgorithmFactory
+    class Factory : public AlgorithmFactory
     {
     public:
         Algorithm *CreateAlgorithm() const;
@@ -28,10 +83,6 @@ public:
 private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
-
-    typedef std::pair<pandora::Cluster *, unsigned int> ClusterIndexPair;
-    typedef std::multimap<float, ClusterIndexPair> ConeFractionToClusterMap;
-    typedef std::vector<ClusterIndexPair> ClusterIndexPairList;
 
     std::string             m_trackClusterAssociationAlgName;       ///< The name of the track-cluster association algorithm to run
 
@@ -50,9 +101,50 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Algorithm *TrackDrivenMergingAlg::Factory::CreateAlgorithm() const
+inline Algorithm *TrackDrivenMergingAlg::Factory::CreateAlgorithm() const
 {
     return new TrackDrivenMergingAlg();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline ClusterConeFraction::ClusterConeFraction(float coneFraction, Cluster *const pCluster, unsigned int clusterIndex) :
+    m_coneFraction(coneFraction),
+    m_pCluster(pCluster),
+    m_clusterIndex(clusterIndex)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ClusterConeFraction::operator< (const ClusterConeFraction &rhs) const
+{
+    if (this->m_coneFraction != rhs.m_coneFraction)
+        return (this->m_coneFraction > rhs.m_coneFraction);
+
+    return (this->m_pCluster->GetHadronicEnergy() > rhs.m_pCluster->GetHadronicEnergy());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ClusterConeFraction::GetConeFraction() const
+{
+    return m_coneFraction;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline Cluster *const ClusterConeFraction::GetCluster() const
+{
+    return m_pCluster;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int ClusterConeFraction::GetClusterIndex() const
+{
+    return m_clusterIndex;
 }
 
 #endif // #ifndef TRACK_DRIVEN_MERGING_ALGORITHM_H

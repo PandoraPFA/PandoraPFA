@@ -25,6 +25,7 @@ StatusCode TrackDrivenAssociationAlg::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Examine each cluster in the input list
     const unsigned int nClusters(clusterVector.size());
