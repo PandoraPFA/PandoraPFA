@@ -14,6 +14,8 @@
 
 #include "Objects/Cluster.h"
 
+#include <limits>
+
 namespace pandora
 {
 

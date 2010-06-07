@@ -104,11 +104,13 @@ StatusCode VisualMonitoringAlgorithm::Run()
     {
         const ClusterList* pClusterList = NULL;
         if( STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentClusterList(*this, pClusterList))
+        {
             if( m_eve )
             {
                 PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "current", AUTO  ) );
             }
             else
+            {
                 if( m_detectorView == "XZ" )
                 {
                     PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, AUTO  ) );
@@ -117,6 +119,8 @@ StatusCode VisualMonitoringAlgorithm::Run()
                 {
                     PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, AUTO  ) );
                 }
+            }
+        }
     }
 
     if( m_show )

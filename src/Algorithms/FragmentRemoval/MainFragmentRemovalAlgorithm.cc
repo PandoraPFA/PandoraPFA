@@ -10,6 +10,8 @@
 
 #include "Helpers/ReclusterHelper.h"
 
+#include <cstdlib>
+
 using namespace pandora;
 
 StatusCode MainFragmentRemovalAlgorithm::Run()

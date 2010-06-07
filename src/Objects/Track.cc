@@ -12,6 +12,7 @@
 #include "Objects/Track.h"
 
 #include <cmath>
+#include <cstdlib>
 
 namespace pandora
 {

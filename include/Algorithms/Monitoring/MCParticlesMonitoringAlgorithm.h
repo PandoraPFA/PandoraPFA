@@ -19,8 +19,6 @@ class MCParticlesMonitoringAlgorithm : public pandora::Algorithm
 private:
 public:
 
-    class pandora::MCParticle;
-
     /**
      *  @brief  Factory class for instantiating algorithm
      */

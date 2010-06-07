@@ -24,52 +24,50 @@ public:
     {
     public:
 
-	class pandora::MCParticle;
-
-	typedef std::set<const pandora::MCParticle*> McParticleSet;
+        typedef std::set<const pandora::MCParticle*> McParticleSet;
 
 
-	void AddChargedClusterCalorimetricEnergy( float energy ) { m_chargedCalorimetric += energy; }
-	void AddNeutralClusterCalorimetricEnergy( float energy ) { m_neutralCalorimetric += energy; }
-	void AddChargedClusterTracksEnergy      ( float energy ) { m_chargedTracks       += energy; }
-	void AddPhotonClusterCalorimetricEnergy ( float energy ) { m_photonCalorimetric  += energy; }
+        void AddChargedClusterCalorimetricEnergy( float energy ) { m_chargedCalorimetric += energy; }
+        void AddNeutralClusterCalorimetricEnergy( float energy ) { m_neutralCalorimetric += energy; }
+        void AddChargedClusterTracksEnergy      ( float energy ) { m_chargedTracks       += energy; }
+        void AddPhotonClusterCalorimetricEnergy ( float energy ) { m_photonCalorimetric  += energy; }
 
-	void AddChargedCluster() { m_chargedCalorimetricClusters += 1; }
-	void AddNeutralCluster() { m_neutralCalorimetricClusters += 1; }
-	void AddTrack         () { m_chargedTracksNumber         += 1; }
-	void AddPhotonCluster () { m_photonCalorimetricClusters  += 1; }
+        void AddChargedCluster() { m_chargedCalorimetricClusters += 1; }
+        void AddNeutralCluster() { m_neutralCalorimetricClusters += 1; }
+        void AddTrack         () { m_chargedTracksNumber         += 1; }
+        void AddPhotonCluster () { m_photonCalorimetricClusters  += 1; }
 
 
-	float GetChargedClusterCalorimetricEnergy() { return m_chargedCalorimetric; }
-	float GetNeutralClusterCalorimetricEnergy() { return m_neutralCalorimetric; }
-	float GetChargedClusterTracksEnergy      () { return m_chargedTracks;       }
-	float GetPhotonClusterCalorimetricEnergy () { return m_photonCalorimetric;  }
+        float GetChargedClusterCalorimetricEnergy() { return m_chargedCalorimetric; }
+        float GetNeutralClusterCalorimetricEnergy() { return m_neutralCalorimetric; }
+        float GetChargedClusterTracksEnergy      () { return m_chargedTracks;       }
+        float GetPhotonClusterCalorimetricEnergy () { return m_photonCalorimetric;  }
 
-	int GetChargedClusterCalorimetricClusters() { return m_chargedCalorimetricClusters; }
-	int GetNeutralClusterCalorimetricClusters() { return m_neutralCalorimetricClusters; }
-	int GetChargedClusterTracks              () { return m_chargedTracksNumber;         }
-	int GetPhotonClusterCalorimetricClusters () { return m_photonCalorimetricClusters;  }
+        int GetChargedClusterCalorimetricClusters() { return m_chargedCalorimetricClusters; }
+        int GetNeutralClusterCalorimetricClusters() { return m_neutralCalorimetricClusters; }
+        int GetChargedClusterTracks              () { return m_chargedTracksNumber;         }
+        int GetPhotonClusterCalorimetricClusters () { return m_photonCalorimetricClusters;  }
 
-	void AddMcParticle( const pandora::MCParticle* mcParticle ) { m_mcParticleSet.insert( mcParticle ); }
-	McParticleSet& GetMcParticleSet() { return m_mcParticleSet; }
-	float GetMcParticleSetEnergy();
-	int   GetMcParticleNumber();
+        void AddMcParticle( const pandora::MCParticle* mcParticle ) { m_mcParticleSet.insert( mcParticle ); }
+        McParticleSet& GetMcParticleSet() { return m_mcParticleSet; }
+        float GetMcParticleSetEnergy();
+        int   GetMcParticleNumber();
 
-	EnergyMixing();
+        EnergyMixing();
 
     private:
 
-	McParticleSet m_mcParticleSet;
+        McParticleSet m_mcParticleSet;
 
-	float m_chargedCalorimetric;
-	float m_chargedTracks;
-	float m_neutralCalorimetric;
-	float m_photonCalorimetric;
+        float m_chargedCalorimetric;
+        float m_chargedTracks;
+        float m_neutralCalorimetric;
+        float m_photonCalorimetric;
 
-	int m_chargedCalorimetricClusters;
-	int m_chargedTracksNumber;
-	int m_neutralCalorimetricClusters;
-	int m_photonCalorimetricClusters;
+        int m_chargedCalorimetricClusters;
+        int m_chargedTracksNumber;
+        int m_neutralCalorimetricClusters;
+        int m_photonCalorimetricClusters;
 
     };
 
