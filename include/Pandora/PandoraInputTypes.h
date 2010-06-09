@@ -12,6 +12,7 @@
 #include "Objects/TrackState.h"
 
 #include "Pandora/PandoraInternal.h"
+#include "Pandora/PdgTable.h"
 
 #include "StatusCodes.h"
 

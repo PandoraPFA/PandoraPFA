@@ -137,7 +137,7 @@ StatusCode PfoCreationAlgorithm::SetSiblingTrackBasedPfoParameters(Track *const 
     pfoParameters.m_momentum = momentum;
     pfoParameters.m_mass = std::sqrt(std::max(energy * energy - momentum.GetDotProduct(momentum), 0.f));
     pfoParameters.m_charge = charge;
-    pfoParameters.m_particleId = 22;
+    pfoParameters.m_particleId = PHOTON;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -169,7 +169,7 @@ StatusCode PfoCreationAlgorithm::SetDaughterTrackBasedPfoParameters(Track *const
     pfoParameters.m_momentum = momentum;
     pfoParameters.m_mass = std::sqrt(std::max(energy * energy - momentum.GetDotProduct(momentum), 0.f));
     pfoParameters.m_charge = (nDaughters > 1) ? pTrack->GetChargeSign() : daughterCharge;
-    pfoParameters.m_particleId = (pfoParameters.m_charge.Get() > 0) ? 211 : -211;
+    pfoParameters.m_particleId = (pfoParameters.m_charge.Get() > 0) ? PI_PLUS : PI_MINUS;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -182,7 +182,7 @@ StatusCode PfoCreationAlgorithm::SetSimpleTrackBasedPfoParameters(Track *const p
     pfoParameters.m_momentum = pTrack->GetMomentumAtDca();
     pfoParameters.m_mass = pTrack->GetMass();
     pfoParameters.m_charge = pTrack->GetChargeSign();
-    pfoParameters.m_particleId = (pTrack->GetChargeSign() > 0) ? 211 : -211;
+    pfoParameters.m_particleId = (pTrack->GetChargeSign() > 0) ? PI_PLUS : PI_MINUS;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -220,9 +220,9 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
 
         // Specify the pfo parameters
         PandoraContentApi::ParticleFlowObject::Parameters pfoParameters;
-        pfoParameters.m_particleId = (isPhoton ? 22 : 2112);
+        pfoParameters.m_particleId = (isPhoton ? PHOTON : NEUTRON);
         pfoParameters.m_charge = 0;
-        pfoParameters.m_mass = (isPhoton ? 0 : 0.9396f);
+        pfoParameters.m_mass = (isPhoton ? GetParticleMass(PHOTON) : GetParticleMass(NEUTRON));
         pfoParameters.m_energy = clusterEnergy;
         pfoParameters.m_clusterList.insert(pCluster);
 

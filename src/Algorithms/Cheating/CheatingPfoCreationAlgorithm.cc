@@ -41,7 +41,7 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
     {
         CartesianVector momentum(0., 0., 0.);
         float  mass = 0.;
-        int    particleId = 211;
+        int    particleId = PI_PLUS;
         int    charge = 0;
         float  energy = 0.;
 
@@ -142,16 +142,16 @@ void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter(Cluster *pCluster, flo
             energy = pCluster->GetElectromagneticEnergy();
             momentum = pCluster->GetFitToAllHitsResult().GetDirection();
             momentum = momentum * energy;
-            particleId = 22; // assume it's a photon
-            mass = 0.f;
-            charge = 0;
+            particleId = PHOTON;
+            mass = GetParticleMass(PHOTON);
+            charge = GetParticleCharge(PHOTON);
         }
         else
         {
             energy = pCluster->GetHadronicEnergy();
-            particleId = 2112; // assume it's a neutron
-            mass = 0.9396f;
-            charge = 0;
+            particleId = NEUTRON;
+            mass = GetParticleMass(NEUTRON);
+            charge = GetParticleCharge(NEUTRON);
 
             CartesianVector energyWeightedClusterPosition(0., 0., 0.);
             ComputeEnergyWeightedClusterPosition(pCluster, energyWeightedClusterPosition);
@@ -168,7 +168,7 @@ void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter(Cluster *pCluster, flo
     else
     {
         energy = pCluster->GetHadronicEnergy();
-        particleId = 211; // assume it's a pion
+        particleId = PI_PLUS;
         mass = 0.1396f;
         charge = 1;
 
@@ -246,7 +246,7 @@ void CheatingPfoCreationAlgorithm::ComputeFromTracks(Cluster *pCluster, float &e
     {
         mass += (*itTrack)->GetMass();
         energy += (*itTrack)->GetEnergyAtDca();
-        particleId = 211;
+        particleId = PI_PLUS;
         charge += (*itTrack)->GetChargeSign();
         momentum += (*itTrack)->GetMomentumAtDca();
     }

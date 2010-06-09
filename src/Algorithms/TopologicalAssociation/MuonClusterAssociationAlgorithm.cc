@@ -25,6 +25,9 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
     if (STATUS_CODE_SUCCESS != statusCode)
         return statusCode;
 
+    ClusterVector muonClusterVector(pMuonClusterList->begin(), pMuonClusterList->end());
+    std::sort(muonClusterVector.begin(), muonClusterVector.end(), Cluster::SortByInnerLayer);
+
     // Get the current cluster list, with which muon clusters will be associated
     std::string inputClusterListName;
     const ClusterList *pInputClusterList = NULL;
@@ -33,10 +36,12 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
     ClusterList standaloneMuonClusters;
 
     // Loop over muon cluster list, looking for muon clusters containing sufficient hits
-    for (ClusterList::const_iterator iterI = pMuonClusterList->begin(); iterI != pMuonClusterList->end();)
+    for (ClusterVector::iterator iterI = muonClusterVector.begin(), iterIEnd = muonClusterVector.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pMuonCluster = *iterI;
-        ++iterI;
+
+        if (NULL == pMuonCluster)
+            continue;
 
         if (pMuonCluster->GetNCaloHits() < m_minHitsInMuonCluster)
             continue;
@@ -163,6 +168,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
         // Merge the clusters
         if (NULL != pBestInputCluster)
         {
+            *iterI = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestInputCluster,
                 pMuonCluster, inputClusterListName, m_muonClusterListName));
         }

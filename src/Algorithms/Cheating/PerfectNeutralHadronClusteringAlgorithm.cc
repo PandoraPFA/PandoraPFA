@@ -14,10 +14,7 @@ using namespace pandora;
 
 bool PerfectNeutralHadronClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle *pMCParticle) const
 {
-    static const int K0L(130);
-    static const int NEUTRON(2112);
-
-    if ((pMCParticle->GetParticleId() == K0L) || (pMCParticle->GetParticleId() == NEUTRON))
+    if ((pMCParticle->GetParticleId() == K_LONG) || (pMCParticle->GetParticleId() == NEUTRON))
         return true;
 
     return false;

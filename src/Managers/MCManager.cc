@@ -125,9 +125,6 @@ StatusCode MCManager::SelectPfoTargets()
 
 StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const pMCParticle, MCParticleList &mcPfoList) const
 {
-    static const int PROTON  = 2212;
-    static const int NEUTRON = 2112;
-
     if (!pMCParticle->IsInitialized())
         return STATUS_CODE_NOT_INITIALIZED;
 
