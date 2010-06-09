@@ -11,6 +11,7 @@
 #include "Helpers/FragmentRemovalHelper.h"
 #include "Helpers/ReclusterHelper.h"
 
+#include <algorithm>
 #include <limits>
 
 using namespace pandora;

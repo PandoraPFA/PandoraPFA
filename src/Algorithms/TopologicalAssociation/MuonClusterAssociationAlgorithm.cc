@@ -11,6 +11,8 @@
 #include "Helpers/ClusterHelper.h"
 #include "Helpers/ReclusterHelper.h"
 
+#include <algorithm>
+
 using namespace pandora;
 
 StatusCode MuonClusterAssociationAlgorithm::Run()
