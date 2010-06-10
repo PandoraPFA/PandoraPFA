@@ -14,9 +14,6 @@ using namespace pandora;
 
 StatusCode FinalParticleIdAlgorithm::Run()
 {
-    static const int ELECTRON = 11;
-    static const int MUON = 13;
-
     const ParticleFlowObjectList *pParticleFlowObjectList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pParticleFlowObjectList));
 
@@ -42,12 +39,12 @@ StatusCode FinalParticleIdAlgorithm::Run()
         // Run fast electron id, followed by fast muon id
         if (ParticleIdHelper::IsElectronFast(pCluster))
         {
-            pParticleFlowObject->SetParticleId((charge < 0) ? ELECTRON : -ELECTRON);
+            pParticleFlowObject->SetParticleId((charge < 0) ? E_MINUS : E_PLUS);
         }
 
         if (ParticleIdHelper::IsMuonFast(pCluster))
         {
-            pParticleFlowObject->SetParticleId((charge < 0) ? MUON : -MUON);
+            pParticleFlowObject->SetParticleId((charge < 0) ? MU_MINUS : MU_PLUS);
         }
     }
 

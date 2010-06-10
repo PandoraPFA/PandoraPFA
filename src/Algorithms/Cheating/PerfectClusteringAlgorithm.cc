@@ -115,7 +115,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitList, pCluster));
 
             // Set photon flag for photon clusters
-            if (pMCParticle->GetParticleId() == 22)
+            if (pMCParticle->GetParticleId() == PHOTON)
                 pCluster->SetIsPhotonFlag(true);
 
             if (!clusterList.insert(pCluster).second)
