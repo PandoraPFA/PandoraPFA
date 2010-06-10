@@ -38,6 +38,8 @@ namespace pandora
     d(K_SHORT_BAR,        -310,        4.97672E-01f,          7.367E-15f,       0)      \
     d(K_LONG,              130,        4.97672E-01f,          1.272E-17f,       0)      \
     d(K_LONG_BAR,         -130,        4.97672E-01f,          1.272E-17f,       0)      \
+    d(SIGMA_MINUS,        3112,         1.1975E+00f,           8.28E-15f,      -1)      \
+    d(SIGMA_PLUS,         3222,         1.1975E+00f,           8.28E-15f,      +1)      \
     d(PROTON,             2212,      9.3827200E-01f,             0.E+00f,       1)      \
     d(NEUTRON,            2112,      9.3956533E-01f,          7.432E-28f,       0)
 
