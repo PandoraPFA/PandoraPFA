@@ -27,14 +27,14 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
     if (m_debug)
     {
-        std::cout << std::endl;
     }
 
     for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; ++itLyr)
     {
+        CaloHitList *pCaloHitList= itLyr->second;
         CaloHitList *pCurrentHits = NULL;
 
-        for (CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
+        for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit* pCaloHit = *hitIter;
 
@@ -126,9 +126,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
         delete pCaloHitList;
     }
 
-    if (!m_clusterListName.empty() && !clusterList.empty())
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName, clusterList));
-
     return STATUS_CODE_SUCCESS;
 }
 
@@ -153,9 +150,6 @@ bool PerfectClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle
 
 StatusCode PerfectClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ClusterListName", m_clusterListName) );
-
     m_debug = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "Debug", m_debug));

@@ -549,12 +549,13 @@ public:
 			 const pandora::OrderedCaloHitList& pOriginalOrderedCaloHitList, 
 			 pandora::protoClusterPeaks_t& peak, 
 			 ClusterProperties& originalClusterProperties, 
-			 bool& useOriginalCluster ); 
+			 bool& useOriginalCluster, 
+			 int& peaksSize); 
 
     StatusCode TransverseProfile(const pandora::Cluster* cluster, std::vector<pandora::protoClusterPeaks_t> &peaks, int maxLayers);
     pandora::Cluster* TransverseProfile( const ClusterProperties& clusterProperties, const pandora::OrderedCaloHitList& pOrderedCaloHitList, const int peakForProtoCluster, const unsigned int maxLayers, const int extraLayers = 0);
 
-    float      GetTrueEnergyContribution(const pandora::Cluster* cluster, float& electromagneticEnergyContribution, int pid = 0 );
+    float      GetTruePhotonContribution(const pandora::Cluster* cluster);
     void       GetClusterProperties(const pandora::Cluster* cluster, ClusterProperties& clusterProperties );
     void       DistanceToPositionAndDirection(const pandora::CartesianVector& position, 
 					      const pandora::CartesianVector& referencePosition,
@@ -579,20 +580,30 @@ public:
     int          m_producePrintoutStatements;
     int          m_makingPhotonIdLikelihoodHistograms;
 
-    std::string     m_clusterListName;              ///< name of the initial cluster list
+    std::string     m_clusterListName;              ///< name of the initial cluster list (only needed when clustering algorithm is run)
+    bool            m_preserveClusters;             ///< preserve clusters which were not split and split which are not photons
 
     std::string     m_monitoringFileName;           ///< filename for file where for monitoring information is stored
     std::string     m_configurationFileNameBkg;     ///< filename for file where the configuration of the photon clustering is stored : background
     std::string     m_configurationFileNameSig;     ///< filename for file where the configuration of the photon clustering is stored : signal
+    float           m_likelihoodRatioCut;           ///< cut on likelihood ratio
+
     std::string     m_strategy;                     ///< The strategy used for photon recognition
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
+
+    pandora::StringVector    m_energyBins;                   ///< borders of bins of energy binning (only important at production of configuration xml files)
+    pandora::StringVector    m_dimensionsRms;                ///< dimensions of photon candidate cluster Rms histogram (e.g. "20 0 5")
+    pandora::StringVector    m_dimensionsFraction;           ///< dimensions of photon fraction histogram (e.g. "20 0 1.0")
+    pandora::StringVector    m_dimensionsStart;              ///< dimensions of photon start histogram (e.g. "20 0 10.0" )
 
 
     int             m_produceConfigurationFiles;    ///< produce the configuration file (using the provided events) (0... signal events, 1 ... background events, 2 ... signal and background events, to be split by "fraction"
 
 
     bool m_isAlreadyInitialized;                    ///< set to true if initialisation has taken place
+
+    pandora::TrackList* pTrackList;                  ///< tracks to be are checked if they are too close to the photoncandidate for a photon
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
