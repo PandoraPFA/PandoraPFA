@@ -16,10 +16,6 @@
 class CheatingClusterMergingAlgorithm : public pandora::Algorithm
 {
 public:
-	
-    class pandora::MCParticle;
-    class pandora::Cluster;
-
     /**
      *  @brief  Factory class for instantiating algorithm
      */
@@ -33,7 +29,17 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    const pandora::MCParticle* GetMainMCParticle(const pandora::Cluster* pCluster);
+    /**
+     *  @brief  Find the mc particle making the largest electromagnetic energy contribution to a specified cluster
+     * 
+     *  @param  pCluster address of the cluster to examine
+     * 
+     *  @return address of the main mc particle
+     */
+    const pandora::MCParticle *GetMainMCParticle(const pandora::Cluster *const pCluster) const;
+
+    typedef std::map<const pandora::MCParticle*, pandora::Cluster*> MCParticleToClusterMap;
+    typedef std::map<const pandora::MCParticle*, float> MCParticleToFloatMap;
 
     pandora::StringVector   m_clusterListNames;             ///< use the given cluster lists to search for clusters to merge
 };

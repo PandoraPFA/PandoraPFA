@@ -346,7 +346,8 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
                 pandora::Cluster* remainingHitsCluster=NULL;
                 PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &caloHitList, remainingHitsCluster ));
                 remainingHitsCluster->SetIsPhotonFlag( pCluster->IsPhoton() );
-                for (TrackList::iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
+
+                for (TrackList::const_iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
                 {
                     Track* pTrack = (*itTrack);
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pTrack, remainingHitsCluster));
@@ -643,8 +644,8 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
 //         const CartesianVector trackPosition = trackStateAtEnd.GetPosition();
 
         float longitudinalComponent = 0.;
-        float approach = 99999999.;
-        float closestApproach = 99999999.;
+        float approach = 99999999.f;
+        float closestApproach = 99999999.f;
 
 
         for(int i=0; i<10; i++){ // 10 layers max. to search for closest hit
@@ -1656,8 +1657,8 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
     {
         PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
 
-        if( E < 0.2 ) 
-            E = 0.2;
+        if( E < 0.2f ) 
+            E = 0.2f;
 
         float lhSig      = plc->energySig.Get(E);
 
