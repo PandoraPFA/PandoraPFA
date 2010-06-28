@@ -111,6 +111,7 @@ typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;
 typedef std::vector<std::string> StringVector;
 typedef std::vector<int> IntVector;
+typedef std::vector<float> FloatVector;
 
 typedef const void * Uid;
 

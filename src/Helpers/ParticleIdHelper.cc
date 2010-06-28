@@ -180,12 +180,19 @@ bool ParticleIdHelper::IsPhotonFastDefault(const Cluster *const pCluster)
     if (pCluster->IsPhoton())
         return true;
 
-    // Reject empty clusters, such as track seeds
-    if (0 == pCluster->GetNCaloHits())
-        return false;
-
     // Cluster with associated tracks is not a photon
     if (!pCluster->GetAssociatedTrackList().empty())
+        return false;
+
+    return ParticleIdHelper::IsElectromagneticShower(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
+{
+    // Reject empty clusters
+    if (0 == pCluster->GetNCaloHits())
         return false;
 
     // Reject clusters starting outside ecal
@@ -321,7 +328,7 @@ bool ParticleIdHelper::IsPhotonFastDefault(const Cluster *const pCluster)
     if (layer90 > static_cast<int>(nECalLayers) + m_photonIdLayer90MaxLayersFromECal)
         return false;
 
-    // Anything remaining at this point is classed as a photon
+    // Anything remaining at this point is classed as an electromagnetic shower
     return true;
 }
 
@@ -336,8 +343,11 @@ bool ParticleIdHelper::IsElectronFastDefault(const Cluster *const pCluster)
 
     const float electromagneticEnergy(pCluster->GetElectromagneticEnergy());
 
-    if (!pCluster->IsPhotonFast() && ((pCluster->GetInnerPseudoLayer() > m_electronIdMaxInnerLayer) || (electromagneticEnergy > m_electronIdMaxEnergy)))
+    if (!ParticleIdHelper::IsElectromagneticShower(pCluster) && ((pCluster->GetInnerPseudoLayer() > m_electronIdMaxInnerLayer) ||
+        (electromagneticEnergy > m_electronIdMaxEnergy)))
+    {
         return false;
+    }
 
     const float showerProfileStart(pCluster->GetShowerProfileStart());
     const float showerProfileDiscrepancy(pCluster->GetShowerProfileDiscrepancy());
@@ -719,7 +729,7 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "ShowerProfileMaxDifference", m_showerProfileMaxDifference));
 
-    // Fast photon id settings
+    // Electromagnetic shower id settings
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "PhotonIdMipCut_0", m_photonIdMipCut_0));
 

@@ -30,12 +30,12 @@ class Cluster
 {
 public:
     /**
-     *  @brief  Sort clusters by ascending inner layer, and by descending mip fraction within a layer
+     *  @brief  Sort clusters by ascending inner layer, and by hadronic energy within a layer
      * 
      *  @param  pLhs address of first cluster
      *  @param  pRhs address of second cluster
      */
-    static bool SortByInnerLayer(const pandora::Cluster *const pLhs, const pandora::Cluster *const pRhs);
+    static bool SortByInnerLayer(const Cluster *const pLhs, const Cluster *const pRhs);
 
     /**
      *  @brief  Get the ordered calo hit list

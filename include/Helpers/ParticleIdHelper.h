@@ -100,6 +100,15 @@ private:
     static bool IsPhotonFastDefault(const Cluster *const pCluster);
 
     /**
+     *  @brief  Whether a cluster is a candidate electromagnetic shower
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsElectromagneticShower(const Cluster *const pCluster);
+
+    /**
      *  @brief  Default pandora fast electron identification function
      * 
      *  @param  pCluster address of the cluster

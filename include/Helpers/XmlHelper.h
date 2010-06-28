@@ -44,6 +44,19 @@ public:
     static StatusCode ReadVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<T> &vector);
 
     /**
+     *  @brief  Read a two-dimensional array of values into a vector of vectors. Each row of values must be contained
+     *          within <rowname></rowname> xml tags, whilst the values in the row must be space separated
+     * 
+     *  @param  xmlHandle the relevant xml handle
+     *  @param  xmlElementName the name of the xml element to examine
+     *  @param  rowName the row name
+     *  @param  vector to receive the 2d vector of values
+     */
+    template <typename T>
+    static StatusCode Read2dVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, const std::string &rowName,
+        std::vector< std::vector<T> > &vector);
+
+    /**
      *  @brief  Process a list of daughter algorithms in an xml file
      * 
      *  @param  algorithm the parent algorithm calling this function
@@ -159,6 +172,45 @@ inline StatusCode XmlHelper::ReadVectorOfValues(const TiXmlHandle &xmlHandle, co
             return STATUS_CODE_FAILURE;
 
         vector.push_back(t);
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline StatusCode XmlHelper::Read2dVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, const std::string &rowName,
+    std::vector< std::vector<T> > &vector)
+{
+    TiXmlElement *pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
+
+    if (NULL == pXmlElement)
+        return STATUS_CODE_NOT_FOUND;
+
+    TiXmlElement *pXmlRowElement = TiXmlHandle(pXmlElement).FirstChild(rowName).Element();
+
+    if (NULL == pXmlRowElement)
+        return STATUS_CODE_NOT_FOUND;
+
+    for ( ; NULL != pXmlRowElement; pXmlRowElement = pXmlRowElement->NextSiblingElement(rowName))
+    {
+        std::vector<T> rowVector;
+
+        StringVector tokens;
+        TokenizeString(pXmlRowElement->GetText(), tokens);
+
+        for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
+        {
+            T t;
+
+            if (!StringToType(*iter, t))
+                return STATUS_CODE_FAILURE;
+
+            rowVector.push_back(t);
+        }
+
+        vector.push_back(rowVector);
     }
 
     return STATUS_CODE_SUCCESS;
