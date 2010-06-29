@@ -7,6 +7,7 @@
  */
 
 #include "Helpers/ReclusterHelper.h"
+#include "Helpers/XmlHelper.h"
 
 #include "Objects/Cluster.h"
 #include "Objects/Track.h"
@@ -96,6 +97,13 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
     reclusterResult.SetMinTrackAssociationEnergy(minTrackAssociationEnergy);
     reclusterResult.SetNExcessTrackAssociations(nExcessTrackAssociations);
 
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ReclusterHelper::ReadSettings(const TiXmlHandle xmlHandle)
+{
     return STATUS_CODE_SUCCESS;
 }
 

@@ -12,6 +12,8 @@
 
 #include "Objects/CartesianVector.h"
 
+#include "Xml/tinyxml.h"
+
 #include "StatusCodes.h"
 
 namespace pandora
@@ -108,6 +110,16 @@ public:
      */
     static StatusCode GetClusterContactDetails(const Cluster *const pClusterI, const Cluster *const pClusterJ, const float distanceThreshold,
         unsigned int &nContactLayers, float &contactFraction);
+
+private:
+    /**
+     *  @brief  Read the fragment removal helper settings
+     * 
+     *  @param  xmlHandle the relevant xml handle
+     */
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+
+    friend class PandoraSettings;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -243,25 +255,51 @@ private:
      */
     void ClusterHelixComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster);
 
-    Cluster        *m_pDaughterCluster;             ///< Address of the daughter candidate cluster
-    Cluster        *m_pParentCluster;               ///< Address of the parent candidate cluster
+    /**
+     *  @brief  Read the cluster contact settings
+     * 
+     *  @param  xmlHandle the relevant xml handle
+     */
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    float           m_parentClusterEnergy;          ///< The parent cluster hadronic energy
-    float           m_parentTrackEnergy;            ///< Sum of energies of tracks associated with parent cluster
+    Cluster                *m_pDaughterCluster;             ///< Address of the daughter candidate cluster
+    Cluster                *m_pParentCluster;               ///< Address of the parent candidate cluster
 
-    unsigned int    m_nContactLayers;               ///< The number of contact layers for parent and daughter clusters two clusters
-    float           m_contactFraction;              ///< The ratio of the number of contact layers to the number of overlap layers
+    float                   m_parentClusterEnergy;          ///< The parent cluster hadronic energy
+    float                   m_parentTrackEnergy;            ///< Sum of energies of tracks associated with parent cluster
 
-    float           m_closeHitFraction1;            ///< Fraction of daughter hits that lie within sepcified distance 1 of parent cluster
-    float           m_closeHitFraction2;            ///< Fraction of daughter hits that lie within sepcified distance 2 of parent cluster
-    float           m_distanceToClosestHit;         ///< Distance between closest hits in parent and daughter clusters, units mm
+    unsigned int            m_nContactLayers;               ///< The number of contact layers for parent and daughter clusters two clusters
+    float                   m_contactFraction;              ///< The ratio of the number of contact layers to the number of overlap layers
 
-    float           m_coneFraction1;                ///< Fraction of daughter hits that lie within specified cone 1 along parent direction
-    float           m_coneFraction2;                ///< Fraction of daughter hits that lie within specified cone 2 along parent direction
-    float           m_coneFraction3;                ///< Fraction of daughter hits that lie within specified cone 3 along parent direction
+    float                   m_closeHitFraction1;            ///< Fraction of daughter hits that lie within sepcified distance 1 of parent cluster
+    float                   m_closeHitFraction2;            ///< Fraction of daughter hits that lie within sepcified distance 2 of parent cluster
+    float                   m_distanceToClosestHit;         ///< Distance between closest hits in parent and daughter clusters, units mm
 
-    float           m_meanDistanceToHelix;          ///< Mean distance of daughter cluster from closest helix fix to parent associated tracks
-    float           m_closestDistanceToHelix;       ///< Closest distance between daughter cluster and helix fits to parent associated tracks
+    float                   m_coneFraction1;                ///< Fraction of daughter hits that lie within specified cone 1 along parent direction
+    float                   m_coneFraction2;                ///< Fraction of daughter hits that lie within specified cone 2 along parent direction
+    float                   m_coneFraction3;                ///< Fraction of daughter hits that lie within specified cone 3 along parent direction
+
+    float                   m_meanDistanceToHelix;          ///< Mean distance of daughter cluster from closest helix fit to parent associated tracks
+    float                   m_closestDistanceToHelix;       ///< Closest distance between daughter cluster and helix fits to parent associated tracks
+
+    static float            m_coneCosineHalfAngle1;         ///< Cosine half angle for first cone comparison in cluster contact object
+    static float            m_coneCosineHalfAngle2;         ///< Cosine half angle for second cone comparison in cluster contact object
+    static float            m_coneCosineHalfAngle3;         ///< Cosine half angle for third cone comparison in cluster contact object
+    static float            m_closeHitDistance1;            ///< First distance used to identify close hits in cluster contact object
+    static float            m_closeHitDistance2;            ///< Second distance used to identify close hits in cluster contact object
+
+    static float            m_minCosOpeningAngle;           ///< Min opening angle between two clusters to perform contact hit comparisons
+    static float            m_distanceThreshold;            ///< Number of calorimeter cell-widths used to identify cluster contact layers
+
+    static float            m_helixComparisonMipFractionCut;///< Mip fraction cut used in cluster contact helix comparison
+    static unsigned int     m_helixComparisonStartOffset;   ///< Start layer offset used in cluster contact helix comparison
+    static unsigned int     m_helixComparisonStartOffsetMip;///< Start layer offset used for mip-like clusters in helix comparison
+    static unsigned int     m_nHelixComparisonLayers;       ///< Max number of layers used in helix comparison for non mip-like clusters
+
+    static unsigned int     m_maxLayersCrossedByHelix;      ///< Max no. of layers crossed by helix between track projection and cluster
+    static float            m_maxTrackClusterDeltaZ;        ///< Max z separation between track projection and cluster
+
+    friend class FragmentRemovalHelper;
 };
 
 typedef std::vector<ClusterContact> ClusterContactVector;

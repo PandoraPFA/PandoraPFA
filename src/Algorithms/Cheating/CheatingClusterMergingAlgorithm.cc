@@ -8,10 +8,7 @@
 
 #include "Algorithms/Cheating/CheatingClusterMergingAlgorithm.h"
 
-#include "Helpers/CaloHitHelper.h"
-
-#include "Objects/MCParticle.h"
-#include "Objects/Cluster.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

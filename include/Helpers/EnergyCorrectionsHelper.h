@@ -11,11 +11,9 @@
 #include "Pandora/PandoraInternal.h"
 #include "Pandora/PandoraInputTypes.h"
 
+#include "Xml/tinyxml.h"
+
 #include "StatusCodes.h"
-
-class TiXmlHandle;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace pandora
 {
@@ -73,9 +71,9 @@ private:
     /**
      *  @brief  Read the energy corrections helper settings
      * 
-     *  @param  pXmlHandle address of the relevant xml handle
+     *  @param  xmlHandle the relevant xml handle
      */
-    static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     static EnergyCorrectionFunctionVector m_hadEnergyCorrectionFunctions;   ///< The hadronic energy correction function vector
     static EnergyCorrectionFunctionVector m_emEnergyCorrectionFunctions;    ///< The electromagnetic energy correction function vector

@@ -8,7 +8,7 @@
 
 #include "Algorithms/Reclustering/ForceSplitTrackAssociationsAlg.h"
 
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

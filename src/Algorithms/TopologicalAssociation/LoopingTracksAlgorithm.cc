@@ -8,11 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/LoopingTracksAlgorithm.h"
 
-#include "Helpers/GeometryHelper.h"
-
-#include <algorithm>
-#include <cmath>
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

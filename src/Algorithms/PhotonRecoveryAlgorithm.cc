@@ -8,7 +8,7 @@
 
 #include "Algorithms/PhotonRecoveryAlgorithm.h"
 
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

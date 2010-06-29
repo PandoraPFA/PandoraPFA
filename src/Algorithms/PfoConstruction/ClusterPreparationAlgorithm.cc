@@ -8,9 +8,7 @@
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 
-#include "Helpers/ParticleIdHelper.h"
-
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

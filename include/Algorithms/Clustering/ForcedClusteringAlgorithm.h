@@ -10,6 +10,8 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Objects/CartesianVector.h"
+
 /**
  *  @brief  ForcedClusteringAlgorithm class
  */

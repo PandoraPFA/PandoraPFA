@@ -11,6 +11,8 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
 
+#include "Xml/tinyxml.h"
+
 namespace pandora
 {
 
@@ -145,7 +147,7 @@ public:
      */
     static float GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList);
 
-        /**
+    /**
      *  @brief  Evaluate the compatibility of a cluster with its associated tracks. Reclustering can be used to split up a
      *          cluster and produce more favourable track/cluster matches.
      * 
@@ -163,6 +165,16 @@ public:
      *  @param  reclusterResult to receive the recluster results
      */
     static StatusCode ExtractReclusterResults(const ClusterList *const pReclusterCandidatesList, ReclusterResult &reclusterResult);
+
+private:
+    /**
+     *  @brief  Read the recluster helper settings
+     * 
+     *  @param  xmlHandle the relevant xml handle
+     */
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+
+    friend class PandoraSettings;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

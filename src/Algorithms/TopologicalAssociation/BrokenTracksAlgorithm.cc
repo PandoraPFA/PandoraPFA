@@ -8,9 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/BrokenTracksAlgorithm.h"
 
-#include <algorithm>
-#include <cmath>
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

@@ -38,18 +38,6 @@ class TrackState;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-#ifdef UNIT_TESTS 
-    #define ADD_TEST_CLASS_FRIENDS      \
-    friend class TestCaloHitManager;    \
-    friend class TestMCManager;         \
-    friend class TestTrackManager;      \
-    friend class TestPandora;
-#else
-    #define ADD_TEST_CLASS_FRIENDS
-#endif
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 template <class T>
 inline bool StringToType(const std::string &s, T &t)
 {

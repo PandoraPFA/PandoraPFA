@@ -8,9 +8,11 @@
 #ifndef CALO_HIT_HELPER_H
 #define CALO_HIT_HELPER_H 1
 
-#include "Api/PandoraApi.h"
-
 #include "Pandora/PandoraInternal.h"
+
+#include "Xml/tinyxml.h"
+
+#include "StatusCodes.h"
 
 namespace pandora
 {
@@ -82,6 +84,13 @@ public:
      *  @return the number of nearby hits
      */
     static unsigned int IsolationCountNearbyHits(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList);
+
+    /**
+     *  @brief  Whether calo hit helper has been configured to use the simple (density weight cut) isolation scheme
+     * 
+     *  @return boolean
+     */
+    static bool ShouldUseSimpleIsolationScheme();
 
     /**
      *  @brief  Count number of "nearby" hits using the mip identification scheme
@@ -169,23 +178,53 @@ private:
      */
     static void ApplySimpleIsolationScheme(const CaloHitVector &caloHitVector);
 
+    /**
+     *  @brief  Read the calo hit helper settings
+     * 
+     *  @param  xmlHandle the relevant xml handle
+     */
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+
     typedef std::map<CaloHit *, bool> CaloHitUsageMap;
     typedef std::map<std::string, CaloHitUsageMap *> NameToCaloHitUsageMap;
     typedef std::vector<CaloHitUsageMap *> UsageMapVector;
     typedef std::vector<StringVector *> NestedUsageMapNames;
 
-    static unsigned int                 m_nReclusteringProcesses;   ///< The number of reclustering algorithms currently in use
-    static CaloHitUsageMap             *m_pCurrentUsageMap;         ///< Address of the current calo hit usage map
-    static UsageMapVector               m_parentCaloHitUsageMaps;   ///< List of current usage maps for all reclustering algorithms in use
-    static NestedUsageMapNames          m_nestedUsageMapNames;      ///< List of usage maps names, ordered by recluster process
-    static NameToCaloHitUsageMap        m_nameToCaloHitUsageMap;    ///< The name to calo hit availability map
+    static unsigned int             m_nReclusteringProcesses;           ///< The number of reclustering algorithms currently in use
+    static CaloHitUsageMap         *m_pCurrentUsageMap;                 ///< Address of the current calo hit usage map
+    static UsageMapVector           m_parentCaloHitUsageMaps;           ///< List of current usage maps for all reclustering algorithms in use
+    static NestedUsageMapNames      m_nestedUsageMapNames;              ///< List of usage maps names, ordered by recluster process
+    static NameToCaloHitUsageMap    m_nameToCaloHitUsageMap;            ///< The name to calo hit availability map
+
+    static float                    m_caloHitMaxSeparation;             ///< Max separation to consider associations between hits, units mm
+    static unsigned int             m_densityWeightPower;               ///< The density weighting power
+    static unsigned int             m_densityWeightNLayers;             ///< Number of adjacent layers to use in density weight calculation
+
+    static bool                     m_shouldUseSimpleIsolationScheme;   ///< Whether to use the simple (density weight cut) isolation scheme
+    static float                    m_isolationDensityWeightCutECal;    ///< ECal isolation density weight cut
+    static float                    m_isolationDensityWeightCutHCal;    ///< HCal isolation density weight cut
+
+    static unsigned int             m_isolationNLayers;                 ///< Number of adjacent layers to use in isolation calculation
+    static float                    m_isolationCutDistanceECal;         ///< ECal isolation cut distance, units mm
+    static float                    m_isolationCutDistanceHCal;         ///< HCal isolation cut distance, units mm
+    static unsigned int             m_isolationMaxNearbyHits;           ///< Max number of "nearby" hits for a hit to be considered isolated
+
+    static float                    m_mipLikeMipCut;                    ///< Mip equivalent energy cut for hit to be flagged as possible mip
+    static unsigned int             m_mipNCellsForNearbyHit;            ///< Separation (in calo cells) for hits to be declared "nearby"
+    static unsigned int             m_mipMaxNearbyHits;                 ///< Max number of "nearby" hits for hit to be flagged as possible mip
 
     friend class CaloHitManager;
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
-
-    ADD_TEST_CLASS_FRIENDS;
+    friend class PandoraSettings;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool CaloHitHelper::ShouldUseSimpleIsolationScheme()
+{
+    return m_shouldUseSimpleIsolationScheme;
+}
 
 } // namespace pandora
 

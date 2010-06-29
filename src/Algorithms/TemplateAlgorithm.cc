@@ -8,6 +8,8 @@
 
 #include "Algorithms/TemplateAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode TemplateAlgorithm::Run()

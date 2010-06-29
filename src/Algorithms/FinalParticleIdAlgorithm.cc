@@ -8,7 +8,7 @@
 
 #include "Algorithms/FinalParticleIdAlgorithm.h"
 
-#include "Helpers/ParticleIdHelper.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

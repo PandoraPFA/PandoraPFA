@@ -7,8 +7,8 @@
  */
 
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
-#include "Objects/MCParticle.h"
-#include "Helpers/CaloHitHelper.h"
+
+#include "Pandora/AlgorithmHeaders.h"
 
 #include <algorithm>
 #include <cassert>
@@ -17,9 +17,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
-
 #include <sstream>
-
 #include <assert.h>
 
 using namespace pandora;

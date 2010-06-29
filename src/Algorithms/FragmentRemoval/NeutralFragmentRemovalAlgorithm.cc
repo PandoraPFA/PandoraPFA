@@ -8,6 +8,8 @@
 
 #include "Algorithms/FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode NeutralFragmentRemovalAlgorithm::Run()

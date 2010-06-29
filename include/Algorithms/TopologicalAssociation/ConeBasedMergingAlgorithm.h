@@ -10,6 +10,8 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Helpers/ClusterHelper.h"
+
 /**
  *  @brief  ConeBasedMergingAlgorithm class
  */

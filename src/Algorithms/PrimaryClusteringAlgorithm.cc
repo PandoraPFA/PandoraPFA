@@ -8,6 +8,8 @@
 
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode PrimaryClusteringAlgorithm::Run()

@@ -10,6 +10,8 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Api/PandoraContentApi.h"
+
 /**
  *  @brief  PfoCreationAlgorithm class
  */

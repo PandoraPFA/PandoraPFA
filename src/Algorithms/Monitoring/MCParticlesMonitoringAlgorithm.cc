@@ -8,11 +8,7 @@
 
 #include "Algorithms/Monitoring/MCParticlesMonitoringAlgorithm.h"
 
-#include "Api/PandoraContentApi.h"
-
-#include "Objects/MCParticle.h"
-#include "Objects/CaloHit.h"
-#include "Objects/Track.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 #include <iostream>
 #include <iomanip>

@@ -8,13 +8,12 @@
 
 #include "Helpers/FragmentRemovalHelper.h"
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/XmlHelper.h"
 
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 #include "Objects/Helix.h"
 #include "Objects/Track.h"
-
-#include "Pandora/PandoraSettings.h"
 
 #include <limits>
 
@@ -300,6 +299,15 @@ StatusCode FragmentRemovalHelper::GetClusterContactDetails(const Cluster *const 
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FragmentRemovalHelper::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterContact::ReadSettings(xmlHandle));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ClusterContact::ClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster) :
@@ -314,16 +322,11 @@ ClusterContact::ClusterContact(Cluster *const pDaughterCluster, Cluster *const p
     m_meanDistanceToHelix(std::numeric_limits<float>::max()),
     m_closestDistanceToHelix(std::numeric_limits<float>::max())
 {
-    static const float coneCosineHalfAngle1(PandoraSettings::GetInstance()->GetContactConeCosineHalfAngle1());
-    static const float coneCosineHalfAngle2(PandoraSettings::GetInstance()->GetContactConeCosineHalfAngle2());
-    static const float coneCosineHalfAngle3(PandoraSettings::GetInstance()->GetContactConeCosineHalfAngle3());
+    m_coneFraction1 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, m_coneCosineHalfAngle1);
+    m_coneFraction2 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, m_coneCosineHalfAngle2);
+    m_coneFraction3 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, m_coneCosineHalfAngle3);
 
-    m_coneFraction1 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, coneCosineHalfAngle1);
-    m_coneFraction2 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, coneCosineHalfAngle2);
-    m_coneFraction3 = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, coneCosineHalfAngle3);
-
-    static const float distanceThreshold(PandoraSettings::GetInstance()->GetContactDistanceThreshold());
-    (void) FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, distanceThreshold, m_nContactLayers, m_contactFraction);
+    (void) FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, m_distanceThreshold, m_nContactLayers, m_contactFraction);
 
     this->HitDistanceComparison(pDaughterCluster, pParentCluster);
     this->ClusterHelixComparison(pDaughterCluster, pParentCluster);
@@ -333,16 +336,13 @@ ClusterContact::ClusterContact(Cluster *const pDaughterCluster, Cluster *const p
 
 void ClusterContact::HitDistanceComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster)
 {
-    static const float closeHitDistance1(PandoraSettings::GetInstance()->GetContactCloseHitDistance1());
-    static const float closeHitDistance2(PandoraSettings::GetInstance()->GetContactCloseHitDistance2());
-    static const float minCosOpeningAngle(PandoraSettings::GetInstance()->GetContactMinCosOpeningAngle());
-    static const float closeHitDistance1Squared(closeHitDistance1 * closeHitDistance1);
-    static const float closeHitDistance2Squared(closeHitDistance2 * closeHitDistance2);
+    static const float closeHitDistance1Squared(m_closeHitDistance1 * m_closeHitDistance1);
+    static const float closeHitDistance2Squared(m_closeHitDistance2 * m_closeHitDistance2);
 
     // Apply simple preselection using cosine of opening angle between the clusters
     const float cosOpeningAngle(pDaughterCluster->GetInitialDirection().GetCosOpeningAngle(pParentCluster->GetInitialDirection()));
 
-    if (cosOpeningAngle < minCosOpeningAngle)
+    if (cosOpeningAngle < m_minCosOpeningAngle)
         return;
 
     // Calculate all hit distance properties in a single loop, for efficiency
@@ -400,22 +400,16 @@ void ClusterContact::HitDistanceComparison(Cluster *const pDaughterCluster, Clus
 
 void ClusterContact::ClusterHelixComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster)
 {
-    static const float mipFractionCut(PandoraSettings::GetInstance()->GetContactHelixComparisonMipFractionCut());
-    static const unsigned int startLayerOffset(PandoraSettings::GetInstance()->GetContactHelixComparisonStartOffset());
-    static const unsigned int startLayerOffsetMip(PandoraSettings::GetInstance()->GetContactHelixComparisonStartOffsetMip());
-    static const unsigned int nHelixComparisonLayers(PandoraSettings::GetInstance()->GetContactNHelixComparisonLayers());
-    static const unsigned int maxLayersCrossedByHelix(PandoraSettings::GetInstance()->GetContactMaxLayersCrossedByHelix());
-    static const float maxTrackClusterDeltaZ(PandoraSettings::GetInstance()->GetContactMaxTrackClusterDeltaZ());
-
     // Configure range of layers in which daughter cluster will be compared to helix fits
-    const bool passMipFractionCut(pParentCluster->GetMipFraction() - mipFractionCut > std::numeric_limits<float>::epsilon());
+    const bool passMipFractionCut(pParentCluster->GetMipFraction() - m_helixComparisonMipFractionCut > std::numeric_limits<float>::epsilon());
 
     const PseudoLayer startLayer(pDaughterCluster->GetInnerPseudoLayer());
-    const PseudoLayer endLayer(passMipFractionCut ? std::max(startLayer + startLayerOffset, pParentCluster->GetOuterPseudoLayer() + startLayerOffsetMip) :
-        startLayer + startLayerOffset);
+    const PseudoLayer endLayer(passMipFractionCut ?
+        std::max(startLayer + m_helixComparisonStartOffset, pParentCluster->GetOuterPseudoLayer() + m_helixComparisonStartOffsetMip) :
+        startLayer + m_helixComparisonStartOffset);
 
     const float clusterZPosition(pDaughterCluster->GetCentroid(startLayer).GetZ());
-    const unsigned int maxOccupiedLayers(passMipFractionCut ? std::numeric_limits<unsigned int>::max() : nHelixComparisonLayers);
+    const unsigned int maxOccupiedLayers(passMipFractionCut ? std::numeric_limits<unsigned int>::max() : m_nHelixComparisonLayers);
 
     // Calculate closest distance between daughter cluster and helix fits to parent associated tracks
     float trackEnergySum(0.);
@@ -429,13 +423,13 @@ void ClusterContact::ClusterHelixComparison(Cluster *const pDaughterCluster, Clu
         const float trackECalZPosition((*iter)->GetTrackStateAtECal().GetPosition().GetZ());
 
         // Check proximity of track projection and cluster
-        if ((std::fabs(trackECalZPosition) > (std::fabs(clusterZPosition) + maxTrackClusterDeltaZ)) || (trackECalZPosition * clusterZPosition < 0.f))
+        if ((std::fabs(trackECalZPosition) > (std::fabs(clusterZPosition) + m_maxTrackClusterDeltaZ)) || (trackECalZPosition * clusterZPosition < 0.f))
             continue;
 
         // Check number of layers crossed by helix
         const PseudoLayer nLayersCrossed(FragmentRemovalHelper::GetNLayersCrossed(pHelix, trackECalZPosition, clusterZPosition));
 
-        if (nLayersCrossed > maxLayersCrossedByHelix)
+        if (nLayersCrossed > m_maxLayersCrossedByHelix)
             continue;
 
         // Calculate distance to helix
@@ -452,6 +446,68 @@ void ClusterContact::ClusterHelixComparison(Cluster *const pDaughterCluster, Clu
     }
 
     m_parentTrackEnergy = trackEnergySum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float ClusterContact::m_coneCosineHalfAngle1 = 0.9f;
+float ClusterContact::m_coneCosineHalfAngle2 = 0.95f;
+float ClusterContact::m_coneCosineHalfAngle3 = 0.985f;
+float ClusterContact::m_closeHitDistance1 = 100.f;
+float ClusterContact::m_closeHitDistance2 = 50.f;
+float ClusterContact::m_minCosOpeningAngle = 0.5f;
+float ClusterContact::m_distanceThreshold = 2.f;
+float ClusterContact::m_helixComparisonMipFractionCut = 0.8f;
+unsigned int ClusterContact::m_helixComparisonStartOffset = 20;
+unsigned int ClusterContact::m_helixComparisonStartOffsetMip = 20;
+unsigned int ClusterContact::m_nHelixComparisonLayers = 9;
+unsigned int ClusterContact::m_maxLayersCrossedByHelix = 100;
+float ClusterContact::m_maxTrackClusterDeltaZ = 250.f;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterContact::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeCosineHalfAngle1", m_coneCosineHalfAngle1));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeCosineHalfAngle2", m_coneCosineHalfAngle2));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeCosineHalfAngle3", m_coneCosineHalfAngle3));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CloseHitDistance1", m_closeHitDistance1));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CloseHitDistance2", m_closeHitDistance2));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCosOpeningAngle", m_minCosOpeningAngle));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceThreshold", m_distanceThreshold));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HelixComparisonMipFractionCut", m_helixComparisonMipFractionCut));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HelixComparisonStartOffset", m_helixComparisonStartOffset));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HelixComparisonStartOffsetMip", m_helixComparisonStartOffsetMip));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NHelixComparisonLayers", m_nHelixComparisonLayers));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxLayersCrossedByHelix", m_maxLayersCrossedByHelix));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxTrackClusterDeltaZ", m_maxTrackClusterDeltaZ));
+
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

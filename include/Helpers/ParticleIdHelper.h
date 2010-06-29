@@ -8,14 +8,12 @@
 #ifndef PARTICLE_ID_HELPER_H
 #define PARTICLE_ID_HELPER_H 1
 
-#include "Pandora/PandoraInternal.h"
 #include "Pandora/PandoraInputTypes.h"
+#include "Pandora/PandoraInternal.h"
+
+#include "Xml/tinyxml.h"
 
 #include "StatusCodes.h"
-
-class TiXmlHandle;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace pandora
 {
@@ -129,9 +127,9 @@ private:
     /**
      *  @brief  Read the particle id helper settings
      * 
-     *  @param  pXmlHandle address of the relevant xml handle
+     *  @param  xmlHandle the relevant xml handle
      */
-    static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     static ParticleIdFunction *m_pPhotonFastFunction;       ///< The fast photon id function pointer
     static ParticleIdFunction *m_pPhotonFullFunction;       ///< The full photon id function pointer

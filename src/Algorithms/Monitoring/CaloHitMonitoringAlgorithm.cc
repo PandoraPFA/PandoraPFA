@@ -8,6 +8,8 @@
 
 #include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode CaloHitMonitoringAlgorithm::Run()

@@ -8,10 +8,7 @@
 
 #include "Algorithms/Monitoring/EnergyMonitoringAlgorithm.h"
 
-#include "Api/PandoraContentApi.h"
-
-#include "Objects/CaloHit.h"
-#include "Objects/MCParticle.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 #include <iostream>
 #include <iomanip>

@@ -8,9 +8,7 @@
 
 #include "Algorithms/Cheating/PerfectClusteringAlgorithm.h"
 
-#include "Helpers/CaloHitHelper.h"
-
-#include "Objects/MCParticle.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

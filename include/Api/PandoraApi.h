@@ -8,12 +8,10 @@
 #ifndef PANDORA_API_H
 #define PANDORA_API_H 1
 
-#include "Objects/ParticleFlowObject.h"
-
 #include "Pandora/Pandora.h"
 #include "Pandora/PandoraInputTypes.h"
 
-namespace pandora { class Algorithm; class AlgorithmFactory; }
+namespace pandora { class AlgorithmFactory; }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

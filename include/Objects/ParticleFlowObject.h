@@ -152,8 +152,6 @@ private:
     ClusterList             m_clusterList;              ///< The cluster list
 
     friend class ParticleFlowObjectManager;
-
-    ADD_TEST_CLASS_FRIENDS;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -8,6 +8,8 @@
 
 #include "Algorithms/PfoConstruction/PfoCreationAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode PfoCreationAlgorithm::Run()

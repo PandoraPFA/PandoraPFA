@@ -8,45 +8,19 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H 1
 
-#include "Api/PandoraContentApi.h"
-
-#include "Helpers/GeometryHelper.h"
-#include "Helpers/XmlHelper.h"
-
-#include "Objects/CaloHit.h"
-#include "Objects/Cluster.h"
-#include "Objects/Helix.h"
-#include "Objects/OrderedCaloHitList.h"
-#include "Objects/Track.h"
-
+#include "Pandora/Pandora.h"
 #include "Pandora/PandoraInternal.h"
-#include "Pandora/PandoraSettings.h"
 
-#ifdef MONITORING
-#include "PandoraMonitoringApi.h"
-#endif
+#include "StatusCodes.h"
+
+class TiXmlHandle;
 
 namespace pandora
 {
 
-/**
- *  @brief  Factory class for instantiating algorithms
- */
-class AlgorithmFactory
-{
-public:
-    /**
-     *  @brief  Create an instance of an algorithm
-     * 
-     *  @return the address of the algorithm instance
-     */
-    virtual Algorithm *CreateAlgorithm() const = 0;
+class PandoraContentApiImpl;
 
-    /**
-     *  @brief  Destructor
-     */
-    virtual ~AlgorithmFactory();
-};
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  Algorithm class
@@ -108,6 +82,28 @@ protected:
 
     friend class AlgorithmManager;
     friend class PandoraContentApiImpl;
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ *  @brief  Factory class for instantiating algorithms
+ */
+class AlgorithmFactory
+{
+public:
+    /**
+     *  @brief  Create an instance of an algorithm
+     * 
+     *  @return the address of the algorithm instance
+     */
+    virtual Algorithm *CreateAlgorithm() const = 0;
+
+    /**
+     *  @brief  Destructor
+     */
+    virtual ~AlgorithmFactory();
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

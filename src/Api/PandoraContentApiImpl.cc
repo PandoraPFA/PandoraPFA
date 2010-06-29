@@ -19,6 +19,10 @@
 #include "Managers/TrackManager.h"
 #include "Managers/ParticleFlowObjectManager.h"
 
+#include "Objects/Cluster.h"
+#include "Objects/ParticleFlowObject.h"
+#include "Objects/Track.h"
+
 #include "Pandora/Pandora.h"
 #include "Pandora/PandoraSettings.h"
 

@@ -8,9 +8,7 @@
 
 #include "Algorithms/Cheating/CheatingPfoCreationAlgorithm.h"
 
-#include "Objects/MCParticle.h"
-
-#include <algorithm>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

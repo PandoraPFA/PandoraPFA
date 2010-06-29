@@ -11,6 +11,8 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
 
+#include "Xml/tinyxml.h"
+
 namespace pandora
 {
 
@@ -364,6 +366,23 @@ private:
      *  @param  clusterFitResult to receive the cluster fit result
      */
     static StatusCode FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, bool isPositiveZ, ClusterFitResult &clusterFitResult);
+
+    /**
+     *  @brief  Read the cluster helper settings
+     * 
+     *  @param  xmlHandle the relevant xml handle
+     */
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+
+    static float           m_showerStartMipFraction;               ///< Max layer mip-fraction to declare layer as shower-like
+    static unsigned int    m_showerStartNonMipLayers;              ///< Number of successive shower-like layers to identify shower start
+
+    static unsigned int    m_leavingNOuterLayersToExamine;         ///< Number of outer layers to examine to identify leaving cluster
+    static unsigned int    m_leavingMipLikeNOccupiedLayers;        ///< Number of occupied outer layers for a mip-like leaving cluster
+    static unsigned int    m_leavingShowerLikeNOccupiedLayers;     ///< Number of occupied outer layers for a shower-like leaving cluster
+    static float           m_leavingShowerLikeEnergyInOuterLayers; ///< Energy deposited in outer layers by a shower-like leaving cluster
+
+    friend class PandoraSettings;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -8,6 +8,8 @@
 
 #include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode TrackPreparationAlgorithm::Run()

@@ -8,13 +8,12 @@
 
 #include "Helpers/ClusterHelper.h"
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/XmlHelper.h"
 
 #include "Objects/CaloHit.h"
 #include "Objects/Cluster.h"
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
-
-#include "Pandora/PandoraSettings.h"
 
 #include <cmath>
 #include <limits>
@@ -668,16 +667,13 @@ bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
     const PseudoLayer outerLayer(pCluster->GetOuterPseudoLayer());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    static const PandoraSettings *const pPandoraSettings(PandoraSettings::GetInstance());
-    static const PseudoLayer nOuterLayersToExamine(pPandoraSettings->GetLeavingNOuterLayersToExamine());
-
-    if (nOuterLayersToExamine > outerLayer)
+    if (m_leavingNOuterLayersToExamine > outerLayer)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     unsigned int nOccupiedOuterLayers(0);
     float hadronicEnergyInOuterLayers(0.f);
 
-    for (PseudoLayer iLayer = outerLayer - nOuterLayersToExamine; iLayer <= outerLayer; ++iLayer)
+    for (PseudoLayer iLayer = outerLayer - m_leavingNOuterLayersToExamine; iLayer <= outerLayer; ++iLayer)
     {
         OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
 
@@ -692,12 +688,8 @@ bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
         }
     }
 
-    static const unsigned int mipLikeNOccupiedOuterLayers(pPandoraSettings->GetLeavingNMipLikeOccupiedLayers());
-    static const unsigned int showerLikeNOccupiedOuterLayers(pPandoraSettings->GetLeavingNShowerLikeOccupiedLayers());
-    static const float showerLikeHadronicEnergyInOuterLayers(pPandoraSettings->GetLeavingShowerLikeEnergyInOuterLayers());
-
-    if ((nOccupiedOuterLayers >= mipLikeNOccupiedOuterLayers) ||
-        ((nOccupiedOuterLayers == showerLikeNOccupiedOuterLayers) && (hadronicEnergyInOuterLayers > showerLikeHadronicEnergyInOuterLayers)))
+    if ((nOccupiedOuterLayers >= m_leavingMipLikeNOccupiedLayers) ||
+        ((nOccupiedOuterLayers == m_leavingShowerLikeNOccupiedLayers) && (hadronicEnergyInOuterLayers > m_leavingShowerLikeEnergyInOuterLayers)))
     {
         return true;
     }
@@ -709,9 +701,6 @@ bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
 
 PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
 {
-    static const float showerStartMipFraction(PandoraSettings::GetInstance()->GetShowerStartMipFraction());
-    static const unsigned int showerStartNonMipLayers(PandoraSettings::GetInstance()->GetShowerStartNonMipLayers());
-
     const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
     const PseudoLayer outerLayer(pCluster->GetOuterPseudoLayer());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
@@ -740,11 +729,11 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
             mipFraction = static_cast<float>(nMipHits) / static_cast<float>(iter->second->size());
         }
 
-        if (mipFraction - showerStartMipFraction > std::numeric_limits<float>::epsilon())
+        if (mipFraction - m_showerStartMipFraction > std::numeric_limits<float>::epsilon())
         {
             currentShowerLayers = 0;
         }
-        else if (++currentShowerLayers >= showerStartNonMipLayers)
+        else if (++currentShowerLayers >= m_showerStartNonMipLayers)
         {
             if (isLayerPopulated)
                 lastForwardLayer = iLayer;
@@ -779,12 +768,12 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
 
         const float mipFraction(static_cast<float>(nMipHits) / static_cast<float>(iter->second->size()));
 
-        if (mipFraction - showerStartMipFraction < std::numeric_limits<float>::epsilon())
+        if (mipFraction - m_showerStartMipFraction < std::numeric_limits<float>::epsilon())
         {
             currentMipLayers = 0;
             showerStartLayer = iLayer;
         }
-        else if (++currentMipLayers >= showerStartNonMipLayers)
+        else if (++currentMipLayers >= m_showerStartNonMipLayers)
         {
             return showerStartLayer;
         }
@@ -814,6 +803,41 @@ ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position,
 {
     if (!m_position.IsInitialized() || (0 == m_cellSize))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float ClusterHelper::m_showerStartMipFraction = 0.8f;
+unsigned int ClusterHelper::m_showerStartNonMipLayers = 2;
+unsigned int ClusterHelper::m_leavingNOuterLayersToExamine = 4;
+unsigned int ClusterHelper::m_leavingMipLikeNOccupiedLayers = 4;
+unsigned int ClusterHelper::m_leavingShowerLikeNOccupiedLayers = 3;
+float ClusterHelper::m_leavingShowerLikeEnergyInOuterLayers = 1.f;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterHelper::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShowerStartMipFraction", m_showerStartMipFraction));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShowerStartNonMipLayers", m_showerStartNonMipLayers));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LeavingNOuterLayersToExamine", m_leavingNOuterLayersToExamine));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LeavingMipLikeNOccupiedLayers", m_leavingMipLikeNOccupiedLayers));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LeavingShowerLikeNOccupiedLayers", m_leavingShowerLikeNOccupiedLayers));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LeavingShowerLikeEnergyInOuterLayers", m_leavingShowerLikeEnergyInOuterLayers));
+
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

@@ -8,6 +8,8 @@
 
 #include "Algorithms/FragmentRemovalAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode FragmentRemovalAlgorithm::Run()

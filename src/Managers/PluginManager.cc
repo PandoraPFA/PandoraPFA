@@ -6,7 +6,7 @@
  *  $Log: $
  */
 
-#include "Algorithms/Algorithm.h"
+#include "Helpers/XmlHelper.h"
 
 #include "Managers/PluginManager.h"
 

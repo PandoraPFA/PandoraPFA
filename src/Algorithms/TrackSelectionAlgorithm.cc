@@ -8,6 +8,8 @@
 
 #include "Algorithms/TrackSelectionAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode TrackSelectionAlgorithm::Run()

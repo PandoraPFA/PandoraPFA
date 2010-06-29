@@ -8,11 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/ProximityBasedMergingAlgorithm.h"
 
-#include "Helpers/FragmentRemovalHelper.h"
-
-#include <algorithm>
-#include <cmath>
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

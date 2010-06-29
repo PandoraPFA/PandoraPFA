@@ -8,9 +8,7 @@
 
 #include "Algorithms/Monitoring/VisualMonitoringAlgorithm.h"
 
-#include "Api/PandoraContentApi.h"
-
-#include "Helpers/CaloHitHelper.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

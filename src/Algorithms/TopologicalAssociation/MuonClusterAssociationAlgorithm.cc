@@ -8,10 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/MuonClusterAssociationAlgorithm.h"
 
-#include "Helpers/ClusterHelper.h"
-#include "Helpers/ReclusterHelper.h"
-
-#include <algorithm>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

@@ -8,7 +8,7 @@
 
 #include "Algorithms/Cheating/PerfectNeutralHadronClusteringAlgorithm.h"
 
-#include "Objects/MCParticle.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

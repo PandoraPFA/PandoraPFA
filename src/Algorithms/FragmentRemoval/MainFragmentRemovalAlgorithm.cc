@@ -8,7 +8,7 @@
 
 #include "Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.h"
 
-#include "Helpers/ReclusterHelper.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 #include <cstdlib>
 

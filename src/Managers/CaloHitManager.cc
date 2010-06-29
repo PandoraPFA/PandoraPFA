@@ -99,7 +99,7 @@ StatusCode CaloHitManager::CalculateCaloHitProperties() const
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CalculateCaloHitProperties(INPUT_LIST_NAME));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CalculateCaloHitProperties(MUON_LIST_NAME));
 
-    static const bool useSimpleIsolationScheme(PandoraSettings::GetInstance()->ShouldUseSimpleIsolationScheme());
+    static const bool useSimpleIsolationScheme(CaloHitHelper::ShouldUseSimpleIsolationScheme());
 
     if (useSimpleIsolationScheme)
         CaloHitHelper::ApplySimpleIsolationScheme(m_inputCaloHitVector);

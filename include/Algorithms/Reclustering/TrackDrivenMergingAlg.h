@@ -10,6 +10,8 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Objects/Cluster.h"
+
 using namespace pandora;
 
 /**

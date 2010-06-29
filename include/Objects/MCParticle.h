@@ -198,8 +198,6 @@ private:
     bool                m_isInitialized;    ///< Whether particle information has been initialized
 
     friend class MCManager;
-
-    ADD_TEST_CLASS_FRIENDS;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

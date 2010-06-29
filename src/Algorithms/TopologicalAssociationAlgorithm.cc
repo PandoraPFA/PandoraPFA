@@ -8,6 +8,8 @@
 
 #include "Algorithms/TopologicalAssociationAlgorithm.h"
 
+#include "Pandora/AlgorithmHeaders.h"
+
 using namespace pandora;
 
 StatusCode TopologicalAssociationAlgorithm::Run()

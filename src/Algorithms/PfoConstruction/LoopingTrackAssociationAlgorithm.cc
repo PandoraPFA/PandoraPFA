@@ -8,10 +8,7 @@
 
 #include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
 
-#include "Helpers/ReclusterHelper.h"
-
-#include <algorithm>
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

@@ -97,8 +97,6 @@ private:
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
     friend class PandoraImpl;
-
-    ADD_TEST_CLASS_FRIENDS;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

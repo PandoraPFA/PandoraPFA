@@ -8,10 +8,7 @@
 
 #include "Algorithms/Clustering/ForcedClusteringAlgorithm.h"
 
-#include "Helpers/CaloHitHelper.h"
-
-#include <algorithm>
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

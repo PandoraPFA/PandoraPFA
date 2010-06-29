@@ -8,10 +8,7 @@
 
 #include "Algorithms/Reclustering/TrackDrivenMergingAlg.h"
 
-#include "Helpers/FragmentRemovalHelper.h"
-
-#include <algorithm>
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

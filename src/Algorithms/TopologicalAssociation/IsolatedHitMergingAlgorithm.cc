@@ -8,10 +8,7 @@
 
 #include "Algorithms/TopologicalAssociation/IsolatedHitMergingAlgorithm.h"
 
-#include "Helpers/CaloHitHelper.h"
-
-#include <algorithm>
-#include <limits>
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

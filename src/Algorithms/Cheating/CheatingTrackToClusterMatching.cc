@@ -8,7 +8,7 @@
 
 #include "Algorithms/Cheating/CheatingTrackToClusterMatching.h"
 
-#include "Objects/MCParticle.h"
+#include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 

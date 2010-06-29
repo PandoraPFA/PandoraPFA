@@ -10,6 +10,9 @@
 
 #include "Algorithms/Algorithm.h"
 
+#include "Objects/CaloHit.h"
+#include "Objects/CartesianVector.h"
+
 using namespace pandora;
 
 /**

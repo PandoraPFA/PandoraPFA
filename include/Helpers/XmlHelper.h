@@ -8,9 +8,11 @@
 #ifndef XML_HELPER_H
 #define XML_HELPER_H 1
 
-#include "Xml/tinyxml.h"
+#include "Algorithms/Algorithm.h"
 
 #include "Pandora/PandoraInternal.h"
+
+#include "Xml/tinyxml.h"
 
 #include "StatusCodes.h"
 
