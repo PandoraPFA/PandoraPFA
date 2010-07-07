@@ -105,7 +105,7 @@ StatusCode VisualMonitoringAlgorithm::Run()
         {
             if( m_eve )
             {
-                PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "current", AUTO  ) );
+                PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "currentClusters", AUTO  ) );
             }
             else
             {
@@ -118,6 +118,30 @@ StatusCode VisualMonitoringAlgorithm::Run()
                     PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, AUTO  ) );
                 }
             }
+        }
+    }
+
+    // show current clusters
+    if(m_particleFlowObjects)
+    {
+        const ParticleFlowObjectList* pPfoList = NULL;
+        if( STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
+        {
+            if( m_eve )
+            {
+                PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", AUTO  ) );
+            }
+//             else
+//             {
+//                 if( m_detectorView == "XZ" )
+//                 {
+//                     PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, AUTO  ) );
+//                 }
+//                 else
+//                 {
+//                     PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, AUTO  ) );
+//                 }
+//             }
         }
     }
 
@@ -142,8 +166,11 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
 
-    m_eve = false;
+    m_eve = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "UseROOTEve", m_eve));
+
+    m_particleFlowObjects = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowCurrentPfos", m_particleFlowObjects));
 
     m_clusters = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowCurrentClusters", m_clusters));

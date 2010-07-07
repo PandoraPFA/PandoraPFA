@@ -33,6 +33,7 @@ private:
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     pandora::StringVector m_clusterListNames;            ///< list of strings denoting clusternames 
+    bool         m_particleFlowObjects;                  ///< show current particle flow object list
     bool         m_clusters;                             ///< show current cluster list
     bool         m_hits;                                 ///< show current ordered calohitlist
     bool         m_tracks;                               ///< show current tracklist
