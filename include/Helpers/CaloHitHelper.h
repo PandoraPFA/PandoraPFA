@@ -197,6 +197,9 @@ private:
     static NameToCaloHitUsageMap    m_nameToCaloHitUsageMap;            ///< The name to calo hit availability map
 
     static float                    m_caloHitMaxSeparation;             ///< Max separation to consider associations between hits, units mm
+    static float                    m_isolationCaloHitMaxSeparation;    ///< Max separation considered when identifying isolated hits, units mm
+
+    static float                    m_densityWeightContribution;        ///< The basic density weight contribution
     static unsigned int             m_densityWeightPower;               ///< The density weighting power
     static unsigned int             m_densityWeightNLayers;             ///< Number of adjacent layers to use in density weight calculation
 

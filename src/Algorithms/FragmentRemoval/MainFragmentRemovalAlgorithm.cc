@@ -57,7 +57,19 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass,
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    for (ClusterList::const_iterator iterI = pClusterList->begin(), iterIEnd = pClusterList->end(); iterI != iterIEnd; ++iterI)
+    // Filter current cluster list to exclude muon candidates
+    ClusterList clusterList;
+
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    {
+        Cluster *pCluster = *iter;
+
+        if (!ParticleIdHelper::IsMuonFast(pCluster))
+            clusterList.insert(pCluster);
+    }
+
+    // Create cluster contacts
+    for (ClusterList::const_iterator iterI = clusterList.begin(), iterIEnd = clusterList.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = *iterI;
 
@@ -81,7 +93,7 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass,
             continue;
 
         // Calculate the cluster contact information
-        for (ClusterList::const_iterator iterJ = pClusterList->begin(), iterJEnd = pClusterList->end(); iterJ != iterJEnd; ++iterJ)
+        for (ClusterList::const_iterator iterJ = clusterList.begin(), iterJEnd = clusterList.end(); iterJ != iterJEnd; ++iterJ)
         {
             Cluster *pParentCluster = *iterJ;
 

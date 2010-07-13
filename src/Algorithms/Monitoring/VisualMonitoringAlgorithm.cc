@@ -121,7 +121,7 @@ StatusCode VisualMonitoringAlgorithm::Run()
         }
     }
 
-    // show current clusters
+    // show current particle flow objects
     if(m_particleFlowObjects)
     {
         const ParticleFlowObjectList* pPfoList = NULL;
@@ -183,7 +183,6 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 
     m_onlyAvailable = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowOnlyAvailable", m_onlyAvailable));
-    
 
     m_detectorView = "XZ";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "DetectorView", m_detectorView));

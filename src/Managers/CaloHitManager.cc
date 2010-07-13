@@ -80,7 +80,7 @@ StatusCode CaloHitManager::OrderInputCaloHits()
         }
         catch (StatusCodeException &statusCodeException)
         {
-            std::cout << "Failed to assign hit to pseudolayer, " << StatusCodeToString(statusCodeException.GetStatusCode()) << std::endl;
+            std::cout << "Failed to assign hit to pseudolayer, " << statusCodeException.ToString() << std::endl;
         }
     }
 
@@ -111,19 +111,27 @@ StatusCode CaloHitManager::CalculateCaloHitProperties() const
 
 StatusCode CaloHitManager::CalculateCaloHitProperties(const std::string &listName) const
 {
-    NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);
-
-    if (m_nameToOrderedCaloHitListMap.end() == iter)
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    for (OrderedCaloHitList::const_iterator pseudoLayerIter = iter->second->begin(), pseudoLayerIterEnd = iter->second->end();
-        pseudoLayerIter != pseudoLayerIterEnd; ++pseudoLayerIter)
+    try
     {
-        for (CaloHitList::iterator caloHitIter = pseudoLayerIter->second->begin(), caloHitIterEnd = pseudoLayerIter->second->end();
-            caloHitIter != caloHitIterEnd; ++caloHitIter)
+        NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);
+
+        if (m_nameToOrderedCaloHitListMap.end() == iter)
+            return STATUS_CODE_NOT_INITIALIZED;
+
+        for (OrderedCaloHitList::const_iterator pseudoLayerIter = iter->second->begin(), pseudoLayerIterEnd = iter->second->end();
+            pseudoLayerIter != pseudoLayerIterEnd; ++pseudoLayerIter)
         {
-            CaloHitHelper::CalculateCaloHitProperties(*caloHitIter, iter->second);
+            for (CaloHitList::iterator caloHitIter = pseudoLayerIter->second->begin(), caloHitIterEnd = pseudoLayerIter->second->end();
+                caloHitIter != caloHitIterEnd; ++caloHitIter)
+            {
+                CaloHitHelper::CalculateCaloHitProperties(*caloHitIter, iter->second);
+            }
         }
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to calculate calo hit properties for list " << listName << ", " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
     }
 
     return STATUS_CODE_SUCCESS;
