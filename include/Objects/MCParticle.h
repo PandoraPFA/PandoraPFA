@@ -57,7 +57,7 @@ public:
     const CartesianVector &GetMomentum() const;
 
     /**
-     *  @brief Get inner radius of mc particle
+     *  @brief  Get inner radius of mc particle
      * 
      *  @return the mc particle inner radius
      */
@@ -71,9 +71,9 @@ public:
     float GetOuterRadius() const;
 
     /**
-     *  @brief  Get the mc particle id (particle type)
+     *  @brief  Get the PDG code of the mc particle
      *
-     *  @return the mc particle id
+     *  @return the PDG code of the mc particle
      */
     int GetParticleId() const;
 
@@ -89,7 +89,7 @@ public:
      * 
      *  @param  pMCParticle to receive the address of the pfo target
      */
-    StatusCode GetPfoTarget(MCParticle *&pMCParticle) const;
+    StatusCode GetPfoTarget(const MCParticle *&pMCParticle) const;
 
     /**
      *  @brief  Get the mc particle unique identifier
@@ -183,19 +183,19 @@ private:
      */
     StatusCode SetPfoTargetInTree(MCParticle *pMCParticle, bool onlyDaughters = false);
 
-    Uid                 m_uid;              ///< Unique ID of the particle
+    Uid                     m_uid;                      ///< Unique identifier for the particle
 
-    float               m_energy;           ///< Energy of the particle
-    CartesianVector     m_momentum;         ///< Momentum of the particle
-    float               m_innerRadius;      ///< Inner radius of the particle's path
-    float               m_outerRadius;      ///< Outer radius of the particle's path
-    int                 m_particleId;       ///< Particle id (particle type)
+    float                   m_energy;                   ///< The energy of the particle
+    CartesianVector         m_momentum;                 ///< The momentum of the particle
+    float                   m_innerRadius;              ///< Inner radius of the particle's path
+    float                   m_outerRadius;              ///< Outer radius of the particle's path
+    int                     m_particleId;               ///< The PDG code of the mc particle
 
-    MCParticle          *m_pPfoTarget;      ///< The pfo target
-    MCParticleList      m_daughterList;     ///< The list of mc daughter particles
-    MCParticleList      m_parentList;       ///< The list of mc parent particles
+    MCParticle             *m_pPfoTarget;               ///< The address of the pfo target
+    MCParticleList          m_daughterList;             ///< The list of mc daughter particles
+    MCParticleList          m_parentList;               ///< The list of mc parent particles
 
-    bool                m_isInitialized;    ///< Whether particle information has been initialized
+    bool                    m_isInitialized;            ///< Whether the particle information has been initialized
 
     friend class MCManager;
 };
@@ -230,7 +230,7 @@ inline bool MCParticle::IsPfoTargetSet() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode MCParticle::GetPfoTarget(MCParticle *&pMCParticle) const
+inline StatusCode MCParticle::GetPfoTarget(const MCParticle *&pMCParticle) const
 {
     if (NULL == m_pPfoTarget)
         return STATUS_CODE_NOT_INITIALIZED;

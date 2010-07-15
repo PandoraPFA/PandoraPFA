@@ -32,18 +32,13 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    pandora::StringVector m_clusterListNames;            ///< list of strings denoting clusternames 
-    bool         m_particleFlowObjects;                  ///< show current particle flow object list
-    bool         m_clusters;                             ///< show current cluster list
-    bool         m_hits;                                 ///< show current ordered calohitlist
-    bool         m_tracks;                               ///< show current tracklist
-    bool         m_onlyAvailable;                        ///< show only available  (i.e. non-clustered) calohits and tracks
-
-    bool         m_eve;                                  ///< use ROOT Eve
-
-    bool         m_show;                                 ///< show the output
-
-    std::string  m_detectorView;                         ///< for "normal" display
+    pandora::StringVector m_clusterListNames;            ///< List of strings denoting clusternames 
+    bool         m_particleFlowObjects;                  ///< Whether to show current particle flow object list
+    bool         m_clusters;                             ///< Whether to show current cluster list
+    bool         m_hits;                                 ///< Whether to show current ordered calohitlist
+    bool         m_tracks;                               ///< Whether to show current tracklist
+    bool         m_onlyAvailable;                        ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
+    bool         m_displayEvent;                         ///< Whether to display the event
 };
 
 

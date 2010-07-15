@@ -73,13 +73,6 @@ EnergyMonitoringAlgorithm::~EnergyMonitoringAlgorithm()
 
 StatusCode EnergyMonitoringAlgorithm::Run()
 {
-    static const int K0L      = 130;
-//    static const int K0S      = 310;
-    static const int NEUTRON  = 2112;
-    static const int PHOTON   = 22;
-//    static const int ELECTRON = 11;
-//    static const int POSITRON = -11;
-
     typedef std::vector<const ClusterList*> ClusterVector;
     ClusterVector clusterListVector;
 
@@ -139,13 +132,9 @@ StatusCode EnergyMonitoringAlgorithm::Run()
 
                     if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
 
-                    int particleId = mc->GetParticleId();
-                    bool mcIsNeutral = (particleId == K0L || 
-//                                        particleId == K0S ||
-                                        particleId == NEUTRON ); 
-//                     bool mcIsEm      = (particleId == ELECTRON || 
-//                                         particleId == POSITRON);
-                    bool mcIsPhoton  = (particleId == PHOTON );
+                    const int particleId = mc->GetParticleId();
+                    bool mcIsNeutral = ((particleId == K_LONG) || (particleId == NEUTRON));
+                    bool mcIsPhoton  = (particleId == PHOTON);
  
 //                     EnergyMixing& energyMixing = (mcIsPhoton? &truePhotons : (mcIsNeutral? &trueNeutral : (mcIsEm? &trueChargedEm : &trueCharged ) ) );
                     EnergyMixing& energyMixing = (mcIsPhoton? truePhotons : (mcIsNeutral? trueNeutral : trueCharged ) );
@@ -200,13 +189,10 @@ StatusCode EnergyMonitoringAlgorithm::Run()
                 pTrack->GetMCParticle( mc );
                 if( mc == NULL ) continue; // maybe an error should be thrown here?
 
-                bool mcIsNeutral = (mc->GetParticleId() == K0L || 
-//                                    mc->GetParticleId() == K0S ||
-                                    mc->GetParticleId() == NEUTRON ); 
-//                 bool mcIsEm      = (mc->GetParticleId() == ELECTRON || 
-//                                     mc->GetParticleId() == POSITRON);
-                bool mcIsPhoton  = (mc->GetParticleId() == PHOTON );
- 
+                const int particleId = mc->GetParticleId();
+                bool mcIsNeutral = ((particleId == K_LONG) || (particleId == NEUTRON));
+                bool mcIsPhoton  = (particleId == PHOTON);
+
 //                     EnergyMixing& energyMixing = (mcIsPhoton? &truePhotons : (mcIsNeutral? &trueNeutral : (mcIsEm? &trueChargedEm : &trueCharged ) ) );
                 EnergyMixing& energyMixing = (mcIsPhoton? truePhotons : (mcIsNeutral? trueNeutral : trueCharged ) );
 

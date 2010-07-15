@@ -16,145 +16,84 @@ using namespace pandora;
 
 StatusCode VisualMonitoringAlgorithm::Run()
 {
-    if( m_hits )
+    // Show current ordered calo hit list
+    if (m_hits)
     {
         const OrderedCaloHitList *pOrderedCaloHitList = NULL;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
-        
-        OrderedCaloHitList caloHitList( *pOrderedCaloHitList ); 
-        if( m_onlyAvailable )
+
+        OrderedCaloHitList caloHitList(*pOrderedCaloHitList);
+
+        if( m_onlyAvailable)
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::RemoveUnavailableCaloHits(caloHitList));
         }
 
-        if( m_eve )
-        {
-            PANDORA_MONITORING_API(VisualizeCaloHits(&caloHitList, "currentHits", GRAY  ) );
-        }
-        else
-            if( m_detectorView == "XZ" )
-            {
-                PANDORA_MONITORING_API(AddCaloHitList(DETECTOR_VIEW_XZ,&caloHitList, GRAY  ) );
-            }
-            else
-            {
-                PANDORA_MONITORING_API(AddCaloHitList(DETECTOR_VIEW_XY,&caloHitList, GRAY  ) );
-            }
+        PANDORA_MONITORING_API(VisualizeCaloHits(&caloHitList, "currentHits", GRAY));
     }
 
-    if( m_tracks )
+    // Show current tracks
+    if (m_tracks)
     {
         const TrackList *pTrackList = NULL;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
-        
-        TrackList trackList; 
-        for( TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
+        TrackList trackList;
+        for (TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack)
         {
             Track* pTrack = (*itTrack);
-            if( !(pTrack->HasAssociatedCluster() && m_onlyAvailable ) )
+
+            if (!(pTrack->HasAssociatedCluster() && m_onlyAvailable))
+            {
                 trackList.insert(pTrack);
-        }
-        
-        if( m_eve )
-        {
-            PANDORA_MONITORING_API(VisualizeTracks(&trackList, "currentTracks", GRAY  ) );
-        }
-        else
-            if( m_detectorView == "XZ" )
-            {
-                PANDORA_MONITORING_API(AddTrackList(DETECTOR_VIEW_XZ,&trackList, GRAY  ) );
             }
-            else
-            {
-                PANDORA_MONITORING_API(AddTrackList(DETECTOR_VIEW_XY,&trackList, GRAY  ) );
-            }
+        }
+
+        PANDORA_MONITORING_API(VisualizeTracks(&trackList, "currentTracks", GRAY));
     }
 
-    for( pandora::StringVector::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
+    // Show specified lists of clusters
+    for (pandora::StringVector::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end();
+        itClusterName != itClusterNameEnd; ++itClusterName)
     {
         const ClusterList* pClusterList = NULL;
         std::string clusterListName = (*itClusterName);
-        std::cout << "visualize: " << clusterListName << std::flush;
-        if( STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, clusterListName, pClusterList))
+
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, clusterListName, pClusterList))
         {
-            if( m_eve )
-            {
-                PANDORA_MONITORING_API(VisualizeClusters(pClusterList, clusterListName, AUTO  ) );
-            }
-            else
-                if( m_detectorView == "XZ" )
-                {
-                    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, AUTO  ) );
-                }
-                else
-                {
-                    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, AUTO  ) );
-                }
-            std::cout << " ... done" << std::endl;
+            PANDORA_MONITORING_API(VisualizeClusters(pClusterList, clusterListName, AUTO));
         }
         else
-            std::cout << " ... cluster-list not found" << std::endl;
+        {
+            std::cout << "VisualMonitoringAlgorithm: cluster-list " << clusterListName << " not found." << std::endl;
+        }
     }
 
-    // show current clusters
-    if(m_clusters)
+    // Show current clusters
+    if (m_clusters)
     {
         const ClusterList* pClusterList = NULL;
-        if( STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentClusterList(*this, pClusterList))
+
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentClusterList(*this, pClusterList))
         {
-            if( m_eve )
-            {
-                PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "currentClusters", AUTO  ) );
-            }
-            else
-            {
-                if( m_detectorView == "XZ" )
-                {
-                    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, AUTO  ) );
-                }
-                else
-                {
-                    PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, AUTO  ) );
-                }
-            }
+            PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "currentClusters", AUTO  ) );
         }
     }
 
-    // show current particle flow objects
-    if(m_particleFlowObjects)
+    // Show current particle flow objects
+    if (m_particleFlowObjects)
     {
         const ParticleFlowObjectList* pPfoList = NULL;
-        if( STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
+
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
         {
-            if( m_eve )
-            {
-                PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", AUTO  ) );
-            }
-//             else
-//             {
-//                 if( m_detectorView == "XZ" )
-//                 {
-//                     PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XZ,pClusterList, AUTO  ) );
-//                 }
-//                 else
-//                 {
-//                     PANDORA_MONITORING_API(AddClusterList(DETECTOR_VIEW_XY,pClusterList, AUTO  ) );
-//                 }
-//             }
+            PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", AUTO  ) );
         }
     }
 
-    if( m_show )
+    if (m_displayEvent)
     {
-        if( m_eve )
-        {
-            PANDORA_MONITORING_API(View() );
-        }
-        else
-        {
-            PANDORA_MONITORING_API(ViewEvent() );
-        }   
+        PANDORA_MONITORING_API(ViewEvent() );
     }
 
     return STATUS_CODE_SUCCESS;
@@ -165,9 +104,6 @@ StatusCode VisualMonitoringAlgorithm::Run()
 StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
-
-    m_eve = true;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "UseROOTEve", m_eve));
 
     m_particleFlowObjects = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowCurrentPfos", m_particleFlowObjects));
@@ -184,11 +120,8 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_onlyAvailable = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ShowOnlyAvailable", m_onlyAvailable));
 
-    m_detectorView = "XZ";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "DetectorView", m_detectorView));
-
-    m_show = true;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Show", m_show));
+    m_displayEvent = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "DisplayEvent", m_displayEvent));
 
     return STATUS_CODE_SUCCESS;
 }

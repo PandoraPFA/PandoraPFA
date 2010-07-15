@@ -23,10 +23,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
     int selected = 0, notSelected = 0;
 
-    if (m_debug)
-    {
-    }
-
     for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; ++itLyr)
     {
         CaloHitList *pCaloHitList= itLyr->second;
@@ -137,7 +133,7 @@ bool PerfectClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle
     for (IntVector::const_iterator itParticleId = m_particleIdList.begin(), itParticleIdEnd = m_particleIdList.end();
         itParticleId != itParticleIdEnd; ++itParticleId)
     {
-        if(pMCParticle->GetParticleId() == *itParticleId)
+        if (pMCParticle->GetParticleId() == *itParticleId)
             return true;
     }
 

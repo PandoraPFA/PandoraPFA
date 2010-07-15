@@ -188,7 +188,7 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
             m_momentumX->push_back( momentum.GetX() );
             m_momentumY->push_back( momentum.GetY() );
             m_momentumZ->push_back( momentum.GetZ() );
-            m_particleId->push_back ( pMCParticle->GetParticleId()  );
+            m_particleId->push_back ( pMCParticle->GetParticleId() );
             m_outerRadius->push_back( pMCParticle->GetOuterRadius() );
             m_innerRadius->push_back( pMCParticle->GetInnerRadius() );
 

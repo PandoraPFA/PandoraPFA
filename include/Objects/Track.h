@@ -51,11 +51,18 @@ public:
     float GetZ0() const;
 
     /**
-     *  @brief  Get the charge sign of the tracked particle
-     * 
-     *  @return the charge sign of the tracked particle
+     *  @brief  Get the PDG code of the tracked particle
+     *
+     *  @return the PDG code of the tracked particle
      */
-    int GetChargeSign() const;
+    int GetParticleId() const; 
+
+    /**
+     *  @brief  Get the charge of the tracked particle
+     * 
+     *  @return the charge of the tracked particle
+     */
+    int GetCharge() const;
 
     /**
      *  @brief  Get the mass of the tracked particle, units GeV
@@ -63,13 +70,6 @@ public:
      *  @return the mass of the tracked particle
      */
     float GetMass() const;
-
-    /**
-     *  @brief  Get the PDG code of the tracked particle
-     * 
-     *  @return the PDG code of the tracked particle
-     */
-    int GetParticleId() const;
 
     /**
      *  @brief  Get the track momentum at the 2D distance of closest approach
@@ -261,9 +261,10 @@ private:
 
     const float             m_d0;                       ///< The 2D impact parameter wrt (0,0), units mm
     const float             m_z0;                       ///< The z coordinate at the 2D distance of closest approach, units mm
-    int                     m_chargeSign;               ///< The charge sign of the tracked particle
-    const float             m_mass;                     ///< The mass of the tracked particle, units GeV
+
     const int               m_particleId;               ///< The PDG code of the tracked particle
+    const int               m_charge;                   ///< The charge of the tracked particle
+    const float             m_mass;                     ///< The mass of the tracked particle, units GeV
 
     const CartesianVector   m_momentumAtDca;            ///< The momentum vector at the 2D distance of closest approach, units GeV
     const float             m_momentumMagnitudeAtDca;   ///< The magnitude of the momentum at the 2D distance of closest approach, units GeV
@@ -342,9 +343,16 @@ inline float Track::GetZ0() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline int Track::GetChargeSign() const
+inline int Track::GetParticleId() const
 {
-    return m_chargeSign;
+    return m_particleId;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline int Track::GetCharge() const
+{
+    return m_charge;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -352,13 +360,6 @@ inline int Track::GetChargeSign() const
 inline float Track::GetMass() const
 {
     return m_mass;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline int Track::GetParticleId() const
-{
-    return m_particleId;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

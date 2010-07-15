@@ -159,7 +159,7 @@ StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval(Cluster *pCluster, f
             retainedEnergy += (*itCaloHit)->GetElectromagneticEnergy();
         }
 
-        std::cout << "Cluster " << pCluster << ", largest MCPFO contribution from : " << pMCPfo << " with PDG code " << pMCPfo->GetParticleId() 
+        std::cout << "Cluster " << pCluster << ", largest MCPFO contribution from : " << pMCPfo << " with PDG code " << pMCPfo->GetParticleId()
                   << " removed energy : " << removedEnergy << " retained energy : " << retainedEnergy << std::endl;
     }
 

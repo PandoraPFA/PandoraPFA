@@ -1409,8 +1409,6 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( const Cluste
 
 float ECalPhotonClusteringAlgorithm::GetTruePhotonContribution(const Cluster* cluster )
 {
-    const int photonId = 22;
-
     float energyFromPhotons = 0.f;
 
     OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
@@ -1423,26 +1421,22 @@ float ECalPhotonClusteringAlgorithm::GetTruePhotonContribution(const Cluster* cl
 
         for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
         {
-
             // sum up the true energies from the MC-particles (don't double count the MCParticles)
-            const MCParticle* mc = NULL; 
-            (*itCaloHit)->GetMCParticle( mc );
-            if( !mc )
+            const MCParticle *pMCParticle = NULL; 
+            (*itCaloHit)->GetMCParticle(pMCParticle);
+
+            if (!pMCParticle)
                 continue;
 
-            int particleId = 0;
-            particleId = mc->GetParticleId();
-
-            if( particleId != photonId )
+            if (pMCParticle->GetParticleId() != PHOTON)
                 continue;
 
             energyFromPhotons += (*itCaloHit)->GetElectromagneticEnergy();
         }
     }
+
     return energyFromPhotons;
 }
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

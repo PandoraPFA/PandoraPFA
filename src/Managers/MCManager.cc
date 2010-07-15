@@ -27,6 +27,7 @@ StatusCode MCManager::CreateMCParticle(const PandoraApi::MCParticleParameters &m
     try
     {
         UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.find(mcParticleParameters.m_pParentAddress.Get());
+
         if (m_uidToMCParticleMap.end() != iter)
         {
             iter->second->SetProperties(mcParticleParameters);
@@ -34,9 +35,11 @@ StatusCode MCManager::CreateMCParticle(const PandoraApi::MCParticleParameters &m
         else
         {
             MCParticle *pMCParticle = new MCParticle(mcParticleParameters);
+
             if (!m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(mcParticleParameters.m_pParentAddress.Get(), pMCParticle)).second)
                 return STATUS_CODE_FAILURE;
         }
+
         return STATUS_CODE_SUCCESS;
     }
     catch (StatusCodeException &statusCodeException)
@@ -114,8 +117,11 @@ StatusCode MCManager::SelectPfoTargets()
     for (UidToMCParticleMap::iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
     {
         MCParticleList mcPfoList;
+
         if (iter->second->IsRootParticle())
+        {
             PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, this->ApplyPfoSelectionRules(iter->second, mcPfoList));
+        }
     }
 
     return STATUS_CODE_SUCCESS;
@@ -132,7 +138,7 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const pMCParticle, MCPa
     static const float selectionMomentum(PandoraSettings::GetInstance()->GetMCPfoSelectionMomentum());
     static const float selectionEnergyCutOffProtonsNeutrons(PandoraSettings::GetInstance()->GetMCPfoSelectionLowEnergyNeutronProtonCutOff());
 
-    int particleId = pMCParticle->GetParticleId();
+    const int particleId(pMCParticle->GetParticleId());
 
     // ATTN: don't take particles from previously used decay chains; could happen because mc particles can have multiple parents.
     // Of those, some don't know the daughter.
@@ -187,8 +193,7 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
         }
         else
         {
-            if (STATUS_CODE_SUCCESS != mcParticleIter->second->GetPfoTarget(pMCParticle))
-                continue;
+            pMCParticle = mcParticleIter->second->m_pPfoTarget;
         }
 
         if (pMCParticle != NULL)
