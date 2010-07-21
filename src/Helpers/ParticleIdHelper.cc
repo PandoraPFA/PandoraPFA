@@ -177,21 +177,6 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ParticleIdHelper::IsPhotonFastDefault(const Cluster *const pCluster)
-{
-    // Already flagged as a photon by full photon id algorithm? - overrides fast photon id
-    if (pCluster->IsPhoton())
-        return true;
-
-    // Cluster with associated tracks is not a photon
-    if (!pCluster->GetAssociatedTrackList().empty())
-        return false;
-
-    return ParticleIdHelper::IsElectromagneticShower(pCluster);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 {
     // Reject empty clusters
@@ -333,6 +318,21 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 
     // Anything remaining at this point is classed as an electromagnetic shower
     return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsPhotonFastDefault(const Cluster *const pCluster)
+{
+    // Already flagged as a photon by full photon id algorithm? - overrides fast photon id
+    if (pCluster->IsPhoton())
+        return true;
+
+    // Cluster with associated tracks is not a photon
+    if (!pCluster->GetAssociatedTrackList().empty())
+        return false;
+
+    return ParticleIdHelper::IsElectromagneticShower(pCluster);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

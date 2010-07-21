@@ -193,7 +193,7 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
 {
     bool passesPreselection(false);
     float totalTrackEnergy(0.f), totalClusterEnergy(0.f);
-    const float daughterClusterEnergy(pDaughterCluster->GetCorrectedHadronicEnergy());
+    const float daughterClusterEnergy(pDaughterCluster->GetTrackComparisonEnergy());
 
     // Check to see if merging parent and daughter clusters would improve track-cluster compatibility
     for (ClusterContactVector::const_iterator iter = clusterContactVector.begin(), iterEnd = clusterContactVector.end(); iter != iterEnd;
@@ -201,7 +201,7 @@ bool MainFragmentRemovalAlgorithm::PassesPreselection(Cluster *const pDaughterCl
     {
         ClusterContact clusterContact = *iter;
         const float parentTrackEnergy(clusterContact.GetParentTrackEnergy());
-        const float parentClusterEnergy(clusterContact.GetParentCluster()->GetCorrectedHadronicEnergy());
+        const float parentClusterEnergy(clusterContact.GetParentCluster()->GetTrackComparisonEnergy());
 
         const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(parentClusterEnergy, parentTrackEnergy));
         const float newChi(ReclusterHelper::GetTrackClusterCompatibility(daughterClusterEnergy + parentClusterEnergy, parentTrackEnergy));
@@ -300,8 +300,8 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     const PseudoLayer correctionLayer, const float globalDeltaChi2)
 {
     // Primary evidence requirement is obtained from change in chi2.
-    const float daughterCorrectedClusterEnergy(pDaughterCluster->GetCorrectedHadronicEnergy());
-    const float parentCorrectedClusterEnergy(clusterContact.GetParentCluster()->GetCorrectedHadronicEnergy());
+    const float daughterCorrectedClusterEnergy(pDaughterCluster->GetTrackComparisonEnergy());
+    const float parentCorrectedClusterEnergy(clusterContact.GetParentCluster()->GetTrackComparisonEnergy());
     const float parentTrackEnergy(clusterContact.GetParentTrackEnergy());
 
     const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(parentCorrectedClusterEnergy, parentTrackEnergy));

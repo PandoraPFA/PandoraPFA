@@ -66,7 +66,7 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             }
 
             // Check consistency of track momentum and cluster energy
-            const float chi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetCorrectedHadronicEnergy(), trackEnergy));
+            const float chi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetTrackComparisonEnergy(), trackEnergy));
 
             if (std::fabs(chi) > m_maxAbsoluteTrackClusterChi)
                 continue;

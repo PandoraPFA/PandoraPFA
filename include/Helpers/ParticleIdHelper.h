@@ -25,15 +25,6 @@ class ParticleIdHelper
 {
 public:
     /**
-     *  @brief  Calculate shower profile for a cluster and compare it with the expected profile for a photon
-     * 
-     *  @param  pCluster address of the cluster to investigate
-     *  @param  showerProfileStart to receive the shower profile start, in radiation lengths
-     *  @param  showerProfileDiscrepancy to receive the shower profile discrepancy
-     */
-    static StatusCode CalculateShowerProfile(const Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy);
-
-    /**
      *  @brief  Provide fast identification of whether a cluster is a photon
      * 
      *  @param  pCluster address of the cluster
@@ -87,15 +78,14 @@ public:
      */
     static bool IsMuonFull(const Cluster *const pCluster);
 
-private:
     /**
-     *  @brief  Default pandora fast photon identification function
+     *  @brief  Calculate shower profile for a cluster and compare it with the expected profile for a photon
      * 
-     *  @param  pCluster address of the cluster
-     * 
-     *  @return boolean
+     *  @param  pCluster address of the cluster to investigate
+     *  @param  showerProfileStart to receive the shower profile start, in radiation lengths
+     *  @param  showerProfileDiscrepancy to receive the shower profile discrepancy
      */
-    static bool IsPhotonFastDefault(const Cluster *const pCluster);
+    static StatusCode CalculateShowerProfile(const Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy);
 
     /**
      *  @brief  Whether a cluster is a candidate electromagnetic shower
@@ -105,6 +95,16 @@ private:
      *  @return boolean
      */
     static bool IsElectromagneticShower(const Cluster *const pCluster);
+
+private:
+    /**
+     *  @brief  Default pandora fast photon identification function
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsPhotonFastDefault(const Cluster *const pCluster);
 
     /**
      *  @brief  Default pandora fast electron identification function

@@ -70,8 +70,8 @@ StatusCode MipPhotonSeparationAlgorithm::Run()
         {
             const float trackEnergy((*(trackList.begin()))->GetEnergyAtDca());
 
-            const float originalChi(ReclusterHelper::GetTrackClusterCompatibility(pOriginalCluster->GetCorrectedHadronicEnergy(), trackEnergy));
-            const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pMipCluster->GetCorrectedHadronicEnergy(), trackEnergy));
+            const float originalChi(ReclusterHelper::GetTrackClusterCompatibility(pOriginalCluster->GetTrackComparisonEnergy(), trackEnergy));
+            const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pMipCluster->GetTrackComparisonEnergy(), trackEnergy));
             const float dChi2(newChi * newChi - originalChi * originalChi);
 
             const bool passChi2Cuts((dChi2 < m_nonPhotonDeltaChi2Cut) || (pPhotonCluster->IsPhotonFast() && (dChi2 < m_photonDeltaChi2Cut)));

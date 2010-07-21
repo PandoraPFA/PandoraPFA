@@ -89,23 +89,24 @@ StatusCode MCParticlesMonitoringAlgorithm::Run()
 
 StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
 
     m_treeName = "emon";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "TreeName", m_treeName));
+
     m_print = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Print", m_print));
+
     m_indent = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Indent", m_indent));
+
     m_oldRoot = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ROOT_OLDER_THAN_5_20", m_oldRoot));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
 
-
     StringVector mcParticleSelection;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "Selection", mcParticleSelection)); ///< "Final" takes only particles without daughters; "ExcludeRoot" excludes particles which don't have parents; "OnlyRoot" takes only particles which don't have parents; "CalorimeterHits"/"Tracks" takes only particles which have caused Tracks or Calorimeterhits. With the current set of rules for the MCPFO selection only particles which cross the spherical boundary around the IP are retained. All particles are therefore ROOT-particles, the ExcludeRoot, the OnlyRoot and the Final options are therefore nonsensical (this might change if a different set of rules is implemented). The CalorimeterHits and the Tracks options are still useful.
-
 
     m_onlyFinal = false;
     m_haveCaloHits = false;

@@ -297,13 +297,25 @@ const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
 
 void Cluster::PerformEnergyCorrections() const
 {
-    float correctedElectromagneticEnergy(0.f), correctedHadronicEnergy(0.f);
+    float correctedElectromagneticEnergy(0.f), correctedHadronicEnergy(0.f), trackComparisonEnergy(0.f);
 
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, EnergyCorrectionsHelper::EnergyCorrection(this, correctedElectromagneticEnergy,
         correctedHadronicEnergy));
 
-    if (!(m_correctedElectromagneticEnergy = correctedElectromagneticEnergy) || !(m_correctedHadronicEnergy = correctedHadronicEnergy))
+    if (ParticleIdHelper::IsElectromagneticShower(this))
+    {
+        trackComparisonEnergy = correctedElectromagneticEnergy;
+    }
+    else
+    {
+        trackComparisonEnergy = correctedHadronicEnergy;
+    }
+
+    if (!(m_correctedElectromagneticEnergy = correctedElectromagneticEnergy) || !(m_correctedHadronicEnergy = correctedHadronicEnergy) ||
+        !(m_trackComparisonEnergy = trackComparisonEnergy))
+    {
         throw StatusCodeException(STATUS_CODE_FAILURE);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

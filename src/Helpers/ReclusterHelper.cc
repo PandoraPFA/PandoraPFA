@@ -33,7 +33,7 @@ float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluste
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
     const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
-    const float chi((pCluster->GetCorrectedHadronicEnergy() - trackEnergySum) / sigmaE);
+    const float chi((pCluster->GetTrackComparisonEnergy() - trackEnergySum) / sigmaE);
 
     return chi;
 }

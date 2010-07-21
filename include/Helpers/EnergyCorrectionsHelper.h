@@ -78,6 +78,8 @@ private:
     static EnergyCorrectionFunctionVector m_hadEnergyCorrectionFunctions;   ///< The hadronic energy correction function vector
     static EnergyCorrectionFunctionVector m_emEnergyCorrectionFunctions;    ///< The electromagnetic energy correction function vector
 
+    static unsigned int     m_nEnergyCorrectionCalls;       ///< Number of calls to energy correction function, used to prevent recursion
+
     static bool             m_shouldCleanClusters;          ///< Whether to make cluster cleaning energy corrections
     static bool             m_shouldScaleHotHadrons;        ///< Whether to make hot hadron energy corrections
 

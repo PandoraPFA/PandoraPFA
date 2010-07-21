@@ -65,7 +65,7 @@ StatusCode TrackRecoveryAlgorithm::Run()
 
             const bool isLeavingCluster(ClusterHelper::IsClusterLeavingDetector(pCluster));
 
-            const float deltaE(pCluster->GetCorrectedHadronicEnergy() - trackEnergy);
+            const float deltaE(pCluster->GetTrackComparisonEnergy() - trackEnergy);
             const float chi(deltaE / sigmaE);
 
             if ((std::fabs(chi) < m_maxAbsoluteTrackClusterChi) || (isLeavingCluster && (chi < 0.f)))
@@ -99,7 +99,7 @@ StatusCode TrackRecoveryAlgorithm::Run()
         if (zEnd > mainTrackerZExtent - m_endCapMaxDeltaZ)
         {
             if ( (smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance1) ||
-                ((smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance2) && (pBestCluster->GetCorrectedHadronicEnergy() < trackEnergy)) )
+                ((smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance2) && (pBestCluster->GetTrackComparisonEnergy() < trackEnergy)) )
             {
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pTrack, pBestCluster));
             }

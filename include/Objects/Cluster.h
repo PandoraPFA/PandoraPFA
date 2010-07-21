@@ -236,6 +236,15 @@ public:
     float GetCorrectedHadronicEnergy() const;
 
     /**
+     *  @brief  Get the best energy estimate to use when comparing cluster energy to associated track momentum, units GeV.
+     *          For clusters identified as electromagnetic showers, the corrected electromagnetic energy will be returned.
+     *          For all other clusters, the corrected hadronic energy will be returned.
+     * 
+     *  @return The track compartison energy estimate
+     */
+    float GetTrackComparisonEnergy() const;
+
+    /**
      *  @brief  Whether the cluster has been flagged as a photon by fast photon id function
      * 
      *  @return boolean
@@ -462,6 +471,7 @@ private:
 
     mutable InputFloat          m_correctedElectromagneticEnergy;///< The corrected electromagnetic estimate of the cluster energy, units GeV
     mutable InputFloat          m_correctedHadronicEnergy;      ///< The corrected hadronic estimate of the cluster energy, units GeV
+    mutable InputFloat          m_trackComparisonEnergy;        ///< The appropriate corrected energy to use in comparisons with track momentum, units GeV
 
     mutable InputBool           m_isPhotonFast;                 ///< Whether the cluster is flagged as a photon by fast photon id function
     mutable InputPseudoLayer    m_showerStartLayer;             ///< The pseudo layer at which shower commences
@@ -676,6 +686,16 @@ inline float Cluster::GetCorrectedHadronicEnergy() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline float Cluster::GetTrackComparisonEnergy() const
+{
+    if (!m_trackComparisonEnergy.IsInitialized())
+        this->PerformEnergyCorrections();
+
+    return m_trackComparisonEnergy.Get();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline bool Cluster::IsPhotonFast() const
 {
     if (!m_isPhotonFast.IsInitialized())
@@ -761,6 +781,7 @@ inline void Cluster::ResetOutdatedProperties()
     m_showerProfileDiscrepancy.Reset();
     m_correctedElectromagneticEnergy.Reset();
     m_correctedHadronicEnergy.Reset();
+    m_trackComparisonEnergy.Reset();
     m_initialDirection.Reset();
 }
 

@@ -12,33 +12,34 @@
 
 using namespace pandora;
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode VisualMonitoringAlgorithm::Run()
 {
     // Show current ordered calo hit list
+    OrderedCaloHitList orderedCaloHitList;
+
     if (m_hits)
     {
         const OrderedCaloHitList *pOrderedCaloHitList = NULL;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
-        OrderedCaloHitList caloHitList(*pOrderedCaloHitList);
+        orderedCaloHitList = (*pOrderedCaloHitList);
 
-        if( m_onlyAvailable)
+        if (m_onlyAvailable)
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::RemoveUnavailableCaloHits(caloHitList));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::RemoveUnavailableCaloHits(orderedCaloHitList));
         }
 
-        PANDORA_MONITORING_API(VisualizeCaloHits(&caloHitList, "currentHits", GRAY));
+        PANDORA_MONITORING_API(VisualizeCaloHits(&orderedCaloHitList, "currentHits", GRAY));
     }
 
     // Show current tracks
+    TrackList trackList;
+
     if (m_tracks)
     {
         const TrackList *pTrackList = NULL;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
-        TrackList trackList;
         for (TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack)
         {
             Track* pTrack = (*itTrack);

@@ -113,7 +113,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
             {
                 if ((dCos > bestDCosLeavingTrack) || ((dCos == bestDCosLeavingTrack) && (clusterEnergy > bestEnergyLeavingTrack)))
                 {
-                    const float chi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetCorrectedHadronicEnergy() + energyLostInCoil,
+                    const float chi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetTrackComparisonEnergy() + energyLostInCoil,
                         trackEnergySum));
 
                     if (chi < m_clusterAssociationChi)
@@ -130,8 +130,8 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
             {
                 if ((dCos > bestDCosNonLeavingTrack) || ((dCos == bestDCosNonLeavingTrack) && (clusterEnergy > bestEnergyNonLeavingTrack)))
                 {
-                    const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetCorrectedHadronicEnergy(), trackEnergySum));
-                    const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetCorrectedHadronicEnergy() + energyLostInCoil,
+                    const float oldChi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetTrackComparisonEnergy(), trackEnergySum));
+                    const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pCluster->GetTrackComparisonEnergy() + energyLostInCoil,
                         trackEnergySum));
 
                     if ((oldChi < -m_clusterAssociationChi) && (newChi < m_clusterAssociationChi))

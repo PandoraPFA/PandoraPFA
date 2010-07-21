@@ -19,9 +19,17 @@
 namespace pandora
 {
 
+unsigned int EnergyCorrectionsHelper::m_nEnergyCorrectionCalls = 0;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode EnergyCorrectionsHelper::EnergyCorrection(const Cluster *const pCluster, float &correctedElectromagneticEnergy,
     float &correctedHadronicEnergy)
 {
+    // ATTN: Current protection against recursive calls is not thread-safe
+    if (m_nEnergyCorrectionCalls++ > 0)
+        return STATUS_CODE_NOT_ALLOWED;
+
     // Hadronic energy corrections
     correctedHadronicEnergy = pCluster->GetHadronicEnergy();
 
@@ -40,6 +48,7 @@ StatusCode EnergyCorrectionsHelper::EnergyCorrection(const Cluster *const pClust
         (*(*iter))(pCluster, correctedElectromagneticEnergy);
     }
 
+    m_nEnergyCorrectionCalls--;
     return STATUS_CODE_SUCCESS;
 }
 
