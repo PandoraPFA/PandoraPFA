@@ -125,11 +125,11 @@ public:
     float GetIsolatedHadronicEnergy() const;
 
     /**
-     *  @brief  Whether the cluster has been flagged as a photon
+     *  @brief  Whether the cluster has been flagged as a fixed photon
      * 
      *  @return boolean
      */
-    bool IsPhoton() const;
+    bool IsFixedPhoton() const;
 
     /**
      *  @brief  Whether the cluster has been flagged as a section of mip track
@@ -280,11 +280,11 @@ public:
     const TrackList &GetAssociatedTrackList() const;
 
     /**
-     *  @brief  Set the is photon flag for the cluster
+     *  @brief  Set the is fixed photon flag for the cluster
      * 
-     *  @param  isPhotonFlag the is photon flag
+     *  @param  isFixedPhotonFlag the is fixed photon flag
      */
-    void SetIsPhotonFlag(bool isPhotonFlag);
+    void SetIsFixedPhotonFlag(bool isFixedPhotonFlag);
 
     /**
      *  @brief  Set the is mip track for the cluster
@@ -452,7 +452,7 @@ private:
     double                      m_isolatedElectromagneticEnergy;///< Sum of electromagnetic energy measures of isolated calo hits, units GeV
     double                      m_isolatedHadronicEnergy;       ///< Sum of hadronic energy measures of isolated calo hits, units GeV
 
-    bool                        m_isPhoton;                     ///< Whether the cluster has been flagged as a photon cluster
+    bool                        m_isFixedPhoton;                ///< Whether the cluster has been flagged as a fixed photon cluster
     bool                        m_isMipTrack;                   ///< Whether the cluster has been flagged as a section of mip track
     const Track                *m_pTrackSeed;                   ///< Address of the track with which the cluster is seeded
 
@@ -594,9 +594,9 @@ inline float Cluster::GetIsolatedHadronicEnergy() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool Cluster::IsPhoton() const
+inline bool Cluster::IsFixedPhoton() const
 {
-    return m_isPhoton;
+    return m_isFixedPhoton;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -743,10 +743,10 @@ inline const TrackList &Cluster::GetAssociatedTrackList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void Cluster::SetIsPhotonFlag(bool isPhotonFlag)
+inline void Cluster::SetIsFixedPhotonFlag(bool isFixedPhotonFlag)
 {
     m_isPhotonFast.Reset();
-    m_isPhoton = isPhotonFlag;
+    m_isFixedPhoton = isFixedPhotonFlag;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

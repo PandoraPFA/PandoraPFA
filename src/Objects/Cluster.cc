@@ -23,7 +23,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_hadronicEnergy(0),
     m_isolatedElectromagneticEnergy(0),
     m_isolatedHadronicEnergy(0),
-    m_isPhoton(false),
+    m_isFixedPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_initialDirection(pCaloHit->GetPositionVector().GetUnitVector()),
@@ -45,7 +45,7 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     m_hadronicEnergy(0),
     m_isolatedElectromagneticEnergy(0),
     m_isolatedHadronicEnergy(0),
-    m_isPhoton(false),
+    m_isFixedPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_isFitUpToDate(false),
@@ -69,7 +69,7 @@ Cluster::Cluster(Track *pTrack) :
     m_hadronicEnergy(0),
     m_isolatedElectromagneticEnergy(0),
     m_isolatedHadronicEnergy(0),
-    m_isPhoton(false),
+    m_isFixedPhoton(false),
     m_isMipTrack(true),
     m_isFitUpToDate(false),
     m_isAvailable(true)
@@ -382,7 +382,7 @@ StatusCode Cluster::ResetProperties()
     m_outerPseudoLayer.Reset();
 
     m_currentFitResult.Reset();
-    m_isPhoton = false;
+    m_isFixedPhoton = false;
     this->ResetOutdatedProperties();
 
     return STATUS_CODE_SUCCESS;

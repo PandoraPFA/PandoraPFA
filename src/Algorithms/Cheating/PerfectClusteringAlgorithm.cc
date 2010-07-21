@@ -110,7 +110,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
             // Set photon flag for photon clusters
             if (pMCParticle->GetParticleId() == PHOTON)
-                pCluster->SetIsPhotonFlag(true);
+                pCluster->SetIsFixedPhotonFlag(true);
 
             if (!clusterList.insert(pCluster).second)
                 return STATUS_CODE_FAILURE;

@@ -324,8 +324,8 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 
 bool ParticleIdHelper::IsPhotonFastDefault(const Cluster *const pCluster)
 {
-    // Already flagged as a photon by full photon id algorithm? - overrides fast photon id
-    if (pCluster->IsPhoton())
+    // Already flagged as a fixed photon by an algorithm - overrides fast photon id
+    if (pCluster->IsFixedPhoton())
         return true;
 
     // Cluster with associated tracks is not a photon

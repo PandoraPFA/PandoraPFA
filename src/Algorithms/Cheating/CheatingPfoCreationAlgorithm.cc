@@ -135,7 +135,7 @@ void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter(Cluster *pCluster, flo
 
     if (trackList.empty())
     {
-        if (pCluster->IsPhoton())
+        if (pCluster->IsFixedPhoton())
         {
             energy = pCluster->GetElectromagneticEnergy();
             momentum = pCluster->GetFitToAllHitsResult().GetDirection();

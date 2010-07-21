@@ -109,8 +109,8 @@ StatusCode EnergyMonitoringAlgorithm::Run()
 
             const TrackList& pTrackList = pCluster->GetAssociatedTrackList();
             bool clusterHasTracks = !(pTrackList.empty());
-            bool clusterIsPhoton  = pCluster->IsPhoton();
-            
+            bool clusterIsPhoton  = pCluster->IsPhotonFast();
+
             float energyMcPhoton  = 0.f;
             float energyMcNeutral = 0.f;
             float energyMcCharged = 0.f;

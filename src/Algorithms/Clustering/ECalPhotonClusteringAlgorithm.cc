@@ -297,7 +297,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
                 int peaksSize = peaks.size();
                 if( IsPhoton( pPhotonCandidateCluster, pOrderedCaloHitList, (*itPeak), clusterProperties, useOriginalCluster, peaksSize ) )
                 {
-                    pPhotonCandidateCluster->SetIsPhotonFlag( true );
+                    pPhotonCandidateCluster->SetIsFixedPhotonFlag( true );
                     if (m_producePrintoutStatements > 0)
                         std::cout << "is photon cluster? --> YES " << std::endl;
 
@@ -332,7 +332,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
             clusterListToDeleteName = fragmentClustersListName;
 
             if( useOriginalCluster )
-                pCluster->SetIsPhotonFlag( true );
+                pCluster->SetIsFixedPhotonFlag( true );
         }
         else
         {
@@ -343,7 +343,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
                 CaloHitHelper::RemoveUnavailableCaloHits(caloHitList);
                 pandora::Cluster* remainingHitsCluster=NULL;
                 PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &caloHitList, remainingHitsCluster ));
-                remainingHitsCluster->SetIsPhotonFlag( pCluster->IsPhoton() );
+                remainingHitsCluster->SetIsFixedPhotonFlag( pCluster->IsFixedPhoton() );
 
                 for (TrackList::const_iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
                 {

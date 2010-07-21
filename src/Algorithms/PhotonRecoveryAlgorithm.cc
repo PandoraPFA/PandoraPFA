@@ -106,7 +106,7 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
         // Tag the cluster as a fixed photon
         if (isPhoton)
         {
-            pCluster->SetIsPhotonFlag(true);
+            pCluster->SetIsFixedPhotonFlag(true);
         }
     }
 }
@@ -174,7 +174,7 @@ void PhotonRecoveryAlgorithm::PerformSoftPhotonId(const ClusterList *const pClus
         Cluster *pCluster = *iter;
 
         if (this->IsSoftPhoton(pCluster))
-            pCluster->SetIsPhotonFlag(true);
+            pCluster->SetIsFixedPhotonFlag(true);
     }
 }
 

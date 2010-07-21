@@ -31,7 +31,6 @@ private:
 
     pandora::StringVector   m_candidateListNames;           ///< The list of cluster list names to use
     std::string             m_finalPfoListName;             ///< The name of the output cluster list
-    bool                    m_shouldPerformPhotonId;        ///< Whether to run full photon id on the newly formed cluster list
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
