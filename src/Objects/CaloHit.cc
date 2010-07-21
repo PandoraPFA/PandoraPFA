@@ -23,6 +23,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_cellLengthScale(std::sqrt(m_cellSizeU * m_cellSizeV)),
     m_nRadiationLengths(caloHitParameters.m_nRadiationLengths.Get()),
     m_nInteractionLengths(caloHitParameters.m_nInteractionLengths.Get()),
+    m_nInteractionLengthsFromIp(caloHitParameters.m_nInteractionLengthsFromIp.Get()),
     m_time(caloHitParameters.m_time.Get()),
     m_inputEnergy(caloHitParameters.m_inputEnergy.Get()),
     m_mipEquivalentEnergy(caloHitParameters.m_mipEquivalentEnergy.Get()),

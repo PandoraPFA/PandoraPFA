@@ -54,6 +54,7 @@ public:
         pandora::InputFloat             m_cellThickness;            ///< Thickness of cell, units mm
         pandora::InputFloat             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
         pandora::InputFloat             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
+        pandora::InputFloat             m_nInteractionLengthsFromIp;///< Absorber material between cell and IP, units interaction lengths
         pandora::InputFloat             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
         pandora::InputFloat             m_inputEnergy;              ///< Corrected energy of calorimeter cell in user framework, units GeV
         pandora::InputFloat             m_mipEquivalentEnergy;      ///< The calibrated mip equivalent energy, units mip

@@ -89,6 +89,13 @@ public:
     float GetNInteractionLengths() const;
 
     /**
+     *  @brief  Get the absorber material between cell and interaction point, units interaction lengths
+     * 
+     *  @return the absorber material between cell and interaction point in interaction lengths
+     */
+    float GetNInteractionLengthsFromIp() const;
+
+    /**
      *  @brief  Get the corrected energy of the calorimeter cell, units GeV, as supplied by the user
      * 
      *  @return the corrected energy of the calorimeter cell
@@ -270,6 +277,7 @@ private:
 
     const float             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
     const float             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
+    const float             m_nInteractionLengthsFromIp;///< Absorber material between cell and interaction point, units interaction lengths
 
     const float             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
     const float             m_inputEnergy;              ///< Corrected energy of calorimeter cell in user framework, units GeV
@@ -378,6 +386,13 @@ inline float CaloHit::GetNRadiationLengths() const
 inline float CaloHit::GetNInteractionLengths() const
 {
     return m_nInteractionLengths;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetNInteractionLengthsFromIp() const
+{
+    return m_nInteractionLengthsFromIp;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

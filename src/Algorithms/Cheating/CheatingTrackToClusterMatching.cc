@@ -44,7 +44,7 @@ StatusCode CheatingTrackToClusterMatching::Run()
             {
                 CaloHit* pCaloHit = *hitIter;
 
-                // TODO option to take hadronic energy as instead?
+                // TODO option to take hadronic energy instead?
                 float energy = pCaloHit->GetElectromagneticEnergy();
 
                 const MCParticle *pMCParticle = NULL; 

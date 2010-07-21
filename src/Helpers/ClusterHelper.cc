@@ -326,7 +326,7 @@ StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitP
     for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
         const CartesianVector difference(iter->GetPosition() - intercept);
-        const float error(iter->GetCellSize() / 3.46f);
+        const double error(iter->GetCellSize() / 3.46);
         const double chiX((difference.GetX() - aX * difference.GetZ()) / error);
         const double chiY((difference.GetY() - aY * difference.GetZ()) / error);
 
