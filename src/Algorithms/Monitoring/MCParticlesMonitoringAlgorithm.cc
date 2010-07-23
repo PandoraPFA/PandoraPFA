@@ -16,34 +16,17 @@
 
 using namespace pandora;
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode MCParticlesMonitoringAlgorithm::Initialize()
 {
-    m_energy = NULL;
-    m_momentumX = NULL;
-    m_momentumY = NULL;
-    m_momentumZ = NULL;
-    m_particleId = NULL;
-    m_outerRadius = NULL;
-    m_innerRadius = NULL;
-    m_caloHitEnergy = NULL;
-    m_trackEnergy = NULL;
-
-    if( !m_monitoringFileName.empty() && !m_treeName.empty() )
-    {
-        m_energy = new FloatVector();
-        m_momentumX = new FloatVector();                     
-        m_momentumY = new FloatVector();                     
-        m_momentumZ = new FloatVector();                     
-        m_particleId = new IntVector();                    
-        m_outerRadius = new FloatVector();                   
-        m_innerRadius = new FloatVector();                   
-        m_caloHitEnergy = new FloatVector();                   
-        m_trackEnergy = new FloatVector();                   
-    }
-    m_eventCounter = 0;
+    m_energy = new FloatVector();
+    m_momentumX = new FloatVector();
+    m_momentumY = new FloatVector();
+    m_momentumZ = new FloatVector();
+    m_particleId = new IntVector();
+    m_outerRadius = new FloatVector();
+    m_innerRadius = new FloatVector();
+    m_caloHitEnergy = new FloatVector();
+    m_trackEnergy = new FloatVector();
 
     return STATUS_CODE_SUCCESS;
 }
@@ -52,11 +35,11 @@ StatusCode MCParticlesMonitoringAlgorithm::Initialize()
 
 MCParticlesMonitoringAlgorithm::~MCParticlesMonitoringAlgorithm()
 {
-    if( !m_monitoringFileName.empty() && !m_treeName.empty() )
+    if (!m_monitoringFileName.empty() && !m_treeName.empty())
     {
-//         PANDORA_MONITORING_API(PrintTree(m_treeName));
         PANDORA_MONITORING_API(SaveTree(m_treeName, m_monitoringFileName, "UPDATE" ));
     }
+
     delete m_energy;
     delete m_momentumX;
     delete m_momentumY;
@@ -67,7 +50,6 @@ MCParticlesMonitoringAlgorithm::~MCParticlesMonitoringAlgorithm()
     delete m_caloHitEnergy;
     delete m_trackEnergy;
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -80,82 +62,19 @@ StatusCode MCParticlesMonitoringAlgorithm::Run()
 
     MonitorMCParticleList(mcParticleList);
 
-    ++m_eventCounter;
-
     return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+void MCParticlesMonitoringAlgorithm::MonitorMCParticleList(const MCParticleList& mcParticleList)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
-
-    m_treeName = "emon";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "TreeName", m_treeName));
-
-    m_print = true;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Print", m_print));
-
-    m_indent = true;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Indent", m_indent));
-
-    m_oldRoot = false;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "ROOT_OLDER_THAN_5_20", m_oldRoot));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "ClusterListNames", m_clusterListNames));
-
-    StringVector mcParticleSelection;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "Selection", mcParticleSelection)); ///< "Final" takes only particles without daughters; "ExcludeRoot" excludes particles which don't have parents; "OnlyRoot" takes only particles which don't have parents; "CalorimeterHits"/"Tracks" takes only particles which have caused Tracks or Calorimeterhits. With the current set of rules for the MCPFO selection only particles which cross the spherical boundary around the IP are retained. All particles are therefore ROOT-particles, the ExcludeRoot, the OnlyRoot and the Final options are therefore nonsensical (this might change if a different set of rules is implemented). The CalorimeterHits and the Tracks options are still useful.
-
-    m_onlyFinal = false;
-    m_haveCaloHits = false;
-    m_haveTracks = false;
-
-    m_excludeRootParticles = false;
-    m_onlyRootParticles = false;   
-
-    for( StringVector::iterator itStr = mcParticleSelection.begin(), itStrEnd = mcParticleSelection.end(); itStr != itStrEnd; ++itStr )
+    if (m_print)
     {
-        std::string currentString = (*itStr);
-        if( currentString == "Final" )
-            m_onlyFinal = true;
-        else if( currentString == "CalorimeterHits" ) 
-            m_haveCaloHits = true;
-        else if( currentString == "Tracks" ) 
-            m_haveTracks = true;
-        else if( currentString == "ExcludeRoot" ) 
-            m_excludeRootParticles = true;
-        else if( currentString == "OnlyRoot" ) 
-            m_onlyRootParticles = true;
-        else
-        {
-            std::cout << "<Selection> '" << currentString << "' unknown in algorithm 'MCParticlesMonitoring'." << std::endl;
-            return STATUS_CODE_NOT_FOUND;
-        }
+        std::cout << "MCParticle monitoring written into tree : " << m_treeName << std::endl;
     }
 
-
-    m_sort = false;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle, "Sort", m_sort));
-
-    return STATUS_CODE_SUCCESS;
-}
-
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList& mcParticleList ) 
-{
-
-    if( m_print )
-        std::cout << "MCParticle monitoring written into tree : " << m_treeName << std::endl;
-
-
     // alle MCParticles ausselektieren die in der parent-list eines anderen particles drinnen sind. TODO!!
-
-
     m_energy->clear();
     m_momentumX->clear();
     m_momentumY->clear();
@@ -173,39 +92,43 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
     typedef std::vector<const MCParticle*> MCParticleVector;
     MCParticleVector mcParticleVector;
 
-    for( MCParticleList::const_iterator itMc = mcParticleList.begin(), itMcEnd = mcParticleList.end(); itMc != itMcEnd; ++itMc )
+    for (MCParticleList::const_iterator itMc = mcParticleList.begin(), itMcEnd = mcParticleList.end(); itMc != itMcEnd; ++itMc)
     {
-        const MCParticle* pMCParticle = (*itMc);
-        
+        const MCParticle *pMCParticle = (*itMc);
+
         float caloHitEnergy = 0.f, trackEnergy = 0.f;
-        if( TakeMCParticle(pMCParticle, caloHitEnergy, trackEnergy) )
+
+        if (TakeMCParticle(pMCParticle, caloHitEnergy, trackEnergy))
         {
             mcParticleVector.push_back(pMCParticle);
 
             float energy = pMCParticle->GetEnergy();
-            sortIndex.insert( std::pair<float,int>(energy, mcParticleNumber) );
-            m_energy->push_back( energy );
-            const CartesianVector& momentum = pMCParticle->GetMomentum();
-            m_momentumX->push_back( momentum.GetX() );
-            m_momentumY->push_back( momentum.GetY() );
-            m_momentumZ->push_back( momentum.GetZ() );
-            m_particleId->push_back ( pMCParticle->GetParticleId() );
-            m_outerRadius->push_back( pMCParticle->GetOuterRadius() );
-            m_innerRadius->push_back( pMCParticle->GetInnerRadius() );
+            sortIndex.insert(std::pair<float,int>(energy, mcParticleNumber));
+            m_energy->push_back(energy);
 
-            m_caloHitEnergy->push_back( caloHitEnergy );
-            m_trackEnergy->push_back(   trackEnergy   );
+            const CartesianVector &momentum = pMCParticle->GetMomentum();
+            m_momentumX->push_back(momentum.GetX());
+            m_momentumY->push_back(momentum.GetY());
+            m_momentumZ->push_back(momentum.GetZ());
+
+            m_particleId->push_back(pMCParticle->GetParticleId());
+            m_outerRadius->push_back(pMCParticle->GetOuterRadius());
+            m_innerRadius->push_back(pMCParticle->GetInnerRadius());
+
+            m_caloHitEnergy->push_back(caloHitEnergy);
+            m_trackEnergy->push_back(trackEnergy);
 
             ++mcParticleNumber;
         }
     }
-    if( m_sort )
+
+    if (m_sort)
     {
-        for( SortIndex::iterator itIdx = sortIndex.begin(), itIdxEnd = sortIndex.end(); itIdx != itIdxEnd; ++itIdx )
+        for (SortIndex::iterator itIdx = sortIndex.begin(), itIdxEnd = sortIndex.end(); itIdx != itIdxEnd; ++itIdx)
         {
             int idx = itIdx->second;
 
-            assert( fabs(itIdx->first - m_energy->at(idx)) < 0.1 );
+            assert(fabs(itIdx->first - m_energy->at(idx)) < 0.1);
 
             m_energy->push_back     ( m_energy->at(idx)      );
             m_momentumX->push_back  ( m_momentumX->at(idx)   );
@@ -220,6 +143,7 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
 
             mcParticleVector.push_back( mcParticleVector.at(idx) );
         }
+
         size_t sortIndexSize = sortIndex.size();
         m_energy->erase( m_energy->begin(), m_energy->begin() + sortIndexSize );
         m_momentumX->erase( m_momentumX->begin(), m_momentumX->begin() + sortIndexSize );
@@ -234,13 +158,14 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
 
         mcParticleVector.erase( mcParticleVector.begin(), mcParticleVector.begin() + sortIndexSize );
     }
-        
-    if( m_print )
+
+    if (m_print)
     {
         int idx = 0;
-        for( MCParticleVector::iterator itMc = mcParticleVector.begin(), itMcEnd = mcParticleVector.end(); itMc != itMcEnd; ++itMc )
+
+        for (MCParticleVector::iterator itMc = mcParticleVector.begin(), itMcEnd = mcParticleVector.end(); itMc != itMcEnd; ++itMc)
         {
-            const MCParticle* pMcParticle = (*itMc);
+            const MCParticle *pMcParticle = (*itMc);
 
             float caloHitEnergy = m_caloHitEnergy->at(idx);
             float trackEnergy = m_trackEnergy->at(idx);
@@ -249,143 +174,112 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList( const MCParticleList
             std::cout << std::endl;
             ++idx;
         }
+
         std::cout << "Total number of MCPFOs : " << mcParticleNumber << std::endl;
     }
 
-
-    if( !m_monitoringFileName.empty() && !m_treeName.empty() )
+    if (!m_monitoringFileName.empty() && !m_treeName.empty())
     {
-        if( m_oldRoot )
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "energy", m_energy));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pX", m_momentumX));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pY", m_momentumY));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pZ", m_momentumZ));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pdg", m_particleId));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ro", m_outerRadius));
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ri", m_innerRadius));
+
+        if (m_haveCaloHits)
         {
-            for( int i = 0; i < mcParticleNumber; ++i )
-            {
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "number", i ));
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "energy", m_energy->at(i) ));
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pX", m_momentumX->at(i) ));
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pY", m_momentumY->at(i) ));
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pZ", m_momentumZ->at(i) ));
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pdg", m_particleId->at(i) ));
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ro", m_outerRadius->at(i) ));
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ri", m_innerRadius->at(i) ));
-
-                if( m_haveCaloHits )
-                {
-                    PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECalo", m_caloHitEnergy->at(i) ));
-                }
-
-                if( m_haveTracks )
-                {
-                    PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy->at(i) ));
-                }
-
-                PANDORA_MONITORING_API(FillTree(m_treeName));
-            }
-        }
-        else
-        {
-            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "energy", m_energy ));
-            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pX", m_momentumX ));
-            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pY", m_momentumY ));
-            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pZ", m_momentumZ ));
-            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pdg", m_particleId ));
-            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ro", m_outerRadius ));
-            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ri", m_innerRadius ));
-
-            if( m_haveCaloHits )
-            {
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECalo", m_caloHitEnergy ));
-            }
-
-            if( m_haveTracks )
-            {
-                PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy ));
-            }
-
-            PANDORA_MONITORING_API(FillTree(m_treeName));
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECalo", m_caloHitEnergy ));
         }
 
-//         PANDORA_MONITORING_API(PrintTree(m_treeName));
+        if (m_haveTracks)
+        {
+            PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ETrack", m_trackEnergy ));
+        }
+
+        PANDORA_MONITORING_API(FillTree(m_treeName));
     }
 }
 
-
-
-
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void MCParticlesMonitoringAlgorithm::PrintMCParticle( const MCParticle* mcParticle, float& caloHitEnergy, float& trackEnergy, std::ostream & o )
+void MCParticlesMonitoringAlgorithm::PrintMCParticle(const MCParticle *pMCParticle, float &caloHitEnergy, float &trackEnergy, std::ostream &o)
 {
 //    static const char* whiteongreen = "\033[1;42m";  // white on green background
-//    static const char* reset  = "\033[0m";     // reset
+//    static const char* reset  = "\033[0m";           // reset
 
-    if( m_indent )
+    if (m_indent)
     {
-        int printDepth = (int)(mcParticle->GetOuterRadius()/100); // this can be changed if the printout doesn't look good
+        int printDepth = (int)(pMCParticle->GetOuterRadius() / 100); // this can be changed if the printout doesn't look good
         o << std::setw (printDepth) << " ";
     }
+
 //  -- indication of ROOT particles is nonsensical for the used set of MCPFO selection rules.
-//     if( mcParticle->IsRootParticle() )
+//     if( pMCParticle->IsRootParticle() )
 //     {
 //         o << whiteongreen << "/ROOT/" << reset;
 //     }
 
-    const CartesianVector& momentum = mcParticle->GetMomentum();
-//   o << "[" << mcParticle << "]"
+    const CartesianVector &momentum = pMCParticle->GetMomentum();
+//    o << "[" << MCParticle << "]"
+
     o << std::setprecision(2);
     o << std::fixed;
-    o << " E=" << mcParticle->GetEnergy()
+    o << " E=" << pMCParticle->GetEnergy()
       << std::scientific
       << " px=" << momentum.GetX()
       << " py=" << momentum.GetY()
       << " pz=" << momentum.GetZ()
-      << " pid=" << mcParticle->GetParticleId()
+      << " pid=" << pMCParticle->GetParticleId()
       << std::fixed << std::setprecision(1)
-      << " r_i=" << mcParticle->GetInnerRadius()
-      << " r_o=" << mcParticle->GetOuterRadius();
-    if( m_haveCaloHits )
+      << " r_i=" << pMCParticle->GetInnerRadius()
+      << " r_o=" << pMCParticle->GetOuterRadius();
+
+    if(m_haveCaloHits)
         o << " ECalo=" << caloHitEnergy;
-    if( m_haveTracks )
+
+    if(m_haveTracks)
         o << " ETrack=" << trackEnergy;
-//     << " uid=" << mcParticle->GetUid();
-//    o << " dghtrs: " << mcParticle->GetDaughterList().size();
+
+//      << " uid=" << pMCParticle->GetUid();
+//    o << " dghtrs: " << pMCParticle->GetDaughterList().size();
 }
-
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
 {
-
-    if( m_clusterListNames.empty() )
+    if (m_clusterListNames.empty())
     {
-        if( m_haveCaloHits )
+        if (m_haveCaloHits)
         {
             const OrderedCaloHitList *pOrderedCaloHitList = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
-        
-            for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; itLyr++ )
+
+            for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; itLyr++)
             {
                 // int pseudoLayer = itLyr->first;
-                CaloHitList::iterator itCaloHit    = itLyr->second->begin();
+                CaloHitList::iterator itCaloHit = itLyr->second->begin();
                 CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
 
-                for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
+                for( ; itCaloHit != itCaloHitEnd; itCaloHit++)
                 {
-                    CaloHit* pCaloHit = (*itCaloHit);
+                    CaloHit *pCaloHit = (*itCaloHit);
 
-                    // fetch the MCParticle
-                    const MCParticle* mc = NULL; 
-                    pCaloHit->GetMCParticle( mc );
+                    const MCParticle *mc = NULL;
+                    pCaloHit->GetMCParticle(mc);
 
-                    if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
+                    if (mc == NULL)
+                        continue;
 
                     float energy = pCaloHit->GetElectromagneticEnergy();
                     ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
-                    if( itMc == m_mcParticleToEnergyMap.end() )
-                        m_mcParticleToEnergyMap.insert( std::make_pair( mc, std::make_pair(energy, 0.f)) );
+
+                    if (itMc == m_mcParticleToEnergyMap.end())
+                    {
+                        m_mcParticleToEnergyMap.insert(std::make_pair(mc, std::make_pair(energy, 0.f)));
+                    }
                     else
                     {
                         itMc->second.first += energy;
@@ -394,76 +288,88 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
             }
         }
 
-
-        if( m_haveTracks )
+        if (m_haveTracks)
         {
             const TrackList *pTrackList = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
             // now for the tracks
-            for( TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
+            for (TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack)
             {
-                Track* pTrack = (*itTrack);
+                Track *pTrack = (*itTrack);
 
                 const MCParticle* mc = NULL;
                 pTrack->GetMCParticle( mc );
-                if( mc == NULL ) continue; // maybe an error should be thrown here?
+
+                if (mc == NULL)
+                    continue; // maybe an error should be thrown here?
 
                 float energy = pTrack->GetEnergyAtDca();
-
                 ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
-                if( itMc == m_mcParticleToEnergyMap.end() )
-                    m_mcParticleToEnergyMap.insert( std::make_pair(mc, std::make_pair(0.f, energy)) );
+
+                if (itMc == m_mcParticleToEnergyMap.end())
+                {
+                    m_mcParticleToEnergyMap.insert(std::make_pair(mc, std::make_pair(0.f, energy)));
+                }
                 else
                 {
-                    if( itMc->second.second < energy )
+                    if (itMc->second.second < energy)
                         itMc->second.second = energy;
                 }
             }
         }
     }
-    else // if( !m_clusterListNames.empty() )
+    else
     {
         typedef std::vector<const ClusterList*> ClusterVector;
         ClusterVector clusterListVector;
 
-        for( pandora::StringVector::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end(); itClusterName != itClusterNameEnd; ++itClusterName )
+        for (StringVector::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end();
+            itClusterName != itClusterNameEnd; ++itClusterName)
         {
             const ClusterList* pClusterList = NULL;
-            if( STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, (*itClusterName), pClusterList))
-                clusterListVector.push_back( pClusterList ); // add the cluster list
+
+            if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, (*itClusterName), pClusterList))
+                clusterListVector.push_back(pClusterList); // add the cluster list
         }
     
-        for( ClusterVector::const_iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
+        for (ClusterVector::const_iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end();
+            itClusterList != itClusterListEnd; ++itClusterList )
         {
-            const ClusterList* pClusterList = (*itClusterList);
-            for( ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
-            {
-                const Cluster* pCluster = (*itCluster);
+            const ClusterList *pClusterList = (*itClusterList);
 
-                if( m_haveCaloHits )
+            for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster )
+            {
+                const Cluster *pCluster = (*itCluster);
+
+                if (m_haveCaloHits)
                 {
-                    const OrderedCaloHitList& pOrderedCaloHitList = pCluster->GetOrderedCaloHitList();
-                    for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
+                    const OrderedCaloHitList &pOrderedCaloHitList = pCluster->GetOrderedCaloHitList();
+
+                    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++)
                     {
                         // int pseudoLayer = itLyr->first;
-                        CaloHitList::iterator itCaloHit    = itLyr->second->begin();
+                        CaloHitList::iterator itCaloHit = itLyr->second->begin();
                         CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
 
-                        for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
+                        for( ; itCaloHit != itCaloHitEnd; itCaloHit++)
                         {
-                            CaloHit* pCaloHit = (*itCaloHit);
+                            CaloHit *pCaloHit = (*itCaloHit);
 
                             // fetch the MCParticle
-                            const MCParticle* mc = NULL; 
-                            pCaloHit->GetMCParticle( mc );
+                            const MCParticle *mc = NULL;
+                            pCaloHit->GetMCParticle(mc);
 
-                            if( mc == NULL ) continue; // has to be continue, since sometimes some CalorimeterHits don't have a MCParticle (e.g. noise)
+                            if (mc == NULL)
+                                continue;
 
                             float energy = pCaloHit->GetElectromagneticEnergy();
                             ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
-                            if( itMc == m_mcParticleToEnergyMap.end() )
-                                m_mcParticleToEnergyMap.insert( std::make_pair( mc, std::make_pair(energy, 0.f)) );
+
+                            if (itMc == m_mcParticleToEnergyMap.end())
+                            {
+                                m_mcParticleToEnergyMap.insert(std::make_pair( mc, std::make_pair(energy, 0.f)));
+                            }
                             else
                             {
                                 itMc->second.first += energy;
@@ -472,27 +378,31 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
                     }
                 }
 
-                if( m_haveTracks )
+                if (m_haveTracks)
                 {
-                    const TrackList& pTrackList = pCluster->GetAssociatedTrackList();
-                    
-                    // now for the tracks
-                    for( TrackList::const_iterator itTrack = pTrackList.begin(), itTrackEnd = pTrackList.end(); itTrack != itTrackEnd; ++itTrack )
-                    {
-                        Track* pTrack = (*itTrack);
+                    const TrackList &trackList = pCluster->GetAssociatedTrackList();
 
-                        const MCParticle* mc = NULL;
-                        pTrack->GetMCParticle( mc );
-                        if( mc == NULL ) continue; // maybe an error should be thrown here?
+                    // now for the tracks
+                    for( TrackList::const_iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack )
+                    {
+                        Track *pTrack = (*itTrack);
+
+                        const MCParticle *mc = NULL;
+                        pTrack->GetMCParticle(mc);
+
+                        if (mc == NULL)
+                            continue; // maybe an error should be thrown here?
 
                         float energy = pTrack->GetEnergyAtDca();
-
                         ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
-                        if( itMc == m_mcParticleToEnergyMap.end() )
-                            m_mcParticleToEnergyMap.insert( std::make_pair(mc, std::make_pair(0.f, energy)) );
+
+                        if (itMc == m_mcParticleToEnergyMap.end())
+                        {
+                            m_mcParticleToEnergyMap.insert(std::make_pair(mc, std::make_pair(0.f, energy)));
+                        }
                         else
                         {
-                            if( itMc->second.second < energy )
+                            if (itMc->second.second < energy)
                                 itMc->second.second = energy;
                         }
                     }
@@ -504,35 +414,115 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
     return STATUS_CODE_SUCCESS;
 }
 
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 bool MCParticlesMonitoringAlgorithm::TakeMCParticle(const MCParticle* pMCParticle, float& caloHitEnergy, float& trackEnergy)
 {
-    if( m_onlyFinal && !pMCParticle->GetDaughterList().empty() )
+    if (m_onlyFinal && !pMCParticle->GetDaughterList().empty())
         return false;
 
-    if( m_excludeRootParticles && pMCParticle->GetParentList().empty() )
+    if (m_excludeRootParticles && pMCParticle->GetParentList().empty())
         return false;
 
-    if( m_onlyRootParticles && !pMCParticle->GetParentList().empty() )
+    if (m_onlyRootParticles && !pMCParticle->GetParentList().empty())
         return false;
 
-    ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find( pMCParticle );
-    if( itMc == m_mcParticleToEnergyMap.end() )
+    ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(pMCParticle);
+
+    if (itMc == m_mcParticleToEnergyMap.end())
     {
         caloHitEnergy = 0.f;
         trackEnergy = 0.f;
-        if( m_haveCaloHits || m_haveTracks )
+
+        if (m_haveCaloHits || m_haveTracks)
+        {
             return false;
+        }
     }
     else
     {
         caloHitEnergy = itMc->second.first;
-        trackEnergy   = itMc->second.second;
+        trackEnergy = itMc->second.second;
         return true;
     }
 
     return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MonitoringFileName", m_monitoringFileName));
+
+    m_treeName = "emon";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "TreeName", m_treeName));
+
+    m_print = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Print", m_print));
+
+    m_indent = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Indent", m_indent));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "ClusterListNames", m_clusterListNames));
+
+    // "Final" takes only particles without daughters;
+    // "ExcludeRoot" excludes particles which don't have parents;
+    // "OnlyRoot" takes only particles which don't have parents;
+    // "CalorimeterHits"/"Tracks" takes only particles which have caused Tracks or Calorimeterhits.
+    //
+    // With current rules for MCPFO selection only particles which cross spherical boundary around the IP are retained.
+    // All particles are therefore ROOT-particles, the ExcludeRoot, the OnlyRoot and the Final options are therefore nonsensical.
+    StringVector mcParticleSelection;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "Selection", mcParticleSelection));
+
+    m_onlyFinal = false;
+    m_haveCaloHits = false;
+    m_haveTracks = false;
+
+    m_excludeRootParticles = false;
+    m_onlyRootParticles = false;   
+
+    for (StringVector::iterator itStr = mcParticleSelection.begin(), itStrEnd = mcParticleSelection.end(); itStr != itStrEnd; ++itStr)
+    {
+        std::string currentString = (*itStr);
+
+        if (currentString == "Final")
+        {
+            m_onlyFinal = true;
+        }
+        else if (currentString == "CalorimeterHits")
+        {
+            m_haveCaloHits = true;
+        }
+        else if (currentString == "Tracks")
+        {
+            m_haveTracks = true;
+        }
+        else if (currentString == "ExcludeRoot")
+        {
+            m_excludeRootParticles = true;
+        }
+        else if (currentString == "OnlyRoot")
+        {
+            m_onlyRootParticles = true;
+        }
+        else
+        {
+            std::cout << "<Selection> '" << currentString << "' unknown in algorithm 'MCParticlesMonitoring'." << std::endl;
+            return STATUS_CODE_NOT_FOUND;
+        }
+    }
+
+    m_sort = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Sort", m_sort));
+
+    return STATUS_CODE_SUCCESS;
 }
