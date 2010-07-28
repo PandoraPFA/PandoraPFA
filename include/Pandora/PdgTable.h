@@ -29,19 +29,20 @@ namespace pandora
     d(PI_PLUS,             211,      1.3957018E-01f,         2.5284E-17f,      +1)      \
     d(PI_MINUS,           -211,      1.3957018E-01f,         2.5284E-17f,      -1)      \
     d(PI_ZERO,             111,       1.349766E-01f,            7.8E-09f,       0)      \
-    d(PI_ZERO_BAR,        -111,       1.349766E-01f,            7.8E-09f,       0)      \
     d(LAMBDA,             3122,       1.115683E+00f,          2.501E-15f,       0)      \
     d(LAMBDA_BAR,        -3122,       1.115683E+00f,          2.501E-15f,       0)      \
     d(K_PLUS,              321,        4.93677E-01f,          5.315E-17f,      +1)      \
     d(K_MINUS,            -321,        4.93677E-01f,          5.315E-17f,      -1)      \
     d(K_SHORT,             310,        4.97672E-01f,          7.367E-15f,       0)      \
-    d(K_SHORT_BAR,        -310,        4.97672E-01f,          7.367E-15f,       0)      \
     d(K_LONG,              130,        4.97672E-01f,          1.272E-17f,       0)      \
-    d(K_LONG_BAR,         -130,        4.97672E-01f,          1.272E-17f,       0)      \
     d(SIGMA_MINUS,        3112,         1.1975E+00f,           8.28E-15f,      -1)      \
     d(SIGMA_PLUS,         3222,         1.1975E+00f,           8.28E-15f,      +1)      \
+    d(HYPERON_MINUS,      3312,        1.32131E+00f,           4.04E-15f,      -1)      \
+    d(HYPERON_MINUS_BAR, -3312,        1.32131E+00f,           4.04E-15f,      +1)      \
     d(PROTON,             2212,      9.3827200E-01f,             0.E+00f,      +1)      \
-    d(NEUTRON,            2112,      9.3956533E-01f,          7.432E-28f,       0)
+    d(PROTON_BAR,        -2212,      9.3827200E-01f,             0.E+00f,      -1)      \
+    d(NEUTRON,            2112,      9.3956533E-01f,          7.432E-28f,       0)      \
+    d(NEUTRON_BAR,       -2112,      9.3956533E-01f,          7.432E-28f,       0)
 
 /**
  *  @brief  The particle type enum macro
