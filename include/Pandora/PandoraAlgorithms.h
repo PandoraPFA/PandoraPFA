@@ -39,6 +39,7 @@
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
 #include "Algorithms/PfoConstruction/PfoCreationAlgorithm.h"
+#include "Algorithms/PfoConstruction/V0PfoCreationAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackRecoveryAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackRecoveryHelixAlgorithm.h"
@@ -95,6 +96,7 @@
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
     d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                  \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \
+    d("V0PfoCreation",                          V0PfoCreationAlgorithm::Factory)                            \
     d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \
     d("TrackRecovery",                          TrackRecoveryAlgorithm::Factory)                            \
     d("TrackRecoveryHelix",                     TrackRecoveryHelixAlgorithm::Factory)                       \
