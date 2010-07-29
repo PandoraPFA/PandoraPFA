@@ -35,24 +35,6 @@ StatusCode V0PfoCreationAlgorithm::Run()
 
         const Track *pTrack2 = *(siblingTrackList.begin());
 
-        bool isElectron1 = false;
-
-        if (pTrack1->HasAssociatedCluster())
-        {
-            Cluster *pCluster1 = NULL;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTrack1->GetAssociatedCluster(pCluster1));
-            isElectron1 = ParticleIdHelper::IsElectronFast(pCluster1);
-        }
-
-        bool isElectron2 = false;
-
-        if (pTrack2->HasAssociatedCluster())
-        {
-            Cluster *pCluster2 = NULL;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTrack2->GetAssociatedCluster(pCluster2));
-            isElectron2 = ParticleIdHelper::IsElectronFast(pCluster2);
-        }
-
         float mass = 0.f;
         const CartesianVector &momentumAtStart1(pTrack1->GetTrackStateAtStart().GetMomentum());
         const CartesianVector &momentumAtStart2(pTrack2->GetTrackStateAtStart().GetMomentum());
@@ -149,6 +131,26 @@ StatusCode V0PfoCreationAlgorithm::Run()
             if (pMCParent1->GetParticleId() != pParticleFlowObject->GetParticleId())
                 goodV0 = false;
 
+            // Fast electron id
+            bool isElectron1 = false;
+
+            if (pTrack1->HasAssociatedCluster())
+            {
+                Cluster *pCluster1 = NULL;
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTrack1->GetAssociatedCluster(pCluster1));
+                isElectron1 = ParticleIdHelper::IsElectronFast(pCluster1);
+            }
+
+            bool isElectron2 = false;
+
+            if (pTrack2->HasAssociatedCluster())
+            {
+                Cluster *pCluster2 = NULL;
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTrack2->GetAssociatedCluster(pCluster2));
+                isElectron2 = ParticleIdHelper::IsElectronFast(pCluster2);
+            }
+
+            // Print debug information
             if (goodV0)
             {
                 std::cout << " Good V0 : " << pParticleFlowObject->GetParticleId() << " " << pTrack1->GetEnergyAtDca() << " "
