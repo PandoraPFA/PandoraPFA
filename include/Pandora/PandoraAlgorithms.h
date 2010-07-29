@@ -60,6 +60,7 @@
 #include "Algorithms/TopologicalAssociation/IsolatedHitMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/LoopingTracksAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/MipPhotonSeparationAlgorithm.h"
+#include "Algorithms/TopologicalAssociation/MuonPhotonSeparationAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/MuonClusterAssociationAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ProximityBasedMergingAlgorithm.h"
 #include "Algorithms/TopologicalAssociation/ShowerMipMergingAlgorithm.h"
@@ -115,6 +116,7 @@
     d("IsolatedHitMerging",                     IsolatedHitMergingAlgorithm::Factory)                       \
     d("LoopingTracks",                          LoopingTracksAlgorithm::Factory)                            \
     d("MipPhotonSeparation",                    MipPhotonSeparationAlgorithm::Factory)                      \
+    d("MuonPhotonSeparation",                   MuonPhotonSeparationAlgorithm::Factory)                     \
     d("MuonClusterAssociation",                 MuonClusterAssociationAlgorithm::Factory)                   \
     d("ProximityBasedMerging",                  ProximityBasedMergingAlgorithm::Factory)                    \
     d("ShowerMipMerging",                       ShowerMipMergingAlgorithm::Factory)                         \

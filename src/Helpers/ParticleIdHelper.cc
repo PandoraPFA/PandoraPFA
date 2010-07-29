@@ -311,7 +311,7 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
     const float layer90Cut2(totalElectromagneticEnergy < m_photonIdLayer90Cut2Energy ? m_photonIdLayer90LowECut2 : m_photonIdLayer90HighECut2);
 
     if ((layer90 - innerLayer <= layer90Cut1 * rDotN) || (layer90 - innerLayer >= layer90Cut2 * rDotN))
-        return false;;
+        return false;
 
     if (layer90 > static_cast<int>(nECalLayers) + m_photonIdLayer90MaxLayersFromECal)
         return false;
@@ -394,12 +394,6 @@ bool ParticleIdHelper::IsMuonFastDefault(const Cluster *const pCluster)
     Track *pTrack = *(trackList.begin());
 
     if (pTrack->GetEnergyAtDca() < m_muonIdMinTrackEnergy)
-        return false;
-
-    const CartesianVector &momentumAtDca(pTrack->GetMomentumAtDca());
-    const float cosThetaTrack(std::fabs(momentumAtDca.GetZ() / momentumAtDca.GetMagnitude()));
-
-    if (cosThetaTrack > m_muonIdMaxCosThetaTrack)
         return false;
 
     // Calculate cut variables

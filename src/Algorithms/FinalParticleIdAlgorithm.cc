@@ -25,8 +25,8 @@ StatusCode FinalParticleIdAlgorithm::Run()
         const TrackList &trackList(pParticleFlowObject->GetTrackList());
         const ClusterList &clusterList(pParticleFlowObject->GetClusterList());
 
-        // Consider only pfos with a single track and a single cluster
-        if ((trackList.size() != 1) || (clusterList.size() != 1))
+        // Consider only pfos with a single cluster and no track sibling relationships
+        if ((clusterList.size() != 1) || (trackList.empty()) || this->ContainsSiblingTrack(trackList))
             continue;
 
         const int charge(pParticleFlowObject->GetCharge());
@@ -49,6 +49,21 @@ StatusCode FinalParticleIdAlgorithm::Run()
     }
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool FinalParticleIdAlgorithm::ContainsSiblingTrack(const TrackList &trackList) const
+{
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+    {
+        if (!(*iter)->GetSiblingTrackList().empty())
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -29,7 +29,14 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    /**
+     *  @brief  Determine whether any track in a specified tracklist has a sibling
+     * 
+     *  @param  trackList the tracklist
+     * 
+     *  @return boolean
+     */
+    bool ContainsSiblingTrack(const pandora::TrackList &trackList) const;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

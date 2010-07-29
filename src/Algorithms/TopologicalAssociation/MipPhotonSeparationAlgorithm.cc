@@ -22,72 +22,32 @@ StatusCode MipPhotonSeparationAlgorithm::Run()
     // Begin by recalculating track-cluster associations
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
 
+    // Create ordered vector of current clusters
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    // Create a vector of input clusters, ordered by inner layer
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
-    // Loop over soft daughter candidate clusters
+    // Examine fragmentation possibilities for each cluster
     for (ClusterVector::iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
     {
-        Cluster *pOriginalCluster = *iter;
+        Cluster *pCluster = *iter;
+        *iter = NULL;
 
-        // Apply preliminary cuts
-        const TrackList &trackList(pOriginalCluster->GetAssociatedTrackList());
+        const TrackList trackList(pCluster->GetAssociatedTrackList());
 
         if (trackList.empty() || (trackList.size() > 1))
             continue;
 
-        // Apply more detailed cuts and determine cluster shower start/end layers
-        PseudoLayer showerStartLayer(LAYER_MAX);
-        PseudoLayer showerEndLayer(LAYER_MAX);
+        // Decide whether to fragment cluster, simultaneously determining cluster shower start/end layers
+        Track *pTrack = *(trackList.begin());
+        PseudoLayer showerStartLayer(LAYER_MAX), showerEndLayer(LAYER_MAX);
 
-        if (!this->ShouldFragmentCluster(pOriginalCluster, showerStartLayer, showerEndLayer))
+        if (!this->ShouldFragmentCluster(pCluster, pTrack, showerStartLayer, showerEndLayer))
             continue;
 
-        // Initialize cluster fragmentation operations
-        ClusterList clusterList;
-        clusterList.insert(pOriginalCluster);
-        std::string originalClustersListName, fragmentClustersListName;
-
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeFragmentation(*this, clusterList,
-            originalClustersListName, fragmentClustersListName));
-
-        // Make the cluster fragments
-        Cluster *pMipCluster = NULL;
-        Cluster *pPhotonCluster = NULL;
-
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->MakeClusterFragments(showerStartLayer, showerEndLayer, pOriginalCluster,
-            pMipCluster, pPhotonCluster));
-
-        // Decide whether to keep original cluster or the fragments
-        std::string clusterListToSaveName(originalClustersListName);
-        std::string clusterListToDeleteName(fragmentClustersListName);
-
-        if ((NULL != pMipCluster) && (NULL != pPhotonCluster))
-        {
-            const float trackEnergy((*(trackList.begin()))->GetEnergyAtDca());
-
-            const float originalChi(ReclusterHelper::GetTrackClusterCompatibility(pOriginalCluster->GetTrackComparisonEnergy(), trackEnergy));
-            const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pMipCluster->GetTrackComparisonEnergy(), trackEnergy));
-            const float dChi2(newChi * newChi - originalChi * originalChi);
-
-            const bool passChi2Cuts((dChi2 < m_nonPhotonDeltaChi2Cut) || (pPhotonCluster->IsPhotonFast() && (dChi2 < m_photonDeltaChi2Cut)));
-            const bool useFragments((pPhotonCluster->GetNCaloHits() >= m_minHitsInPhotonCluster) && passChi2Cuts);
-
-            if (useFragments)
-            {
-                *iter = NULL;
-                clusterListToSaveName = fragmentClustersListName;
-                clusterListToDeleteName = originalClustersListName;
-            }
-        }
-
-        // End cluster fragmentation operations
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndFragmentation(*this, clusterListToSaveName,
-            clusterListToDeleteName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PerformFragmentation(pCluster, pTrack, showerStartLayer, showerEndLayer));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -95,14 +55,14 @@ StatusCode MipPhotonSeparationAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster, PseudoLayer &showerStartLayer, PseudoLayer &showerEndLayer) const
+bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster, Track *const pTrack, PseudoLayer &showerStartLayer,
+    PseudoLayer &showerEndLayer) const
 {
     static const PseudoLayer firstPseudoLayer(TRACK_PROJECTION_LAYER + 1);
 
     PseudoLayer mipRegion1StartLayer(LAYER_MAX), mipRegion1EndLayer(LAYER_MAX);
     PseudoLayer mipRegion2StartLayer(LAYER_MAX), mipRegion2EndLayer(LAYER_MAX);
 
-    Track *pTrack = *(pCluster->GetAssociatedTrackList().begin());
     const PseudoLayer lastPseudoLayer(pCluster->GetOuterPseudoLayer());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
@@ -235,6 +195,50 @@ bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode MipPhotonSeparationAlgorithm::PerformFragmentation(Cluster *const pOriginalCluster, Track *const pTrack, PseudoLayer showerStartLayer,
+    PseudoLayer showerEndLayer) const
+{
+    ClusterList clusterList;
+    clusterList.insert(pOriginalCluster);
+    std::string originalClustersListName, fragmentClustersListName;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::InitializeFragmentation(*this, clusterList, originalClustersListName,
+        fragmentClustersListName));
+
+    // Make the cluster fragments
+    Cluster *pMipCluster = NULL, *pPhotonCluster = NULL;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->MakeClusterFragments(showerStartLayer, showerEndLayer, pOriginalCluster,
+        pMipCluster, pPhotonCluster));
+
+    // Decide whether to keep original cluster or the fragments
+    std::string clusterListToSaveName(originalClustersListName), clusterListToDeleteName(fragmentClustersListName);
+
+    if ((NULL != pMipCluster) && (NULL != pPhotonCluster) && (pPhotonCluster->GetNCaloHits() >= m_minHitsInPhotonCluster))
+    {
+        const float trackEnergy(pTrack->GetEnergyAtDca());
+        const float originalChi(ReclusterHelper::GetTrackClusterCompatibility(pOriginalCluster->GetTrackComparisonEnergy(), trackEnergy));
+        const float newChi(ReclusterHelper::GetTrackClusterCompatibility(pMipCluster->GetTrackComparisonEnergy(), trackEnergy));
+        const float dChi2(newChi * newChi - originalChi * originalChi);
+
+        const bool passChi2Cuts((dChi2 < m_nonPhotonDeltaChi2Cut) || (pPhotonCluster->IsPhotonFast() && (dChi2 < m_photonDeltaChi2Cut)));
+
+        if (passChi2Cuts)
+        {
+            clusterListToSaveName = fragmentClustersListName;
+            clusterListToDeleteName = originalClustersListName;
+        }
+    }
+
+    // End cluster fragmentation operations
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndFragmentation(*this, clusterListToSaveName,
+        clusterListToDeleteName));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer showerStartLayer, const PseudoLayer showerEndLayer,
     Cluster *const pOriginalCluster, Cluster *&pMipCluster, Cluster *&pPhotonCluster) const
 {
@@ -244,17 +248,38 @@ StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer 
 
     for (OrderedCaloHitList::const_iterator iter =  orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
+        CaloHit *pClosestHit(NULL);
+        float closestDistance(FLOAT_MAX);
+
         const PseudoLayer iLayer = iter->first;
 
+        // If in shower region find closest hit on track trajectory
+        if ((iLayer >= showerStartLayer) && (iLayer <= showerEndLayer))
+        {
+            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            {
+                CaloHit *pCaloHit = *hitIter;
+                float distance(0.f);
+
+                PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrack(pOriginalCluster, 
+                    pTrack, pCaloHit, distance));
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    pClosestHit = pCaloHit;
+                }
+            }
+        }
+
+        // Add hits to the relevant cluster fragment
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
-            float distance(0.f);
 
-            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrack(pOriginalCluster, 
-                pTrack, pCaloHit, distance));
+            const bool isHitOnMipPath((pClosestHit == pCaloHit) && (closestDistance < m_genericDistanceCut) && (ECAL == pCaloHit->GetHitType()));
 
-            if ((distance < m_genericDistanceCut) || (iLayer < showerStartLayer) || (iLayer > showerEndLayer))
+            if (isHitOnMipPath || (iLayer < showerStartLayer) || (iLayer > showerEndLayer))
             {
                 if (NULL == pMipCluster)
                 {
@@ -288,6 +313,7 @@ StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pClus
     if (0 == m_maxTrackSeparation)
         return STATUS_CODE_FAILURE;
 
+    static const float nInitialPadWidths(1.f / std::sqrt(2.f));
     const CartesianVector hitPosition(pCaloHit->GetPositionVector());
 
     const CartesianVector &trackSeedPosition(pTrack->GetTrackStateAtECal().GetPosition());
@@ -300,8 +326,8 @@ StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pClus
         const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeparation)));
 
         const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
-            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
+            flexibility * ( (nInitialPadWidths + m_additionalPadWidthsECal) * pCaloHit->GetCellLengthScale()) :
+            flexibility * ( (nInitialPadWidths + m_additionalPadWidthsHCal) * pCaloHit->GetCellLengthScale()) );
 
         if (0 == dCut)
             return STATUS_CODE_FAILURE;
@@ -378,11 +404,11 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackSeparation", m_maxTrackSeparation));
 
-    m_additionalPadWidthsECal = 2.5f;
+    m_additionalPadWidthsECal = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
 
-    m_additionalPadWidthsHCal = 2.5f;
+    m_additionalPadWidthsHCal = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
 
