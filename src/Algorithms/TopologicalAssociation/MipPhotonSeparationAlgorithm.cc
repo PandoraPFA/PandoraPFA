@@ -254,7 +254,7 @@ StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer 
         const PseudoLayer iLayer = iter->first;
 
         // If in shower region find closest hit on track trajectory
-        if ((iLayer >= showerStartLayer) && (iLayer <= showerEndLayer))
+        if ((iLayer >= (showerStartLayer - m_nTransitionLayers)) && (iLayer <= (showerEndLayer + m_nTransitionLayers)))
         {
             for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
             {
@@ -277,9 +277,9 @@ StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer 
         {
             CaloHit *pCaloHit = *hitIter;
 
-            const bool isHitOnMipPath((pClosestHit == pCaloHit) && (closestDistance < m_genericDistanceCut) && (ECAL == pCaloHit->GetHitType()));
+            const bool isHitOnMipPath((pClosestHit == pCaloHit) && (closestDistance < m_genericDistanceCut));
 
-            if (isHitOnMipPath || (iLayer < showerStartLayer) || (iLayer > showerEndLayer))
+            if (isHitOnMipPath || (iLayer < (showerStartLayer - m_nTransitionLayers)) || (iLayer > (showerEndLayer + m_nTransitionLayers)))
             {
                 if (NULL == pMipCluster)
                 {
@@ -377,6 +377,10 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     m_minShowerRegionSpan2 = 200;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinShowerRegionSpan2", m_minShowerRegionSpan2));
+
+    m_nTransitionLayers = 1;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NTransitionLayers", m_nTransitionLayers));
 
     // Parameters aiding selection of original clusters or new fragments
     m_nonPhotonDeltaChi2Cut = 0.f;

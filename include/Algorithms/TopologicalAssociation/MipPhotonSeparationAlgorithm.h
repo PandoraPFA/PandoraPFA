@@ -92,6 +92,8 @@ protected:
     unsigned int    m_maxShowerStartLayer2;         ///< 2nd pair of cuts: Maximum shower start layer to allow fragmentation
     unsigned int    m_minShowerRegionSpan2;         ///< 2nd pair of cuts: Minimum layers spanned by shower region to allow fragmentation
 
+    unsigned int    m_nTransitionLayers;            ///< Number of transition layers, treated more flexibly, between shower and mip-region
+
     float           m_nonPhotonDeltaChi2Cut;        ///< Delta chi2 cut for case when photon cluster fragment fails photon id
     float           m_photonDeltaChi2Cut;           ///< Delta chi2 cut for case when photon cluster fragment passes photon id
     unsigned int    m_minHitsInPhotonCluster;       ///< Minimum number of hit in photon cluster fragment
