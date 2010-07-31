@@ -40,6 +40,7 @@
 #include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
 #include "Algorithms/PfoConstruction/PfoCreationAlgorithm.h"
 #include "Algorithms/PfoConstruction/V0PfoCreationAlgorithm.h"
+#include "Algorithms/PfoConstruction/KinkPfoCreationAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackRecoveryAlgorithm.h"
 #include "Algorithms/PfoConstruction/TrackRecoveryHelixAlgorithm.h"
@@ -98,6 +99,7 @@
     d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                  \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \
     d("V0PfoCreation",                          V0PfoCreationAlgorithm::Factory)                            \
+    d("KinkPfoCreation",                        KinkPfoCreationAlgorithm::Factory)                          \
     d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                         \
     d("TrackRecovery",                          TrackRecoveryAlgorithm::Factory)                            \
     d("TrackRecoveryHelix",                     TrackRecoveryHelixAlgorithm::Factory)                       \
