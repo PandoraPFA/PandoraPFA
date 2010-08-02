@@ -57,12 +57,88 @@ StatusCode MuonPhotonSeparationAlgorithm::PerformFragmentation(Cluster *const pO
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode MuonPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer showerStartLayer, const PseudoLayer showerEndLayer,
+    Cluster *const pOriginalCluster, Cluster *&pMipCluster, Cluster *&pPhotonCluster) const
+{
+    Track *pTrack = *(pOriginalCluster->GetAssociatedTrackList().begin());
+    OrderedCaloHitList orderedCaloHitList(pOriginalCluster->GetOrderedCaloHitList());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(pOriginalCluster->GetIsolatedCaloHitList()));
+
+    for (OrderedCaloHitList::const_iterator iter =  orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        CaloHit *pClosestHit(NULL);
+        float closestDistance(FLOAT_MAX);
+
+        const PseudoLayer iLayer = iter->first;
+
+        // If in shower region find closest hit on track trajectory
+        if ((iLayer >= (showerStartLayer - m_nTransitionLayers)) && (iLayer <= (showerEndLayer + m_nTransitionLayers)))
+        {
+            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            {
+                CaloHit *pCaloHit = *hitIter;
+                float distance(0.f);
+
+                PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrack(pOriginalCluster, 
+                    pTrack, pCaloHit, distance));
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    pClosestHit = pCaloHit;
+                }
+            }
+        }
+
+        // Add hits to the relevant cluster fragment
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            CaloHit *pCaloHit = *hitIter;
+
+            const bool isHitOnMipPath((pClosestHit == pCaloHit) && (closestDistance < m_genericDistanceCut));
+
+            if (isHitOnMipPath || (iLayer < showerStartLayer) || (iLayer > showerEndLayer))
+            {
+                if (NULL == pMipCluster)
+                {
+                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pTrack, pMipCluster));
+                }
+
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pMipCluster, pCaloHit));
+            }
+            else
+            {
+                if (NULL == pPhotonCluster)
+                {
+                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHit, pPhotonCluster));
+                }
+                else
+                {
+                    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pPhotonCluster, pCaloHit));
+                }
+            }
+        }
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode MuonPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Read base class settings
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MipPhotonSeparationAlgorithm::ReadSettings(xmlHandle));
 
-    m_highEnergyMuonCut = 0.f;
+    m_additionalPadWidthsECal = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
+
+    m_additionalPadWidthsHCal = 0.7071f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
+
+    m_highEnergyMuonCut = 0.7071f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "HighEnergyMuonCut", m_highEnergyMuonCut));
 

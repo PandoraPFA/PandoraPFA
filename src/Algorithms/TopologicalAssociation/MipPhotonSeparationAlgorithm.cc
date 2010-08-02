@@ -248,38 +248,17 @@ StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer 
 
     for (OrderedCaloHitList::const_iterator iter =  orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
-        CaloHit *pClosestHit(NULL);
-        float closestDistance(FLOAT_MAX);
-
         const PseudoLayer iLayer = iter->first;
 
-        // If in shower region find closest hit on track trajectory
-        if ((iLayer >= (showerStartLayer - m_nTransitionLayers)) && (iLayer <= (showerEndLayer + m_nTransitionLayers)))
-        {
-            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-            {
-                CaloHit *pCaloHit = *hitIter;
-                float distance(0.f);
-
-                PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrack(pOriginalCluster, 
-                    pTrack, pCaloHit, distance));
-
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    pClosestHit = pCaloHit;
-                }
-            }
-        }
-
-        // Add hits to the relevant cluster fragment
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
+            float distance(0.f);
 
-            const bool isHitOnMipPath((pClosestHit == pCaloHit) && (closestDistance < m_genericDistanceCut));
+            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrack(pOriginalCluster, 
+                pTrack, pCaloHit, distance));
 
-            if (isHitOnMipPath || (iLayer < (showerStartLayer - m_nTransitionLayers)) || (iLayer > (showerEndLayer + m_nTransitionLayers)))
+            if ((distance < m_genericDistanceCut) || (iLayer < showerStartLayer) || (iLayer > showerEndLayer))
             {
                 if (NULL == pMipCluster)
                 {
@@ -313,7 +292,6 @@ StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pClus
     if (0 == m_maxTrackSeparation)
         return STATUS_CODE_FAILURE;
 
-    static const float nInitialPadWidths(1.f / std::sqrt(2.f));
     const CartesianVector hitPosition(pCaloHit->GetPositionVector());
 
     const CartesianVector &trackSeedPosition(pTrack->GetTrackStateAtECal().GetPosition());
@@ -326,8 +304,8 @@ StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pClus
         const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeparation)));
 
         const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-            flexibility * ( (nInitialPadWidths + m_additionalPadWidthsECal) * pCaloHit->GetCellLengthScale()) :
-            flexibility * ( (nInitialPadWidths + m_additionalPadWidthsHCal) * pCaloHit->GetCellLengthScale()) );
+            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
+            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
 
         if (0 == dCut)
             return STATUS_CODE_FAILURE;
@@ -378,10 +356,6 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinShowerRegionSpan2", m_minShowerRegionSpan2));
 
-    m_nTransitionLayers = 1;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "NTransitionLayers", m_nTransitionLayers));
-
     // Parameters aiding selection of original clusters or new fragments
     m_nonPhotonDeltaChi2Cut = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -408,11 +382,11 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackSeparation", m_maxTrackSeparation));
 
-    m_additionalPadWidthsECal = 0.f;
+    m_additionalPadWidthsECal = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
 
-    m_additionalPadWidthsHCal = 0.f;
+    m_additionalPadWidthsHCal = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
 
