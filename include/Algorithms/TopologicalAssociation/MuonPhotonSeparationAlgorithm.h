@@ -35,6 +35,7 @@ private:
         pandora::Cluster *const pOriginalCluster, pandora::Cluster *&pMipCluster, pandora::Cluster *&pPhotonCluster) const;
 
     float           m_highEnergyMuonCut;            ///< Cut for muon to be considered high energy
+    unsigned int    m_nTransitionLayers;            ///< Number of transition layers, treated more flexibly, between shower and mip-region
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

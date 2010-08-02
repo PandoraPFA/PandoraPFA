@@ -72,7 +72,7 @@ StatusCode MuonPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer
         const PseudoLayer iLayer = iter->first;
 
         // If in shower region find closest hit on track trajectory
-        if ((iLayer >= (showerStartLayer - m_nTransitionLayers)) && (iLayer <= (showerEndLayer + m_nTransitionLayers)))
+        if (((iLayer + m_nTransitionLayers) >= showerStartLayer) && (iLayer <= (showerEndLayer + m_nTransitionLayers)))
         {
             for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
             {
@@ -97,7 +97,7 @@ StatusCode MuonPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer
 
             const bool isHitOnMipPath((pClosestHit == pCaloHit) && (closestDistance < m_genericDistanceCut));
 
-            if (isHitOnMipPath || (iLayer < showerStartLayer) || (iLayer > showerEndLayer))
+            if (isHitOnMipPath || ((iLayer + m_nTransitionLayers) < showerStartLayer) || (iLayer > (showerEndLayer + m_nTransitionLayers)))
             {
                 if (NULL == pMipCluster)
                 {
@@ -130,7 +130,7 @@ StatusCode MuonPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     // Read base class settings
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MipPhotonSeparationAlgorithm::ReadSettings(xmlHandle));
 
-    m_additionalPadWidthsECal = 0.f;
+    m_additionalPadWidthsECal = 0.7071f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
 
@@ -138,9 +138,13 @@ StatusCode MuonPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
 
-    m_highEnergyMuonCut = 0.7071f;
+    m_highEnergyMuonCut = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "HighEnergyMuonCut", m_highEnergyMuonCut));
+
+    m_nTransitionLayers = 1;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NTransitionLayers", m_nTransitionLayers));
 
     return STATUS_CODE_SUCCESS;
 }
