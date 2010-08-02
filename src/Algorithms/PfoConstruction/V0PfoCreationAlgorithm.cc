@@ -180,7 +180,8 @@ StatusCode V0PfoCreationAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode V0PfoCreationAlgorithm::GetV0Mass(const CartesianVector &momentum1, const CartesianVector &momentum2, float mass1, float mass2, float &v0mass)
+StatusCode V0PfoCreationAlgorithm::GetV0Mass(const CartesianVector &momentum1, const CartesianVector &momentum2, float mass1, float mass2,
+    float &v0mass) const
 {
     // Calculate the invariant mass for a decaying charged particle
     v0mass = 0.f;
@@ -193,7 +194,7 @@ StatusCode V0PfoCreationAlgorithm::GetV0Mass(const CartesianVector &momentum1, c
     const float totalEnergy(energy1 + energy2);
     const float massSquared(totalEnergy * totalEnergy - totalMomentum.GetMagnitudeSquared());
 
-    if (massSquared <= 0.)
+    if (massSquared <= 0.f)
         return STATUS_CODE_FAILURE;
 
     v0mass = std::sqrt(massSquared);

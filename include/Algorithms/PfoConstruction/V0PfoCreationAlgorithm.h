@@ -40,7 +40,8 @@ private:
      *  @param  mass2 is assumed mass of track2
      *  @param  V0mass is the resulting mass of the V0
      */
-    StatusCode GetV0Mass(const pandora::CartesianVector &momentum1, const pandora::CartesianVector &momentum2, float mass1, float mass2, float &V0mass);
+    StatusCode GetV0Mass(const pandora::CartesianVector &momentum1, const pandora::CartesianVector &momentum2, float mass1, float mass2,
+        float &V0mass) const;
 
     bool    m_mcMonitoring;         ///< Whether to use mc monitoring functionality
 };
