@@ -650,7 +650,6 @@ float ParticleIdHelper::m_electronIdMaxResidualEOverP = 0.2f;
 
 unsigned int ParticleIdHelper::m_muonIdMaxInnerLayer = 10;
 float ParticleIdHelper::m_muonIdMinTrackEnergy = 2.5f;
-float ParticleIdHelper::m_muonIdMaxCosThetaTrack = 0.99f;
 unsigned int ParticleIdHelper::m_muonIdMinECalLayers = 20;
 unsigned int ParticleIdHelper::m_muonIdMinHCalLayers = 20;
 float ParticleIdHelper::m_muonIdECalEnergyCut0 = 1.f;
@@ -836,9 +835,6 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle xmlHandle)
 
    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinTrackEnergy", m_muonIdMinTrackEnergy));
-
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MuonIdMaxCosThetaTrack", m_muonIdMaxCosThetaTrack));
 
    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinECalLayers", m_muonIdMinECalLayers));

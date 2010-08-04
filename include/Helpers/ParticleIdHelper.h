@@ -184,7 +184,6 @@ private:
 
     static unsigned int m_muonIdMaxInnerLayer;              ///< Max inner psuedo layer for fast muon id
     static float        m_muonIdMinTrackEnergy;             ///< Min energy of associated track for fast muon id
-    static float        m_muonIdMaxCosThetaTrack;           ///< Max cos theta value for associated track at dca
     static unsigned int m_muonIdMinECalLayers;              ///< Min number of ecal layers for fast muon id
     static unsigned int m_muonIdMinHCalLayers;              ///< Min number of hcal layers for fast muon id
     static float        m_muonIdECalEnergyCut0;             ///< Parameter 0 for ecal energy cut: cut = par0 + (par1 * trackEnergy)
