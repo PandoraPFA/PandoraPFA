@@ -95,7 +95,6 @@ private:
     typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
 
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
-    float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged
 
     unsigned int    m_minHitsInCluster;                 ///< Min number of calo hits in cluster
     unsigned int    m_minOccupiedLayersForStartFit;     ///< Min number of occupied layers in cluster to allow fit to start of cluster

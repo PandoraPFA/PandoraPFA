@@ -29,7 +29,7 @@ StatusCode BrokenTracksAlgorithm::Run()
     {
         Cluster *pCluster = *iter;
 
-        if (!ClusterHelper::CanMergeCluster(pCluster, m_canMergeMinMipFraction, m_canMergeMaxRms))
+        if (!ClusterHelper::CanMergeCluster(pCluster, m_canMergeMinMipFraction, m_maxFitRms))
             continue;
 
         if (pCluster->GetNCaloHits() < m_minHitsInCluster)
@@ -44,7 +44,7 @@ StatusCode BrokenTracksAlgorithm::Run()
         if (nOccupiedLayers >= m_minOccupiedLayersForEndFit)
             (void) ClusterHelper::FitEnd(pCluster, m_nEndLayersToFit, endFitResult);
 
-        if ((startFitResult.IsFitSuccessful() && (startFitResult.GetRms() < m_maxFitRms)) ||
+        if ((startFitResult.IsFitSuccessful() && (startFitResult.GetRms() < m_maxFitRms)) &&
             (endFitResult.IsFitSuccessful() && (endFitResult.GetRms() < m_maxFitRms)))
         {
             clusterFitRelationList.push_back(new ClusterFitRelation(pCluster, startFitResult, endFitResult));
@@ -59,9 +59,6 @@ StatusCode BrokenTracksAlgorithm::Run()
 
         Cluster *pParentCluster((*iterI)->GetCluster());
         const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetEndFitResult());
-
-        if (!parentClusterFitResult.IsFitSuccessful() || (parentClusterFitResult.GetRms() > m_maxFitRms))
-            continue;
 
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
         const CartesianVector parentOuterCentroid(pParentCluster->GetCentroid(parentOuterLayer));
@@ -80,9 +77,6 @@ StatusCode BrokenTracksAlgorithm::Run()
             const ClusterHelper::ClusterFitResult &daughterClusterFitResult((*iterJ)->GetStartFitResult());
 
             if (pParentCluster == pDaughterCluster)
-                continue;
-
-            if (!daughterClusterFitResult.IsFitSuccessful() || (daughterClusterFitResult.GetRms() > m_maxFitRms))
                 continue;
 
             const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -158,10 +152,6 @@ StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CanMergeMinMipFraction", m_canMergeMinMipFraction));
 
-    m_canMergeMaxRms = 5.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "CanMergeMaxRms", m_canMergeMaxRms));
-
     m_minHitsInCluster = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
@@ -182,7 +172,7 @@ StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NEndLayersToFit", m_nEndLayersToFit));
 
-    m_maxFitRms = 15.f;
+    m_maxFitRms = 35.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxFitRms", m_maxFitRms));
 
@@ -198,11 +188,11 @@ StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitDirectionDotProductCut", m_fitDirectionDotProductCut));
 
-    m_trackMergeCutEcal = 25.f;
+    m_trackMergeCutEcal = 45.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackMergeCutEcal", m_trackMergeCutEcal));
 
-    m_trackMergeCutHcal = 25.f;
+    m_trackMergeCutHcal = 45.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackMergeCutHcal", m_trackMergeCutHcal));
 

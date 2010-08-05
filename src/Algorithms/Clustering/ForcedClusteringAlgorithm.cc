@@ -22,9 +22,8 @@ StatusCode ForcedClusteringAlgorithm::Run()
         return STATUS_CODE_INVALID_PARAMETER;
 
     Track *pTrack = *(pTrackList->begin());
+    const Helix *const pHelix(pTrack->GetHelixFitAtECal());
     const float trackEnergy(pTrack->GetEnergyAtDca());
-    const CartesianVector &trackPosition(pTrack->GetTrackStateAtECal().GetPosition());
-    const CartesianVector trackDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector());
 
     // Read current ordered calo hit list
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
@@ -43,16 +42,13 @@ StatusCode ForcedClusteringAlgorithm::Run()
     {
         if (CaloHitHelper::IsCaloHitAvailable(*iter) && (m_shouldClusterIsolatedHits || !(*iter)->IsIsolated()))
         {
-            float distanceToTrackSeed(std::numeric_limits<float>::max());
-
-            if (STATUS_CODE_SUCCESS == this->GetDistanceToTrackSeed(trackPosition, trackDirection, *iter, distanceToTrackSeed))
-            {
-                caloHitDistanceVector.push_back(std::make_pair(*iter, distanceToTrackSeed));
-            }
+            CartesianVector helixSeparation;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint((*iter)->GetPositionVector(), helixSeparation));
+            caloHitDistanceVector.push_back(std::make_pair(*iter, helixSeparation.GetMagnitudeSquared()));
         }
     }
 
-    std::sort(caloHitDistanceVector.begin(), caloHitDistanceVector.end(), ForcedClusteringAlgorithm::SortByDistanceToTrackSeed);
+    std::sort(caloHitDistanceVector.begin(), caloHitDistanceVector.end(), ForcedClusteringAlgorithm::SortByDistanceToTrack);
 
     // Return if there are no suitable calo hits to cluster
     if (caloHitDistanceVector.empty())
@@ -104,56 +100,8 @@ StatusCode ForcedClusteringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ForcedClusteringAlgorithm::GetDistanceToTrackSeed(const CartesianVector &trackPosition, const CartesianVector &trackDirection,
-    CaloHit *const pCaloHit, float &distance) const
-{
-    if (0 == m_maxTrackSeedSeparation)
-        return STATUS_CODE_FAILURE;
-
-    const CartesianVector hitPosition(pCaloHit->GetPositionVector());
-
-    const CartesianVector positionDifference(hitPosition - trackPosition);
-    const float separation(positionDifference.GetMagnitude());
-
-    if (separation < m_maxTrackSeedSeparation)
-    {
-        const float dPerp((trackDirection.GetCrossProduct(positionDifference)).GetMagnitude());
-        const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
-
-        const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
-            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
-
-        if (0 == dCut)
-            return STATUS_CODE_FAILURE;
-
-        distance = dPerp / dCut;
-        return STATUS_CODE_SUCCESS;
-    }
-
-    return STATUS_CODE_UNCHANGED;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ForcedClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_trackPathWidth = 2.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackPathWidth", m_trackPathWidth));
-
-    m_maxTrackSeedSeparation = 250.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxTrackSeedSeparation", m_maxTrackSeedSeparation));
-
-    m_additionalPadWidthsECal = 2.5f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
-
-    m_additionalPadWidthsHCal = 2.5f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
-
     m_shouldRunStandardClusteringAlgorithm = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShouldRunStandardClusteringAlgorithm", m_shouldRunStandardClusteringAlgorithm));
