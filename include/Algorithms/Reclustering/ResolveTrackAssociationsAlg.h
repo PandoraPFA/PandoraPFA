@@ -51,6 +51,13 @@ private:
     float                   m_currentChi2ForReclusterHalt;          ///< If using ordered algorithms, halt if current chi2 above this value
 
     bool                    m_shouldUseBestGuessCandidates;         ///< Whether to use "best guess" clusters if no ideal replacement found
+
+    bool                    m_shouldUseForcedClustering;            ///< Whether to use a forced clustering algorithm if all else fails
+    std::string             m_forcedClusteringAlgorithmName;        ///< The name of the forced clustering algorithm to run
+
+    float                   m_minChiForForcedClustering;            ///< The min chi value required to use forced clustering
+    float                   m_minForcedChi2Improvement;             ///< The min improvement in chi2 required to use forced clustering
+    float                   m_maxForcedChi2;                        ///< The max allowed chi2 value to use forced clustering
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

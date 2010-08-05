@@ -79,7 +79,9 @@ StatusCode ResolveTrackAssociationsAlg::Run()
 
         // Run multiple clustering algorithms and identify the best cluster candidates produced
         std::string bestReclusterListName, bestGuessListName;
-        float bestReclusterChi2(chi * chi), bestGuessChi(std::numeric_limits<float>::max());
+        float bestReclusterChi(chi);
+        float bestReclusterChi2(chi * chi);
+        float bestGuessChi(std::numeric_limits<float>::max());
 
         for (StringVector::const_iterator clusteringIter = m_clusteringAlgorithms.begin(), clusteringIterEnd = m_clusteringAlgorithms.end();
             clusteringIter != clusteringIterEnd; ++clusteringIter)
@@ -111,6 +113,7 @@ StatusCode ResolveTrackAssociationsAlg::Run()
 
             if ((bestReclusterChi2 - reclusterChi2 > m_minChi2Improvement) && (reclusterChi2 < minChi2))
             {
+                bestReclusterChi = reclusterResult.GetChiPerDof();
                 bestReclusterChi2 = reclusterChi2;
                 bestReclusterListName = reclustersListName;
             }
@@ -145,7 +148,33 @@ StatusCode ResolveTrackAssociationsAlg::Run()
         {
             bestReclusterListName = originalClustersListName;
         }
-        else if (bestReclusterListName != originalClustersListName)
+
+        // If cannot produce satisfactory split of cluster using main clustering algorithms, use forced clustering algorithm
+        if (m_shouldUseForcedClustering)
+        {
+            if ((bestReclusterListName == originalClustersListName) || (bestReclusterChi > m_minChiForForcedClustering))
+            {
+                std::string forcedListName;
+                const ClusterList *pForcedClusterList = NULL;
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_forcedClusteringAlgorithmName,
+                    pForcedClusterList, forcedListName));
+
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
+
+                ReclusterHelper::ReclusterResult forcedClusterResult;
+
+                if (STATUS_CODE_SUCCESS == ReclusterHelper::ExtractReclusterResults(pForcedClusterList, forcedClusterResult))
+                {
+                    const float forcedChi2(forcedClusterResult.GetChi2PerDof());
+                    const float originalChi2(chi * chi);
+
+                    if ((originalChi2 - forcedChi2 > m_minForcedChi2Improvement) && (forcedChi2 < m_maxForcedChi2))
+                        bestReclusterListName = forcedListName;
+                }
+            }
+        }
+
+        if (bestReclusterListName != originalClustersListName)
         {
             for (UIntVector::const_iterator iter = originalClusterIndices.begin(), iterEnd = originalClusterIndices.end(); iter != iterEnd; ++iter)
                 clusterVector[*iter] = NULL;
@@ -221,6 +250,28 @@ StatusCode ResolveTrackAssociationsAlg::ReadSettings(const TiXmlHandle xmlHandle
     m_shouldUseBestGuessCandidates = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShouldUseBestGuessCandidates", m_shouldUseBestGuessCandidates));
+
+    m_shouldUseForcedClustering = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldUseForcedClustering", m_shouldUseForcedClustering));
+
+    if (m_shouldUseForcedClustering)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle, "ForcedClustering",
+            m_forcedClusteringAlgorithmName));
+    }
+
+    m_minChiForForcedClustering = 4.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinChiForForcedClustering", m_minChiForForcedClustering));
+
+    m_minForcedChi2Improvement = 9.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinForcedChi2Improvement", m_minForcedChi2Improvement));
+
+    m_maxForcedChi2 = 36.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxForcedChi2", m_maxForcedChi2));
 
     return STATUS_CODE_SUCCESS;
 }

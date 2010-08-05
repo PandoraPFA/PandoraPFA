@@ -104,7 +104,7 @@ StatusCode SplitMergedClustersAlg::Run()
         }
 
         // If cannot produce satisfactory split of cluster using main clustering algorithms, use forced clustering algorithm
-        if (m_shouldUseForcedClustering && (nTrackAssociations == 1))
+        if (m_shouldUseForcedClustering)
         {
             if ((bestReclusterListName == originalClustersListName) || (bestReclusterChi > m_minChiForForcedClustering))
             {

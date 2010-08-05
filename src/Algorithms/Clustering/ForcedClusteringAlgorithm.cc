@@ -14,16 +14,12 @@ using namespace pandora;
 
 StatusCode ForcedClusteringAlgorithm::Run()
 {
-    // Read current track list, which should have exactly one entry
+    // Read current track list
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
 
-    if (pTrackList->size() != 1)
+    if (pTrackList->empty())
         return STATUS_CODE_INVALID_PARAMETER;
-
-    Track *pTrack = *(pTrackList->begin());
-    const Helix *const pHelix(pTrack->GetHelixFitAtECal());
-    const float trackEnergy(pTrack->GetEnergyAtDca());
 
     // Read current ordered calo hit list
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
@@ -35,36 +31,45 @@ StatusCode ForcedClusteringAlgorithm::Run()
     CaloHitList inputCaloHitList;
     pOrderedCaloHitList->GetCaloHitList(inputCaloHitList);
 
-    // Order all available calo hits by distance to track seed
-    CaloHitDistanceVector caloHitDistanceVector;
+    // Make new track-seeded clusters and populate track distance info vector
+    TrackDistanceInfoVector trackDistanceInfoVector;
 
-    for (CaloHitList::const_iterator iter = inputCaloHitList.begin(), iterEnd = inputCaloHitList.end(); iter != iterEnd; ++iter)
+    for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
-        if (CaloHitHelper::IsCaloHitAvailable(*iter) && (m_shouldClusterIsolatedHits || !(*iter)->IsIsolated()))
+        Track *pTrack = *iter;
+        const Helix *const pHelix(pTrack->GetHelixFitAtECal());
+        const float trackEnergy(pTrack->GetEnergyAtDca());
+
+        Cluster *pCluster = NULL;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pTrack, pCluster));
+
+        for (CaloHitList::const_iterator hitIter = inputCaloHitList.begin(), hitIterEnd = inputCaloHitList.end(); hitIter != hitIterEnd; ++hitIter)
         {
-            CartesianVector helixSeparation;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint((*iter)->GetPositionVector(), helixSeparation));
-            caloHitDistanceVector.push_back(std::make_pair(*iter, helixSeparation.GetMagnitudeSquared()));
+            CaloHit *pCaloHit = *hitIter;
+
+            if (CaloHitHelper::IsCaloHitAvailable(pCaloHit) && (m_shouldClusterIsolatedHits || !pCaloHit->IsIsolated()))
+            {
+                CartesianVector helixSeparation;
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint(pCaloHit->GetPositionVector(), helixSeparation));
+
+                trackDistanceInfoVector.push_back(TrackDistanceInfo(pCaloHit, pCluster, trackEnergy, helixSeparation.GetMagnitude()));
+            }
         }
     }
 
-    std::sort(caloHitDistanceVector.begin(), caloHitDistanceVector.end(), ForcedClusteringAlgorithm::SortByDistanceToTrack);
+    std::sort(trackDistanceInfoVector.begin(), trackDistanceInfoVector.end(), ForcedClusteringAlgorithm::SortByDistanceToTrack);
 
-    // Return if there are no suitable calo hits to cluster
-    if (caloHitDistanceVector.empty())
-        return STATUS_CODE_SUCCESS;
-
-    // Create a single track seeded cluster
-    Cluster *pCluster = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pTrack, pCluster));
-
-    // Work along ordered list of calo hits, adding to the cluster until cluster energy matches track energy.
-    for (CaloHitDistanceVector::const_iterator iter = caloHitDistanceVector.begin(), iterEnd = caloHitDistanceVector.end(); iter != iterEnd; ++iter)
+    // Work along ordered list of calo hits, adding to the clusters until each cluster energy matches associated track energy.
+    for (TrackDistanceInfoVector::const_iterator iter = trackDistanceInfoVector.begin(), iterEnd = trackDistanceInfoVector.end(); iter != iterEnd; ++iter)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pCluster, iter->first));
+        Cluster *pCluster = iter->GetCluster();
+        CaloHit *pCaloHit = iter->GetCaloHit();
+        const float trackEnergy = iter->GetTrackEnergy();
 
-        if (pCluster->GetHadronicEnergy() >= trackEnergy)
-            break;
+        if ((pCluster->GetHadronicEnergy() < trackEnergy) && CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pCluster, pCaloHit));
+        }
     }
 
     // Deal with remaining hits. Either run standard clustering algorithm, or crudely collect together into one cluster
@@ -93,6 +98,32 @@ StatusCode ForcedClusteringAlgorithm::Run()
     if (m_shouldAssociateIsolatedHits)
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_isolatedHitAssociationAlgorithmName));
+    }
+
+    // Delete any empty clusters
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RemoveEmptyClusters());
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ForcedClusteringAlgorithm::RemoveEmptyClusters() const
+{
+    const ClusterList *pClusterList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+
+    ClusterList clusterDeletionList;
+
+    for (ClusterList::iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    {
+        if (0 == (*iter)->GetNCaloHits())
+            clusterDeletionList.insert(*iter);
+    }
+
+    if (!clusterDeletionList.empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteClusters(*this, clusterDeletionList));
     }
 
     return STATUS_CODE_SUCCESS;
