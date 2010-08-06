@@ -139,7 +139,7 @@ StatusCode KinkPfoCreationAlgorithm::Run()
                     deltaR *= m_photonDistancePenalty;
 
                 if (candidateTrackList.size() == 1)
-                    deltaR = deltaR / 2.;
+                    deltaR = deltaR / 2.f;
 
                 if (deltaR < m_maxProjectedDistanceToNeutral)
                 {
@@ -586,7 +586,7 @@ StatusCode KinkPfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FindDecaysWithLambdas", m_findDecaysWithLambdas));
 
-    m_lowerCutOnPiZeroMass = 0.12;
+    m_lowerCutOnPiZeroMass = 0.12f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LowerCutOnPiZeroMass", m_lowerCutOnPiZeroMass));
 

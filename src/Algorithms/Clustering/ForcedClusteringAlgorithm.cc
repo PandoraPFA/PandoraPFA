@@ -115,7 +115,7 @@ StatusCode ForcedClusteringAlgorithm::RemoveEmptyClusters() const
 
     ClusterList clusterDeletionList;
 
-    for (ClusterList::iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
+    for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         if (0 == (*iter)->GetNCaloHits())
             clusterDeletionList.insert(*iter);
