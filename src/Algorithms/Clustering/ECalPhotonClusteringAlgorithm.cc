@@ -233,10 +233,6 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
     for( std::vector<Cluster*>::const_iterator itCluster = temporaryClusterList.begin(), itClusterEnd = temporaryClusterList.end(); itCluster != itClusterEnd; ++itCluster )
     {
         Cluster* pCluster = (*itCluster);
-
-
- //       std::cout << "nhits " << pCluster->GetNCaloHits() << " em " << pCluster->GetElectromagneticEnergy() << " had " << pCluster->GetHadronicEnergy() << std::endl;
-
         if (m_producePrintoutStatements > 0)
             std::cout << "Number of caloHits in cluster : " << pCluster->GetNCaloHits() << std::endl;
         if( pCluster->GetElectromagneticEnergy()<=0.2 || pCluster->GetNCaloHits() < m_minimumHitsInClusters ) 
@@ -283,6 +279,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
         int peakForProtoCluster = 0;
         bool useOriginalCluster = false;
 
+        int peaksSize = peaks.size();
         for( std::vector<pandora::protoClusterPeaks_t>::iterator itPeak = peaks.begin(), itPeakEnd = peaks.end(); 
              itPeak != itPeakEnd; ++itPeak )
         {
@@ -294,14 +291,13 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
                 if (m_producePrintoutStatements > 0)
                     std::cout << "*** sub  cluster size : " << pPhotonCandidateCluster->GetNCaloHits() << std::endl;
 
-                int peaksSize = peaks.size();
                 if( IsPhoton( pPhotonCandidateCluster, pOrderedCaloHitList, (*itPeak), clusterProperties, useOriginalCluster, peaksSize ) )
                 {
                     pPhotonCandidateCluster->SetIsFixedPhotonFlag( true );
                     if (m_producePrintoutStatements > 0)
                         std::cout << "is photon cluster? --> YES " << std::endl;
 
-                    if( useOriginalCluster ) // if the original cluster is used
+                    if( useOriginalCluster ) // if the original cluster should be used
                     {
                         break;
                     }
@@ -369,12 +365,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Run()
         photonClusters.clear();
     }
 
-
-
     delete pTrackList;
-
-
-
 
     return STATUS_CODE_SUCCESS;
 }
@@ -421,6 +412,11 @@ StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     m_likelihoodRatioCut = 0.5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
                                                                                                          "LikelihoodRatioCut", m_likelihoodRatioCut));
+
+    // cheating: set pid to true photon fraction 
+    m_cheatingTrueFractionForPid = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+                                                                                                         "CheatingTrueFractionForLikelihoodRatio", m_cheatingTrueFractionForPid));
 
     // produce configuration file
     // 0... signal events, 1 ... background events, 2 ... signal and background events (to be split by "fraction" always : >=0.5 for signal, < 0.5 for background )
@@ -689,6 +685,11 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     float pid = -1.0;
     pid = (PhotonIDLikelihoodCalculator::Instance())->PID( peak.energy, peak.rms, photonFraction,showerStart );
 
+
+    if( m_cheatingTrueFractionForPid )
+    {
+        pid = fraction;
+    }
 
     bool accept = false;
     useOriginalCluster = false;
@@ -1645,26 +1646,27 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
     float pid = 0;
     float yes = 0, no = 0;
 
-    if( PhotonIDLikelihoodCalculator::fromXml )
-    {
-        PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
+    if( !PhotonIDLikelihoodCalculator::fromXml )
+        return 0.0; // if no xml data, it cannot be recognized. Hence, return 0
 
-        if( E < 0.2f ) 
-            E = 0.2f;
+    PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
 
-        float lhSig      = plc->energySig.Get(E);
+    if( E < 0.2f ) 
+        E = 0.2f;
 
-        float lhRmsSig   = plc->rmsSig.Get  (E, rms  );
-        float lhFracSig  = plc->fracSig.Get (E, frac );
-        float lhStartSig = plc->startSig.Get(E, start);
+    float lhSig      = plc->energySig.Get(E);
+
+    float lhRmsSig   = plc->rmsSig.Get  (E, rms  );
+    float lhFracSig  = plc->fracSig.Get (E, frac );
+    float lhStartSig = plc->startSig.Get(E, start);
         
-        float lhBkg      = plc->energyBkg.Get(E);
-        float lhRmsBkg   = plc->rmsBkg.Get  (E, rms  );
-        float lhFracBkg  = plc->fracBkg.Get (E, frac );
-        float lhStartBkg = plc->startBkg.Get(E, start);
+    float lhBkg      = plc->energyBkg.Get(E);
+    float lhRmsBkg   = plc->rmsBkg.Get  (E, rms  );
+    float lhFracBkg  = plc->fracBkg.Get (E, frac );
+    float lhStartBkg = plc->startBkg.Get(E, start);
         
-        yes = lhSig*lhRmsSig*lhFracSig*lhStartSig;
-        no  = lhBkg*lhRmsBkg*lhFracBkg*lhStartBkg;
+    yes = lhSig*lhRmsSig*lhFracSig*lhStartSig;
+    no  = lhBkg*lhRmsBkg*lhFracBkg*lhStartBkg;
 
 //         int ien = 0;
 //         if( E >  0.2 && E <=  0.5)ien=0;
@@ -1705,52 +1707,6 @@ float PhotonIDLikelihoodCalculator::PID(float E, float rms, float frac, float st
 //         assert( fabs(lhStartSig-likesstart[ien][istartbin] ) <0.0001 );
 //         assert( fabs(lhStartBkg-likebstart[ien][istartbin] ) <0.0001 );
 
-    }
-    else
-    {
-        int ien = 0;
-        if( E >  0.2 && E <=  0.5)ien=0;
-        if( E >  0.5 && E <=  1.0)ien=1;
-        if( E >  1.0 && E <=  1.5)ien=2;
-        if( E >  1.5 && E <=  2.5)ien=3;
-        if( E >  2.5 && E <=  5.0)ien=4;
-        if( E >  5.0 && E <= 10.0)ien=5;
-        if( E > 10.0 && E <= 20.0)ien=6;
-        if( E > 20.0 && E <= 50.0)ien=7;
-        if( E > 50.0)ien=8;
-        int irmsbin = int(rms*4)+1;
-        if(irmsbin<0)irmsbin  =  0;
-        if(irmsbin>21)irmsbin = 21;
-        int ifracbin = int(frac*20)+1;
-        if(ifracbin<0)ifracbin  =  0;
-        if(ifracbin>21)ifracbin = 21;
-        int istartbin = int(start*2)+1;
-        if(istartbin<0)istartbin  =  0;
-        if(istartbin>21)istartbin = 21;
-
-        if(0) // TODO make m_producePrintoutStatements from main algorithm (public and) static so can access here
-        {
-            std::cout << " E     = " << E     << " -> " << ien       << std::endl;
-            std::cout << " rms   = " << rms   << " -> " << irmsbin   << std::endl;
-            std::cout << " frac  = " << frac  << " -> " << ifracbin  << std::endl;
-            std::cout << " start = " << start << " -> " << istartbin << std::endl;
-            std::cout << " likeSig[ie]  = " << likeSig[ien] << std::endl;
-            std::cout << " likeBack[ie] = " << likeBack[ien] << std::endl;
-
-            std::cout << " likesrms[ie][irmsbin] = " << likesrms[ien][irmsbin] << std::endl;
-            std::cout << " likebrms[ie][irmsbin] = " << likebrms[ien][irmsbin] << std::endl;
-
-            std::cout << " likesfrac[ie][irmsbin] = " << likesfrac[ien][ifracbin] << std::endl;
-            std::cout << " likebfrac[ie][irmsbin] = " << likebfrac[ien][ifracbin] << std::endl;
-
-            std::cout << " likesstart[ie][irmsbin] = " << likesstart[ien][istartbin] << std::endl;
-            std::cout << " likebstart[ie][irmsbin] = " << likebstart[ien][istartbin] << std::endl;
-        }
-
-
-        yes = static_cast<float>(likeSig[ien]*likesrms[ien][irmsbin]*likesfrac[ien][ifracbin]*likesstart[ien][istartbin]);
-        no  = static_cast<float>(likeBack[ien]*likebrms[ien][irmsbin]*likebfrac[ien][ifracbin]*likebstart[ien][istartbin]);
-    }
     
     if(0)
     {
@@ -2035,6 +1991,7 @@ void Histogram1D::CreateEmptyBins()
     {
         bins.insert( std::make_pair<int,float>(ibin,0.f) );
     }
+    sumOfWeights = 0.f;
 }
 
 
@@ -2057,6 +2014,7 @@ Histogram1D::Histogram1D()
 void Histogram1D::Fill( float value, float weight )
 {
     bins[axis.GetBinForValue(value)] += weight;
+    sumOfWeights += weight;
 }
 
 
@@ -2114,6 +2072,7 @@ void Histogram1D::WriteToXml ( TiXmlElement * &xmlElement )
 {
     xmlElement = new TiXmlElement( name );
     xmlElement->SetAttribute( "Type", "Histogram1D" );
+    xmlElement->SetDoubleAttribute( "SumOfWeights", sumOfWeights );
 
     axis.WriteToXml( xmlElement );
 
@@ -2148,6 +2107,7 @@ void Histogram1D::ReadFromXml( const TiXmlElement&  xmlElement )
         std::cout << "The name of the Xml element is : " << name << std::endl;
         throw NotHistogram1D();
     }
+    xmlElement.QueryFloatAttribute( "SumOfWeights",  &sumOfWeights );
 
     const TiXmlElement* pXmlAxisElement = xmlElement.FirstChildElement();
 
@@ -2182,7 +2142,10 @@ void Histogram1D::ReadFromXml( const TiXmlElement&  xmlElement )
 
 void Histogram1D::Print( std::ostream& os )
 {
-    std::cout << "=== Histogram1D === [" << name << "] " << std::endl;
+    os << "=== Histogram1D === [" << name << "] " << std::endl;
+
+    os << "SumOfWeights=" << sumOfWeights << std::endl;
+
     axis.Print( os );
 
     std::stringstream binValuesString;
@@ -2302,6 +2265,7 @@ void Histogram2D::CreateEmptyBins()
             itMoMoB->second.insert( std::make_pair<int,float>(ibinX,0.f) );
         }
     }
+    sumOfWeights = 0.f;
 }
 
 
@@ -2325,6 +2289,7 @@ Histogram2D::Histogram2D()
 void Histogram2D::Fill( float valueX, float valueY, float weight )
 {
     bins[axisY.GetBinForValue(valueY)][axisX.GetBinForValue(valueX)] += weight;
+    sumOfWeights += weight;
 }
 
 
@@ -2401,6 +2366,7 @@ void Histogram2D::WriteToXml ( TiXmlElement * &xmlElement )
 {
     xmlElement = new TiXmlElement( name );
     xmlElement->SetAttribute( "Type", "Histogram2D" );
+    xmlElement->SetDoubleAttribute( "SumOfWeights", sumOfWeights );
 
     axisX.WriteToXml( xmlElement );
     axisY.WriteToXml( xmlElement );
@@ -2447,6 +2413,7 @@ void Histogram2D::ReadFromXml( const TiXmlElement&  xmlElement )
         std::cout << "The name of the Xml element is : " << name << std::endl;
         throw NotHistogram2D();
     }
+    xmlElement.QueryFloatAttribute( "SumOfWeights", &sumOfWeights );
 
     const TiXmlElement* pXmlAxisXElement = xmlElement.FirstChildElement();
     axisX.ReadFromXml( *(pXmlAxisXElement) );
@@ -2492,7 +2459,10 @@ void Histogram2D::ReadFromXml( const TiXmlElement&  xmlElement )
 
 void Histogram2D::Print( std::ostream& os )
 {
-    std::cout << "=== Histogram2D === [" << name << "] " << std::endl;
+    os << "=== Histogram2D === [" << name << "] " << std::endl;
+
+    os << "SumOfWeights=" << sumOfWeights << std::endl;
+
     axisX.Print( os );
     axisY.Print( os );
 
