@@ -81,14 +81,9 @@ ENDIF()
 #include directories
 INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/include")
 
-IF( DEFINED MONITORING_DIRECTORY )
+IF( DEFINED PandoraMonitoring_HOME )
     ADD_DEFINITIONS( -DMONITORING )
-
-    INCLUDE_DIRECTORIES( "${MONITORING_DIRECTORY}/include")
-
-    SET( PandoraMonitoring_HOME "${MONITORING_DIRECTORY}"
-        CACHE PATH "Path to PandoraMonitoring" FORCE )
-
+    INCLUDE_DIRECTORIES( "${PandoraMonitoring_HOME}/include")
     SET( LINK_WITH "PandoraMonitoring" )
 ENDIF()
 
@@ -124,14 +119,11 @@ AUX_SOURCE_DIRECTORY( src/Objects library_sources )
 AUX_SOURCE_DIRECTORY( src/Pandora library_sources )
 AUX_SOURCE_DIRECTORY( src/Xml library_sources )
 
-
-IF( DEFINED UNIT_TEST_DIRECTORY )
+IF( DEFINED UnitTest_HOME )
     ADD_DEFINITIONS( -DUNIT_TESTS )
-
-    AUX_SOURCE_DIRECTORY( ${UNIT_TEST_DIRECTORY}/src library_sources )
-    ADD_EXECUTABLE( unitTests ${UNIT_TEST_DIRECTORY}/src/RunUnitTests.cc )
-    INCLUDE_DIRECTORIES( "${UNIT_TEST_DIRECTORY}/include")
-
+    AUX_SOURCE_DIRECTORY( ${UnitTest_HOME}/src library_sources )
+    ADD_EXECUTABLE( unitTests ${UnitTest_HOME}/src/RunUnitTests.cc )
+    INCLUDE_DIRECTORIES( "${UnitTest_HOME}/include")
     TARGET_LINK_LIBRARIES( unitTests lib_${PROJECT_NAME} )
 ENDIF()
 
@@ -279,14 +271,14 @@ SET( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" CACHE PATH
 SET( INSTALL_DOC "${INSTALL_DOC}" CACHE BOOL
     "Set to OFF to skip build/install Documentation" FORCE )
 
-IF( DEFINED UNIT_TEST_DIRECTORY )
-    SET( UNIT_TEST_DIRECTORY "${UNIT_TEST_DIRECTORY}" CACHE PATH
-	 "Set to location of unit tests source" FORCE )
+IF( DEFINED UnitTest_HOME )
+    SET( UnitTest_HOME "${UnitTest_HOME}" CACHE PATH
+        "Path to unit tests" FORCE )
 ENDIF()
 
-IF( DEFINED MONITORING_DIRECTORY )
-    SET( MONITORING_DIRECTORY "${MONITORING_DIRECTORY}" CACHE PATH
-	 "Set to location of pandora monitoring package" FORCE )
+IF( DEFINED PandoraMonitoring_HOME )
+    SET( PandoraMonitoring_HOME "${PandoraMonitoring_HOME}" CACHE PATH
+        "Path to PandoraMonitoring" FORCE )
 ENDIF()
 
 # export build settings
