@@ -20,8 +20,9 @@ StatusCode TrackPreparationAlgorithm::Run()
     for (StringVector::const_iterator iter = m_candidateListNames.begin(), iterEnd = m_candidateListNames.end(); iter != iterEnd; ++iter)
     {
         const TrackList *pTrackList = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetTrackList(*this, *iter, pTrackList));
-        candidateTrackList.insert(pTrackList->begin(), pTrackList->end());
+
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetTrackList(*this, *iter, pTrackList))
+            candidateTrackList.insert(pTrackList->begin(), pTrackList->end());
     }
 
     // Set this list of candidate pfo tracks to be the current track list for a number of track-cluster association algorithms

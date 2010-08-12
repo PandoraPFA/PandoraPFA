@@ -16,7 +16,7 @@
 #############################################################################
 
 # CMake Modules Path, only required if you wish to use the pandora monitoring package
-#SET( CMAKE_MODULE_PATH "${HOME}/CMakeModules/v01-08"
+#SET( CMAKE_MODULE_PATH "${HOME}/CMakeModules/a.b.c.d"
 #    CACHE PATH "Path to CMake Modules" FORCE )
 
 ###############################################

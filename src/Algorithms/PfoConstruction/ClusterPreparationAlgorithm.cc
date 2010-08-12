@@ -17,7 +17,10 @@ StatusCode ClusterPreparationAlgorithm::Run()
     // Create pfo cluster list, containing all candidate clusters for use in final pfo creation
     for (StringVector::const_iterator iter = m_candidateListNames.begin(), iterEnd = m_candidateListNames.end(); iter != iterEnd; ++iter)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, *iter, m_finalPfoListName));
+        const ClusterList *pClusterList = NULL;
+
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, *iter, pClusterList))
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, *iter, m_finalPfoListName));
     }
 
     // Save the filtered list and set it to be the current list for next algorithms
