@@ -186,7 +186,6 @@ inline bool ParticleFlowObject::SortByEnergy(const ParticleFlowObject *const pLh
     return (pLhs->GetEnergy() > pRhs->GetEnergy());
 }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline int ParticleFlowObject::GetParticleId() const
