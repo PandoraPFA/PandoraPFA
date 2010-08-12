@@ -93,7 +93,7 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
 
             if (it == m_mcParticleToTrackMap.end())
             {
-                m_mcParticleToTrackMap.insert(std::map<const MCParticle*,const Track*>::value_type(pMcParticle,pTrack));
+                m_mcParticleToTrackMap.insert(MCParticleToTrackMap::value_type(pMcParticle,pTrack));
             }
             else
             {
@@ -167,25 +167,24 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
     FORMATTED_OUTPUT_CONFUSION(confmat[0][0], confmat[0][1], confmat[0][2], confmat[1][0], confmat[1][1], confmat[1][2], confmat[2][0],
         confmat[2][1], confmat[2][2]);
 
-//    const float sumCal(m_trackRecoAsTrackEnergy + m_photonRecoAsTrackEnergy + m_neutralRecoAsTrackEnergy +
-//        m_trackRecoAsPhotonEnergy + m_photonRecoAsPhotonEnergy + m_neutralRecoAsPhotonEnergy + m_trackRecoAsNeutralEnergy +
-//        m_photonRecoAsNeutralEnergy + m_neutralRecoAsNeutralEnergy);
-//
-//    const float nSumCal(sumCal / 100.f);
-//
-//    if (0.f == nSumCal)
-//        return STATUS_CODE_FAILURE;
-//
-//    const float econfmat[3][3] =
-//    {
-//        {m_trackRecoAsTrackEnergy / nSumCal, m_photonRecoAsTrackEnergy / nSumCal, m_neutralRecoAsTrackEnergy / nSumCal},
-//        {m_trackRecoAsPhotonEnergy / nSumCal, m_photonRecoAsPhotonEnergy / nSumCal, m_neutralRecoAsPhotonEnergy / nSumCal},
-//        {m_trackRecoAsNeutralEnergy / nSumCal, m_photonRecoAsNeutralEnergy / nSumCal, m_neutralRecoAsNeutralEnergy / nSumCal}
-//    };
-//
-//    std::cout << endl;
-//    FORMATTED_OUTPUT_CONFUSION(econfmat[0][0], econfmat[0][1], econfmat[0][2], econfmat[1][0], econfmat[1][1], econfmat[1][2], econfmat[2][0],
-//        econfmat[2][1], econfmat[2][2]);
+    const float sumCal(m_trackRecoAsTrackEnergy + m_photonRecoAsTrackEnergy + m_neutralRecoAsTrackEnergy +
+        m_trackRecoAsPhotonEnergy + m_photonRecoAsPhotonEnergy + m_neutralRecoAsPhotonEnergy + m_trackRecoAsNeutralEnergy +
+        m_photonRecoAsNeutralEnergy + m_neutralRecoAsNeutralEnergy);
+
+    const float nSumCal(sumCal / 100.f);
+
+    if (0.f == nSumCal)
+        return STATUS_CODE_FAILURE;
+
+    const float econfmat[3][3] =
+    {
+        {m_trackRecoAsTrackEnergy / nSumCal, m_photonRecoAsTrackEnergy / nSumCal, m_neutralRecoAsTrackEnergy / nSumCal},
+        {m_trackRecoAsPhotonEnergy / nSumCal, m_photonRecoAsPhotonEnergy / nSumCal, m_neutralRecoAsPhotonEnergy / nSumCal},
+        {m_trackRecoAsNeutralEnergy / nSumCal, m_photonRecoAsNeutralEnergy / nSumCal, m_neutralRecoAsNeutralEnergy / nSumCal}
+    };
+
+    FORMATTED_OUTPUT_CONFUSION(econfmat[0][0], econfmat[0][1], econfmat[0][2], econfmat[1][0], econfmat[1][1], econfmat[1][2], econfmat[2][0],
+        econfmat[2][1], econfmat[2][2]);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -491,7 +490,7 @@ void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster
     float photonEnergy(0.f);
     float chargedEnergy(0.f);
 
-    std::map<const MCParticle*, float> mcContribs;
+    MCParticleToFloatMap mcParticleContributions;
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
@@ -501,39 +500,39 @@ void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster
         {
             CaloHit *pCaloHit = *hitIter;
 
-            const MCParticle *mcpart(NULL);
-            pCaloHit->GetMCParticle(mcpart);
+            const MCParticle *pMCParticle(NULL);
+            pCaloHit->GetMCParticle(pMCParticle);
 
-            if (mcpart == NULL)
+            if (pMCParticle == NULL)
                 continue;
 
-            const MCParticle* mcPfoTarget(NULL);
-            mcpart->GetPfoTarget(mcPfoTarget);
+            const MCParticle *pMCPfoTarget(NULL);
+            pMCParticle->GetPfoTarget(pMCPfoTarget);
 
-            if (mcPfoTarget == NULL)
+            if (pMCPfoTarget == NULL)
                 continue;
 
             totEnergy += pCaloHit->GetHadronicEnergy();
-            std::map<const MCParticle*,float>::iterator it = mcContribs.find(mcPfoTarget);
+            MCParticleToFloatMap::iterator it = mcParticleContributions.find(pMCPfoTarget);
 
-            if (it != mcContribs.end())
+            if (it != mcParticleContributions.end())
             {
-                (*it).second+=pCaloHit->GetHadronicEnergy();
+                it->second += pCaloHit->GetHadronicEnergy();
             }
             else
             {
-                mcContribs.insert(std::map<const MCParticle*,float>::value_type(mcPfoTarget,pCaloHit->GetHadronicEnergy()));
+                mcParticleContributions.insert(MCParticleToFloatMap::value_type(pMCPfoTarget, pCaloHit->GetHadronicEnergy()));
             }
 
-            const int pdgCode = mcPfoTarget->GetParticleId();
+            const int pdgCode(pMCPfoTarget->GetParticleId());
 
             try
             {
-                const int charge  = PdgTable::GetParticleCharge(pdgCode);
+                const int charge(PdgTable::GetParticleCharge(pdgCode));
 
-                if(charge!=0 || abs(pdgCode)==3122 || abs(pdgCode)==310)
+                if ((charge != 0) || (std::abs(pdgCode) == LAMBDA) || (std::abs(pdgCode) == K_SHORT))
                 {
-                    if(m_trackMcPfoTargets.count(mcpart)==0)
+                    if (m_trackMcPfoTargets.count(pMCParticle) == 0)
                     {
                         neutralEnergy += pCaloHit->GetHadronicEnergy();
                     }
@@ -544,7 +543,7 @@ void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster
                 }
                 else
                 {
-                    (mcpart->GetParticleId() == 22) ? photonEnergy += pCaloHit->GetHadronicEnergy() : neutralEnergy += pCaloHit->GetHadronicEnergy();
+                    (pMCParticle->GetParticleId() == PHOTON) ? photonEnergy += pCaloHit->GetHadronicEnergy() : neutralEnergy += pCaloHit->GetHadronicEnergy();
                 }
             }
             catch (StatusCodeException &statusCodeException)
@@ -554,26 +553,23 @@ void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster
         }
     }
 
-    if (totEnergy > 0)
+    if (totEnergy > 0.f)
     {
         fCharged = chargedEnergy/totEnergy;
         fPhoton  = photonEnergy/totEnergy;
         fNeutral = neutralEnergy/totEnergy;
     }
 
-    // find mc particle with largest associated energy
-    float emax(0.);
-    std::map<const MCParticle*,float>::iterator iter = mcContribs.begin();
-    std::map<const MCParticle*,float>::iterator iter_end = mcContribs.end();
+    // Find mc particle with largest associated energy
+    float maximumEnergy(0.f);
 
-    while(iter != iter_end)
+    for (MCParticleToFloatMap::const_iterator iter = mcParticleContributions.begin(), iterEnd = mcParticleContributions.end(); iter != iterEnd; ++iter)
     {
-        if( (*iter).second > emax)
+        if (iter->second > maximumEnergy)
         {
-            emax = (*iter).second;
-            pMcBest = (*iter).first;
+            maximumEnergy = iter->second;
+            pMcBest = iter->first;
         }
-        ++iter;
     }
 }
 

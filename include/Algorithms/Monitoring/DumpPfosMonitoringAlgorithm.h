@@ -186,6 +186,8 @@ private:
 
     typedef std::set<const pandora::MCParticle*> MCParticleList;
     typedef std::vector<pandora::ParticleFlowObject*> ParticleFlowObjectVector;
+
+    typedef std::map<const pandora::MCParticle*, float> MCParticleToFloatMap;
     typedef std::map<const pandora::MCParticle*, const pandora::Track*> MCParticleToTrackMap;
     typedef std::map<const pandora::Track*, TrackErrorTypes> TrackToErrorTypeMap;
 
