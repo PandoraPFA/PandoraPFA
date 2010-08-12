@@ -35,6 +35,7 @@
 #include "Algorithms/Monitoring/EnergyMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/MCParticlesMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/VisualMonitoringAlgorithm.h"
+#include "Algorithms/Monitoring/DumpPfosMonitoringAlgorithm.h"
 
 #include "Algorithms/PfoConstruction/ClusterPreparationAlgorithm.h"
 #include "Algorithms/PfoConstruction/LoopingTrackAssociationAlgorithm.h"
@@ -95,6 +96,7 @@
     d("EnergyMonitoring",                       EnergyMonitoringAlgorithm::Factory)                         \
     d("VisualMonitoring",                       VisualMonitoringAlgorithm::Factory)                         \
     d("MCParticlesMonitoring",                  MCParticlesMonitoringAlgorithm::Factory)                    \
+    d("DumpPfosMonitoring",                     DumpPfosMonitoringAlgorithm::Factory)                       \
     d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                       \
     d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                  \
     d("PfoCreation",                            PfoCreationAlgorithm::Factory)                              \

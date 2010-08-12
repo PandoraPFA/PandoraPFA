@@ -94,6 +94,7 @@ typedef std::set<ParticleFlowObject *> ParticleFlowObjectList;
 
 typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;
 typedef std::set<Track *, PointerLessThan<Track> > MomentumSortedTrackList;
+typedef std::set<ParticleFlowObject *, PointerLessThan<ParticleFlowObject> > EnergySortedParticleFlowObjectList;
 
 typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;

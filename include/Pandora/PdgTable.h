@@ -37,6 +37,10 @@ namespace pandora
     d(K_LONG,              130,        4.97672E-01f,          1.272E-17f,       0)      \
     d(SIGMA_MINUS,        3112,         1.1975E+00f,           8.28E-15f,      -1)      \
     d(SIGMA_PLUS,         3222,         1.1975E+00f,           8.28E-15f,      +1)      \
+    d(SIGMA_MINUS_BAR,   -3112,         1.1975E+00f,           8.28E-15f,      +1)      \
+    d(SIGMA_PLUS_BAR,    -3222,         1.1975E+00f,           8.28E-15f,      -1)      \
+    d(HYPERON_ZERO ,      3322,        1.31483E+00f,           2.28E-15f,       0)      \
+    d(HYPERON_ZERO_BAR,  -3322,        1.31483E+00f,           2.28E-15f,       0)      \
     d(HYPERON_MINUS,      3312,        1.32131E+00f,           4.04E-15f,      -1)      \
     d(HYPERON_MINUS_BAR, -3312,        1.32131E+00f,           4.04E-15f,      +1)      \
     d(PROTON,             2212,      9.3827200E-01f,             0.E+00f,      +1)      \

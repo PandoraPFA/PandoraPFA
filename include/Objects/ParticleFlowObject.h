@@ -19,6 +19,22 @@ namespace pandora
 class ParticleFlowObject
 {
 public:
+
+    /**
+     *  @brief  Operator< now order by energy
+     * 
+     *  @param  rhs pfo to compare with
+     */
+    bool operator< (const ParticleFlowObject &rhs) const;
+
+    /**
+     *  @brief  Sort pfos by descending energy 
+     * 
+     *  @param  pLhs address of first pfo
+     *  @param  pRhs address of second pfo
+     */
+    static bool SortByEnergy(const ParticleFlowObject *const pLhs, const ParticleFlowObject *const pRhs);
+
     /**
      *  @brief  Get the particle flow object id (PDG code)
      * 
@@ -153,6 +169,23 @@ private:
 
     friend class ParticleFlowObjectManager;
 };
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleFlowObject::operator< (const ParticleFlowObject &rhs) const
+{
+    return (!(m_energy > rhs.m_energy) && !(rhs.m_energy > m_energy) ?
+        (this > &rhs) : (m_energy > rhs.m_energy));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleFlowObject::SortByEnergy(const ParticleFlowObject *const pLhs, const ParticleFlowObject *const pRhs)
+{
+    return (pLhs->GetEnergy() > pRhs->GetEnergy());
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
