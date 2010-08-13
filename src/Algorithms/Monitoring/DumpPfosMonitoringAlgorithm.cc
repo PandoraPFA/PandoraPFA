@@ -381,8 +381,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
 
         float showerProfileStart(0.);
         float showerProfileDiscrepancy(0.);
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ParticleIdHelper::CalculateShowerProfile(pCluster, showerProfileStart,
-            showerProfileDiscrepancy));
+        (void) ParticleIdHelper::CalculateShowerProfile(pCluster, showerProfileStart, showerProfileDiscrepancy);
 
         const bool badConfusion((clusterEnergy * fCharged) > m_minConfusionEnergyToDisplay);
         const bool badFragment((fCharged > 0.8f) && ((clusterEnergy * fCharged) > m_fragmentEnergyToDisplay));
@@ -399,7 +398,10 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
             }
         }
 
-        const bool badPhotonId((fPhoton > 0.8f) && ((clusterEnergy * fPhoton) > m_photonIdEnergyToDisplay));
+        const bool badPhotonId( (!isPhotonPfo && (fPhoton > 0.8f) && ((clusterEnergy * fPhoton)  > m_photonIdEnergyToDisplay))
+				||( isPhotonPfo && (fNeutral > 0.8f) && ((clusterEnergy * fNeutral)> m_photonIdEnergyToDisplay)) );
+
+
 
         if (pfoEnergy > m_minPfoEnergyToDisplay)
             printThisPfo = true;
