@@ -1,17 +1,15 @@
 /**
  *  @file   PandoraPFANew/src/Algorithms/Monitoring/DumpPfosMonitoringAlgorithm.cc
  * 
- *  @brief  Implementation of the energy monitoring algorithm class 
+ *  @brief  Implementation of the dump pfos monitoring algorithm class
  * 
  *  $Log: $
  */
 
 #include "Algorithms/Monitoring/DumpPfosMonitoringAlgorithm.h"
-#include "Pandora/AlgorithmHeaders.h"
-#include "Pandora/PdgTable.h"
 
-#include <vector>
-#include <iostream>
+#include "Pandora/AlgorithmHeaders.h"
+
 #include <iomanip>
 
 using namespace pandora;
@@ -79,7 +77,7 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
             const MCParticle* pMcParticle(NULL);
             pTrack->GetMCParticle(pMcParticle);
 
-            if(pMcParticle == NULL)
+            if (pMcParticle == NULL)
                 continue;
 
             m_trackMcPfoTargets.insert(pMcParticle);
@@ -193,9 +191,9 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
 
 StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject* pPfo)
 {
-    const TrackList   &trackList(pPfo->GetTrackList());
-    const int pfoPid    = pPfo->GetParticleId();
-    const float pfoEnergy = pPfo->GetEnergy();
+    const TrackList &trackList(pPfo->GetTrackList());
+    const int pfoPid(pPfo->GetParticleId());
+    const float pfoEnergy(pPfo->GetEnergy());
     bool printedHeader(false);
     bool printThisPfo(false);
 
@@ -243,7 +241,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
 
         const TrackList &daughterTrackList(pTrack->GetDaughterTrackList());
         const bool isParent(!daughterTrackList.empty());
-        const bool badChi(chi>m_minAbsChiToDisplay || (chi<-m_minAbsChiToDisplay && !isLeaving && !isParent));
+        const bool badChi((chi > m_minAbsChiToDisplay) || (chi < -m_minAbsChiToDisplay && !isLeaving && !isParent));
 
         float fCharged(0.f);
         float fPhoton(0.f);
@@ -264,7 +262,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
         m_photonRecoAsTrackEnergy += clusterEnergy * fPhoton;
         m_neutralRecoAsTrackEnergy += clusterEnergy * fNeutral;
 
-        const bool badConfusion(clusterEnergy*(fPhoton+fNeutral)>m_minConfusionEnergyToDisplay);
+        const bool badConfusion(clusterEnergy * (fPhoton + fNeutral) > m_minConfusionEnergyToDisplay);
 
         // Decide whether to print
         if (pfoEnergy > m_minPfoEnergyToDisplay)
@@ -273,9 +271,9 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
         if (badConfusion || badChi)
             printThisPfo=true;
 
-        if(printThisPfo)
+        if (printThisPfo)
         {
-            if(m_firstChargedPfoToPrint)
+            if (m_firstChargedPfoToPrint)
             {
                 // First loop to dump charged pfos
                 std::cout << std::endl;
@@ -284,7 +282,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
                 m_firstChargedPfoToPrint = false;
             }
 
-            if(!printedHeader)
+            if (!printedHeader)
             {
                 FORMATTED_OUTPUT_PFO_HEADER(pfoPid, pfoEnergy);
 
@@ -294,14 +292,14 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
                 printedHeader = true;
             }
 
-            if(trackList.size() > 1)
+            if (trackList.size() > 1)
             {
                 FORMATTED_OUTPUT_PFO_HEADER("", "");
             }
 
             if (pCluster != NULL)
             {
-                FORMATTED_OUTPUT_TRACK(trackId, mcId, pTrack->CanFormPfo(), pTrack->ReachesECal(),trackEnergy, mcEnergy, clusterEnergy, chi, leaving, fCharged, fPhoton, fNeutral);
+                FORMATTED_OUTPUT_TRACK(trackId, mcId, pTrack->CanFormPfo(), pTrack->ReachesECal(), trackEnergy, mcEnergy, clusterEnergy, chi, leaving, fCharged, fPhoton, fNeutral);
             }
             else
             {
@@ -314,9 +312,9 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
                 continue;
             }
 
-            if(badConfusion)
+            if (badConfusion)
             {
-                std::cout << " <-- confusion : " << clusterEnergy*(fPhoton+fNeutral) << " GeV " << std::endl;
+                std::cout << " <-- confusion : " << clusterEnergy * (fPhoton + fNeutral) << " GeV " << std::endl;
                 continue;
             }
 
@@ -363,8 +361,8 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
         Cluster *pCluster = *clusterIter;
         const float clusterEnergy(pCluster->GetHadronicEnergy());
 
-        const MCParticle *bestMcMatch(NULL);
-        this->DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(pCluster, fCharged, fPhoton, fNeutral, bestMcMatch);
+        const MCParticle *pBestMCMatch(NULL);
+        this->DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(pCluster, fCharged, fPhoton, fNeutral, pBestMCMatch);
 
         if (isPhotonPfo)
         {
@@ -389,7 +387,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
 
         if (badTrackMatch)
         {
-            MCParticleToTrackMap::iterator it = m_mcParticleToTrackMap.find(bestMcMatch);
+            MCParticleToTrackMap::iterator it = m_mcParticleToTrackMap.find(pBestMCMatch);
 
             if (it != m_mcParticleToTrackMap.end())
             {
@@ -399,9 +397,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
         }
 
         const bool badPhotonId( (!isPhotonPfo && (fPhoton > 0.8f) && ((clusterEnergy * fPhoton)  > m_photonIdEnergyToDisplay))
-				||( isPhotonPfo && (fNeutral > 0.8f) && ((clusterEnergy * fNeutral)> m_photonIdEnergyToDisplay)) );
-
-
+            ||( isPhotonPfo && (fNeutral > 0.8f) && ((clusterEnergy * fNeutral)> m_photonIdEnergyToDisplay)) );
 
         if (pfoEnergy > m_minPfoEnergyToDisplay)
             printThisPfo = true;
@@ -436,8 +432,8 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
             {
                 std::cout << " <-- bad track match  : " << clusterEnergy * fCharged << " GeV ";
 
-                if (bestMcMatch != NULL)
-                    std::cout << "(" << bestMcMatch->GetEnergy() << " ) ";
+                if (pBestMCMatch != NULL)
+                    std::cout << "(" << pBestMCMatch->GetEnergy() << " ) ";
 
                 std::cout << std::endl;
                 continue;
@@ -447,8 +443,8 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
             {
                 std::cout << " <-- fragment  : " << clusterEnergy * fCharged << " GeV ";
 
-                if (bestMcMatch != NULL)
-                    std::cout << "(" << bestMcMatch->GetEnergy() << " ) ";
+                if (pBestMCMatch != NULL)
+                    std::cout << "(" << pBestMCMatch->GetEnergy() << " ) ";
 
                 std::cout << std::endl;
                 continue;
@@ -484,9 +480,9 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster, float &fCharged, float &fPhoton, float &fNeutral,
-    const MCParticle* &pMcBest) const
+    const MCParticle *&pBestMatchedMcPfo) const
 {
-    pMcBest = NULL;
+    pBestMatchedMcPfo = NULL;
     float totEnergy(0.f);
     float neutralEnergy(0.f);
     float photonEnergy(0.f);
@@ -570,7 +566,7 @@ void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster
         if (iter->second > maximumEnergy)
         {
             maximumEnergy = iter->second;
-            pMcBest = iter->first;
+            pBestMatchedMcPfo = iter->first;
         }
     }
 }

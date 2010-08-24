@@ -44,15 +44,27 @@ StatusCode PandoraApiImpl::CreateObject<PandoraApi::TrackParameters>(const Pando
 }
 
 template <>
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::MCParticleParameters>(const PandoraApi::MCParticleParameters &mcParticleParameters) const
+{
+    return m_pPandora->m_pMCManager->CreateMCParticle(mcParticleParameters);
+}
+
+template <>
 StatusCode PandoraApiImpl::CreateObject<PandoraApi::GeometryParameters>(const PandoraApi::GeometryParameters &geometryParameters) const
 {
     return m_pPandora->m_pGeometryHelper->Initialize(geometryParameters);
 }
 
 template <>
-StatusCode PandoraApiImpl::CreateObject<PandoraApi::MCParticleParameters>(const PandoraApi::MCParticleParameters &mcParticleParameters) const
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::BoxGapParameters>(const PandoraApi::BoxGapParameters &gapParameters) const
 {
-    return m_pPandora->m_pMCManager->CreateMCParticle(mcParticleParameters);
+    return m_pPandora->m_pGeometryHelper->CreateBoxGap(gapParameters);
+}
+
+template <>
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::ConcentricGapParameters>(const PandoraApi::ConcentricGapParameters &gapParameters) const
+{
+    return m_pPandora->m_pGeometryHelper->CreateConcentricGap(gapParameters);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

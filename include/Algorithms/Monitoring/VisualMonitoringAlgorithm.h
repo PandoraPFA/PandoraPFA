@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/include/Algorithms/Monitoring/VisualMonitoringAlgorithm.h
  * 
- *  @brief  Header file for the energy monitoring algorithm
+ *  @brief  Header file for the visual monitoring algorithm class
  * 
  *  $Log: $
  */

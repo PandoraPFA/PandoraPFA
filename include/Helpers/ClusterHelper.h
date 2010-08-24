@@ -42,7 +42,7 @@ public:
          *  @param  cellThickness the thickness of the cell in which the point was recorded
          *  @param  pseudoLayer the pseudolayer in which the point was recorded
          */
-        ClusterFitPoint(const CartesianVector &position, float cellThickness, PseudoLayer pseudoLayer);
+        ClusterFitPoint(const CartesianVector &position, const float cellThickness, const PseudoLayer pseudoLayer);
 
         /**
          *  @brief  Get the position vector of the fit point
@@ -131,7 +131,7 @@ public:
          * 
          *  @param  successFlag the fit success flag
          */
-        void SetSuccessFlag(bool successFlag);
+        void SetSuccessFlag(const bool successFlag);
 
         /**
          *  @brief  Set the fit direction
@@ -152,21 +152,21 @@ public:
          * 
          *  @param  chi2 the fit chi2
          */
-        void SetChi2(float chi2);
+        void SetChi2(const float chi2);
 
         /**
          *  @brief  Set the fit rms
          * 
          *  @param  rms the fit rms
          */
-        void SetRms(float rms);
+        void SetRms(const float rms);
 
         /**
          *  @brief  Set the fit direction cosine w.r.t. the radial direction
          * 
          *  @param  radialDirectionCosine the fit direction cosine w.r.t. the radial direction
          */
-        void SetRadialDirectionCosine(float radialDirectionCosine);
+        void SetRadialDirectionCosine(const float radialDirectionCosine);
 
         /**
          *  @brief  Reset the cluster fit result
@@ -189,7 +189,7 @@ public:
      *  @param  maxOccupiedLayers the maximum number of occupied pseudo layers to consider
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitStart(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult);
+    static StatusCode FitStart(const Cluster *const pCluster, const unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Fit points in last n occupied pseudolayers of a cluster
@@ -198,7 +198,7 @@ public:
      *  @param  maxOccupiedLayers the maximum number of occupied pseudo layers to consider
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitEnd(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult);
+    static StatusCode FitEnd(const Cluster *const pCluster, const unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Fit all cluster points within the specified (inclusive) pseudolayer range
@@ -208,7 +208,8 @@ public:
      *  @param  endLayer the end of the pseudolayer range
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitLayers(const Cluster *const pCluster, PseudoLayer startLayer, PseudoLayer endLayer, ClusterFitResult &clusterFitResult);
+    static StatusCode FitLayers(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
+        ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Fit all points in a cluster
@@ -246,7 +247,7 @@ public:
      *  @return the closest distance of approach
      */
     static float GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
-        PseudoLayer startLayer, PseudoLayer endLayer);
+        const PseudoLayer startLayer, const PseudoLayer endLayer);
 
     /**
      *  @brief  Get smallest distance between pairs of hits in two clusters
@@ -269,7 +270,7 @@ public:
      *  @return the closest distance of approach
      */
     static float GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
-        PseudoLayer startLayer, pandora::PseudoLayer endLayer);
+        const PseudoLayer startLayer, const PseudoLayer endLayer);
 
     /**
      *  @brief  Get the closest distance between layer centroid positions in two overlapping clusters
@@ -299,8 +300,8 @@ public:
      *  @param  parallelDistanceCut maximum allowed projection of track-cluster separation along track direction
      *  @param  trackClusterDistance to receive the track cluster distance
      */
-    static StatusCode GetTrackClusterDistance(const pandora::Track *const pTrack, const pandora::Cluster *const pCluster,
-        const pandora::PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance);
+    static StatusCode GetTrackClusterDistance(const Track *const pTrack, const Cluster *const pCluster, const PseudoLayer maxSearchLayer,
+        const float parallelDistanceCut, float &trackClusterDistance);
 
     /**
      *  @brief  Get the distance of closest approach between a specified track state and the hits within a cluster.
@@ -312,8 +313,8 @@ public:
      *  @param  parallelDistanceCut maximum allowed projection of track-cluster separation along track direction
      *  @param  trackClusterDistance to receive the track cluster distance
      */
-    static StatusCode GetTrackClusterDistance(const pandora::TrackState &trackState, const pandora::Cluster *const pCluster,
-        const pandora::PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance);
+    static StatusCode GetTrackClusterDistance(const TrackState &trackState, const Cluster *const pCluster, const PseudoLayer maxSearchLayer,
+        const float parallelDistanceCut, float &trackClusterDistance);
 
     /**
      *  @brief  Whether a cluster can be merged with another. Uses simple suggested criteria, including cluster photon id flag
@@ -325,7 +326,7 @@ public:
      * 
      *  @return boolean
      */
-    static bool CanMergeCluster(const Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms);
+    static bool CanMergeCluster(const Cluster *const pCluster, const float minMipFraction, const float maxAllHitsFitRms);
 
     /**
      *  @brief  Whether a cluster should be considered as leaving the calorimeters, leading to leakage of its energy
@@ -335,6 +336,20 @@ public:
      *  @return boolean
      */
     static bool IsClusterLeavingDetector(const Cluster *const pCluster);
+
+    /**
+     *  @brief  Whether a linear fit to a cluster crosses a registered gap region. Only the region between the startlayer and
+     *          endlayer is considered in the fit and in the comparison with registered gap regions.
+     * 
+     *  @param  pCluster address of the cluster
+     *  @param  startLayer the start layer (adjusted to maximum of specified layer and cluster inner layer)
+     *  @param  endLayer the end layer (adjusted to minimum of specified layer and cluster outer layer)
+     *  @param  nSamplingPoints number of points at which to sample the fit within the specified layer region
+     * 
+     *  @return boolean
+     */
+    static bool DoesClusterCrossGapRegion(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
+        const unsigned int nSamplingPoints = 50);
 
     /**
      *  @brief  Get the layer at which shower can be considered to start; this function evaluates the the starting point of
@@ -355,7 +370,7 @@ private:
      *  @param  sinTheta sine of coordinate rotation angle
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitBarrelPoints(const ClusterFitPointList &clusterFitPointList, float cosTheta, float sinTheta,
+    static StatusCode FitBarrelPoints(const ClusterFitPointList &clusterFitPointList, const float cosTheta, const float sinTheta,
         ClusterFitResult &clusterFitResult);
 
     /**
@@ -365,7 +380,7 @@ private:
      *  @param  isPositiveZ whether fit is to endcap in region of positive or negative z coordinate
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, bool isPositiveZ, ClusterFitResult &clusterFitResult);
+    static StatusCode FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, const bool isPositiveZ, ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Read the cluster helper settings
@@ -495,7 +510,7 @@ inline void ClusterHelper::ClusterFitResult::SetIntercept(const CartesianVector 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void ClusterHelper::ClusterFitResult::SetChi2(float chi2)
+inline void ClusterHelper::ClusterFitResult::SetChi2(const float chi2)
 {
     if (!(m_chi2 = chi2))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -503,7 +518,7 @@ inline void ClusterHelper::ClusterFitResult::SetChi2(float chi2)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void ClusterHelper::ClusterFitResult::SetRms(float rms)
+inline void ClusterHelper::ClusterFitResult::SetRms(const float rms)
 {
     if (!(m_rms = rms))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -511,7 +526,7 @@ inline void ClusterHelper::ClusterFitResult::SetRms(float rms)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void ClusterHelper::ClusterFitResult::SetRadialDirectionCosine(float radialDirectionCosine)
+inline void ClusterHelper::ClusterFitResult::SetRadialDirectionCosine(const float radialDirectionCosine)
 {
     if (!(m_dirCosR = radialDirectionCosine))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);

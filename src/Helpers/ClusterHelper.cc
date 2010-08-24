@@ -21,7 +21,7 @@
 namespace pandora
 {
 
-StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult)
+StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, const unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult)
 {
     if (maxOccupiedLayers < 2)
         return STATUS_CODE_INVALID_PARAMETER;
@@ -54,7 +54,7 @@ StatusCode ClusterHelper::FitStart(const Cluster *const pCluster, unsigned int m
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult)
+StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, const unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult)
 {
     if (maxOccupiedLayers < 2)
         return STATUS_CODE_INVALID_PARAMETER;
@@ -87,7 +87,8 @@ StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, unsigned int max
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::FitLayers(const Cluster *const pCluster, PseudoLayer startLayer, PseudoLayer endLayer, ClusterFitResult &clusterFitResult)
+StatusCode ClusterHelper::FitLayers(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
+    ClusterFitResult &clusterFitResult)
 {
     if (startLayer >= endLayer)
         return STATUS_CODE_INVALID_PARAMETER;
@@ -187,7 +188,7 @@ StatusCode ClusterHelper::FitPoints(const ClusterFitPointList &clusterFitPointLi
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitPointList, float cosTheta, float sinTheta,
+StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitPointList, const float cosTheta, const float sinTheta,
     ClusterFitResult &clusterFitResult)
 {
     // Extract the data
@@ -278,7 +279,7 @@ StatusCode ClusterHelper::FitBarrelPoints(const ClusterFitPointList &clusterFitP
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, bool isPositiveZ, ClusterFitResult &clusterFitResult)
+StatusCode ClusterHelper::FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, const bool isPositiveZ, ClusterFitResult &clusterFitResult)
 {
     // Extract the data
     double sumX(0.), sumY(0.), sumZ(0.);
@@ -381,7 +382,7 @@ StatusCode ClusterHelper::GetFitResultsClosestApproach(const ClusterHelper::Clus
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 float ClusterHelper::GetDistanceToClosestHit(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
-    PseudoLayer startLayer, PseudoLayer endLayer)
+    const PseudoLayer startLayer, const PseudoLayer endLayer)
 {
     if (startLayer > endLayer)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -448,7 +449,7 @@ float ClusterHelper::GetDistanceToClosestHit(const Cluster *const pClusterI, con
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 float ClusterHelper::GetDistanceToClosestCentroid(const ClusterFitResult &clusterFitResult, const Cluster *const pCluster,
-    PseudoLayer startLayer, PseudoLayer endLayer)
+    const PseudoLayer startLayer, const PseudoLayer endLayer)
 {
     if (startLayer > endLayer)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -558,8 +559,8 @@ StatusCode ClusterHelper::GetClosestIntraLayerDistance(const Cluster *const pClu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, const Cluster *const pCluster,
-    const PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance)
+StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, const Cluster *const pCluster, const PseudoLayer maxSearchLayer,
+    const float parallelDistanceCut, float &trackClusterDistance)
 {
     if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
         return STATUS_CODE_NOT_FOUND;
@@ -594,8 +595,8 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, const Cluster *const pCluster,
-    const PseudoLayer maxSearchLayer, float parallelDistanceCut, float &trackClusterDistance)
+StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, const Cluster *const pCluster, const PseudoLayer maxSearchLayer,
+    const float parallelDistanceCut, float &trackClusterDistance)
 {
     if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
         return STATUS_CODE_NOT_FOUND;
@@ -639,7 +640,7 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ClusterHelper::CanMergeCluster(const Cluster *const pCluster, float minMipFraction, float maxAllHitsFitRms)
+bool ClusterHelper::CanMergeCluster(const Cluster *const pCluster, const float minMipFraction, const float maxAllHitsFitRms)
 {
     if (0 == pCluster->GetNCaloHits())
         return false;
@@ -692,6 +693,42 @@ bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
         ((nOccupiedOuterLayers == m_leavingShowerLikeNOccupiedLayers) && (hadronicEnergyInOuterLayers > m_leavingShowerLikeEnergyInOuterLayers)))
     {
         return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ClusterHelper::DoesClusterCrossGapRegion(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
+    const unsigned int nSamplingPoints)
+{
+    const PseudoLayer fitStartLayer(std::max(startLayer, pCluster->GetInnerPseudoLayer()));
+    const PseudoLayer fitEndLayer(std::min(endLayer, pCluster->GetOuterPseudoLayer()));
+
+    if (fitStartLayer > fitEndLayer)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    ClusterFitResult fitResult;
+
+    if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, fitStartLayer, fitEndLayer, fitResult))
+        return false;
+
+    const float startDistance((pCluster->GetCentroid(fitStartLayer) - fitResult.GetIntercept()).GetDotProduct(fitResult.GetDirection()));
+    const float endDistance((pCluster->GetCentroid(fitEndLayer) - fitResult.GetIntercept()).GetDotProduct(fitResult.GetDirection()));
+
+    const CartesianVector startPosition(fitResult.GetIntercept() + fitResult.GetDirection() * startDistance);
+    const CartesianVector endPosition(fitResult.GetIntercept() + fitResult.GetDirection() * endDistance);
+
+    const CartesianVector positionDifference(endPosition - startPosition);
+    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+
+    for (unsigned int i = 0; i < nSamplingPoints; ++i)
+    {
+        const CartesianVector fitPosition(startPosition + (positionDifference * (static_cast<float>(i) / static_cast<float>(nSamplingPoints))));
+
+        if (pGeometryHelper->IsInGapRegion(fitPosition))
+            return true;
     }
 
     return false;
@@ -796,7 +833,7 @@ ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position, float cellSize, PseudoLayer pseudoLayer) :
+ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position, const float cellSize, const PseudoLayer pseudoLayer) :
     m_position(position),
     m_cellSize(cellSize),
     m_pseudoLayer(pseudoLayer)

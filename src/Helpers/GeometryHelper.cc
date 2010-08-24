@@ -22,7 +22,7 @@ GeometryHelper* GeometryHelper::m_pGeometryHelper = NULL;
 
 GeometryHelper *GeometryHelper::GetInstance()
 {
-    if(!m_instanceFlag)
+    if (!m_instanceFlag)
     {
         m_pGeometryHelper = new GeometryHelper();
         m_instanceFlag = true;
@@ -42,6 +42,11 @@ GeometryHelper::GeometryHelper() :
 
 GeometryHelper::~GeometryHelper()
 {
+    for (GapList::const_iterator iter = m_gapList.begin(), iterEnd = m_gapList.end(); iter != iterEnd; ++iter)
+        delete *iter;
+
+    m_gapList.clear();
+    m_instanceFlag = false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,56 +118,6 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters,
-    LayerPositionList *const pLayerPositionList)
-{
-    m_innerRCoordinate      = inputParameters.m_innerRCoordinate.Get();
-    m_innerZCoordinate      = inputParameters.m_innerZCoordinate.Get();
-    m_innerPhiCoordinate    = inputParameters.m_innerPhiCoordinate.Get();
-    m_innerSymmetryOrder    = inputParameters.m_innerSymmetryOrder.Get();
-    m_outerRCoordinate      = inputParameters.m_outerRCoordinate.Get();
-    m_outerZCoordinate      = inputParameters.m_outerZCoordinate.Get();
-    m_outerPhiCoordinate    = inputParameters.m_outerPhiCoordinate.Get();
-    m_outerSymmetryOrder    = inputParameters.m_outerSymmetryOrder.Get();
-    m_nLayers               = inputParameters.m_nLayers.Get();
-
-    if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
-    {
-        std::cout << "GeometryHelper: Invalid number of entries in layer parameters list." << std::endl;
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-    }
-
-    float cumulativeRadiationLengths(0.);
-    float cumulativeInteractionLengths(0.);
-
-    for (PandoraApi::GeometryParameters::LayerParametersList::const_iterator iter = inputParameters.m_layerParametersList.begin();
-        iter != inputParameters.m_layerParametersList.end(); ++iter)
-    {
-        LayerParameters layerParameters;
-        layerParameters.m_closestDistanceToIp = iter->m_closestDistanceToIp.Get();
-
-        const float nRadiationLengths(iter->m_nRadiationLengths.Get());
-        const float nInteractionLengths(iter->m_nInteractionLengths.Get());
-
-        cumulativeRadiationLengths += nRadiationLengths;
-        cumulativeInteractionLengths += nInteractionLengths;
-
-        layerParameters.m_nRadiationLengths = nRadiationLengths;
-        layerParameters.m_nInteractionLengths = nInteractionLengths;
-        layerParameters.m_cumulativeRadiationLengths = cumulativeRadiationLengths;
-        layerParameters.m_cumulativeInteractionLengths = cumulativeInteractionLengths;
-
-        m_layerParametersList.push_back(layerParameters);
-
-        if (NULL != pLayerPositionList)
-            pLayerPositionList->push_back(layerParameters.m_closestDistanceToIp);
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector) const
 {
@@ -170,7 +125,7 @@ PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector
     static const GeometryHelper::SubDetectorParameters eCalEndCapParameters = this->GetECalEndCapParameters();
 
     const float zCoordinate = std::fabs(positionVector.GetZ());
-    const float radius = this->GetMaximumRadius(positionVector.GetX(), positionVector.GetY());
+    const float radius = this->GetMaximumECalBarrelRadius(positionVector.GetX(), positionVector.GetY());
 
     PseudoLayer pseudoLayer;
 
@@ -207,8 +162,8 @@ bool GeometryHelper::IsOutsideECal(const CartesianVector &position) const
     if (position.GetZ() > eCalEndCapOuterZCoordinate)
         return true;
 
-    static const float eCalBarrelMaxRadius(this->GetMaximumRadius(0.f, eCalBarrelOuterRCoordinate));
-    const float maxRadius(this->GetMaximumRadius(position.GetX(), position.GetY()));
+    static const float eCalBarrelMaxRadius(this->GetMaximumECalBarrelRadius(0.f, eCalBarrelOuterRCoordinate));
+    const float maxRadius(this->GetMaximumECalBarrelRadius(position.GetX(), position.GetY()));
 
     if (maxRadius > eCalBarrelMaxRadius)
         return true;
@@ -226,8 +181,9 @@ bool GeometryHelper::IsOutsideHCal(const CartesianVector &position) const
     if (position.GetZ() > hCalEndCapOuterZCoordinate)
         return true;
 
-    static const float hCalBarrelMaxRadius(this->GetMaximumRadius(0.f, hCalBarrelOuterRCoordinate));
-    const float maxRadius(this->GetMaximumRadius(position.GetX(), position.GetY()));
+    // TODO Review usage of ecal barrel inner symmetry here
+    static const float hCalBarrelMaxRadius(this->GetMaximumECalBarrelRadius(0.f, hCalBarrelOuterRCoordinate));
+    const float maxRadius(this->GetMaximumECalBarrelRadius(position.GetX(), position.GetY()));
 
     if (maxRadius > hCalBarrelMaxRadius)
         return true;
@@ -260,6 +216,63 @@ bool GeometryHelper::IsInECalGapRegion(const CartesianVector &position) const
     }
 
     return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::IsInGapRegion(const CartesianVector &position) const
+{
+    for (GapList::const_iterator iter = m_gapList.begin(), iterEnd = m_gapList.end(); iter != iterEnd; ++iter)
+    {
+        if ((*iter)->IsInGap(position))
+            return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::CreateBoxGap(const PandoraApi::BoxGap::Parameters &gapParameters)
+{
+    try
+    {
+        Gap *pGap = NULL;
+        pGap = new BoxGap(gapParameters);
+
+        if (NULL == pGap)
+            return STATUS_CODE_FAILURE;
+
+        m_gapList.push_back(pGap);
+        return STATUS_CODE_SUCCESS;
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create box gap: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::CreateConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters)
+{
+    try
+    {
+        Gap *pGap = NULL;
+        pGap = new ConcentricGap(gapParameters);
+
+        if (NULL == pGap)
+            return STATUS_CODE_FAILURE;
+
+        m_gapList.push_back(pGap);
+        return STATUS_CODE_SUCCESS;
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create concentric gap: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -336,7 +349,7 @@ StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &laye
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float GeometryHelper::GetMaximumRadius(float x, float y) const
+float GeometryHelper::GetMaximumECalBarrelRadius(const float x, const float y) const
 {
     static const unsigned int symmetryOrder = GetECalBarrelParameters().GetInnerSymmetryOrder();
     static const float phi0 = GetECalBarrelParameters().GetInnerPhiCoordinate();
@@ -369,6 +382,161 @@ float GeometryHelper::GetMaximumRadius(float x, float y) const
     }
 
     return maxRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float GeometryHelper::GetMaximumPolygonRadius(const float x, const float y, const unsigned int symmetryOrder, const float phi0) const
+{
+    static const float twoPi = static_cast<float>(2. * std::acos(-1.));
+
+    if (symmetryOrder <= 2)
+        return std::sqrt((x * x) + (y * y));
+
+    float maxRadius(0.);
+    for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)
+    {
+        const float phi = phi0 + ((twoPi * static_cast<float>(iSymmetry)) / static_cast<float>(symmetryOrder));
+        const float radius((x * std::cos(phi)) + (y * std::sin(phi)));
+
+        if (radius > maxRadius)
+            maxRadius = radius;
+    }
+
+    return maxRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters,
+    LayerPositionList *const pLayerPositionList)
+{
+    m_innerRCoordinate      = inputParameters.m_innerRCoordinate.Get();
+    m_innerZCoordinate      = inputParameters.m_innerZCoordinate.Get();
+    m_innerPhiCoordinate    = inputParameters.m_innerPhiCoordinate.Get();
+    m_innerSymmetryOrder    = inputParameters.m_innerSymmetryOrder.Get();
+    m_outerRCoordinate      = inputParameters.m_outerRCoordinate.Get();
+    m_outerZCoordinate      = inputParameters.m_outerZCoordinate.Get();
+    m_outerPhiCoordinate    = inputParameters.m_outerPhiCoordinate.Get();
+    m_outerSymmetryOrder    = inputParameters.m_outerSymmetryOrder.Get();
+    m_nLayers               = inputParameters.m_nLayers.Get();
+
+    if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
+    {
+        std::cout << "GeometryHelper: Invalid number of entries in layer parameters list." << std::endl;
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    }
+
+    float cumulativeRadiationLengths(0.);
+    float cumulativeInteractionLengths(0.);
+
+    for (PandoraApi::GeometryParameters::LayerParametersList::const_iterator iter = inputParameters.m_layerParametersList.begin();
+        iter != inputParameters.m_layerParametersList.end(); ++iter)
+    {
+        LayerParameters layerParameters;
+        layerParameters.m_closestDistanceToIp = iter->m_closestDistanceToIp.Get();
+
+        const float nRadiationLengths(iter->m_nRadiationLengths.Get());
+        const float nInteractionLengths(iter->m_nInteractionLengths.Get());
+
+        cumulativeRadiationLengths += nRadiationLengths;
+        cumulativeInteractionLengths += nInteractionLengths;
+
+        layerParameters.m_nRadiationLengths = nRadiationLengths;
+        layerParameters.m_nInteractionLengths = nInteractionLengths;
+        layerParameters.m_cumulativeRadiationLengths = cumulativeRadiationLengths;
+        layerParameters.m_cumulativeInteractionLengths = cumulativeInteractionLengths;
+
+        m_layerParametersList.push_back(layerParameters);
+
+        if (NULL != pLayerPositionList)
+            pLayerPositionList->push_back(layerParameters.m_closestDistanceToIp);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+GeometryHelper::Gap::~Gap()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+GeometryHelper::BoxGap::BoxGap(const PandoraApi::BoxGap::Parameters &gapParameters) :
+    m_vertex(gapParameters.m_vertex.Get()),
+    m_side1(gapParameters.m_side1.Get()),
+    m_side2(gapParameters.m_side2.Get()),
+    m_side3(gapParameters.m_side3.Get())
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::BoxGap::IsInGap(const CartesianVector &positionVector) const
+{
+    const CartesianVector relativePosition(positionVector - m_vertex);
+
+    const float projection1(relativePosition.GetDotProduct(m_side1.GetUnitVector()));
+
+    if ((projection1 < 0.f) || (projection1 > m_side1.GetMagnitude()))
+        return false;
+
+    const float projection2(relativePosition.GetDotProduct(m_side2.GetUnitVector()));
+
+    if ((projection2 < 0.f) || (projection2 > m_side2.GetMagnitude()))
+        return false;
+
+    const float projection3(relativePosition.GetDotProduct(m_side3.GetUnitVector()));
+
+    if ((projection3 < 0.f) || (projection3 > m_side3.GetMagnitude()))
+        return false;
+
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+GeometryHelper::ConcentricGap::ConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters) :
+    m_minZCoordinate(gapParameters.m_minZCoordinate.Get()),
+    m_maxZCoordinate(gapParameters.m_maxZCoordinate.Get()),
+    m_innerRCoordinate(gapParameters.m_innerRCoordinate.Get()),
+    m_innerPhiCoordinate(gapParameters.m_innerPhiCoordinate.Get()),
+    m_innerSymmetryOrder(gapParameters.m_innerSymmetryOrder.Get()),
+    m_outerRCoordinate(gapParameters.m_outerRCoordinate.Get()),
+    m_outerPhiCoordinate(gapParameters.m_outerPhiCoordinate.Get()),
+    m_outerSymmetryOrder(gapParameters.m_outerSymmetryOrder.Get())
+{
+    if ((0 == m_innerSymmetryOrder) || (0 == m_outerSymmetryOrder))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::ConcentricGap::IsInGap(const CartesianVector &positionVector) const
+{
+    const float z(positionVector.GetZ());
+
+    if ((z < m_minZCoordinate) || (z > m_maxZCoordinate))
+        return false;
+
+    const float x(positionVector.GetX()), y(positionVector.GetY());
+    const float r(std::sqrt(x * x + y * y));
+
+    if (r < m_innerRCoordinate)
+        return false;
+
+    static const float pi(std::acos(-1.));
+
+    if (r > m_outerRCoordinate / std::cos(pi / static_cast<float>(m_outerSymmetryOrder)))
+        return false;
+
+    // TODO Complete IsInGap functionality
+
+    return true;
 }
 
 } // namespace pandora

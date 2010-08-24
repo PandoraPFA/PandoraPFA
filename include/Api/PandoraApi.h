@@ -149,22 +149,46 @@ public:
         SubDetectorParameters           m_hCalEndCapParameters;     ///< The hcal end cap parameters
         SubDetectorParameters           m_muonBarrelParameters;     ///< the muon detector barrel parameters
         SubDetectorParameters           m_muonEndCapParameters;     ///< The muon detector end cap parameters
-
         pandora::InputFloat             m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
         pandora::InputFloat             m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
         pandora::InputFloat             m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
-
         pandora::InputFloat             m_coilInnerRadius;          ///< The coil inner radius, units mm
         pandora::InputFloat             m_coilOuterRadius;          ///< The coil outer radius, units mm
         pandora::InputFloat             m_coilZExtent;              ///< The coil z extent, units mm
         pandora::InputFloat             m_bField;                   ///< The detector magnetic field (assumed constant), units Tesla
-
         pandora::InputFloat             m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
         pandora::InputFloat             m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
         pandora::InputFloat             m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
         pandora::InputFloat             m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
-
         SubDetectorParametersMap        m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
+    };
+
+    /**
+     *  @brief  BoxGapParameters class
+     */
+    class BoxGapParameters
+    {
+    public:
+        pandora::InputCartesianVector   m_vertex;                   ///< Cartesian coordinates of a gap vertex, units mm
+        pandora::InputCartesianVector   m_side1;                    ///< Cartesian vector describing first side meeting vertex, units mm
+        pandora::InputCartesianVector   m_side2;                    ///< Cartesian vector describing second side meeting vertex, units mm
+        pandora::InputCartesianVector   m_side3;                    ///< Cartesian vector describing third side meeting vertex, units mm
+    };
+
+    /**
+     *  @brief  ConcentricGapParameters class
+     */
+    class ConcentricGapParameters
+    {
+    public:
+        pandora::InputFloat             m_minZCoordinate;           ///< Min cylindrical polar z coordinate, origin interaction point, units mm
+        pandora::InputFloat             m_maxZCoordinate;           ///< Max cylindrical polar z coordinate, origin interaction point, units mm
+        pandora::InputFloat             m_innerRCoordinate;         ///< Inner cylindrical polar r coordinate, origin interaction point, units mm
+        pandora::InputFloat             m_innerPhiCoordinate;       ///< Inner cylindrical polar phi coordinate (angle wrt cartesian x axis)
+        pandora::InputUInt              m_innerSymmetryOrder;       ///< Order of symmetry of the innermost edge of gap
+        pandora::InputFloat             m_outerRCoordinate;         ///< Outer cylindrical polar r coordinate, origin interaction point, units mm
+        pandora::InputFloat             m_outerPhiCoordinate;       ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
+        pandora::InputUInt              m_outerSymmetryOrder;       ///< Order of symmetry of the outermost edge of gap
     };
 
     // Objects available for construction by pandora
@@ -172,6 +196,8 @@ public:
     typedef ObjectCreationHelper<TrackParameters> Track;
     typedef ObjectCreationHelper<MCParticleParameters> MCParticle;
     typedef ObjectCreationHelper<GeometryParameters> Geometry;
+    typedef ObjectCreationHelper<BoxGapParameters> BoxGap;
+    typedef ObjectCreationHelper<ConcentricGapParameters> ConcentricGap;
 
     /**
      *  @brief  Process an event

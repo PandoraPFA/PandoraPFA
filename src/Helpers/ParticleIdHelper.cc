@@ -464,7 +464,13 @@ bool ParticleIdHelper::IsMuonFastDefault(const Cluster *const pCluster)
         return false;
 
     if ((nPseudoLayersHCal < m_muonIdMinHCalLayers) && (layersHCal.size() < m_muonIdMinHCalLayers))
-        return false;
+    {
+        if ((nPseudoLayersHCal <= 3) || (nMuonHits <= 2)) // TODO Remove hardcoded numbers
+            return false;
+
+        if (!ClusterHelper::DoesClusterCrossGapRegion(pCluster, *(pseudoLayersHCal.begin()), *(pseudoLayersHCal.rbegin())))
+            return false;
+    }
 
     // Calculate energies per layer
     float energyECalDCos(0.), nHitsPerLayerECal(0.), nHitsPerLayerHCal(0.), mipFractionECal(0.), mipFractionHCal(0.);

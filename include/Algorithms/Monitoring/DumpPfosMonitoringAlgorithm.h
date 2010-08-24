@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/include/Algorithms/Monitoring/DumpPfosMonitoringAlgorithm.h
  * 
- *  @brief  Header file for the energy monitoring algorithm
+ *  @brief  Header file for the dump pfos monitoring algorithm class
  * 
  *  $Log: $
  */
@@ -179,10 +179,10 @@ private:
      *  @param  fCharged
      *  @param  fPhoton
      *  @param  fneutral
-     *  @param  bestMatchedMcPfo
+     *  @param  pBestMatchedMcPfo
      */
     void ClusterEnergyFractions(const pandora::Cluster *pCluster, float &fCharged, float &fPhoton, float &fneutral,
-        const pandora::MCParticle *&bestMatchedMcPfo) const;
+        const pandora::MCParticle *&pBestMatchedMcPfo) const;
 
     typedef std::set<const pandora::MCParticle*> MCParticleList;
     typedef std::vector<pandora::ParticleFlowObject*> ParticleFlowObjectVector;

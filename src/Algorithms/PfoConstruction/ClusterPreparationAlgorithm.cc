@@ -20,7 +20,10 @@ StatusCode ClusterPreparationAlgorithm::Run()
         const ClusterList *pClusterList = NULL;
 
         if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, *iter, pClusterList))
-            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, PandoraContentApi::SaveClusterList(*this, *iter, m_finalPfoListName));
+        {
+            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, PandoraContentApi::SaveClusterList(*this,
+                *iter, m_finalPfoListName));
+        }
     }
 
     // Save the filtered list and set it to be the current list for next algorithms

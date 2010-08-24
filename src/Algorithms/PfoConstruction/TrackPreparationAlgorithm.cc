@@ -22,7 +22,9 @@ StatusCode TrackPreparationAlgorithm::Run()
         const TrackList *pTrackList = NULL;
 
         if (STATUS_CODE_SUCCESS == PandoraContentApi::GetTrackList(*this, *iter, pTrackList))
+        {
             candidateTrackList.insert(pTrackList->begin(), pTrackList->end());
+        }
     }
 
     // Set this list of candidate pfo tracks to be the current track list for a number of track-cluster association algorithms

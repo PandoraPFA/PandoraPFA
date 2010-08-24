@@ -148,6 +148,75 @@ public:
     typedef std::map<std::string, SubDetectorParameters> SubDetectorParametersMap;
 
     /**
+     *  @brief  Gap class
+     */
+    class Gap
+    {
+    public:
+        /**
+         *  @brief  Destructor
+         */
+        virtual ~Gap();
+
+        /**
+         *  @brief  Whether a specified position lies within the gap
+         * 
+         *  @param  positionVector the position vector
+         * 
+         *  @return boolean
+         */
+        virtual bool IsInGap(const CartesianVector &positionVector) const = 0;
+    };
+
+    typedef std::vector<Gap *> GapList;
+
+    /**
+     *  @brief  BoxGap class
+     */
+    class BoxGap : public Gap
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  gapParameters the gap parameters
+         */
+        BoxGap(const PandoraApi::BoxGap::Parameters &gapParameters);
+
+        bool IsInGap(const CartesianVector &positionVector) const;
+
+        const CartesianVector   m_vertex;               ///< Cartesian coordinates of a gap vertex, units mm
+        const CartesianVector   m_side1;                ///< Cartesian vector describing first side meeting vertex, units mm
+        const CartesianVector   m_side2;                ///< Cartesian vector describing second side meeting vertex, units mm
+        const CartesianVector   m_side3;                ///< Cartesian vector describing third side meeting vertex, units mm
+    };
+
+    /**
+     *  @brief  ConcentricGap class
+     */
+    class ConcentricGap : public Gap
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  gapParameters the gap parameters
+         */
+        ConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
+
+        bool IsInGap(const CartesianVector &positionVector) const;
+
+        const float             m_minZCoordinate;       ///< Min cylindrical polar z coordinate, origin interaction point, units mm
+        const float             m_maxZCoordinate;       ///< Max cylindrical polar z coordinate, origin interaction point, units mm
+        const float             m_innerRCoordinate;     ///< Inner cylindrical polar r coordinate, origin interaction point, units mm
+        const float             m_innerPhiCoordinate;   ///< Inner cylindrical polar phi coordinate (angle wrt cartesian x axis)
+        const unsigned int      m_innerSymmetryOrder;   ///< Order of symmetry of the innermost edge of gap
+        const float             m_outerRCoordinate;     ///< Outer cylindrical polar r coordinate, origin interaction point, units mm
+        const float             m_outerPhiCoordinate;   ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
+        const unsigned int      m_outerSymmetryOrder;   ///< Order of symmetry of the outermost edge of gap
+    };
+
+    /**
      *  @brief  Get the geometry helper singleton
      */
     static GeometryHelper *GetInstance();
@@ -286,6 +355,13 @@ public:
     const SubDetectorParametersMap &GetAdditionalSubDetectors() const;
 
     /**
+     *  @brief  Get the list of gaps in the active detector volume
+     * 
+     *  @return The list of gaps in the active detector volume
+     */
+    const GapList &GetGapList() const;
+
+    /**
      *  @brief  Get the appropriate pseudolayer for a specified position vector
      * 
      *  @param  positionVector the specified position
@@ -322,14 +398,37 @@ public:
 
     /**
      *  @brief  Whether a specified position is in the gap region between the ecal barrel and ecal endcap
+     *
+     *  @param  position the specified position
+     *
+     *  @return boolean
+     */
+    bool IsInECalGapRegion(const CartesianVector &position) const;
+
+    /**
+     *  @brief  Whether a specified position is in a gap region
      * 
      *  @param  position the specified position
      * 
      *  @return boolean
      */
-    bool IsInECalGapRegion(const CartesianVector &position) const;
+    bool IsInGapRegion(const CartesianVector &position) const;
 
 private:
+    /**
+     *  @brief  Create box gap
+     * 
+     *  @param  gapParameters the gap parameters
+     */
+    StatusCode CreateBoxGap(const PandoraApi::BoxGap::Parameters &gapParameters);
+
+    /**
+     *  @brief  Create concentric gap
+     * 
+     *  @param  gapParameters the gap parameters
+     */
+    StatusCode CreateConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
+
     /**
      *  @brief  Find the layer number corresponding to a specified radial position in the barrel
      * 
@@ -337,7 +436,7 @@ private:
      *  @param  layer to receive the layer number
      *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
      */
-    StatusCode FindBarrelLayer(float radius, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
+    StatusCode FindBarrelLayer(const float radius, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
 
     /**
      *  @brief  Find the layer number corresponding to specified z position in the endcap
@@ -346,17 +445,29 @@ private:
      *  @param  layer to receive the layer number
      *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
      */
-    StatusCode FindEndCapLayer(float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
+    StatusCode FindEndCapLayer(const float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
 
     /**
-     *  @brief  Get the maximum radius
+     *  @brief  Get the maximum ecal barrel radius
      * 
      *  @param  x the cartesian x coordinate
      *  @param  y the cartesian y coordinate
      * 
      *  @return the maximum radius
      */
-    float GetMaximumRadius(float x, float y) const;
+    float GetMaximumECalBarrelRadius(const float x, const float y) const;
+
+    /**
+     *  @brief  Get the maximum polygon radius
+     * 
+     *  @param  x the cartesian x coordinate
+     *  @param  y the cartesian y coordinate
+     *  @param  symmetryOrder the symmetry order
+     *  @param  phi0 the angular offset
+     * 
+     *  @return the maximum radius
+     */
+    float GetMaximumPolygonRadius(const float x, const float y, const unsigned int symmetryOrder, const float phi0) const;
 
     /**
      *  @brief  Constructor
@@ -401,6 +512,7 @@ private:
     float                       m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
 
     SubDetectorParametersMap    m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
+    GapList                     m_gapList;                  ///< List of gaps in the active detector volume
 
     LayerPositionList           m_barrelLayerPositions;     ///< The barrel layer positions list
     LayerPositionList           m_endCapLayerPositions;     ///< The endcap layer positions list
@@ -596,6 +708,12 @@ inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditi
     return m_additionalSubDetectors;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const GeometryHelper::GapList &GeometryHelper::GetGapList() const
+{
+    return m_gapList;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

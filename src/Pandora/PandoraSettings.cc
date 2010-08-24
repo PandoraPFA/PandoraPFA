@@ -47,6 +47,7 @@ PandoraSettings::PandoraSettings() :
 
 PandoraSettings::~PandoraSettings()
 {
+    m_instanceFlag = false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
