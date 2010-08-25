@@ -169,6 +169,7 @@ public:
     };
 
     typedef std::vector<Gap *> GapList;
+    typedef std::vector<CartesianVector> VertexPointList;
 
     /**
      *  @brief  BoxGap class
@@ -214,6 +215,10 @@ public:
         const float             m_outerRCoordinate;     ///< Outer cylindrical polar r coordinate, origin interaction point, units mm
         const float             m_outerPhiCoordinate;   ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
         const unsigned int      m_outerSymmetryOrder;   ///< Order of symmetry of the outermost edge of gap
+
+    private:
+        VertexPointList         m_innerVertexPointList; ///< The vertex points of the inner polygon
+        VertexPointList         m_outerVertexPointList; ///< The vertex points of the outer polygon
     };
 
     /**
@@ -414,6 +419,29 @@ public:
      */
     bool IsInGapRegion(const CartesianVector &position) const;
 
+    /**
+     *  @brief  Populate list of polygon vertices, assuming regular polygon in XY plane at constant z coordinate
+     * 
+     *  @brief  rCoordinate polygon r coordinate
+     *  @brief  zCoordinate polygon z coordinate
+     *  @brief  phiCoordinate polygon phi coordinate
+     *  @brief  symmetryOrder polygon symmetry order
+     *  @param  vertexPointList to receive the vertex point list, with vertexPointList[symmetryOrder] = vertexPointList[0]
+     */
+    static void GetPolygonVertices(const float rCoordinate, const float zCoordinate, const float phiCoordinate,
+        const unsigned int symmetryOrder, VertexPointList &vertexPointList);
+
+    /**
+     *  @brief  Winding number test for a point in a 2D polygon in the XY plane (z coordinates are ignored)
+     * 
+     *  @param  point the test point
+     *  @param  vertexPointList vertex points of a polygon, with vertexPointList[symmetryOrder] = vertexPointList[0]
+     *  @param  symmetryOrder order of symmetry of polygon
+     * 
+     *  @return whether point is inside polygon
+     */
+    static bool IsIn2DPolygon(const CartesianVector &point, const VertexPointList &vertexPointList, const unsigned int symmetryOrder);
+
 private:
     /**
      *  @brief  Create box gap
@@ -458,18 +486,6 @@ private:
     float GetMaximumECalBarrelRadius(const float x, const float y) const;
 
     /**
-     *  @brief  Get the maximum polygon radius
-     * 
-     *  @param  x the cartesian x coordinate
-     *  @param  y the cartesian y coordinate
-     *  @param  symmetryOrder the symmetry order
-     *  @param  phi0 the angular offset
-     * 
-     *  @return the maximum radius
-     */
-    float GetMaximumPolygonRadius(const float x, const float y, const unsigned int symmetryOrder, const float phi0) const;
-
-    /**
      *  @brief  Constructor
      */
     GeometryHelper();
@@ -487,7 +503,6 @@ private:
     StatusCode Initialize(const PandoraApi::GeometryParameters &geometryParameters);
 
     bool                        m_isInitialized;            ///< Whether the geometry helper is initialized
-
     GeometryType                m_geometryType;             ///< The geometry type
 
     SubDetectorParameters       m_eCalBarrelParameters;     ///< The ecal barrel parameters
@@ -500,12 +515,10 @@ private:
     float                       m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
     float                       m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
     float                       m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
-
     float                       m_coilInnerRadius;          ///< The coil inner radius, units mm
     float                       m_coilOuterRadius;          ///< The coil outer radius, units mm
     float                       m_coilZExtent;              ///< The coil z extent, units mm
     float                       m_bField;                   ///< The detector magnetic field (assumed constant), units Tesla
-
     float                       m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
     float                       m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
     float                       m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths

@@ -233,6 +233,67 @@ bool GeometryHelper::IsInGapRegion(const CartesianVector &position) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void GeometryHelper::GetPolygonVertices(const float rCoordinate, const float zCoordinate, const float phiCoordinate,
+    const unsigned int symmetryOrder, VertexPointList &vertexPointList)
+{
+    if (0 == symmetryOrder)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    static const float pi(std::acos(-1.));
+    const float firstVertexAngle(pi / static_cast<float>(symmetryOrder));
+    const float rMax(rCoordinate / std::cos(firstVertexAngle));
+
+    for (unsigned int i = 0; i < symmetryOrder + 1; ++i)
+    {
+        const float phi = phiCoordinate + firstVertexAngle + (2. * pi * static_cast<float>(i) / static_cast<float>(symmetryOrder));
+        const float sinPhi(std::sin(phi));
+        const float cosPhi(std::cos(phi));
+        vertexPointList.push_back(CartesianVector(sinPhi * rMax, cosPhi * rMax, zCoordinate));
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::IsIn2DPolygon(const CartesianVector &point, const VertexPointList &vertexPointList, const unsigned int symmetryOrder)
+{
+    if (vertexPointList.size() != (symmetryOrder + 1))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    int windingNumber(0);
+
+    for (unsigned int i = 0; i < symmetryOrder; ++i)
+    {
+        if (vertexPointList[i].GetY() <= point.GetY())
+        {
+            if (vertexPointList[i + 1].GetY() > point.GetY())
+            {
+                // If point is left of edge, identify an upward crossing
+                if (((vertexPointList[i + 1].GetX() - vertexPointList[i].GetX()) * (point.GetY() - vertexPointList[i].GetY()) -
+                     (point.GetX() - vertexPointList[i].GetX()) * (vertexPointList[i + 1].GetY() - vertexPointList[i].GetY()) ) > 0.f)
+                {
+                    ++windingNumber;
+                }
+            }
+        }
+        else
+        {
+            if (vertexPointList[i + 1].GetY() <= point.GetY())
+            {
+                // If point is right of edge, identify a downward crossing
+                if (((vertexPointList[i + 1].GetX() - vertexPointList[i].GetX()) * (point.GetY() - vertexPointList[i].GetY()) -
+                     (point.GetX() - vertexPointList[i].GetX()) * (vertexPointList[i + 1].GetY() - vertexPointList[i].GetY()) ) < 0.f)
+                {
+                    --windingNumber;
+                }
+            }
+        }
+    }
+
+    return (0 != windingNumber);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode GeometryHelper::CreateBoxGap(const PandoraApi::BoxGap::Parameters &gapParameters)
 {
     try
@@ -385,28 +446,6 @@ float GeometryHelper::GetMaximumECalBarrelRadius(const float x, const float y) c
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-
-float GeometryHelper::GetMaximumPolygonRadius(const float x, const float y, const unsigned int symmetryOrder, const float phi0) const
-{
-    static const float twoPi = static_cast<float>(2. * std::acos(-1.));
-
-    if (symmetryOrder <= 2)
-        return std::sqrt((x * x) + (y * y));
-
-    float maxRadius(0.);
-    for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)
-    {
-        const float phi = phi0 + ((twoPi * static_cast<float>(iSymmetry)) / static_cast<float>(symmetryOrder));
-        const float radius((x * std::cos(phi)) + (y * std::sin(phi)));
-
-        if (radius > maxRadius)
-            maxRadius = radius;
-    }
-
-    return maxRadius;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters,
@@ -512,6 +551,10 @@ GeometryHelper::ConcentricGap::ConcentricGap(const PandoraApi::ConcentricGap::Pa
 {
     if ((0 == m_innerSymmetryOrder) || (0 == m_outerSymmetryOrder))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    const float centralZCoordinate(0.5f * (m_maxZCoordinate + m_minZCoordinate));
+    GeometryHelper::GetPolygonVertices(m_innerRCoordinate, centralZCoordinate, m_innerPhiCoordinate, m_innerSymmetryOrder, m_innerVertexPointList);
+    GeometryHelper::GetPolygonVertices(m_outerRCoordinate, centralZCoordinate, m_outerPhiCoordinate, m_outerSymmetryOrder, m_outerVertexPointList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -534,7 +577,11 @@ bool GeometryHelper::ConcentricGap::IsInGap(const CartesianVector &positionVecto
     if (r > m_outerRCoordinate / std::cos(pi / static_cast<float>(m_outerSymmetryOrder)))
         return false;
 
-    // TODO Complete IsInGap functionality
+    if (!GeometryHelper::IsIn2DPolygon(positionVector, m_outerVertexPointList, m_outerSymmetryOrder))
+        return false;
+
+    if (GeometryHelper::IsIn2DPolygon(positionVector, m_innerVertexPointList, m_innerSymmetryOrder))
+        return false;
 
     return true;
 }

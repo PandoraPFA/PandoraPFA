@@ -28,8 +28,6 @@ enum StatusCode
     STATUS_CODE_UNCHANGED
 };
 
-// TODO: check if __FUNCTION__ macro is available for all platforms and compilers
-
 #define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                \
     {                                                                                           \
         StatusCode statusCode = Command;                                                        \

@@ -527,7 +527,7 @@ bool ParticleIdHelper::IsMuonFastDefault(const Cluster *const pCluster)
         nECalCutsFailed++;
 
     // Calculate event shape variables for hcal
-    // TODO rms cut should be made wrt Kalman filter fit: cut makes no sense for tracks which loop back in hcal barrel
+    // ATTN rms cut should be made wrt Kalman filter fit: cut makes no sense for tracks which loop back in hcal barrel
     float hCalRms(std::numeric_limits<float>::max());
     int nHCalCutsFailed(0);
 

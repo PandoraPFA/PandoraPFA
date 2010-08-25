@@ -112,8 +112,6 @@ StatusCode PfoCreationAlgorithm::SetTrackBasedPfoParameters(Track *const pTrack,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-// TODO Use track energy at start, rather than dca. Complete particle id.
-
 StatusCode PfoCreationAlgorithm::SetSiblingTrackBasedPfoParameters(Track *const pTrack, PfoParameters &pfoParameters) const
 {
     int charge(0);
@@ -228,7 +226,6 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         pfoParameters.m_energy = clusterEnergy;
         pfoParameters.m_clusterList.insert(pCluster);
 
-        // TODO check position matches lcio::ClusterImpl::GetPosition()
         const CartesianVector positionWeight(pCluster->GetCentroid(pCluster->GetInnerPseudoLayer()).GetUnitVector());
 
         pfoParameters.m_momentum = CartesianVector(clusterEnergy * positionWeight.GetX(),
