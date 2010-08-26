@@ -145,6 +145,7 @@ StatusCode LoopingTracksAlgorithm::Run()
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestClusterFitRelation->GetCluster()));
             pBestClusterFitRelation->SetAsDefunct();
+            --iterI;
         }
     }
 

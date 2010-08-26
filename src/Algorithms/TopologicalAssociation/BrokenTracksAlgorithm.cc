@@ -60,6 +60,9 @@ StatusCode BrokenTracksAlgorithm::Run()
         Cluster *pParentCluster((*iterI)->GetCluster());
         const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetEndFitResult());
 
+        if (!parentClusterFitResult.IsFitSuccessful() || (parentClusterFitResult.GetRms() > m_maxFitRms))
+            continue;
+
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
         const CartesianVector parentOuterCentroid(pParentCluster->GetCentroid(parentOuterLayer));
 
@@ -79,17 +82,14 @@ StatusCode BrokenTracksAlgorithm::Run()
             if (pParentCluster == pDaughterCluster)
                 continue;
 
+            if (!daughterClusterFitResult.IsFitSuccessful() || (daughterClusterFitResult.GetRms() > m_maxFitRms))
+                continue;
+
             const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
             const CartesianVector daughterInnerCentroid(pDaughterCluster->GetCentroid(daughterInnerLayer));
 
-            // Cut on layer separation between the two clusters
-            if ((daughterInnerLayer <= parentOuterLayer) || ((daughterInnerLayer - parentOuterLayer) > m_maxLayerDifference))
-                continue;
-
-            // Also cut on physical separation between the two clusters
-            const CartesianVector centroidDifference(daughterInnerCentroid - parentOuterCentroid);
-
-            if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
+            // Basic cut on layer separation between the two clusters
+            if (daughterInnerLayer <= parentOuterLayer)
                 continue;
 
             // Check that cluster fit directions are compatible
@@ -110,6 +110,7 @@ StatusCode BrokenTracksAlgorithm::Run()
                 continue;
 
             // Cut on perpendicular distance between fit directions and centroid difference vector.
+            const CartesianVector centroidDifference(daughterInnerCentroid - parentOuterCentroid);
             const float trackMergePerpCut(isDaughterOutsideECal ? m_trackMergePerpCutHcal : m_trackMergePerpCutEcal);
 
             const CartesianVector parentCrossProduct(parentClusterFitResult.GetDirection().GetCrossProduct(centroidDifference));
@@ -120,6 +121,23 @@ StatusCode BrokenTracksAlgorithm::Run()
 
             if ((parentPerpendicularDistance > trackMergePerpCut) && (daughterPerpendicularDistance > trackMergePerpCut))
                 continue;
+
+            // More detailed (and potentially time-consuming) examination of cluster separation
+            const float centroidSeparation(centroidDifference.GetMagnitude());
+            if ((daughterInnerLayer - parentOuterLayer > m_maxLayerDifference) || (centroidSeparation > m_maxCentroidDifference))
+            {
+                if (!m_shouldPerformGapCheck)
+                    continue;
+
+                if (parentClusterFitResult.GetChi2() > m_maxChi2ForGapCheck || daughterClusterFitResult.GetChi2() > m_maxChi2ForGapCheck)
+                    continue;
+
+                if (!ClusterHelper::DoesFitCrossGapRegion(parentClusterFitResult, parentOuterCentroid, centroidSeparation) &&
+                    !ClusterHelper::DoesFitCrossGapRegion(daughterClusterFitResult, daughterInnerCentroid, -centroidSeparation))
+                {
+                    continue;
+                }
+            }
 
             const float distanceProduct(parentPerpendicularDistance * daughterPerpendicularDistance);
 
@@ -134,6 +152,7 @@ StatusCode BrokenTracksAlgorithm::Run()
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestClusterFitRelation->GetCluster()));
             pBestClusterFitRelation->SetAsDefunct();
+            --iterI;
         }
     }
 
@@ -176,14 +195,6 @@ StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxFitRms", m_maxFitRms));
 
-    m_maxLayerDifference = 10;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxLayerDifference", m_maxLayerDifference));
-
-    m_maxCentroidDifference = 2000.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxCentroidDifference", m_maxCentroidDifference));
-
     m_fitDirectionDotProductCut = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitDirectionDotProductCut", m_fitDirectionDotProductCut));
@@ -203,6 +214,22 @@ StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_trackMergePerpCutHcal = 75.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackMergePerpCutHcal", m_trackMergePerpCutHcal));
+
+    m_maxLayerDifference = 10;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxLayerDifference", m_maxLayerDifference));
+
+    m_maxCentroidDifference = 2000.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxCentroidDifference", m_maxCentroidDifference));
+
+    m_maxChi2ForGapCheck = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxChi2ForGapCheck", m_maxChi2ForGapCheck));
+
+    m_shouldPerformGapCheck = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldPerformGapCheck", m_shouldPerformGapCheck));
 
     return STATUS_CODE_SUCCESS;
 }

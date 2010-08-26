@@ -186,6 +186,7 @@ private:
     static float        m_muonIdMinTrackEnergy;             ///< Min energy of associated track for fast muon id
     static unsigned int m_muonIdMinECalLayers;              ///< Min number of ecal layers for fast muon id
     static unsigned int m_muonIdMinHCalLayers;              ///< Min number of hcal layers for fast muon id
+    static bool         m_muonIdShouldPerformGapCheck;      ///< Whether to perform muon recovery gap checks
     static unsigned int m_muonIdMinHCalLayersForGapCheck;   ///< Min number of hcal layers to perform muon recovery gap check
     static unsigned int m_muonIdMinMuonHitsForGapCheck;     ///< Min number of muon hits to perform muon recovery gap check
     static float        m_muonIdECalEnergyCut0;             ///< Parameter 0 for ecal energy cut: cut = par0 + (par1 * trackEnergy)

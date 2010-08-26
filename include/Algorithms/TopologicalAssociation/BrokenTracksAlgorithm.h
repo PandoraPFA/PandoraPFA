@@ -104,15 +104,18 @@ private:
     unsigned int    m_nEndLayersToFit;                  ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_maxFitRms;                        ///< The max value of the start/end fit rms for cluster to be considered
 
-    unsigned int    m_maxLayerDifference;               ///< The max difference (for merging) between cluster outer and inner pseudo layers
-    float           m_maxCentroidDifference;            ///< The max difference (for merging) between cluster outer and inner centroids
     float           m_fitDirectionDotProductCut;        ///< Cut on max value of dot product between cluster fit directions
-
     float           m_trackMergeCutEcal;                ///< ECal cut on closest distance of approach between two cluster fit results
     float           m_trackMergeCutHcal;                ///< HCal cut on closest distance of approach between two cluster fit results
 
     float           m_trackMergePerpCutEcal;            ///< ECal cut on perp. distance between fit directions and centroid difference
     float           m_trackMergePerpCutHcal;            ///< HCal cut on perp. distance between fit directions and centroid difference
+
+    unsigned int    m_maxLayerDifference;               ///< The max difference (for merging) between cluster outer and inner pseudo layers
+    float           m_maxCentroidDifference;            ///< The max difference (for merging) between cluster outer and inner centroids
+
+    bool            m_shouldPerformGapCheck;            ///< Whether to check if clusters pass through detector gaps
+    float           m_maxChi2ForGapCheck;               ///< The max chi2 to check whether clusters pass through detector gaps
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

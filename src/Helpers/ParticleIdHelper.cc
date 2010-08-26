@@ -465,7 +465,7 @@ bool ParticleIdHelper::IsMuonFastDefault(const Cluster *const pCluster)
 
     if ((nPseudoLayersHCal < m_muonIdMinHCalLayers) && (layersHCal.size() < m_muonIdMinHCalLayers))
     {
-        if ((nPseudoLayersHCal < m_muonIdMinHCalLayersForGapCheck) || (nMuonHits < m_muonIdMinMuonHitsForGapCheck))
+        if (!m_muonIdShouldPerformGapCheck || (nPseudoLayersHCal < m_muonIdMinHCalLayersForGapCheck) || (nMuonHits < m_muonIdMinMuonHitsForGapCheck))
             return false;
 
         if (!ClusterHelper::DoesClusterCrossGapRegion(pCluster, *(pseudoLayersHCal.begin()), *(pseudoLayersHCal.rbegin())))
@@ -658,6 +658,7 @@ unsigned int ParticleIdHelper::m_muonIdMaxInnerLayer = 10;
 float ParticleIdHelper::m_muonIdMinTrackEnergy = 2.5f;
 unsigned int ParticleIdHelper::m_muonIdMinECalLayers = 20;
 unsigned int ParticleIdHelper::m_muonIdMinHCalLayers = 20;
+bool ParticleIdHelper::m_muonIdShouldPerformGapCheck = true;
 unsigned int ParticleIdHelper::m_muonIdMinHCalLayersForGapCheck = 4;
 unsigned int ParticleIdHelper::m_muonIdMinMuonHitsForGapCheck = 3;
 float ParticleIdHelper::m_muonIdECalEnergyCut0 = 1.f;
@@ -849,6 +850,9 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle xmlHandle)
 
    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinHCalLayers", m_muonIdMinHCalLayers));
+
+   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MuonIdShouldPerformGapCheck", m_muonIdShouldPerformGapCheck));
 
    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinHCalLayersForGapCheck", m_muonIdMinHCalLayersForGapCheck));

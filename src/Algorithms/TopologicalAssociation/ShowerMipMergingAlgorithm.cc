@@ -112,6 +112,7 @@ StatusCode ShowerMipMergingAlgorithm::Run()
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, *bestDaughterClusterIter));
             *bestDaughterClusterIter = NULL;
+            --iterI;
         }
     }
 
