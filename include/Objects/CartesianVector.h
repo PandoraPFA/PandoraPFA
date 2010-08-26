@@ -145,6 +145,15 @@ public:
     void GetSphericalCoordinates(float &radius, float &phi, float &theta) const;
 
     /**
+     *  @brief  Get the cylindrical coordinates of the cartesian vector (x/y .. radius, z .. z)
+     * 
+     *  @param  radius the radius (x,y-plane) of the vector
+     *  @param  phi the azimuth of the vector
+     *  @param  z the z position of the vector
+     */
+    void GetCylindricalCoordinates(float &radius, float &phi, float &z) const;
+
+    /**
      *  @brief  Get a unit vector in the direction of the cartesian vector
      * 
      *  @return The unit vector
