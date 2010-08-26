@@ -329,6 +329,16 @@ public:
     static bool CanMergeCluster(const Cluster *const pCluster, const float minMipFraction, const float maxAllHitsFitRms);
 
     /**
+     *  @brief  Get the layer at which shower can be considered to start; this function evaluates the the starting point of
+     *          a series of "showerStartNonMipLayers" successive layers, each with mip fraction below "showerLayerMipFraction"
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return The shower start layer
+     */
+    static PseudoLayer GetShowerStartLayer(const Cluster *const pCluster);
+
+    /**
      *  @brief  Whether a cluster should be considered as leaving the calorimeters, leading to leakage of its energy
      * 
      *  @param  pCluster address of the cluster
@@ -352,14 +362,19 @@ public:
         const unsigned int nSamplingPoints = 50);
 
     /**
-     *  @brief  Get the layer at which shower can be considered to start; this function evaluates the the starting point of
-     *          a series of "showerStartNonMipLayers" successive layers, each with mip fraction below "showerLayerMipFraction"
+     *  @brief  Whether a linear fit crosses a registered gap region. The fit will be propagated through the specified distance
+     *          from its closest approach to the startPosition. Within this propagation, the fit will be sampled a specified number
+     *          of times and the resulting position compared with registered gap regions.
      * 
-     *  @param  pCluster address of the cluster
+     *  @param  clusterFitResult the clsuter fit result
+     *  @param  startPosition the propagation start position (adjusted to closest point on fit trajectory)
+     *  @param  propagationDistance the propagation distance, which can be negative for propagation towards the ip
+     *  @param  nSamplingPoints number of points at which to sample the fit within its propagation
      * 
-     *  @return The shower start layer
+     *  @return boolean
      */
-    static PseudoLayer GetShowerStartLayer(const Cluster *const pCluster);
+    static bool DoesFitCrossGapRegion(const ClusterFitResult &clusterFitResult, const CartesianVector &startPosition,
+        const float propagationDistance, const unsigned int nSamplingPoints = 50);
 
 private:
     /**

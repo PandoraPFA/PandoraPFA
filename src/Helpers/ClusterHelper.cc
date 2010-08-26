@@ -656,86 +656,6 @@ bool ClusterHelper::CanMergeCluster(const Cluster *const pCluster, const float m
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
-{
-    if (!pCluster->ContainsHitInOuterSamplingLayer())
-        return false;
-
-    if (pCluster->ContainsHitType(MUON))
-        return true;
-
-    // Examine occupancy and energy content of outer layers
-    const PseudoLayer outerLayer(pCluster->GetOuterPseudoLayer());
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-    if (m_leavingNOuterLayersToExamine > outerLayer)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    unsigned int nOccupiedOuterLayers(0);
-    float hadronicEnergyInOuterLayers(0.f);
-
-    for (PseudoLayer iLayer = outerLayer - m_leavingNOuterLayersToExamine; iLayer <= outerLayer; ++iLayer)
-    {
-        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
-
-        if (orderedCaloHitList.end() != iter)
-        {
-            nOccupiedOuterLayers++;
-
-            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-            {
-                hadronicEnergyInOuterLayers += (*hitIter)->GetHadronicEnergy();
-            }
-        }
-    }
-
-    if ((nOccupiedOuterLayers >= m_leavingMipLikeNOccupiedLayers) ||
-        ((nOccupiedOuterLayers == m_leavingShowerLikeNOccupiedLayers) && (hadronicEnergyInOuterLayers > m_leavingShowerLikeEnergyInOuterLayers)))
-    {
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool ClusterHelper::DoesClusterCrossGapRegion(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
-    const unsigned int nSamplingPoints)
-{
-    const PseudoLayer fitStartLayer(std::max(startLayer, pCluster->GetInnerPseudoLayer()));
-    const PseudoLayer fitEndLayer(std::min(endLayer, pCluster->GetOuterPseudoLayer()));
-
-    if (fitStartLayer > fitEndLayer)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    ClusterFitResult fitResult;
-
-    if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, fitStartLayer, fitEndLayer, fitResult))
-        return false;
-
-    const float startDistance((pCluster->GetCentroid(fitStartLayer) - fitResult.GetIntercept()).GetDotProduct(fitResult.GetDirection()));
-    const float endDistance((pCluster->GetCentroid(fitEndLayer) - fitResult.GetIntercept()).GetDotProduct(fitResult.GetDirection()));
-
-    const CartesianVector startPosition(fitResult.GetIntercept() + fitResult.GetDirection() * startDistance);
-    const CartesianVector endPosition(fitResult.GetIntercept() + fitResult.GetDirection() * endDistance);
-
-    const CartesianVector positionDifference(endPosition - startPosition);
-    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
-
-    for (unsigned int i = 0; i < nSamplingPoints; ++i)
-    {
-        const CartesianVector fitPosition(startPosition + (positionDifference * (static_cast<float>(i) / static_cast<float>(nSamplingPoints))));
-
-        if (pGeometryHelper->IsInGapRegion(fitPosition))
-            return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
 {
     const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
@@ -817,6 +737,96 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
     }
 
     return showerStartLayer;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
+{
+    if (!pCluster->ContainsHitInOuterSamplingLayer())
+        return false;
+
+    if (pCluster->ContainsHitType(MUON))
+        return true;
+
+    // Examine occupancy and energy content of outer layers
+    const PseudoLayer outerLayer(pCluster->GetOuterPseudoLayer());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    if (m_leavingNOuterLayersToExamine > outerLayer)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    unsigned int nOccupiedOuterLayers(0);
+    float hadronicEnergyInOuterLayers(0.f);
+
+    for (PseudoLayer iLayer = outerLayer - m_leavingNOuterLayersToExamine; iLayer <= outerLayer; ++iLayer)
+    {
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+
+        if (orderedCaloHitList.end() != iter)
+        {
+            nOccupiedOuterLayers++;
+
+            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            {
+                hadronicEnergyInOuterLayers += (*hitIter)->GetHadronicEnergy();
+            }
+        }
+    }
+
+    if ((nOccupiedOuterLayers >= m_leavingMipLikeNOccupiedLayers) ||
+        ((nOccupiedOuterLayers == m_leavingShowerLikeNOccupiedLayers) && (hadronicEnergyInOuterLayers > m_leavingShowerLikeEnergyInOuterLayers)))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ClusterHelper::DoesClusterCrossGapRegion(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
+    const unsigned int nSamplingPoints)
+{
+    const PseudoLayer fitStartLayer(std::max(startLayer, pCluster->GetInnerPseudoLayer()));
+    const PseudoLayer fitEndLayer(std::min(endLayer, pCluster->GetOuterPseudoLayer()));
+
+    if (fitStartLayer > fitEndLayer)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    ClusterFitResult fitResult;
+    if (STATUS_CODE_SUCCESS != ClusterHelper::FitLayers(pCluster, fitStartLayer, fitEndLayer, fitResult))
+        return false;
+
+    const CartesianVector startLayerCentroid(pCluster->GetCentroid(fitStartLayer));
+    const float propagationDistance((pCluster->GetCentroid(fitEndLayer) - startLayerCentroid).GetDotProduct(fitResult.GetDirection()));
+
+    return ClusterHelper::DoesFitCrossGapRegion(fitResult, startLayerCentroid, propagationDistance, nSamplingPoints);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ClusterHelper::DoesFitCrossGapRegion(const ClusterFitResult &clusterFitResult, const CartesianVector &startPosition,
+    const float propagationDistance, const unsigned int nSamplingPoints)
+{
+    const CartesianVector &fitDirection(clusterFitResult.GetDirection());
+    const CartesianVector &fitIntercept(clusterFitResult.GetIntercept());
+
+    const float fitStartDistance((startPosition - fitIntercept).GetDotProduct(fitDirection));
+    const CartesianVector fitStartPosition(fitIntercept + (fitDirection * fitStartDistance));
+    const CartesianVector fitPropagation(fitDirection * propagationDistance);
+
+    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
+
+    for (unsigned int i = 0; i < nSamplingPoints; ++i)
+    {
+        const CartesianVector fitPosition(fitStartPosition + (fitPropagation * (static_cast<float>(i) / static_cast<float>(nSamplingPoints))));
+
+        if (pGeometryHelper->IsInGapRegion(fitPosition))
+            return true;
+    }
+
+    return false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
