@@ -72,6 +72,20 @@ private:
         const ClusterFitResult &GetEndFitResult() const;
 
         /**
+         *  @brief  Set the cluster start fit result
+         * 
+         *  @param  startFitResult the cluster start fit result
+         */
+        void SetStartFitResult(const ClusterFitResult &startFitResult);
+
+        /**
+         *  @brief  Set the cluster start fit result
+         * 
+         *  @param  endFitResult the cluster end fit result
+         */
+        void SetEndFitResult(const ClusterFitResult &endFitResult);
+
+        /**
          *  @brief  Whether the cluster fit relation is defunct (the cluster has changed or been deleted and the
          *          fit result is no longer valid).
          * 
@@ -88,8 +102,8 @@ private:
     private:
         bool                        m_isDefunct;            ///< Whether the cluster fit relation is defunct
         Cluster                    *m_pCluster;             ///< Address of the cluster
-        const ClusterFitResult      m_startFitResult;       ///< The cluster start fit result
-        const ClusterFitResult      m_endFitResult;         ///< The cluster end fit result
+        ClusterFitResult            m_startFitResult;       ///< The cluster start fit result
+        ClusterFitResult            m_endFitResult;         ///< The cluster end fit result
     };
 
     typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
@@ -166,6 +180,20 @@ inline const ClusterHelper::ClusterFitResult &BrokenTracksAlgorithm::ClusterFitR
         throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
 
     return m_endFitResult;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void BrokenTracksAlgorithm::ClusterFitRelation::SetStartFitResult(const ClusterFitResult &startFitResult)
+{
+    m_startFitResult = startFitResult;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void BrokenTracksAlgorithm::ClusterFitRelation::SetEndFitResult(const ClusterFitResult &endFitResult)
+{
+    m_endFitResult = endFitResult;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

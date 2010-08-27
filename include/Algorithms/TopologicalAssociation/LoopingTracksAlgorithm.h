@@ -64,6 +64,13 @@ private:
         const ClusterFitResult &GetClusterFitResult() const;
 
         /**
+         *  @brief  Set the cluster fit result
+         * 
+         *  @param  clusterFitResult the cluster fit result
+         */
+        void SetClusterFitResult(const ClusterFitResult &clusterFitResult);
+
+        /**
          *  @brief  Whether the cluster fit relation is defunct (the cluster has changed or been deleted and the
          *          fit result is no longer valid).
          * 
@@ -80,7 +87,7 @@ private:
     private:
         bool                        m_isDefunct;            ///< Whether the cluster fit relation is defunct
         Cluster                    *m_pCluster;             ///< Address of the cluster
-        const ClusterFitResult      m_clusterFitResult;     ///< The cluster fit result
+        ClusterFitResult            m_clusterFitResult;     ///< The cluster fit result
     };
 
     typedef std::vector<ClusterFitRelation *> ClusterFitRelationList;
@@ -161,6 +168,13 @@ inline const ClusterHelper::ClusterFitResult &LoopingTracksAlgorithm::ClusterFit
         throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
 
     return m_clusterFitResult;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void LoopingTracksAlgorithm::ClusterFitRelation::SetClusterFitResult(const ClusterFitResult &clusterFitResult)
+{
+    m_clusterFitResult = clusterFitResult;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

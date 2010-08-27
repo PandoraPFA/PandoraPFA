@@ -35,7 +35,7 @@ StatusCode LoopingTracksAlgorithm::Run()
         if ((pCluster->GetNCaloHits() < m_minHitsInCluster) || (pCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
             continue;
 
-        ClusterHelper::ClusterFitResult clusterFitResult;
+        ClusterFitResult clusterFitResult;
         (void) ClusterHelper::FitEnd(pCluster, m_nLayersToFit, clusterFitResult);
 
         if (clusterFitResult.IsFitSuccessful() && (clusterFitResult.GetChi2() < m_fitChi2Cut))
@@ -145,7 +145,16 @@ StatusCode LoopingTracksAlgorithm::Run()
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestClusterFitRelation->GetCluster()));
             pBestClusterFitRelation->SetAsDefunct();
-            --iterI;
+
+            // Re-fit and re-use modified parent cluster
+            ClusterFitResult clusterFitResult;
+            (void) ClusterHelper::FitEnd(pParentCluster, m_nLayersToFit, clusterFitResult);
+
+            if (clusterFitResult.IsFitSuccessful() && (clusterFitResult.GetChi2() < m_fitChi2Cut))
+            {
+                (*iterI)->SetClusterFitResult(clusterFitResult);
+                --iterI;
+            }
         }
     }
 

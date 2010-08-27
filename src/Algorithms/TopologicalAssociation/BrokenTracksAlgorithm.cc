@@ -60,9 +60,6 @@ StatusCode BrokenTracksAlgorithm::Run()
         Cluster *pParentCluster((*iterI)->GetCluster());
         const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetEndFitResult());
 
-        if (!parentClusterFitResult.IsFitSuccessful() || (parentClusterFitResult.GetRms() > m_maxFitRms))
-            continue;
-
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
         const CartesianVector parentOuterCentroid(pParentCluster->GetCentroid(parentOuterLayer));
 
@@ -80,9 +77,6 @@ StatusCode BrokenTracksAlgorithm::Run()
             const ClusterHelper::ClusterFitResult &daughterClusterFitResult((*iterJ)->GetStartFitResult());
 
             if (pParentCluster == pDaughterCluster)
-                continue;
-
-            if (!daughterClusterFitResult.IsFitSuccessful() || (daughterClusterFitResult.GetRms() > m_maxFitRms))
                 continue;
 
             const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -152,7 +146,16 @@ StatusCode BrokenTracksAlgorithm::Run()
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pParentCluster, pBestClusterFitRelation->GetCluster()));
             pBestClusterFitRelation->SetAsDefunct();
-            --iterI;
+
+            // Re-fit and re-use modified parent cluster
+            ClusterFitResult endFitResult;
+            (void) ClusterHelper::FitEnd(pParentCluster, m_nEndLayersToFit, endFitResult);
+
+            if (endFitResult.IsFitSuccessful() && (endFitResult.GetRms() < m_maxFitRms))
+            {
+                (*iterI)->SetEndFitResult(endFitResult);
+                --iterI;
+            }
         }
     }
 
