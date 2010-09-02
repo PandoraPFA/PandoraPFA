@@ -49,8 +49,12 @@ private:
 
     pandora::StringVector   m_candidateListNames;           ///< The list of track list names to use
     std::string             m_mergedCandidateListName;      ///< The name under which to save the full, merged, list of candidate tracks
+
+    bool                    m_shouldMakeAssociations;       ///< Whether to re-make track-cluster associations for candidate tracks
     pandora::StringVector   m_associationAlgorithms;        ///< The ordered list of track-cluster associations algorithm to run
-    std::string             m_finalPfoListName;             ///< The name of the output track list, containing parent tracks of charged pfos
+
+    bool                    m_shouldMakePfoTrackList;       ///< Whether to make pfo track list, containing parent tracks of charged pfos
+    std::string             m_pfoTrackListName;             ///< The name of the pfo track list, containing parent tracks of charged pfos
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

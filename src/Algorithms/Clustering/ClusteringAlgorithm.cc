@@ -121,7 +121,8 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
         CaloHit *pCaloHit = *iter;
 
         Cluster *pBestCluster = NULL;
-        float smallestGenericDistance(FLOAT_MAX);
+        float bestClusterEnergy(0.f);
+        float smallestGenericDistance(m_genericDistanceCut);
         const PseudoLayer layersToStepBack((ECAL == pCaloHit->GetHitType()) ? m_layersToStepBackECal : m_layersToStepBackHCal);
 
         // Associate with existing clusters in stepBack layers. If stepBackLayer == pseudoLayer, will examine TRACK_PROJECTION_LAYER.
@@ -135,13 +136,15 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
             {
                 Cluster *pCluster = *clusterIter;
                 float genericDistance(FLOAT_MAX);
+                const float clusterEnergy(pCluster->GetHadronicEnergy());
 
                 PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetGenericDistanceToHit(pCluster,
                     pCaloHit, searchLayer, genericDistance));
 
-                if ((genericDistance < m_genericDistanceCut) && (genericDistance < smallestGenericDistance))
+                if ((genericDistance < smallestGenericDistance) || ((genericDistance == smallestGenericDistance) && (clusterEnergy > bestClusterEnergy)))
                 {
                     pBestCluster = pCluster;
+                    bestClusterEnergy = clusterEnergy;
                     smallestGenericDistance = genericDistance;
                 }
             }
@@ -191,8 +194,10 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Cus
                 iter != iterEnd;)
             {
                 CaloHit *pCaloHit = *iter;
+
                 Cluster *pBestCluster = NULL;
-                float smallestGenericDistance = FLOAT_MAX;
+                float bestClusterEnergy(0.f);
+                float smallestGenericDistance(m_genericDistanceCut);
 
                 // See if hit should be associated with any existing clusters
                 for (ClusterVector::iterator clusterIter = clusterVector.begin(), clusterIterEnd = clusterVector.end();
@@ -200,13 +205,15 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Cus
                 {
                     Cluster *pCluster = *clusterIter;
                     float genericDistance(FLOAT_MAX);
+                    const float clusterEnergy(pCluster->GetHadronicEnergy());
 
                     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetGenericDistanceToHit(pCluster,
                         pCaloHit, pseudoLayer, genericDistance));
 
-                    if ((genericDistance < m_genericDistanceCut) && (genericDistance < smallestGenericDistance))
+                    if ((genericDistance < smallestGenericDistance) || ((genericDistance == smallestGenericDistance) && (clusterEnergy > bestClusterEnergy)))
                     {
                         pBestCluster = pCluster;
+                        bestClusterEnergy = clusterEnergy;
                         smallestGenericDistance = genericDistance;
                     }
                 }

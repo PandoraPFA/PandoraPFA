@@ -30,7 +30,7 @@ private:
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     pandora::StringVector   m_candidateListNames;           ///< The list of cluster list names to use
-    std::string             m_finalPfoListName;             ///< The name of the output cluster list
+    std::string             m_mergedCandidateListName;      ///< The name of the merged candidate list name
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
