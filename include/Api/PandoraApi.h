@@ -96,10 +96,10 @@ public:
     class MCParticleParameters
     {
     public:
-        pandora::InputFloat             m_energy;                   ///< The MC particle's energy
-        pandora::InputCartesianVector   m_momentum;                 ///< The MC particle's momentum
-        pandora::InputFloat             m_innerRadius;              ///< The MC particle's path's inner radius
-        pandora::InputFloat             m_outerRadius;              ///< The MC particle's path's outer radius
+        pandora::InputFloat             m_energy;                   ///< The energy of the MC particle, units GeV
+        pandora::InputCartesianVector   m_momentum;                 ///< The momentum of the MC particle, units GeV
+        pandora::InputCartesianVector   m_vertex;                   ///< The production vertex of the MC particle, units mm
+        pandora::InputCartesianVector   m_endpoint;                 ///< The endpoint of the MC particle, units mm
         pandora::InputInt               m_particleId;               ///< The MC particle's ID (PDG code)
         pandora::InputAddress           m_pParentAddress;           ///< Address of the parent MC particle in the user framework
     };

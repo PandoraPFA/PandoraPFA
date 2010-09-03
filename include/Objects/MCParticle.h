@@ -43,28 +43,42 @@ public:
     bool IsPfoTarget() const;
 
     /**
-     *  @brief  Get energy of mc particle
+     *  @brief  Get energy of mc particle, units GeV
      *
      *  @return the mc particle energy
      */
     float GetEnergy() const;
 
     /**
-     *  @brief  Get momentum of mc particle
+     *  @brief  Get momentum of mc particle, units GeV
      *
      *  @return the mc particle momentum
      */
     const CartesianVector &GetMomentum() const;
 
     /**
-     *  @brief  Get inner radius of mc particle
+     *  @brief  Get the production vertex of the mc particle, units mm
+     *
+     *  @return the production vertex of the mc particle
+     */
+    const CartesianVector &GetVertex() const;
+
+    /**
+     *  @brief  Get the endpoint of the mc particle, units mm
+     *
+     *  @return the endpoint of the mc particle
+     */
+    const CartesianVector &GetEndpoint() const;
+
+    /**
+     *  @brief  Get inner radius of mc particle, units mm
      * 
      *  @return the mc particle inner radius
      */
     float GetInnerRadius() const;
 
     /**
-     *  @brief  Get outer radius of mc particle
+     *  @brief  Get outer radius of mc particle, units mm
      *
      *  @return the mc particle outer radius
      */
@@ -183,12 +197,15 @@ private:
      */
     StatusCode SetPfoTargetInTree(MCParticle *pMCParticle, bool onlyDaughters = false);
 
-    Uid                     m_uid;                      ///< Unique identifier for the particle
+    Uid                     m_uid;                      ///< Unique identifier for the mc particle
 
-    float                   m_energy;                   ///< The energy of the particle
-    CartesianVector         m_momentum;                 ///< The momentum of the particle
-    float                   m_innerRadius;              ///< Inner radius of the particle's path
-    float                   m_outerRadius;              ///< Outer radius of the particle's path
+    float                   m_energy;                   ///< The energy of the mc particle, units GeV
+    CartesianVector         m_momentum;                 ///< The momentum of the mc particle, units GeV
+    CartesianVector         m_vertex;                   ///< The production vertex of the mc particle, units mm
+    CartesianVector         m_endpoint;                 ///< The endpoint of the mc particle, units mm
+
+    float                   m_innerRadius;              ///< Inner radius of the particle's path, units mm
+    float                   m_outerRadius;              ///< Outer radius of the particle's path, units mm
     int                     m_particleId;               ///< The PDG code of the mc particle
 
     MCParticle             *m_pPfoTarget;               ///< The address of the pfo target
@@ -319,6 +336,20 @@ inline float MCParticle::GetEnergy() const
 inline const CartesianVector &MCParticle::GetMomentum() const
 {
     return m_momentum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &MCParticle::GetVertex() const
+{
+    return m_vertex;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &MCParticle::GetEndpoint() const
+{
+    return m_endpoint;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
