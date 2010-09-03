@@ -38,6 +38,8 @@ private:
     bool         m_hits;                                 ///< Whether to show current ordered calohitlist
     bool         m_tracks;                               ///< Whether to show current tracklist
     bool         m_onlyAvailable;                        ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
+    bool         m_mcParticles;                          ///< Whether to show MC particles
+
     bool         m_displayEvent;                         ///< Whether to display the event
 };
 

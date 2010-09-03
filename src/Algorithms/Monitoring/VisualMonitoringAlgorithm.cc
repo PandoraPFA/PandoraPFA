@@ -14,6 +14,27 @@ using namespace pandora;
 
 StatusCode VisualMonitoringAlgorithm::Run()
 {
+
+    // Show current tracks
+    MCParticleList mcParticleList;
+
+    if (m_mcParticles)
+    {
+        MCParticleList pMCParticleList;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetMCParticleList(*this, pMCParticleList));
+
+        for (MCParticleList::const_iterator itMCParticle = pMCParticleList.begin(), itMCParticleEnd = pMCParticleList.end(); itMCParticle != itMCParticleEnd; ++itMCParticle)
+        {
+            MCParticle* pMCParticle = (*itMCParticle);
+
+            mcParticleList.insert(pMCParticle);
+        }
+
+        PANDORA_MONITORING_API(VisualizeMCParticles(&mcParticleList, "MCParticles", AUTO));
+    }
+
+
+
     // Show current ordered calo hit list
     OrderedCaloHitList orderedCaloHitList;
 
@@ -126,6 +147,10 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_onlyAvailable = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShowOnlyAvailable", m_onlyAvailable));
+
+    m_mcParticles = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShowMCParticles", m_mcParticles));
 
     m_displayEvent = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
