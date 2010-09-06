@@ -32,15 +32,14 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    pandora::StringVector m_clusterListNames;            ///< List of strings denoting clusternames 
-    bool         m_particleFlowObjects;                  ///< Whether to show current particle flow object list
-    bool         m_clusters;                             ///< Whether to show current cluster list
-    bool         m_hits;                                 ///< Whether to show current ordered calohitlist
-    bool         m_tracks;                               ///< Whether to show current tracklist
-    bool         m_onlyAvailable;                        ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
-    bool         m_mcParticles;                          ///< Whether to show MC particles
-
-    bool         m_displayEvent;                         ///< Whether to display the event
+    pandora::StringVector   m_clusterListNames;         ///< List of strings denoting clusternames 
+    bool                    m_mcParticles;              ///< Whether to show MC particles
+    bool                    m_particleFlowObjects;      ///< Whether to show current particle flow object list
+    bool                    m_clusters;                 ///< Whether to show current cluster list
+    bool                    m_hits;                     ///< Whether to show current ordered calohitlist
+    bool                    m_tracks;                   ///< Whether to show current tracklist
+    bool                    m_onlyAvailable;            ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
+    bool                    m_displayEvent;             ///< Whether to display the event
 };
 
 

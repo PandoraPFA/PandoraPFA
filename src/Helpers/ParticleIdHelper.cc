@@ -632,7 +632,7 @@ float ParticleIdHelper::m_photonIdDCosRLowECut = 0.94f;
 float ParticleIdHelper::m_photonIdDCosRHighECut = 0.95f;
 float ParticleIdHelper::m_photonIdRmsCutEnergy = 40.f;
 float ParticleIdHelper::m_photonIdRmsLowECut = 40.f;
-float ParticleIdHelper::m_photonIdRmsHighECut = 50.f;
+float ParticleIdHelper::m_photonIdRmsHighECut = 90.f;
 float ParticleIdHelper::m_photonIdEndCapZSeparation = 50.f;
 float ParticleIdHelper::m_photonIdRadiationLengthsCut = 10.f;
 float ParticleIdHelper::m_photonIdShowerMaxCut1_0 = 0.f;
@@ -649,7 +649,7 @@ int ParticleIdHelper::m_photonIdLayer90MaxLayersFromECal = 10;
 
 unsigned int ParticleIdHelper::m_electronIdMaxInnerLayer = 4;
 float ParticleIdHelper::m_electronIdMaxEnergy = 5.f;
-float ParticleIdHelper::m_electronIdMaxProfileStart = 2.5f;
+float ParticleIdHelper::m_electronIdMaxProfileStart = 4.5f;
 float ParticleIdHelper::m_electronIdMaxProfileDiscrepancy = 0.6f;
 float ParticleIdHelper::m_electronIdProfileDiscrepancyForAutoId = 0.5f;
 float ParticleIdHelper::m_electronIdMaxResidualEOverP = 0.2f;
