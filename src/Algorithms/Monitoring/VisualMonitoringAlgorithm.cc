@@ -20,7 +20,7 @@ StatusCode VisualMonitoringAlgorithm::Run()
     if (m_mcParticles)
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetMCParticleList(*this, mcParticleList));
-        PANDORA_MONITORING_API(VisualizeMCParticles(&mcParticleList, "MCParticles", AUTO));
+        PANDORA_MONITORING_API(VisualizeMCParticles(&mcParticleList, "MCParticles", AUTO, &m_suppressParticlesMap));
     }
 
     // Show current ordered calo hit list
@@ -111,6 +111,23 @@ StatusCode VisualMonitoringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void VisualMonitoringAlgorithm::TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter)
+{
+    // tokenize the string
+    std::string::size_type lastPos = inputString.find_first_not_of(delimiter, 0);
+    std::string::size_type pos     = inputString.find_first_of(delimiter, lastPos);
+
+    while ((std::string::npos != pos) || (std::string::npos != lastPos))
+    {
+        tokens.push_back(inputString.substr(lastPos, pos - lastPos));
+        lastPos = inputString.find_first_not_of(delimiter, pos);
+        pos = inputString.find_first_of(delimiter, lastPos);
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
@@ -143,6 +160,39 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_displayEvent = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DisplayEvent", m_displayEvent));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "SuppressMCParticles", m_suppressMCParticles));
+
+    for( StringVector::iterator it = m_suppressMCParticles.begin(), itEnd = m_suppressMCParticles.end(); it != itEnd; ++it )
+    {
+        std::string pdgEnergy = (*it);
+        StringVector pdgEnergySeparated;
+        const std::string delimiter = ":";
+        TokenizeString( pdgEnergy, pdgEnergySeparated, delimiter );
+
+        try
+        {
+            std::string pdgString = pdgEnergySeparated.at(0);
+            std::string energyString = pdgEnergySeparated.at(1);
+
+            std::stringstream sstrPdg;
+            sstrPdg << pdgString;
+            int pdgCode;
+            sstrPdg >> pdgCode;
+            
+            std::stringstream sstrEnergy;
+            sstrEnergy << energyString;
+            float energy;
+            sstrEnergy >> energy;
+
+            m_suppressParticlesMap.insert( std::make_pair(pdgCode,energy) );
+        }
+        catch(...)
+        {
+            return STATUS_CODE_INVALID_PARAMETER;
+        }
+    }
 
     return STATUS_CODE_SUCCESS;
 }
