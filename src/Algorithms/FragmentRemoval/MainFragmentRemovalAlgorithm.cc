@@ -64,8 +64,10 @@ StatusCode MainFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass,
     {
         Cluster *pCluster = *iter;
 
-        if (!ParticleIdHelper::IsMuonFast(pCluster))
+        if (!ParticleIdHelper::IsMuonFast(pCluster) && !ParticleIdHelper::IsElectronFast(pCluster))
+        {
             clusterList.insert(pCluster);
+        }
     }
 
     // Create cluster contacts

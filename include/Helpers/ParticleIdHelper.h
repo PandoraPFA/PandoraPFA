@@ -184,6 +184,7 @@ private:
 
     static unsigned int m_muonIdMaxInnerLayer;              ///< Max inner psuedo layer for fast muon id
     static float        m_muonIdMinTrackEnergy;             ///< Min energy of associated track for fast muon id
+    static float        m_muonIdMaxHCalHitEnergy;           ///< Max hadronic energy for an individual hcal hit (suppress fluctuations)
     static unsigned int m_muonIdMinECalLayers;              ///< Min number of ecal layers for fast muon id
     static unsigned int m_muonIdMinHCalLayers;              ///< Min number of hcal layers for fast muon id
     static bool         m_muonIdShouldPerformGapCheck;      ///< Whether to perform muon recovery gap checks
