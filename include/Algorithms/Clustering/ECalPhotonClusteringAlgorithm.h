@@ -43,8 +43,6 @@ namespace pandora
 
 	void Print( std::ostream& );
 
-	static void TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter);
-
     private:
 	int numberBins;
 	float minValue;

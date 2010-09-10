@@ -10,7 +10,6 @@
 
 #include "Algorithms/Algorithm.h"
 
-
 /**
  *  @brief VisualMonitoringAlgorithm class
  */
@@ -27,11 +26,9 @@ public:
         Algorithm *CreateAlgorithm() const;
     };
 
-
 private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
-    void TokenizeString(const std::string &inputString, pandora::StringVector &tokens, const std::string &delimiter);
 
     pandora::StringVector   m_clusterListNames;         ///< List of strings denoting clusternames 
     pandora::StringVector   m_suppressMCParticles;      ///< List of PDG numbers and energies for MC particles to be suppressed (e.g. " 22:0.1 2112:1.0 ")
@@ -43,11 +40,10 @@ private:
     bool                    m_onlyAvailable;            ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
     bool                    m_displayEvent;             ///< Whether to display the event
 
-    typedef std::map<int,float> PdgCodeEnergyMap;
-    PdgCodeEnergyMap        m_suppressParticlesMap;     ///< PDG code and max. energy for particles to be suppressed
+    typedef std::map<int, float> PdgCodeToEnergyMap;
 
+    PdgCodeToEnergyMap      m_particleSuppressionMap;   ///< Map from pdg-codes to energy for suppression of particles types below specific energies
 };
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

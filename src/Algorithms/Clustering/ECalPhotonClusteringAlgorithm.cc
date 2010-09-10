@@ -1888,7 +1888,7 @@ void Axis::ReadFromXml( const TiXmlElement &xmlElement )
 
         StringVector binsStringVector;
 
-        TokenizeString( binsString, binsStringVector, " " );
+        XmlHelper::TokenizeString( binsString, binsStringVector, " " );
 
         // transform the strings to float and fill the bins
         std::vector<float> binBorders;
@@ -1925,29 +1925,6 @@ void Axis::Print( std::ostream& os )
         os << "Bin-borders = " << sstr.str() << std::endl;
     }
 } 
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void Axis::TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter)
-{
-    // tokenize the string
-    std::string::size_type lastPos = inputString.find_first_not_of(delimiter, 0);
-    std::string::size_type pos     = inputString.find_first_of(delimiter, lastPos);
-
-    while ((std::string::npos != pos) || (std::string::npos != lastPos))
-    {
-        tokens.push_back(inputString.substr(lastPos, pos - lastPos));
-        lastPos = inputString.find_first_not_of(delimiter, pos);
-        pos = inputString.find_first_of(delimiter, lastPos);
-    }
-}
-
-
-
-
-
-
-
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -2121,7 +2098,7 @@ void Histogram1D::ReadFromXml( const TiXmlElement&  xmlElement )
 
     StringVector binsStringVector;
 
-    Axis::TokenizeString( binsString, binsStringVector, " " );
+    XmlHelper::TokenizeString( binsString, binsStringVector, " " );
 
     // transform the strings to float and fill the bins
     bins.clear();
@@ -2437,7 +2414,7 @@ void Histogram2D::ReadFromXml( const TiXmlElement&  xmlElement )
         StringVector binsStringVector;
 
         // tokenize the string
-        Axis::TokenizeString( binsString, binsStringVector, " " );
+        XmlHelper::TokenizeString( binsString, binsStringVector, " " );
 
         // transform the strings to float and fill the bins
         int iBinX = -1; // start with the underflow bin

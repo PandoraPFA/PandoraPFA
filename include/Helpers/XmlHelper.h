@@ -100,7 +100,6 @@ public:
     static StatusCode ProcessAlgorithm(const Algorithm &algorithm, const TiXmlHandle &xmlHandle, const std::string &description,
         std::string &algorithmName);
 
-private:
     /**
      *  @brief  Tokenize a string
      * 
