@@ -30,6 +30,7 @@
 
 #include "Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.h"
 #include "Algorithms/FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
+#include "Algorithms/FragmentRemoval/PhotonFragmentRemovalAlgorithm.h"
 
 #include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/EnergyMonitoringAlgorithm.h"
@@ -92,6 +93,7 @@
     d("ForcedClustering",                       ForcedClusteringAlgorithm::Factory)                         \
     d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                      \
     d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                   \
+    d("PhotonFragmentRemoval",                  PhotonFragmentRemovalAlgorithm::Factory)                    \
     d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
     d("EnergyMonitoring",                       EnergyMonitoringAlgorithm::Factory)                         \
     d("VisualMonitoring",                       VisualMonitoringAlgorithm::Factory)                         \

@@ -98,7 +98,7 @@ private:
 
     float               m_minEvidence;                              ///< Min evidence before parent/daughter candidates can be merged
 
-    unsigned int        m_photonLikeMinInnerLayer;                  ///< Min inner layer to identify daughter cluster as photon-like
+    unsigned int        m_photonLikeMaxInnerLayer;                  ///< Max inner layer to identify daughter cluster as photon-like
     float               m_photonLikeMinDCosR;                       ///< Max radial direction cosine to identify daughter as photon-like
     float               m_photonLikeMaxShowerStart;                 ///< Max shower profile start to identify daughter as photon-like
     float               m_photonLikeMaxProfileDiscrepancy;          ///< Max shower profile discrepancy to identify daughter as photon-like
