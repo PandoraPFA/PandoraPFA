@@ -15,6 +15,95 @@
 using namespace pandora;
 
 /**
+ *  @brief  ChargedClusterContact class, describing the interactions and proximity between parent and daughter candidate clusters
+ */
+class ChargedClusterContact : public ClusterContact
+{
+public:
+    /**
+     *  @brief  Parameters class
+     */
+    class Parameters : public ClusterContact::Parameters
+    {
+    public:
+        float           m_coneCosineHalfAngle2;         ///< Cosine half angle for second cone comparison in cluster contact object
+        float           m_coneCosineHalfAngle3;         ///< Cosine half angle for third cone comparison in cluster contact object
+        float           m_helixComparisonMipFractionCut;///< Mip fraction cut used in cluster contact helix comparison
+        unsigned int    m_helixComparisonStartOffset;   ///< Start layer offset used in cluster contact helix comparison
+        unsigned int    m_helixComparisonStartOffsetMip;///< Start layer offset used for mip-like clusters in helix comparison
+        unsigned int    m_nHelixComparisonLayers;       ///< Max number of layers used in helix comparison for non mip-like clusters
+        unsigned int    m_maxLayersCrossedByHelix;      ///< Max no. of layers crossed by helix between track projection and cluster
+        float           m_maxTrackClusterDeltaZ;        ///< Max z separation between track projection and cluster
+    };
+
+    /**
+     *  @brief  Constructor
+     * 
+     *  @param  pDaughterCluster address of the daughter candidate cluster
+     *  @param  pParentCluster address of the parent candidate cluster
+     *  @param  parameters the cluster contact parameters
+     */
+    ChargedClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters);
+
+    /**
+     *  @brief  Get the sum of energies of tracks associated with parent cluster
+     * 
+     *  @return The sum of energies of tracks associated with parent cluster
+     */
+    float GetParentTrackEnergy() const;
+
+    /**
+     *  @brief  Get the fraction of daughter hits that lie within specified cone 2 along parent direction
+     * 
+     *  @return The daughter cone fraction
+     */
+    float GetConeFraction2() const;
+
+    /**
+     *  @brief  Get the fraction of daughter hits that lie within specified cone 3 along parent direction
+     * 
+     *  @return The daughter cone fraction
+     */
+    float GetConeFraction3() const;
+
+    /**
+     *  @brief  Get the mean distance of daughter cluster from closest helix fix to parent associated tracks
+     * 
+     *  @return The mean daughter distance to the closest helix
+     */
+    float GetMeanDistanceToHelix() const;
+
+    /**
+     *  @brief  Get the closest distance between daughter cluster and helix fits to parent associated tracks
+     * 
+     *  @return The closest daughter distance to helix
+     */
+    float GetClosestDistanceToHelix() const;
+
+private:
+    /**
+     *  @brief  Compare daughter cluster with helix fits to parent associated tracks
+     * 
+     *  @param  pDaughterCluster address of the daughter candidate cluster
+     *  @param  pParentCluster address of the parent candidate cluster
+     *  @param  parameters the cluster contact parameters
+     */
+    void ClusterHelixComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters);
+
+    float               m_parentTrackEnergy;            ///< Sum of energies of tracks associated with parent cluster
+    float               m_coneFraction2;                ///< Fraction of daughter hits that lie within specified cone 2 along parent direction
+    float               m_coneFraction3;                ///< Fraction of daughter hits that lie within specified cone 3 along parent direction
+    float               m_meanDistanceToHelix;          ///< Mean distance of daughter cluster from closest helix fit to parent associated tracks
+    float               m_closestDistanceToHelix;       ///< Closest distance between daughter cluster and helix fits to parent associated tracks
+};
+
+typedef std::vector<ChargedClusterContact> ChargedClusterContactVector;
+typedef std::map<Cluster *, ChargedClusterContactVector> ChargedClusterContactMap;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
  *  @brief  MainFragmentRemovalAlgorithm class
  */
 class MainFragmentRemovalAlgorithm : public Algorithm
@@ -37,64 +126,64 @@ private:
      *  @brief  Get cluster contact map, linking each daughter candidate cluster to a list of parent candidates and describing
      *          the proximity/contact between each pairing
      * 
-     *  @param  isFirstPass whether this is the first call to GetClusterContactMap
+     *  @param  isFirstPass whether this is the first call to GetChargedClusterContactMap
      *  @param  affectedClusters list of those clusters affected by previous cluster merging, for which contact details must be updated
-     *  @param  clusterContactMap to receive the populated cluster contact map
+     *  @param  chargedClusterContactMap to receive the populated cluster contact map
      */
-    StatusCode GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters, ClusterContactMap &clusterContactMap) const;
+    StatusCode GetChargedClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters, ChargedClusterContactMap &chargedClusterContactMap) const;
 
     /**
      *  @brief  Whether candidate parent and daughter clusters are sufficiently in contact to warrant further investigation
      * 
-     *  @param  clusterContact
+     *  @param  chargedClusterContact the cluster contact
      * 
      *  @return boolean
      */
-    bool PassesClusterContactCuts(const ClusterContact &clusterContact) const;
+    bool PassesClusterContactCuts(const ChargedClusterContact &chargedClusterContact) const;
 
     /**
      *  @brief  Find the best candidate parent and daughter clusters for fragment removal merging
      * 
-     *  @param  clusterContactMap the populated cluster contact map
+     *  @param  chargedClusterContactMap the populated cluster contact map
      *  @param  pBestParentCluster to receive the address of the best parent cluster candidate
      *  @param  pBestDaughterCluster to receive the address of the best daughter cluster candidate
      */
-    StatusCode GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
+    StatusCode GetClusterMergingCandidates(const ChargedClusterContactMap &chargedClusterContactMap, Cluster *&pBestParentCluster,
         Cluster *&pBestDaughterCluster);
 
     /**
      *  @brief  Whether the candidate parent and daughter clusters pass quick preselection for fragment removal merging
      * 
      *  @param  pDaughterCluster address of the daughter cluster candidate
-     *  @param  clusterContactVector list cluster contact details for the given daughter cluster
+     *  @param  chargedClusterContactVector list cluster contact details for the given daughter cluster
      *  @param  globalDeltaChi2 to receive global delta chi2, indicating whether daughter cluster would be better merged
      *          with group of all nearby clusters
      * 
      *  @return boolean
      */
-    bool PassesPreselection(Cluster *const pDaughterCluster, const ClusterContactVector &clusterContactVector, float &globalDeltaChi2) const;
+    bool PassesPreselection(Cluster *const pDaughterCluster, const ChargedClusterContactVector &chargedClusterContactVector, float &globalDeltaChi2) const;
 
     /**
      *  @brief  Get a measure of the total evidence for merging the parent and daughter candidate clusters
      * 
-     *  @param  clusterContact the cluster contact details for parent/daughter candidate merge
+     *  @param  chargedClusterContact the cluster contact details for parent/daughter candidate merge
      * 
      *  @return the total evidence
      */
-    float GetTotalEvidenceForMerge(const ClusterContact &clusterContact) const;
+    float GetTotalEvidenceForMerge(const ChargedClusterContact &chargedClusterContact) const;
 
     /**
      *  @brief  Get the required evidence for merging the parent and daughter candidate clusters
      * 
      *  @param  pDaughterCluster address of the daughter cluster candidate
-     *  @param  clusterContact the cluster contact details for parent/daughter candidate merge
+     *  @param  chargedClusterContact the cluster contact details for parent/daughter candidate merge
      *  @param  correctionLayer the daughter cluster correction layer
      *  @param  globalDeltaChi2 global delta chi2, indicating whether daughter cluster would be better merged
      *          with group of all nearby clusters
      * 
      *  @return the required evidence
      */
-    float GetRequiredEvidenceForMerge(Cluster *const pDaughterCluster, const ClusterContact &clusterContact, const PseudoLayer correctionLayer,
+    float GetRequiredEvidenceForMerge(Cluster *const pDaughterCluster, const ChargedClusterContact &chargedClusterContact, const PseudoLayer correctionLayer,
         const float globalDeltaChi2);
 
     /**
@@ -121,16 +210,18 @@ private:
     /**
      *  @brief  Get the list of clusters for which cluster contact information will be affected by a specified cluster merge
      * 
-     *  @param  clusterContactMap the cluster contact map
+     *  @param  chargedClusterContactMap the cluster contact map
      *  @param  pBestParentCluster address of the parent cluster to be merged
      *  @param  pBestDaughterCluster address of the daughter cluster to be merged
      *  @param  affectedClusters to receive the list of affected clusters
      */
-    StatusCode GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
+    StatusCode GetAffectedClusters(const ChargedClusterContactMap &chargedClusterContactMap, Cluster *const pBestParentCluster,
         Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
 
-    typedef std::vector<CartesianVector> DirectionVector;
+    typedef ChargedClusterContact::Parameters ContactParameters;
+    ContactParameters   m_contactParameters;                        ///< The charged cluster contact parameters
 
+    typedef std::vector<CartesianVector> DirectionVector;
     DirectionVector     m_muonDirectionVector;                      ///< The muon calo hit direction vector
 
     unsigned int        m_minDaughterCaloHits;                      ///< Min number of calo hits in daughter candidate clusters
@@ -236,6 +327,42 @@ private:
     float               m_minRequiredEvidence;                      ///< Minimum required evidence to merge parent/daughter clusters
 };
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ChargedClusterContact::GetParentTrackEnergy() const
+{
+    return m_parentTrackEnergy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ChargedClusterContact::GetConeFraction2() const
+{
+    return m_coneFraction2;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ChargedClusterContact::GetConeFraction3() const
+{
+    return m_coneFraction3;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ChargedClusterContact::GetMeanDistanceToHelix() const
+{
+    return m_meanDistanceToHelix;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ChargedClusterContact::GetClosestDistanceToHelix() const
+{
+    return m_closestDistanceToHelix;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline Algorithm *MainFragmentRemovalAlgorithm::Factory::CreateAlgorithm() const

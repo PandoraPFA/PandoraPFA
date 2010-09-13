@@ -18,7 +18,7 @@ StatusCode PhotonFragmentRemovalAlgorithm::Run()
     bool isFirstPass(true), shouldRecalculate(true);
 
     ClusterList affectedClusters;
-    PhotonClusterContactMap clusterContactMap;
+    ClusterContactMap clusterContactMap;
 
     while ((nPasses++ < m_nMaxPasses) && shouldRecalculate)
     {
@@ -51,7 +51,7 @@ StatusCode PhotonFragmentRemovalAlgorithm::Run()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PhotonFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters,
-    PhotonClusterContactMap &clusterContactMap) const
+    ClusterContactMap &clusterContactMap) const
 {
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
@@ -66,7 +66,7 @@ StatusCode PhotonFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPas
             if (affectedClusters.end() == affectedClusters.find(pDaughterCluster))
                 continue;
 
-            PhotonClusterContactMap::iterator pastEntryIter = clusterContactMap.find(pDaughterCluster);
+            ClusterContactMap::iterator pastEntryIter = clusterContactMap.find(pDaughterCluster);
 
             if (clusterContactMap.end() != pastEntryIter)
                 clusterContactMap.erase(clusterContactMap.find(pDaughterCluster));
@@ -106,7 +106,7 @@ StatusCode PhotonFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPas
                 continue;
 
             // Evaluate cluster contact properties
-            const PhotonClusterContact clusterContact(pDaughterCluster, pParentCluster);
+            const ClusterContact clusterContact(pDaughterCluster, pParentCluster, m_contactParameters);
 
             if (this->PassesClusterContactCuts(clusterContact))
             {
@@ -143,13 +143,13 @@ bool PhotonFragmentRemovalAlgorithm::IsPhotonLike(Cluster *const pDaughterCluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool PhotonFragmentRemovalAlgorithm::PassesClusterContactCuts(const PhotonClusterContact &clusterContact) const
+bool PhotonFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact &clusterContact) const
 {
     if (clusterContact.GetDistanceToClosestHit() > m_contactCutMaxDistance)
         return false;
 
     if ((clusterContact.GetNContactLayers() > m_contactCutNLayers) ||
-        (clusterContact.GetConeFraction() > m_contactCutConeFraction) ||
+        (clusterContact.GetConeFraction1() > m_contactCutConeFraction1) ||
         (clusterContact.GetCloseHitFraction1() > m_contactCutCloseHitFraction1) ||
         (clusterContact.GetCloseHitFraction2() > m_contactCutCloseHitFraction2))
     {
@@ -161,19 +161,19 @@ bool PhotonFragmentRemovalAlgorithm::PassesClusterContactCuts(const PhotonCluste
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PhotonFragmentRemovalAlgorithm::GetClusterMergingCandidates(const PhotonClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
+StatusCode PhotonFragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
     Cluster *&pBestDaughterCluster) const
 {
     float highestEvidence(m_minEvidence);
     float highestEvidenceParentEnergy(0.);
 
-    for (PhotonClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
+    for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = iterI->first;
 
-        for (PhotonClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
+        for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
         {
-            PhotonClusterContact clusterContact = *iterJ;
+            ClusterContact clusterContact = *iterJ;
 
             if (pDaughterCluster != clusterContact.GetDaughterCluster())
                 throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -196,7 +196,7 @@ StatusCode PhotonFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Pho
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float PhotonFragmentRemovalAlgorithm::GetEvidenceForMerge(const PhotonClusterContact &clusterContact) const
+float PhotonFragmentRemovalAlgorithm::GetEvidenceForMerge(const ClusterContact &clusterContact) const
 {
     // Calculate a measure of the evidence that the daughter candidate cluster is a fragment of the parent candidate cluster:
 
@@ -209,9 +209,9 @@ float PhotonFragmentRemovalAlgorithm::GetEvidenceForMerge(const PhotonClusterCon
 
     // 2. Cone extrapolation
     float coneEvidence(0.f);
-    if (clusterContact.GetConeFraction() > m_coneEvidenceFraction)
+    if (clusterContact.GetConeFraction1() > m_coneEvidenceFraction1)
     {
-        coneEvidence = clusterContact.GetConeFraction();
+        coneEvidence = clusterContact.GetConeFraction1();
     }
 
     // 3. Distance of closest approach
@@ -228,19 +228,19 @@ float PhotonFragmentRemovalAlgorithm::GetEvidenceForMerge(const PhotonClusterCon
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PhotonFragmentRemovalAlgorithm::GetAffectedClusters(const PhotonClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
+StatusCode PhotonFragmentRemovalAlgorithm::GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
     Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const
 {
     if (clusterContactMap.end() == clusterContactMap.find(pBestDaughterCluster))
         return STATUS_CODE_FAILURE;
 
     affectedClusters.clear();
-    for (PhotonClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
+    for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
         // Store addresses of all clusters that were in contact with the newly deleted daughter cluster
         if (iterI->first == pBestDaughterCluster)
         {
-            for (PhotonClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
+            for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
             {
                 affectedClusters.insert(iterJ->GetParentCluster());
             }
@@ -248,7 +248,7 @@ StatusCode PhotonFragmentRemovalAlgorithm::GetAffectedClusters(const PhotonClust
         }
 
         // Also store addresses of all clusters that contained either the parent or daughter clusters in their own ClusterContactVectors
-        for (PhotonClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
+        for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
         {
             if ((iterJ->GetParentCluster() == pBestParentCluster) || (iterJ->GetParentCluster() == pBestDaughterCluster))
             {
@@ -262,94 +262,30 @@ StatusCode PhotonFragmentRemovalAlgorithm::GetAffectedClusters(const PhotonClust
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-PhotonClusterContact::PhotonClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster) :
-    m_pDaughterCluster(pDaughterCluster),
-    m_pParentCluster(pParentCluster),
-    m_nContactLayers(0),
-    m_contactFraction(0.f),
-    m_closeHitFraction1(0.f),
-    m_closeHitFraction2(0.f),
-    m_distanceToClosestHit(std::numeric_limits<float>::max())
-{
-    m_coneFraction = FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, m_coneCosineHalfAngle);
-
-    (void) FragmentRemovalHelper::GetClusterContactDetails(pDaughterCluster, pParentCluster, m_distanceThreshold, m_nContactLayers, m_contactFraction);
-
-    this->HitDistanceComparison(pDaughterCluster, pParentCluster);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void PhotonClusterContact::HitDistanceComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster)
-{
-    static const float closeHitDistance1Squared(m_closeHitDistance1 * m_closeHitDistance1);
-    static const float closeHitDistance2Squared(m_closeHitDistance2 * m_closeHitDistance2);
-
-    // Calculate all hit distance properties in a single loop, for efficiency
-    unsigned int nCloseHits1(0), nCloseHits2(0);
-    float minDistanceSquared(std::numeric_limits<float>::max());
-
-    const OrderedCaloHitList &orderedCaloHitListI(pDaughterCluster->GetOrderedCaloHitList());
-    const OrderedCaloHitList &orderedCaloHitListJ(pParentCluster->GetOrderedCaloHitList());
-
-    // Loop over hits in daughter cluster
-    for (OrderedCaloHitList::const_iterator iterI = orderedCaloHitListI.begin(), iterIEnd = orderedCaloHitListI.end(); iterI != iterIEnd; ++iterI)
-    {
-        for (CaloHitList::const_iterator hitIterI = iterI->second->begin(), hitIterIEnd = iterI->second->end(); hitIterI != hitIterIEnd; ++hitIterI)
-        {
-            bool isCloseHit1(false), isCloseHit2(false);
-            const CartesianVector &positionVectorI((*hitIterI)->GetPositionVector());
-
-            // Compare each hit in daughter cluster with those in parent cluster
-            for (OrderedCaloHitList::const_iterator iterJ = orderedCaloHitListJ.begin(), iterJEnd = orderedCaloHitListJ.end(); iterJ != iterJEnd; ++iterJ)
-            {
-                for (CaloHitList::const_iterator hitIterJ = iterJ->second->begin(), hitIterJEnd = iterJ->second->end(); hitIterJ != hitIterJEnd; ++hitIterJ)
-                {
-                    const float distanceSquared((positionVectorI - (*hitIterJ)->GetPositionVector()).GetMagnitudeSquared());
-
-                    if (!isCloseHit1 && (distanceSquared < closeHitDistance1Squared))
-                        isCloseHit1 = true;
-
-                    if (!isCloseHit2 && (distanceSquared < closeHitDistance2Squared))
-                        isCloseHit2 = true;
-
-                    if (distanceSquared < minDistanceSquared)
-                        minDistanceSquared = distanceSquared;
-                }
-            }
-
-            if (isCloseHit1)
-                nCloseHits1++;
-
-            if (isCloseHit2)
-                nCloseHits2++;
-        }
-    }
-
-    const unsigned int nDaughterCaloHits(pDaughterCluster->GetNCaloHits());
-
-    if (0 == nDaughterCaloHits)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    m_distanceToClosestHit = std::sqrt(minDistanceSquared);
-    m_closeHitFraction1 = static_cast<float>(nCloseHits1) / static_cast<float>(nDaughterCaloHits);
-    m_closeHitFraction2 = static_cast<float>(nCloseHits2) / static_cast<float>(nDaughterCaloHits);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float PhotonClusterContact::m_distanceThreshold = 2.f;
-float PhotonClusterContact::m_coneCosineHalfAngle = 0.95f;
-float PhotonClusterContact::m_closeHitDistance1 = 40.f;
-float PhotonClusterContact::m_closeHitDistance2 = 20.f;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PhotonFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    // Cluster contact parameters
+    m_contactParameters.m_coneCosineHalfAngle1 = 0.95f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeCosineHalfAngle1", m_contactParameters.m_coneCosineHalfAngle1));
+
+    m_contactParameters.m_closeHitDistance1 = 40.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CloseHitDistance1", m_contactParameters.m_closeHitDistance1));
+
+    m_contactParameters.m_closeHitDistance2 = 20.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CloseHitDistance2", m_contactParameters.m_closeHitDistance2));
+
+    m_contactParameters.m_minCosOpeningAngle = 0.95f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCosOpeningAngle", m_contactParameters.m_minCosOpeningAngle));
+
+    m_contactParameters.m_distanceThreshold = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceThreshold", m_contactParameters.m_distanceThreshold));
+
     m_nMaxPasses = 200;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NMaxPasses", m_nMaxPasses));
@@ -397,9 +333,9 @@ StatusCode PhotonFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ContactCutNLayers", m_contactCutNLayers));
 
-    m_contactCutConeFraction = 0.5f;
+    m_contactCutConeFraction1 = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ContactCutConeFraction", m_contactCutConeFraction));
+        "ContactCutConeFraction1", m_contactCutConeFraction1));
 
     m_contactCutCloseHitFraction1 = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -419,9 +355,9 @@ StatusCode PhotonFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHan
         "ContactEvidenceFraction", m_contactEvidenceFraction));
 
     // Cone evidence
-    m_coneEvidenceFraction = 0.5f;
+    m_coneEvidenceFraction1 = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ConeEvidenceFraction", m_coneEvidenceFraction));
+        "ConeEvidenceFraction1", m_coneEvidenceFraction1));
 
     // Distance of closest approach evidence
     m_distanceEvidence1 = 100.f;
@@ -459,19 +395,6 @@ StatusCode PhotonFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     m_minEvidence = 2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinEvidence", m_minEvidence));
-
-    // Photon cluster contact parameters
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "DistanceThreshold", PhotonClusterContact::m_distanceThreshold));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ConeCosineHalfAngle", PhotonClusterContact::m_coneCosineHalfAngle));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "CloseHitDistance1", PhotonClusterContact::m_closeHitDistance1));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "CloseHitDistance2", PhotonClusterContact::m_closeHitDistance2));
 
     return STATUS_CODE_SUCCESS;
 }

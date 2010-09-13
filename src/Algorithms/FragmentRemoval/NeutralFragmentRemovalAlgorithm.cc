@@ -18,24 +18,24 @@ StatusCode NeutralFragmentRemovalAlgorithm::Run()
     bool isFirstPass(true), shouldRecalculate(true);
 
     ClusterList affectedClusters;
-    ClusterContactMap clusterContactMap;
+    NeutralClusterContactMap neutralClusterContactMap;
 
     while ((nPasses++ < m_nMaxPasses) && shouldRecalculate)
     {
         shouldRecalculate = false;
         Cluster *pBestParentCluster(NULL), *pBestDaughterCluster(NULL);
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterContactMap(isFirstPass, affectedClusters, clusterContactMap));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetNeutralClusterContactMap(isFirstPass, affectedClusters, neutralClusterContactMap));
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterMergingCandidates(clusterContactMap, pBestParentCluster,
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterMergingCandidates(neutralClusterContactMap, pBestParentCluster,
             pBestDaughterCluster));
 
         if ((NULL != pBestParentCluster) && (NULL != pBestDaughterCluster))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetAffectedClusters(clusterContactMap, pBestParentCluster,
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetAffectedClusters(neutralClusterContactMap, pBestParentCluster,
                 pBestDaughterCluster, affectedClusters));
 
-            clusterContactMap.erase(clusterContactMap.find(pBestDaughterCluster));
+            neutralClusterContactMap.erase(neutralClusterContactMap.find(pBestDaughterCluster));
             shouldRecalculate = true;
 
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster,
@@ -48,8 +48,8 @@ StatusCode NeutralFragmentRemovalAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode NeutralFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters,
-    ClusterContactMap &clusterContactMap) const
+StatusCode NeutralFragmentRemovalAlgorithm::GetNeutralClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters,
+    NeutralClusterContactMap &neutralClusterContactMap) const
 {
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
@@ -64,10 +64,10 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPa
             if (affectedClusters.end() == affectedClusters.find(pDaughterCluster))
                 continue;
 
-            ClusterContactMap::iterator pastEntryIter = clusterContactMap.find(pDaughterCluster);
+            NeutralClusterContactMap::iterator pastEntryIter = neutralClusterContactMap.find(pDaughterCluster);
 
-            if (clusterContactMap.end() != pastEntryIter)
-                clusterContactMap.erase(clusterContactMap.find(pDaughterCluster));
+            if (neutralClusterContactMap.end() != pastEntryIter)
+                neutralClusterContactMap.erase(neutralClusterContactMap.find(pDaughterCluster));
         }
 
         // Apply simple daughter selection cuts
@@ -88,11 +88,11 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPa
             if (!pParentCluster->GetAssociatedTrackList().empty() || pParentCluster->IsPhotonFast())
                 continue;
 
-            const ClusterContact clusterContact(pDaughterCluster, pParentCluster);
+            const NeutralClusterContact neutralClusterContact(pDaughterCluster, pParentCluster, m_contactParameters);
 
-            if (this->PassesClusterContactCuts(clusterContact))
+            if (this->PassesClusterContactCuts(neutralClusterContact))
             {
-                clusterContactMap[pDaughterCluster].push_back(clusterContact);
+                neutralClusterContactMap[pDaughterCluster].push_back(neutralClusterContact);
             }
         }
     }
@@ -125,51 +125,51 @@ bool NeutralFragmentRemovalAlgorithm::IsPhotonLike(Cluster *const pDaughterClust
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool NeutralFragmentRemovalAlgorithm::PassesClusterContactCuts(const ClusterContact &clusterContact) const
+bool NeutralFragmentRemovalAlgorithm::PassesClusterContactCuts(const NeutralClusterContact &neutralClusterContact) const
 {
-    if (clusterContact.GetDistanceToClosestHit() > m_contactCutMaxDistance)
+    if (neutralClusterContact.GetDistanceToClosestHit() > m_contactCutMaxDistance)
         return false;
 
-    if ((clusterContact.GetNContactLayers() > m_contactCutNLayers) ||
-        (clusterContact.GetConeFraction1() > m_contactCutConeFraction1) ||
-        (clusterContact.GetCloseHitFraction1() > m_contactCutCloseHitFraction1) ||
-        (clusterContact.GetCloseHitFraction2() > m_contactCutCloseHitFraction2))
+    if ((neutralClusterContact.GetNContactLayers() > m_contactCutNLayers) ||
+        (neutralClusterContact.GetConeFraction1() > m_contactCutConeFraction1) ||
+        (neutralClusterContact.GetCloseHitFraction1() > m_contactCutCloseHitFraction1) ||
+        (neutralClusterContact.GetCloseHitFraction2() > m_contactCutCloseHitFraction2))
     {
         return true;
     }
 
-    return ((clusterContact.GetDistanceToClosestHit() < m_contactCutNearbyDistance) &&
-        (clusterContact.GetCloseHitFraction2() > m_contactCutNearbyCloseHitFraction2));
+    return ((neutralClusterContact.GetDistanceToClosestHit() < m_contactCutNearbyDistance) &&
+        (neutralClusterContact.GetCloseHitFraction2() > m_contactCutNearbyCloseHitFraction2));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
+StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const NeutralClusterContactMap &neutralClusterContactMap, Cluster *&pBestParentCluster,
     Cluster *&pBestDaughterCluster) const
 {
     float highestEvidence(m_minEvidence);
     float highestEvidenceParentEnergy(0.);
 
-    for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
+    for (NeutralClusterContactMap::const_iterator iterI = neutralClusterContactMap.begin(), iterIEnd = neutralClusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
         Cluster *pDaughterCluster = iterI->first;
 
-        for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
+        for (NeutralClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
         {
-            ClusterContact clusterContact = *iterJ;
+            NeutralClusterContact neutralClusterContact = *iterJ;
 
-            if (pDaughterCluster != clusterContact.GetDaughterCluster())
+            if (pDaughterCluster != neutralClusterContact.GetDaughterCluster())
                 throw StatusCodeException(STATUS_CODE_FAILURE);
 
-            const float evidence(this->GetEvidenceForMerge(clusterContact));
+            const float evidence(this->GetEvidenceForMerge(neutralClusterContact));
 
-            const float parentEnergy(clusterContact.GetParentCluster()->GetHadronicEnergy());
+            const float parentEnergy(neutralClusterContact.GetParentCluster()->GetHadronicEnergy());
 
             if ((evidence > highestEvidence) || ((evidence == highestEvidence) && (parentEnergy > highestEvidenceParentEnergy)))
             {
                 highestEvidence = evidence;
                 pBestDaughterCluster = pDaughterCluster;
-                pBestParentCluster = clusterContact.GetParentCluster();
+                pBestParentCluster = neutralClusterContact.GetParentCluster();
                 highestEvidenceParentEnergy = parentEnergy;
             }
         }
@@ -180,34 +180,34 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetClusterMergingCandidates(const Cl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float NeutralFragmentRemovalAlgorithm::GetEvidenceForMerge(const ClusterContact &clusterContact) const
+float NeutralFragmentRemovalAlgorithm::GetEvidenceForMerge(const NeutralClusterContact &neutralClusterContact) const
 {
     // Calculate a measure of the evidence that the daughter candidate cluster is a fragment of the parent candidate cluster:
 
     // 1. Layers in contact
     float contactEvidence(0.f);
-    if (clusterContact.GetNContactLayers() > m_contactEvidenceNLayers1)
+    if (neutralClusterContact.GetNContactLayers() > m_contactEvidenceNLayers1)
     {
         contactEvidence = m_contactEvidence1;
     }
-    else if (clusterContact.GetNContactLayers() > m_contactEvidenceNLayers2)
+    else if (neutralClusterContact.GetNContactLayers() > m_contactEvidenceNLayers2)
     {
         contactEvidence = m_contactEvidence2;
     }
-    else if (clusterContact.GetNContactLayers() > m_contactEvidenceNLayers3)
+    else if (neutralClusterContact.GetNContactLayers() > m_contactEvidenceNLayers3)
     {
         contactEvidence = m_contactEvidence3;
     }
-    contactEvidence *= (1.f + clusterContact.GetContactFraction());
+    contactEvidence *= (1.f + neutralClusterContact.GetContactFraction());
 
     // 2. Cone extrapolation
     float coneEvidence(0.f);
-    if (clusterContact.GetConeFraction1() > m_coneEvidenceFraction1)
+    if (neutralClusterContact.GetConeFraction1() > m_coneEvidenceFraction1)
     {
-        coneEvidence = clusterContact.GetConeFraction1() + clusterContact.GetConeFraction2() + clusterContact.GetConeFraction3();
+        coneEvidence = neutralClusterContact.GetConeFraction1() + neutralClusterContact.GetConeFraction2() + neutralClusterContact.GetConeFraction3();
 
         static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-        const PseudoLayer daughterInnerLayer(clusterContact.GetDaughterCluster()->GetInnerPseudoLayer());
+        const PseudoLayer daughterInnerLayer(neutralClusterContact.GetDaughterCluster()->GetInnerPseudoLayer());
 
         if (daughterInnerLayer < nECalLayers)
             coneEvidence *= m_coneEvidenceECalMultiplier;
@@ -215,11 +215,11 @@ float NeutralFragmentRemovalAlgorithm::GetEvidenceForMerge(const ClusterContact 
 
     // 3. Distance of closest approach
     float distanceEvidence(0.f);
-    if (clusterContact.GetDistanceToClosestHit() < m_distanceEvidence1)
+    if (neutralClusterContact.GetDistanceToClosestHit() < m_distanceEvidence1)
     {
-        distanceEvidence = (m_distanceEvidence1 - clusterContact.GetDistanceToClosestHit()) / m_distanceEvidence1d;
-        distanceEvidence += m_distanceEvidenceCloseFraction1Multiplier * clusterContact.GetCloseHitFraction1();
-        distanceEvidence += m_distanceEvidenceCloseFraction2Multiplier * clusterContact.GetCloseHitFraction2();
+        distanceEvidence = (m_distanceEvidence1 - neutralClusterContact.GetDistanceToClosestHit()) / m_distanceEvidence1d;
+        distanceEvidence += m_distanceEvidenceCloseFraction1Multiplier * neutralClusterContact.GetCloseHitFraction1();
+        distanceEvidence += m_distanceEvidenceCloseFraction2Multiplier * neutralClusterContact.GetCloseHitFraction2();
     }
 
     return ((m_contactWeight * contactEvidence) + (m_coneWeight * coneEvidence) + (m_distanceWeight * distanceEvidence));
@@ -227,27 +227,27 @@ float NeutralFragmentRemovalAlgorithm::GetEvidenceForMerge(const ClusterContact 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode NeutralFragmentRemovalAlgorithm::GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
+StatusCode NeutralFragmentRemovalAlgorithm::GetAffectedClusters(const NeutralClusterContactMap &neutralClusterContactMap, Cluster *const pBestParentCluster,
     Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const
 {
-    if (clusterContactMap.end() == clusterContactMap.find(pBestDaughterCluster))
+    if (neutralClusterContactMap.end() == neutralClusterContactMap.find(pBestDaughterCluster))
         return STATUS_CODE_FAILURE;
 
     affectedClusters.clear();
-    for (ClusterContactMap::const_iterator iterI = clusterContactMap.begin(), iterIEnd = clusterContactMap.end(); iterI != iterIEnd; ++iterI)
+    for (NeutralClusterContactMap::const_iterator iterI = neutralClusterContactMap.begin(), iterIEnd = neutralClusterContactMap.end(); iterI != iterIEnd; ++iterI)
     {
         // Store addresses of all clusters that were in contact with the newly deleted daughter cluster
         if (iterI->first == pBestDaughterCluster)
         {
-            for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
+            for (NeutralClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
             {
                 affectedClusters.insert(iterJ->GetParentCluster());
             }
             continue;
         }
 
-        // Also store addresses of all clusters that contained either the parent or daughter clusters in their own ClusterContactVectors
-        for (ClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
+        // Also store addresses of all clusters that contained either the parent or daughter clusters in their own NeutralClusterContactVectors
+        for (NeutralClusterContactVector::const_iterator iterJ = iterI->second.begin(), iterJEnd = iterI->second.end(); iterJ != iterJEnd; ++iterJ)
         {
             if ((iterJ->GetParentCluster() == pBestParentCluster) || (iterJ->GetParentCluster() == pBestDaughterCluster))
             {
@@ -261,9 +261,49 @@ StatusCode NeutralFragmentRemovalAlgorithm::GetAffectedClusters(const ClusterCon
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+NeutralClusterContact::NeutralClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters) :
+    ClusterContact(pDaughterCluster, pParentCluster, parameters),
+    m_coneFraction2(FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, parameters.m_coneCosineHalfAngle2)),
+    m_coneFraction3(FragmentRemovalHelper::GetFractionOfHitsInCone(pDaughterCluster, pParentCluster, parameters.m_coneCosineHalfAngle3))
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode NeutralFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    // Cluster contact parameters
+    m_contactParameters.m_coneCosineHalfAngle1 = 0.9f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeCosineHalfAngle1", m_contactParameters.m_coneCosineHalfAngle1));
+
+    m_contactParameters.m_coneCosineHalfAngle2 = 0.95f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeCosineHalfAngle2", m_contactParameters.m_coneCosineHalfAngle2));
+
+    m_contactParameters.m_coneCosineHalfAngle3 = 0.985f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ConeCosineHalfAngle3", m_contactParameters.m_coneCosineHalfAngle3));
+
+    m_contactParameters.m_closeHitDistance1 = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CloseHitDistance1", m_contactParameters.m_closeHitDistance1));
+
+    m_contactParameters.m_closeHitDistance2 = 50.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "CloseHitDistance2", m_contactParameters.m_closeHitDistance2));
+
+    m_contactParameters.m_minCosOpeningAngle = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCosOpeningAngle", m_contactParameters.m_minCosOpeningAngle));
+
+    m_contactParameters.m_distanceThreshold = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "DistanceThreshold", m_contactParameters.m_distanceThreshold));
+
     m_nMaxPasses = 200;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NMaxPasses", m_nMaxPasses));
@@ -276,10 +316,6 @@ StatusCode NeutralFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     m_minDaughterHadronicEnergy = 0.025f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinDaughterHadronicEnergy", m_minDaughterHadronicEnergy));
-
-    m_minEvidence = 2.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinEvidence", m_minEvidence));
 
     // Photon-like cuts
     m_photonLikeMaxInnerLayer = 10;
@@ -393,6 +429,10 @@ StatusCode NeutralFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     m_distanceWeight = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DistanceWeight", m_distanceWeight));
+
+    m_minEvidence = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinEvidence", m_minEvidence));
 
     return STATUS_CODE_SUCCESS;
 }

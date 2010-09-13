@@ -132,12 +132,26 @@ class ClusterContact
 {
 public:
     /**
+     *  @brief  Parameters class
+     */
+    class Parameters
+    {
+    public:
+        float           m_coneCosineHalfAngle1;         ///< Cosine half angle for first cone comparison in cluster contact object
+        float           m_closeHitDistance1;            ///< First distance used to identify close hits in cluster contact object
+        float           m_closeHitDistance2;            ///< Second distance used to identify close hits in cluster contact object
+        float           m_minCosOpeningAngle;           ///< Min opening angle between two clusters to perform contact hit comparisons
+        float           m_distanceThreshold;            ///< Number of calorimeter cell-widths used to identify cluster contact layers
+    };
+
+    /**
      *  @brief  Constructor
      * 
      *  @param  pDaughterCluster address of the daughter candidate cluster
      *  @param  pParentCluster address of the parent candidate cluster
+     *  @param  parameters the cluster contact parameters
      */
-    ClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster);
+    ClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters);
 
     /**
      *  @brief  Get the address of the daughter candidate cluster
@@ -152,20 +166,6 @@ public:
      *  @return The address of the parent candidate cluster
      */
     Cluster *GetParentCluster() const;
-
-    /**
-     *  @brief  Get the parent cluster hadronic energy
-     * 
-     *  @return The parent cluster hadronic energy
-     */
-    float GetParentClusterEnergy() const;
-
-    /**
-     *  @brief  Get the sum of energies of tracks associated with parent cluster
-     * 
-     *  @return The sum of energies of tracks associated with parent cluster
-     */
-    float GetParentTrackEnergy() const;
 
     /**
      *  @brief  Get the number of contact layers for parent and daughter clusters two clusters
@@ -209,97 +209,26 @@ public:
      */
     float GetConeFraction1() const;
 
-    /**
-     *  @brief  Get the fraction of daughter hits that lie within specified cone 2 along parent direction
-     * 
-     *  @return The daughter cone fraction
-     */
-    float GetConeFraction2() const;
-
-    /**
-     *  @brief  Get the fraction of daughter hits that lie within specified cone 3 along parent direction
-     * 
-     *  @return The daughter cone fraction
-     */
-    float GetConeFraction3() const;
-
-    /**
-     *  @brief  Get the mean distance of daughter cluster from closest helix fix to parent associated tracks
-     * 
-     *  @return The mean daughter distance to the closest helix
-     */
-    float GetMeanDistanceToHelix() const;
-
-    /**
-     *  @brief  Get the closest distance between daughter cluster and helix fits to parent associated tracks
-     * 
-     *  @return The closest daughter distance to helix
-     */
-    float GetClosestDistanceToHelix() const;
-
-private:
+protected:
     /**
      *  @brief  Compare hits in daughter cluster with those in parent cluster to calculate minimum hit separation
      *          and close hit fractions. Calculate these properties in a single loop, for efficiency.
      * 
      *  @param  pDaughterCluster address of the daughter candidate cluster
      *  @param  pParentCluster address of the parent candidate cluster
+     *  @param  parameters the cluster contact parameters
      */
-    void HitDistanceComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster);
+    void HitDistanceComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters);
 
-    /**
-     *  @brief  Compare daughter cluster with helix fits to parent associated tracks
-     * 
-     *  @param  pDaughterCluster address of the daughter candidate cluster
-     *  @param  pParentCluster address of the parent candidate cluster
-     */
-    void ClusterHelixComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster);
+    Cluster            *m_pDaughterCluster;             ///< Address of the daughter candidate cluster
+    Cluster            *m_pParentCluster;               ///< Address of the parent candidate cluster
 
-    /**
-     *  @brief  Read the cluster contact settings
-     * 
-     *  @param  xmlHandle the relevant xml handle
-     */
-    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
-
-    Cluster                *m_pDaughterCluster;             ///< Address of the daughter candidate cluster
-    Cluster                *m_pParentCluster;               ///< Address of the parent candidate cluster
-
-    float                   m_parentClusterEnergy;          ///< The parent cluster hadronic energy
-    float                   m_parentTrackEnergy;            ///< Sum of energies of tracks associated with parent cluster
-
-    unsigned int            m_nContactLayers;               ///< The number of contact layers for parent and daughter clusters two clusters
-    float                   m_contactFraction;              ///< The ratio of the number of contact layers to the number of overlap layers
-
-    float                   m_closeHitFraction1;            ///< Fraction of daughter hits that lie within sepcified distance 1 of parent cluster
-    float                   m_closeHitFraction2;            ///< Fraction of daughter hits that lie within sepcified distance 2 of parent cluster
-    float                   m_distanceToClosestHit;         ///< Distance between closest hits in parent and daughter clusters, units mm
-
-    float                   m_coneFraction1;                ///< Fraction of daughter hits that lie within specified cone 1 along parent direction
-    float                   m_coneFraction2;                ///< Fraction of daughter hits that lie within specified cone 2 along parent direction
-    float                   m_coneFraction3;                ///< Fraction of daughter hits that lie within specified cone 3 along parent direction
-
-    float                   m_meanDistanceToHelix;          ///< Mean distance of daughter cluster from closest helix fit to parent associated tracks
-    float                   m_closestDistanceToHelix;       ///< Closest distance between daughter cluster and helix fits to parent associated tracks
-
-    static float            m_coneCosineHalfAngle1;         ///< Cosine half angle for first cone comparison in cluster contact object
-    static float            m_coneCosineHalfAngle2;         ///< Cosine half angle for second cone comparison in cluster contact object
-    static float            m_coneCosineHalfAngle3;         ///< Cosine half angle for third cone comparison in cluster contact object
-    static float            m_closeHitDistance1;            ///< First distance used to identify close hits in cluster contact object
-    static float            m_closeHitDistance2;            ///< Second distance used to identify close hits in cluster contact object
-
-    static float            m_minCosOpeningAngle;           ///< Min opening angle between two clusters to perform contact hit comparisons
-    static float            m_distanceThreshold;            ///< Number of calorimeter cell-widths used to identify cluster contact layers
-
-    static float            m_helixComparisonMipFractionCut;///< Mip fraction cut used in cluster contact helix comparison
-    static unsigned int     m_helixComparisonStartOffset;   ///< Start layer offset used in cluster contact helix comparison
-    static unsigned int     m_helixComparisonStartOffsetMip;///< Start layer offset used for mip-like clusters in helix comparison
-    static unsigned int     m_nHelixComparisonLayers;       ///< Max number of layers used in helix comparison for non mip-like clusters
-
-    static unsigned int     m_maxLayersCrossedByHelix;      ///< Max no. of layers crossed by helix between track projection and cluster
-    static float            m_maxTrackClusterDeltaZ;        ///< Max z separation between track projection and cluster
-
-    friend class FragmentRemovalHelper;
+    unsigned int        m_nContactLayers;               ///< The number of contact layers for parent and daughter clusters
+    float               m_contactFraction;              ///< The ratio of the number of contact layers to the number of overlap layers
+    float               m_coneFraction1;                ///< Fraction of daughter hits that lie within specified cone 1 along parent direction
+    float               m_closeHitFraction1;            ///< Fraction of daughter hits that lie within sepcified distance 1 of parent cluster
+    float               m_closeHitFraction2;            ///< Fraction of daughter hits that lie within sepcified distance 2 of parent cluster
+    float               m_distanceToClosestHit;         ///< Distance between closest hits in parent and daughter clusters, units mm
 };
 
 typedef std::vector<ClusterContact> ClusterContactVector;
@@ -317,20 +246,6 @@ inline Cluster *ClusterContact::GetDaughterCluster() const
 inline Cluster *ClusterContact::GetParentCluster() const
 {
     return m_pParentCluster;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float ClusterContact::GetParentClusterEnergy() const
-{
-    return m_parentClusterEnergy;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float ClusterContact::GetParentTrackEnergy() const
-{
-    return m_parentTrackEnergy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -373,34 +288,6 @@ inline float ClusterContact::GetCloseHitFraction2() const
 inline float ClusterContact::GetConeFraction1() const
 {
     return m_coneFraction1;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float ClusterContact::GetConeFraction2() const
-{
-    return m_coneFraction2;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float ClusterContact::GetConeFraction3() const
-{
-    return m_coneFraction3;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float ClusterContact::GetMeanDistanceToHelix() const
-{
-    return m_meanDistanceToHelix;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float ClusterContact::GetClosestDistanceToHelix() const
-{
-    return m_closestDistanceToHelix;
 }
 
 } // namespace pandora
