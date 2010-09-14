@@ -31,7 +31,7 @@ private:
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     void VisualizeMCParticleList();
-    void VisualizeCurrentOrderedCaloHitsList(std::string caloHitListName);
+    void VisualizeOrderedCaloHitsList(std::string caloHitListName);
     void VisualizeCurrentTrackList();
     void VisualizeClusterList(std::string clusterListName);
     void VisualizeCurrentParticleFlowList();

@@ -20,21 +20,21 @@ StatusCode VisualMonitoringAlgorithm::Run()
 
     // Show current ordered calo hit list
     if (m_hits)
-        VisualizeCurrentOrderedCaloHitsList("currentCaloHits");
+    {
+        std::string orderedCaloHitListName;
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentOrderedCaloHitListName(*this, orderedCaloHitListName))
+            VisualizeOrderedCaloHitsList(orderedCaloHitListName);
+        else
+            std::cout << "VisualMonitoringAlgorithm/ No current ordered calohitlist with name '" << orderedCaloHitListName << "' found." << std::endl;
+        
+    }
 
     if( !m_inputCaloHitListNames.empty() )
         for( StringVector::iterator itInpCaloHitListName = m_inputCaloHitListNames.begin(), itInpCaloHitListNameEnd = m_inputCaloHitListNames.end(); 
              itInpCaloHitListName != itInpCaloHitListNameEnd; ++itInpCaloHitListName )
         {
-            std::string originalCaloHitListName;
             std::string inputCaloHitListName = (*itInpCaloHitListName);
-            if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentOrderedCaloHitListName(*this, originalCaloHitListName))
-                continue;
-            if (STATUS_CODE_SUCCESS != PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, inputCaloHitListName))
-                continue;
-            VisualizeCurrentOrderedCaloHitsList(inputCaloHitListName);
-            if (STATUS_CODE_SUCCESS != PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, originalCaloHitListName))
-                std::cout << "VisualMonitoringAlgorithm/ Error at putting back the original CaloHitList" << std::endl;
+            VisualizeOrderedCaloHitsList(inputCaloHitListName);
         }
 
 
@@ -78,12 +78,12 @@ void VisualMonitoringAlgorithm::VisualizeMCParticleList()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void VisualMonitoringAlgorithm::VisualizeCurrentOrderedCaloHitsList(std::string caloHitListName)
+void VisualMonitoringAlgorithm::VisualizeOrderedCaloHitsList(std::string caloHitListName)
 {
     OrderedCaloHitList orderedCaloHitList;
 
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList))
+    if (STATUS_CODE_SUCCESS != PandoraContentApi::GetOrderedCaloHitList(*this, caloHitListName, pOrderedCaloHitList))
         return;
 
     orderedCaloHitList = (*pOrderedCaloHitList);
