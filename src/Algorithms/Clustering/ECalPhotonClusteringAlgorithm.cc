@@ -20,6 +20,9 @@
 #include <sstream>
 #include <assert.h>
 
+#include <string>
+#include <algorithm>
+
 using namespace pandora;
 
 PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::_instance = 0;
@@ -46,7 +49,7 @@ ECalPhotonClusteringAlgorithm::ECalPhotonClusteringAlgorithm()
     : m_nECalLayers(0),
       m_producePrintoutStatements(0),
       m_preserveClusters(false),
-      m_produceConfigurationFiles(-1)
+      m_produceConfigurationFiles("")
 {
     if (m_producePrintoutStatements > 0)
         std::cout << "constructor" << std::endl;
@@ -70,10 +73,24 @@ StatusCode ECalPhotonClusteringAlgorithm::Initialize()
     m_nECalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
 
 
+    const bool produceSignalConfigFile     = m_produceConfigurationFiles.find("signal")     != std::string::npos;
+    const bool produceBackgroundConfigFile = m_produceConfigurationFiles.find("background") != std::string::npos;
+    const bool combineConfigFiles          = m_produceConfigurationFiles.find("combine")    != std::string::npos;
 
-    if( m_produceConfigurationFiles <= -1 )
+    if( !produceSignalConfigFile && !produceBackgroundConfigFile )
     {
-        PhotonIDLikelihoodCalculator::Instance()->LoadXml( m_configurationFileNameSig, m_configurationFileNameBkg );
+        PhotonIDLikelihoodCalculator::Instance()->LoadXml( m_configurationFileNamesSig, m_configurationFileNamesBkg, combineConfigFiles );
+
+        // normalize the likelihood histograms
+        PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
+
+        plc->rmsSig.Scale( 1.f/plc->rmsSig.GetSumOfEntries() );
+        plc->fracSig.Scale( 1.f/plc->fracSig.GetSumOfEntries() );
+        plc->startSig.Scale( 1.f/plc->startSig.GetSumOfEntries() );
+
+        plc->rmsBkg.Scale( 1.f/plc->rmsBkg.GetSumOfEntries() );
+        plc->fracBkg.Scale( 1.f/plc->fracBkg.GetSumOfEntries() );
+        plc->startBkg.Scale( 1.f/plc->startBkg.GetSumOfEntries() );
     }
     else
     {
@@ -399,14 +416,16 @@ StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
                                                                                                          "MonitoringFileName", m_monitoringFileName));
     // xml configuration input filename background
-    m_configurationFileNameBkg = "photonClusteringConfiguration_Bkg.xml";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-                                                                                                         "ConfigurationFileNameBkg", m_configurationFileNameBkg));
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+                                                                                                                  "ConfigurationFileNameBkg", m_configurationFileNamesBkg));
+    if( m_configurationFileNamesBkg.empty() )
+        m_configurationFileNamesBkg.push_back("photonClusteringConfiguration_Bkg.xml");
 
     // xml configuration input filename signal
-    m_configurationFileNameSig = "photonClusteringConfiguration_Sig.xml";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-                                                                                                         "ConfigurationFileNameSig", m_configurationFileNameSig));
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+                                                                                                                  "ConfigurationFileNameSig", m_configurationFileNamesSig));
+    if( m_configurationFileNamesSig.empty() )
+        m_configurationFileNamesSig.push_back("photonClusteringConfiguration_Sig.xml");
 
     // cut on pid (likelihood ratio)
     m_likelihoodRatioCut = 0.5;
@@ -419,10 +438,14 @@ StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
                                                                                                          "CheatingTrueFractionForLikelihoodRatio", m_cheatingTrueFractionForPid));
 
     // produce configuration file
-    // 0... signal events, 1 ... background events, 2 ... signal and background events (to be split by "fraction" always : >=0.5 for signal, < 0.5 for background )
-    m_produceConfigurationFiles = -1;
+    // "signal" for signal events, "background" for background events, "signal background" for signal and background events (to be split by "fraction" always : >=0.5 for signal, < 0.5 for background )
+    // "combine" for combining a number of signal events and write them out into the last filename(s) [for signal and for background] given 
+    m_produceConfigurationFiles = "";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
                                                                                                          "ProduceConfiguration", m_produceConfigurationFiles));
+
+    std::transform(m_produceConfigurationFiles.begin(), m_produceConfigurationFiles.end(), m_produceConfigurationFiles.begin(), ::tolower);
+
 
     m_energyBins.clear();
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "EnergyBins", m_energyBins));
@@ -542,25 +565,29 @@ void ECalPhotonClusteringAlgorithm::CreateOrSaveLikelihoodHistograms(bool create
     // write config files (if enabled)
     if( !create )
     {
+        const bool produceSignalConfigFile     = m_produceConfigurationFiles.find("signal")     != std::string::npos;
+        const bool produceBackgroundConfigFile = m_produceConfigurationFiles.find("background") != std::string::npos;
+        const bool combineConfigFiles          = m_produceConfigurationFiles.find("combine")    != std::string::npos;
+
         PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
-        if( m_produceConfigurationFiles==0 || m_produceConfigurationFiles==2 ) // write signal file
+        if( produceSignalConfigFile || combineConfigFiles ) // write signal file
         {
             //            plc->energySig.Scale( plc->energySig.GetSumOfEntries() );
-            plc->rmsSig.Scale( plc->rmsSig.GetSumOfEntries() );
-            plc->fracSig.Scale( plc->fracSig.GetSumOfEntries() );
-            plc->startSig.Scale( plc->startSig.GetSumOfEntries() );
+//             plc->rmsSig.Scale( 1.f/plc->rmsSig.GetSumOfEntries() );
+//             plc->fracSig.Scale( 1.f/plc->fracSig.GetSumOfEntries() );
+//             plc->startSig.Scale( 1.f/plc->startSig.GetSumOfEntries() );
 
-            plc->WriteXmlSig( m_configurationFileNameSig );
+            plc->WriteXmlSig( m_configurationFileNamesSig.back() );
         }
 
-        if( m_produceConfigurationFiles==1 || m_produceConfigurationFiles==2 ) // write background file
+        if( produceBackgroundConfigFile  || combineConfigFiles ) // write background file
         {
             //            plc->energyBkg.Scale( plc->energyBkg.GetSumOfEntries() );
-            plc->rmsBkg.Scale( plc->rmsBkg.GetSumOfEntries() );
-            plc->fracBkg.Scale( plc->fracBkg.GetSumOfEntries() );
-            plc->startBkg.Scale( plc->startBkg.GetSumOfEntries() );
+//             plc->rmsBkg.Scale( 1.f/plc->rmsBkg.GetSumOfEntries() );
+//             plc->fracBkg.Scale( 1.f/plc->fracBkg.GetSumOfEntries() );
+//             plc->startBkg.Scale( 1.f/plc->startBkg.GetSumOfEntries() );
 
-            plc->WriteXmlBkg( m_configurationFileNameBkg );
+            plc->WriteXmlBkg( m_configurationFileNamesBkg.back());
         }
     }
 }
@@ -790,7 +817,10 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
     }
 
 
-    if(m_produceConfigurationFiles >= 0)
+    static const bool produceSignalConfigFile     = m_produceConfigurationFiles.find("signal")     != std::string::npos;
+    static const bool produceBackgroundConfigFile = m_produceConfigurationFiles.find("background") != std::string::npos;
+
+    if(produceSignalConfigFile || produceBackgroundConfigFile)
     {
         PhotonIDLikelihoodCalculator* plc = PhotonIDLikelihoodCalculator::Instance();
         if( (peak.energy>0.2) && photonFraction<1.0 && showerStart<10. && peak.rms<5.)
@@ -1579,11 +1609,30 @@ void PhotonIDLikelihoodCalculator::WriteXmlBkg( const std::string& fileName )
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PhotonIDLikelihoodCalculator::LoadXml( const std::string& fileNameSig, const std::string& fileNameBkg )
+void PhotonIDLikelihoodCalculator::LoadXml( const StringVector& fileNamesSig, const StringVector& fileNamesBkg, bool dontTakeLastFileName )
 {
     std::cout << "Load photon clustering configuration / loadXml" << std::endl;
-    ReadXmlSignal( fileNameSig );
-    ReadXmlBackground( fileNameBkg );
+
+    // if files are to be combined, don't use the last filename, since this is reserved for the output then
+    StringVector::const_iterator it = fileNamesSig.begin(), itEnd = fileNamesSig.end();
+    if( dontTakeLastFileName )
+        itEnd--;
+
+    for( ; it != itEnd; ++it )
+    {
+        ReadXmlSignal( (*it) );
+    }
+
+    // if files are to be combined, don't use the last filename, since this is reserved for the output then
+    it = fileNamesBkg.begin();
+    itEnd = fileNamesBkg.end();
+    if( dontTakeLastFileName )
+        itEnd--;
+
+    for( ; it != itEnd; ++it )
+    {
+        ReadXmlBackground( (*it) );
+    }
 
     PhotonIDLikelihoodCalculator::fromXml = true;
 }
@@ -1597,14 +1646,46 @@ void PhotonIDLikelihoodCalculator::ReadXmlSignal( const std::string& fileNameSig
     docSig.LoadFile();
 
     TiXmlElement * loadElement = docSig.FirstChildElement();
+    
+    if( !loadElement )
+    {
+        std::cout << std::endl;
+        std::cout << "ECalPhotonClustering/Signal configuration-file: '" << fileNameSig 
+                  << "' not found (or xml element could not be read). \nIn case you want to combine several config files to one, please set the option "
+                  << "\n<ProduceConfiguration>combine</ProduceConfiguration> in the configuration of the ECalPhotonClustering." << std::endl;
+        std::cout << std::endl;
+        throw FileNotFound();
+    }
 
-    energySig.ReadFromXml( *loadElement );
-    loadElement = loadElement->NextSiblingElement();
-    rmsSig.ReadFromXml   ( *loadElement );
-    loadElement = loadElement->NextSiblingElement();
-    fracSig.ReadFromXml  ( *loadElement );
-    loadElement = loadElement->NextSiblingElement();
-    startSig.ReadFromXml ( *loadElement );
+    if( energySig.GetAxis().GetNumberBins() == 0 )
+    {
+        energySig.ReadFromXml( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        rmsSig.ReadFromXml   ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        fracSig.ReadFromXml  ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        startSig.ReadFromXml ( *loadElement );
+    }
+    else
+    {
+        Histogram1D loadEnergySig;
+        Histogram2D loadRmsSig;
+        Histogram2D loadFracSig;
+        Histogram2D loadStartSig;
+        loadEnergySig.ReadFromXml( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        loadRmsSig.ReadFromXml   ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        loadFracSig.ReadFromXml  ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        loadStartSig.ReadFromXml ( *loadElement );
+        energySig.Add( loadEnergySig );
+        rmsSig.Add(loadRmsSig);
+        fracSig.Add(loadFracSig);
+        startSig.Add(loadStartSig);
+    }
+
 
     energySig.Print( std::cout );
 
@@ -1622,14 +1703,48 @@ void PhotonIDLikelihoodCalculator::ReadXmlBackground( const std::string& fileNam
     TiXmlDocument docBkg(fileNameBkg);
     docBkg.LoadFile();
     TiXmlElement * loadElement = docBkg.FirstChildElement();
+
+    if( !loadElement )
+    {
+        std::cout << std::endl;
+        std::cout << "ECalPhotonClustering/Background configuration-file: '" << fileNameBkg
+                  << "' not found (or xml element could not be read). \nIn case you want to combine several config files to one, please set the option "
+                  << "\n<ProduceConfiguration>combine</ProduceConfiguration> in the configuration of the ECalPhotonClustering." << std::endl;
+        std::cout << std::endl;
+        throw FileNotFound();
+    }
+
     
-    energyBkg.ReadFromXml( *loadElement );
-    loadElement = loadElement->NextSiblingElement();
-    rmsBkg.ReadFromXml   ( *loadElement );
-    loadElement = loadElement->NextSiblingElement();
-    fracBkg.ReadFromXml  ( *loadElement );
-    loadElement = loadElement->NextSiblingElement();
-    startBkg.ReadFromXml ( *loadElement );
+    if( energyBkg.GetAxis().GetNumberBins() == 0 )
+    {
+        energyBkg.ReadFromXml( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        rmsBkg.ReadFromXml   ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        fracBkg.ReadFromXml  ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        startBkg.ReadFromXml ( *loadElement );
+    }
+    else
+    {
+        Histogram1D loadEnergyBkg;
+        Histogram2D loadRmsBkg;
+        Histogram2D loadFracBkg;
+        Histogram2D loadStartBkg;
+        loadEnergyBkg.ReadFromXml( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        loadRmsBkg.ReadFromXml   ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        loadFracBkg.ReadFromXml  ( *loadElement );
+        loadElement = loadElement->NextSiblingElement();
+        loadStartBkg.ReadFromXml ( *loadElement );
+        energyBkg.Add( loadEnergyBkg );
+        rmsBkg.Add(loadRmsBkg);
+        fracBkg.Add(loadFracBkg);
+        startBkg.Add(loadStartBkg);
+    }
+
+
 
     energyBkg.Print( std::cout );
 
@@ -1818,7 +1933,7 @@ int Axis::GetBinForValue( float value )
 	
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-int Axis::GetNumberBins()
+int Axis::GetNumberBins() const
 {
     return numberBins;
 }
@@ -1929,7 +2044,7 @@ void Axis::Print( std::ostream& os )
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram1D::Histogram1D( const std::string& histogramName, int numberBins, float from, float to )
+Histogram1D::Histogram1D( const std::string histogramName, int numberBins, float from, float to )
 {
     // create empty bins
 
@@ -1940,7 +2055,7 @@ Histogram1D::Histogram1D( const std::string& histogramName, int numberBins, floa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram1D::SetDimensions( const std::string& histogramName, int numberBins, float from, float to )
+void Histogram1D::SetDimensions( const std::string histogramName, int numberBins, float from, float to )
 {
     // create empty bins
     name = histogramName;
@@ -1951,7 +2066,7 @@ void Histogram1D::SetDimensions( const std::string& histogramName, int numberBin
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram1D::SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders )
+void Histogram1D::SetDimensions( const std::string histogramName, const std::vector<float>& binBorders )
 {
     // create empty bins
     name = histogramName;
@@ -2036,8 +2151,26 @@ void Histogram1D::Scale( float value )
     for( MapOfBins::iterator itBin = bins.begin(), itBinEnd = bins.end(); itBin != itBinEnd; ++itBin )
     {
         float binValue = itBin->second;
-        itBin->second = binValue/value;
+        itBin->second = binValue*value;
     }
+    sumOfWeights *= value;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram1D::Add( Histogram1D &histogramToAdd )
+{
+    if( histogramToAdd.axis.GetNumberBins() != axis.GetNumberBins() || histogramToAdd.axis.GetMinValue() != axis.GetMinValue() || histogramToAdd.axis.GetMaxValue() != axis.GetMaxValue() )
+        throw DifferentBinning();
+
+    MapOfBins::iterator itBinH2 = histogramToAdd.bins.begin(), itBinH2End = histogramToAdd.bins.end();
+    MapOfBins::iterator itBin = bins.begin(), itBinEnd = bins.end();
+    for( ; itBin != itBinEnd || itBinH2 != itBinH2End ; ++itBin, ++itBinH2 )
+    {
+        float binValue = itBin->second;
+        itBin->second = binValue + itBinH2->second;
+    }
+    sumOfWeights += histogramToAdd.sumOfWeights;
 }
 
 
@@ -2153,7 +2286,7 @@ void Histogram1D::Print( std::ostream& os )
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram2D::Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
+Histogram2D::Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
 {
     // create empty bins
     SetDimensions( histogramName, numberBinsX, fromX, toX, numberBinsY, fromY, toY );
@@ -2161,23 +2294,30 @@ Histogram2D::Histogram2D( const std::string& histogramName, int numberBinsX, flo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram2D::Histogram2D( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
+Histogram2D::Histogram2D( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
 {
     SetDimensions( histogramName, binBorders, numberBinsY, fromY, toY );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram2D::Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
+Histogram2D::Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
 {
     SetDimensions( histogramName, numberBinsX, fromX, toX, binBorders );
 }
 
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram2D::Histogram2D( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
+{
+    SetDimensions( histogramName, binBordersX, binBordersY );
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
+void Histogram2D::SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
 {
     // create empty bins
     name = histogramName;
@@ -2189,7 +2329,7 @@ void Histogram2D::SetDimensions( const std::string& histogramName, int numberBin
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
+void Histogram2D::SetDimensions( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
 {
     // create empty bins
     name = histogramName;
@@ -2201,7 +2341,7 @@ void Histogram2D::SetDimensions( const std::string& histogramName, const std::ve
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
+void Histogram2D::SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
 {
     // create empty bins
     name = histogramName;
@@ -2213,7 +2353,7 @@ void Histogram2D::SetDimensions( const std::string& histogramName, int numberBin
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string& histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
+void Histogram2D::SetDimensions( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
 {
     // create empty bins
     name = histogramName;
@@ -2328,9 +2468,38 @@ void Histogram2D::Scale( float value )
         for( MapOfBins::iterator itBinX = binsX.begin(), itBinXEnd = binsX.end(); itBinX != itBinXEnd; ++itBinX )
         {
             float binValue = itBinX->second;
-            itBinX->second = binValue/value;
+            itBinX->second = binValue*value;
         }
     }
+    sumOfWeights *= value;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram2D::Add( Histogram2D &histogramToAdd )
+{
+    if( histogramToAdd.axisX.GetNumberBins() != axisX.GetNumberBins() || histogramToAdd.axisX.GetMinValue() != axisX.GetMinValue() || histogramToAdd.axisX.GetMaxValue() != axisX.GetMaxValue() )
+        throw DifferentBinning();
+    if( histogramToAdd.axisY.GetNumberBins() != axisY.GetNumberBins() || histogramToAdd.axisY.GetMinValue() != axisY.GetMinValue() || histogramToAdd.axisY.GetMaxValue() != axisY.GetMaxValue() )
+        throw DifferentBinning();
+
+
+    MapOfMapOfBins::iterator itBinY = bins.begin(), itBinYEnd = bins.end();
+    MapOfMapOfBins::iterator itBinYH2 = histogramToAdd.bins.begin(), itBinYH2End = histogramToAdd.bins.end();
+    for( ; itBinY != itBinYEnd || itBinYH2 != itBinYH2End; ++itBinY, ++itBinYH2 )
+    {
+        MapOfBins& binsX   = itBinY->second;
+        MapOfBins& binsXH2 = itBinYH2->second;
+        
+        MapOfBins::iterator itBinX = binsX.begin(), itBinXEnd = binsX.end();
+        MapOfBins::iterator itBinXH2 = binsXH2.begin(), itBinXH2End = binsXH2.end();
+        for( ; itBinX != itBinXEnd || itBinXH2 != itBinXH2End ; ++itBinX, ++itBinXH2 )
+        {
+            float binValue = itBinX->second;
+            itBinX->second = binValue + itBinXH2->second;
+        }
+    }
+    sumOfWeights += histogramToAdd.sumOfWeights;
 }
 
 
@@ -2464,7 +2633,14 @@ void Histogram2D::Print( std::ostream& os )
 }
 
 
+//------------------------------------------------------------------------------------------------------------------------------------------
 
+void Histogram2D::Print( std::string histogramName )
+{
+//     PANDORA_MONITORING_API(Create2DHistogram(histogramName, histogramName, axisX.GetNumberBins(), axisX.GetMinValue(), axisX.GetMaxValue(), axisY.GetNumberBins(), axisY.GetMinValue(), axisY.GetMaxValue()));
+//     PANDORA_MONITORING_API(Fill2DHistogram(IsIsolatedFlagHistName, (*caloHitIter)->IsIsolated()));
+    
+}
 
 
 

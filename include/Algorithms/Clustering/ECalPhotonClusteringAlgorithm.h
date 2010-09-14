@@ -34,9 +34,9 @@ namespace pandora
 
 	int GetBinForValue( float value );
 	
-	int GetNumberBins();
-	float GetMinValue();
-	float GetMaxValue();
+	int GetNumberBins() const;
+	float GetMinValue() const;
+	float GetMaxValue() const;
 
 	void WriteToXml ( TiXmlElement * xmlElement );
 	void ReadFromXml( const TiXmlElement &xmlElement );
@@ -57,12 +57,12 @@ namespace pandora
 	friend class Histogram2D;
     };
 
-    inline float Axis::GetMinValue()
+    inline float Axis::GetMinValue() const
     {
 	return minValue;
     }
 
-    inline float Axis::GetMaxValue()
+    inline float Axis::GetMaxValue() const 
     {
 	return maxValue;
     }
@@ -76,15 +76,16 @@ namespace pandora
 
 	class XmlError {};
 	class NotHistogram1D {};
+	class DifferentBinning {};
 
 
 	Histogram1D();
 	Histogram1D( const TiXmlElement &xmlElement );
-	Histogram1D( const std::string& histogramName, int numberBins, float from, float to );
-	Histogram1D( const std::string& histogramName, const std::vector<float>& binBorders );
+	Histogram1D( const std::string histogramName, int numberBins, float from, float to );
+	Histogram1D( const std::string histogramName, const std::vector<float>& binBorders );
 
-	void SetDimensions( const std::string& histogramName, int numberBins, float from, float to );
-	void SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders );
+	void SetDimensions( const std::string histogramName, int numberBins, float from, float to );
+	void SetDimensions( const std::string histogramName, const std::vector<float>& binBorders );
 
 	void Fill( float value, float weight = 1.0 );
 
@@ -94,12 +95,16 @@ namespace pandora
 	float GetSumOfEntries();
 	void Scale( float value );
 
+	void Add( Histogram1D &histogram );
+
 	void WriteToXml ( TiXmlElement * &xmlElement );
 	void ReadFromXml( const TiXmlElement &xmlElement );
 
 	void Print( std::ostream& );
 
 	float GetSumOfWeights() { return sumOfWeights; } // get sum of filled in weights (not changed when the histogram is scaled)
+
+	const Axis& GetAxis() { return axis; }
 
 	static void TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter);
 
@@ -123,19 +128,20 @@ namespace pandora
 	class XmlError {};
 	class NotHistogram2D {};
 	class DataStructureError {};
+	class DifferentBinning {};
 
 
 	Histogram2D();
 	Histogram2D( const TiXmlElement &xmlElement );
-	Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
-	Histogram2D( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY );
-	Histogram2D( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
-	Histogram2D( const std::string& histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+	Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+	Histogram2D( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY );
+	Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+	Histogram2D( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
 
-	void SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
-	void SetDimensions( const std::string& histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
-	void SetDimensions( const std::string& histogramName, const std::vector<float>& binBorders, int numberBinsX, float fromX, float toX );
-	void SetDimensions( const std::string& histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+	void SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+	void SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+	void SetDimensions( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsX, float fromX, float toX );
+	void SetDimensions( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
 
 	void Fill( float x, float y, float weight = 1.0 );
 
@@ -145,12 +151,18 @@ namespace pandora
 	float GetSumOfEntries();
 	void Scale( float value );
 
+	void Add( Histogram2D &histogramToAdd );
+
 	void WriteToXml ( TiXmlElement * &xmlElement );
 	void ReadFromXml( const TiXmlElement &xmlElement );
 
 	void Print( std::ostream& );
+	void Print( std::string );
 
 	float GetSumOfWeights() { return sumOfWeights; } // get sum of filled in weights (not changed when the histogram is scaled)
+
+	const Axis& GetAxisX() { return axisX; }
+	const Axis& GetAxisY() { return axisY; }
 
     private:
 	void CreateEmptyBins();
@@ -165,16 +177,20 @@ namespace pandora
     };
 
 
+
     class PhotonIDLikelihoodCalculator
     {
     public:
+
+        class FileNotFound {};
+
 	static PhotonIDLikelihoodCalculator* Instance();
 	float  PID(float E, float rms, float frac, float start);
 	void Delete();
 
 	void WriteXmlSig( const std::string& fileName );
 	void WriteXmlBkg( const std::string& fileName );
-	void LoadXml(  const std::string& fileNameSig, const std::string& fileNameBkg );
+	void LoadXml(  const pandora::StringVector& fileNamesSig, const pandora::StringVector& fileNamesBkg, bool dontTakeLastFileName = false );
 
 	Histogram1D energySig;
 	Histogram1D energyBkg;
@@ -459,8 +475,8 @@ public:
     bool            m_cheatingTrueFractionForPid;   ///< Cheating! Set PID to true photon fraction
 
     std::string     m_monitoringFileName;           ///< filename for file where for monitoring information is stored
-    std::string     m_configurationFileNameBkg;     ///< filename for file where the configuration of the photon clustering is stored : background
-    std::string     m_configurationFileNameSig;     ///< filename for file where the configuration of the photon clustering is stored : signal
+    pandora::StringVector    m_configurationFileNamesBkg;     ///< filenames for file where the configuration of the photon clustering is stored : background
+    pandora::StringVector    m_configurationFileNamesSig;     ///< filenames for file where the configuration of the photon clustering is stored : signal
     float           m_likelihoodRatioCut;           ///< cut on likelihood ratio
 
     std::string     m_strategy;                     ///< The strategy used for photon recognition
@@ -473,7 +489,7 @@ public:
     pandora::StringVector    m_dimensionsStart;              ///< dimensions of photon start histogram (e.g. "20 0 10.0" )
 
 
-    int             m_produceConfigurationFiles;    ///< produce the configuration file (using the provided events) (0... signal events, 1 ... background events, 2 ... signal and background events, to be split by "fraction"
+    std::string              m_produceConfigurationFiles;    ///< produce the configuration file (using the provided events) ("signal" events, "background" events, "signal" and "background" events, to be split by "fraction", "combine" takes a list of input files and writes into the last given filename
 
 
     bool m_isAlreadyInitialized;                    ///< set to true if initialisation has taken place
