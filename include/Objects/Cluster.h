@@ -240,7 +240,7 @@ public:
      *          For clusters identified as electromagnetic showers, the corrected electromagnetic energy will be returned.
      *          For all other clusters, the corrected hadronic energy will be returned.
      * 
-     *  @return The track compartison energy estimate
+     *  @return The track comparison energy estimate
      */
     float GetTrackComparisonEnergy() const;
 
