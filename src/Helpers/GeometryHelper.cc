@@ -239,13 +239,13 @@ void GeometryHelper::GetPolygonVertices(const float rCoordinate, const float zCo
     if (0 == symmetryOrder)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-    static const float pi(std::acos(-1.));
+    static const float pi(std::acos(-1.f));
     const float firstVertexAngle(pi / static_cast<float>(symmetryOrder));
     const float rMax(rCoordinate / std::cos(firstVertexAngle));
 
     for (unsigned int i = 0; i < symmetryOrder + 1; ++i)
     {
-        const float phi = phiCoordinate + firstVertexAngle + (2. * pi * static_cast<float>(i) / static_cast<float>(symmetryOrder));
+        const float phi = phiCoordinate + firstVertexAngle + (2.f * pi * static_cast<float>(i) / static_cast<float>(symmetryOrder));
         const float sinPhi(std::sin(phi));
         const float cosPhi(std::cos(phi));
         vertexPointList.push_back(CartesianVector(sinPhi * rMax, cosPhi * rMax, zCoordinate));
@@ -572,7 +572,7 @@ bool GeometryHelper::ConcentricGap::IsInGap(const CartesianVector &positionVecto
     if (r < m_innerRCoordinate)
         return false;
 
-    static const float pi(std::acos(-1.));
+    static const float pi(std::acos(-1.f));
 
     if (r > m_outerRCoordinate / std::cos(pi / static_cast<float>(m_outerSymmetryOrder)))
         return false;
