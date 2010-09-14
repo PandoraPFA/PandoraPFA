@@ -15,91 +15,46 @@ using namespace pandora;
 StatusCode VisualMonitoringAlgorithm::Run()
 {
     // Show mc particles
-    MCParticleList mcParticleList;
-
     if (m_mcParticles)
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetMCParticleList(*this, mcParticleList));
-        PANDORA_MONITORING_API(VisualizeMCParticles(&mcParticleList, "MCParticles", AUTO, &m_particleSuppressionMap));
-    }
+        VisualizeMCParticleList();
 
     // Show current ordered calo hit list
-    OrderedCaloHitList orderedCaloHitList;
-
     if (m_hits)
-    {
-        const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+        VisualizeCurrentOrderedCaloHitsList("currentCaloHits");
 
-        orderedCaloHitList = (*pOrderedCaloHitList);
-
-        if (m_onlyAvailable)
+    if( !m_inputCaloHitListNames.empty() )
+        for( StringVector::iterator itInpCaloHitListName = m_inputCaloHitListNames.begin(), itInpCaloHitListNameEnd = m_inputCaloHitListNames.end(); 
+             itInpCaloHitListName != itInpCaloHitListNameEnd; ++itInpCaloHitListName )
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::RemoveUnavailableCaloHits(orderedCaloHitList));
+            std::string originalCaloHitListName;
+            std::string inputCaloHitListName = (*itInpCaloHitListName);
+            if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentOrderedCaloHitListName(*this, originalCaloHitListName))
+                continue;
+            if (STATUS_CODE_SUCCESS != PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, inputCaloHitListName))
+                continue;
+            VisualizeCurrentOrderedCaloHitsList(inputCaloHitListName);
+            if (STATUS_CODE_SUCCESS != PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, originalCaloHitListName))
+                std::cout << "VisualMonitoringAlgorithm/ Error at putting back the original CaloHitList" << std::endl;
         }
 
-        PANDORA_MONITORING_API(VisualizeCaloHits(&orderedCaloHitList, "currentHits", GRAY));
-    }
+
 
     // Show current tracks
-    TrackList trackList;
-
     if (m_tracks)
-    {
-        const TrackList *pTrackList = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
-
-        for (TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack)
-        {
-            Track* pTrack = (*itTrack);
-
-            if (!(pTrack->HasAssociatedCluster() && m_onlyAvailable))
-            {
-                trackList.insert(pTrack);
-            }
-        }
-
-        PANDORA_MONITORING_API(VisualizeTracks(&trackList, "currentTracks", GRAY));
-    }
+        VisualizeCurrentTrackList();
 
     // Show specified lists of clusters
-    for (pandora::StringVector::iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end();
-        itClusterName != itClusterNameEnd; ++itClusterName)
-    {
-        const ClusterList* pClusterList = NULL;
-        std::string clusterListName = (*itClusterName);
-
-        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, clusterListName, pClusterList))
-        {
-            PANDORA_MONITORING_API(VisualizeClusters(pClusterList, clusterListName, AUTO));
-        }
-        else
-        {
-            std::cout << "VisualMonitoringAlgorithm: cluster-list " << clusterListName << " not found." << std::endl;
-        }
-    }
+    for (pandora::StringVector::iterator itClusterListName = m_clusterListNames.begin(), itClusterListNameEnd = m_clusterListNames.end();
+        itClusterListName != itClusterListNameEnd; ++itClusterListName)
+        VisualizeClusterList( (*itClusterListName) );
 
     // Show current clusters
     if (m_clusters)
-    {
-        const ClusterList* pClusterList = NULL;
-
-        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentClusterList(*this, pClusterList))
-        {
-            PANDORA_MONITORING_API(VisualizeClusters(pClusterList, "currentClusters", AUTO));
-        }
-    }
+        VisualizeClusterList("");
 
     // Show current particle flow objects
     if (m_particleFlowObjects)
-    {
-        const ParticleFlowObjectList* pPfoList = NULL;
-
-        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
-        {
-            PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", AUTO));
-        }
-    }
+        VisualizeCurrentParticleFlowList();
 
     if (m_displayEvent)
     {
@@ -107,6 +62,99 @@ StatusCode VisualMonitoringAlgorithm::Run()
     }
 
     return STATUS_CODE_SUCCESS;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void VisualMonitoringAlgorithm::VisualizeMCParticleList()
+{
+    MCParticleList mcParticleList;
+
+    if (STATUS_CODE_SUCCESS != PandoraContentApi::GetMCParticleList(*this, mcParticleList))
+        return;
+    PANDORA_MONITORING_API(VisualizeMCParticles(&mcParticleList, "MCParticles", AUTO, &m_particleSuppressionMap));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void VisualMonitoringAlgorithm::VisualizeCurrentOrderedCaloHitsList(std::string caloHitListName)
+{
+    OrderedCaloHitList orderedCaloHitList;
+
+    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
+    if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList))
+        return;
+
+    orderedCaloHitList = (*pOrderedCaloHitList);
+
+    if (m_onlyAvailable)
+    {
+        if (STATUS_CODE_SUCCESS != CaloHitHelper::RemoveUnavailableCaloHits(orderedCaloHitList))
+            return;
+    }
+
+    PANDORA_MONITORING_API(VisualizeCaloHits(&orderedCaloHitList, caloHitListName, GRAY));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void VisualMonitoringAlgorithm::VisualizeCurrentTrackList()
+{
+    TrackList trackList;
+
+    const TrackList *pTrackList = NULL;
+    if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentTrackList(*this, pTrackList))
+        return;
+
+    for (TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack)
+    {
+        Track* pTrack = (*itTrack);
+
+        if (!(pTrack->HasAssociatedCluster() && m_onlyAvailable))
+        {
+            trackList.insert(pTrack);
+        }
+    }
+
+    PANDORA_MONITORING_API(VisualizeTracks(&trackList, "currentTracks", GRAY));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void VisualMonitoringAlgorithm::VisualizeClusterList(std::string clusterListName)
+{
+    const ClusterList* pClusterList = NULL;
+
+    if (clusterListName.empty())
+    {
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentClusterList(*this, pClusterList))
+        {
+            std::cout << "VisualMonitoringAlgorithm: current cluster-list not found." << std::endl;
+            return;
+        }
+        clusterListName = "currentClusters";
+    }
+    else
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, clusterListName, pClusterList))
+        {
+            std::cout << "VisualMonitoringAlgorithm: cluster-list " << clusterListName << " not found." << std::endl;
+            return;
+        }
+
+   PANDORA_MONITORING_API(VisualizeClusters(pClusterList, clusterListName, AUTO  ) );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void VisualMonitoringAlgorithm::VisualizeCurrentParticleFlowList()
+{
+    const ParticleFlowObjectList* pPfoList = NULL;
+
+    if (STATUS_CODE_SUCCESS == PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
+    {
+        PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", AUTO  ) );
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -131,6 +179,9 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_hits = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShowCurrentCaloHits", m_hits));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "CaloHitListNames", m_inputCaloHitListNames));
 
     m_tracks = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

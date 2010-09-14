@@ -30,7 +30,14 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
+    void VisualizeMCParticleList();
+    void VisualizeCurrentOrderedCaloHitsList(std::string caloHitListName);
+    void VisualizeCurrentTrackList();
+    void VisualizeClusterList(std::string clusterListName);
+    void VisualizeCurrentParticleFlowList();
+
     pandora::StringVector   m_clusterListNames;         ///< List of strings denoting clusternames 
+    pandora::StringVector   m_inputCaloHitListNames;    ///< List of strings denoting calohitlists
     pandora::StringVector   m_suppressMCParticles;      ///< List of PDG numbers and energies for MC particles to be suppressed (e.g. " 22:0.1 2112:1.0 ")
     bool                    m_mcParticles;              ///< Whether to show MC particles
     bool                    m_particleFlowObjects;      ///< Whether to show current particle flow object list
