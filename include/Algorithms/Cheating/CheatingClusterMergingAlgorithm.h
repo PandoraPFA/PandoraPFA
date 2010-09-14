@@ -42,6 +42,8 @@ private:
     typedef std::map<const pandora::MCParticle*, float> MCParticleToFloatMap;
 
     pandora::StringVector   m_clusterListNames;             ///< use the given cluster lists to search for clusters to merge
+
+    bool                    m_debug;                        ///< turn on additional debugging output
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -12,6 +12,9 @@
 
 using namespace pandora;
 
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode CheatingClusterMergingAlgorithm::Run()
 {
     std::string currentClusterListName;
@@ -43,7 +46,8 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
 
             // merge clusters within the current list if their main MCParticles are the same
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBaseCluster, pCluster));
-            std::cout << "merged clusters in current list" << std::endl;
+            if( m_debug )
+                std::cout << "CheatingClusterMerging: Clusters within current cluster list '" << currentClusterListName << "' have been merged" << std::endl;
             // don't have to add the cluster, since the base cluster is already in the map
         }
     }
@@ -52,11 +56,13 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
     {
         std::string clusterListName = (*itClusterListName);
         const ClusterList *pClusterList = NULL;
-        std::cout << "clusterlistname " << clusterListName << std::endl;
+        if( m_debug )
+            std::cout << "clusterlistname " << clusterListName << std::endl;
 
         if (STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, clusterListName, pClusterList))
         {
-            std::cout << "-->not found" << std::endl;
+            if( m_debug )
+                std::cout << "CheatingClusterMerging: Cluster list '" << clusterListName << "' not found" << std::endl;
             continue;
         }
         
@@ -74,13 +80,22 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
 
             if (itMCParticle != mcParticleToClusterMap.end()) // if the main mcparticle of the cluster is not present in the list, don't touch the cluster
             {
-                std::cout << "pid of mcparticle " << pSelectedMCParticle->GetParticleId() << std::endl;
+                if( m_debug )
+                    std::cout << "pid of mcparticle " << pSelectedMCParticle->GetParticleId() << std::endl;
                 Cluster* pBaseCluster = itMCParticle->second;
 
+                if( clusterListName == currentClusterListName )
+                {
+                    if( m_debug )
+                        std::cout << "CheatingClusterMerging: Merging of clusters from cluster list '" << clusterListName << "' into current cluster list '" << currentClusterListName << "' is not possible." << std::endl;
+                    return STATUS_CODE_NOT_ALLOWED;
+                }
+
                 // merge clusters of other list to the cluster in the current list if their main MCParticles are the same
-                std::cout << "merge clusters from list " << clusterListName << " to current list with name " << currentClusterListName << std::endl;
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBaseCluster, pCluster, 
                     currentClusterListName, clusterListName ));
+                if( m_debug )
+                    std::cout << "CheatingClusterMerging: Merged clusters from cluster list '" << clusterListName << "' into current cluster list '" << currentClusterListName << "'" << std::endl;
             }
         }
     }
@@ -149,6 +164,10 @@ StatusCode CheatingClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     m_clusterListNames.clear();
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
         "ClusterListNames", m_clusterListNames) );
+
+    m_debug = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Debug", m_debug));
 
     return STATUS_CODE_SUCCESS;
 }
