@@ -99,6 +99,8 @@ StatusCode EnergyMonitoringAlgorithm::Run()
     int clusterNumber = 0;
     int trackNumber   = 0;
 
+    m_clusterEnergies.clear();
+
     for( ClusterVector::const_iterator itClusterList = clusterListVector.begin(), itClusterListEnd = clusterListVector.end(); itClusterList != itClusterListEnd; ++itClusterList )
     {
         const ClusterList* pClusterList = (*itClusterList);
@@ -110,6 +112,15 @@ StatusCode EnergyMonitoringAlgorithm::Run()
             const TrackList& pTrackList = pCluster->GetAssociatedTrackList();
             bool clusterHasTracks = !(pTrackList.empty());
             bool clusterIsPhoton  = pCluster->IsPhotonFast();
+
+                        
+            float clusterEnergy = 0;
+            if( clusterIsPhoton )
+                clusterEnergy = pCluster->GetCorrectedElectromagneticEnergy();
+            else
+                clusterEnergy = pCluster->GetCorrectedHadronicEnergy();
+
+            m_clusterEnergies.push_back( clusterEnergy );
 
             float energyMcPhoton  = 0.f;
             float energyMcNeutral = 0.f;
@@ -142,6 +153,7 @@ StatusCode EnergyMonitoringAlgorithm::Run()
                     energyMixing.AddMcParticle( mc );
 
                     float electromagneticEnergy = pCaloHit->GetElectromagneticEnergy();
+                    float hadronicEnergy        = pCaloHit->GetHadronicEnergy();
                     if( clusterHasTracks )
                     {
                         energyMixing.AddChargedClusterCalorimetricEnergy( electromagneticEnergy );
@@ -152,7 +164,7 @@ StatusCode EnergyMonitoringAlgorithm::Run()
                     }
                     else
                     {
-                        energyMixing.AddNeutralClusterCalorimetricEnergy( electromagneticEnergy );
+                        energyMixing.AddNeutralClusterCalorimetricEnergy( hadronicEnergy );
                     }
 
                     if( mcIsPhoton )
@@ -160,7 +172,7 @@ StatusCode EnergyMonitoringAlgorithm::Run()
                     else if( mcIsNeutral )
                         energyMcNeutral += electromagneticEnergy;
                     else 
-                        energyMcCharged += electromagneticEnergy;
+                        energyMcCharged += hadronicEnergy;
                     
                 }
             }
@@ -289,17 +301,25 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
             std::cout << (*itClusterName) << " " << std::flush;
         }
         std::cout << std::endl;
-        std::cout << "number of clusters : " << numberClusters << std::endl;
-        std::cout << "number of tracks   : " << numberTracks << std::endl;
+        std::cout << "number of clusters  : " << numberClusters << std::endl;
+        std::cout << "number of tracks    : " << numberTracks << std::endl;
+        std::cout << "energies of clusters: " << std::endl;
 
         std::ios_base::fmtflags original_flags = std::cout.flags();   // store the original flags
 
         static const int precision = 1;
         static const int width = 12;
         static const int widthNum = 3;
-        
+
         std::cout << std::fixed;
         std::cout << std::setprecision(precision);
+
+        for( std::vector<float>::iterator itCluster = m_clusterEnergies.begin(), itClusterEnd = m_clusterEnergies.end(); itCluster != itClusterEnd; ++itCluster )
+        {
+            float clusterEnergy = (*itCluster);
+            std::cout << "  " << clusterEnergy;
+        }
+        std::cout << std::endl;
 
 #define FORMATTEDOUTPUTSHORT(TITLE,E1,E2,E3) std::cout << std::left << std::setw(width) << TITLE \
                                                        << std::right << std::setw(widthNum) << " " << std::setw(width) << E1 \
@@ -391,6 +411,8 @@ StatusCode EnergyMonitoringAlgorithm::MonitoringOutput( EnergyMixing& trueCharge
         PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "p2p", truePhotons_recoPhotonCalo ));
         PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "p2t", truePhotons_recoChargedTracks ));
         PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "pMc", truePhotons_mc ));
+
+        PANDORA_MONITORING_API(SetTreeVariable(m_treeName, "ECluster", &m_clusterEnergies ));
 
         if( m_quantity )
         {

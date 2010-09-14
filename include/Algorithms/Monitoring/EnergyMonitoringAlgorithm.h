@@ -97,6 +97,8 @@ private:
     std::string  m_treeName;                             ///< tree name for the monitoring output
     bool         m_print;                                ///< print the monitoring info
     bool         m_quantity;                             ///< show the number of clusters/tracks
+
+    std::vector<float> m_clusterEnergies;                ///< Energies of the clusters
 };
 
 
