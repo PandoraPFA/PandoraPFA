@@ -30,25 +30,59 @@ private:
     StatusCode Run();
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    void VisualizeMCParticleList();
-    void VisualizeOrderedCaloHitsList(std::string caloHitListName);
-    void VisualizeCurrentTrackList();
-    void VisualizeClusterList(std::string clusterListName);
-    void VisualizeCurrentParticleFlowList();
+    /**
+     *  @brief  Visualize a specified ordered calo hit list
+     * 
+     *  @param  listName the list name
+     */
+    void VisualizeMCParticleList() const;
 
-    pandora::StringVector   m_clusterListNames;         ///< List of strings denoting clusternames 
-    pandora::StringVector   m_inputCaloHitListNames;    ///< List of strings denoting calohitlists
-    pandora::StringVector   m_suppressMCParticles;      ///< List of PDG numbers and energies for MC particles to be suppressed (e.g. " 22:0.1 2112:1.0 ")
-    bool                    m_mcParticles;              ///< Whether to show MC particles
-    bool                    m_particleFlowObjects;      ///< Whether to show current particle flow object list
-    bool                    m_clusters;                 ///< Whether to show current cluster list
-    bool                    m_hits;                     ///< Whether to show current ordered calohitlist
-    bool                    m_tracks;                   ///< Whether to show current tracklist
-    bool                    m_onlyAvailable;            ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
-    bool                    m_displayEvent;             ///< Whether to display the event
+    /**
+     *  @brief  Visualize a specified ordered calo hit list
+     * 
+     *  @param  listName the list name
+     */
+    void VisualizeOrderedCaloHitList(const std::string &listName) const;
+
+    /**
+     *  @brief  Visualize a specified ordered calo hit list
+     * 
+     *  @param  listName the list name
+     */
+    void VisualizeTrackList(const std::string &listName) const;
+
+    /**
+     *  @brief  Visualize a specified ordered calo hit list
+     * 
+     *  @param  listName the list name
+     */
+    void VisualizeClusterList(const std::string &listName) const;
+
+    /**
+     *  @brief  Visualize a specified ordered calo hit list
+     * 
+     *  @param  listName the list name
+     */
+    void VisualizeParticleFlowList() const;
 
     typedef std::map<int, float> PdgCodeToEnergyMap;
 
+    bool                    m_showMCParticles;          ///< Whether to show MC particles
+
+    bool                    m_showCurrentCaloHits;      ///< Whether to show current ordered calohitlist
+    pandora::StringVector   m_caloHitListNames;         ///< Names of calo hit lists to show
+
+    bool                    m_showCurrentTracks;        ///< Whether to show current ordered calohitlist
+    pandora::StringVector   m_trackListNames;           ///< Names of calo hit lists to show
+
+    bool                    m_showCurrentClusters;      ///< Whether to show current ordered calohitlist
+    pandora::StringVector   m_clusterListNames;         ///< Names of calo hit lists to show
+
+    bool                    m_showCurrentPfos;          ///< Whether to show current particle flow object list
+    bool                    m_showOnlyAvailable;        ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
+    bool                    m_displayEvent;             ///< Whether to display the event
+
+    pandora::StringVector   m_suppressMCParticles;      ///< List of PDG numbers and energies for MC particles to be suppressed (e.g. " 22:0.1 2112:1.0 ")
     PdgCodeToEnergyMap      m_particleSuppressionMap;   ///< Map from pdg-codes to energy for suppression of particles types below specific energies
 };
 
