@@ -101,6 +101,8 @@ private:
     unsigned int        m_innerLayerTolerance;                      ///< Max number of layers by which daughter can exceed parent inner layer
     float               m_minCosOpeningAngle;                       ///< Min cos opening angle between candidate cluster initial directions
 
+    bool                m_useOnlyPhotonLikeDaughters;               ///< Whether to skip photon-like checks for daughter cluster
+
     unsigned int        m_photonLikeMaxInnerLayer;                  ///< Max inner layer to identify daughter cluster as photon-like
     float               m_photonLikeMinDCosR;                       ///< Max radial direction cosine to identify daughter as photon-like
     float               m_photonLikeMaxShowerStart;                 ///< Max shower profile start to identify daughter as photon-like

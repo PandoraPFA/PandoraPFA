@@ -79,7 +79,7 @@ StatusCode PhotonFragmentRemovalAlgorithm::GetClusterContactMap(bool &isFirstPas
         if ((pDaughterCluster->GetNCaloHits() < m_minDaughterCaloHits) || (pDaughterCluster->GetHadronicEnergy() < m_minDaughterHadronicEnergy))
             continue;
 
-        if (!this->IsPhotonLike(pDaughterCluster))
+        if (m_useOnlyPhotonLikeDaughters && !this->IsPhotonLike(pDaughterCluster))
             continue;
 
         const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
@@ -306,6 +306,10 @@ StatusCode PhotonFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     m_minCosOpeningAngle = 0.95f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCosOpeningAngle", m_minCosOpeningAngle));
+
+    m_useOnlyPhotonLikeDaughters = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "UseOnlyPhotonLikeDaughters", m_useOnlyPhotonLikeDaughters));
 
     // Photon-like cuts
     m_photonLikeMaxInnerLayer = 10;
