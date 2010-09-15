@@ -12,9 +12,6 @@
 
 using namespace pandora;
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode CheatingClusterMergingAlgorithm::Run()
 {
     std::string currentClusterListName;
@@ -44,11 +41,13 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
         {
             Cluster *pBaseCluster = itMCParticle->second;
 
-            // merge clusters within the current list if their main MCParticles are the same
+            // Merge clusters within the current list if their main MCParticles are the same
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBaseCluster, pCluster));
-            if( m_debug )
+
+            if (m_debug)
                 std::cout << "CheatingClusterMerging: Clusters within current cluster list '" << currentClusterListName << "' have been merged" << std::endl;
-            // don't have to add the cluster, since the base cluster is already in the map
+
+            // Don't have to add the cluster, since the base cluster is already in the map
         }
     }
 
@@ -56,13 +55,15 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
     {
         std::string clusterListName = (*itClusterListName);
         const ClusterList *pClusterList = NULL;
-        if( m_debug )
+
+        if (m_debug)
             std::cout << "clusterlistname " << clusterListName << std::endl;
 
         if (STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, clusterListName, pClusterList))
         {
-            if( m_debug )
+            if (m_debug)
                 std::cout << "CheatingClusterMerging: Cluster list '" << clusterListName << "' not found" << std::endl;
+
             continue;
         }
         
@@ -73,28 +74,32 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
 
             const MCParticle* pSelectedMCParticle = GetMainMCParticle(pCluster);
 
-            if( !pSelectedMCParticle )
+            if (!pSelectedMCParticle)
                 continue;
 
             MCParticleToClusterMap::iterator itMCParticle = mcParticleToClusterMap.find(pSelectedMCParticle);
 
-            if (itMCParticle != mcParticleToClusterMap.end()) // if the main mcparticle of the cluster is not present in the list, don't touch the cluster
+            // If the main mcparticle of the cluster is not present in the list, don't touch the cluster
+            if (itMCParticle != mcParticleToClusterMap.end())
             {
-                if( m_debug )
+                if (m_debug)
                     std::cout << "pid of mcparticle " << pSelectedMCParticle->GetParticleId() << std::endl;
-                Cluster* pBaseCluster = itMCParticle->second;
 
-                if( clusterListName == currentClusterListName )
+                Cluster *pBaseCluster = itMCParticle->second;
+
+                if (clusterListName == currentClusterListName)
                 {
-                    if( m_debug )
+                    if (m_debug)
                         std::cout << "CheatingClusterMerging: Merging of clusters from cluster list '" << clusterListName << "' into current cluster list '" << currentClusterListName << "' is not possible." << std::endl;
+
                     return STATUS_CODE_NOT_ALLOWED;
                 }
 
-                // merge clusters of other list to the cluster in the current list if their main MCParticles are the same
+                // Merge clusters of other list to the cluster in the current list if their main MCParticles are the same
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBaseCluster, pCluster, 
-                    currentClusterListName, clusterListName ));
-                if( m_debug )
+                    currentClusterListName, clusterListName));
+
+                if (m_debug)
                     std::cout << "CheatingClusterMerging: Merged clusters from cluster list '" << clusterListName << "' into current cluster list '" << currentClusterListName << "'" << std::endl;
             }
         }

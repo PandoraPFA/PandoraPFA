@@ -22,16 +22,15 @@ StatusCode PerfectClusteringAlgorithm::Run()
         std::cout << std::endl;
         std::string currentCaloHitListName;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitListName(*this, currentCaloHitListName));
+
         std::cout << "PerfectClusteringAlgorithm/ current OrderedCaloHitList - name '" << currentCaloHitListName << "'" << std::endl;
         std::cout << "PerfectClusteringAlgorithm/ current OrderedCaloHitList - size '" << pOrderedCaloHitList->size() << "' (number of pseudo layers)" << std::endl;
+
         for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; ++itLyr)
         {
             PseudoLayer pseudoLayer = itLyr->first;
             CaloHitList *pCaloHitList= itLyr->second;
-            CaloHitList *pCurrentHits = NULL;
-
             std::cout << "PerfectClusteringAlgorithm/ pseudo layer " << pseudoLayer << " - size '" << pCaloHitList->size() << "' (number of hits in pseudo layer)" << std::endl;
-            
         }
     }
 
@@ -50,20 +49,19 @@ StatusCode PerfectClusteringAlgorithm::Run()
         {
             CaloHit* pCaloHit = *hitIter;
 
-            if( m_debug )
+            if (m_debug)
             {
-                if(!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+                if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
                     std::cout << "N" << std::flush;
 
-                if(pCaloHit->IsIsolated() && !m_shouldUseIsolatedHits)
+                if (pCaloHit->IsIsolated() && !m_shouldUseIsolatedHits)
                     std::cout << "I" << std::flush;
-
             }
 
-            if(!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+            if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
                 continue;
 
-            if(!m_shouldUseIsolatedHits && pCaloHit->IsIsolated())
+            if (!m_shouldUseIsolatedHits && pCaloHit->IsIsolated())
                 continue;
 
             const MCParticle *pMCParticle = NULL;
@@ -72,9 +70,9 @@ StatusCode PerfectClusteringAlgorithm::Run()
             // Some CalorimeterHits don't have a MCParticle (e.g. noise)
             if (NULL == pMCParticle)
             {
-                if( m_debug )
+                if (m_debug)
                     std::cout << "[no MC]" << std::flush;
-                
+
                 continue;
             }
 
@@ -121,7 +119,6 @@ StatusCode PerfectClusteringAlgorithm::Run()
         std::cout << std::endl;
         std::cout << "selected hits= " << selected << "  not selected hits= " << notSelected << std::endl;
     }
-
 
     // Create the clusters
     ClusterList clusterList;
