@@ -10,6 +10,8 @@
 
 #include "Api/PandoraApi.h"
 
+#include "Xml/tinyxml.h"
+
 namespace pandora
 {
 
@@ -442,6 +444,13 @@ public:
      */
     static bool IsIn2DPolygon(const CartesianVector &point, const VertexPointList &vertexPointList, const unsigned int symmetryOrder);
 
+    /**
+     *  @brief  Get the tolerance allowed when declaring a point to be "in" a gap region, units mm
+     * 
+     *  @return The gap tolerance
+     */
+    static float GetGapTolerance();
+
 private:
     /**
      *  @brief  Create box gap
@@ -502,6 +511,13 @@ private:
      */
     StatusCode Initialize(const PandoraApi::GeometryParameters &geometryParameters);
 
+    /**
+     *  @brief  Read the cluster helper settings
+     * 
+     *  @param  xmlHandle the relevant xml handle
+     */
+    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+
     bool                        m_isInitialized;            ///< Whether the geometry helper is initialized
     GeometryType                m_geometryType;             ///< The geometry type
 
@@ -533,8 +549,11 @@ private:
     static bool                 m_instanceFlag;             ///< The geometry helper instance flag
     static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance
 
+    static float                m_gapTolerance;             ///< Tolerance allowed when declaring a point to be "in" a gap region, units mm
+
     friend class Pandora;
     friend class PandoraApiImpl;
+    friend class PandoraSettings;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -742,6 +761,13 @@ inline StatusCode GeometryHelper::GetPseudoLayer(const CartesianVector &position
     }
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::GetGapTolerance()
+{
+    return m_gapTolerance;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

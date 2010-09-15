@@ -7,6 +7,7 @@
  */
  
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/XmlHelper.h"
 
 #include <algorithm>
 #include <cmath>
@@ -516,21 +517,22 @@ GeometryHelper::BoxGap::BoxGap(const PandoraApi::BoxGap::Parameters &gapParamete
 
 bool GeometryHelper::BoxGap::IsInGap(const CartesianVector &positionVector) const
 {
+    static const float gapTolerance(GeometryHelper::GetGapTolerance());
     const CartesianVector relativePosition(positionVector - m_vertex);
 
     const float projection1(relativePosition.GetDotProduct(m_side1.GetUnitVector()));
 
-    if ((projection1 < 0.f) || (projection1 > m_side1.GetMagnitude()))
+    if ((projection1 < -gapTolerance) || (projection1 > m_side1.GetMagnitude() + gapTolerance))
         return false;
 
     const float projection2(relativePosition.GetDotProduct(m_side2.GetUnitVector()));
 
-    if ((projection2 < 0.f) || (projection2 > m_side2.GetMagnitude()))
+    if ((projection2 < -gapTolerance) || (projection2 > m_side2.GetMagnitude() + gapTolerance))
         return false;
 
     const float projection3(relativePosition.GetDotProduct(m_side3.GetUnitVector()));
 
-    if ((projection3 < 0.f) || (projection3 > m_side3.GetMagnitude()))
+    if ((projection3 < -gapTolerance) || (projection3 > m_side3.GetMagnitude() + gapTolerance))
         return false;
 
     return true;
@@ -561,11 +563,13 @@ GeometryHelper::ConcentricGap::ConcentricGap(const PandoraApi::ConcentricGap::Pa
 
 bool GeometryHelper::ConcentricGap::IsInGap(const CartesianVector &positionVector) const
 {
+    static const float gapTolerance(GeometryHelper::GetGapTolerance());
     const float z(positionVector.GetZ());
 
-    if ((z < m_minZCoordinate) || (z > m_maxZCoordinate))
+    if ((z < m_minZCoordinate - gapTolerance) || (z > m_maxZCoordinate + gapTolerance))
         return false;
 
+    // ATTN: For concentric gaps, the gap tolerance is currently only used for the z position check
     const float x(positionVector.GetX()), y(positionVector.GetY());
     const float r(std::sqrt(x * x + y * y));
 
@@ -585,5 +589,22 @@ bool GeometryHelper::ConcentricGap::IsInGap(const CartesianVector &positionVecto
 
     return true;
 }
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float GeometryHelper::m_gapTolerance = 0.f;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "GapTolerance", m_gapTolerance));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 } // namespace pandora

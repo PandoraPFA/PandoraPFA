@@ -10,6 +10,7 @@
 #include "Helpers/ClusterHelper.h"
 #include "Helpers/EnergyCorrectionsHelper.h"
 #include "Helpers/FragmentRemovalHelper.h"
+#include "Helpers/GeometryHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 #include "Helpers/ReclusterHelper.h"
 #include "Helpers/XmlHelper.h"
@@ -82,6 +83,12 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
 
         if (NULL != pXmlElement)
             PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemovalHelper::ReadSettings(TiXmlHandle(pXmlElement)));
+
+        // Geometry helper settings
+        pXmlElement = pXmlHandle->FirstChild("GeometryHelper").Element();
+
+        if (NULL != pXmlElement)
+            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, GeometryHelper::ReadSettings(TiXmlHandle(pXmlElement)));
 
         // Particle id helper settings
         pXmlElement = pXmlHandle->FirstChild("ParticleIdHelper").Element();
