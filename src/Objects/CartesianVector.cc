@@ -9,6 +9,7 @@
 #include "Objects/CartesianVector.h"
 
 #include <iostream>
+#include <limits>
 
 namespace pandora
 {
@@ -43,7 +44,7 @@ void CartesianVector::GetSphericalCoordinates(float &radius, float &phi, float &
 
     const float magnitude(this->GetMagnitude());
 
-    if (0 == magnitude)
+    if (std::fabs(magnitude) < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     radius = magnitude;
@@ -60,7 +61,7 @@ void CartesianVector::GetCylindricalCoordinates(float &radius, float &phi, float
 
     const float magnitude(this->GetMagnitude());
 
-    if (0 == magnitude)
+    if (std::fabs(magnitude) < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     radius = std::sqrt(m_y * m_y + m_x * m_x);
@@ -77,7 +78,7 @@ CartesianVector CartesianVector::GetUnitVector() const
 
     const float magnitude(this->GetMagnitude());
 
-    if (0 == magnitude)
+    if (std::fabs(magnitude) < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     return CartesianVector(m_x / magnitude, m_y / magnitude, m_z / magnitude);
