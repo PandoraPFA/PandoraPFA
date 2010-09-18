@@ -383,6 +383,7 @@ StatusCode CaloHitManager::ResetForNextEvent()
 
     for (NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.begin(); listIter != m_nameToOrderedCaloHitListMap.end();)
     {
+        listIter->second->clear();
         delete listIter->second;
         m_nameToOrderedCaloHitListMap.erase(listIter++);
     }

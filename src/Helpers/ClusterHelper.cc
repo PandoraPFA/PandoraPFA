@@ -372,10 +372,9 @@ StatusCode ClusterHelper::GetFitResultsClosestApproach(const ClusterHelper::Clus
         const CartesianVector directionNormal((lhs.GetDirection().GetCrossProduct(rhs.GetDirection())).GetUnitVector());
         closestApproach = std::fabs(directionNormal.GetDotProduct(interceptDifference));
     }
-    catch (StatusCodeException &statusCodeException)
+    catch (StatusCodeException &)
     {
         closestApproach = interceptDifference.GetMagnitude();
-        return statusCodeException.GetStatusCode();
     }
 
     return STATUS_CODE_SUCCESS;

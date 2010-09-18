@@ -516,6 +516,7 @@ StatusCode ClusterManager::ResetForNextEvent()
             delete (*clusterIter);
         }
 
+        iter->second->clear();
         delete iter->second;
         m_nameToClusterListMap.erase(iter++);
     }
