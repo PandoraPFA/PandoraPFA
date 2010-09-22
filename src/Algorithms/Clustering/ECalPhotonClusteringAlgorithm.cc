@@ -182,7 +182,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Initialize()
         plc->energySig.SetDimensions( "energySig", eBinBorders );
         plc->rmsSig.SetDimensions  ( "rmsSig",     eBinBorders, binsRms, fromRms, toRms  );
         plc->fracSig.SetDimensions ( "fracSig",    eBinBorders, binsFrac, fromFrac, toFrac  );
-        plc->startSig.SetDimensions( "startSig",   eBinBorders, binsStart, fromFrac, toFrac );
+        plc->startSig.SetDimensions( "startSig",   eBinBorders, binsStart, fromStart, toStart );
 
         plc->energyBkg.SetDimensions( "energyBkg", eBinBorders );
         plc->rmsBkg.SetDimensions  ( "rmsBkg",     eBinBorders, binsRms, fromRms, toRms  );
@@ -441,9 +441,16 @@ StatusCode ECalPhotonClusteringAlgorithm::ReadSettings(TiXmlHandle xmlHandle)
     // "signal" for signal events, "background" for background events, "signal background" for signal and background events (to be split by "fraction" always : >=0.5 for signal, < 0.5 for background )
     // "combine" for combining a number of signal events and write them out into the last filename(s) [for signal and for background] given 
     m_produceConfigurationFiles = "";
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-                                                                                                         "ProduceConfiguration", m_produceConfigurationFiles));
-
+    StringVector produceConfigFilesInput;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+                                                                                                                  "ProduceConfiguration", produceConfigFilesInput));
+    // concatenate the string vector to a single string
+    std::stringstream sstr;
+    for( StringVector::iterator it = produceConfigFilesInput.begin(), itEnd = produceConfigFilesInput.end(); it != itEnd; ++it )
+    {
+        sstr << (*it) << " ";
+    }
+    m_produceConfigurationFiles = sstr.str();
     std::transform(m_produceConfigurationFiles.begin(), m_produceConfigurationFiles.end(), m_produceConfigurationFiles.begin(), ::tolower);
 
 
