@@ -16,6 +16,7 @@
 
 #include "StatusCodes.h"
 
+#include <cmath>
 #include <vector>
 
 namespace pandora
@@ -147,7 +148,6 @@ typedef PandoraInputType<void *> InputAddress;
 typedef PandoraInputType<bool> InputBool;
 typedef PandoraInputType<HitType> InputHitType;
 typedef PandoraInputType<DetectorRegion> InputDetectorRegion;
-typedef PandoraInputType<ParticleType> InputParticleType;
 typedef PandoraInputType<unsigned int> InputPseudoLayer;
 
 typedef PandoraInputType<CartesianVector> InputCartesianVector;
@@ -285,16 +285,28 @@ inline bool PandoraInputType<T>::IsValid(const T &t) const
 }
 
 template <>
-inline bool PandoraInputType<void *>::IsValid(void *const &v) const
+inline bool PandoraInputType<void *>::IsValid(void *const &t) const
 {
     return true;
 }
 
 template <>
-inline bool PandoraInputType<CartesianVector>::IsValid(const CartesianVector &c) const
+inline bool PandoraInputType<HitType>::IsValid(const HitType &t) const
 {
-    return !(std::isnan(c.GetX()) || std::isnan(c.GetY()) || std::isnan(c.GetZ()) ||
-        std::isinf(c.GetX()) || std::isinf(c.GetY()) || std::isinf(c.GetZ()));
+    return !(std::isnan(static_cast<unsigned int>(t)) || std::isinf(static_cast<unsigned int>(t)));
+}
+
+template <>
+inline bool PandoraInputType<DetectorRegion>::IsValid(const DetectorRegion &t) const
+{
+    return !(std::isnan(static_cast<unsigned int>(t)) || std::isinf(static_cast<unsigned int>(t)));
+}
+
+template <>
+inline bool PandoraInputType<CartesianVector>::IsValid(const CartesianVector &t) const
+{
+    return !(std::isnan(t.GetX()) || std::isnan(t.GetY()) || std::isnan(t.GetZ()) ||
+        std::isinf(t.GetX()) || std::isinf(t.GetY()) || std::isinf(t.GetZ()));
 }
 
 template <>
