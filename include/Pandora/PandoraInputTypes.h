@@ -127,7 +127,14 @@ public:
     bool operator= (const PandoraInputType<T> &rhs);
 
 private:
-    T       *m_pValue;          ///< Address of the actual value being held by the pandora type
+    /**
+     *  @brief  Whether pandora type is valid (not inf or nan)
+     * 
+     *  @return boolean
+     */
+    bool IsValid(const T &t) const;
+
+    T      *m_pValue;           ///< Address of the actual value being held by the pandora type
     bool    m_isInitialized;    ///< Whether the pandora type is initialized
 };
 
@@ -202,6 +209,9 @@ inline void PandoraInputType<T>::Set(const T &t)
     if (m_isInitialized)
         delete m_pValue;
 
+    if (!this->IsValid(t))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
     m_pValue = new T(t);
     m_isInitialized = true;
 }
@@ -249,7 +259,7 @@ inline bool PandoraInputType<T>::operator= (const T &rhs)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-bool PandoraInputType<T>::operator= (const PandoraInputType<T> &rhs)
+inline bool PandoraInputType<T>::operator= (const PandoraInputType<T> &rhs)
 {
     if (this == &rhs)
         return m_isInitialized;
@@ -264,6 +274,39 @@ bool PandoraInputType<T>::operator= (const PandoraInputType<T> &rhs)
     }
 
     return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline bool PandoraInputType<T>::IsValid(const T &t) const
+{
+    return !(std::isnan(t) || std::isinf(t));
+}
+
+template <>
+inline bool PandoraInputType<void *>::IsValid(void *const &v) const
+{
+    return true;
+}
+
+template <>
+inline bool PandoraInputType<CartesianVector>::IsValid(const CartesianVector &c) const
+{
+    return !(std::isnan(c.GetX()) || std::isnan(c.GetY()) || std::isnan(c.GetZ()) ||
+        std::isinf(c.GetX()) || std::isinf(c.GetY()) || std::isinf(c.GetZ()));
+}
+
+template <>
+inline bool PandoraInputType<TrackState>::IsValid(const TrackState &t) const
+{
+    const CartesianVector &p(t.GetPosition());
+    const CartesianVector &m(t.GetMomentum());
+
+    return !(std::isnan(p.GetX()) || std::isnan(p.GetY()) || std::isnan(p.GetZ()) ||
+        std::isinf(p.GetX()) || std::isinf(p.GetY()) || std::isinf(p.GetZ()) ||
+        std::isnan(m.GetX()) || std::isnan(m.GetY()) || std::isnan(m.GetZ()) ||
+        std::isinf(m.GetX()) || std::isinf(m.GetY()) || std::isinf(m.GetZ()));
 }
 
 } // namespace pandora
