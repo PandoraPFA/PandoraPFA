@@ -12,6 +12,7 @@
 #include <string>
 
 #ifdef __GNUC__
+#include <cstdlib>
 #include <execinfo.h>
 #endif
 
@@ -171,7 +172,7 @@ inline StatusCodeException::StatusCodeException(const StatusCode statusCode) :
         m_backTrace += "\n    ";
     }
 
-    free(stackStrings);
+    free(stackStrings); // malloc()ed by backtrace_symbols
 #endif
 }
 
