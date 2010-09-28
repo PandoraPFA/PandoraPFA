@@ -1,0 +1,67 @@
+************************************************************************
+LCD_WG2_VALIDATION_3 TAG
+************************************************************************
+Added protection against input NaN and INF values.
+Corrected ClusterHelper::GetFitResultsClosestApproach to deal with (nearly-)parallel fit-results.
+Overhaul of cluster contact classes used in all fragment removal algorithms.
+Added PhotonFragmentRemovalAlgorithm to mop-up neutral photon-like fragments after e.g. break-up of showers by forced reclustering.
+Increased number of passes for NeutralFragmentRemoval algorithm.
+Call IsElectronFast in MainFragmentRemoval algorithm to prevent merging neutral fragments with high energy electrons.
+Increased electron id cut on shower profile start.
+Increased em shower id cut on high energy cluster rms.
+Added vertex and endpoint properties to MCParticle parameters.
+Improvements to VisualMonitoringAlgorithm to allow visualization of different track/calohit/cluster/pfo/mcparticle lists.
+Track preparation algorithm no longer clears existing track-cluster associations in external lists.
+Improved error checking in cluster and track preparation algorithms.
+Consistency improvements to cluster and track preparation algorithms.
+Re-fit and re-use modified parent clusters in looping and broken tracks topological association algorithms.
+Reconsider parent clusters after cluster merges in topological association algorithms.
+Implementation of detector gap treatment.
+Added new DoesFitCrossGapRegion cluster helper function.
+Added point-in-polygon winding algorithm for use with ConcentricPolygonGaps.
+Allow gap checks in broken tracks topological association algorithm.
+Added detector "gap tolerance" as a configurable parameter.
+New DumpPfosMonitoringAlgorithm examines reconstructed PFOs and displays/analyses reconstruction errors.
+Upgrade xml parser from tiny xml v2.5.3 to v2.6.1
+XmlHelper::TokenizeString is now public.
+
+************************************************************************
+LCD_WG2_VALIDATION_2 TAG
+************************************************************************
+New approach to forced clustering, ordering calo hits by distance to track helix projection.
+Improvements to ForcedClustering algorithm, so that it can deal with multiple tracks.
+Use ForcedClustering algorithm in ExitingTrack, ResolveTrackAssociations and SplitTrackAssociations algorithms.
+Relaxed fit rms cuts and closest approach cut in BrokenTracks topological association algorithm.
+Added MuonPhotonSeparation algorithm, which derives from MipPhotonSeparation algorithm. New algorithm takes different approach when deciding whether to use new cluster fragments.
+MipPhotonSeparation algorithm modified to drive 'cleaner' mip path through photon cluster.
+Increase default parameter for fast muon id hcal energy cut.
+Forward region direction cosine cut removed from default fast muon id function.
+Final particle id algorithm now deals with split/prong tracks.
+Added new algorithm to create PFOs from reconstructed V0s.
+Added new algorithm to create PFOs from reconstructed kinks.
+
+************************************************************************
+LCD_WG2_VALIDATION TAG
+************************************************************************
+CaloHitParameters now require nInteractionLengthsFromIp to be specified.
+TrackParameters now require specification of track charge, rather than simple charge sign.
+Add GetTrackComparisonEnergy functionality to clusters. Will return corrected HAD energy, unless cluster is identified as an EM shower; it will then return corrected EM energy.
+Rename Cluster IsPhoton functionality to IsFixedPhoton. Illustrates more clearly the difference between using ParticleId helper functions and an algorithm permanently tagging a cluster as a photon.
+Cosmetic changes associated with changing interface to MCParticles and changes to monitoring framework.
+Call IsMuonFast in MainFragmentRemoval algorithm to prevent merging photon clusters with high energy muons.
+Tweak density weight calculation to deal with coincident hits.
+Added visualization of particle flow objects to VisualMonitoringAlgorithm.
+ParticleType helper functions moved to PdgTable helper class.
+Reorganized header files and all helper class settings.
+
+************************************************************************
+TAG V00-02 FOR ILCSOFT USAGE
+************************************************************************
+Separated shared electromagnetic shower id code from fast electron and photon id.
+Added Read2dVectorOfValues xml helper function.
+Added PdgTable header file, containing masses, widths and charges for relevant particle types.
+Use particle types enum throughout algorithms.
+
+************************************************************************
+TAG V00-01 FOR ILCSOFT USAGE
+************************************************************************
