@@ -32,7 +32,7 @@ New approach to forced clustering, ordering calo hits by distance to track helix
 Improvements to ForcedClustering algorithm, so that it can deal with multiple tracks.
 Use ForcedClustering algorithm in ExitingTrack, ResolveTrackAssociations and SplitTrackAssociations algorithms.
 Relaxed fit rms cuts and closest approach cut in BrokenTracks topological association algorithm.
-Added MuonPhotonSeparation algorithm, which derives from MipPhotonSeparation algorithm. New algorithm takes different approach when deciding whether to use new cluster fragments.
+Added MuonPhotonSeparation algorithm, based upon MipPhotonSeparation. New algorithm differs in decision whether to use new cluster fragments.
 MipPhotonSeparation algorithm modified to drive 'cleaner' mip path through photon cluster.
 Increase default parameter for fast muon id hcal energy cut.
 Forward region direction cosine cut removed from default fast muon id function.
@@ -45,8 +45,8 @@ LCD_WG2_VALIDATION TAG
 ************************************************************************
 CaloHitParameters now require nInteractionLengthsFromIp to be specified.
 TrackParameters now require specification of track charge, rather than simple charge sign.
-Add GetTrackComparisonEnergy functionality to clusters. Will return corrected HAD energy, unless cluster is identified as an EM shower; it will then return corrected EM energy.
-Rename Cluster IsPhoton functionality to IsFixedPhoton. Illustrates more clearly the difference between using ParticleId helper functions and an algorithm permanently tagging a cluster as a photon.
+Add GetTrackComparisonEnergy functionality to clusters. Returns corrected HAD energy (or EM energy if cluster is identified as EM shower).
+Rename Cluster IsPhoton functionality to IsFixedPhoton. Highlights difference between using ParticleId functions and permanently tagging clusters.
 Cosmetic changes associated with changing interface to MCParticles and changes to monitoring framework.
 Call IsMuonFast in MainFragmentRemoval algorithm to prevent merging photon clusters with high energy muons.
 Tweak density weight calculation to deal with coincident hits.
