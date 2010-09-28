@@ -11,22 +11,51 @@
 #include <exception>
 #include <string>
 
+#ifdef __GNUC__
+#include <execinfo.h>
+#endif
+
+#define STATUS_CODE_TABLE(d)                                                                    \
+    d(STATUS_CODE_SUCCESS,                  "STATUS_CODE_SUCCESS"                   )           \
+    d(STATUS_CODE_FAILURE,                  "STATUS_CODE_FAILURE"                   )           \
+    d(STATUS_CODE_NOT_FOUND,                "STATUS_CODE_NOT_FOUND"                 )           \
+    d(STATUS_CODE_NOT_INITIALIZED,          "STATUS_CODE_NOT_INITIALIZED"           )           \
+    d(STATUS_CODE_ALREADY_INITIALIZED,      "STATUS_CODE_ALREADY_INITIALIZED"       )           \
+    d(STATUS_CODE_ALREADY_PRESENT,          "STATUS_CODE_ALREADY_PRESENT"           )           \
+    d(STATUS_CODE_OUT_OF_RANGE,             "STATUS_CODE_OUT_OF_RANGE"              )           \
+    d(STATUS_CODE_NOT_ALLOWED,              "STATUS_CODE_NOT_ALLOWED"               )           \
+    d(STATUS_CODE_INVALID_PARAMETER,        "STATUS_CODE_INVALID_PARAMETER"         )           \
+    d(STATUS_CODE_UNCHANGED,                "STATUS_CODE_UNCHANGED"                 )
+
+/**
+ *  @brief  The status code enum entry macro
+ */
+#define GET_STATUS_CODE_ENUM_ENTRY(a, b)                                                        \
+    a,
+
+/**
+ *  @brief  The status code name switch statement macro
+ */
+#define GET_STATUS_CODE_NAME_SWITCH(a, b)                                                       \
+    case a : return b;
+
 /**
  *  @brief  The StatusCode enum
  */
 enum StatusCode
 {
-    STATUS_CODE_SUCCESS,
-    STATUS_CODE_FAILURE,
-    STATUS_CODE_NOT_FOUND,
-    STATUS_CODE_NOT_INITIALIZED,
-    STATUS_CODE_ALREADY_INITIALIZED,
-    STATUS_CODE_ALREADY_PRESENT,
-    STATUS_CODE_OUT_OF_RANGE,
-    STATUS_CODE_NOT_ALLOWED,
-    STATUS_CODE_INVALID_PARAMETER,
-    STATUS_CODE_UNCHANGED
+    STATUS_CODE_TABLE(GET_STATUS_CODE_ENUM_ENTRY)
+    NUMBER_OF_STATUS_CODES
 };
+
+/**
+ *  @brief  Get status code as a string
+ * 
+ *  @return The status code string
+ */
+std::string StatusCodeToString(const StatusCode statusCode);
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 #define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                \
     {                                                                                           \
@@ -83,13 +112,18 @@ enum StatusCode
  */
 class StatusCodeException : public std::exception
 {
-  public:
+public:
     /**
      *  @brief  Constructor
      * 
      *  @param  statusCode the status code
      */
     StatusCodeException(const StatusCode statusCode);
+
+    /**
+     *  @brief  Constructor
+     */
+    ~StatusCodeException() throw();
 
     /**
      *  @brief  Get status code
@@ -105,21 +139,45 @@ class StatusCodeException : public std::exception
      */
     std::string ToString() const;
 
-  private:
-    StatusCode    m_statusCode;    ///< The status code
-};
+    /**
+     *  @brief  Get back trace at point of exception construction (gcc only)
+     * 
+     *  @return The back trace
+     */
+    const std::string &GetBackTrace() const;
 
-/**
- *  @brief  Get status code as a string
- * 
- *  @return The status code string
- */
-std::string StatusCodeToString(const StatusCode statusCode);
+private:
+    const StatusCode    m_statusCode;   ///< The status code
+    std::string         m_backTrace;    ///< The back trace
+};
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline StatusCodeException::StatusCodeException(const StatusCode statusCode) :
     m_statusCode(statusCode)
+{
+#ifdef __GNUC__
+    const size_t maxDepth = 100;
+    void *stackAddresses[maxDepth];
+
+    size_t stackDepth = backtrace(stackAddresses, maxDepth);
+    char **stackStrings = backtrace_symbols(stackAddresses, stackDepth);
+
+    m_backTrace = "BackTrace\n    ";
+
+    for (size_t i = 1; i < stackDepth; ++i)
+    {
+        m_backTrace += stackStrings[i];
+        m_backTrace += "\n    ";
+    }
+
+    free(stackStrings);
+#endif
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCodeException::~StatusCodeException() throw()
 {
 }
 
@@ -138,44 +196,21 @@ inline std::string StatusCodeException::ToString() const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const std::string &StatusCodeException::GetBackTrace() const
+{
+    return m_backTrace;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline std::string StatusCodeToString(const StatusCode statusCode)
 {
     switch (statusCode)
     {
-    case STATUS_CODE_SUCCESS:
-        return "STATUS_CODE_SUCCESS";
-
-    case STATUS_CODE_FAILURE:
-        return "STATUS_CODE_FAILURE";
-
-    case STATUS_CODE_NOT_FOUND:
-        return "STATUS_CODE_NOT_FOUND";
-
-    case STATUS_CODE_NOT_INITIALIZED:
-        return "STATUS_CODE_NOT_INITIALIZED";
-
-    case STATUS_CODE_ALREADY_INITIALIZED:
-        return "STATUS_CODE_ALREADY_INITIALIZED";
-
-    case STATUS_CODE_ALREADY_PRESENT:
-        return "STATUS_CODE_ALREADY_PRESENT";
-
-    case STATUS_CODE_OUT_OF_RANGE:
-        return "STATUS_CODE_OUT_OF_RANGE";
-
-    case STATUS_CODE_NOT_ALLOWED:
-        return "STATUS_CODE_NOT_ALLOWED";
-
-    case STATUS_CODE_INVALID_PARAMETER:
-        return "STATUS_CODE_INVALID_PARAMETER";
-
-    case STATUS_CODE_UNCHANGED:
-        return "STATUS_CODE_UNCHANGED";
-
-    default:
-        return "STATUS_CODE_UNRECOGNIZED";
+        STATUS_CODE_TABLE(GET_STATUS_CODE_NAME_SWITCH)
+        default : throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
     }
 }
 
