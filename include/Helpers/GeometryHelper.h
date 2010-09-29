@@ -473,7 +473,7 @@ private:
      *  @param  layer to receive the layer number
      *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
      */
-    StatusCode FindBarrelLayer(const float radius, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
+    StatusCode FindBarrelLayer(float radius, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
 
     /**
      *  @brief  Find the layer number corresponding to specified z position in the endcap
@@ -482,7 +482,16 @@ private:
      *  @param  layer to receive the layer number
      *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
      */
-    StatusCode FindEndCapLayer(const float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
+    StatusCode FindEndCapLayer(float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
+
+    /**
+     *  @brief  Find the layer number corresponding to a specified position, via reference to a specified layer position list
+     * 
+     *  @param  position the specified position
+     *  @param  layerPositionList the specified layer position list
+     *  @param  layer to receive the layer number
+     */
+    StatusCode FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, unsigned int &layer) const;
 
     /**
      *  @brief  Get the maximum ecal barrel radius

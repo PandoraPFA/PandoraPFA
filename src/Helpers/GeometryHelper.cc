@@ -104,8 +104,18 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
             m_geometryType = ENCLOSING_BARREL;
         }
 
+        // Sort layer positions lists and check for duplicate entries
         std::sort(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end());
         std::sort(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end());
+
+        LayerPositionList::const_iterator barrelIter = std::unique(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end());
+        LayerPositionList::const_iterator endcapIter = std::unique(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end());
+
+        if ((m_barrelLayerPositions.end() != barrelIter) || (m_endCapLayerPositions.end() != endcapIter))
+        {
+            std::cout << "GeometryHelper: Duplicate layer position specified." << std::endl;
+            return STATUS_CODE_FAILURE;
+        }
 
         m_isInitialized = true;
 
@@ -347,30 +357,7 @@ StatusCode GeometryHelper::FindBarrelLayer(float radius, unsigned int &layer, bo
     if (shouldApplyOverlapCorrection && (ENCLOSING_ENDCAP == GetGeometryType()))
         radius -= overlapCorrection;
 
-    for (unsigned int iLayer = 0, iLayerEnd = m_barrelLayerPositions.size(); iLayer < iLayerEnd; ++iLayer)
-    {
-        const float separation = m_barrelLayerPositions[iLayer] - radius;
-
-        if (separation > 0)
-        {
-            layer = iLayer;
-
-            if ((layer > 0) && ((radius - m_barrelLayerPositions[iLayer - 1]) < separation))
-                layer = iLayer - 1;
-
-            return STATUS_CODE_SUCCESS;
-        }
-    }
-
-    static const float maxRCoordinate(std::max(m_hCalBarrelParameters.GetOuterRCoordinate(), m_muonBarrelParameters.GetOuterRCoordinate()));
-
-    if (maxRCoordinate > radius)
-    {
-        layer = m_barrelLayerPositions.size() - 1;
-        return STATUS_CODE_SUCCESS;
-    }
-
-    return STATUS_CODE_NOT_FOUND;
+    return this->FindMatchingLayer(radius, m_barrelLayerPositions, layer);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -383,30 +370,38 @@ StatusCode GeometryHelper::FindEndCapLayer(float zCoordinate, unsigned int &laye
     if (shouldApplyOverlapCorrection && (ENCLOSING_BARREL == GetGeometryType()))
         zCoordinate -= overlapCorrection;
 
-    for (unsigned int iLayer = 0, iLayerEnd = m_endCapLayerPositions.size(); iLayer < iLayerEnd; ++iLayer)
+    return this->FindMatchingLayer(zCoordinate, m_endCapLayerPositions, layer);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, unsigned int &layer) const
+{
+    LayerPositionList::const_iterator upperIter = std::upper_bound(layerPositionList.begin(), layerPositionList.end(), position);
+
+    if (layerPositionList.end() == upperIter)
     {
-        const float separation = m_endCapLayerPositions[iLayer] - zCoordinate;
-
-        if (separation > 0)
-        {
-            layer = iLayer;
-
-            if ((layer > 0) && ((zCoordinate - m_endCapLayerPositions[iLayer - 1]) < separation))
-                layer = iLayer - 1;
-
-            return STATUS_CODE_SUCCESS;
-        }
+        return STATUS_CODE_NOT_FOUND;
     }
 
-    static const float maxZCoordinate(std::max(m_hCalEndCapParameters.GetOuterZCoordinate(), m_muonEndCapParameters.GetOuterZCoordinate()));
-
-    if (maxZCoordinate > zCoordinate)
+    if (layerPositionList.begin() == upperIter)
     {
-        layer = m_endCapLayerPositions.size() - 1;
+        layer = 0;
         return STATUS_CODE_SUCCESS;
     }
 
-    return STATUS_CODE_NOT_FOUND;
+    LayerPositionList::const_iterator lowerIter = upperIter - 1;
+
+    if (std::fabs(position - *lowerIter) < std::fabs(position - *upperIter))
+    {
+        layer = std::distance(layerPositionList.begin(), lowerIter);
+    }
+    else
+    {
+        layer = std::distance(layerPositionList.begin(), upperIter);
+    }
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
