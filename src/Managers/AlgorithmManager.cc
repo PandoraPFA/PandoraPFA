@@ -73,7 +73,10 @@ StatusCode AlgorithmManager::CreateAlgorithm(TiXmlElement *const pXmlElement, st
     AlgorithmFactoryMap::const_iterator iter = m_algorithmFactoryMap.find(pXmlElement->Attribute("type"));
 
     if (m_algorithmFactoryMap.end() == iter)
+    {
+        std::cout << "Algorithm '" << pXmlElement->Attribute("type") << "' not found in defined algorithms. Please check the spelling." << std::endl;
         return STATUS_CODE_NOT_FOUND;
+    }
 
     Algorithm *pAlgorithm = NULL;
     pAlgorithm = iter->second->CreateAlgorithm();
