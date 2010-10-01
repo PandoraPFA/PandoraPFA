@@ -117,6 +117,7 @@ AUX_SOURCE_DIRECTORY( src/Helpers library_sources )
 AUX_SOURCE_DIRECTORY( src/Managers library_sources )
 AUX_SOURCE_DIRECTORY( src/Objects library_sources )
 AUX_SOURCE_DIRECTORY( src/Pandora library_sources )
+AUX_SOURCE_DIRECTORY( src/Utilities library_sources )
 AUX_SOURCE_DIRECTORY( src/Xml library_sources )
 
 IF( DEFINED UnitTest_HOME )

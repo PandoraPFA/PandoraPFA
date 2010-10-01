@@ -15,6 +15,11 @@
 namespace pandora
 {
 
+class DetectorGap;
+class PseudoLayerCalculator;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  Geometry type enum
  */
@@ -47,7 +52,6 @@ public:
     };
 
     typedef std::vector<LayerParameters> LayerParametersList;
-    typedef std::vector<float> LayerPositionList;
 
     /**
      *  @brief  SubDetectorParameters class
@@ -61,8 +65,7 @@ public:
          *  @param  inputParameters the input sub detector parameters
          *  @param  pLayerPositionsList optional list to receive the distances of the layers from the interaction point
          */
-        void Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters,
-            LayerPositionList *const pLayerPositionList = NULL);
+        void Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters);
 
         /**
          *  @brief  Get the inner cylindrical polar r coordinate, origin interaction point, units mm
@@ -148,80 +151,7 @@ public:
     };
 
     typedef std::map<std::string, SubDetectorParameters> SubDetectorParametersMap;
-
-    /**
-     *  @brief  Gap class
-     */
-    class Gap
-    {
-    public:
-        /**
-         *  @brief  Destructor
-         */
-        virtual ~Gap();
-
-        /**
-         *  @brief  Whether a specified position lies within the gap
-         * 
-         *  @param  positionVector the position vector
-         * 
-         *  @return boolean
-         */
-        virtual bool IsInGap(const CartesianVector &positionVector) const = 0;
-    };
-
-    typedef std::vector<Gap *> GapList;
-    typedef std::vector<CartesianVector> VertexPointList;
-
-    /**
-     *  @brief  BoxGap class
-     */
-    class BoxGap : public Gap
-    {
-    public:
-        /**
-         *  @brief  Constructor
-         * 
-         *  @param  gapParameters the gap parameters
-         */
-        BoxGap(const PandoraApi::BoxGap::Parameters &gapParameters);
-
-        bool IsInGap(const CartesianVector &positionVector) const;
-
-        const CartesianVector   m_vertex;               ///< Cartesian coordinates of a gap vertex, units mm
-        const CartesianVector   m_side1;                ///< Cartesian vector describing first side meeting vertex, units mm
-        const CartesianVector   m_side2;                ///< Cartesian vector describing second side meeting vertex, units mm
-        const CartesianVector   m_side3;                ///< Cartesian vector describing third side meeting vertex, units mm
-    };
-
-    /**
-     *  @brief  ConcentricGap class
-     */
-    class ConcentricGap : public Gap
-    {
-    public:
-        /**
-         *  @brief  Constructor
-         * 
-         *  @param  gapParameters the gap parameters
-         */
-        ConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
-
-        bool IsInGap(const CartesianVector &positionVector) const;
-
-        const float             m_minZCoordinate;       ///< Min cylindrical polar z coordinate, origin interaction point, units mm
-        const float             m_maxZCoordinate;       ///< Max cylindrical polar z coordinate, origin interaction point, units mm
-        const float             m_innerRCoordinate;     ///< Inner cylindrical polar r coordinate, origin interaction point, units mm
-        const float             m_innerPhiCoordinate;   ///< Inner cylindrical polar phi coordinate (angle wrt cartesian x axis)
-        const unsigned int      m_innerSymmetryOrder;   ///< Order of symmetry of the innermost edge of gap
-        const float             m_outerRCoordinate;     ///< Outer cylindrical polar r coordinate, origin interaction point, units mm
-        const float             m_outerPhiCoordinate;   ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
-        const unsigned int      m_outerSymmetryOrder;   ///< Order of symmetry of the outermost edge of gap
-
-    private:
-        VertexPointList         m_innerVertexPointList; ///< The vertex points of the inner polygon
-        VertexPointList         m_outerVertexPointList; ///< The vertex points of the outer polygon
-    };
+    typedef std::vector<DetectorGap *> DetectorGapList;
 
     /**
      *  @brief  Get the geometry helper singleton
@@ -234,6 +164,23 @@ public:
      *  @return the geometry type
      */
     GeometryType GetGeometryType() const;
+
+    /**
+     *  @brief  Get the appropriate pseudolayer for a specified position vector
+     * 
+     *  @param  positionVector the specified position
+     * 
+     *  @return the appropriate pseudolayer
+     */
+    PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
+
+    /**
+     *  @brief  Get the appropriate pseudolayer for a specified position vector
+     * 
+     *  @param  positionVector the specified position
+     *  @param  pseudoLayer to receive the appropriate pseudolayer
+     */
+    StatusCode GetPseudoLayer(const CartesianVector &positionVector, PseudoLayer &pseudoLayer) const;
 
     /**
      *  @brief  Get the ecal barrel parameters
@@ -366,24 +313,7 @@ public:
      * 
      *  @return The list of gaps in the active detector volume
      */
-    const GapList &GetGapList() const;
-
-    /**
-     *  @brief  Get the appropriate pseudolayer for a specified position vector
-     * 
-     *  @param  positionVector the specified position
-     * 
-     *  @return the appropriate pseudolayer
-     */
-    PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
-
-    /**
-     *  @brief  Get the appropriate pseudolayer for a specified position vector
-     * 
-     *  @param  positionVector the specified position
-     *  @param  pseudoLayer to receive the appropriate pseudolayer
-     */
-    StatusCode GetPseudoLayer(const CartesianVector &positionVector, PseudoLayer &pseudoLayer) const;
+    const DetectorGapList &GetDetectorGapList() const;
 
     /**
      *  @brief  Whether a specified position is outside of the ecal region
@@ -413,85 +343,25 @@ public:
     bool IsInECalGapRegion(const CartesianVector &position) const;
 
     /**
-     *  @brief  Whether a specified position is in a gap region
+     *  @brief  Whether a specified position is in a detector gap region
      * 
      *  @param  position the specified position
      * 
      *  @return boolean
      */
-    bool IsInGapRegion(const CartesianVector &position) const;
+    bool IsInDetectorGapRegion(const CartesianVector &position) const;
 
     /**
-     *  @brief  Populate list of polygon vertices, assuming regular polygon in XY plane at constant z coordinate
+     *  @brief  Get the maximum polygon radius
      * 
-     *  @brief  rCoordinate polygon r coordinate
-     *  @brief  zCoordinate polygon z coordinate
-     *  @brief  phiCoordinate polygon phi coordinate
-     *  @brief  symmetryOrder polygon symmetry order
-     *  @param  vertexPointList to receive the vertex point list, with vertexPointList[symmetryOrder] = vertexPointList[0]
+     *  @param  symmetryOrder the polygon symmetry order
+     *  @param  phi0 the polygon cylindrical polar phi coordinate
+     *  @param  x the cartesian x coordinate
+     *  @param  y the cartesian y coordinate
+     * 
+     *  @return the maximum radius
      */
-    static void GetPolygonVertices(const float rCoordinate, const float zCoordinate, const float phiCoordinate,
-        const unsigned int symmetryOrder, VertexPointList &vertexPointList);
-
-    /**
-     *  @brief  Winding number test for a point in a 2D polygon in the XY plane (z coordinates are ignored)
-     * 
-     *  @param  point the test point
-     *  @param  vertexPointList vertex points of a polygon, with vertexPointList[symmetryOrder] = vertexPointList[0]
-     *  @param  symmetryOrder order of symmetry of polygon
-     * 
-     *  @return whether point is inside polygon
-     */
-    static bool IsIn2DPolygon(const CartesianVector &point, const VertexPointList &vertexPointList, const unsigned int symmetryOrder);
-
-    /**
-     *  @brief  Get the tolerance allowed when declaring a point to be "in" a gap region, units mm
-     * 
-     *  @return The gap tolerance
-     */
-    static float GetGapTolerance();
-
-private:
-    /**
-     *  @brief  Create box gap
-     * 
-     *  @param  gapParameters the gap parameters
-     */
-    StatusCode CreateBoxGap(const PandoraApi::BoxGap::Parameters &gapParameters);
-
-    /**
-     *  @brief  Create concentric gap
-     * 
-     *  @param  gapParameters the gap parameters
-     */
-    StatusCode CreateConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
-
-    /**
-     *  @brief  Find the layer number corresponding to a specified radial position in the barrel
-     * 
-     *  @param  radius the radial distance to the ip
-     *  @param  layer to receive the layer number
-     *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
-     */
-    StatusCode FindBarrelLayer(float radius, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
-
-    /**
-     *  @brief  Find the layer number corresponding to specified z position in the endcap
-     * 
-     *  @param  zCoordinate the z distance to the ip
-     *  @param  layer to receive the layer number
-     *  @param  shouldApplyOverlapCorrection whether to apply an overlap correction
-     */
-    StatusCode FindEndCapLayer(float zCoordinate, unsigned int &layer, bool shouldApplyOverlapCorrection = false) const;
-
-    /**
-     *  @brief  Find the layer number corresponding to a specified position, via reference to a specified layer position list
-     * 
-     *  @param  position the specified position
-     *  @param  layerPositionList the specified layer position list
-     *  @param  layer to receive the layer number
-     */
-    StatusCode FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, unsigned int &layer) const;
+    float GetMaximumRadius(const unsigned int symmetryOrder, const float phi0, const float x, const float y) const;
 
     /**
      *  @brief  Get the maximum ecal barrel radius
@@ -503,6 +373,34 @@ private:
      */
     float GetMaximumECalBarrelRadius(const float x, const float y) const;
 
+    /**
+     *  @brief  Get the maximum hcal barrel radius
+     * 
+     *  @param  x the cartesian x coordinate
+     *  @param  y the cartesian y coordinate
+     * 
+     *  @return the maximum radius
+     */
+    float GetMaximumHCalBarrelRadius(const float x, const float y) const;
+
+    /**
+     *  @brief  Get the maximum muon barrel radius
+     * 
+     *  @param  x the cartesian x coordinate
+     *  @param  y the cartesian y coordinate
+     * 
+     *  @return the maximum radius
+     */
+    float GetMaximumMuonBarrelRadius(const float x, const float y) const;
+
+    /**
+     *  @brief  Get the tolerance allowed when declaring a point to be "in" a gap region, units mm
+     * 
+     *  @return The gap tolerance
+     */
+    static float GetGapTolerance();
+
+private:
     /**
      *  @brief  Constructor
      */
@@ -521,6 +419,42 @@ private:
     StatusCode Initialize(const PandoraApi::GeometryParameters &geometryParameters);
 
     /**
+     *  @brief  Create box gap
+     * 
+     *  @param  gapParameters the gap parameters
+     */
+    StatusCode CreateBoxGap(const PandoraApi::BoxGap::Parameters &gapParameters);
+
+    /**
+     *  @brief  Create concentric gap
+     * 
+     *  @param  gapParameters the gap parameters
+     */
+    StatusCode CreateConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
+
+    typedef std::vector< std::pair<float, float> > AngleVector;
+
+    /**
+     *  @brief  Fill a vector with sine/cosine values for relevant polygon angles
+     * 
+     *  @param  symmetryOrder the polygon symmetry order
+     *  @param  phi0 the polygon cylindrical polar phi coordinate
+     *  @param  angleVector the vector to fill with sine/cosine values for relevant polygon angles
+     */
+    void FillAngleVector(const unsigned int symmetryOrder, const float phi0, AngleVector &angleVector) const;
+
+    /**
+     *  @brief  Get the maximum polygon radius, with reference to cached sine/cosine values for relevant polygon angles
+     * 
+     *  @param  angleVector vector containing cached sine/cosine values
+     *  @param  x the cartesian x coordinate
+     *  @param  y the cartesian y coordinate
+     * 
+     *  @return the maximum radius
+     */
+    float GetMaximumRadius(const AngleVector &angleVector, const float x, const float y) const;
+
+    /**
      *  @brief  Read the cluster helper settings
      * 
      *  @param  xmlHandle the relevant xml handle
@@ -529,6 +463,7 @@ private:
 
     bool                        m_isInitialized;            ///< Whether the geometry helper is initialized
     GeometryType                m_geometryType;             ///< The geometry type
+    PseudoLayerCalculator      *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
 
     SubDetectorParameters       m_eCalBarrelParameters;     ///< The ecal barrel parameters
     SubDetectorParameters       m_eCalEndCapParameters;     ///< The ecal end cap parameters
@@ -550,10 +485,11 @@ private:
     float                       m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
 
     SubDetectorParametersMap    m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
-    GapList                     m_gapList;                  ///< List of gaps in the active detector volume
+    DetectorGapList             m_detectorGapList;          ///< List of gaps in the active detector volume
 
-    LayerPositionList           m_barrelLayerPositions;     ///< The barrel layer positions list
-    LayerPositionList           m_endCapLayerPositions;     ///< The endcap layer positions list
+    AngleVector                 m_eCalBarrelAngleVector;    ///< The ecal barrel angle vector
+    AngleVector                 m_hCalBarrelAngleVector;    ///< The hcal barrel angle vector
+    AngleVector                 m_muonBarrelAngleVector;    ///< The muon barrel angle vector
 
     static bool                 m_instanceFlag;             ///< The geometry helper instance flag
     static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance
@@ -751,25 +687,30 @@ inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditi
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::GapList &GeometryHelper::GetGapList() const
+inline const GeometryHelper::DetectorGapList &GeometryHelper::GetDetectorGapList() const
 {
-    return m_gapList;
+    return m_detectorGapList;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector, PseudoLayer &pseudoLayer) const
+inline float GeometryHelper::GetMaximumECalBarrelRadius(const float x, const float y) const
 {
-    try
-    {
-        pseudoLayer = this->GetPseudoLayer(positionVector);
-    }
-    catch (StatusCodeException &statusCodeException)
-    {
-        return statusCodeException.GetStatusCode();
-    }
+    return this->GetMaximumRadius(m_eCalBarrelAngleVector, x, y);
+}
 
-    return STATUS_CODE_SUCCESS;
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::GetMaximumHCalBarrelRadius(const float x, const float y) const
+{
+    return this->GetMaximumRadius(m_hCalBarrelAngleVector, x, y);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float GeometryHelper::GetMaximumMuonBarrelRadius(const float x, const float y) const
+{
+    return this->GetMaximumRadius(m_muonBarrelAngleVector, x, y);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
