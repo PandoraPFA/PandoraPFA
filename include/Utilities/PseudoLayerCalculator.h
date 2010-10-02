@@ -8,17 +8,19 @@
 #ifndef PSEUDO_LAYER_CALCULATOR_H
 #define PSEUDO_LAYER_CALCULATOR_H 1
 
-#include "Helpers/GeometryHelper.h"
-
 namespace pandora
 {
+
+class GeometryHelper;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  PseudoLayerCalculator class
  */
 class PseudoLayerCalculator
 {
-public:
+protected:
     /**
      *  @brief  Destructor
      */
@@ -39,6 +41,8 @@ public:
      *  @return the appropriate pseudolayer
      */
     virtual PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const = 0;
+
+    friend class GeometryHelper;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,11 +52,10 @@ public:
  */
 class HighGranularityPseudoLayerCalculator : public PseudoLayerCalculator
 {
-public:
+private:
     void Initialize(const GeometryHelper *const pGeometryHelper);
     PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
 
-private:
     typedef std::vector<float> LayerPositionList;
 
     /**
@@ -63,16 +66,18 @@ private:
     void StoreLayerPositions(const GeometryHelper::LayerParametersList &layerParametersList, LayerPositionList &LayerPositionList);
 
     /**
-     *  @brief  Get the appropriate pseudolayer for a specified position, with reference to given barrel and endcap parameters
+     *  @brief  Get the appropriate pseudolayer for a specified parameters
      * 
-     *  @param  barrelParameters the relevant barrel parameters
-     *  @param  endCapParameters the relevant endcap parameters
-     *  @param  radius the radial coordinate
-     *  @param  zPosition the z coordinate
+     *  @param  rCoordinate the radial coordinate
+     *  @param  zCoordinate the z coordinate
+     *  @param  rCorrection the barrel/endcap overlap r correction
+     *  @param  zCorrection the barrel/endcap overlap z correction
+     *  @param  barrelInnerR the barrel inner r coordinate
+     *  @param  endCapInnerZ the endcap inner z coordinate
      *  @param  pseudoLayer to receive the appropriate pseudolayer
      */
-    StatusCode GetPseudoLayer(const GeometryHelper::SubDetectorParameters &barrelParameters,
-    const GeometryHelper::SubDetectorParameters &endCapParameters, const float rCoordinate, const float zCoordinate, PseudoLayer &pseudoLayer) const;
+    StatusCode GetPseudoLayer(const float rCoordinate, const float zCoordinate, const float rCorrection, const float zCorrection, 
+        const float barrelInnerR, const float endCapInnerZ, PseudoLayer &pseudoLayer) const;
 
     /**
      *  @brief  Find the layer number corresponding to a specified position, via reference to a specified layer position list
@@ -85,6 +90,16 @@ private:
 
     LayerPositionList   m_barrelLayerPositions;     ///< List of barrel layer positions
     LayerPositionList   m_endCapLayerPositions;     ///< List of endcap layer positions
+
+    float               m_barrelInnerR;             ///< Barrel inner radius
+    float               m_endCapInnerZ;             ///< Endcap inner z position
+    float               m_barrelInnerRMuon;         ///< Muon barrel inner radius
+    float               m_endCapInnerZMuon;         ///< Muon endcap inner z position
+
+    float               m_rCorrection;              ///< Barrel/endcap overlap r correction
+    float               m_zCorrection;              ///< Barrel/endcap overlap z correction
+    float               m_rCorrectionMuon;          ///< Muon barrel/endcap overlap r correction
+    float               m_zCorrectionMuon;          ///< Muon barrel/endcap overlap z correction
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
