@@ -33,8 +33,8 @@
 #include "Algorithms/FragmentRemoval/PhotonFragmentRemovalAlgorithm.h"
 
 #include "Algorithms/Monitoring/CaloHitMonitoringAlgorithm.h"
-#include "Algorithms/Monitoring/EnergyMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/EfficiencyMonitoringAlgorithm.h"
+#include "Algorithms/Monitoring/EnergyMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/MCParticlesMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/VisualMonitoringAlgorithm.h"
 #include "Algorithms/Monitoring/DumpPfosMonitoringAlgorithm.h"
@@ -96,8 +96,8 @@
     d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                   \
     d("PhotonFragmentRemoval",                  PhotonFragmentRemovalAlgorithm::Factory)                    \
     d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                        \
-    d("EnergyMonitoring",                       EnergyMonitoringAlgorithm::Factory)                         \
     d("EfficiencyMonitoring",                   EfficiencyMonitoringAlgorithm::Factory)                     \
+    d("EnergyMonitoring",                       EnergyMonitoringAlgorithm::Factory)                         \
     d("VisualMonitoring",                       VisualMonitoringAlgorithm::Factory)                         \
     d("MCParticlesMonitoring",                  MCParticlesMonitoringAlgorithm::Factory)                    \
     d("DumpPfosMonitoring",                     DumpPfosMonitoringAlgorithm::Factory)                       \

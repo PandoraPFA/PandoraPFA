@@ -74,7 +74,7 @@ StatusCode AlgorithmManager::CreateAlgorithm(TiXmlElement *const pXmlElement, st
 
     if (m_algorithmFactoryMap.end() == iter)
     {
-        std::cout << "Algorithm '" << pXmlElement->Attribute("type") << "' not found in defined algorithms. Please check the spelling." << std::endl;
+        std::cout << "Algorithm type '" << pXmlElement->Attribute("type") << "' not registered with pandora algorithm manager." << std::endl;
         return STATUS_CODE_NOT_FOUND;
     }
 

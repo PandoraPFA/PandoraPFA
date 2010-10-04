@@ -15,7 +15,6 @@
  */
 class VisualMonitoringAlgorithm : public pandora::Algorithm
 {
-private:
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
