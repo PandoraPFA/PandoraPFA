@@ -6,8 +6,6 @@
  *  $Log: $
  */
 
-#include "Helpers/GeometryHelper.h"
-
 #include "Utilities/PseudoLayerCalculator.h"
 
 #include <algorithm>

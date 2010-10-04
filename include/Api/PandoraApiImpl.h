@@ -103,6 +103,13 @@ public:
     StatusCode GetParticleFlowObjects(ParticleFlowObjectList &particleFlowObjectList) const;
 
     /**
+     *  @brief  Set the pseudo layer calculator used by pandora
+     * 
+     *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
+     */
+    StatusCode SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator) const;
+
+    /**
      *  @brief  Register an energy correction function
      * 
      *  @param  functionName the name/label associated with the energy correction function

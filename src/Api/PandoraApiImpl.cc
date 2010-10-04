@@ -134,6 +134,13 @@ StatusCode PandoraApiImpl::GetParticleFlowObjects(ParticleFlowObjectList &partic
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApiImpl::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator) const
+{
+    return m_pPandora->m_pGeometryHelper->SetPseudoLayerCalculator(pPseudoLayerCalculator);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApiImpl::RegisterEnergyCorrectionFunction(const std::string &functionName, const EnergyCorrectionType energyCorrectionType,
     EnergyCorrectionFunction *pEnergyCorrectionFunction) const
 {

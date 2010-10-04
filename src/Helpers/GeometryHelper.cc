@@ -331,6 +331,19 @@ float GeometryHelper::GetMaximumRadius(const AngleVector &angleVector, const flo
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator)
+{
+    if (m_isInitialized)
+        return STATUS_CODE_NOT_ALLOWED;
+
+    delete m_pPseudoLayerCalculator;
+    m_pPseudoLayerCalculator = pPseudoLayerCalculator;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters)

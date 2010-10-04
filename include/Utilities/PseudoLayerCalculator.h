@@ -8,12 +8,10 @@
 #ifndef PSEUDO_LAYER_CALCULATOR_H
 #define PSEUDO_LAYER_CALCULATOR_H 1
 
+#include "Helpers/GeometryHelper.h"
+
 namespace pandora
 {
-
-class GeometryHelper;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  PseudoLayerCalculator class

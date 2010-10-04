@@ -285,6 +285,14 @@ public:
     static StatusCode GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList);
 
     /**
+     *  @brief  Set the pseudo layer calculator used by pandora
+     * 
+     *  @param  pandora the pandora instance to register the pseudo layer calculator with
+     *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
+     */
+    static StatusCode SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator);
+
+    /**
      *  @brief  Register an energy correction function
      * 
      *  @param  pandora the pandora instance with which to register the energy correction function

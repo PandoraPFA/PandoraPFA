@@ -23,6 +23,7 @@ class Helix;
 class MCParticle;
 class OrderedCaloHitList;
 class ParticleFlowObject;
+class PseudoLayerCalculator;
 class Track;
 class TrackState;
 

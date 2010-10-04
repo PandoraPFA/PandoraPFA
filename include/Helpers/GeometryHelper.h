@@ -455,6 +455,13 @@ private:
     float GetMaximumRadius(const AngleVector &angleVector, const float x, const float y) const;
 
     /**
+     *  @brief  Set the pseudo layer calculator
+     * 
+     *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
+     */
+    StatusCode SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator);
+
+    /**
      *  @brief  Read the cluster helper settings
      * 
      *  @param  xmlHandle the relevant xml handle
