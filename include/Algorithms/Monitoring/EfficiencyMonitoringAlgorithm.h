@@ -57,6 +57,7 @@ private:
     StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     int             m_particleId;                         ///< particle Id of which the data is collected
+    bool            m_print;                              ///< if true, print out the efficiency and purity per event
     std::string     m_monitoringFileName;                 ///< filename for storing the monitoring information (ROOT)
     std::string     m_foundTreeName;                      ///< tree name for the monitoring output for the found MCParticles
     std::string     m_notFoundTreeName;                   ///< tree name for the monitoring output for the not found MCParticles

@@ -77,11 +77,11 @@ EfficiencyMonitoringAlgorithm::~EfficiencyMonitoringAlgorithm()
     std::cout << "avg. MCParticle purity per Event     : " << m_eventPurity << std::endl;
 
 
-    PANDORA_MONITORING_API(AddMultiplyOrDivideHistograms("MCParticleEffVsTheta","EntriesForEffPerThetaBin", 1.f, 1.f, false, false)); // divide the histograms
-    PANDORA_MONITORING_API(AddMultiplyOrDivideHistograms("MCParticleEffVsEnergy","EntriesForEffPerEnergyBin", 1.f, 1.f, false, false)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms("MCParticleEffVsTheta","EntriesForEffPerThetaBin", 1.f, 1.f)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms("MCParticleEffVsEnergy","EntriesForEffPerEnergyBin", 1.f, 1.f)); // divide the histograms
 
-    PANDORA_MONITORING_API(AddMultiplyOrDivideHistograms("MCParticlePurityVsTheta","EntriesForPurityPerThetaBin", 1.f, 1.f, false, false)); // divide the histograms
-    PANDORA_MONITORING_API(AddMultiplyOrDivideHistograms("MCParticlePurityVsEnergy","EntriesForPurityPerEnergyBin", 1.f, 1.f, false, false)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms("MCParticlePurityVsTheta","EntriesForPurityPerThetaBin", 1.f, 1.f)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms("MCParticlePurityVsEnergy","EntriesForPurityPerEnergyBin", 1.f, 1.f)); // divide the histograms
 
     PANDORA_MONITORING_API(SaveAndCloseHistogram("EntriesForEffPerThetaBin",m_monitoringFileName, "UPDATE"));
     PANDORA_MONITORING_API(SaveAndCloseHistogram("EntriesForEffPerEnergyBin",m_monitoringFileName, "UPDATE"));
@@ -167,61 +167,61 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
     typedef std::vector<float> FloatVec;
     typedef std::vector<int>   IntVec;
 
-    static FloatVec found_pfoTheta;
-    static FloatVec found_pfoPhi;
-    static FloatVec found_pfoEnergy;
-    static FloatVec found_pfoP;
-    static IntVec   found_pfoCharge;
-    static FloatVec found_mcTheta;
-    static FloatVec found_mcPhi;
-    static FloatVec found_mcEnergy;
-    static FloatVec found_mcP;
+    FloatVec found_pfoTheta;
+    FloatVec found_pfoPhi;
+    FloatVec found_pfoEnergy;
+    FloatVec found_pfoP;
+    IntVec   found_pfoCharge;
+    FloatVec found_mcTheta;
+    FloatVec found_mcPhi;
+    FloatVec found_mcEnergy;
+    FloatVec found_mcP;
 
-    static FloatVec falseFound_pfoTheta;
-    static FloatVec falseFound_pfoPhi;
-    static FloatVec falseFound_pfoEnergy;
-    static FloatVec falseFound_pfoP;
-    static IntVec   falseFound_pfoCharge;
+    FloatVec falseFound_pfoTheta;
+    FloatVec falseFound_pfoPhi;
+    FloatVec falseFound_pfoEnergy;
+    FloatVec falseFound_pfoP;
+    IntVec   falseFound_pfoCharge;
 
-    static FloatVec notFound_mcTheta;
-    static FloatVec notFound_mcPhi;
-    static FloatVec notFound_mcEnergy;
-    static FloatVec notFound_mcP;
+    FloatVec notFound_mcTheta;
+    FloatVec notFound_mcPhi;
+    FloatVec notFound_mcEnergy;
+    FloatVec notFound_mcP;
 
-    static FloatVec other_pfoTheta;
-    static FloatVec other_pfoPhi;
-    static FloatVec other_pfoEnergy;
-    static FloatVec other_pfoP;
-    static IntVec   other_pfoCharge;
+    FloatVec other_pfoTheta;
+    FloatVec other_pfoPhi;
+    FloatVec other_pfoEnergy;
+    FloatVec other_pfoP;
+    IntVec   other_pfoCharge;
 
-    static FloatVec pfoCaloHitE_truePositive;
-    static FloatVec pfoCaloHitE_falsePositive;
-    static FloatVec pfoCaloHitE_trueNegative;
-    static FloatVec pfoCaloHitE_purity;
+    FloatVec pfoCaloHitE_truePositive;
+    FloatVec pfoCaloHitE_falsePositive;
+    FloatVec pfoCaloHitE_trueNegative;
+    FloatVec pfoCaloHitE_purity;
 
-    static FloatVec pfoCaloHitE_pfoTheta;
-    static FloatVec pfoCaloHitE_pfoPhi;
-    static FloatVec pfoCaloHitE_pfoEnergy;
-    static FloatVec pfoCaloHitE_pfoP;
-    static IntVec   pfoCaloHitE_pfoCharge;
+    FloatVec pfoCaloHitE_pfoTheta;
+    FloatVec pfoCaloHitE_pfoPhi;
+    FloatVec pfoCaloHitE_pfoEnergy;
+    FloatVec pfoCaloHitE_pfoP;
+    IntVec   pfoCaloHitE_pfoCharge;
 
-    static FloatVec mcCaloHitE_truePositive;
-    static FloatVec mcCaloHitE_falseNegative;
-    static FloatVec mcCaloHitE_efficiency;
+    FloatVec mcCaloHitE_truePositive;
+    FloatVec mcCaloHitE_falseNegative;
+    FloatVec mcCaloHitE_efficiency;
 
-    static FloatVec mcCaloHitE_mcTheta;
-    static FloatVec mcCaloHitE_mcPhi;
-    static FloatVec mcCaloHitE_mcEnergy;
-    static FloatVec mcCaloHitE_mcP;
+    FloatVec mcCaloHitE_mcTheta;
+    FloatVec mcCaloHitE_mcPhi;
+    FloatVec mcCaloHitE_mcEnergy;
+    FloatVec mcCaloHitE_mcP;
 
 
-    static FloatVec control_energyOfLargestAndMatchingMC;
-    static FloatVec control_pfoMCCaloHitEFraction;
-    static FloatVec control_largestContribution;
-    static FloatVec control_totalContribution;
-    static FloatVec control_pfoEnergy;
-    static FloatVec control_pfoMCEDiffMulByEMC;
-    static FloatVec control_passedCriteria;
+    FloatVec control_energyOfLargestAndMatchingMC;
+    FloatVec control_pfoMCCaloHitEFraction;
+    FloatVec control_largestContribution;
+    FloatVec control_totalContribution;
+    FloatVec control_pfoEnergy;
+    FloatVec control_pfoMCEDiffMulByEMC;
+    FloatVec control_passedCriteria;
 
 
     // clear all the vectors
@@ -557,6 +557,12 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
     m_eventEfficiency     += eventEfficiency; // for MCParticle efficiency averaged over the events
     m_eventPurity         += eventPurity;     // for MCParticle efficiency averaged over the events
 
+    if (m_print)
+    {
+        std::cout << "Event: " << m_numberEvents << " --- " << std::endl;
+        std::cout << "efficiency: " << eventEfficiency << "  purity: " << eventPurity;
+        std::cout << "    found: " << truePositive << "   fakes:" << falsePositive << "  not found: " << falseNegative << "  other: " << trueNegative << std::endl;
+    }
 
     PANDORA_MONITORING_API(SetTreeVariable(m_eventTreeName, "found", truePositive ));
     PANDORA_MONITORING_API(SetTreeVariable(m_eventTreeName, "fakes", falsePositive ));
@@ -720,6 +726,10 @@ StatusCode EfficiencyMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     m_particleId = 0;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
         "ParticleId", m_particleId));
+
+    m_print = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "Print", m_print));
 
     m_monitoringFileName = "effmon.root";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
