@@ -57,11 +57,18 @@ private:
     typedef std::vector<float> LayerPositionList;
 
     /**
-     *  @brief  Store barrel and layer positions upon initialization
+     *  @brief  Store barrel and endcap layer positions upon initialization
      * 
      *  @param  layerParametersList the layer parameters list
      */
     void StoreLayerPositions(const GeometryHelper::LayerParametersList &layerParametersList, LayerPositionList &LayerPositionList);
+
+    /**
+     *  @brief  Store positions of barrel and endcap outer edges upon initialization
+     * 
+     *  @param  pGeometryHelper address of the geometry helper
+     */
+    void StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper);
 
     /**
      *  @brief  Get the appropriate pseudolayer for a specified parameters

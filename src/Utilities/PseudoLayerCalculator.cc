@@ -35,6 +35,8 @@ void HighGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *cons
         throw StatusCodeException(STATUS_CODE_FAILURE);
     }
 
+    this->StoreDetectorOuterEdge(pGeometryHelper);
+
     // Cache information used to identify overlap regions
     m_barrelInnerR = pGeometryHelper->GetECalBarrelParameters().GetInnerRCoordinate();
     m_endCapInnerZ = pGeometryHelper->GetECalEndCapParameters().GetInnerZCoordinate();
@@ -96,6 +98,30 @@ void HighGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHel
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void HighGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper)
+{
+    // Find extremal barrel and endcap coordinates. Necessary to guard against e.g. user-specified dummy muon coordinates.
+    const float barrelEdgeR(std::max(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
+        pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate(),
+        pGeometryHelper->GetMuonBarrelParameters().GetOuterRCoordinate()) ));
+
+    const float endCapEdgeZ(std::max(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate(), std::max(
+        pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate(),
+        pGeometryHelper->GetMuonEndCapParameters().GetOuterZCoordinate()) ));
+
+    if ((m_barrelLayerPositions.end() != std::upper_bound(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end(), barrelEdgeR)) ||
+        (m_endCapLayerPositions.end() != std::upper_bound(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end(), endCapEdgeZ)))
+    {
+        std::cout << "PseudoLayerCalculator: Layers specified outside detector edge." << std::endl;
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+    }
+
+    m_barrelLayerPositions.push_back(barrelEdgeR);
+    m_endCapLayerPositions.push_back(endCapEdgeZ);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode HighGranularityPseudoLayerCalculator::GetPseudoLayer(const float rCoordinate, const float zCoordinate, const float rCorrection,
     const float zCorrection, const float barrelInnerR, const float endCapInnerZ, PseudoLayer &pseudoLayer) const
 {
@@ -126,7 +152,8 @@ StatusCode HighGranularityPseudoLayerCalculator::GetPseudoLayer(const float rCoo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode HighGranularityPseudoLayerCalculator::FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, PseudoLayer &layer) const
+StatusCode HighGranularityPseudoLayerCalculator::FindMatchingLayer(const float position, const LayerPositionList &layerPositionList,
+    PseudoLayer &layer) const
 {
     LayerPositionList::const_iterator upperIter = std::upper_bound(layerPositionList.begin(), layerPositionList.end(), position);
 
