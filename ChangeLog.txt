@@ -1,4 +1,13 @@
 ************************************************************************
+TAG V00-03 FOR ILCSOFT USAGE
+************************************************************************
+Tidied GeometryHelper class, separating PseudoLayerCalculator and DetectorGap classes.
+Improved pseudo layer calculation; now uses binary search and has improved treatment for barrel/endcap overlap regions.
+Added ability to create and use custom pseudo layer calculator class.
+Added efficiency monitoring algorithm to assess particle identification purity and completeness.
+Set BUILD_32BIT_COMPATIBLE to OFF by default.
+
+************************************************************************
 LCD_WG2_VALIDATION_3 TAG
 ************************************************************************
 Added protection against input NaN and INF values.
