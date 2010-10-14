@@ -21,9 +21,13 @@ StatusCode TrackPreparationAlgorithm::Run()
     {
         const TrackList *pTrackList = NULL;
 
-        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetTrackList(*this, *iter, pTrackList))
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetTrackList(*this, *iter, pTrackList))
+            continue;
+
+        for (TrackList::const_iterator trackIter = pTrackList->begin(), trackIterEnd = pTrackList->end(); trackIter != trackIterEnd; ++trackIter)
         {
-            candidateTrackList.insert(pTrackList->begin(), pTrackList->end());
+            if ((*trackIter)->IsAvailable())
+                candidateTrackList.insert(*trackIter);
         }
     }
 
@@ -100,6 +104,9 @@ bool TrackPreparationAlgorithm::HasAssociatedClusters(const Track *const pTrack,
 {
     if ((pTrack->CanFormPfo() && pTrack->HasAssociatedCluster()) || (pTrack->CanFormClusterlessPfo()))
         return true;
+
+    if (!pTrack->IsAvailable())
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 
     // Consider any sibling tracks
     if (readSiblingInfo)

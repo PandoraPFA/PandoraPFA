@@ -10,6 +10,7 @@
 
 #include "Algorithms/FinalParticleIdAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
+#include "Algorithms/MuonReconstructionAlgorithm.h"
 #include "Algorithms/PhotonRecoveryAlgorithm.h"
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
 #include "Algorithms/ReclusteringAlgorithm.h"
@@ -77,6 +78,7 @@
 #define PANDORA_ALGORITHM_LIST(d)                                                                           \
     d("FinalParticleId",                        FinalParticleIdAlgorithm::Factory)                          \
     d("FragmentRemoval",                        FragmentRemovalAlgorithm::Factory)                          \
+    d("MuonReconstruction",                     MuonReconstructionAlgorithm::Factory)                       \
     d("PhotonRecovery",                         PhotonRecoveryAlgorithm::Factory)                           \
     d("PrimaryClustering",                      PrimaryClusteringAlgorithm::Factory)                        \
     d("Reclustering",                           ReclusteringAlgorithm::Factory)                             \

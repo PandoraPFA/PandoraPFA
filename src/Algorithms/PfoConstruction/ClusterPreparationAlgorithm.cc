@@ -19,11 +19,19 @@ StatusCode ClusterPreparationAlgorithm::Run()
     {
         const ClusterList *pClusterList = NULL;
 
-        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, *iter, pClusterList))
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, *iter, pClusterList))
+            continue;
+
+        ClusterList clustersToSave;
+
+        for (ClusterList::const_iterator clusterIter = pClusterList->begin(), clusterIterEnd = pClusterList->end(); clusterIter != clusterIterEnd; ++clusterIter)
         {
-            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, PandoraContentApi::SaveClusterList(*this,
-                *iter, m_mergedCandidateListName));
+            if ((*clusterIter)->IsAvailable())
+                clustersToSave.insert(*clusterIter);
         }
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, PandoraContentApi::SaveClusterList(*this,
+            *iter, m_mergedCandidateListName, clustersToSave));
     }
 
     // Save the merged list and set it to be the current list for future algorithms
