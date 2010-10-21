@@ -89,7 +89,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
         ClusterHelper::ClusterFitResult clusterFitResult;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::FitStart(pCluster, m_nClusterLayersToFit, clusterFitResult));
 
-        if (!clusterFitResult.IsFitSuccessful())// || (clusterFitResult.GetChi2() > m_maxClusterFitChi2))
+        if (!clusterFitResult.IsFitSuccessful())
             continue;
 
         const CartesianVector clusterInnerCentroid(pCluster->GetCentroid(pCluster->GetInnerPseudoLayer()));
@@ -121,18 +121,17 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointInZ((clusterInnerCentroid.GetZ() < 0.f) ? -muonEndCapInnerZ : muonEndCapInnerZ, pHelix->GetReferencePoint(), muonEntryPosition));
 
             const float muonEntryR(std::sqrt(muonEntryPosition.GetX() * muonEntryPosition.GetX() + muonEntryPosition.GetY() * muonEntryPosition.GetY()));
+            bool isInBarrel(false);
 
             if (muonEntryR > coilMidPointR)
             {
+                isInBarrel = true;
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointOnCircle(coilMidPointR, pHelix->GetReferencePoint(), muonEntryPosition));
             }
 
             const CartesianVector muonEntryMomentum(pHelix->GetExtrapolatedMomentum(muonEntryPosition));
             const CartesianVector helixDirection(muonEntryPosition.GetUnitVector());
-            const Helix externalHelix(muonEntryPosition, muonEntryMomentum, -pHelix->GetCharge(), 1.5f); // TODO get bfield outside
-
-            // Original attempt
-            // const CartesianVector helixDirection(pHelix->GetExtrapolatedMomentum(clusterInnerCentroid).GetUnitVector());
+            const Helix externalHelix(muonEntryPosition, muonEntryMomentum, isInBarrel ? -pHelix->GetCharge() : pHelix->GetCharge(), isInBarrel ? 1.5f : 4.f); // TODO get bfield outside
 
             const float helixClusterCosAngle(helixDirection.GetCosOpeningAngle(clusterFitResult.GetDirection()));
 
@@ -141,7 +140,6 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
 
             // Calculate separation of helix and cluster inner centroid
             CartesianVector helixSeparation;
-            //PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint(clusterInnerCentroid, helixSeparation));
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, externalHelix.GetDistanceToPoint(clusterInnerCentroid, helixSeparation));
 
             const float distanceToTrack(helixSeparation.GetZ());
