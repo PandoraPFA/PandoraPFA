@@ -706,6 +706,7 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
     PANDORA_MONITORING_API(FillTree(m_notFoundTreeName));
 
     PANDORA_MONITORING_API(FillTree(m_pfoCaloHitETreeName));
+    PANDORA_MONITORING_API(FillTree(m_mcCaloHitETreeName));
     PANDORA_MONITORING_API(FillTree(m_controlTreeName));
 
     PANDORA_MONITORING_API(FillTree(m_eventTreeName));
