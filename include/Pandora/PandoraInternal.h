@@ -91,6 +91,8 @@ typedef std::vector<TrackState *> TrackStateList;
 typedef std::vector<CaloHit *> CaloHitVector;
 typedef std::vector<Track *> TrackVector;
 typedef std::vector<Cluster *> ClusterVector;
+typedef std::vector<MCParticle *> MCParticleVector;
+typedef std::vector<ParticleFlowObject *> ParticleFlowObjectVector;
 typedef std::set<ParticleFlowObject *> ParticleFlowObjectList;
 
 typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;

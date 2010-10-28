@@ -21,6 +21,15 @@ namespace pandora
 class MCParticle 
 {
 public:
+
+    /**
+     *  @brief  Sort MCParticles by descending energy
+     * 
+     *  @param  pLhs address of first MCParticle
+     *  @param  pRhs address of second MCParticle
+     */
+    static bool SortByEnergy(const MCParticle *const pLhs, const MCParticle *const pRhs);
+
     /**
      *  @brief  Whether the mc particle properties have been initialized
      * 
@@ -216,6 +225,13 @@ private:
 
     friend class MCManager;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool MCParticle::SortByEnergy(const MCParticle *const pLhs, const MCParticle *const pRhs)
+{
+    return (pLhs->GetEnergy() > pRhs->GetEnergy());
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -29,6 +29,14 @@ public:
     bool operator< (const Track &rhs) const;
 
     /**
+     *  @brief  Sort tracks by descending momentum
+     * 
+     *  @param  pLhs address of first track
+     *  @param  pRhs address of second track
+     */
+    static bool SortByMomentum(const Track *const pLhs, const Track *const pRhs);
+
+    /**
      *  @brief  Sort tracks by descending energy at dca
      * 
      *  @param  pLhs address of first track
@@ -311,6 +319,13 @@ std::ostream &operator<<(std::ostream &stream, const Track &track);
  *  @param  momentumSortedTrackList to receive the momentum sorted track list
  */
 StatusCode SortByMomentum(const TrackList &trackList, MomentumSortedTrackList &momentumSortedTrackList);
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::SortByMomentum(const Track *const pLhs, const Track *const pRhs)
+{
+    return (pLhs->m_momentumMagnitudeAtDca > pRhs->m_momentumMagnitudeAtDca);
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

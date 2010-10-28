@@ -29,6 +29,15 @@ class CaloHit;
 class Cluster
 {
 public:
+
+    /**
+     *  @brief  Sort clusters by descending hadronic energy
+     * 
+     *  @param  pLhs address of first cluster
+     *  @param  pRhs address of second cluster
+     */
+    static bool SortByHadronicEnergy(const Cluster *const pLhs, const Cluster *const pRhs);
+
     /**
      *  @brief  Sort clusters by ascending inner layer, and by hadronic energy within a layer
      * 
@@ -485,6 +494,13 @@ private:
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Cluster::SortByHadronicEnergy(const Cluster *const pLhs, const Cluster *const pRhs)
+{
+    return (pLhs->GetHadronicEnergy() > pRhs->GetHadronicEnergy());
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
