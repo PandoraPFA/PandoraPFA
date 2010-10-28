@@ -39,6 +39,15 @@ private:
     StatusCode AssociateMuonTracks(const pandora::ClusterList *const pMuonClusterList) const;
 
     /**
+     *  @brief  Get the coordinates of the point at which a helix enters the muon detectors
+     * 
+     *  @param  pHelix address of the helix
+     *  @param  isPositiveZ whether to project the helix to the muon endcap with positive or negative z coordiante
+     *  @param  muonEntryPoint to receive the muon entry point
+     */
+    StatusCode GetMuonEntryPoint(const pandora::Helix *const pHelix, const bool isPositiveZ, pandora::CartesianVector &muonEntryPoint) const;
+
+    /**
      *  @brief  Add appropriate calo hits in the ecal/hcal to the muon clusters
      * 
      *  @param  pMuonClusterList address of the muon cluster list

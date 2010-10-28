@@ -67,8 +67,8 @@ StatusCode VisualMonitoringAlgorithm::Run()
     // Finally, display the event and pause application
     if (m_displayEvent)
     {
+        PANDORA_MONITORING_API(SetEveDisplayParameters(Color(m_backgroundColor), m_showDetector));
         PANDORA_MONITORING_API(ViewEvent());
-        PANDORA_MONITORING_API(SetEveDisplayParameters(Color(m_backgroundColor),m_showDetector));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -266,32 +266,17 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         m_particleSuppressionMap.insert(PdgCodeToEnergyMap::value_type(pdgCode, energy));
     }
 
-    try
-    {  
-        bool blackBackground = Color(m_backgroundColor)==BLACK?true:false;
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
-                                                                              "BlackBackground", blackBackground));
-        if (blackBackground)
-            m_backgroundColor = int(BLACK);
-        else
-            m_backgroundColor = int(WHITE);
+    bool blackBackground = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "BlackBackground", blackBackground));
 
-        PANDORA_MONITORING_API(SetEveDisplayParameters(Color(m_backgroundColor),m_showDetector));
-    }
-    catch(...)
-    {
-    }
+    m_backgroundColor = blackBackground ? int(BLACK) : int(WHITE);
 
-    try
-    {
-        m_showDetector = true;
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
-                                                                              "ShowDetector", m_showDetector));
-        PANDORA_MONITORING_API(SetEveDisplayParameters(Color(m_backgroundColor),m_showDetector));
-    }
-    catch(...)
-    {
-    }
+    m_showDetector = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShowDetector", m_showDetector));
+
+    PANDORA_MONITORING_API(SetEveDisplayParameters(Color(m_backgroundColor), m_showDetector));
 
     return STATUS_CODE_SUCCESS;
 }

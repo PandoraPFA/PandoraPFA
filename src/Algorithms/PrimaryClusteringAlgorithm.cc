@@ -27,16 +27,15 @@ StatusCode PrimaryClusteringAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
 
+    // Run the topological association algorithms to modify clusters
+    if (!pClusterList->empty() && !m_associationAlgorithmName.empty())
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
+
+    // Save the new cluster list
     if (!pClusterList->empty())
     {
-        // Run the topological association algorithms
-        if (!m_associationAlgorithmName.empty())
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_associationAlgorithmName));
-
-        // Save the new cluster list
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_clusterListName));
 
-        // If specified, replace the current cluster list
         if (m_replaceCurrentClusterList)
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentClusterList(*this, m_clusterListName));
     }

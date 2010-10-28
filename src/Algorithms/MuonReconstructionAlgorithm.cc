@@ -65,7 +65,6 @@ StatusCode MuonReconstructionAlgorithm::Run()
 
 StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *const pMuonClusterList) const
 {
-    static const float muonEndCapInnerZ(GeometryHelper::GetInstance()->GetMuonEndCapParameters().GetInnerZCoordinate());
     static const float coilMidPointR(0.5f * (GeometryHelper::GetInstance()->GetCoilOuterRadius() + GeometryHelper::GetInstance()->GetCoilInnerRadius()));
 
     const TrackList *pTrackList = NULL;
@@ -82,7 +81,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
         if (pCluster->GetOrderedCaloHitList().size() < m_minClusterOccupiedLayers)
             continue;
 
-        if ((pCluster->GetOuterPseudoLayer() - pCluster->GetInnerPseudoLayer()) < m_minClusterLayerSpan)
+        if ((pCluster->GetOuterPseudoLayer() - pCluster->GetInnerPseudoLayer() + 1) < m_minClusterLayerSpan)
             continue;
 
         // Get direction of the cluster
@@ -93,6 +92,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             continue;
 
         const CartesianVector clusterInnerCentroid(pCluster->GetCentroid(pCluster->GetInnerPseudoLayer()));
+        const bool isPositiveZ(clusterInnerCentroid.GetZ() > 0.f);
 
         // Loop over all non-associated tracks in the current track list to find bestTrack
         Track *pBestTrack(NULL);
@@ -117,22 +117,26 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             const Helix *const pHelix(pTrack->GetHelixFitAtECal());
 
             // Compare cluster and helix directions
-            CartesianVector muonEntryPosition;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointInZ((clusterInnerCentroid.GetZ() < 0.f) ? -muonEndCapInnerZ : muonEndCapInnerZ, pHelix->GetReferencePoint(), muonEntryPosition));
+            CartesianVector muonEntryPoint;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetMuonEntryPoint(pHelix, isPositiveZ, muonEntryPoint));
 
-            const float muonEntryR(std::sqrt(muonEntryPosition.GetX() * muonEntryPosition.GetX() + muonEntryPosition.GetY() * muonEntryPosition.GetY()));
             bool isInBarrel(false);
+            const float muonEntryR(std::sqrt(muonEntryPoint.GetX() * muonEntryPoint.GetX() + muonEntryPoint.GetY() * muonEntryPoint.GetY()));
 
             if (muonEntryR > coilMidPointR)
             {
                 isInBarrel = true;
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointOnCircle(coilMidPointR, pHelix->GetReferencePoint(), muonEntryPosition));
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointOnCircle(coilMidPointR, pHelix->GetReferencePoint(), muonEntryPoint));
             }
 
-            const CartesianVector muonEntryMomentum(pHelix->GetExtrapolatedMomentum(muonEntryPosition));
-            const CartesianVector helixDirection(muonEntryPosition.GetUnitVector());
-            const Helix externalHelix(muonEntryPosition, muonEntryMomentum, isInBarrel ? -pHelix->GetCharge() : pHelix->GetCharge(), isInBarrel ? 1.5f : 4.f); // TODO get bfield outside
+            // Create helix that can be propagated in muon system, outside central detector
+            const Helix externalHelix(muonEntryPoint, pHelix->GetExtrapolatedMomentum(muonEntryPoint),
+                isInBarrel ? -pHelix->GetCharge() : pHelix->GetCharge(), isInBarrel ? 1.5f : 0.01f); // TODO get bfield outside
 
+            CartesianVector correctedMuonEntryPoint;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetMuonEntryPoint(&externalHelix, isPositiveZ, correctedMuonEntryPoint));
+
+            const CartesianVector helixDirection(externalHelix.GetExtrapolatedMomentum(correctedMuonEntryPoint).GetUnitVector());
             const float helixClusterCosAngle(helixDirection.GetCosOpeningAngle(clusterFitResult.GetDirection()));
 
             if (helixClusterCosAngle < m_minHelixClusterCosAngle)
@@ -143,7 +147,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, externalHelix.GetDistanceToPoint(clusterInnerCentroid, helixSeparation));
 
             const float distanceToTrack(helixSeparation.GetZ());
-
+ 
             if ((distanceToTrack < bestDistanceToTrack) || ((distanceToTrack == bestDistanceToTrack) && (pTrack->GetEnergyAtDca() > bestTrackEnergy)))
             {
                 pBestTrack = pTrack;
@@ -155,6 +159,61 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
         if (NULL != pBestTrack)
         {
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pBestTrack, pCluster));
+        }
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHelix, const bool isPositiveZ, CartesianVector &muonEntryPoint) const
+{
+    static const float muonEndCapInnerZ(GeometryHelper::GetInstance()->GetMuonEndCapParameters().GetInnerZCoordinate());
+
+    float minTime(std::numeric_limits<float>::max());
+    const CartesianVector &referencePoint(pHelix->GetReferencePoint());
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointInZ(isPositiveZ ? muonEndCapInnerZ : -muonEndCapInnerZ,
+        referencePoint, muonEntryPoint, minTime));
+
+    static const unsigned int muonBarrelInnerSymmetry = GeometryHelper::GetInstance()->GetMuonBarrelParameters().GetInnerSymmetryOrder();
+    static const float muonBarrelInnerPhi = GeometryHelper::GetInstance()->GetMuonBarrelParameters().GetInnerPhiCoordinate();
+    static const float muonBarrelInnerR = GeometryHelper::GetInstance()->GetMuonBarrelParameters().GetInnerRCoordinate();
+
+    if (muonBarrelInnerSymmetry > 0)
+    {
+        static const float pi(std::acos(-1.f));
+        static const float twopi_n = 2.f * pi / (static_cast<float>(muonBarrelInnerSymmetry));
+
+        for (unsigned int i = 0; i < muonBarrelInnerSymmetry; ++i)
+        {
+            const float phi(twopi_n * static_cast<float>(i) + muonBarrelInnerPhi);
+
+            CartesianVector barrelEntryPoint;
+            float time(std::numeric_limits<float>::max());
+
+            const StatusCode statusCode(pHelix->GetPointInXY(muonBarrelInnerR * std::cos(phi), muonBarrelInnerR * std::sin(phi),
+                 std::cos(phi + 0.5f * pi), std::sin(phi + 0.5f * pi), referencePoint, barrelEntryPoint, time));
+
+            if ((STATUS_CODE_SUCCESS == statusCode) && (time < minTime))
+            {
+                minTime = time;
+                muonEntryPoint = barrelEntryPoint;
+            }
+        }
+    }
+    else
+    {
+        CartesianVector barrelEntryPoint;
+        float time(std::numeric_limits<float>::max());
+
+        const StatusCode statusCode(pHelix->GetPointOnCircle(muonBarrelInnerR, referencePoint, barrelEntryPoint, time));
+
+        if ((STATUS_CODE_SUCCESS == statusCode) && (time < minTime))
+        {
+            minTime = time;
+            muonEntryPoint = barrelEntryPoint;
         }
     }
 
@@ -584,7 +643,7 @@ StatusCode MuonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxClusterFitChi2", m_maxClusterFitChi2));
 
-    m_maxDistanceToTrack = 1500.f;
+    m_maxDistanceToTrack = 200.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxDistanceToTrack", m_maxDistanceToTrack));
 
@@ -592,7 +651,7 @@ StatusCode MuonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinTrackCandidateEnergy", m_minTrackCandidateEnergy));
 
-    m_minHelixClusterCosAngle = 0.95f;
+    m_minHelixClusterCosAngle = 0.995f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHelixClusterCosAngle", m_minHelixClusterCosAngle));
 
