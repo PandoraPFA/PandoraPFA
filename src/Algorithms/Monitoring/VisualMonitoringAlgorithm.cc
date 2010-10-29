@@ -10,6 +10,9 @@
 
 #include "Pandora/AlgorithmHeaders.h"
 
+#include <algorithm>
+#include <string>
+
 using namespace pandora;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,7 +203,10 @@ void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
         return;
     }
 
-    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", AUTO));
+    Color color = AUTO;
+    if (m_hitColors.find("particleid") != std::string::npos)
+        color = AUTOID;
+    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", color));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -235,6 +241,11 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_showCurrentPfos = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShowCurrentPfos", m_showCurrentPfos));
+
+    m_hitColors = "pfo";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HitColors", m_hitColors));
+    std::transform(m_hitColors.begin(), m_hitColors.end(), m_hitColors.begin(), ::tolower);
 
     m_showOnlyAvailable = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
