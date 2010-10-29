@@ -11,6 +11,7 @@
 
 #include "Objects/DetectorGap.h"
 
+#include "Utilities/BFieldCalculator.h"
 #include "Utilities/PseudoLayerCalculator.h"
 
 #include <cmath>
@@ -32,6 +33,13 @@ GeometryHelper *GeometryHelper::GetInstance()
     }
 
     return m_pGeometryHelper;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float GeometryHelper::GetBField(const CartesianVector &positionVector) const
+{
+    return m_pBFieldCalculator->GetBField(positionVector);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -167,7 +175,8 @@ float GeometryHelper::GetMaximumRadius(const unsigned int symmetryOrder, const f
 
 GeometryHelper::GeometryHelper() :
     m_isInitialized(false),
-    m_pPseudoLayerCalculator(new HighGranularityPseudoLayerCalculator)
+    m_pBFieldCalculator(NULL),
+    m_pPseudoLayerCalculator(NULL)
 {
 }
 
@@ -178,7 +187,12 @@ GeometryHelper::~GeometryHelper()
     for (DetectorGapList::const_iterator iter = m_detectorGapList.begin(), iterEnd = m_detectorGapList.end(); iter != iterEnd; ++iter)
         delete *iter;
 
-    delete m_pPseudoLayerCalculator;
+    if (NULL != m_pBFieldCalculator)
+        delete m_pBFieldCalculator;
+
+    if (NULL != m_pPseudoLayerCalculator)
+        delete m_pPseudoLayerCalculator;
+
     m_detectorGapList.clear();
     m_instanceFlag = false;
 }
@@ -190,7 +204,22 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
     try
     {
         if (m_isInitialized)
+        {
+            std::cout << "GeometryHelper: Singleton already initialized " << std::endl;
             throw StatusCodeException(STATUS_CODE_ALREADY_INITIALIZED);
+        }
+
+        if (NULL == m_pBFieldCalculator)
+        {
+            std::cout << "GeometryHelper: No bfield calculator specified " << std::endl;
+            throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+        }
+
+        if (NULL == m_pPseudoLayerCalculator)
+        {
+            std::cout << "GeometryHelper: No pseudo layer calculator specified " << std::endl;
+            throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+        }
 
         m_mainTrackerInnerRadius = geometryParameters.m_mainTrackerInnerRadius.Get();
         m_mainTrackerOuterRadius = geometryParameters.m_mainTrackerOuterRadius.Get();
@@ -199,7 +228,6 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_coilInnerRadius        = geometryParameters.m_coilInnerRadius.Get();
         m_coilOuterRadius        = geometryParameters.m_coilOuterRadius.Get();
         m_coilZExtent            = geometryParameters.m_coilZExtent.Get();
-        m_bField                 = geometryParameters.m_bField.Get();
 
         m_nRadLengthsInZGap      = geometryParameters.m_nRadLengthsInZGap.Get();
         m_nIntLengthsInZGap      = geometryParameters.m_nIntLengthsInZGap.Get();
@@ -240,8 +268,9 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         this->FillAngleVector(m_eCalBarrelParameters.GetInnerSymmetryOrder(), m_eCalBarrelParameters.GetInnerPhiCoordinate(), m_eCalBarrelAngleVector);
         this->FillAngleVector(m_hCalBarrelParameters.GetInnerSymmetryOrder(), m_hCalBarrelParameters.GetInnerPhiCoordinate(), m_hCalBarrelAngleVector);
         this->FillAngleVector(m_muonBarrelParameters.GetInnerSymmetryOrder(), m_muonBarrelParameters.GetInnerPhiCoordinate(), m_muonBarrelAngleVector);
-        m_isInitialized = true;
 
+        m_isInitialized = true;
+        m_pBFieldCalculator->Initialize(this);
         m_pPseudoLayerCalculator->Initialize(this);
     }
     catch (StatusCodeException &statusCodeException)
@@ -332,12 +361,29 @@ float GeometryHelper::GetMaximumRadius(const AngleVector &angleVector, const flo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode GeometryHelper::SetBFieldCalculator(BFieldCalculator *pBFieldCalculator)
+{
+    if (m_isInitialized)
+        return STATUS_CODE_NOT_ALLOWED;
+
+    if (NULL != m_pBFieldCalculator)
+        delete m_pBFieldCalculator;
+
+    m_pBFieldCalculator = pBFieldCalculator;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode GeometryHelper::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator)
 {
     if (m_isInitialized)
         return STATUS_CODE_NOT_ALLOWED;
 
-    delete m_pPseudoLayerCalculator;
+    if (NULL != m_pPseudoLayerCalculator)
+        delete m_pPseudoLayerCalculator;
+
     m_pPseudoLayerCalculator = pPseudoLayerCalculator;
 
     return STATUS_CODE_SUCCESS;

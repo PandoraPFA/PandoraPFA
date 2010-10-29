@@ -134,6 +134,13 @@ StatusCode PandoraApiImpl::GetParticleFlowObjects(ParticleFlowObjectList &partic
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApiImpl::SetBFieldCalculator(BFieldCalculator *pBFieldCalculator) const
+{
+    return m_pPandora->m_pGeometryHelper->SetBFieldCalculator(pBFieldCalculator);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApiImpl::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator) const
 {
     return m_pPandora->m_pGeometryHelper->SetPseudoLayerCalculator(pPseudoLayerCalculator);

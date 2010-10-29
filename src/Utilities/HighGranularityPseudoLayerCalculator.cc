@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/src/Utilities/PseudoLayerCalculator.cc
+ *  @file   PandoraPFANew/src/Utilities/HighGranularityPseudoLayerCalculator.cc
  * 
- *  @brief  Implementation of the pseudo layer calculator class.
+ *  @brief  Implementation of the high granularity pseudo layer calculator class.
  * 
  *  $Log: $
  */
 
-#include "Utilities/PseudoLayerCalculator.h"
+#include "Utilities/HighGranularityPseudoLayerCalculator.h"
 
 #include <algorithm>
 

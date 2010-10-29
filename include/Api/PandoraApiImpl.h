@@ -103,6 +103,13 @@ public:
     StatusCode GetParticleFlowObjects(ParticleFlowObjectList &particleFlowObjectList) const;
 
     /**
+     *  @brief  Set the bfield calculator used by pandora
+     * 
+     *  @param  pBFieldCalculator address of the bfield calculator
+     */
+    StatusCode SetBFieldCalculator(BFieldCalculator *pBFieldCalculator) const;
+
+    /**
      *  @brief  Set the pseudo layer calculator used by pandora
      * 
      *  @param  pPseudoLayerCalculator address of the pseudo layer calculator

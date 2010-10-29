@@ -16,6 +16,7 @@ namespace pandora
 {
 
 class DetectorGap;
+class BFieldCalculator;
 class PseudoLayerCalculator;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -166,6 +167,15 @@ public:
     GeometryType GetGeometryType() const;
 
     /**
+     *  @brief  Get the bfield value for a specified position vector
+     * 
+     *  @param  positionVector the specified position
+     * 
+     *  @return the bfield, units Tesla
+     */
+    float GetBField(const CartesianVector &positionVector) const;
+
+    /**
      *  @brief  Get the appropriate pseudolayer for a specified position vector
      * 
      *  @param  positionVector the specified position
@@ -265,13 +275,6 @@ public:
      *  @return The coil z extent
      */
     float GetCoilZExtent() const;
-
-    /**
-     *  @brief  Get the detector magnetic field (assumed constant), units Tesla
-     * 
-     *  @return The detector magnetic field
-     */
-    float GetBField() const;
 
     /**
      *  @brief  Get the absorber material in barrel/endcap z gap, units radiation lengths
@@ -455,6 +458,13 @@ private:
     float GetMaximumRadius(const AngleVector &angleVector, const float x, const float y) const;
 
     /**
+     *  @brief  Set the bfield calculator
+     * 
+     *  @param  pBFieldCalculator address of the bfield calculator
+     */
+    StatusCode SetBFieldCalculator(BFieldCalculator *pBFieldCalculator);
+
+    /**
      *  @brief  Set the pseudo layer calculator
      * 
      *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
@@ -470,6 +480,7 @@ private:
 
     bool                        m_isInitialized;            ///< Whether the geometry helper is initialized
     GeometryType                m_geometryType;             ///< The geometry type
+    BFieldCalculator           *m_pBFieldCalculator;        ///< Address of the bfield calculator
     PseudoLayerCalculator      *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
 
     SubDetectorParameters       m_eCalBarrelParameters;     ///< The ecal barrel parameters
@@ -485,7 +496,6 @@ private:
     float                       m_coilInnerRadius;          ///< The coil inner radius, units mm
     float                       m_coilOuterRadius;          ///< The coil outer radius, units mm
     float                       m_coilZExtent;              ///< The coil z extent, units mm
-    float                       m_bField;                   ///< The detector magnetic field (assumed constant), units Tesla
     float                       m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
     float                       m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
     float                       m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
@@ -636,13 +646,6 @@ inline float GeometryHelper::GetCoilZExtent() const
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_coilZExtent;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float GeometryHelper::GetBField() const
-{
-    return m_bField;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

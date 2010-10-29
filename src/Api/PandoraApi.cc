@@ -84,6 +84,13 @@ StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApi::SetBFieldCalculator(const pandora::Pandora &pandora, pandora::BFieldCalculator *pBFieldCalculator)
+{
+    return pandora.GetPandoraApiImpl()->SetBFieldCalculator(pBFieldCalculator);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApi::SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator)
 {
     return pandora.GetPandoraApiImpl()->SetPseudoLayerCalculator(pPseudoLayerCalculator);

@@ -17,6 +17,7 @@
 namespace pandora
 {
 
+class BFieldCalculator;
 class CaloHit;
 class Cluster;
 class Helix;

@@ -51,7 +51,7 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     // Obtain helix fit to track state at ecal
-    static const float bField(GeometryHelper::GetInstance()->GetBField());
+    static const float bField(GeometryHelper::GetInstance()->GetBField(CartesianVector(0.f, 0.f, 0.f)));
     m_pHelixFitAtECal = new Helix(m_trackStateAtECal.GetPosition(), m_trackStateAtECal.GetMomentum(), static_cast<float>(m_charge), bField);
 }
 
