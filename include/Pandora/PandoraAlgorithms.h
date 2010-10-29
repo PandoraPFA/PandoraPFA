@@ -8,6 +8,7 @@
 #ifndef PANDORA_ALGORITHMS_H
 #define PANDORA_ALGORITHMS_H 1
 
+#include "Algorithms/EventPreparationAlgorithm.h"
 #include "Algorithms/FinalParticleIdAlgorithm.h"
 #include "Algorithms/FragmentRemovalAlgorithm.h"
 #include "Algorithms/MuonReconstructionAlgorithm.h"
@@ -15,7 +16,6 @@
 #include "Algorithms/PrimaryClusteringAlgorithm.h"
 #include "Algorithms/ReclusteringAlgorithm.h"
 #include "Algorithms/TopologicalAssociationAlgorithm.h"
-#include "Algorithms/TrackSelectionAlgorithm.h"
 
 #include "Algorithms/Cheating/PerfectClusteringAlgorithm.h"
 #include "Algorithms/Cheating/PerfectPhotonClusteringAlgorithm.h"
@@ -76,6 +76,7 @@
 #include "Algorithms/TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
 #define PANDORA_ALGORITHM_LIST(d)                                                                           \
+    d("EventPreparation",                       EventPreparationAlgorithm::Factory)                         \
     d("FinalParticleId",                        FinalParticleIdAlgorithm::Factory)                          \
     d("FragmentRemoval",                        FragmentRemovalAlgorithm::Factory)                          \
     d("MuonReconstruction",                     MuonReconstructionAlgorithm::Factory)                       \
@@ -83,7 +84,6 @@
     d("PrimaryClustering",                      PrimaryClusteringAlgorithm::Factory)                        \
     d("Reclustering",                           ReclusteringAlgorithm::Factory)                             \
     d("TopologicalAssociation",                 TopologicalAssociationAlgorithm::Factory)                   \
-    d("TrackSelection",                         TrackSelectionAlgorithm::Factory)                           \
     d("PerfectClustering",                      PerfectClusteringAlgorithm::Factory)                        \
     d("PerfectPhotonClustering",                PerfectPhotonClusteringAlgorithm::Factory)                  \
     d("PerfectNeutralHadronClustering",         PerfectNeutralHadronClusteringAlgorithm::Factory)           \

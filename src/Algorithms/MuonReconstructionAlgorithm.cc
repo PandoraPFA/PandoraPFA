@@ -34,27 +34,8 @@ StatusCode MuonReconstructionAlgorithm::Run()
         return STATUS_CODE_SUCCESS;
     }
 
-    // Associate muon clusters to tracks
-    if (m_shouldCheatTrackAssociation)
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CheatAssociateMuonTracks(pMuonClusterList));
-    }
-    else
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssociateMuonTracks(pMuonClusterList));
-    }
-
-    // Add ecal/hcal hits to the muon cluster
-    if (m_shouldCheatCaloHitAddition)
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CheatAddCaloHits(pMuonClusterList, inputCaloHitListName));
-    }
-    else
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHits(pMuonClusterList, inputCaloHitListName));
-    }
-
-    // Complete the reconstruction
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssociateMuonTracks(pMuonClusterList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHits(pMuonClusterList, inputCaloHitListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateMuonPfos(pMuonClusterList));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->TidyLists(inputTrackListName, inputCaloHitListName, muonClusterListName));
 
@@ -317,97 +298,6 @@ StatusCode MuonReconstructionAlgorithm::AddCaloHits(const ClusterList *const pMu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MuonReconstructionAlgorithm::CheatAssociateMuonTracks(const ClusterList *const pMuonClusterList) const
-{
-    const TrackList *pTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
-
-    for (ClusterList::const_iterator iter = pMuonClusterList->begin(), iterEnd = pMuonClusterList->end(); iter != iterEnd; ++iter)
-    {
-        Cluster *pCluster = *iter;
-
-        const MCParticle *pBestMCParticle = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetBestMCParticle(pCluster, pBestMCParticle));
-
-        const Uid bestUid(pBestMCParticle->GetUid());
-
-        for (TrackList::const_iterator trackIter = pTrackList->begin(), trackIterEnd = pTrackList->end(); trackIter != trackIterEnd; ++trackIter)
-        {
-            Track *pTrack = *trackIter;
-
-            // Simple cuts on track properties
-            if (pTrack->HasAssociatedCluster() || !pTrack->CanFormPfo())
-                continue;
-
-            if (!pTrack->GetDaughterTrackList().empty())
-                continue;
-
-            if (pTrack->GetEnergyAtDca() < m_minTrackCandidateEnergy)
-                continue;
-
-            const MCParticle *pMCTrackParticle = NULL;
-
-            if (STATUS_CODE_SUCCESS != pTrack->GetMCParticle(pMCTrackParticle))
-                continue;
-
-            if (this->IsMatchedMCParticle(pMCTrackParticle, bestUid))
-            {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddTrackClusterAssociation(*this, pTrack, pCluster));
-                break;
-            }
-        }
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode MuonReconstructionAlgorithm::CheatAddCaloHits(const ClusterList *const pMuonClusterList, const std::string &inputCaloHitListName) const
-{
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetOrderedCaloHitList(*this, inputCaloHitListName, pOrderedCaloHitList));
-
-    for (ClusterList::const_iterator clusterIter = pMuonClusterList->begin(), clusterIterEnd = pMuonClusterList->end(); clusterIter != clusterIterEnd; ++clusterIter)
-    {
-        Cluster *pCluster = *clusterIter;
-
-        const MCParticle *pBestMCParticle = NULL;
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetBestMCParticle(pCluster, pBestMCParticle));
-
-        // Check track associations
-        const TrackList &trackList(pCluster->GetAssociatedTrackList());
-
-        if (trackList.size() != m_nExpectedTracksPerCluster)
-            continue;
-
-        for (OrderedCaloHitList::const_iterator layerIter = pOrderedCaloHitList->begin(), layerIterEnd = pOrderedCaloHitList->end(); layerIter != layerIterEnd; ++layerIter)
-        {
-            for (CaloHitList::const_iterator hitIter = layerIter->second->begin(), hitIterEnd = layerIter->second->end(); hitIter != hitIterEnd; ++hitIter)
-            {
-                CaloHit *pCaloHit = *hitIter;
-
-                if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit) || (!m_shouldClusterIsolatedHits && pCaloHit->IsIsolated()))
-                    continue;
-
-                const MCParticle *pMCParticle = NULL;
-
-                if (STATUS_CODE_SUCCESS != pCaloHit->GetMCParticle(pMCParticle))
-                    continue;
-
-                if (pBestMCParticle->GetUid() != pMCParticle->GetUid())
-                    continue;
-
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddCaloHitToCluster(*this, pCluster, pCaloHit));
-            }
-        }
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode MuonReconstructionAlgorithm::CreateMuonPfos(const ClusterList *const pMuonClusterList) const
 {
     for (ClusterList::const_iterator iter = pMuonClusterList->begin(), iterEnd = pMuonClusterList->end(); iter != iterEnd; ++iter)
@@ -504,74 +394,6 @@ StatusCode MuonReconstructionAlgorithm::TidyLists(const std::string &inputTrackL
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MuonReconstructionAlgorithm::GetBestMCParticle(const Cluster *const pCluster, const MCParticle *&pBestMCParticle) const
-{
-    bool isFound = false;
-
-    typedef std::map<const MCParticle *, float> MCParticleToEnergyMap;
-    MCParticleToEnergyMap mcParticleToEnergyMap;
-
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-    for (OrderedCaloHitList::const_iterator layerIter = orderedCaloHitList.begin(), layerIterEnd = orderedCaloHitList.end(); layerIter != layerIterEnd; ++layerIter)
-    {
-        for (CaloHitList::const_iterator hitIter = layerIter->second->begin(), hitIterEnd = layerIter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            CaloHit *pCaloHit = *hitIter;
-            const MCParticle *pMCParticle = NULL;
-
-            if (STATUS_CODE_SUCCESS != pCaloHit->GetMCParticle(pMCParticle))
-                continue;
-
-            mcParticleToEnergyMap[pMCParticle] += pCaloHit->GetHadronicEnergy();
-        }
-    }
-
-    float bestEnergy(0.f);
-
-    for (MCParticleToEnergyMap::const_iterator iter = mcParticleToEnergyMap.begin(), iterEnd = mcParticleToEnergyMap.end(); iter != iterEnd; ++iter)
-    {
-        const float energy(iter->second);
-
-        if (energy > bestEnergy)
-        {
-            bestEnergy = energy;
-            pBestMCParticle = iter->first;
-            isFound = true;
-        }
-    }
-
-    if (isFound)
-    {
-        return STATUS_CODE_SUCCESS;
-    }
-
-    return STATUS_CODE_NOT_FOUND;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-bool MuonReconstructionAlgorithm::IsMatchedMCParticle(const MCParticle *const pMCParticle, const Uid uid) const
-{
-    if (uid == pMCParticle->GetUid())
-        return true;
-
-    const MCParticleList &daughterList(pMCParticle->GetDaughterList());
-
-    for (MCParticleList::const_iterator iter = daughterList.begin(), iterEnd = daughterList.end(); iter != iterEnd; ++iter)
-    {
-        if (uid == (*iter)->GetUid())
-            return true;
-
-        if (this->IsMatchedMCParticle(*iter, uid))
-            return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode MuonReconstructionAlgorithm::GetPfoComponents(TrackList &pfoTrackList, OrderedCaloHitList &pfoCaloHitList, ClusterList &pfoClusterList) const
 {
     pfoTrackList.clear(); pfoCaloHitList.clear(); pfoClusterList.clear();
@@ -606,21 +428,12 @@ StatusCode MuonReconstructionAlgorithm::GetPfoComponents(TrackList &pfoTrackList
 StatusCode MuonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Input lists
-    m_muonCaloHitListName = "Muon";
+    m_muonCaloHitListName = "MuonYokeHits";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "m_muonCaloHitListName", m_muonCaloHitListName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle,
         "MuonClusterFormation", m_muonClusteringAlgName));
-
-    // Algorithm steering
-    m_shouldCheatTrackAssociation = false;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShouldCheatTrackAssociation", m_shouldCheatTrackAssociation));
-
-    m_shouldCheatCaloHitAddition = false;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShouldCheatCaloHitAddition", m_shouldCheatCaloHitAddition));
 
     // Cluster-track association
     m_maxClusterCaloHits = 30;
@@ -647,7 +460,7 @@ StatusCode MuonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxDistanceToTrack", m_maxDistanceToTrack));
 
-    m_minTrackCandidateEnergy = 4.f;
+    m_minTrackCandidateEnergy = 7.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinTrackCandidateEnergy", m_minTrackCandidateEnergy));
 

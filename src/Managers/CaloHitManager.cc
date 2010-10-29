@@ -22,7 +22,6 @@ namespace pandora
 {
 
 const std::string CaloHitManager::INPUT_LIST_NAME = "Input";
-const std::string CaloHitManager::MUON_LIST_NAME = "Muon";
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +59,7 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 {
     static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
 
-    OrderedCaloHitList orderedCaloHitList, muonOrderedCaloHitList;
+    OrderedCaloHitList orderedCaloHitList;
 
     for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
@@ -68,15 +67,7 @@ StatusCode CaloHitManager::OrderInputCaloHits()
         {
             PseudoLayer pseudoLayer = pGeometryHelper->GetPseudoLayer((*iter)->GetPositionVector());
             PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer(pseudoLayer));
-
-            if (MUON == (*iter)->GetHitType())
-            {
-                PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, muonOrderedCaloHitList.Add(*iter));
-            }
-            else
-            {
-                PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
-            }
+            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
         }
         catch (StatusCodeException &statusCodeException)
         {
@@ -85,8 +76,6 @@ StatusCode CaloHitManager::OrderInputCaloHits()
     }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(orderedCaloHitList, INPUT_LIST_NAME));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(muonOrderedCaloHitList, MUON_LIST_NAME));
-
     m_currentListName = INPUT_LIST_NAME;
 
     return STATUS_CODE_SUCCESS;
@@ -97,7 +86,6 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 StatusCode CaloHitManager::CalculateCaloHitProperties() const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CalculateCaloHitProperties(INPUT_LIST_NAME));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CalculateCaloHitProperties(MUON_LIST_NAME));
 
     static const bool useSimpleIsolationScheme(CaloHitHelper::ShouldUseSimpleIsolationScheme());
 

@@ -56,21 +56,6 @@ private:
     StatusCode AddCaloHits(const pandora::ClusterList *const pMuonClusterList, const std::string &inputCaloHitListName) const;
 
     /**
-     *  @brief  Use mc information to cheat the association of muon clusters with appropriate tracks
-     * 
-     *  @param  pMuonClusterList address of the muon cluster list
-     */
-    StatusCode CheatAssociateMuonTracks(const pandora::ClusterList *const pMuonClusterList) const;
-
-    /**
-     *  @brief  Use mc information to cheat the addition of appropriate ecal/hcal calo hits to the muon clusters
-     * 
-     *  @param  pMuonClusterList address of the muon cluster list
-     *  @param  inputCaloHitListName the name of the algorithm input calo hit list
-     */
-    StatusCode CheatAddCaloHits(const pandora::ClusterList *const pMuonClusterList, const std::string &inputCaloHitListName) const;
-
-    /**
      *  @brief  Create the muon pfos
      * 
      *  @param  pMuonClusterList address of the muon cluster list
@@ -85,24 +70,6 @@ private:
      *  @param  muonClusterListName the name of the list containing the initial muon clusters
      */
     StatusCode TidyLists(const std::string &inputTrackListName, const std::string &inputCaloHitListName, const std::string &muonClusterListName) const;
-
-    /**
-     *  @brief  Get the best mc particle for a specified cluster
-     * 
-     *  @param  pCluster address of the cluster
-     *  @param  pBestMCParticle to receive the address of the best mc particle
-     */
-    StatusCode GetBestMCParticle(const pandora::Cluster *const pCluster, const pandora::MCParticle *&pBestMCParticle) const;
-
-    /**
-     *  @brief  Whether a mc particle, or any of its daughters or siblings, matches the specified unique identifier
-     * 
-     *  @param  pMCParticle address of the mc particle
-     *  @param  uid the specified unique identifier
-     *
-     *  @return boolean
-     */
-    bool IsMatchedMCParticle(const pandora::MCParticle *const pMCParticle, Uid uid) const;
 
     typedef std::pair<pandora::CaloHit *, float> TrackDistanceInfo;
     typedef std::vector<TrackDistanceInfo> TrackDistanceInfoVector;
@@ -126,9 +93,6 @@ private:
 
     std::string     m_muonCaloHitListName;          ///< The name of the original calo hit list containing muon hits
     std::string     m_muonClusteringAlgName;        ///< The name of the muon clustering algorithm to run
-
-    bool            m_shouldCheatTrackAssociation;  ///< Whether to cheat muon cluster to track association
-    bool            m_shouldCheatCaloHitAddition;   ///< Whether to cheat addition of ecal/hcal hits to muon cluster
 
     unsigned int    m_maxClusterCaloHits;           ///< The maximum number of calo hits in a muon cluster
     unsigned int    m_minClusterOccupiedLayers;     ///< The minimum number of occupied layers in a muon cluster
