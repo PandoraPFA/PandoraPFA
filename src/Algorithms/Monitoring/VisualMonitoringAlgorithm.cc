@@ -70,7 +70,7 @@ StatusCode VisualMonitoringAlgorithm::Run()
     // Finally, display the event and pause application
     if (m_displayEvent)
     {
-        PANDORA_MONITORING_API(SetEveDisplayParameters(Color(m_backgroundColor), m_showDetector));
+        PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector));
         PANDORA_MONITORING_API(ViewEvent());
     }
 
@@ -203,10 +203,8 @@ void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
         return;
     }
 
-    Color color = AUTO;
-    if (m_hitColors.find("particleid") != std::string::npos)
-        color = AUTOID;
-    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", color));
+    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos",
+        (m_hitColors.find("particleid") != std::string::npos) ? AUTOID : AUTO));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -277,17 +275,15 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         m_particleSuppressionMap.insert(PdgCodeToEnergyMap::value_type(pdgCode, energy));
     }
 
-    bool blackBackground = false;
+    m_blackBackground = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "BlackBackground", blackBackground));
-
-    m_backgroundColor = blackBackground ? int(BLACK) : int(WHITE);
+        "BlackBackground", m_blackBackground));
 
     m_showDetector = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShowDetector", m_showDetector));
 
-    PANDORA_MONITORING_API(SetEveDisplayParameters(Color(m_backgroundColor), m_showDetector));
+    PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector));
 
     return STATUS_CODE_SUCCESS;
 }

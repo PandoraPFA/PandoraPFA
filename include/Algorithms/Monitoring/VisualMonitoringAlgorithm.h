@@ -81,9 +81,9 @@ private:
     bool                    m_showOnlyAvailable;        ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
     bool                    m_displayEvent;             ///< Whether to display the event
 
-    int                     m_backgroundColor;          ///< Set the background color to be white or black
-    bool                    m_showDetector;             ///< set the visibility of the detector geometry
-    std::string             m_hitColors;                ///< define the hit coloring scheme (default: pfo, choices: pfo, particleid)
+    bool                    m_blackBackground;          ///< Whether to use a black background color, rather than white
+    bool                    m_showDetector;             ///< Whether to display the detector geometry
+    std::string             m_hitColors;                ///< Define the hit coloring scheme (default: pfo, choices: pfo, particleid)
 
     pandora::StringVector   m_suppressMCParticles;      ///< List of PDG numbers and energies for MC particles to be suppressed (e.g. " 22:0.1 2112:1.0 ")
     PdgCodeToEnergyMap      m_particleSuppressionMap;   ///< Map from pdg-codes to energy for suppression of particles types below specific energies
