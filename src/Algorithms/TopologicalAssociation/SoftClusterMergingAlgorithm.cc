@@ -140,7 +140,10 @@ bool SoftClusterMergingAlgorithm::CanMergeSoftCluster(const Cluster *const pDaug
     if ((closestDistance < m_closestDistanceCut2) && (daughterInnerLayer > m_innerLayerCut2))
         return true;
 
-    if (closestDistance < m_maxClusterDistance)
+    static const PseudoLayer nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
+    const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
+
+    if (closestDistance < ((daughterOuterLayer < nECalLayers) ? m_maxClusterDistanceECal : m_maxClusterDistanceHCal))
     {
         if ((pDaughterCluster->GetHadronicEnergy() < m_minClusterHadEnergy) || (pDaughterCluster->GetNCaloHits() < m_minHitsInCluster))
             return true;
@@ -199,9 +202,13 @@ StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "InnerLayerCut2", m_innerLayerCut2));
 
-    m_maxClusterDistance = 250.f;
+    m_maxClusterDistanceECal = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxClusterDistance", m_maxClusterDistance));
+        "MaxClusterDistanceECal", m_maxClusterDistanceECal));
+
+    m_maxClusterDistanceHCal = 250.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxClusterDistanceHCal", m_maxClusterDistanceHCal));
 
     m_minHitsInCluster = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
