@@ -26,8 +26,11 @@ Helix::Helix(const float phi0, const float d0, const float z0, const float omega
     m_omega(omega),
     m_tanLambda(tanLambda)
 {
-    if (0. == omega)
+    if ((0. >= bField) || (0. == omega))
+    {
+        std::cout << "Helix, invalid parameter: bField " << bField << ", omega " << omega << std::endl;
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    }
 
     m_charge = omega / std::fabs(omega);
     m_radius = 1.f / std::fabs(omega);
@@ -55,8 +58,11 @@ Helix::Helix(const CartesianVector &position, const CartesianVector &momentum, c
     const double px(momentum.GetX()), py(momentum.GetY());
     const double pxy(std::sqrt(px * px + py * py));
 
-    if ((0. == bField) || (0. == pxy))
+    if ((0. >= bField) || (0. == pxy))
+    {
+        std::cout << "Helix, invalid parameter: bField " << bField << ", pxy " << pxy << std::endl;
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    }
 
     const double radius(pxy / (FCT * bField));
     m_pxy    = static_cast<float>(pxy);
@@ -115,62 +121,6 @@ Helix::Helix(const CartesianVector &position, const CartesianVector &momentum, c
 
     const int nCircles((std::fabs(n1 - xCircles) < std::fabs(n2 - xCircles) ? n1 : n2));
     m_z0 = position.GetZ() + m_radius * m_tanLambda * charge * (deltaPhi + TWO_PI * nCircles);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-Helix::Helix(const float xCentre, const float yCentre, const float radius, const float bZ, const float phi0, const float bField,
-        const float signPz, const float zBegin) :
-    m_xCentre(xCentre),
-    m_yCentre(yCentre),
-    m_radius(radius)
-{
-    m_pxy = FCT * bField * m_radius;
-
-    if ((0. == bZ) || (0. == signPz) || (0. == radius) || (0. == m_pxy))
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    m_charge    = -(bZ * signPz) / std::fabs(bZ * signPz);
-    m_omega     =  m_charge / radius;
-    m_phiAtPCA  =  std::atan2(-m_yCentre, -m_xCentre);
-    m_phi0      = -HALF_PI * m_charge + m_phiAtPCA;
-
-    while (m_phi0 < 0)
-        m_phi0 += TWO_PI;
-
-    while (m_phi0 >= TWO_PI)
-        m_phi0 -= TWO_PI;
-
-    m_xAtPCA =  m_xCentre + m_radius*std::cos(m_phiAtPCA);
-    m_yAtPCA =  m_yCentre + m_radius*std::sin(m_phiAtPCA);
-    m_d0     = -m_xAtPCA * std::sin(m_phi0) + m_yAtPCA * std::cos(m_phi0);
-    m_pxAtPCA = m_pxy * std::cos(m_phi0);
-    m_pyAtPCA = m_pxy * std::sin(m_phi0);
-
-    m_referencePoint.SetValues(xCentre + radius * std::cos(bZ * zBegin + phi0), yCentre + radius * std::sin(bZ * zBegin + phi0), zBegin);
-    m_phiRefPoint       =  std::atan2(m_referencePoint.GetY() - m_yCentre, m_referencePoint.GetX() - m_xCentre);
-
-    m_phiMomRefPoint    = -HALF_PI * m_charge + m_phiRefPoint;
-    m_momentum.SetValues(m_pxy * std::cos(m_phiMomRefPoint), m_pxy * std::sin(m_phiMomRefPoint), -m_charge * m_pxy / (bZ * m_radius));
-
-    m_tanLambda     =  m_momentum.GetZ() / m_pxy;
-    float deltaPhi  = m_phiRefPoint - m_phiAtPCA;
-    float xCircles  = (bZ * m_referencePoint.GetZ() - deltaPhi) / TWO_PI;
-
-    int n1, n2;
-    if (xCircles >= 0.)
-    {
-        n1 = static_cast<int>(xCircles);
-        n2 = n1 + 1;
-    }
-    else
-    {
-        n1 = static_cast<int>(xCircles) - 1;
-        n2 = n1 + 1;
-    }
-
-    const int nCircles((std::fabs(n1 - xCircles) < std::fabs(n2 - xCircles) ? n1 : n2));
-    m_z0 = m_referencePoint.GetZ() - (deltaPhi + TWO_PI * nCircles) / bZ;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

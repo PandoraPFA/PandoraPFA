@@ -114,8 +114,10 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             }
 
             // Create helix that can be propagated in muon system, outside central detector
+            const float externalBField(isInBarrel ? muonBarrelBField : muonEndCapBField);
+
             const Helix externalHelix(muonEntryPoint, pHelix->GetExtrapolatedMomentum(muonEntryPoint),
-                isInBarrel ? -pHelix->GetCharge() : pHelix->GetCharge(), isInBarrel ? muonBarrelBField : muonEndCapBField);
+                (externalBField < 0.f) ? -pHelix->GetCharge() : pHelix->GetCharge(), std::fabs(externalBField));
 
             CartesianVector correctedMuonEntryPoint;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetMuonEntryPoint(&externalHelix, isPositiveZ, correctedMuonEntryPoint));

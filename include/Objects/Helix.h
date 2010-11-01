@@ -46,22 +46,6 @@ public:
     Helix(const CartesianVector &position, const CartesianVector &momentum, const float charge, const float bField);
 
     /**
-     *  @brief  Constructor using the following parameterisation: x = xCentre + radius*cos(bZ*z + phi0),
-     *          y = yCentre + radius*sin(bZ*z + phi0), where (x,y,z) is position of point on the helix
-     * 
-     *  @param  xCentre x coordinate at centre of circumference in R-Phi plane
-     *  @param  yCentre y coordinate at centre of circumference in R-Phi plane
-     *  @param  radius the radius of circumference
-     *  @param  bZ the helix slope parameter
-     *  @param  phi0 the initial phase of circumference
-     *  @param  bField magnetic field (in Tesla)
-     *  @param  signPz the sign of the z component of momentum vector
-     *  @param  zBegin the z coordinate of the reference point
-     */
-    Helix(const float xCentre, const float yCentre, const float radius, const float bZ, const float phi0, const float bField,
-        const float signPz, const float zBegin);
-
-    /**
      *  @brief  Get helix intersection point with a plane parallel to z axis. The plane is defined by two coordinates in the
      *          plane (x0,y0) and a normal vector (ax,ay).
      * 
