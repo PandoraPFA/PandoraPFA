@@ -119,7 +119,8 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
     // 2. Construct expected cluster profile
     const double a(m_showerProfileParameter0 + m_showerProfileParameter1 * std::log(clusterEnergy / m_showerProfileCriticalEnergy));
 #ifdef __GNUC__
-    const double gammaA(std::exp(gamma(a)));
+//    const double gammaA(std::exp(gamma(a)));
+    const double gammaA(std::exp(lgamma(a)));
 #else
     const double gammaA(0.);
     std::cout << " PandoraPFANew, ParticleIdHelper: TODO - implement gamma function " << std::endl;
