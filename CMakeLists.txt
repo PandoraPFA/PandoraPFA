@@ -35,10 +35,6 @@ OPTION( BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON )
 OPTION( BUILD_32BIT_COMPATIBLE "Set to ON to build in 32 bit compatibility mode" OFF )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 
-IF( APPLE )
-    LIST(APPEND ${PROJECT_NAME}_DEPENDS "streamlog")
-ENDIF() 
-
 # set default cmake build type to RelWithDebInfo
 # possible options are: None Debug Release RelWithDebInfo MinSizeRel
 IF( NOT CMAKE_BUILD_TYPE )
