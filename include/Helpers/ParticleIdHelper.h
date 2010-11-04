@@ -161,19 +161,12 @@ private:
     static float        m_photonIdRmsCutEnergy;             ///< Energy at which photon id cut (on cluster fit result rms) changes
     static float        m_photonIdRmsLowECut;               ///< Low energy cut on cluster fit result rms
     static float        m_photonIdRmsHighECut;              ///< High energy cut on cluster fit result rms
-    static float        m_photonIdEndCapZSeparation;        ///< To determine whether cluster strikes endcap: max z distance to inner centroid
-    static float        m_photonIdRadiationLengthsCut;      ///< Max number of radiation lengths before cluster inner layer
-    static float        m_photonIdShowerMaxCut1_0;          ///< Default value for shower max cut 1: min number of layers from inner layer
-    static float        m_photonIdShowerMaxCut1Energy_1;    ///< Energy above which shower max cut 1 value 1 is applied
-    static float        m_photonIdShowerMaxCut1_1;          ///< Shower max cut 1 value 1
-    static float        m_photonIdShowerMaxCut1Energy_2;    ///< Energy above which shower max cut 1 value 2 is applied
-    static float        m_photonIdShowerMaxCut1_2;          ///< Shower max cut 1 value 2
-    static float        m_photonIdShowerMaxCut2;            ///< Shower max cut 2: max number of layers from inner layer
-    static float        m_photonIdLayer90Cut1;              ///< Cut on cluster layer 90: min number of layers from inner layer
-    static float        m_photonIdLayer90Cut2Energy;        ///< Energy at which photon id cut (on cluster layer 90) changes
-    static float        m_photonIdLayer90LowECut2;          ///< Low energy cut on max number of layers between layer 90 and inner layer
-    static float        m_photonIdLayer90HighECut2;         ///< High energy cut on max number of layers between layer 90 and inner layer
-    static int          m_photonIdLayer90MaxLayersFromECal; ///< Max number of layers between cluster layer 90 and last ecal layer
+    static float        m_photonIdMinCosAngle;              ///< Min angular correction used to adjust radiation length measures
+    static float        m_photonIdMaxInnerLayerRadLengths;  ///< Max number of radiation lengths before cluster inner layer
+    static float        m_photonIdMinLayer90RadLengths;     ///< Min number of radiation lengths before cluster layer90
+    static float        m_photonIdMaxLayer90RadLengths;     ///< Max number of radiation lengths before cluster layer90
+    static float        m_photonIdMinShowerMaxRadLengths;   ///< Min number of radiation lengths before cluster shower max layer
+    static float        m_photonIdMaxShowerMaxRadLengths;   ///< Max number of radiation lengths before cluster shower max layer
 
     static unsigned int m_electronIdMaxInnerLayer;          ///< Max inner psuedo layer for fast electron id
     static float        m_electronIdMaxEnergy;              ///< Max electromagnetic energy for fast electron id

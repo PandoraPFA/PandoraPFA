@@ -180,15 +180,11 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
 bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 {
-    // Reject empty clusters
-    if (0 == pCluster->GetNCaloHits())
-        return false;
-
     // Reject clusters starting outside ecal
     static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
+    const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
 
-    if (innerLayer > nECalLayers)
+    if (innerPseudoLayer > nECalLayers)
         return false;
 
     // Cut on cluster mip fraction
@@ -221,7 +217,6 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
     float clusterRms(0.f);
 
     const ClusterHelper::ClusterFitResult &clusterFitResult(pCluster->GetFitToAllHitsResult());
-    const CartesianVector innerLayerCentroid(pCluster->GetCentroid(innerLayer));
 
     if (clusterFitResult.IsFitSuccessful())
     {
@@ -239,82 +234,71 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
     if (clusterRms > rmsCut)
         return false;
 
-    // Compare initial cluster direction with normal to ecal layers - TODO use calo hit normal vectors here
-    static const float eCalEndCapInnerZ(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetInnerZCoordinate());
-    const bool isEndCap((std::fabs(innerLayerCentroid.GetZ()) > eCalEndCapInnerZ - m_photonIdEndCapZSeparation));
+    const CartesianVector &clusterDirection(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
+        pCluster->GetFitToAllHitsResult().GetDirection() : pCluster->GetInitialDirection());
 
-    const float cosTheta(std::fabs(innerLayerCentroid.GetZ()) / innerLayerCentroid.GetMagnitude());
-    const float rDotN(isEndCap ? cosTheta : std::sqrt(1.f - cosTheta * cosTheta));
-
-    if (0 == rDotN)
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-
-    // Find number of radiation lengths in front of cluster first layer
-    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
-    static const GeometryHelper::LayerParametersList &barrelLayerList(pGeometryHelper->GetECalBarrelParameters().GetLayerParametersList());
-    static const GeometryHelper::LayerParametersList &endCapLayerList(pGeometryHelper->GetECalEndCapParameters().GetLayerParametersList());
-
-    const unsigned int physicalLayer((innerLayer > (1 + TRACK_PROJECTION_LAYER)) ? innerLayer - 1 - TRACK_PROJECTION_LAYER : 0);
-    const float nRadiationLengths(isEndCap ? barrelLayerList[physicalLayer].m_cumulativeRadiationLengths : endCapLayerList[physicalLayer].m_cumulativeRadiationLengths);
-    const float firstLayerInRadiationLengths(nRadiationLengths / rDotN);
-
-    if (firstLayerInRadiationLengths > m_photonIdRadiationLengthsCut)
-        return false;
-
-    // Calculate position of shower max layer and layer by which 90% of cluster energy has been deposited
+    // Calculate properties of longitudinal shower profile: layer90 and shower max layer
     bool foundLayer90(false);
-    float electromagneticEnergy90(0.f), maxElectromagneticEnergyInlayer(0.f);
-    int layer90(std::numeric_limits<int>::max()), showerMaxLayer(std::numeric_limits<int>::max());
+    float eCalEnergy(0.f), nRadiationLengths(0.f), nRadiationLengthsInLastLayer(0.f), maxEnergyInlayer(0.f);
+    float layer90RadLengths(0.f), showerMaxRadLengths(0.f);
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {
-        float electromagneticEnergyInlayer(0.f);
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+
+        if ((orderedCaloHitList.end() == iter) || (iter->second->empty()))
+        {
+            nRadiationLengths += nRadiationLengthsInLastLayer;
+            continue;
+        }
+
+        // Extract information from calo hits
+        float energyInLayer(0.f);
+        float nRadiationLengthsInLayer(0.f);
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            electromagneticEnergy90 += (*hitIter)->GetElectromagneticEnergy();
-            electromagneticEnergyInlayer += (*hitIter)->GetElectromagneticEnergy();
+            float cosOpeningAngle(std::fabs((*hitIter)->GetNormalVector().GetCosOpeningAngle(clusterDirection)));
+            cosOpeningAngle = std::max(cosOpeningAngle, m_photonIdMinCosAngle);
+
+            energyInLayer += (*hitIter)->GetElectromagneticEnergy();
+            nRadiationLengthsInLayer += (*hitIter)->GetNRadiationLengths() / cosOpeningAngle;
         }
 
-        if (electromagneticEnergyInlayer > maxElectromagneticEnergyInlayer)
+        eCalEnergy += energyInLayer;
+        nRadiationLengthsInLayer /= static_cast<float>(iter->second->size());
+        nRadiationLengthsInLastLayer = nRadiationLengthsInLayer;
+        nRadiationLengths += nRadiationLengthsInLayer;
+
+        // Account for layers before start of cluster
+        if (innerPseudoLayer == iLayer)
         {
-            showerMaxLayer = static_cast<int>(iter->first);
-            maxElectromagneticEnergyInlayer = electromagneticEnergyInlayer;
+            nRadiationLengths *= static_cast<float>(innerPseudoLayer - TRACK_PROJECTION_LAYER);
+
+            if (nRadiationLengths > m_photonIdMaxInnerLayerRadLengths)
+                return false;
         }
 
-        if (!foundLayer90 && (electromagneticEnergy90 > 0.9 * totalElectromagneticEnergy))
+        if (energyInLayer > maxEnergyInlayer)
         {
-            layer90 = static_cast<int>(iter->first);
+            showerMaxRadLengths = nRadiationLengths;
+            maxEnergyInlayer = energyInLayer;
+        }
+
+        if (!foundLayer90 && (eCalEnergy > 0.9f * totalElectromagneticEnergy))
+        {
+            layer90RadLengths = nRadiationLengths;
             foundLayer90 = true;
         }
     }
 
-    // Cut on position of shower max layer
-    float showerMaxCut1(m_photonIdShowerMaxCut1_0);
-    const float showerMaxCut2(m_photonIdShowerMaxCut2);
-
-    if (totalElectromagneticEnergy > m_photonIdShowerMaxCut1Energy_1)
-    {
-        showerMaxCut1 = m_photonIdShowerMaxCut1_1;
-    }
-    else if (totalElectromagneticEnergy > m_photonIdShowerMaxCut1Energy_2)
-    {
-        showerMaxCut1 = m_photonIdShowerMaxCut1_2;
-    }
-
-    if ((showerMaxLayer - innerLayer <= showerMaxCut1 * rDotN) || (showerMaxLayer - innerLayer >= showerMaxCut2 * rDotN))
+    // Cut on longitudinal shower profile properties
+    if ((layer90RadLengths < m_photonIdMinLayer90RadLengths) || (layer90RadLengths > m_photonIdMaxLayer90RadLengths))
         return false;
 
-    // Cut on layer by which 90% of cluster energy has been deposited
-    const float layer90Cut1(m_photonIdLayer90Cut1);
-    const float layer90Cut2(totalElectromagneticEnergy < m_photonIdLayer90Cut2Energy ? m_photonIdLayer90LowECut2 : m_photonIdLayer90HighECut2);
-
-    if ((layer90 - innerLayer <= layer90Cut1 * rDotN) || (layer90 - innerLayer >= layer90Cut2 * rDotN))
-        return false;
-
-    if (layer90 > static_cast<int>(nECalLayers) + m_photonIdLayer90MaxLayersFromECal)
+    if ((showerMaxRadLengths < m_photonIdMinShowerMaxRadLengths) || (showerMaxRadLengths > m_photonIdMaxShowerMaxRadLengths))
         return false;
 
     // Anything remaining at this point is classed as an electromagnetic shower
@@ -634,19 +618,12 @@ float ParticleIdHelper::m_photonIdDCosRHighECut = 0.95f;
 float ParticleIdHelper::m_photonIdRmsCutEnergy = 40.f;
 float ParticleIdHelper::m_photonIdRmsLowECut = 40.f;
 float ParticleIdHelper::m_photonIdRmsHighECut = 90.f;
-float ParticleIdHelper::m_photonIdEndCapZSeparation = 50.f;
-float ParticleIdHelper::m_photonIdRadiationLengthsCut = 10.f;
-float ParticleIdHelper::m_photonIdShowerMaxCut1_0 = 0.f;
-float ParticleIdHelper::m_photonIdShowerMaxCut2 = 40.f;
-float ParticleIdHelper::m_photonIdShowerMaxCut1Energy_1 = 3.f;
-float ParticleIdHelper::m_photonIdShowerMaxCut1_1 = 3.f;
-float ParticleIdHelper::m_photonIdShowerMaxCut1Energy_2 = 1.5f;
-float ParticleIdHelper::m_photonIdShowerMaxCut1_2 = 1.f;
-float ParticleIdHelper::m_photonIdLayer90Cut1 = 5.f;
-float ParticleIdHelper::m_photonIdLayer90Cut2Energy = 40.f;
-float ParticleIdHelper::m_photonIdLayer90LowECut2 = 40.f;
-float ParticleIdHelper::m_photonIdLayer90HighECut2 = 50.f;
-int ParticleIdHelper::m_photonIdLayer90MaxLayersFromECal = 10;
+float ParticleIdHelper::m_photonIdMinCosAngle = 0.3f;
+float ParticleIdHelper::m_photonIdMaxInnerLayerRadLengths = 10.f;
+float ParticleIdHelper::m_photonIdMinLayer90RadLengths = 4.f;
+float ParticleIdHelper::m_photonIdMaxLayer90RadLengths = 30.f;
+float ParticleIdHelper::m_photonIdMinShowerMaxRadLengths = 0.f;
+float ParticleIdHelper::m_photonIdMaxShowerMaxRadLengths = 25.f;
 
 unsigned int ParticleIdHelper::m_electronIdMaxInnerLayer = 4;
 float ParticleIdHelper::m_electronIdMaxEnergy = 5.f;
@@ -783,43 +760,22 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle xmlHandle)
         "PhotonIdRmsHighECut", m_photonIdRmsHighECut));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdEndCapZSeparation", m_photonIdEndCapZSeparation));
+        "PhotonIdMinCosAngle", m_photonIdMinCosAngle));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdRadiationLengthsCut", m_photonIdRadiationLengthsCut));
+        "PhotonIdMaxInnerLayerRadLengths", m_photonIdMaxInnerLayerRadLengths));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1_0", m_photonIdShowerMaxCut1_0));
+        "PhotonIdMinLayer90RadLengths", m_photonIdMinLayer90RadLengths));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut2", m_photonIdShowerMaxCut2));
+        "PhotonIdMaxLayer90RadLengths", m_photonIdMaxLayer90RadLengths));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1Energy_1", m_photonIdShowerMaxCut1Energy_1));
+        "PhotonIdMinShowerMaxRadLengths", m_photonIdMinShowerMaxRadLengths));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1_1", m_photonIdShowerMaxCut1_1));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1Energy_2", m_photonIdShowerMaxCut1Energy_2));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdShowerMaxCut1_2", m_photonIdShowerMaxCut1_2));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdLayer90Cut1", m_photonIdLayer90Cut1));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdLayer90Cut2Energy", m_photonIdLayer90Cut2Energy));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdLayer90LowECut2", m_photonIdLayer90LowECut2));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdLayer90HighECut2", m_photonIdLayer90HighECut2));
-
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PhotonIdLayer90MaxLayersFromECal", m_photonIdLayer90MaxLayersFromECal));
+        "PhotonIdMaxShowerMaxRadLengths", m_photonIdMaxShowerMaxRadLengths));
 
     // Fast electron id settings
    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
