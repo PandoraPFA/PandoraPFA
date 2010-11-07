@@ -237,10 +237,14 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
     const CartesianVector &clusterDirection(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
         pCluster->GetFitToAllHitsResult().GetDirection() : pCluster->GetInitialDirection());
 
+    const CartesianVector &clusterIntercept(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
+        pCluster->GetFitToAllHitsResult().GetIntercept() : CartesianVector(0.f, 0.f, 0.f));
+
     // Calculate properties of longitudinal shower profile: layer90 and shower max layer
     bool foundLayer90(false);
-    float eCalEnergy(0.f), nRadiationLengths(0.f), nRadiationLengthsInLastLayer(0.f), maxEnergyInlayer(0.f);
-    float layer90RadLengths(0.f), showerMaxRadLengths(0.f);
+    float layer90EnergySum(0.f), showerMaxRadLengths(0.f), energyAboveHighRadLengths(0.f);
+    float nRadiationLengths(0.f), nRadiationLengthsInLastLayer(0.f), maxEnergyInlayer(0.f);
+    HitEnergyDistanceVector hitEnergyDistanceVector;
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
@@ -254,7 +258,7 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
             continue;
         }
 
-        // Extract information from calo hits
+        // Extract information from the calo hits
         float energyInLayer(0.f);
         float nRadiationLengthsInLayer(0.f);
 
@@ -263,16 +267,20 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
             float cosOpeningAngle(std::fabs((*hitIter)->GetNormalVector().GetCosOpeningAngle(clusterDirection)));
             cosOpeningAngle = std::max(cosOpeningAngle, m_photonIdMinCosAngle);
 
-            energyInLayer += (*hitIter)->GetElectromagneticEnergy();
+            const float hitEnergy((*hitIter)->GetElectromagneticEnergy());
+            energyInLayer += hitEnergy;
             nRadiationLengthsInLayer += (*hitIter)->GetNRadiationLengths() / cosOpeningAngle;
+
+            const float radialDistance(((*hitIter)->GetPositionVector() - clusterIntercept).GetCrossProduct(clusterDirection).GetMagnitude());
+            hitEnergyDistanceVector.push_back(HitEnergyDistance(hitEnergy, radialDistance));
         }
 
-        eCalEnergy += energyInLayer;
+        layer90EnergySum += energyInLayer;
         nRadiationLengthsInLayer /= static_cast<float>(iter->second->size());
         nRadiationLengthsInLastLayer = nRadiationLengthsInLayer;
         nRadiationLengths += nRadiationLengthsInLayer;
 
-        // Account for layers before start of cluster
+        // Cut on number of radiation lengths before cluster start
         if (innerPseudoLayer == iLayer)
         {
             nRadiationLengths *= static_cast<float>(innerPseudoLayer - TRACK_PROJECTION_LAYER);
@@ -281,24 +289,52 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
                 return false;
         }
 
+        // Cut on number of radiation lengths before longitudinal layer90
+        if (!foundLayer90 && (layer90EnergySum > 0.9f * totalElectromagneticEnergy))
+        {
+            foundLayer90 = true;
+
+            if ((nRadiationLengths < m_photonIdMinLayer90RadLengths) || (nRadiationLengths > m_photonIdMaxLayer90RadLengths))
+                return false;
+        }
+
+        // Identify number of radiation lengths before shower max layer
         if (energyInLayer > maxEnergyInlayer)
         {
             showerMaxRadLengths = nRadiationLengths;
             maxEnergyInlayer = energyInLayer;
         }
 
-        if (!foundLayer90 && (eCalEnergy > 0.9f * totalElectromagneticEnergy))
+        // Count energy above specified "high" number of radiation lengths
+        if (nRadiationLengths > m_photonIdHighRadLengths)
         {
-            layer90RadLengths = nRadiationLengths;
-            foundLayer90 = true;
+            energyAboveHighRadLengths += energyInLayer;
         }
     }
 
     // Cut on longitudinal shower profile properties
-    if ((layer90RadLengths < m_photonIdMinLayer90RadLengths) || (layer90RadLengths > m_photonIdMaxLayer90RadLengths))
+    if ((showerMaxRadLengths < m_photonIdMinShowerMaxRadLengths) || (showerMaxRadLengths > m_photonIdMaxShowerMaxRadLengths))
         return false;
 
-    if ((showerMaxRadLengths < m_photonIdMinShowerMaxRadLengths) || (showerMaxRadLengths > m_photonIdMaxShowerMaxRadLengths))
+    if (energyAboveHighRadLengths > m_photonIdMaxHighRadLengthEnergyFraction * totalElectromagneticEnergy)
+        return false;
+
+    // Cut on transverse shower profile properties
+    std::sort(hitEnergyDistanceVector.begin(), hitEnergyDistanceVector.end(), ParticleIdHelper::SortHitsByDistance);
+    float radial90EnergySum(0.f), radial90(std::numeric_limits<float>::max());
+
+    for (HitEnergyDistanceVector::const_iterator iter = hitEnergyDistanceVector.begin(), iterEnd = hitEnergyDistanceVector.end(); iter != iterEnd; ++iter)
+    {
+        radial90EnergySum += iter->first;
+
+        if (radial90EnergySum > 0.9f * totalElectromagneticEnergy)
+        {
+            radial90 = iter->second;
+            break;
+        }
+    }
+
+    if (radial90 > m_photonIdMaxRadial90)
         return false;
 
     // Anything remaining at this point is classed as an electromagnetic shower
@@ -624,6 +660,9 @@ float ParticleIdHelper::m_photonIdMinLayer90RadLengths = 4.f;
 float ParticleIdHelper::m_photonIdMaxLayer90RadLengths = 30.f;
 float ParticleIdHelper::m_photonIdMinShowerMaxRadLengths = 0.f;
 float ParticleIdHelper::m_photonIdMaxShowerMaxRadLengths = 25.f;
+float ParticleIdHelper::m_photonIdHighRadLengths = 40.f;
+float ParticleIdHelper::m_photonIdMaxHighRadLengthEnergyFraction = 0.04f;
+float ParticleIdHelper::m_photonIdMaxRadial90 = 40.f;
 
 unsigned int ParticleIdHelper::m_electronIdMaxInnerLayer = 4;
 float ParticleIdHelper::m_electronIdMaxEnergy = 5.f;

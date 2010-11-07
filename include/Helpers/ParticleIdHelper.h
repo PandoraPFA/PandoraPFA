@@ -124,6 +124,17 @@ private:
      */
     static bool IsMuonFastDefault(const Cluster *const pCluster);
 
+    typedef std::pair<float, float> HitEnergyDistance;
+    typedef std::vector<HitEnergyDistance> HitEnergyDistanceVector;
+
+    /**
+     *  @brief  Sort HitEnergyDistance objects by increasing distance
+     * 
+     *  @param  lhs the first hit energy distance pair
+     *  @param  rhs the second hit energy distance pair
+     */
+    static bool SortHitsByDistance(const HitEnergyDistance &lhs, const HitEnergyDistance &rhs);
+
     /**
      *  @brief  Read the particle id helper settings
      * 
@@ -167,6 +178,9 @@ private:
     static float        m_photonIdMaxLayer90RadLengths;     ///< Max number of radiation lengths before cluster layer90
     static float        m_photonIdMinShowerMaxRadLengths;   ///< Min number of radiation lengths before cluster shower max layer
     static float        m_photonIdMaxShowerMaxRadLengths;   ///< Max number of radiation lengths before cluster shower max layer
+    static float        m_photonIdHighRadLengths;           ///< Max number of radiation lengths expected to be spanned by em shower
+    static float        m_photonIdMaxHighRadLengthEnergyFraction;   ///< Max fraction of cluster energy above max expected radiation lengths
+    static float        m_photonIdMaxRadial90;              ///< Max value of transverse profile radial90
 
     static unsigned int m_electronIdMaxInnerLayer;          ///< Max inner psuedo layer for fast electron id
     static float        m_electronIdMaxEnergy;              ///< Max electromagnetic energy for fast electron id
@@ -286,6 +300,13 @@ inline bool ParticleIdHelper::IsMuonFull(const Cluster *const pCluster)
         return false;
 
     return (*m_pMuonFullFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::SortHitsByDistance(const HitEnergyDistance &lhs, const HitEnergyDistance &rhs)
+{
+    return (lhs.second < rhs.second);
 }
 
 } // namespace pandora
