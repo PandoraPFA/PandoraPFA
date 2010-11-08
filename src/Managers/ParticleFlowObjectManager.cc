@@ -50,10 +50,6 @@ StatusCode ParticleFlowObjectManager::CreateParticleFlowObject(const PandoraCont
 StatusCode ParticleFlowObjectManager::GetParticleFlowObjects(ParticleFlowObjectList &particleFlowObjectList) const
 {
     particleFlowObjectList = m_particleFlowObjectList;
-
-    if (particleFlowObjectList.empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
     return STATUS_CODE_SUCCESS;
 }
 
@@ -61,11 +57,7 @@ StatusCode ParticleFlowObjectManager::GetParticleFlowObjects(ParticleFlowObjectL
 
 StatusCode ParticleFlowObjectManager::GetCurrentList(const ParticleFlowObjectList *&pParticleFlowObjectList) const
 {
-    if (m_particleFlowObjectList.empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
     pParticleFlowObjectList = &m_particleFlowObjectList;
-
     return STATUS_CODE_SUCCESS;
 }
 

@@ -28,15 +28,15 @@ StatusCode MuonReconstructionAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_muonClusteringAlgName, pMuonClusterList,
         muonClusterListName));
 
-    if (pMuonClusterList->empty())
+    // If muon clusters formed, complete the muon reconstruction
+    if (!pMuonClusterList->empty())
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, inputCaloHitListName));
-        return STATUS_CODE_SUCCESS;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssociateMuonTracks(pMuonClusterList));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHits(pMuonClusterList, inputCaloHitListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateMuonPfos(pMuonClusterList));
     }
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssociateMuonTracks(pMuonClusterList));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHits(pMuonClusterList, inputCaloHitListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateMuonPfos(pMuonClusterList));
+    // Tidy up
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->TidyLists(inputTrackListName, inputCaloHitListName, muonClusterListName));
 
     return STATUS_CODE_SUCCESS;
@@ -404,13 +404,7 @@ StatusCode MuonReconstructionAlgorithm::GetPfoComponents(TrackList &pfoTrackList
     pfoTrackList.clear(); pfoCaloHitList.clear(); pfoClusterList.clear();
 
     const ParticleFlowObjectList *pPfoList = NULL;
-    const StatusCode statusCode(PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
-
-    if (STATUS_CODE_NOT_INITIALIZED == statusCode)
-        return STATUS_CODE_SUCCESS;
-
-    if (STATUS_CODE_SUCCESS != statusCode)
-        return statusCode;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
 
     for (ParticleFlowObjectList::const_iterator iter = pPfoList->begin(), iterEnd = pPfoList->end(); iter != iterEnd; ++iter)
     {

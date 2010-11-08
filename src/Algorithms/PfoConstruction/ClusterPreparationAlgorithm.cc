@@ -35,7 +35,11 @@ StatusCode ClusterPreparationAlgorithm::Run()
     }
 
     // Save the merged list and set it to be the current list for future algorithms
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentClusterList(*this, m_mergedCandidateListName));
+    if (STATUS_CODE_SUCCESS != PandoraContentApi::ReplaceCurrentClusterList(*this, m_mergedCandidateListName))
+    {
+        std::cout << "ClusterPreparationAlgorithm: empty cluster list for subsequent pfo construction." << std::endl;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DropCurrentClusterList(*this));
+    }
 
     return STATUS_CODE_SUCCESS;
 }
