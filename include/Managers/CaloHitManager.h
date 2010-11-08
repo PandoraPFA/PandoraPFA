@@ -26,6 +26,11 @@ class OrderedCaloHitList;
 class CaloHitManager
 {
 public:
+    /**
+     *  @brief  Default constructor
+     */
+    CaloHitManager();
+
      /**
      *  @brief  Destructor
      */
@@ -38,6 +43,16 @@ private:
      *  @param  caloHitParameters the calo hit parameters
      */
     StatusCode CreateCaloHit(const PandoraApi::CaloHitParameters &caloHitParameters);
+
+    /**
+     *  @brief  Create the null ordered calo hit list
+     */
+    StatusCode CreateNullList();
+
+    /**
+     *  @brief  Delete the null ordered calo hit list
+     */
+    void DeleteNullList();
 
     /**
      *  @brief  Order input calo hits by pseudo layer
@@ -113,6 +128,11 @@ private:
      *  @param  pAlgorithm address of the algorithm changing the current ordered calo hit list
      */
     StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+
+    /**
+     *  @brief  Drop the current list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentList();
 
     /**
      *  @brief  Change the current ordered calo hit list to a specified ordered calo hit list
@@ -216,21 +236,18 @@ private:
     typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
 
     CaloHitVector                   m_inputCaloHitVector;               ///< The input calo hit vector
-
     NameToOrderedCaloHitListMap     m_nameToOrderedCaloHitListMap;      ///< The name to ordered calo hit list map
     AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map
 
     std::string                     m_currentListName;                  ///< The name of the current ordered calo hit list
     StringSet                       m_savedLists;                       ///< The set of saved ordered calo hit lists
-
+    static const std::string        NULL_LIST_NAME;                     ///< The name of the default empty (NULL) ordered calo hit list
     static const std::string        INPUT_LIST_NAME;                    ///< The name of the input ordered calo hit list
-    static const std::string        MUON_LIST_NAME;                     ///< The name of the muon ordered calo hit list
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
     friend class PandoraImpl;
 };
-
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -291,6 +308,14 @@ inline StatusCode CaloHitManager::GetAlgorithmInputList(const Algorithm *const p
 inline StatusCode CaloHitManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
 {
     return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode CaloHitManager::DropCurrentList()
+{
+    m_currentListName = NULL_LIST_NAME;
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

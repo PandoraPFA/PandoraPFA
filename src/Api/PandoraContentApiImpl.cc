@@ -172,6 +172,13 @@ StatusCode PandoraContentApiImpl::GetClusterList(const std::string &clusterListN
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::DropCurrentClusterList() const
+{
+    return m_pPandora->m_pClusterManager->DropCurrentList();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList,
     std::string &orderedCaloHitListName) const
 {
@@ -194,6 +201,13 @@ StatusCode PandoraContentApiImpl::GetOrderedCaloHitList(const std::string &order
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::DropCurrentOrderedCaloHitList() const
+{
+    return m_pPandora->m_pCaloHitManager->DropCurrentList();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const
 {
     return m_pPandora->m_pTrackManager->GetCurrentList(pTrackList, trackListName);
@@ -211,6 +225,13 @@ StatusCode PandoraContentApiImpl::GetCurrentTrackListName(std::string &trackList
 StatusCode PandoraContentApiImpl::GetTrackList(const std::string &trackListName, const TrackList *&pTrackList) const
 {
     return m_pPandora->m_pTrackManager->GetList(trackListName, pTrackList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::DropCurrentTrackList() const
+{
+    return m_pPandora->m_pTrackManager->DropCurrentList();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

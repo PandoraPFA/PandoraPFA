@@ -60,7 +60,7 @@ std::string StatusCodeToString(const StatusCode statusCode);
 
 #define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                        \
 {                                                                                                       \
-    StatusCode statusCode = Command;                                                                    \
+    const StatusCode statusCode(Command);                                                               \
     if (statusCode Operator StatusCode1)                                                                \
     {                                                                                                   \
         std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl;             \
@@ -72,7 +72,7 @@ std::string StatusCodeToString(const StatusCode statusCode);
 
 #define PANDORA_RETURN_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                    \
 {                                                                                                       \
-    StatusCode statusCode = Command;                                                                    \
+    const StatusCode statusCode(Command);                                                               \
     if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))                         \
     {                                                                                                   \
         std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl;             \
@@ -84,7 +84,7 @@ std::string StatusCodeToString(const StatusCode statusCode);
 
 #define PANDORA_THROW_RESULT_IF(StatusCode1, Operator, Command)                                         \
 {                                                                                                       \
-    StatusCode statusCode = Command;                                                                    \
+    const StatusCode statusCode(Command);                                                               \
     if (statusCode Operator StatusCode1)                                                                \
     {                                                                                                   \
         std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;              \
@@ -96,7 +96,7 @@ std::string StatusCodeToString(const StatusCode statusCode);
 
 #define PANDORA_THROW_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                     \
 {                                                                                                       \
-    StatusCode statusCode = Command;                                                                    \
+    const StatusCode statusCode(Command);                                                               \
     if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))                         \
     {                                                                                                   \
         std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;              \

@@ -46,6 +46,16 @@ private:
     StatusCode CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster);
 
     /**
+     *  @brief  Create the null cluster list
+     */
+    StatusCode CreateNullList();
+
+    /**
+     *  @brief  Delete the null cluster list
+     */
+    void DeleteNullList();
+
+    /**
      *  @brief  Get the current cluster list name
      * 
      *  @param  clusterListName to receive the current cluster list name
@@ -108,6 +118,11 @@ private:
      *  @param  pAlgorithm address of the algorithm changing the cluster lists
      */
     StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+
+    /**
+     *  @brief  Drop the current list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentList();
 
     /**
      *  @brief  Make a temporary cluster list and set it to be the current cluster list
@@ -303,20 +318,21 @@ private:
     class AlgorithmInfo
     {
     public:
-        std::string                 m_parentListName;               ///< The current cluster list when algorithm was initialized
-        StringSet                   m_temporaryListNames;           ///< The temporary cluster list names
-        unsigned int                m_numberOfListsCreated;         ///< The number of cluster lists created by the algorithm
+        std::string                 m_parentListName;                   ///< The current cluster list when algorithm was initialized
+        StringSet                   m_temporaryListNames;               ///< The temporary cluster list names
+        unsigned int                m_numberOfListsCreated;             ///< The number of cluster lists created by the algorithm
     };
 
     typedef std::map<std::string, ClusterList *> NameToClusterListMap;
     typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
 
-    NameToClusterListMap            m_nameToClusterListMap;         ///< The name to cluster list map
-    AlgorithmInfoMap                m_algorithmInfoMap;             ///< The algorithm info map
+    NameToClusterListMap            m_nameToClusterListMap;             ///< The name to cluster list map
+    AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map
 
-    bool                            m_canMakeNewClusters;           ///< Whether the manager is allowed to make new clusters
-    std::string                     m_currentListName;              ///< The name of the current cluster list
-    StringSet                       m_savedLists;                   ///< The set of saved cluster lists
+    bool                            m_canMakeNewClusters;               ///< Whether the manager is allowed to make new clusters
+    std::string                     m_currentListName;                  ///< The name of the current cluster list
+    StringSet                       m_savedLists;                       ///< The set of saved cluster lists
+    static const std::string        NULL_LIST_NAME;                     ///< The name of the default empty (NULL) cluster list
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
@@ -381,6 +397,15 @@ inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const p
 inline StatusCode ClusterManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
 {
     return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::DropCurrentList()
+{
+    m_canMakeNewClusters = false;
+    m_currentListName = NULL_LIST_NAME;
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -41,7 +41,10 @@ StatusCode PandoraImpl::PrepareMCParticles() const
 
 StatusCode PandoraImpl::PrepareTracks() const
 {
-    return m_pPandora->m_pTrackManager->AssociateTracks();
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->CreateInputTrackList());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->AssociateTracks());
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -81,6 +81,11 @@ public:
     StatusCode GetClusterList(const std::string &clusterListName, const ClusterList *&pClusterList) const;
 
     /**
+     *  @brief  Drop the current cluster list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentClusterList() const;
+
+    /**
      *  @brief  Get the current ordered calo hit list
      * 
      *  @param  pOrderedCaloHitList to receive the address of the current ordered calo hit list
@@ -104,6 +109,11 @@ public:
     StatusCode GetOrderedCaloHitList(const std::string &orderedCaloHitListName, const OrderedCaloHitList *&pOrderedCaloHitList) const;
 
     /**
+     *  @brief  Drop the current ordered calo hit list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentOrderedCaloHitList() const;
+
+    /**
      *  @brief  Get the current track list
      * 
      *  @param  pTrackList to receive the address of the current track list
@@ -125,6 +135,11 @@ public:
      *  @param  pTrackList to receive the address of the track list
      */
     StatusCode GetTrackList(const std::string &trackListName, const TrackList *&pTrackList) const;
+
+    /**
+     *  @brief  Drop the current track list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentTrackList() const;
 
     /**
      *  @brief  Get the current particle flow object list

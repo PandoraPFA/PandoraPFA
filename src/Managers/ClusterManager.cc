@@ -13,9 +13,15 @@
 namespace pandora
 {
 
+const std::string ClusterManager::NULL_LIST_NAME = "NullList";
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 ClusterManager::ClusterManager() :
-    m_canMakeNewClusters(false)
+    m_canMakeNewClusters(false),
+    m_currentListName(NULL_LIST_NAME)
 {
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,6 +29,7 @@ ClusterManager::ClusterManager() :
 ClusterManager::~ClusterManager()
 {
     (void) this->ResetForNextEvent();
+    this->DeleteNullList();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +62,45 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
     {
         std::cout << "Failed to create cluster: " << statusCodeException.ToString() << std::endl;
         return statusCodeException.GetStatusCode();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::CreateNullList()
+{
+    if (!m_nameToClusterListMap.empty() || !m_savedLists.empty())
+        return STATUS_CODE_NOT_ALLOWED;
+
+    m_nameToClusterListMap[NULL_LIST_NAME] = new ClusterList;
+    m_savedLists.insert(NULL_LIST_NAME);
+
+    if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(NULL_LIST_NAME))
+        return STATUS_CODE_FAILURE;
+
+    if (m_savedLists.end() == m_savedLists.find(NULL_LIST_NAME))
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void ClusterManager::DeleteNullList()
+{
+    NameToClusterListMap::iterator iter = m_nameToClusterListMap.find(NULL_LIST_NAME);
+
+    if (m_nameToClusterListMap.end() != iter)
+    {
+        delete iter->second;
+        m_nameToClusterListMap.erase(iter);
+    }
+
+    StringSet::iterator savedListsIter = m_savedLists.find(NULL_LIST_NAME);
+
+    if (m_savedLists.end() != savedListsIter)
+    {
+        m_savedLists.erase(savedListsIter);
     }
 }
 
@@ -506,7 +552,6 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
 StatusCode ClusterManager::ResetForNextEvent()
 {
     m_canMakeNewClusters = false;
-    m_currentListName.clear();
 
     for (NameToClusterListMap::iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end();)
     {
@@ -524,6 +569,9 @@ StatusCode ClusterManager::ResetForNextEvent()
     m_nameToClusterListMap.clear();
     m_algorithmInfoMap.clear();
     m_savedLists.clear();
+
+    m_currentListName = NULL_LIST_NAME;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
 
     return STATUS_CODE_SUCCESS;
 }

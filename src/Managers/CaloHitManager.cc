@@ -21,13 +21,23 @@
 namespace pandora
 {
 
+const std::string CaloHitManager::NULL_LIST_NAME = "NullList";
 const std::string CaloHitManager::INPUT_LIST_NAME = "Input";
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+CaloHitManager::CaloHitManager() :
+    m_currentListName(NULL_LIST_NAME)
+{
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 CaloHitManager::~CaloHitManager()
 {
     (void) this->ResetForNextEvent();
+    this->DeleteNullList();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,6 +60,45 @@ StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::CaloHitParameters &ca
     {
         std::cout << "Failed to create calo hit: " << statusCodeException.ToString() << std::endl;
         return statusCodeException.GetStatusCode();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHitManager::CreateNullList()
+{
+    if (!m_nameToOrderedCaloHitListMap.empty() || !m_savedLists.empty())
+        return STATUS_CODE_NOT_ALLOWED;
+
+    m_nameToOrderedCaloHitListMap[NULL_LIST_NAME] = new OrderedCaloHitList;
+    m_savedLists.insert(NULL_LIST_NAME);
+
+    if (m_nameToOrderedCaloHitListMap.end() == m_nameToOrderedCaloHitListMap.find(NULL_LIST_NAME))
+        return STATUS_CODE_FAILURE;
+
+    if (m_savedLists.end() == m_savedLists.find(NULL_LIST_NAME))
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void CaloHitManager::DeleteNullList()
+{
+    NameToOrderedCaloHitListMap::iterator iter = m_nameToOrderedCaloHitListMap.find(NULL_LIST_NAME);
+
+    if (m_nameToOrderedCaloHitListMap.end() != iter)
+    {
+        delete iter->second;
+        m_nameToOrderedCaloHitListMap.erase(iter);
+    }
+
+    StringSet::iterator savedListsIter = m_savedLists.find(NULL_LIST_NAME);
+
+    if (m_savedLists.end() != savedListsIter)
+    {
+        m_savedLists.erase(savedListsIter);
     }
 }
 
@@ -378,7 +427,9 @@ StatusCode CaloHitManager::ResetForNextEvent()
 
     m_nameToOrderedCaloHitListMap.clear();
     m_savedLists.clear();
-    m_currentListName.clear();
+
+    m_currentListName = NULL_LIST_NAME;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
 
     return STATUS_CODE_SUCCESS;
 }

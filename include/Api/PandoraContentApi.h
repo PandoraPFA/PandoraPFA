@@ -139,6 +139,13 @@ public:
         const pandora::ClusterList *&pClusterList);
 
     /**
+     *  @brief  Drop the current cluster list, returning the current list to its default empty/null state
+     * 
+     *  @param  algorithm the algorithm calling this function
+     */
+    static StatusCode DropCurrentClusterList(const pandora::Algorithm &algorithm);
+
+    /**
      *  @brief  Get the current ordered calo hit list
      * 
      *  @param  algorithm the algorithm calling this function
@@ -175,6 +182,13 @@ public:
         const pandora::OrderedCaloHitList *&pOrderedCaloHitList);
 
     /**
+     *  @brief  Drop the current ordered calo hit list, returning the current list to its default empty/null state
+     * 
+     *  @param  algorithm the algorithm calling this function
+     */
+    static StatusCode DropCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm);
+
+    /**
      *  @brief  Get the current track list
      * 
      *  @param  algorithm the algorithm calling this function
@@ -208,6 +222,13 @@ public:
      *  @param  pTrackList to receive the address of the track list
      */
     static StatusCode GetTrackList(const pandora::Algorithm &algorithm, const std::string &trackListName, const pandora::TrackList *&pTrackList);
+
+    /**
+     *  @brief  Drop the current track list, returning the current list to its default empty/null state
+     * 
+     *  @param  algorithm the algorithm calling this function
+     */
+    static StatusCode DropCurrentTrackList(const pandora::Algorithm &algorithm);
 
     /**
      *  @brief  Get the current particle flow object list

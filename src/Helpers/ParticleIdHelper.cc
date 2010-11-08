@@ -13,6 +13,7 @@
 #include "Objects/Cluster.h"
 #include "Objects/Track.h"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 

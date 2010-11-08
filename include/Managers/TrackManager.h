@@ -44,9 +44,19 @@ private:
     StatusCode CreateTrack(const PandoraApi::TrackParameters &trackParameters);
 
     /**
-     *  @brief  Create the track input list
+     *  @brief  Create the null track list
      */
-    StatusCode CreateInputList();
+    StatusCode CreateNullList();
+
+    /**
+     *  @brief  Delete the null track list
+     */
+    void DeleteNullList();
+
+    /**
+     *  @brief  Create the input track list (accessible to algorithms), using contents of the input track vector
+     */
+    StatusCode CreateInputTrackList();
 
     /**
      *  @brief  Get the current track list name
@@ -102,6 +112,11 @@ private:
      *  @param  pAlgorithm address of the algorithm changing the current track list
      */
     StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+
+    /**
+     *  @brief  Drop the current list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentList();
 
     /**
      *  @brief  Change the current track list to a specified temporary list of tracks
@@ -204,28 +219,29 @@ private:
     class AlgorithmInfo
     {
     public:
-        std::string                 m_parentListName;               ///< The current track list when algorithm was initialized
-        StringSet                   m_temporaryListNames;           ///< The temporary track list names
-        unsigned int                m_numberOfListsCreated;         ///< The number of track lists created by the algorithm
+        std::string                 m_parentListName;                   ///< The current track list when algorithm was initialized
+        StringSet                   m_temporaryListNames;               ///< The temporary track list names
+        unsigned int                m_numberOfListsCreated;             ///< The number of track lists created by the algorithm
     };
 
     typedef std::map<std::string, TrackList *> NameToTrackListMap;
     typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
 
-    NameToTrackListMap              m_nameToTrackListMap;           ///< The name to track list map
-    AlgorithmInfoMap                m_algorithmInfoMap;             ///< The algorithm info map
+    TrackVector                     m_inputTrackVector;                 ///< The input track vector
+    NameToTrackListMap              m_nameToTrackListMap;               ///< The name to track list map
+    AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map
 
-    std::string                     m_currentListName;              ///< The name of the current track list
-    StringSet                       m_savedLists;                   ///< The set of saved track lists
-
-    static const std::string        INPUT_LIST_NAME;                ///< The name of the input track list
+    std::string                     m_currentListName;                  ///< The name of the current track list
+    StringSet                       m_savedLists;                       ///< The set of saved track lists
+    static const std::string        NULL_LIST_NAME;                     ///< The name of the default empty (NULL) track list
+    static const std::string        INPUT_LIST_NAME;                    ///< The name of the input track list
 
     typedef std::map<Uid, Track *> UidToTrackMap;
     typedef std::multimap<Uid, Uid> TrackRelationMap;
 
-    UidToTrackMap                   m_uidToTrackMap;                ///< The uid to track map
-    TrackRelationMap                m_parentDaughterRelationMap;    ///< The track parent-daughter relation map
-    TrackRelationMap                m_siblingRelationMap;           ///< The track sibling relation map
+    UidToTrackMap                   m_uidToTrackMap;                    ///< The uid to track map
+    TrackRelationMap                m_parentDaughterRelationMap;        ///< The track parent-daughter relation map
+    TrackRelationMap                m_siblingRelationMap;               ///< The track sibling relation map
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
@@ -291,6 +307,14 @@ inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAl
 inline StatusCode TrackManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
 {
     return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode TrackManager::DropCurrentList()
+{
+    m_currentListName = NULL_LIST_NAME;
+    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora
