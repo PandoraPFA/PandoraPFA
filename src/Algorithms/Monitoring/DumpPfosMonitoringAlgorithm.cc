@@ -171,18 +171,18 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
 
     const float nSumCal(sumCal / 100.f);
 
-    if (0.f == nSumCal)
-        return STATUS_CODE_FAILURE;
-
-    const float econfmat[3][3] =
+    if (nSumCal > 0.f)
     {
-        {m_trackRecoAsTrackEnergy / nSumCal, m_photonRecoAsTrackEnergy / nSumCal, m_neutralRecoAsTrackEnergy / nSumCal},
-        {m_trackRecoAsPhotonEnergy / nSumCal, m_photonRecoAsPhotonEnergy / nSumCal, m_neutralRecoAsPhotonEnergy / nSumCal},
-        {m_trackRecoAsNeutralEnergy / nSumCal, m_photonRecoAsNeutralEnergy / nSumCal, m_neutralRecoAsNeutralEnergy / nSumCal}
-    };
+        const float econfmat[3][3] =
+        {
+            {m_trackRecoAsTrackEnergy / nSumCal, m_photonRecoAsTrackEnergy / nSumCal, m_neutralRecoAsTrackEnergy / nSumCal},
+            {m_trackRecoAsPhotonEnergy / nSumCal, m_photonRecoAsPhotonEnergy / nSumCal, m_neutralRecoAsPhotonEnergy / nSumCal},
+            {m_trackRecoAsNeutralEnergy / nSumCal, m_photonRecoAsNeutralEnergy / nSumCal, m_neutralRecoAsNeutralEnergy / nSumCal}
+        };
 
-    FORMATTED_OUTPUT_CONFUSION(econfmat[0][0], econfmat[0][1], econfmat[0][2], econfmat[1][0], econfmat[1][1], econfmat[1][2], econfmat[2][0],
-        econfmat[2][1], econfmat[2][2]);
+        FORMATTED_OUTPUT_CONFUSION(econfmat[0][0], econfmat[0][1], econfmat[0][2], econfmat[1][0], econfmat[1][1], econfmat[1][2], econfmat[2][0],
+            econfmat[2][1], econfmat[2][2]);
+    }
 
     return STATUS_CODE_SUCCESS;
 }
