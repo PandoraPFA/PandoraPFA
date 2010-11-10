@@ -22,7 +22,7 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 protected:

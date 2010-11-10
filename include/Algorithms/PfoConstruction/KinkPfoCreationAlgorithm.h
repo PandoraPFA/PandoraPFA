@@ -23,12 +23,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Kink mass calculation
@@ -39,7 +39,7 @@ private:
      *  @param  daughterMass assumed mass of neutral
      *  @param  mass the resulting mass of the decay
      */
-    StatusCode GetKinkMass(const pandora::CartesianVector &parentMomentum, const pandora::CartesianVector &daughterMomentum,
+    pandora::StatusCode GetKinkMass(const pandora::CartesianVector &parentMomentum, const pandora::CartesianVector &daughterMomentum,
         const float daughterMass, const float neutralMass, float &mass) const;
 
     /**
@@ -51,15 +51,15 @@ private:
      *  @param  mass2 is assumed mass of track2
      *  @param  V0mass is the resulting mass of the V0
      */
-    StatusCode GetV0Mass(const pandora::CartesianVector &momentum1, const pandora::CartesianVector &momentum2, float mass1, float mass2,
-        float &V0mass) const;
+    pandora::StatusCode GetV0Mass(const pandora::CartesianVector &momentum1, const pandora::CartesianVector &momentum2, float mass1,
+        float mass2, float &V0mass) const;
 
     /**
      *  @brief  Set the PFO parameters to those of the parent
      * 
      *  @param  pPfo address of the particle flow object
      */
-    StatusCode SetPfoParametersFromParentTrack(pandora::ParticleFlowObject *pPfo) const;
+    pandora::StatusCode SetPfoParametersFromParentTrack(pandora::ParticleFlowObject *pPfo) const;
 
     /**
      *  @brief  Merge the clusters from one Pfo into another and delete list
@@ -67,7 +67,7 @@ private:
      *  @param  pfosToMerge the list of Pfos to merge with pfo
      *  @param  pPfo address of particle flow object accepting the clusters
      */
-    StatusCode MergeClustersFromPfoListToPfo(pandora::ParticleFlowObjectList &pfosToMerge, pandora::ParticleFlowObject *pPfo) const;
+    pandora::StatusCode MergeClustersFromPfoListToPfo(pandora::ParticleFlowObjectList &pfosToMerge, pandora::ParticleFlowObject *pPfo) const;
 
     /**
      *  @brief  Disply MC information for candidate kink

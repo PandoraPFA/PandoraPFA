@@ -12,18 +12,16 @@
 
 #include "Helpers/FragmentRemovalHelper.h"
 
-using namespace pandora;
-
 /**
  *  @brief  ChargedClusterContact class, describing the interactions and proximity between parent and daughter candidate clusters
  */
-class ChargedClusterContact : public ClusterContact
+class ChargedClusterContact : public pandora::ClusterContact
 {
 public:
     /**
      *  @brief  Parameters class
      */
-    class Parameters : public ClusterContact::Parameters
+    class Parameters : public pandora::ClusterContact::Parameters
     {
     public:
         float           m_coneCosineHalfAngle2;         ///< Cosine half angle for second cone comparison in cluster contact object
@@ -43,7 +41,7 @@ public:
      *  @param  pParentCluster address of the parent candidate cluster
      *  @param  parameters the cluster contact parameters
      */
-    ChargedClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters);
+    ChargedClusterContact(pandora::Cluster *const pDaughterCluster, pandora::Cluster *const pParentCluster, const Parameters &parameters);
 
     /**
      *  @brief  Get the sum of energies of tracks associated with parent cluster
@@ -88,7 +86,7 @@ private:
      *  @param  pParentCluster address of the parent candidate cluster
      *  @param  parameters the cluster contact parameters
      */
-    void ClusterHelixComparison(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters);
+    void ClusterHelixComparison(pandora::Cluster *const pDaughterCluster, pandora::Cluster *const pParentCluster, const Parameters &parameters);
 
     float               m_parentTrackEnergy;            ///< Sum of energies of tracks associated with parent cluster
     float               m_coneFraction2;                ///< Fraction of daughter hits that lie within specified cone 2 along parent direction
@@ -98,7 +96,7 @@ private:
 };
 
 typedef std::vector<ChargedClusterContact> ChargedClusterContactVector;
-typedef std::map<Cluster *, ChargedClusterContactVector> ChargedClusterContactMap;
+typedef std::map<pandora::Cluster *, ChargedClusterContactVector> ChargedClusterContactMap;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -106,21 +104,21 @@ typedef std::map<Cluster *, ChargedClusterContactVector> ChargedClusterContactMa
 /**
  *  @brief  MainFragmentRemovalAlgorithm class
  */
-class MainFragmentRemovalAlgorithm : public Algorithm
+class MainFragmentRemovalAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get cluster contact map, linking each daughter candidate cluster to a list of parent candidates and describing
@@ -130,7 +128,8 @@ private:
      *  @param  affectedClusters list of those clusters affected by previous cluster merging, for which contact details must be updated
      *  @param  chargedClusterContactMap to receive the populated cluster contact map
      */
-    StatusCode GetChargedClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters, ChargedClusterContactMap &chargedClusterContactMap) const;
+    pandora::StatusCode GetChargedClusterContactMap(bool &isFirstPass, const pandora::ClusterList &affectedClusters,
+        ChargedClusterContactMap &chargedClusterContactMap) const;
 
     /**
      *  @brief  Whether candidate parent and daughter clusters are sufficiently in contact to warrant further investigation
@@ -148,8 +147,8 @@ private:
      *  @param  pBestParentCluster to receive the address of the best parent cluster candidate
      *  @param  pBestDaughterCluster to receive the address of the best daughter cluster candidate
      */
-    StatusCode GetClusterMergingCandidates(const ChargedClusterContactMap &chargedClusterContactMap, Cluster *&pBestParentCluster,
-        Cluster *&pBestDaughterCluster);
+    pandora::StatusCode GetClusterMergingCandidates(const ChargedClusterContactMap &chargedClusterContactMap, pandora::Cluster *&pBestParentCluster,
+        pandora::Cluster *&pBestDaughterCluster);
 
     /**
      *  @brief  Whether the candidate parent and daughter clusters pass quick preselection for fragment removal merging
@@ -161,7 +160,8 @@ private:
      * 
      *  @return boolean
      */
-    bool PassesPreselection(Cluster *const pDaughterCluster, const ChargedClusterContactVector &chargedClusterContactVector, float &globalDeltaChi2) const;
+    bool PassesPreselection(pandora::Cluster *const pDaughterCluster, const ChargedClusterContactVector &chargedClusterContactVector,
+        float &globalDeltaChi2) const;
 
     /**
      *  @brief  Get a measure of the total evidence for merging the parent and daughter candidate clusters
@@ -183,8 +183,8 @@ private:
      * 
      *  @return the required evidence
      */
-    float GetRequiredEvidenceForMerge(Cluster *const pDaughterCluster, const ChargedClusterContact &chargedClusterContact, const PseudoLayer correctionLayer,
-        const float globalDeltaChi2);
+    float GetRequiredEvidenceForMerge(pandora::Cluster *const pDaughterCluster, const ChargedClusterContact &chargedClusterContact,
+        const pandora::PseudoLayer correctionLayer, const float globalDeltaChi2);
 
     /**
      *  @brief  Get the cluster correction layer. Working from innermost to outermost layer, the correction layer is that in which:
@@ -195,7 +195,7 @@ private:
      * 
      *  @return the cluster correction layer
      */
-    PseudoLayer GetClusterCorrectionLayer(const Cluster *const pDaughterCluster) const;
+    pandora::PseudoLayer GetClusterCorrectionLayer(const pandora::Cluster *const pDaughterCluster) const;
 
     /**
      *  @brief  Get the number of muon hits deemed to be compatible with a parent candidate cluster. Compatibility is assessed
@@ -205,7 +205,7 @@ private:
      * 
      *  @return the number of muon hits compatible with the parent cluster
      */
-    unsigned int GetNCompatibleMuonHits(const Cluster *const pParentCluster);
+    unsigned int GetNCompatibleMuonHits(const pandora::Cluster *const pParentCluster);
 
     /**
      *  @brief  Get the list of clusters for which cluster contact information will be affected by a specified cluster merge
@@ -215,13 +215,13 @@ private:
      *  @param  pBestDaughterCluster address of the daughter cluster to be merged
      *  @param  affectedClusters to receive the list of affected clusters
      */
-    StatusCode GetAffectedClusters(const ChargedClusterContactMap &chargedClusterContactMap, Cluster *const pBestParentCluster,
-        Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
+    pandora::StatusCode GetAffectedClusters(const ChargedClusterContactMap &chargedClusterContactMap, pandora::Cluster *const pBestParentCluster,
+        pandora::Cluster *const pBestDaughterCluster, pandora::ClusterList &affectedClusters) const;
 
     typedef ChargedClusterContact::Parameters ContactParameters;
     ContactParameters   m_contactParameters;                        ///< The charged cluster contact parameters
 
-    typedef std::vector<CartesianVector> DirectionVector;
+    typedef std::vector<pandora::CartesianVector> DirectionVector;
     DirectionVector     m_muonDirectionVector;                      ///< The muon calo hit direction vector
 
     unsigned int        m_minDaughterCaloHits;                      ///< Min number of calo hits in daughter candidate clusters
@@ -365,7 +365,7 @@ inline float ChargedClusterContact::GetClosestDistanceToHelix() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Algorithm *MainFragmentRemovalAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *MainFragmentRemovalAlgorithm::Factory::CreateAlgorithm() const
 {
     return new MainFragmentRemovalAlgorithm();
 }

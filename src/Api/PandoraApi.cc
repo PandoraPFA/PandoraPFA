@@ -10,7 +10,7 @@
 #include "Api/PandoraApiImpl.h"
 
 template <typename PARAMETERS>
-StatusCode PandoraApi::ObjectCreationHelper<PARAMETERS>::Create(const pandora::Pandora &pandora, const Parameters &parameters)
+pandora::StatusCode PandoraApi::ObjectCreationHelper<PARAMETERS>::Create(const pandora::Pandora &pandora, const Parameters &parameters)
 {
     return pandora.GetPandoraApiImpl()->CreateObject(parameters);
 }
@@ -18,21 +18,21 @@ StatusCode PandoraApi::ObjectCreationHelper<PARAMETERS>::Create(const pandora::P
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::ProcessEvent(const pandora::Pandora &pandora)
+pandora::StatusCode PandoraApi::ProcessEvent(const pandora::Pandora &pandora)
 {
     return pandora.GetPandoraApiImpl()->ProcessEvent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::ReadSettings(const pandora::Pandora &pandora, const std::string &xmlFileName)
+pandora::StatusCode PandoraApi::ReadSettings(const pandora::Pandora &pandora, const std::string &xmlFileName)
 {
     return pandora.GetPandoraApiImpl()->ReadSettings(xmlFileName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::RegisterAlgorithmFactory(const pandora::Pandora &pandora, const std::string &algorithmType,
+pandora::StatusCode PandoraApi::RegisterAlgorithmFactory(const pandora::Pandora &pandora, const std::string &algorithmType,
     pandora::AlgorithmFactory *const pAlgorithmFactory)
 {
     return pandora.GetPandoraApiImpl()->RegisterAlgorithmFactory(algorithmType, pAlgorithmFactory);
@@ -40,28 +40,31 @@ StatusCode PandoraApi::RegisterAlgorithmFactory(const pandora::Pandora &pandora,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::SetMCParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress, const void *pDaughterAddress)
+pandora::StatusCode PandoraApi::SetMCParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress,
+    const void *pDaughterAddress)
 {
     return pandora.GetPandoraApiImpl()->SetMCParentDaughterRelationship(pParentAddress, pDaughterAddress);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::SetTrackParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress, const void *pDaughterAddress)
+pandora::StatusCode PandoraApi::SetTrackParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress,
+    const void *pDaughterAddress)
 {
     return pandora.GetPandoraApiImpl()->SetTrackParentDaughterRelationship(pParentAddress, pDaughterAddress);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::SetTrackSiblingRelationship(const pandora::Pandora &pandora, const void *pFirstSiblingAddress, const void *pSecondSiblingAddress)
+pandora::StatusCode PandoraApi::SetTrackSiblingRelationship(const pandora::Pandora &pandora, const void *pFirstSiblingAddress,
+    const void *pSecondSiblingAddress)
 {
     return pandora.GetPandoraApiImpl()->SetTrackSiblingRelationship(pFirstSiblingAddress, pSecondSiblingAddress);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
+pandora::StatusCode PandoraApi::SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
     const void *pMCParticleParentAddress, const float mcParticleWeight)
 {
     return pandora.GetPandoraApiImpl()->SetCaloHitToMCParticleRelationship(pCaloHitParentAddress, pMCParticleParentAddress, mcParticleWeight);
@@ -69,7 +72,7 @@ StatusCode PandoraApi::SetCaloHitToMCParticleRelationship(const pandora::Pandora
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::SetTrackToMCParticleRelationship(const pandora::Pandora &pandora, const void *pTrackParentAddress,
+pandora::StatusCode PandoraApi::SetTrackToMCParticleRelationship(const pandora::Pandora &pandora, const void *pTrackParentAddress,
     const void *pMCParticleParentAddress, const float mcParticleWeight)
 {
     return pandora.GetPandoraApiImpl()->SetTrackToMCParticleRelationship(pTrackParentAddress, pMCParticleParentAddress, mcParticleWeight);
@@ -77,28 +80,28 @@ StatusCode PandoraApi::SetTrackToMCParticleRelationship(const pandora::Pandora &
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList)
+pandora::StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList)
 {
     return pandora.GetPandoraApiImpl()->GetParticleFlowObjects(particleFlowObjectList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::SetBFieldCalculator(const pandora::Pandora &pandora, pandora::BFieldCalculator *pBFieldCalculator)
+pandora::StatusCode PandoraApi::SetBFieldCalculator(const pandora::Pandora &pandora, pandora::BFieldCalculator *pBFieldCalculator)
 {
     return pandora.GetPandoraApiImpl()->SetBFieldCalculator(pBFieldCalculator);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator)
+pandora::StatusCode PandoraApi::SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator)
 {
     return pandora.GetPandoraApiImpl()->SetPseudoLayerCalculator(pPseudoLayerCalculator);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
+pandora::StatusCode PandoraApi::RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
     const pandora::EnergyCorrectionType energyCorrectionType, pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction)
 {
     return pandora.GetPandoraApiImpl()->RegisterEnergyCorrectionFunction(functionName, energyCorrectionType, pEnergyCorrectionFunction);
@@ -106,7 +109,7 @@ StatusCode PandoraApi::RegisterEnergyCorrectionFunction(const pandora::Pandora &
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::RegisterParticleIdFunction(const pandora::Pandora &pandora, const std::string &functionName,
+pandora::StatusCode PandoraApi::RegisterParticleIdFunction(const pandora::Pandora &pandora, const std::string &functionName,
     pandora::ParticleIdFunction *pParticleIdFunction)
 {
     return pandora.GetPandoraApiImpl()->RegisterParticleIdFunction(functionName, pParticleIdFunction);
@@ -114,7 +117,7 @@ StatusCode PandoraApi::RegisterParticleIdFunction(const pandora::Pandora &pandor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApi::Reset(const pandora::Pandora &pandora)
+pandora::StatusCode PandoraApi::Reset(const pandora::Pandora &pandora)
 {
     return pandora.GetPandoraApiImpl()->ResetForNextEvent();
 }

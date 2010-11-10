@@ -12,21 +12,16 @@
 
 #include "Helpers/FragmentRemovalHelper.h"
 
-using namespace pandora;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 /**
  *  @brief  NeutralClusterContact class, describing the interactions and proximity between parent and daughter candidate clusters
  */
-class NeutralClusterContact : public ClusterContact
+class NeutralClusterContact : public pandora::ClusterContact
 {
 public:
     /**
      *  @brief  Parameters class
      */
-    class Parameters : public ClusterContact::Parameters
+    class Parameters : public pandora::ClusterContact::Parameters
     {
     public:
         float           m_coneCosineHalfAngle2;         ///< Cosine half angle for second cone comparison in cluster contact object
@@ -40,7 +35,7 @@ public:
      *  @param  pParentCluster address of the parent candidate cluster
      *  @param  parameters the cluster contact parameters
      */
-    NeutralClusterContact(Cluster *const pDaughterCluster, Cluster *const pParentCluster, const Parameters &parameters);
+    NeutralClusterContact(pandora::Cluster *const pDaughterCluster, pandora::Cluster *const pParentCluster, const Parameters &parameters);
 
     /**
      *  @brief  Get the fraction of daughter hits that lie within specified cone 2 along parent direction
@@ -62,7 +57,7 @@ private:
 };
 
 typedef std::vector<NeutralClusterContact> NeutralClusterContactVector;
-typedef std::map<Cluster *, NeutralClusterContactVector> NeutralClusterContactMap;
+typedef std::map<pandora::Cluster *, NeutralClusterContactVector> NeutralClusterContactMap;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,21 +65,21 @@ typedef std::map<Cluster *, NeutralClusterContactVector> NeutralClusterContactMa
 /**
  *  @brief  NeutralFragmentRemovalAlgorithm class
  */
-class NeutralFragmentRemovalAlgorithm : public Algorithm
+class NeutralFragmentRemovalAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get cluster contact map, linking each daughter candidate cluster to a list of parent candidates and describing
@@ -94,7 +89,8 @@ private:
      *  @param  affectedClusters list of those clusters affected by previous cluster merging, for which contact details must be updated
      *  @param  neutralClusterContactMap to receive the populated cluster contact map
      */
-    StatusCode GetNeutralClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters, NeutralClusterContactMap &neutralClusterContactMap) const;
+    pandora::StatusCode GetNeutralClusterContactMap(bool &isFirstPass, const pandora::ClusterList &affectedClusters,
+        NeutralClusterContactMap &neutralClusterContactMap) const;
 
     /**
      *  @brief  Whether candidate daughter cluster can be considered as photon-like
@@ -103,7 +99,7 @@ private:
      * 
      *  @return boolean
      */
-    bool IsPhotonLike(Cluster *const pDaughterCluster) const;
+    bool IsPhotonLike(pandora::Cluster *const pDaughterCluster) const;
 
     /**
      *  @brief  Whether candidate parent and daughter clusters are sufficiently in contact to warrant further investigation
@@ -121,8 +117,8 @@ private:
      *  @param  pBestParentCluster to receive the address of the best parent cluster candidate
      *  @param  pBestDaughterCluster to receive the address of the best daughter cluster candidate
      */
-    StatusCode GetClusterMergingCandidates(const NeutralClusterContactMap &neutralClusterContactMap, Cluster *&pBestParentCluster,
-        Cluster *&pBestDaughterCluster) const;
+    pandora::StatusCode GetClusterMergingCandidates(const NeutralClusterContactMap &neutralClusterContactMap, pandora::Cluster *&pBestParentCluster,
+        pandora::Cluster *&pBestDaughterCluster) const;
 
     /**
      *  @brief  Get a measure of the evidence for merging the parent and daughter candidate clusters
@@ -141,8 +137,8 @@ private:
      *  @param  pBestDaughterCluster address of the daughter cluster to be merged
      *  @param  affectedClusters to receive the list of affected clusters
      */
-    StatusCode GetAffectedClusters(const NeutralClusterContactMap &neutralClusterContactMap, Cluster *const pBestParentCluster,
-        Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
+    pandora::StatusCode GetAffectedClusters(const NeutralClusterContactMap &neutralClusterContactMap, pandora::Cluster *const pBestParentCluster,
+        pandora::Cluster *const pBestDaughterCluster, pandora::ClusterList &affectedClusters) const;
 
     typedef NeutralClusterContact::Parameters ContactParameters;
     ContactParameters   m_contactParameters;                        ///< The neutral cluster contact parameters

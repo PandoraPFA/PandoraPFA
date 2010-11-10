@@ -10,10 +10,9 @@
 
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
+#include "Pandora/StatusCodes.h"
 
 #include "Xml/tinyxml.h"
-
-#include "StatusCodes.h"
 
 namespace pandora
 {

@@ -22,12 +22,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get the smallest distance between a hit in a cluster and the projected initial direction of a second cluster.

@@ -10,8 +10,6 @@
 
 #include "Algorithms/Algorithm.h"
 
-using namespace pandora;
-
 /**
  *  @brief  MipPhotonSeparationAlgorithm class
  */
@@ -24,12 +22,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 protected:
-    virtual StatusCode Run();
-    virtual StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    virtual pandora::StatusCode Run();
+    virtual pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Whether to attempt to fragment a cluster into a mip-like part and a photon-like part
@@ -41,8 +39,8 @@ protected:
      * 
      *  @return boolean
      */
-    virtual bool ShouldFragmentCluster(Cluster *const pCluster, Track *const pTrack, PseudoLayer &showerStartLayer,
-        PseudoLayer &showerEndLayer) const;
+    virtual bool ShouldFragmentCluster(pandora::Cluster *const pCluster, pandora::Track *const pTrack,
+        pandora::PseudoLayer &showerStartLayer, pandora::PseudoLayer &showerEndLayer) const;
 
     /**
      *  @brief  Perform cluster fragmentation operations to separate cluster into mip-like and photon-like sections
@@ -52,8 +50,8 @@ protected:
      *  @param  showerStartLayer the shower start layer
      *  @param  showerEndLayer the shower end layer
      */
-    virtual StatusCode PerformFragmentation(Cluster *const pOriginalCluster, Track *const pTrack, PseudoLayer showerStartLayer,
-        PseudoLayer showerEndLayer) const;
+    virtual pandora::StatusCode PerformFragmentation(pandora::Cluster *const pOriginalCluster, pandora::Track *const pTrack,
+        pandora::PseudoLayer showerStartLayer, pandora::PseudoLayer showerEndLayer) const;
 
     /**
      *  @brief  Make mip-like and photon-like fragments from a cluster
@@ -64,8 +62,8 @@ protected:
      *  @param  pMipCluster to receive the address of the mip-like cluster fragment
      *  @param  pPhotonCluster to receive the address of the photon-like cluster fragment
      */
-    virtual StatusCode MakeClusterFragments(const PseudoLayer showerStartLayer, const PseudoLayer showerEndLayer,
-        Cluster *const pOriginalCluster, Cluster *&pMipCluster, Cluster *&pPhotonCluster) const;
+    virtual pandora::StatusCode MakeClusterFragments(const pandora::PseudoLayer showerStartLayer, const pandora::PseudoLayer showerEndLayer,
+        pandora::Cluster *const pOriginalCluster, pandora::Cluster *&pMipCluster, pandora::Cluster *&pPhotonCluster) const;
 
     /**
      *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface
@@ -75,7 +73,8 @@ protected:
      *  @param  pCaloHit address of the calo hit
      *  @param  distance to receive the distance
      */
-    virtual StatusCode GetDistanceToTrack(Cluster *const pCluster, Track *const pTrack, CaloHit *const pCaloHit, float &distance) const;
+    virtual pandora::StatusCode GetDistanceToTrack(pandora::Cluster *const pCluster, pandora::Track *const pTrack,
+        pandora::CaloHit *const pCaloHit, float &distance) const;
 
     static const float FLOAT_MAX;
     static const unsigned int LAYER_MAX;

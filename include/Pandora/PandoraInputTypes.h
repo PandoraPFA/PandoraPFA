@@ -13,8 +13,7 @@
 
 #include "Pandora/PandoraInternal.h"
 #include "Pandora/PdgTable.h"
-
-#include "StatusCodes.h"
+#include "Pandora/StatusCodes.h"
 
 #include <cmath>
 #include <vector>

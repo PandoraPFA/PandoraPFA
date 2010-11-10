@@ -22,12 +22,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     float           m_lowEnergyCut;                     ///< Energy cut (GeV). Algorithm prefers to associate tracks to high-energy clusters
     float           m_maxTrackClusterDistance;          ///< Max distance between track and cluster to allow association

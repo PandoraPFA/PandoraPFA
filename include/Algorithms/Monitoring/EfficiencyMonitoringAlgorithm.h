@@ -22,7 +22,7 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
     /**
@@ -33,7 +33,7 @@ public:
     /**
      *  @brief  Perform any operations that must occur after reading settings, but before running the algorithm
      */
-    virtual StatusCode Initialize();
+    virtual pandora::StatusCode Initialize();
 
 private:
     /**
@@ -53,8 +53,8 @@ private:
         float       m_falseNegativeEnergy;                ///< The false negative energy
     };
 
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     int             m_particleId;                         ///< particle Id of which the data is collected
     bool            m_print;                              ///< if true, print out the efficiency and purity per event

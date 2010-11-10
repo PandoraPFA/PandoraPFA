@@ -8,11 +8,10 @@
 #ifndef ORDERED_CALO_HIT_LIST_H
 #define ORDERED_CALO_HIT_LIST_H 1
 
-#include "Pandora/PandoraInternal.h"
-
 #include "Objects/CaloHit.h"
 
-#include "StatusCodes.h"
+#include "Pandora/PandoraInternal.h"
+#include "Pandora/StatusCodes.h"
 
 #include <map>
 

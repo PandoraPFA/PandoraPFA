@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/include/StatusCodes.h
+ *  @file   PandoraPFANew/include/Pandora/StatusCodes.h
  * 
  *  @brief  Header file defining status codes and relevant preprocessor macros
  * 
@@ -15,6 +15,59 @@
     #include <cstdlib>
     #include <execinfo.h>
 #endif
+
+#define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                        \
+{                                                                                                       \
+    const pandora::StatusCode statusCode(Command);                                                      \
+    if (statusCode Operator StatusCode1)                                                                \
+    {                                                                                                   \
+        std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl;             \
+        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
+        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
+        return statusCode;                                                                              \
+    }                                                                                                   \
+}
+
+#define PANDORA_RETURN_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                    \
+{                                                                                                       \
+    const pandora::StatusCode statusCode(Command);                                                      \
+    if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))                         \
+    {                                                                                                   \
+        std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl;             \
+        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
+        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
+        return statusCode;                                                                              \
+    }                                                                                                   \
+}
+
+#define PANDORA_THROW_RESULT_IF(StatusCode1, Operator, Command)                                         \
+{                                                                                                       \
+    const pandora::StatusCode statusCode(Command);                                                      \
+    if (statusCode Operator StatusCode1)                                                                \
+    {                                                                                                   \
+        std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;              \
+        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
+        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
+        throw pandora::StatusCodeException(statusCode);                                                 \
+    }                                                                                                   \
+}
+
+#define PANDORA_THROW_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                     \
+{                                                                                                       \
+    const pandora::StatusCode statusCode(Command);                                                      \
+    if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))                         \
+    {                                                                                                   \
+        std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;              \
+        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
+        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
+        throw pandora::StatusCodeException(statusCode);                                                 \
+    }                                                                                                   \
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+namespace pandora
+{
 
 #define STATUS_CODE_TABLE(d)                                                                            \
     d(STATUS_CODE_SUCCESS,                  "STATUS_CODE_SUCCESS"                   )                   \
@@ -57,56 +110,6 @@ enum StatusCode
 std::string StatusCodeToString(const StatusCode statusCode);
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-
-#define PANDORA_RETURN_RESULT_IF(StatusCode1, Operator, Command)                                        \
-{                                                                                                       \
-    const StatusCode statusCode(Command);                                                               \
-    if (statusCode Operator StatusCode1)                                                                \
-    {                                                                                                   \
-        std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl;             \
-        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
-        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
-        return statusCode;                                                                              \
-    }                                                                                                   \
-}
-
-#define PANDORA_RETURN_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                    \
-{                                                                                                       \
-    const StatusCode statusCode(Command);                                                               \
-    if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))                         \
-    {                                                                                                   \
-        std::cout << #Command << " return " << StatusCodeToString(statusCode) << std::endl;             \
-        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
-        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
-        return statusCode;                                                                              \
-    }                                                                                                   \
-}
-
-#define PANDORA_THROW_RESULT_IF(StatusCode1, Operator, Command)                                         \
-{                                                                                                       \
-    const StatusCode statusCode(Command);                                                               \
-    if (statusCode Operator StatusCode1)                                                                \
-    {                                                                                                   \
-        std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;              \
-        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
-        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
-        throw StatusCodeException(statusCode);                                                          \
-    }                                                                                                   \
-}
-
-#define PANDORA_THROW_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                     \
-{                                                                                                       \
-    const StatusCode statusCode(Command);                                                               \
-    if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))                         \
-    {                                                                                                   \
-        std::cout << #Command << " throw " << StatusCodeToString(statusCode) << std::endl;              \
-        std::cout << "    in function: " << __FUNCTION__ << std::endl;                                  \
-        std::cout << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl;            \
-        throw StatusCodeException(statusCode);                                                          \
-    }                                                                                                   \
-}
-
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -215,5 +218,7 @@ inline std::string StatusCodeToString(const StatusCode statusCode)
         default : throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
     }
 }
+
+} // namespace pandora
 
 #endif // #ifndef STATUS_CODES_H

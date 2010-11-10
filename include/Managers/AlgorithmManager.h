@@ -9,8 +9,7 @@
 #define ALGORITHM_MANAGER_H 1
 
 #include "Pandora/PandoraInternal.h"
-
-#include "StatusCodes.h"
+#include "Pandora/StatusCodes.h"
 
 class TiXmlElement;
 class TiXmlHandle;

@@ -8,13 +8,12 @@
 #ifndef FRAGMENT_REMOVAL_HELPER_H
 #define FRAGMENT_REMOVAL_HELPER_H 1
 
-#include "Pandora/PandoraInternal.h"
-
 #include "Objects/CartesianVector.h"
 
-#include "Xml/tinyxml.h"
+#include "Pandora/PandoraInternal.h"
+#include "Pandora/StatusCodes.h"
 
-#include "StatusCodes.h"
+#include "Xml/tinyxml.h"
 
 namespace pandora
 {

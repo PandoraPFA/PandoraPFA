@@ -13,8 +13,6 @@
 #include "Objects/CaloHit.h"
 #include "Objects/CartesianVector.h"
 
-using namespace pandora;
-
 /**
  *  @brief  CustomHitOrder class
  */
@@ -33,7 +31,7 @@ public:
      *  @param  lhs calo hit for comparison
      *  @param  rhs calo hit for comparison
      */
-    bool operator()(const CaloHit *lhs, const CaloHit *rhs) const;
+    bool operator()(const pandora::CaloHit *lhs, const pandora::CaloHit *rhs) const;
 
     /**
      *  @brief  Order calo hits by decreasing input energy
@@ -41,7 +39,7 @@ public:
      *  @param  lhs calo hit for comparison
      *  @param  rhs calo hit for comparison
      */
-    bool SortByEnergy(const CaloHit *lhs, const CaloHit *rhs) const;
+    bool SortByEnergy(const pandora::CaloHit *lhs, const pandora::CaloHit *rhs) const;
 
     /**
      *  @brief  Order calo hits by decreasing density weight
@@ -49,17 +47,17 @@ public:
      *  @param  lhs calo hit for comparison
      *  @param  rhs calo hit for comparison
      */
-    bool SortByDensityWeight(const CaloHit *lhs, const CaloHit *rhs) const;
+    bool SortByDensityWeight(const pandora::CaloHit *lhs, const pandora::CaloHit *rhs) const;
 
     /**
      *  @brief  Function pointer, specifying the function used to sort the calo hits
      */
-    bool (CustomHitOrder::*pSortFunction)(const CaloHit *lhs, const CaloHit *rhs) const;
+    bool (CustomHitOrder::*pSortFunction)(const pandora::CaloHit *lhs, const pandora::CaloHit *rhs) const;
 
     static unsigned int     m_hitSortingStrategy;   ///< Strategy used to sort the calo hits: 0 - input energy, 1 - density weight, ...
 };
 
-typedef std::set<CaloHit *, CustomHitOrder> CustomSortedCaloHitList;
+typedef std::set<pandora::CaloHit *, CustomHitOrder> CustomSortedCaloHitList;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -75,19 +73,19 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Use current track list to make seed clusters
      * 
      *  @param  clusterVector to receive the addresses of clusters created (which could also be accessed via current cluster list)
      */
-    StatusCode SeedClustersWithTracks(ClusterVector &clusterVector) const;
+    pandora::StatusCode SeedClustersWithTracks(pandora::ClusterVector &clusterVector) const;
 
     /**
      *  @brief  Match clusters to calo hits in previous pseudo layers
@@ -97,8 +95,8 @@ private:
      *  @param  pOrderedCaloHitList address of the current ordered calo hit list
      *  @param  clusterVector vector containing addresses of current clusters
      */
-    StatusCode FindHitsInPreviousLayers(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
-        ClusterVector &clusterVector) const;
+    pandora::StatusCode FindHitsInPreviousLayers(pandora::PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
+        pandora::ClusterVector &clusterVector) const;
 
     /**
      *  @brief  Match clusters to calo hits in current pseudo layer
@@ -107,8 +105,8 @@ private:
      *  @param  pCustomSortedCaloHitList address of the custom sorted list of calo hits in the current pseudo layer
      *  @param  clusterVector vector containing addresses of current clusters
      */
-    StatusCode FindHitsInSameLayer(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
-        ClusterVector &clusterVector) const;
+    pandora::StatusCode FindHitsInSameLayer(pandora::PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
+        pandora::ClusterVector &clusterVector) const;
 
     /**
      *  @brief  Update the properties of the current clusters, calculating their current directions and identifying whether
@@ -117,7 +115,7 @@ private:
      *  @param  pseudoLayer the current pseudo layer
      *  @param  clusterVector vector containing addresses of current clusters
      */
-    StatusCode UpdateClusterProperties(PseudoLayer pseudoLayer, ClusterVector &clusterVector) const;
+    pandora::StatusCode UpdateClusterProperties(pandora::PseudoLayer pseudoLayer, pandora::ClusterVector &clusterVector) const;
 
     /**
      *  @brief  Get the "generic distance" between a calo hit and a cluster; the smaller the distance, the stronger the association
@@ -127,8 +125,8 @@ private:
      *  @param  searchLayer the pseudolayer currently being examined
      *  @param  genericDistance to receive the generic distance
      */
-    StatusCode GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
-        float &genericDistance) const;
+    pandora::StatusCode GetGenericDistanceToHit(pandora::Cluster *const pCluster, pandora::CaloHit *const pCaloHit,
+        pandora::PseudoLayer searchLayer, float &genericDistance) const;
 
     /**
      *  @brief  Get the generic distance between a calo hit and a cluster in the same pseudo layer
@@ -137,7 +135,8 @@ private:
      *  @param  pCaloHitList address of the cluster's constituent hit list
      *  @param  distance to receive the distance
      */
-    StatusCode GetDistanceToHitInSameLayer(CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList, float &distance) const;
+    pandora::StatusCode GetDistanceToHitInSameLayer(pandora::CaloHit *const pCaloHit, const pandora::CaloHitList *const pCaloHitList,
+        float &distance) const;
 
     /**
      *  @brief  Get the smallest cone approach distance between a calo hit and all the hits in a cluster, using a specified
@@ -148,8 +147,8 @@ private:
      *  @param  clusterDirection
      *  @param  distance to receive the generic distance
      */
-    StatusCode GetConeApproachDistanceToHit(CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList,
-        const CartesianVector &clusterDirection, float &distance) const;
+    pandora::StatusCode GetConeApproachDistanceToHit(pandora::CaloHit *const pCaloHit, const pandora::CaloHitList *const pCaloHitList,
+        const pandora::CartesianVector &clusterDirection, float &distance) const;
 
     /**
      *  @brief  Get the cone approach distance between a calo hit and a specified point in the cluster, using a specified
@@ -160,8 +159,8 @@ private:
      *  @param  clusterDirection the cluster direction unit vector
      *  @param  distance to receive the distance
      */
-    StatusCode GetConeApproachDistanceToHit(CaloHit *const pCaloHit, const CartesianVector &clusterPosition,
-        const CartesianVector &clusterDirection, float &distance) const;
+    pandora::StatusCode GetConeApproachDistanceToHit(pandora::CaloHit *const pCaloHit, const pandora::CartesianVector &clusterPosition,
+        const pandora::CartesianVector &clusterDirection, float &distance) const;
 
     /**
      *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface, ONLY calculated if:
@@ -173,8 +172,8 @@ private:
      *  @param  the pseudolayer currently being examined
      *  @param  to receive the distance
      */
-    StatusCode GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
-        float &distance) const;
+    pandora::StatusCode GetDistanceToTrackSeed(pandora::Cluster *const pCluster, pandora::CaloHit *const pCaloHit,
+        pandora::PseudoLayer searchLayer, float &distance) const;
 
     /**
      *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface
@@ -183,14 +182,14 @@ private:
      *  @param  pCaloHit address of the calo hit
      *  @param  distance to receive the distance
      */
-    StatusCode GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, float &distance) const;
+    pandora::StatusCode GetDistanceToTrackSeed(pandora::Cluster *const pCluster, pandora::CaloHit *const pCaloHit, float &distance) const;
 
     /**
      *  @brief  Remove any empty clusters at the end of the algorithm
      * 
      *  @param  clusterVector containing the addresses of all clusters created
      */
-    StatusCode RemoveEmptyClusters(ClusterVector &clusterVector) const;
+    pandora::StatusCode RemoveEmptyClusters(pandora::ClusterVector &clusterVector) const;
 
     static const float FLOAT_MAX;
 
@@ -257,14 +256,14 @@ inline CustomHitOrder::CustomHitOrder()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool CustomHitOrder::operator()(const CaloHit *lhs, const CaloHit *rhs) const
+inline bool CustomHitOrder::operator()(const pandora::CaloHit *lhs, const pandora::CaloHit *rhs) const
 {
     return (this->*pSortFunction)(lhs, rhs);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool CustomHitOrder::SortByEnergy(const CaloHit *lhs, const CaloHit *rhs) const
+inline bool CustomHitOrder::SortByEnergy(const pandora::CaloHit *lhs, const pandora::CaloHit *rhs) const
 {
     return (!(lhs->GetInputEnergy() > rhs->GetInputEnergy()) && !(rhs->GetInputEnergy() > lhs->GetInputEnergy()) ?
         (lhs > rhs) :
@@ -273,7 +272,7 @@ inline bool CustomHitOrder::SortByEnergy(const CaloHit *lhs, const CaloHit *rhs)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline bool CustomHitOrder::SortByDensityWeight(const CaloHit *lhs, const CaloHit *rhs) const
+inline bool CustomHitOrder::SortByDensityWeight(const pandora::CaloHit *lhs, const pandora::CaloHit *rhs) const
 {
     return (!(lhs->GetDensityWeight() > rhs->GetDensityWeight()) && !(rhs->GetDensityWeight() > lhs->GetDensityWeight()) ?
         (lhs > rhs) :

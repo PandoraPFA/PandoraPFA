@@ -136,26 +136,26 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  DumpChargedPfo
      * 
      *  @param  pPfo
      */
-    StatusCode DumpChargedPfo(const pandora::ParticleFlowObject *pPfo);
+    pandora::StatusCode DumpChargedPfo(const pandora::ParticleFlowObject *pPfo);
 
     /**
      *  @brief  DumpNeutralPfo
      * 
      *  @param  pPfo
      */
-    StatusCode DumpNeutralPfo(const pandora::ParticleFlowObject *pPfo);
+    pandora::StatusCode DumpNeutralPfo(const pandora::ParticleFlowObject *pPfo);
 
     /**
      *  @brief  DumpNeutralOrPhotonPfo
@@ -163,14 +163,14 @@ private:
      *  @param  pPfo
      *  @param  isPhotonPfo
      */
-    StatusCode DumpNeutralOrPhotonPfo(const pandora::ParticleFlowObject *pPfo, bool isPhotonPfo);
+    pandora::StatusCode DumpNeutralOrPhotonPfo(const pandora::ParticleFlowObject *pPfo, bool isPhotonPfo);
 
     /**
      *  @brief  DumpPhotonPfo
      * 
      *  @param  pPfo
      */
-    StatusCode DumpPhotonPfo(const pandora::ParticleFlowObject *pPfo);
+    pandora::StatusCode DumpPhotonPfo(const pandora::ParticleFlowObject *pPfo);
 
     /**
      *  @brief  ClusterEnergyFractions
@@ -221,14 +221,14 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode DumpPfosMonitoringAlgorithm::DumpPhotonPfo(const pandora::ParticleFlowObject *pPfo)
+inline pandora::StatusCode DumpPfosMonitoringAlgorithm::DumpPhotonPfo(const pandora::ParticleFlowObject *pPfo)
 {
     return this->DumpNeutralOrPhotonPfo(pPfo, true);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralPfo(const pandora::ParticleFlowObject *pPfo)
+inline pandora::StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralPfo(const pandora::ParticleFlowObject *pPfo)
 {
     return this->DumpNeutralOrPhotonPfo(pPfo, false);
 }

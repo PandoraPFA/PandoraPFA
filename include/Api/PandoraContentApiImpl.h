@@ -10,7 +10,7 @@
 
 #include "Api/PandoraContentApi.h"
 
-#include "StatusCodes.h"
+#include "Pandora/StatusCodes.h"
 
 namespace pandora
 {

@@ -12,31 +12,29 @@
 
 #include "Objects/CartesianVector.h"
 
-using namespace pandora;
-
 /**
  *  @brief  ForcedClusteringAlgorithm class
  */
-class ForcedClusteringAlgorithm : public Algorithm
+class ForcedClusteringAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Remove any empty clusters at the end of the algorithm
      */
-    StatusCode RemoveEmptyClusters() const;
+    pandora::StatusCode RemoveEmptyClusters() const;
 
     /**
      *  @brief  TrackDistanceInfo class
@@ -52,21 +50,21 @@ private:
          *  @param  trackEnergy energy of track, measured at dca
          *  @param  trackDistance distance from calo hit to track
          */
-        TrackDistanceInfo(CaloHit *pCaloHit, Cluster *pCluster, float trackEnergy, float trackDistance);
+        TrackDistanceInfo(pandora::CaloHit *pCaloHit, pandora::Cluster *pCluster, float trackEnergy, float trackDistance);
 
         /**
          *  @brief  Get the address of the calo hit
          *
          *  @return The address of the calo hit
          */
-        CaloHit *GetCaloHit() const;
+        pandora::CaloHit *GetCaloHit() const;
 
         /**
          *  @brief  Get the address of the cluster seeded by track
          *
          *  @return The address of the cluster seeded by track
          */
-        Cluster *GetCluster() const;
+        pandora::Cluster *GetCluster() const;
 
         /**
          *  @brief  Get the energy of the track, measured at dca
@@ -83,10 +81,10 @@ private:
         float GetTrackDistance() const;
 
     private:
-        CaloHit    *m_pCaloHit;                                 ///< Address of calo hit
-        Cluster    *m_pCluster;                                 ///< Address of cluster seeded by track
-        float       m_trackEnergy;                              ///< Energy of track, measured at dca
-        float       m_trackDistance;                            ///< Distance from calo hit to track
+        pandora::CaloHit   *m_pCaloHit;                                 ///< Address of calo hit
+        pandora::Cluster   *m_pCluster;                                 ///< Address of cluster seeded by track
+        float               m_trackEnergy;                              ///< Energy of track, measured at dca
+        float               m_trackDistance;                            ///< Distance from calo hit to track
     };
 
     typedef std::vector<TrackDistanceInfo> TrackDistanceInfoVector;
@@ -99,12 +97,12 @@ private:
      */
     static bool SortByDistanceToTrack(const TrackDistanceInfo &lhs, const TrackDistanceInfo &rhs);
 
-    bool            m_shouldRunStandardClusteringAlgorithm;     ///< Whether to run standard clustering algorithm to deal with remnants
-    std::string     m_standardClusteringAlgorithmName;          ///< The name of standard clustering algorithm to run
-
-    bool            m_shouldClusterIsolatedHits;                ///< Whether to directly include isolated hits in newly formed clusters
-    bool            m_shouldAssociateIsolatedHits;              ///< Whether to associate isolated hits to newly formed clusters
-    std::string     m_isolatedHitAssociationAlgorithmName;      ///< The name of isolated hit association algorithm
+    bool                    m_shouldRunStandardClusteringAlgorithm;     ///< Whether to run standard clustering algorithm to deal with remnants
+    std::string             m_standardClusteringAlgorithmName;          ///< The name of standard clustering algorithm to run
+        
+    bool                    m_shouldClusterIsolatedHits;                ///< Whether to directly include isolated hits in newly formed clusters
+    bool                    m_shouldAssociateIsolatedHits;              ///< Whether to associate isolated hits to newly formed clusters
+    std::string             m_isolatedHitAssociationAlgorithmName;      ///< The name of isolated hit association algorithm
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -117,7 +115,8 @@ inline bool ForcedClusteringAlgorithm::SortByDistanceToTrack(const TrackDistance
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline ForcedClusteringAlgorithm::TrackDistanceInfo::TrackDistanceInfo(CaloHit *pCaloHit, Cluster *pCluster, float trackEnergy, float trackDistance) :
+inline ForcedClusteringAlgorithm::TrackDistanceInfo::TrackDistanceInfo(pandora::CaloHit *pCaloHit, pandora::Cluster *pCluster,
+        float trackEnergy, float trackDistance) :
     m_pCaloHit(pCaloHit),
     m_pCluster(pCluster),
     m_trackEnergy(trackEnergy),
@@ -127,14 +126,14 @@ inline ForcedClusteringAlgorithm::TrackDistanceInfo::TrackDistanceInfo(CaloHit *
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline CaloHit *ForcedClusteringAlgorithm::TrackDistanceInfo::GetCaloHit() const
+inline pandora::CaloHit *ForcedClusteringAlgorithm::TrackDistanceInfo::GetCaloHit() const
 {
     return m_pCaloHit;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Cluster *ForcedClusteringAlgorithm::TrackDistanceInfo::GetCluster() const
+inline pandora::Cluster *ForcedClusteringAlgorithm::TrackDistanceInfo::GetCluster() const
 {
     return m_pCluster;
 }

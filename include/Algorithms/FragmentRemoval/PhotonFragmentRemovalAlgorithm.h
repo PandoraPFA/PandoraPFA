@@ -12,26 +12,24 @@
 
 #include "Helpers/FragmentRemovalHelper.h"
 
-using namespace pandora;
-
 /**
  *  @brief  PhotonFragmentRemovalAlgorithm class
  */
-class PhotonFragmentRemovalAlgorithm : public Algorithm
+class PhotonFragmentRemovalAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get cluster contact map, linking each daughter candidate cluster to a list of parent candidates and describing
@@ -41,7 +39,7 @@ private:
      *  @param  affectedClusters list of those clusters affected by previous cluster merging, for which contact details must be updated
      *  @param  clusterContactMap to receive the populated cluster contact map
      */
-    StatusCode GetClusterContactMap(bool &isFirstPass, const ClusterList &affectedClusters, ClusterContactMap &clusterContactMap) const;
+    pandora::StatusCode GetClusterContactMap(bool &isFirstPass, const pandora::ClusterList &affectedClusters, pandora::ClusterContactMap &clusterContactMap) const;
 
     /**
      *  @brief  Whether candidate daughter cluster can be considered as photon-like
@@ -50,7 +48,7 @@ private:
      * 
      *  @return boolean
      */
-    bool IsPhotonLike(Cluster *const pDaughterCluster) const;
+    bool IsPhotonLike(pandora::Cluster *const pDaughterCluster) const;
 
     /**
      *  @brief  Whether candidate parent and daughter clusters are sufficiently in contact to warrant further investigation
@@ -59,7 +57,7 @@ private:
      * 
      *  @return boolean
      */
-    bool PassesClusterContactCuts(const ClusterContact &clusterContact) const;
+    bool PassesClusterContactCuts(const pandora::ClusterContact &clusterContact) const;
 
     /**
      *  @brief  Find the best candidate parent and daughter clusters for fragment removal merging
@@ -68,8 +66,8 @@ private:
      *  @param  pBestParentCluster to receive the address of the best parent cluster candidate
      *  @param  pBestDaughterCluster to receive the address of the best daughter cluster candidate
      */
-    StatusCode GetClusterMergingCandidates(const ClusterContactMap &clusterContactMap, Cluster *&pBestParentCluster,
-        Cluster *&pBestDaughterCluster) const;
+    pandora::StatusCode GetClusterMergingCandidates(const pandora::ClusterContactMap &clusterContactMap, pandora::Cluster *&pBestParentCluster,
+        pandora::Cluster *&pBestDaughterCluster) const;
 
     /**
      *  @brief  Get a measure of the evidence for merging the parent and daughter candidate clusters
@@ -78,7 +76,7 @@ private:
      * 
      *  @return the evidence
      */
-    float GetEvidenceForMerge(const ClusterContact &clusterContact) const;
+    float GetEvidenceForMerge(const pandora::ClusterContact &clusterContact) const;
 
     /**
      *  @brief  Get the list of clusters for which cluster contact information will be affected by a specified cluster merge
@@ -88,10 +86,10 @@ private:
      *  @param  pBestDaughterCluster address of the daughter cluster to be merged
      *  @param  affectedClusters to receive the list of affected clusters
      */
-    StatusCode GetAffectedClusters(const ClusterContactMap &clusterContactMap, Cluster *const pBestParentCluster,
-        Cluster *const pBestDaughterCluster, ClusterList &affectedClusters) const;
+    pandora::StatusCode GetAffectedClusters(const pandora::ClusterContactMap &clusterContactMap, pandora::Cluster *const pBestParentCluster,
+        pandora::Cluster *const pBestDaughterCluster, pandora::ClusterList &affectedClusters) const;
 
-    typedef ClusterContact::Parameters ContactParameters;
+    typedef pandora::ClusterContact::Parameters ContactParameters;
     ContactParameters   m_contactParameters;                        ///< The cluster contact parameters
 
     unsigned int        m_nMaxPasses;                               ///< Maximum number of passes over cluster contact information

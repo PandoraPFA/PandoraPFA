@@ -201,7 +201,7 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
     /**
@@ -210,8 +210,8 @@ public:
     virtual ~EnergyMonitoringAlgorithm();
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  MonitoringOutput
@@ -222,7 +222,7 @@ private:
      *  @param  numberClusters
      *  @param  numberTracks
      */
-    StatusCode MonitoringOutput(const EnergyMixing &trueCharged, const EnergyMixing &trueNeutral, const EnergyMixing &truePhotons,
+    pandora::StatusCode MonitoringOutput(const EnergyMixing &trueCharged, const EnergyMixing &trueNeutral, const EnergyMixing &truePhotons,
         const int numberClusters, const int numberTracks);
 
     pandora::StringVector   m_clusterListNames;             ///< list of strings denoting clusternames 

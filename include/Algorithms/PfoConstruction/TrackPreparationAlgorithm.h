@@ -22,12 +22,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Create list of parent tracks to be used in construction of charged pfos
@@ -35,7 +35,7 @@ private:
      *  @param  inputTrackList the input track list
      *  @param  pfoTrackList to receive the list of parent tracks to be used in construction of charged pfos
      */
-    StatusCode CreatePfoTrackList(const pandora::TrackList &inputTrackList, pandora::TrackList &pfoTrackList) const;
+    pandora::StatusCode CreatePfoTrackList(const pandora::TrackList &inputTrackList, pandora::TrackList &pfoTrackList) const;
 
     /**
      *  @brief  Whether a track, or any of its daughters or siblings has an associated cluster

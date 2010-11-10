@@ -22,20 +22,18 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 protected:
     virtual bool SelectMCParticlesForClustering(const pandora::MCParticle *pMcParticle) const;
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     pandora::IntVector  m_particleIdList;               ///< list of particle ids of MCPFOs to be selected
-
     bool                m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the perfect clustering algorithm
-
     bool                m_debug;                        ///< turn on additional debugging output
 };
 

@@ -12,28 +12,26 @@
 
 #include "Helpers/ClusterHelper.h"
 
-using namespace pandora;
-
 /**
  *  @brief  BrokenTracksAlgorithm class
  */
-class BrokenTracksAlgorithm : public Algorithm
+class BrokenTracksAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    typedef ClusterHelper::ClusterFitResult ClusterFitResult;
+    typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
 
     /**
      *  @brief  ClusterFitRelation class
@@ -48,14 +46,14 @@ private:
          *  @param  startFitResult the cluster start fit result
          *  @param  endFitResult the cluster end fit result
          */
-        ClusterFitRelation(Cluster *const pCluster, const ClusterFitResult &startFitResult, const ClusterFitResult &endFitResult);
+        ClusterFitRelation(pandora::Cluster *const pCluster, const ClusterFitResult &startFitResult, const ClusterFitResult &endFitResult);
 
         /**
          *  @brief  Get the address of the cluster
          * 
          *  @return The address of the cluster
          */
-        Cluster *GetCluster() const;
+        pandora::Cluster *GetCluster() const;
 
         /**
          *  @brief  Get the cluster start fit result
@@ -101,7 +99,7 @@ private:
 
     private:
         bool                        m_isDefunct;            ///< Whether the cluster fit relation is defunct
-        Cluster                    *m_pCluster;             ///< Address of the cluster
+        pandora::Cluster           *m_pCluster;             ///< Address of the cluster
         ClusterFitResult            m_startFitResult;       ///< The cluster start fit result
         ClusterFitResult            m_endFitResult;         ///< The cluster end fit result
     };
@@ -134,7 +132,7 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Algorithm *BrokenTracksAlgorithm::Factory::CreateAlgorithm() const
+inline pandora::Algorithm *BrokenTracksAlgorithm::Factory::CreateAlgorithm() const
 {
     return new BrokenTracksAlgorithm();
 }
@@ -143,7 +141,7 @@ inline Algorithm *BrokenTracksAlgorithm::Factory::CreateAlgorithm() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline BrokenTracksAlgorithm::ClusterFitRelation::ClusterFitRelation(Cluster *const pCluster, const ClusterFitResult &startFitResult,
+inline BrokenTracksAlgorithm::ClusterFitRelation::ClusterFitRelation(pandora::Cluster *const pCluster, const ClusterFitResult &startFitResult,
         const ClusterFitResult &endFitResult) :
     m_isDefunct(false),
     m_pCluster(pCluster),
@@ -154,30 +152,30 @@ inline BrokenTracksAlgorithm::ClusterFitRelation::ClusterFitRelation(Cluster *co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Cluster *BrokenTracksAlgorithm::ClusterFitRelation::GetCluster() const
+inline pandora::Cluster *BrokenTracksAlgorithm::ClusterFitRelation::GetCluster() const
 {
     if (m_isDefunct)
-        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_ALLOWED);
 
     return m_pCluster;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const ClusterHelper::ClusterFitResult &BrokenTracksAlgorithm::ClusterFitRelation::GetStartFitResult() const
+inline const BrokenTracksAlgorithm::ClusterFitResult &BrokenTracksAlgorithm::ClusterFitRelation::GetStartFitResult() const
 {
     if (m_isDefunct)
-        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_ALLOWED);
 
     return m_startFitResult;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const ClusterHelper::ClusterFitResult &BrokenTracksAlgorithm::ClusterFitRelation::GetEndFitResult() const
+inline const BrokenTracksAlgorithm::ClusterFitResult &BrokenTracksAlgorithm::ClusterFitRelation::GetEndFitResult() const
 {
     if (m_isDefunct)
-        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+        throw pandora::StatusCodeException(pandora::STATUS_CODE_NOT_ALLOWED);
 
     return m_endFitResult;
 }

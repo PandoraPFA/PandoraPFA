@@ -10,21 +10,19 @@
 
 #include "Algorithms/Algorithm.h"
 
-using namespace pandora;
-
 /**
  *  @brief  TrackRecoveryHelixAlgorithm class
  */
-class TrackRecoveryHelixAlgorithm : public Algorithm
+class TrackRecoveryHelixAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
@@ -40,14 +38,14 @@ private:
          *  @param  pCluster address of cluster to which association could be made
          *  @param  closestApproach distance of closest approach between the cluster and the track under consideration
          */
-        AssociationInfo(Cluster *const pCluster, const float closestApproach);
+        AssociationInfo(pandora::Cluster *const pCluster, const float closestApproach);
 
         /**
          *  @brief  Get the address of the cluster to which association could be made
          * 
          *  @return The address of the cluster
          */
-        Cluster *GetCluster() const;
+        pandora::Cluster *GetCluster() const;
 
         /**
          *  @brief  Get the distance of closest approach between the cluster and the track under consideration
@@ -64,29 +62,29 @@ private:
         bool operator< (const AssociationInfo &rhs) const;
 
     private:
-        Cluster    *m_pCluster;                         ///< The cluster to which an association would be made
-        float       m_closestApproach;                  ///< The distance of closest approach
+        pandora::Cluster   *m_pCluster;                 ///< The cluster to which an association would be made
+        float               m_closestApproach;          ///< The distance of closest approach
     };
 
     typedef std::set<AssociationInfo> AssociationInfoSet;
-    typedef std::map<Track *, AssociationInfoSet> TrackAssociationInfoMap;
+    typedef std::map<pandora::Track *, AssociationInfoSet> TrackAssociationInfoMap;
 
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get a map specifying cluster association information for every possible matching cluster
      * 
      *  @param  trackAssociationInfoMap the track association info map
      */
-    StatusCode GetTrackAssociationInfoMap(TrackAssociationInfoMap &trackAssociationInfoMap) const;
+    pandora::StatusCode GetTrackAssociationInfoMap(TrackAssociationInfoMap &trackAssociationInfoMap) const;
 
     /**
      *  @brief  Use information in the track association info map to create track to cluster associations
      * 
      *  @param  trackAssociationInfoMap the track association info map
      */
-    StatusCode MakeTrackClusterAssociations(TrackAssociationInfoMap &trackAssociationInfoMap) const;
+    pandora::StatusCode MakeTrackClusterAssociations(TrackAssociationInfoMap &trackAssociationInfoMap) const;
 
     float           m_maxTrackClusterDeltaZ;            ///< Max z separation between track ecal projection and cluster to allow association
     float           m_maxAbsoluteTrackClusterChi;       ///< Max absolute track-cluster consistency chi value to allow association
@@ -113,7 +111,7 @@ inline pandora::Algorithm *TrackRecoveryHelixAlgorithm::Factory::CreateAlgorithm
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline TrackRecoveryHelixAlgorithm::AssociationInfo::AssociationInfo(Cluster *const pCluster, const float closestApproach) :
+inline TrackRecoveryHelixAlgorithm::AssociationInfo::AssociationInfo(pandora::Cluster *const pCluster, const float closestApproach) :
     m_pCluster(pCluster),
     m_closestApproach(closestApproach)
 {
@@ -121,7 +119,7 @@ inline TrackRecoveryHelixAlgorithm::AssociationInfo::AssociationInfo(Cluster *co
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Cluster *TrackRecoveryHelixAlgorithm::AssociationInfo::GetCluster() const
+inline pandora::Cluster *TrackRecoveryHelixAlgorithm::AssociationInfo::GetCluster() const
 {
     return m_pCluster;
 }

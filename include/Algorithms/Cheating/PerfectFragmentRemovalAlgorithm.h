@@ -24,12 +24,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  FragmentRemoval
@@ -37,7 +37,7 @@ private:
      *  @param  pCluster
      *  @param  removedEnergy
      */
-    StatusCode FragmentRemoval(pandora::Cluster *pCluster, float &removedEnergy) const;
+    pandora::StatusCode FragmentRemoval(pandora::Cluster *pCluster, float &removedEnergy) const;
 
     pandora::StringVector   m_clusterListNames;             ///< names of the clusterlists of which fragments should be removed
     bool                    m_debug;                        ///< turn on additional debugging output

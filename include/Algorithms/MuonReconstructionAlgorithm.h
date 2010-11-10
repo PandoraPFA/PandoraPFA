@@ -22,21 +22,21 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
     typedef const void *Uid;
 
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Associate muon clusters with appropriate tracks
      * 
      *  @param  pMuonClusterList address of the muon cluster list
      */
-    StatusCode AssociateMuonTracks(const pandora::ClusterList *const pMuonClusterList) const;
+    pandora::StatusCode AssociateMuonTracks(const pandora::ClusterList *const pMuonClusterList) const;
 
     /**
      *  @brief  Get the coordinates of the point at which a helix enters the muon detectors
@@ -45,7 +45,7 @@ private:
      *  @param  isPositiveZ whether to project the helix to the muon endcap with positive or negative z coordiante
      *  @param  muonEntryPoint to receive the muon entry point
      */
-    StatusCode GetMuonEntryPoint(const pandora::Helix *const pHelix, const bool isPositiveZ, pandora::CartesianVector &muonEntryPoint) const;
+    pandora::StatusCode GetMuonEntryPoint(const pandora::Helix *const pHelix, const bool isPositiveZ, pandora::CartesianVector &muonEntryPoint) const;
 
     /**
      *  @brief  Add appropriate calo hits in the ecal/hcal to the muon clusters
@@ -53,14 +53,14 @@ private:
      *  @param  pMuonClusterList address of the muon cluster list
      *  @param  inputCaloHitListName the name of the algorithm input calo hit list
      */
-    StatusCode AddCaloHits(const pandora::ClusterList *const pMuonClusterList, const std::string &inputCaloHitListName) const;
+    pandora::StatusCode AddCaloHits(const pandora::ClusterList *const pMuonClusterList, const std::string &inputCaloHitListName) const;
 
     /**
      *  @brief  Create the muon pfos
      * 
      *  @param  pMuonClusterList address of the muon cluster list
      */
-    StatusCode CreateMuonPfos(const pandora::ClusterList *const pMuonClusterList) const;
+    pandora::StatusCode CreateMuonPfos(const pandora::ClusterList *const pMuonClusterList) const;
 
     /**
      *  @brief  Tidy all relevant pandora lists, saving the muon clusters and saving muon-removed track and calo hit lists
@@ -69,7 +69,7 @@ private:
      *  @param  inputCaloHitListName the name of the algorithm input calo hit list
      *  @param  muonClusterListName the name of the list containing the initial muon clusters
      */
-    StatusCode TidyLists(const std::string &inputTrackListName, const std::string &inputCaloHitListName, const std::string &muonClusterListName) const;
+    pandora::StatusCode TidyLists(const std::string &inputTrackListName, const std::string &inputCaloHitListName, const std::string &muonClusterListName) const;
 
     typedef std::pair<pandora::CaloHit *, float> TrackDistanceInfo;
     typedef std::vector<TrackDistanceInfo> TrackDistanceInfoVector;
@@ -89,7 +89,7 @@ private:
      *  @param  pfoCaloHitList to receive the list of calo hits in pfos
      *  @param  pfoClusterList to receive the list of clusters in pfos
      */
-    StatusCode GetPfoComponents(pandora::TrackList &pfoTrackList, pandora::OrderedCaloHitList &pfoCaloHitList, pandora::ClusterList &pfoClusterList) const;
+    pandora::StatusCode GetPfoComponents(pandora::TrackList &pfoTrackList, pandora::OrderedCaloHitList &pfoCaloHitList, pandora::ClusterList &pfoClusterList) const;
 
     std::string     m_muonCaloHitListName;          ///< The name of the original calo hit list containing muon hits
     std::string     m_muonClusteringAlgName;        ///< The name of the muon clustering algorithm to run

@@ -8,7 +8,7 @@
 #ifndef PANDORA_SETTINGS_H
 #define PANDORA_SETTINGS_H 1
 
-#include "StatusCodes.h"
+#include "Pandora/StatusCodes.h"
 
 class TiXmlHandle;
 

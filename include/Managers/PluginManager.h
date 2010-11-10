@@ -10,8 +10,7 @@
 
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
-
-#include "StatusCodes.h"
+#include "Pandora/StatusCodes.h"
 
 class TiXmlHandle;
 

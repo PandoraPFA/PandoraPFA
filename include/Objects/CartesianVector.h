@@ -8,7 +8,7 @@
 #ifndef CARTESIAN_VECTOR_H
 #define CARTESIAN_VECTOR_H 1
 
-#include "StatusCodes.h"
+#include "Pandora/StatusCodes.h"
 
 #include <cmath>
 

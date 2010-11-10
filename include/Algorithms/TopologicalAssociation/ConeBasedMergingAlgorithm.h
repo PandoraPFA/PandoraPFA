@@ -24,12 +24,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     typedef pandora::ClusterHelper::ClusterFitResult ClusterFitResult;
     typedef std::map<pandora::Cluster *, ClusterFitResult> ClusterFitResultMap;
@@ -41,7 +41,7 @@ private:
      *  @param  daughterVector to receive the daughter cluster vector
      *  @param  parentFitResultMap to receive the parent cluster fit result map
      */
-    StatusCode PrepareClusters(pandora::ClusterVector &daughterVector, ClusterFitResultMap &parentFitResultMap) const;
+    pandora::StatusCode PrepareClusters(pandora::ClusterVector &daughterVector, ClusterFitResultMap &parentFitResultMap) const;
 
     /**
      *  @brief  Get the fraction of hits in a daughter candidate cluster that are contained in a cluster defined by a mip fit

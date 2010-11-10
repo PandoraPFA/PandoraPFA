@@ -10,26 +10,24 @@
 
 #include "Algorithms/Algorithm.h"
 
-using namespace pandora;
-
 /**
  *  @brief  FragmentRemovalAlgorithm class
  */
-class FragmentRemovalAlgorithm : public Algorithm
+class FragmentRemovalAlgorithm : public pandora::Algorithm
 {
 public:
     /**
      *  @brief  Factory class for instantiating algorithm
      */
-    class Factory : public AlgorithmFactory
+    class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     pandora::StringVector   m_fragmentRemovalAlgorithms;    ///< The ordered list of fragment removal algorithms to be used
 };

@@ -9,10 +9,9 @@
 #define CALO_HIT_HELPER_H 1
 
 #include "Pandora/PandoraInternal.h"
+#include "Pandora/StatusCodes.h"
 
 #include "Xml/tinyxml.h"
-
-#include "StatusCodes.h"
 
 namespace pandora
 {

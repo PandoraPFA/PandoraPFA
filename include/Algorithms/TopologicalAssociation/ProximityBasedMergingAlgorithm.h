@@ -22,12 +22,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get generic distance between hits in parent cluster candidate and those in nearby (typically overlapping) daughter
@@ -39,7 +39,7 @@ private:
      *  @param  endLayer last layer to examine
      *  @param  distance to receive the generic distance
      */
-    StatusCode GetGenericDistanceBetweenClusters(const pandora::Cluster *const pParentCluster, const pandora::Cluster *const pDaughterCluster,
+    pandora::StatusCode GetGenericDistanceBetweenClusters(const pandora::Cluster *const pParentCluster, const pandora::Cluster *const pDaughterCluster,
         const pandora::PseudoLayer startLayer, const pandora::PseudoLayer endLayer, float &distance) const;
 
     /**

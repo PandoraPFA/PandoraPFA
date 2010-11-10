@@ -24,12 +24,12 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Calculate the invariant mass for a decaying charged particle
@@ -40,8 +40,8 @@ private:
      *  @param  mass2 is assumed mass of track2
      *  @param  V0mass is the resulting mass of the V0
      */
-    StatusCode GetV0Mass(const pandora::CartesianVector &momentum1, const pandora::CartesianVector &momentum2, float mass1, float mass2,
-        float &V0mass) const;
+    pandora::StatusCode GetV0Mass(const pandora::CartesianVector &momentum1, const pandora::CartesianVector &momentum2, float mass1,
+        float mass2, float &V0mass) const;
 
     bool    m_mcMonitoring;         ///< Whether to use mc monitoring functionality
 };

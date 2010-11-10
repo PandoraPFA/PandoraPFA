@@ -22,15 +22,15 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
-    virtual StatusCode Initialize();
+    virtual pandora::StatusCode Initialize();
     virtual ~MCParticlesMonitoringAlgorithm();
 
 private:
-    StatusCode Run();
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Run();
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
      *  @brief  
@@ -42,7 +42,7 @@ private:
     /**
      *  @brief  
      */
-    StatusCode FillListOfUsedMCParticles();
+    pandora::StatusCode FillListOfUsedMCParticles();
 
     /**
      *  @brief  

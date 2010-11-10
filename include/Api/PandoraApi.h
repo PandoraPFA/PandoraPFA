@@ -38,7 +38,7 @@ public:
          *  @param  pandora the pandora instance to create the new object
          *  @param  parameters the object parameters
          */
-         static StatusCode Create(const pandora::Pandora &pandora, const Parameters &parameters);
+         static pandora::StatusCode Create(const pandora::Pandora &pandora, const Parameters &parameters);
     };
 
     /**
@@ -203,7 +203,7 @@ public:
      * 
      *  @param  pandora the pandora instance to process event
      */
-    static StatusCode ProcessEvent(const pandora::Pandora &pandora);
+    static pandora::StatusCode ProcessEvent(const pandora::Pandora &pandora);
 
     /**
      *  @brief  Read pandora settings
@@ -211,7 +211,7 @@ public:
      *  @param  pandora the pandora instance to run the algorithms initialize
      *  @param  xmlFileName the name of the xml file containing the settings
      */
-    static StatusCode ReadSettings(const pandora::Pandora &pandora, const std::string &xmlFileName);
+    static pandora::StatusCode ReadSettings(const pandora::Pandora &pandora, const std::string &xmlFileName);
 
     /**
      *  @brief  Register an algorithm factory with pandora
@@ -220,7 +220,7 @@ public:
      *  @param  algorithmType the type of algorithm that the factory will create
      *  @param  pAlgorithmFactory the address of an algorithm factory instance
      */
-    static StatusCode RegisterAlgorithmFactory(const pandora::Pandora &pandora, const std::string &algorithmType,
+    static pandora::StatusCode RegisterAlgorithmFactory(const pandora::Pandora &pandora, const std::string &algorithmType,
         pandora::AlgorithmFactory *const pAlgorithmFactory);
 
     /**
@@ -230,7 +230,7 @@ public:
      *  @param  pParentAddress address of parent mc particle in the user framework
      *  @param  pDaughterAddress address of daughter mc particle in the user framework
      */
-    static StatusCode SetMCParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress,
+    static pandora::StatusCode SetMCParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress,
         const void *pDaughterAddress);
 
     /**
@@ -240,7 +240,7 @@ public:
      *  @param  pParentAddress address of parent track in the user framework
      *  @param  pDaughterAddress address of daughter track in the user framework
      */
-    static StatusCode SetTrackParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress,
+    static pandora::StatusCode SetTrackParentDaughterRelationship(const pandora::Pandora &pandora, const void *pParentAddress,
         const void *pDaughterAddress);
 
     /**
@@ -250,7 +250,7 @@ public:
      *  @param  pFirstSiblingAddress address of first sibling track in the user framework
      *  @param  pSecondSiblingAddress address of second sibling track in the user framework
      */
-    static StatusCode SetTrackSiblingRelationship(const pandora::Pandora &pandora, const void *pFirstSiblingAddress,
+    static pandora::StatusCode SetTrackSiblingRelationship(const pandora::Pandora &pandora, const void *pFirstSiblingAddress,
         const void *pSecondSiblingAddress);
 
     /**
@@ -261,7 +261,7 @@ public:
      *  @param  pMCParticleParentAddress address of mc particle in the user framework
      *  @param  mcParticleWeight weighting to assign to the mc particle
      */
-    static StatusCode SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
+    static pandora::StatusCode SetCaloHitToMCParticleRelationship(const pandora::Pandora &pandora, const void *pCaloHitParentAddress,
         const void *pMCParticleParentAddress, const float mcParticleWeight = 1);
 
     /**
@@ -272,7 +272,7 @@ public:
      *  @param  pMCParticleParentAddress address of mc particle in the user framework
      *  @param  mcParticleWeight weighting to assign to the mc particle
      */
-    static StatusCode SetTrackToMCParticleRelationship(const pandora::Pandora &pandora, const void *pTrackParentAddress,
+    static pandora::StatusCode SetTrackToMCParticleRelationship(const pandora::Pandora &pandora, const void *pTrackParentAddress,
         const void *pMCParticleParentAddress, const float mcParticleWeight = 1);
 
     /**
@@ -281,7 +281,7 @@ public:
      *  @param  pandora the pandora instance to get the objects from
      *  @param  pfoVector container to receive the particle flow objects
      */
-    static StatusCode GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList);
+    static pandora::StatusCode GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList);
 
     /**
      *  @brief  Set the bfield calculator used by pandora
@@ -289,7 +289,7 @@ public:
      *  @param  pandora the pandora instance to register the bfield calculator with
      *  @param  pBFieldCalculator address of the bfield calculator
      */
-    static StatusCode SetBFieldCalculator(const pandora::Pandora &pandora, pandora::BFieldCalculator *pBFieldCalculator);
+    static pandora::StatusCode SetBFieldCalculator(const pandora::Pandora &pandora, pandora::BFieldCalculator *pBFieldCalculator);
 
     /**
      *  @brief  Set the pseudo layer calculator used by pandora
@@ -297,7 +297,7 @@ public:
      *  @param  pandora the pandora instance to register the pseudo layer calculator with
      *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
      */
-    static StatusCode SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator);
+    static pandora::StatusCode SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator);
 
     /**
      *  @brief  Register an energy correction function
@@ -307,7 +307,7 @@ public:
      *  @param  energyCorrectionType the energy correction type
      *  @param  energyCorrectionFunction pointer to an energy correction function
      */
-    static StatusCode RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
+    static pandora::StatusCode RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
         const pandora::EnergyCorrectionType energyCorrectionType, pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction);
 
     /**
@@ -317,7 +317,7 @@ public:
      *  @param  functionName the name/label associated with the particle id function
      *  @param  particleIdFunction pointer to a particle id function
      */
-    static StatusCode RegisterParticleIdFunction(const pandora::Pandora &pandora, const std::string &functionName,
+    static pandora::StatusCode RegisterParticleIdFunction(const pandora::Pandora &pandora, const std::string &functionName,
         pandora::ParticleIdFunction *pParticleIdFunction);
 
     /**
@@ -325,7 +325,7 @@ public:
      * 
      *  @param  pandora the pandora instance to reset
      */
-    static StatusCode Reset(const pandora::Pandora &pandora);
+    static pandora::StatusCode Reset(const pandora::Pandora &pandora);
 };
 
 #endif // #ifndef PANDORA_API_H

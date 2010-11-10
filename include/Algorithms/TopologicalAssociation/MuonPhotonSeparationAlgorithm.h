@@ -22,16 +22,16 @@ public:
     class Factory : public pandora::AlgorithmFactory
     {
     public:
-        Algorithm *CreateAlgorithm() const;
+        pandora::Algorithm *CreateAlgorithm() const;
     };
 
 private:
-    StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    StatusCode PerformFragmentation(pandora::Cluster *const pOriginalCluster, pandora::Track *const pTrack,
+    pandora::StatusCode PerformFragmentation(pandora::Cluster *const pOriginalCluster, pandora::Track *const pTrack,
         pandora::PseudoLayer showerStartLayer, pandora::PseudoLayer showerEndLayer) const;
 
-    StatusCode MakeClusterFragments(const pandora::PseudoLayer showerStartLayer, const pandora::PseudoLayer showerEndLayer,
+    pandora::StatusCode MakeClusterFragments(const pandora::PseudoLayer showerStartLayer, const pandora::PseudoLayer showerEndLayer,
         pandora::Cluster *const pOriginalCluster, pandora::Cluster *&pMipCluster, pandora::Cluster *&pPhotonCluster) const;
 
     float           m_highEnergyMuonCut;            ///< Cut for muon to be considered high energy
