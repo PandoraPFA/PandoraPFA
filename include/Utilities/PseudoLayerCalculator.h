@@ -51,7 +51,7 @@ inline PseudoLayerCalculator::~PseudoLayerCalculator()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void PseudoLayerCalculator::Initialize(const GeometryHelper *const pGeometryHelper)
+inline void PseudoLayerCalculator::Initialize(const GeometryHelper *const /*pGeometryHelper*/)
 {
 }
 

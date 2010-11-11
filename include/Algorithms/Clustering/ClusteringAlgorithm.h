@@ -112,10 +112,9 @@ private:
      *  @brief  Update the properties of the current clusters, calculating their current directions and identifying whether
      *          they are likely to be sections of mip tracks
      * 
-     *  @param  pseudoLayer the current pseudo layer
      *  @param  clusterVector vector containing addresses of current clusters
      */
-    pandora::StatusCode UpdateClusterProperties(pandora::PseudoLayer pseudoLayer, pandora::ClusterVector &clusterVector) const;
+    pandora::StatusCode UpdateClusterProperties(pandora::ClusterVector &clusterVector) const;
 
     /**
      *  @brief  Get the "generic distance" between a calo hit and a cluster; the smaller the distance, the stronger the association

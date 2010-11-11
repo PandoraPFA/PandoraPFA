@@ -68,7 +68,7 @@ bool FinalParticleIdAlgorithm::ContainsSiblingTrack(const TrackList &trackList) 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FinalParticleIdAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode FinalParticleIdAlgorithm::ReadSettings(const TiXmlHandle /*xmlHandle*/)
 {
     return STATUS_CODE_SUCCESS;
 }

@@ -293,7 +293,7 @@ inline bool PandoraInputType<T>::IsValid(const T &t) const
 }
 
 template <>
-inline bool PandoraInputType<void *>::IsValid(void *const &t) const
+inline bool PandoraInputType<void *>::IsValid(void *const &) const
 {
     return true;
 }

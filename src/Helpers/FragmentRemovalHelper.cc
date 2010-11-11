@@ -300,7 +300,7 @@ StatusCode FragmentRemovalHelper::GetClusterContactDetails(const Cluster *const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FragmentRemovalHelper::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode FragmentRemovalHelper::ReadSettings(const TiXmlHandle /*xmlHandle*/)
 {
     return STATUS_CODE_SUCCESS;
 }

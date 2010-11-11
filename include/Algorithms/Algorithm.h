@@ -43,7 +43,7 @@ public:
      * 
      *  @return Address of the pandora content api impl
      */
-    const PandoraContentApiImpl *const GetPandoraContentApiImpl() const;
+    const PandoraContentApiImpl *GetPandoraContentApiImpl() const;
 
     /**
      *  @brief  Get the algorithm type
@@ -77,7 +77,7 @@ protected:
      */
     StatusCode RegisterPandora(Pandora *pPandora);
 
-    Pandora             *m_pPandora;            ///< The pandora object that will run the algorithm
+    Pandora            *m_pPandora;             ///< The pandora object that will run the algorithm
     std::string         m_algorithmType;        ///< The type of algorithm
 
     friend class AlgorithmManager;
@@ -128,7 +128,7 @@ inline Algorithm::~Algorithm()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const PandoraContentApiImpl *const Algorithm::GetPandoraContentApiImpl() const
+inline const PandoraContentApiImpl *Algorithm::GetPandoraContentApiImpl() const
 {
     if (NULL == m_pPandora)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);

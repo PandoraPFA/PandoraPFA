@@ -159,7 +159,7 @@ public:
      * 
      *  @return address of the track seed
      */
-    const Track *const GetTrackSeed() const;
+    const Track *GetTrackSeed() const;
 
     /**
      *  @brief  Get the innermost pseudo layer in the cluster
@@ -631,7 +631,7 @@ inline bool Cluster::IsTrackSeeded() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const Track *const Cluster::GetTrackSeed() const
+inline const Track *Cluster::GetTrackSeed() const
 {
     if (NULL == m_pTrackSeed)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);

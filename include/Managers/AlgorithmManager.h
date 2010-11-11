@@ -46,7 +46,7 @@ public:
      *
      *  @return address of the list pandora algorithms
      */
-    const StringVector *const GetPandoraAlgorithms() const;
+    const StringVector *GetPandoraAlgorithms() const;
 
 private:
     /**
@@ -100,7 +100,7 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const StringVector *const AlgorithmManager::GetPandoraAlgorithms() const
+inline const StringVector *AlgorithmManager::GetPandoraAlgorithms() const
 {
     return &m_pandoraAlgorithms;
 }

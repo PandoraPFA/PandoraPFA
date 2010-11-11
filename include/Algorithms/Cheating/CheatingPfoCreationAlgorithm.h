@@ -23,11 +23,6 @@ class Select2nd : public std::binary_function<Pair, Pair, typename Pair::second_
     { 
         return Op()( arg0.second, arg1.second ); 
     }
-
-    const bool operator()(const Pair& arg0, Pair& arg1) const
-    { 
-        return Op()( arg0.second, arg1.second ); 
-    }
 };
 
 } // namespace pandora

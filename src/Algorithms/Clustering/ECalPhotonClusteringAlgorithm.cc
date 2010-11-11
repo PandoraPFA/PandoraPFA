@@ -601,7 +601,7 @@ void ECalPhotonClusteringAlgorithm::CreateOrSaveLikelihoodHistograms(bool create
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster, const OrderedCaloHitList& pOriginalOrderedCaloHitList, 
+bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster, const OrderedCaloHitList& /*pOriginalOrderedCaloHitList*/, 
                                               protoClusterPeaks_t& peak, ClusterProperties& originalClusterProperties, bool& useOriginalCluster, int& peaksSize )
 {
     if(m_producePrintoutStatements > 0)
@@ -2642,7 +2642,7 @@ void Histogram2D::Print( std::ostream& os )
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::Print( std::string histogramName )
+void Histogram2D::Print( std::string /*histogramName*/ )
 {
 //     PANDORA_MONITORING_API(Create2DHistogram(histogramName, histogramName, axisX.GetNumberBins(), axisX.GetMinValue(), axisX.GetMaxValue(), axisY.GetNumberBins(), axisY.GetMinValue(), axisY.GetMaxValue()));
 //     PANDORA_MONITORING_API(Fill2DHistogram(IsIsolatedFlagHistName, (*caloHitIter)->IsIsolated()));

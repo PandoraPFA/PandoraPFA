@@ -190,8 +190,8 @@ void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter(Cluster *pCluster, flo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingPfoCreationAlgorithm::ComputeFromMC(Cluster *pCluster, float &energy, CartesianVector &momentum, float &mass,
-    int &particleId, int &charge) const
+void CheatingPfoCreationAlgorithm::ComputeFromMC(Cluster *pCluster, float &energy, CartesianVector &/*momentum*/, float &/*mass*/,
+    int &particleId, int &/*charge*/) const
 {
     // Match CaloHitVectors to their MCParticles
     std::map< const MCParticle*, float > energyPerMCParticle;

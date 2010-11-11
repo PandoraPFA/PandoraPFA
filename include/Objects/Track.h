@@ -147,7 +147,7 @@ public:
      * 
      *  @return address of the helix fit to the ecal track state
      */
-    const Helix *const GetHelixFitAtECal() const;
+    const Helix *GetHelixFitAtECal() const;
 
     /**
      *  @brief  Whether the track has an associated cluster
@@ -443,7 +443,7 @@ inline const TrackStateList &Track::GetCalorimeterProjections() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const Helix *const Track::GetHelixFitAtECal() const
+inline const Helix *Track::GetHelixFitAtECal() const
 {
     return m_pHelixFitAtECal;
 }

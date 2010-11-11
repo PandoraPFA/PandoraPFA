@@ -51,7 +51,7 @@ inline BFieldCalculator::~BFieldCalculator()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void BFieldCalculator::Initialize(const GeometryHelper *const pGeometryHelper)
+inline void BFieldCalculator::Initialize(const GeometryHelper *const /*pGeometryHelper*/)
 {
 }
 

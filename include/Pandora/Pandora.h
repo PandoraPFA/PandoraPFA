@@ -50,14 +50,14 @@ public:
      * 
      *  @return Address of the pandora api impl
      */
-    const PandoraApiImpl *const GetPandoraApiImpl() const;
+    const PandoraApiImpl *GetPandoraApiImpl() const;
 
     /**
      *  @brief  Get the pandora content api impl
      * 
      *  @return Address of the pandora content api impl
      */
-    const PandoraContentApiImpl *const GetPandoraContentApiImpl() const;
+    const PandoraContentApiImpl *GetPandoraContentApiImpl() const;
 
 private:
     /**

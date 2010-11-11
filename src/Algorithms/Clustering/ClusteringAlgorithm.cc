@@ -46,7 +46,7 @@ StatusCode ClusteringAlgorithm::Run()
 
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInPreviousLayers(pseudoLayer, &customSortedCaloHitList, clusterVector));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindHitsInSameLayer(pseudoLayer, &customSortedCaloHitList, clusterVector));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(pseudoLayer, clusterVector));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->UpdateClusterProperties(clusterVector));
     }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RemoveEmptyClusters(clusterVector));
@@ -248,7 +248,7 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Cus
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::UpdateClusterProperties(PseudoLayer pseudoLayer, ClusterVector &clusterVector) const
+StatusCode ClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVector) const
 {
     // TODO replace this eventually - it remains only to reproduce old pandora results
     for (ClusterVector::iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)

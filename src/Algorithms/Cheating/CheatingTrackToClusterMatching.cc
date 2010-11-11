@@ -193,7 +193,7 @@ StatusCode CheatingTrackToClusterMatching::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CheatingTrackToClusterMatching::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode CheatingTrackToClusterMatching::ReadSettings(const TiXmlHandle /*xmlHandle*/)
 {
     return STATUS_CODE_SUCCESS;
 }

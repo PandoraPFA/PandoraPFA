@@ -651,7 +651,8 @@ StatusCode PandoraContentApiImpl::SaveClusterListAndReplaceCurrent(const Algorit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::SaveOrderedCaloHitList(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName) const
+StatusCode PandoraContentApiImpl::SaveOrderedCaloHitList(const Algorithm &/*algorithm*/, const OrderedCaloHitList &orderedCaloHitList,
+    const std::string &newListName) const
 {
     return m_pPandora->m_pCaloHitManager->SaveList(orderedCaloHitList, newListName);
 }
@@ -665,7 +666,8 @@ StatusCode PandoraContentApiImpl::ReplaceCurrentOrderedCaloHitList(const Algorit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::SaveOrderedCaloHitListAndReplaceCurrent(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName) const
+StatusCode PandoraContentApiImpl::SaveOrderedCaloHitListAndReplaceCurrent(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList,
+    const std::string &newListName) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SaveOrderedCaloHitList(algorithm, orderedCaloHitList, newListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newListName));
@@ -675,7 +677,7 @@ StatusCode PandoraContentApiImpl::SaveOrderedCaloHitListAndReplaceCurrent(const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::SaveTrackList(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const
+StatusCode PandoraContentApiImpl::SaveTrackList(const Algorithm &/*algorithm*/, const TrackList &trackList, const std::string &newListName) const
 {
     return m_pPandora->m_pTrackManager->SaveList(trackList, newListName);
 }

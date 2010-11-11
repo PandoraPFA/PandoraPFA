@@ -119,14 +119,14 @@ StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-const PandoraApiImpl *const Pandora::GetPandoraApiImpl() const
+const PandoraApiImpl *Pandora::GetPandoraApiImpl() const
 {
     return m_pPandoraApiImpl;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-const PandoraContentApiImpl *const Pandora::GetPandoraContentApiImpl() const
+const PandoraContentApiImpl *Pandora::GetPandoraContentApiImpl() const
 {
     return m_pPandoraContentApiImpl;
 }

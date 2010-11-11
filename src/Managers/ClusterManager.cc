@@ -219,7 +219,7 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const std::string &targetListName,
+StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, const std::string &targetListName,
     const std::string &sourceListName)
 {
     NameToClusterListMap::iterator sourceClusterListIter = m_nameToClusterListMap.find(sourceListName);
@@ -261,7 +261,7 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::SaveClusters(const Algorithm *const pAlgorithm, const std::string &targetListName,
+StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, const std::string &targetListName,
     const std::string &sourceListName, const ClusterList &clustersToSave)
 {
     if (clustersToSave.empty())

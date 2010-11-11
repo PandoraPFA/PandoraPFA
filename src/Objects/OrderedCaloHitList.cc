@@ -12,13 +12,15 @@
 namespace pandora
 {
 
-OrderedCaloHitList::OrderedCaloHitList()
+OrderedCaloHitList::OrderedCaloHitList() :
+    std::map<PseudoLayer, CaloHitList *>()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-OrderedCaloHitList::OrderedCaloHitList(const OrderedCaloHitList &rhs)
+OrderedCaloHitList::OrderedCaloHitList(const OrderedCaloHitList &rhs) :
+    std::map<PseudoLayer, CaloHitList *>()
 {
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->Add(rhs));
 }

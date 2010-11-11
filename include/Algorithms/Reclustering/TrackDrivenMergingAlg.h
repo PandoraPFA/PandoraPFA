@@ -46,7 +46,7 @@ public:
      * 
      *  @return The address of the cluster
      */
-    pandora::Cluster *const GetCluster() const;
+    pandora::Cluster *GetCluster() const;
 
     /**
      *  @brief  Get the index of the cluster in the associated cluster vector
@@ -135,7 +135,7 @@ inline float ClusterConeFraction::GetConeFraction() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::Cluster *const ClusterConeFraction::GetCluster() const
+inline pandora::Cluster *ClusterConeFraction::GetCluster() const
 {
     return m_pCluster;
 }

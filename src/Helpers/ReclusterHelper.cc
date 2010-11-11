@@ -102,7 +102,7 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ReclusterHelper::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode ReclusterHelper::ReadSettings(const TiXmlHandle /*xmlHandle*/)
 {
     return STATUS_CODE_SUCCESS;
 }
