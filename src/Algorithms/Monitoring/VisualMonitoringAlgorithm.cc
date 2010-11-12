@@ -19,6 +19,8 @@ using namespace pandora;
 
 StatusCode VisualMonitoringAlgorithm::Run()
 {
+    PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector, m_maximumHitEnergy));
+
     // Show mc particles
     if (m_showMCParticles)
     {
@@ -70,7 +72,6 @@ StatusCode VisualMonitoringAlgorithm::Run()
     // Finally, display the event and pause application
     if (m_displayEvent)
     {
-        PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector));
         PANDORA_MONITORING_API(ViewEvent());
     }
 
@@ -203,8 +204,8 @@ void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
         return;
     }
 
-    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos",
-        (m_hitColors.find("particleid") != std::string::npos) ? AUTOID : AUTO));
+    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos",(m_hitColors.find("particleid") != std::string::npos) ? AUTOID : 
+                                                        (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: AUTO));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -253,6 +254,10 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DisplayEvent", m_displayEvent));
 
+    m_maximumHitEnergy = -1.0;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaximumHitEnergy", m_maximumHitEnergy));
+
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
         "SuppressMCParticles", m_suppressMCParticles));
 
@@ -283,7 +288,7 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShowDetector", m_showDetector));
 
-    PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector));
+    PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector, m_maximumHitEnergy));
 
     return STATUS_CODE_SUCCESS;
 }
