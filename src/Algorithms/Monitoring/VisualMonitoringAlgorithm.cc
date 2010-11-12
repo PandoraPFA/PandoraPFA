@@ -204,8 +204,8 @@ void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
         return;
     }
 
-    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos",(m_hitColors.find("particleid") != std::string::npos) ? AUTOID : 
-                                                        (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: AUTO));
+    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", (m_hitColors.find("particleid") != std::string::npos) ?
+        AUTOID : (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: AUTO));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -254,7 +254,7 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DisplayEvent", m_displayEvent));
 
-    m_maximumHitEnergy = -1.0;
+    m_maximumHitEnergy = -1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaximumHitEnergy", m_maximumHitEnergy));
 

@@ -221,9 +221,6 @@ private:
     typedef ChargedClusterContact::Parameters ContactParameters;
     ContactParameters   m_contactParameters;                        ///< The charged cluster contact parameters
 
-    typedef std::vector<pandora::CartesianVector> DirectionVector;
-    DirectionVector     m_muonDirectionVector;                      ///< The muon calo hit direction vector
-
     unsigned int        m_minDaughterCaloHits;                      ///< Min number of calo hits in daughter candidate clusters
     float               m_minDaughterHadronicEnergy;                ///< Min hadronic energy for daughter candidate clusters
 
@@ -288,13 +285,6 @@ private:
     float               m_layerCorrectionLayersFromECal;            ///< Daughter layers from ecal for layer correction contribution 6
 
     float               m_leavingCorrection;                        ///< Correction for clusters leaving calorimeters
-    bool                m_useMuonHitsInLeavingCorrection;           ///< Whether to use muon hits in calculation of leaving correction
-    std::string         m_muonHitListName;                          ///< The name of the muon ordered calo hit list
-
-    unsigned int        m_minCompatibleMuonHits;                    ///< Number of required muon hits to apply muon hit leaving correction
-    float               m_muonHitLeavingCorrection;                 ///< The leaving correction if there are sufficient compatible muon hits
-    float               m_noMuonHitLeavingCorrection;               ///< The leaving correction if there are no compatible muon hits
-    float               m_minDCosForCompatibleMuon;                 ///< Min direction cosine between cluster and compatible muon direction
 
     float               m_energyCorrectionThreshold;                ///< Energy correction threshold
 
