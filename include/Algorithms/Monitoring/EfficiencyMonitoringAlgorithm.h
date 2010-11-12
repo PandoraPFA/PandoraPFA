@@ -87,6 +87,26 @@ private:
     int             m_numberEvents;                       ///< number of events
     float           m_eventEfficiency;                    ///< average MCParticle efficiency per event
     float           m_eventPurity;                        ///< average MCParticle purity per event
+
+    std::string     m_histEntriesForEffPerThetaBin;       ///< histogram name
+    std::string     m_histEntriesForEffPerEnergyBin;      ///< histogram name
+    std::string     m_histEntriesForPurityPerThetaBin;    ///< histogram name
+    std::string     m_histEntriesForPurityPerEnergyBin;   ///< histogram name
+
+    std::string     m_histMCParticleEffVsTheta;           ///< histogram name
+    std::string     m_histMCParticleEffVsEnergy;          ///< histogram name
+    std::string     m_histMCParticlePurityVsTheta;        ///< histogram name
+    std::string     m_histMCParticlePurityVsEnergy;       ///< histogram name
+
+    std::string     m_histCaloHitMCEffVsTheta;              ///< histogram name
+    std::string     m_histCaloHitMCEffVsEnergy;             ///< histogram name
+    std::string     m_histCaloHitMCPurityVsTheta;           ///< histogram name
+    std::string     m_histCaloHitMCPurityVsEnergy;          ///< histogram name
+
+    std::string     m_histPFO_MC_EDiffMulByEMC;           ///< histogram name
+    std::string     m_histMCFractionLargestContribution;  ///< histogram name
+
+
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

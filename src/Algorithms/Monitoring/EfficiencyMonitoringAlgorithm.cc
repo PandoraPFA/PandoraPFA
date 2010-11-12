@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 using namespace pandora;
 
@@ -27,30 +28,93 @@ StatusCode EfficiencyMonitoringAlgorithm::Initialize()
     m_eventEfficiency = 0.f; // for MCParticle efficiency averaged over the events
     m_eventPurity = 0.f; // for MCParticle efficiency averaged over the events
 
-    PANDORA_MONITORING_API(Create1DHistogram("EntriesForEffPerThetaBin","Entries per #Theta bin", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "N"));
-    PANDORA_MONITORING_API(Create1DHistogram("EntriesForEffPerEnergyBin","Entries per energy bin", m_energyBins, m_energyMin, m_energyMax, "E", "N"));
 
-    PANDORA_MONITORING_API(Create1DHistogram("EntriesForPurityPerThetaBin","Entries per #Theta bin", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "N"));
-    PANDORA_MONITORING_API(Create1DHistogram("EntriesForPurityPerEnergyBin","Entries per energy bin", m_energyBins, m_energyMin, m_energyMax, "E", "N"));
+    std::stringstream sstr;
+    sstr << "_";
+    sstr << m_particleId;
+    std::string particleIdString("");
+    sstr >> particleIdString;
+
+    while (size_t pos = particleIdString.find("-") != std::string::npos)
+    {
+        particleIdString.replace(pos,1,"m");
+    } 
+
+    m_histEntriesForEffPerThetaBin = "EntriesForEffPerThetaBin";
+    m_histEntriesForEffPerEnergyBin = "EntriesForEffPerEnergyBin";
+    m_histEntriesForPurityPerThetaBin = "EntriesForPurityPerThetaBin";
+    m_histEntriesForPurityPerEnergyBin = "EntriesForPurityPerEnergyBin";
+
+    m_histMCParticleEffVsTheta = "MCParticleEffVsTheta";
+    m_histMCParticleEffVsEnergy = "MCParticleEffVsEnergy";
+    m_histMCParticlePurityVsTheta = "MCParticlePurityVsTheta";
+    m_histMCParticlePurityVsEnergy = "MCParticlePurityVsEnergy";
+
+    m_histCaloHitMCEffVsTheta = "CaloHitMCEffVsTheta";
+    m_histCaloHitMCEffVsEnergy = "CaloHitMCEffVsEnergy";
+    m_histCaloHitMCPurityVsTheta = "CaloHitMCPurityVsTheta";
+    m_histCaloHitMCPurityVsEnergy = "CaloHitMCPurityVsEnergy";
+
+    m_histPFO_MC_EDiffMulByEMC = "PFO_MC_EDiffMulByEMC";
+    m_histMCFractionLargestContribution = "MCFractionLargestContribution";
 
 
-    PANDORA_MONITORING_API(Create1DHistogram("MCParticleEffVsTheta","MC particle efficiency vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "#epsilon"));
-    PANDORA_MONITORING_API(Create1DHistogram("MCParticleEffVsEnergy","MC particle efficiency vs. Energy", m_energyBins, m_energyMin, m_energyMax, "E_{MC}", "#epsilon"));
+    m_histEntriesForEffPerThetaBin.append(particleIdString);
+    m_histEntriesForEffPerEnergyBin.append(particleIdString);
+    m_histEntriesForPurityPerThetaBin.append(particleIdString);
+    m_histEntriesForPurityPerEnergyBin.append(particleIdString);
 
-    PANDORA_MONITORING_API(Create1DHistogram("MCParticlePurityVsTheta","MC particle purity vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "purity"));
-    PANDORA_MONITORING_API(Create1DHistogram("MCParticlePurityVsEnergy","MC particle purity vs. Energy", m_energyBins, m_energyMin, m_energyMax, "E_{PFO}", "purity"));
+    m_histMCParticleEffVsTheta.append(particleIdString);
+    m_histMCParticleEffVsEnergy.append(particleIdString);
+    m_histMCParticlePurityVsTheta.append(particleIdString);
+    m_histMCParticlePurityVsEnergy.append(particleIdString);
 
-    PANDORA_MONITORING_API(Create2DHistogram("CaloHitMCEffVsTheta","Calorimeter-hit-MC efficiency vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, 24, -0.1, 1.1, "#Theta", "#epsilon_{Calohit}"));
-    PANDORA_MONITORING_API(Create2DHistogram("CaloHitMCEffVsEnergy","Calorimeter-hit-MC efficiency vs. Energy", m_energyBins, m_energyMin, m_energyMax, 24, -0.1, 1.1, "E_{PFO}", "#epsilon_{Calohit}"));
+    m_histCaloHitMCEffVsTheta.append(particleIdString);
+    m_histCaloHitMCEffVsEnergy.append(particleIdString);
+    m_histCaloHitMCPurityVsTheta.append(particleIdString);
+    m_histCaloHitMCPurityVsEnergy.append(particleIdString);
 
-    PANDORA_MONITORING_API(Create2DHistogram("CaloHitMCPurityVsTheta","Calorimeter-hit-MC purity vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, 24, -0.1, 1.1, "#Theta", "purity_{Calohit}"));
-    PANDORA_MONITORING_API(Create2DHistogram("CaloHitMCPurityVsEnergy","Calorimeter-hit-MC purity vs. Energy", m_energyBins, m_energyMin, m_energyMax, 24, -0.1, 1.1, "E_{PFO}", "purity_{Calohit}"));
+    m_histPFO_MC_EDiffMulByEMC.append(particleIdString);
+    m_histMCFractionLargestContribution.append(particleIdString);
 
-    PANDORA_MONITORING_API(Create1DHistogram("PFO_MC_EDiffMulByEMC","#Delta(E_{PFO}-E_{MC})/#sqrt{E_{MC}}", 2*m_energyBins, -m_calorimeterResolutionStochasticCut*3, 
+
+
+
+    PANDORA_MONITORING_API(Create1DHistogram(m_histEntriesForEffPerThetaBin,"Entries per #Theta bin", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "N"));
+    PANDORA_MONITORING_API(Create1DHistogram(m_histEntriesForEffPerEnergyBin,"Entries per energy bin", m_energyBins, m_energyMin, m_energyMax, "E", "N"));
+
+    PANDORA_MONITORING_API(Create1DHistogram(m_histEntriesForPurityPerThetaBin,"Entries per #Theta bin", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "N"));
+    PANDORA_MONITORING_API(Create1DHistogram(m_histEntriesForPurityPerEnergyBin,"Entries per energy bin", m_energyBins, m_energyMin, m_energyMax, "E", "N"));
+
+
+    PANDORA_MONITORING_API(Create1DHistogram(m_histMCParticleEffVsTheta,"MC particle efficiency vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "#epsilon"));
+    PANDORA_MONITORING_API(Create1DHistogram(m_histMCParticleEffVsEnergy,"MC particle efficiency vs. Energy", m_energyBins, m_energyMin, m_energyMax, "E_{MC}", "#epsilon"));
+
+    PANDORA_MONITORING_API(Create1DHistogram(m_histMCParticlePurityVsTheta,"MC particle purity vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, "#Theta", "purity"));
+    PANDORA_MONITORING_API(Create1DHistogram(m_histMCParticlePurityVsEnergy,"MC particle purity vs. Energy", m_energyBins, m_energyMin, m_energyMax, "E_{PFO}", "purity"));
+
+    PANDORA_MONITORING_API(Create2DHistogram(m_histCaloHitMCEffVsTheta,"Calorimeter-hit-MC efficiency vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, 24, -0.1, 1.1, "#Theta", "#epsilon_{Calohit}"));
+    PANDORA_MONITORING_API(Create2DHistogram(m_histCaloHitMCEffVsEnergy,"Calorimeter-hit-MC efficiency vs. Energy", m_energyBins, m_energyMin, m_energyMax, 24, -0.1, 1.1, "E_{PFO}", "#epsilon_{Calohit}"));
+
+    PANDORA_MONITORING_API(Create2DHistogram(m_histCaloHitMCPurityVsTheta,"Calorimeter-hit-MC purity vs. #Theta", m_thetaBins, m_thetaMin, m_thetaMax, 24, -0.1, 1.1, "#Theta", "purity_{Calohit}"));
+    PANDORA_MONITORING_API(Create2DHistogram(m_histCaloHitMCPurityVsEnergy,"Calorimeter-hit-MC purity vs. Energy", m_energyBins, m_energyMin, m_energyMax, 24, -0.1, 1.1, "E_{PFO}", "purity_{Calohit}"));
+
+    PANDORA_MONITORING_API(Create1DHistogram(m_histPFO_MC_EDiffMulByEMC,"#Delta(E_{PFO}-E_{MC})/#sqrt{E_{MC}}", 2*m_energyBins, -m_calorimeterResolutionStochasticCut*3, 
                                              m_calorimeterResolutionStochasticCut*3, "#Delta(E_{PFO}-E_{MC})/#sqrt{E_{MC}}", "N [%]"));
 
-    PANDORA_MONITORING_API(Create1DHistogram("MCFractionLargestContribution","Calohit energy fraction of the MC which gives the largest contribution", m_energyBins, 0.f, 110.f, 
+    PANDORA_MONITORING_API(Create1DHistogram(m_histMCFractionLargestContribution,"Calohit energy fraction of the MC which gives the largest contribution", m_energyBins, 0.f, 110.f, 
                                              "Calohit energy fraction in PFO", "N [%]" ));
+
+
+    m_foundTreeName.append(particleIdString);
+    m_notFoundTreeName.append(particleIdString);
+    m_fakesTreeName.append(particleIdString);
+    m_otherTreeName.append(particleIdString);
+
+    m_pfoCaloHitETreeName.append(particleIdString);
+    m_mcCaloHitETreeName.append(particleIdString);
+    m_controlTreeName.append(particleIdString);
+    m_eventTreeName.append(particleIdString);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -77,32 +141,32 @@ EfficiencyMonitoringAlgorithm::~EfficiencyMonitoringAlgorithm()
     std::cout << "avg. MCParticle purity per Event     : " << m_eventPurity << std::endl;
 
 
-    PANDORA_MONITORING_API(DivideHistograms("MCParticleEffVsTheta","EntriesForEffPerThetaBin", 1.f, 1.f)); // divide the histograms
-    PANDORA_MONITORING_API(DivideHistograms("MCParticleEffVsEnergy","EntriesForEffPerEnergyBin", 1.f, 1.f)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms(m_histMCParticleEffVsTheta,m_histEntriesForEffPerThetaBin, 1.f, 1.f)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms(m_histMCParticleEffVsEnergy,m_histEntriesForEffPerEnergyBin, 1.f, 1.f)); // divide the histograms
 
-    PANDORA_MONITORING_API(DivideHistograms("MCParticlePurityVsTheta","EntriesForPurityPerThetaBin", 1.f, 1.f)); // divide the histograms
-    PANDORA_MONITORING_API(DivideHistograms("MCParticlePurityVsEnergy","EntriesForPurityPerEnergyBin", 1.f, 1.f)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms(m_histMCParticlePurityVsTheta,m_histEntriesForPurityPerThetaBin, 1.f, 1.f)); // divide the histograms
+    PANDORA_MONITORING_API(DivideHistograms(m_histMCParticlePurityVsEnergy,m_histEntriesForPurityPerEnergyBin, 1.f, 1.f)); // divide the histograms
 
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("EntriesForEffPerThetaBin",m_monitoringFileName, "UPDATE"));
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("EntriesForEffPerEnergyBin",m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histEntriesForEffPerThetaBin,m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histEntriesForEffPerEnergyBin,m_monitoringFileName, "UPDATE"));
 
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("EntriesForPurityPerThetaBin",m_monitoringFileName, "UPDATE"));
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("EntriesForPurityPerEnergyBin",m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histEntriesForPurityPerThetaBin,m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histEntriesForPurityPerEnergyBin,m_monitoringFileName, "UPDATE"));
 
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("MCParticleEffVsTheta",m_monitoringFileName, "UPDATE"));
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("MCParticleEffVsEnergy",m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histMCParticleEffVsTheta,m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histMCParticleEffVsEnergy,m_monitoringFileName, "UPDATE"));
 
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("MCParticlePurityVsTheta",m_monitoringFileName, "UPDATE"));
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("MCParticlePurityVsEnergy",m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histMCParticlePurityVsTheta,m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histMCParticlePurityVsEnergy,m_monitoringFileName, "UPDATE"));
 
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("CaloHitMCEffVsTheta",m_monitoringFileName, "UPDATE"));
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("CaloHitMCEffVsEnergy",m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histCaloHitMCEffVsTheta,m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histCaloHitMCEffVsEnergy,m_monitoringFileName, "UPDATE"));
 
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("CaloHitMCPurityVsTheta",m_monitoringFileName, "UPDATE"));
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("CaloHitMCPurityVsEnergy",m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histCaloHitMCPurityVsTheta,m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histCaloHitMCPurityVsEnergy,m_monitoringFileName, "UPDATE"));
 
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("PFO_MC_EDiffMulByEMC",m_monitoringFileName, "UPDATE"));
-    PANDORA_MONITORING_API(SaveAndCloseHistogram("MCFractionLargestContribution",m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histPFO_MC_EDiffMulByEMC,m_monitoringFileName, "UPDATE"));
+    PANDORA_MONITORING_API(SaveAndCloseHistogram(m_histMCFractionLargestContribution,m_monitoringFileName, "UPDATE"));
 
 
     PANDORA_MONITORING_API(SaveTree(m_foundTreeName, m_monitoringFileName, "UPDATE" ));
@@ -424,8 +488,8 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
             {
                 float pfoMCEDiffMulByEMC = (energyOfLargestAndMatchingMC-pfoEnergy) / sqrt(energyOfLargestAndMatchingMC)*100.f;
                 float pfoMCCaloHitEFraction = 100.f*largestContribution/totalContributions;
-                PANDORA_MONITORING_API(Fill1DHistogram("PFO_MC_EDiffMulByEMC", pfoMCEDiffMulByEMC )); 
-                PANDORA_MONITORING_API(Fill1DHistogram("MCFractionLargestContribution", pfoMCCaloHitEFraction )); 
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histPFO_MC_EDiffMulByEMC, pfoMCEDiffMulByEMC )); 
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histMCFractionLargestContribution, pfoMCCaloHitEFraction )); 
 
                 control_energyOfLargestAndMatchingMC.push_back(energyOfLargestAndMatchingMC);
                 control_pfoMCCaloHitEFraction.push_back(pfoMCCaloHitEFraction);
@@ -443,11 +507,11 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
                     falseFoundPfo.insert(std::make_pair(pPfo,mcLargestContribution)); // then it's a false found (fake)
 
                     // take the pfo information here, because no useful MCParticle information is available for fake Pfos
-                    PANDORA_MONITORING_API(Fill1DHistogram("MCParticlePurityVsTheta", pfoTheta, 0.f ));
-                    PANDORA_MONITORING_API(Fill1DHistogram("MCParticlePurityVsEnergy", pfoEnergy, 0.f ));
+                    PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticlePurityVsTheta, pfoTheta, 0.f ));
+                    PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticlePurityVsEnergy, pfoEnergy, 0.f ));
 
-                    PANDORA_MONITORING_API(Fill1DHistogram("EntriesForPurityPerThetaBin",pfoTheta));
-                    PANDORA_MONITORING_API(Fill1DHistogram("EntriesForPurityPerEnergyBin",pfoEnergy));
+                    PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForPurityPerThetaBin,pfoTheta));
+                    PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForPurityPerEnergyBin,pfoEnergy));
 
                     falseFound_pfoTheta.push_back(pfoTheta);
                     falseFound_pfoPhi.push_back(pfoPhi);
@@ -481,17 +545,17 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
 
 
                 // TO THINK: in case of two PFOs per one MCParticle, now the parameters all of the found MCParticles are filled into the histograms
-                PANDORA_MONITORING_API(Fill1DHistogram("MCParticlePurityVsTheta", pfoTheta, 1.f )); 
-                PANDORA_MONITORING_API(Fill1DHistogram("MCParticlePurityVsEnergy", pfoEnergy, 1.f ));
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticlePurityVsTheta, pfoTheta, 1.f )); 
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticlePurityVsEnergy, pfoEnergy, 1.f ));
 
-                PANDORA_MONITORING_API(Fill1DHistogram("MCParticleEffVsTheta", mcTheta, 1.f ));
-                PANDORA_MONITORING_API(Fill1DHistogram("MCParticleEffVsEnergy", mcEnergy, 1.f ));
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticleEffVsTheta, mcTheta, 1.f ));
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticleEffVsEnergy, mcEnergy, 1.f ));
 
-                PANDORA_MONITORING_API(Fill1DHistogram("EntriesForEffPerThetaBin",mcTheta));
-                PANDORA_MONITORING_API(Fill1DHistogram("EntriesForEffPerEnergyBin",mcEnergy));
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForEffPerThetaBin,mcTheta));
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForEffPerEnergyBin,mcEnergy));
 
-                PANDORA_MONITORING_API(Fill1DHistogram("EntriesForPurityPerThetaBin",pfoTheta));
-                PANDORA_MONITORING_API(Fill1DHistogram("EntriesForPurityPerEnergyBin",pfoEnergy));
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForPurityPerThetaBin,pfoTheta));
+                PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForPurityPerEnergyBin,pfoEnergy));
 
                 found_pfoTheta.push_back(pfoTheta);
                 found_pfoPhi.push_back(pfoPhi);
@@ -525,11 +589,11 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
 
         float mcEnergy = mcPtcl->GetEnergy();
 
-        PANDORA_MONITORING_API(Fill1DHistogram("MCParticleEffVsTheta", mcTheta, 0.f ));
-        PANDORA_MONITORING_API(Fill1DHistogram("MCParticleEffVsEnergy", mcEnergy, 0.f ));
+        PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticleEffVsTheta, mcTheta, 0.f ));
+        PANDORA_MONITORING_API(Fill1DHistogram(m_histMCParticleEffVsEnergy, mcEnergy, 0.f ));
 
-        PANDORA_MONITORING_API(Fill1DHistogram("EntriesForEffPerThetaBin",mcTheta));
-        PANDORA_MONITORING_API(Fill1DHistogram("EntriesForEffPerEnergyBin",mcEnergy));
+        PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForEffPerThetaBin,mcTheta));
+        PANDORA_MONITORING_API(Fill1DHistogram(m_histEntriesForEffPerEnergyBin,mcEnergy));
 
         notFound_mcTheta.push_back(mcTheta);
         notFound_mcPhi.push_back(mcPhi);
@@ -589,8 +653,8 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
         if (truePositiveCHEnergy+falseNegativeCHEnergy>epsilon)
             caloHitEnergyEfficiency = truePositiveCHEnergy/(truePositiveCHEnergy+falseNegativeCHEnergy);
 
-        PANDORA_MONITORING_API(Fill2DHistogram("CaloHitMCEffVsTheta", mcTheta, caloHitEnergyEfficiency ));
-        PANDORA_MONITORING_API(Fill2DHistogram("CaloHitMCEffVsEnergy", mcEnergy, caloHitEnergyEfficiency ));
+        PANDORA_MONITORING_API(Fill2DHistogram(m_histCaloHitMCEffVsTheta, mcTheta, caloHitEnergyEfficiency ));
+        PANDORA_MONITORING_API(Fill2DHistogram(m_histCaloHitMCEffVsEnergy, mcEnergy, caloHitEnergyEfficiency ));
         
         mcCaloHitE_truePositive.push_back(truePositiveCHEnergy);
         mcCaloHitE_falseNegative.push_back(falseNegativeCHEnergy);
@@ -625,8 +689,8 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
         else
             caloHitEnergyPurity = 1.f;
 
-        PANDORA_MONITORING_API(Fill2DHistogram("CaloHitMCPurityVsTheta", pfoTheta, caloHitEnergyPurity ));
-        PANDORA_MONITORING_API(Fill2DHistogram("CaloHitMCPurityVsEnergy", pfoEnergy, caloHitEnergyPurity ));
+        PANDORA_MONITORING_API(Fill2DHistogram(m_histCaloHitMCPurityVsTheta, pfoTheta, caloHitEnergyPurity ));
+        PANDORA_MONITORING_API(Fill2DHistogram(m_histCaloHitMCPurityVsEnergy, pfoEnergy, caloHitEnergyPurity ));
 
         pfoCaloHitE_truePositive.push_back(truePositiveCHEnergy);
         pfoCaloHitE_falsePositive.push_back(falsePositiveCHEnergy);
