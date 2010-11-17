@@ -158,12 +158,16 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     const CartesianVector &referencePoint(pHelix->GetReferencePoint());
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(zStart, referencePoint, intersectionPoint));
 
-    static const PseudoLayer MAX_LAYER = std::numeric_limits<unsigned int>::max();
-    static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
+    static const PseudoLayer MAX_LAYER(std::numeric_limits<unsigned int>::max());
+    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
 
     PseudoLayer startLayer(MAX_LAYER);
 
-    if ((pGeometryHelper->IsOutsideHCal(intersectionPoint)) || (STATUS_CODE_SUCCESS != pGeometryHelper->GetPseudoLayer(intersectionPoint, startLayer)))
+    try
+    {
+        startLayer = pGeometryHelper->GetPseudoLayer(intersectionPoint);
+    }
+    catch (StatusCodeException &)
     {
         return MAX_LAYER;
     }
@@ -174,20 +178,22 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     {
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(z, referencePoint, intersectionPoint));
 
-        PseudoLayer iLayer(MAX_LAYER);
+        try
+        {
+            const PseudoLayer iLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
 
-        if ((pGeometryHelper->IsOutsideHCal(intersectionPoint)) || (STATUS_CODE_SUCCESS != pGeometryHelper->GetPseudoLayer(intersectionPoint, iLayer)))
+            if (iLayer != currentLayer)
+            {
+                if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
+                {
+                    layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
+                }
+                currentLayer = iLayer;
+            }
+        }
+        catch (StatusCodeException &)
         {
             continue;
-        }
-
-        if (iLayer != currentLayer)
-        {
-            if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
-            {
-                layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
-            }
-            currentLayer = iLayer;
         }
     }
 

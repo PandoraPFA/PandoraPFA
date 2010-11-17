@@ -22,18 +22,6 @@ class PseudoLayerCalculator;
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *  @brief  Geometry type enum
- */
-enum GeometryType
-{
-    ENCLOSING_ENDCAP,
-    ENCLOSING_BARREL,
-    TEST_BEAM
-};
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-/**
  *  @brief  GeometryHelper class
  */
 class GeometryHelper
@@ -48,8 +36,6 @@ public:
         float       m_closestDistanceToIp;              ///< Closest distance of the layer from the interaction point, units mm
         float       m_nRadiationLengths;                ///< Absorber material in front of layer, units radiation lengths
         float       m_nInteractionLengths;              ///< Absorber material in front of layer, units interaction lengths
-        float       m_cumulativeRadiationLengths;       ///< Cumulative subdetector absorber material in front of layer, radiation lengths
-        float       m_cumulativeInteractionLengths;     ///< Cumulative subdetector absorber material in front of layer, interaction lengths
     };
 
     typedef std::vector<LayerParameters> LayerParametersList;
@@ -61,12 +47,24 @@ public:
     {
     public:
         /**
+         *  @brief  Default constructor
+         */
+        SubDetectorParameters();
+
+        /**
          *  @brief  Initialize sub detector parameters
          * 
+         *  @param  subDetectorName the sub detector name
          *  @param  inputParameters the input sub detector parameters
-         *  @param  pLayerPositionsList optional list to receive the distances of the layers from the interaction point
          */
-        void Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters);
+        void Initialize(const std::string &subDetectorName, const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters);
+
+        /**
+         *  @brief  Whether the sub detector parameters have been initialized
+         *
+         *  @return boolean
+         */
+        bool IsInitialized() const;
 
         /**
          *  @brief  Get the inner cylindrical polar r coordinate, origin interaction point, units mm
@@ -139,6 +137,7 @@ public:
         const LayerParametersList &GetLayerParametersList() const;
 
     private:
+        bool                    m_isInitialized;        ///< Whether the sub detector parameters have been initialized
         float                   m_innerRCoordinate;     ///< Inner cylindrical polar r coordinate, origin interaction point, units mm
         float                   m_innerZCoordinate;     ///< Inner cylindrical polar z coordinate, origin interaction point, units mm
         float                   m_innerPhiCoordinate;   ///< Inner cylindrical polar phi coordinate (angle wrt cartesian x axis)
@@ -160,13 +159,6 @@ public:
     static GeometryHelper *GetInstance();
 
     /**
-     *  @brief  Get the geometry type
-     * 
-     *  @return the geometry type
-     */
-    GeometryType GetGeometryType() const;
-
-    /**
      *  @brief  Get the bfield value for a specified position vector
      * 
      *  @param  positionVector the specified position
@@ -183,14 +175,6 @@ public:
      *  @return the appropriate pseudolayer
      */
     PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
-
-    /**
-     *  @brief  Get the appropriate pseudolayer for a specified position vector
-     * 
-     *  @param  positionVector the specified position
-     *  @param  pseudoLayer to receive the appropriate pseudolayer
-     */
-    StatusCode GetPseudoLayer(const CartesianVector &positionVector, PseudoLayer &pseudoLayer) const;
 
     /**
      *  @brief  Get the ecal barrel parameters
@@ -277,34 +261,6 @@ public:
     float GetCoilZExtent() const;
 
     /**
-     *  @brief  Get the absorber material in barrel/endcap z gap, units radiation lengths
-     * 
-     *  @return The absorber material in barrel/endcap z gap
-     */
-    float GetNRadiationLengthsInZGap() const;
-
-    /**
-     *  @brief  Get the absorber material in barrel/endcap z gap, units interaction lengths
-     * 
-     *  @return The absorber material in barrel/endcap z gap
-     */
-    float GetNInteractionLengthsInZGap() const;
-
-    /**
-     *  @brief  Get the absorber material in barrel/endcap radial gap, units radiation lengths
-     * 
-     *  @return The absorber material in barrel/endcap radial gap
-     */
-    float GetNRadiationLengthsInRadialGap() const;
-
-    /**
-     *  @brief  Get the absorber material in barrel/endcap radial gap, units interaction lengths
-     * 
-     *  @return The absorber material in barrel/endcap radial gap
-     */
-    float GetNInteractionLengthsInRadialGap() const;
-
-    /**
      *  @brief  Get the map from name to parameters for any additional sub detectors
      * 
      *  @return The map from name to parameters
@@ -326,15 +282,6 @@ public:
      *  @return boolean
      */
     bool IsOutsideECal(const CartesianVector &position) const;
-
-    /**
-     *  @brief  Whether a specified position is outside of the hcal region
-     * 
-     *  @param  position the specified position
-     * 
-     *  @return boolean
-     */
-    bool IsOutsideHCal(const CartesianVector &position) const;
 
     /**
      *  @brief  Whether a specified position is in the gap region between the ecal barrel and ecal endcap
@@ -364,37 +311,29 @@ public:
      * 
      *  @return the maximum radius
      */
-    float GetMaximumRadius(const unsigned int symmetryOrder, const float phi0, const float x, const float y) const;
+    static float GetMaximumRadius(const unsigned int symmetryOrder, const float phi0, const float x, const float y);
+
+    typedef std::vector< std::pair<float, float> > AngleVector;
 
     /**
-     *  @brief  Get the maximum ecal barrel radius
+     *  @brief  Get the maximum polygon radius, with reference to cached sine/cosine values for relevant polygon angles
      * 
+     *  @param  angleVector vector containing cached sine/cosine values
      *  @param  x the cartesian x coordinate
      *  @param  y the cartesian y coordinate
      * 
      *  @return the maximum radius
      */
-    float GetMaximumECalBarrelRadius(const float x, const float y) const;
+    static float GetMaximumRadius(const AngleVector &angleVector, const float x, const float y);
 
     /**
-     *  @brief  Get the maximum hcal barrel radius
+     *  @brief  Fill a vector with sine/cosine values for relevant polygon angles
      * 
-     *  @param  x the cartesian x coordinate
-     *  @param  y the cartesian y coordinate
-     * 
-     *  @return the maximum radius
+     *  @param  symmetryOrder the polygon symmetry order
+     *  @param  phi0 the polygon cylindrical polar phi coordinate
+     *  @param  angleVector the vector to fill with sine/cosine values for relevant polygon angles
      */
-    float GetMaximumHCalBarrelRadius(const float x, const float y) const;
-
-    /**
-     *  @brief  Get the maximum muon barrel radius
-     * 
-     *  @param  x the cartesian x coordinate
-     *  @param  y the cartesian y coordinate
-     * 
-     *  @return the maximum radius
-     */
-    float GetMaximumMuonBarrelRadius(const float x, const float y) const;
+    static void FillAngleVector(const unsigned int symmetryOrder, const float phi0, AngleVector &angleVector);
 
     /**
      *  @brief  Get the tolerance allowed when declaring a point to be "in" a gap region, units mm
@@ -435,28 +374,6 @@ private:
      */
     StatusCode CreateConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
 
-    typedef std::vector< std::pair<float, float> > AngleVector;
-
-    /**
-     *  @brief  Fill a vector with sine/cosine values for relevant polygon angles
-     * 
-     *  @param  symmetryOrder the polygon symmetry order
-     *  @param  phi0 the polygon cylindrical polar phi coordinate
-     *  @param  angleVector the vector to fill with sine/cosine values for relevant polygon angles
-     */
-    void FillAngleVector(const unsigned int symmetryOrder, const float phi0, AngleVector &angleVector) const;
-
-    /**
-     *  @brief  Get the maximum polygon radius, with reference to cached sine/cosine values for relevant polygon angles
-     * 
-     *  @param  angleVector vector containing cached sine/cosine values
-     *  @param  x the cartesian x coordinate
-     *  @param  y the cartesian y coordinate
-     * 
-     *  @return the maximum radius
-     */
-    float GetMaximumRadius(const AngleVector &angleVector, const float x, const float y) const;
-
     /**
      *  @brief  Set the bfield calculator
      * 
@@ -479,7 +396,6 @@ private:
     static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     bool                        m_isInitialized;            ///< Whether the geometry helper is initialized
-    GeometryType                m_geometryType;             ///< The geometry type
     BFieldCalculator           *m_pBFieldCalculator;        ///< Address of the bfield calculator
     PseudoLayerCalculator      *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
 
@@ -490,23 +406,15 @@ private:
     SubDetectorParameters       m_muonBarrelParameters;     ///< The muon detector barrel parameters
     SubDetectorParameters       m_muonEndCapParameters;     ///< The muon detector end cap parameters
 
-    float                       m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
-    float                       m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
-    float                       m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
-    float                       m_coilInnerRadius;          ///< The coil inner radius, units mm
-    float                       m_coilOuterRadius;          ///< The coil outer radius, units mm
-    float                       m_coilZExtent;              ///< The coil z extent, units mm
-    float                       m_nRadLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units radiation lengths
-    float                       m_nIntLengthsInZGap;        ///< Absorber material in barrel/endcap z gap, units interaction lengths
-    float                       m_nRadLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, radiation lengths
-    float                       m_nIntLengthsInRadialGap;   ///< Absorber material in barrel/endcap radial gap, interaction lengths
+    InputFloat                  m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
+    InputFloat                  m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
+    InputFloat                  m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
+    InputFloat                  m_coilInnerRadius;          ///< The coil inner radius, units mm
+    InputFloat                  m_coilOuterRadius;          ///< The coil outer radius, units mm
+    InputFloat                  m_coilZExtent;              ///< The coil z extent, units mm
 
     SubDetectorParametersMap    m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
     DetectorGapList             m_detectorGapList;          ///< List of gaps in the active detector volume
-
-    AngleVector                 m_eCalBarrelAngleVector;    ///< The ecal barrel angle vector
-    AngleVector                 m_hCalBarrelAngleVector;    ///< The hcal barrel angle vector
-    AngleVector                 m_muonBarrelAngleVector;    ///< The muon barrel angle vector
 
     static bool                 m_instanceFlag;             ///< The geometry helper instance flag
     static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance
@@ -520,19 +428,9 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline GeometryType GeometryHelper::GetGeometryType() const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_geometryType;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalBarrelParameters() const
 {
-    if (!m_isInitialized)
+    if (!m_eCalBarrelParameters.IsInitialized())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_eCalBarrelParameters;
@@ -542,7 +440,7 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalBarre
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCapParameters() const
 {
-    if (!m_isInitialized)
+    if (!m_eCalEndCapParameters.IsInitialized())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_eCalEndCapParameters;
@@ -552,7 +450,7 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCa
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarrelParameters() const
 {
-    if (!m_isInitialized)
+    if (!m_hCalBarrelParameters.IsInitialized())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_hCalBarrelParameters;
@@ -562,7 +460,7 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarre
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalEndCapParameters() const
 {
-    if (!m_isInitialized)
+    if (!m_hCalEndCapParameters.IsInitialized())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_hCalEndCapParameters;
@@ -572,7 +470,7 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalEndCa
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonBarrelParameters() const
 {
-    if (!m_isInitialized)
+    if (!m_muonBarrelParameters.IsInitialized())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_muonBarrelParameters;
@@ -582,7 +480,7 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonBarre
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonEndCapParameters() const
 {
-    if (!m_isInitialized)
+    if (!m_muonEndCapParameters.IsInitialized())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_muonEndCapParameters;
@@ -592,106 +490,51 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonEndCa
 
 inline float GeometryHelper::GetMainTrackerInnerRadius() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_mainTrackerInnerRadius;
+    return m_mainTrackerInnerRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float GeometryHelper::GetMainTrackerOuterRadius() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_mainTrackerOuterRadius;
+    return m_mainTrackerOuterRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float GeometryHelper::GetMainTrackerZExtent() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_mainTrackerZExtent;
+    return m_mainTrackerZExtent.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float GeometryHelper::GetCoilInnerRadius() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_coilInnerRadius;
+    return m_coilInnerRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float GeometryHelper::GetCoilOuterRadius() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_coilOuterRadius;
+    return m_coilOuterRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float GeometryHelper::GetCoilZExtent() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_coilZExtent;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float GeometryHelper::GetNRadiationLengthsInZGap() const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_nRadLengthsInZGap;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float GeometryHelper::GetNInteractionLengthsInZGap() const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_nIntLengthsInZGap;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float GeometryHelper::GetNRadiationLengthsInRadialGap() const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_nRadLengthsInRadialGap;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float GeometryHelper::GetNInteractionLengthsInRadialGap() const
-{
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    return m_nIntLengthsInRadialGap;
+    return m_coilZExtent.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditionalSubDetectors() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_additionalSubDetectors;
 }
 
@@ -704,27 +547,6 @@ inline const GeometryHelper::DetectorGapList &GeometryHelper::GetDetectorGapList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::GetMaximumECalBarrelRadius(const float x, const float y) const
-{
-    return this->GetMaximumRadius(m_eCalBarrelAngleVector, x, y);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float GeometryHelper::GetMaximumHCalBarrelRadius(const float x, const float y) const
-{
-    return this->GetMaximumRadius(m_hCalBarrelAngleVector, x, y);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float GeometryHelper::GetMaximumMuonBarrelRadius(const float x, const float y) const
-{
-    return this->GetMaximumRadius(m_muonBarrelAngleVector, x, y);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline float GeometryHelper::GetGapTolerance()
 {
     return m_gapTolerance;
@@ -733,8 +555,21 @@ inline float GeometryHelper::GetGapTolerance()
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline bool GeometryHelper::SubDetectorParameters::IsInitialized() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_isInitialized;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline float GeometryHelper::SubDetectorParameters::GetInnerRCoordinate() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_innerRCoordinate;
 }
 
@@ -742,6 +577,9 @@ inline float GeometryHelper::SubDetectorParameters::GetInnerRCoordinate() const
 
 inline float GeometryHelper::SubDetectorParameters::GetInnerZCoordinate() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_innerZCoordinate;
 }
 
@@ -749,6 +587,9 @@ inline float GeometryHelper::SubDetectorParameters::GetInnerZCoordinate() const
 
 inline float GeometryHelper::SubDetectorParameters::GetInnerPhiCoordinate() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_innerPhiCoordinate;
 }
 
@@ -756,6 +597,9 @@ inline float GeometryHelper::SubDetectorParameters::GetInnerPhiCoordinate() cons
 
 inline unsigned int GeometryHelper::SubDetectorParameters::GetInnerSymmetryOrder() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_innerSymmetryOrder;
 }
 
@@ -763,6 +607,9 @@ inline unsigned int GeometryHelper::SubDetectorParameters::GetInnerSymmetryOrder
 
 inline float GeometryHelper::SubDetectorParameters::GetOuterRCoordinate() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_outerRCoordinate;
 }
 
@@ -770,6 +617,9 @@ inline float GeometryHelper::SubDetectorParameters::GetOuterRCoordinate() const
 
 inline float GeometryHelper::SubDetectorParameters::GetOuterZCoordinate() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_outerZCoordinate;
 }
 
@@ -777,6 +627,9 @@ inline float GeometryHelper::SubDetectorParameters::GetOuterZCoordinate() const
 
 inline float GeometryHelper::SubDetectorParameters::GetOuterPhiCoordinate() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_outerPhiCoordinate;
 }
 
@@ -784,6 +637,9 @@ inline float GeometryHelper::SubDetectorParameters::GetOuterPhiCoordinate() cons
 
 inline unsigned int GeometryHelper::SubDetectorParameters::GetOuterSymmetryOrder() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_outerSymmetryOrder;
 }
 
@@ -791,6 +647,9 @@ inline unsigned int GeometryHelper::SubDetectorParameters::GetOuterSymmetryOrder
 
 inline unsigned int GeometryHelper::SubDetectorParameters::GetNLayers() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_nLayers;
 }
 
@@ -798,6 +657,9 @@ inline unsigned int GeometryHelper::SubDetectorParameters::GetNLayers() const
 
 inline const GeometryHelper::LayerParametersList &GeometryHelper::SubDetectorParameters::GetLayerParametersList() const
 {
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
     return m_layerParametersList;
 }
 

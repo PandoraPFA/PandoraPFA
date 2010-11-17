@@ -63,18 +63,24 @@ private:
      */
     StatusCode FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, unsigned int &layer) const;
 
-    LayerPositionList   m_barrelLayerPositions;     ///< List of barrel layer positions
-    LayerPositionList   m_endCapLayerPositions;     ///< List of endcap layer positions
+    LayerPositionList               m_barrelLayerPositions;     ///< List of barrel layer positions
+    LayerPositionList               m_endCapLayerPositions;     ///< List of endcap layer positions
 
-    float               m_barrelInnerR;             ///< Barrel inner radius
-    float               m_endCapInnerZ;             ///< Endcap inner z position
-    float               m_barrelInnerRMuon;         ///< Muon barrel inner radius
-    float               m_endCapInnerZMuon;         ///< Muon endcap inner z position
+    GeometryHelper::AngleVector     m_eCalBarrelAngleVector;    ///< The ecal barrel angle vector
+    GeometryHelper::AngleVector     m_muonBarrelAngleVector;    ///< The muon barrel angle vector
 
-    float               m_rCorrection;              ///< Barrel/endcap overlap r correction
-    float               m_zCorrection;              ///< Barrel/endcap overlap z correction
-    float               m_rCorrectionMuon;          ///< Muon barrel/endcap overlap r correction
-    float               m_zCorrectionMuon;          ///< Muon barrel/endcap overlap z correction
+    float                           m_barrelInnerR;             ///< Barrel inner radius
+    float                           m_endCapInnerZ;             ///< Endcap inner z position
+    float                           m_barrelInnerRMuon;         ///< Muon barrel inner radius
+    float                           m_endCapInnerZMuon;         ///< Muon endcap inner z position
+            
+    float                           m_rCorrection;              ///< Barrel/endcap overlap r correction
+    float                           m_zCorrection;              ///< Barrel/endcap overlap z correction
+    float                           m_rCorrectionMuon;          ///< Muon barrel/endcap overlap r correction
+    float                           m_zCorrectionMuon;          ///< Muon barrel/endcap overlap z correction
+
+    float                           m_barrelEdgeR;              ///< Extremal barrel r coordinate
+    float                           m_endCapEdgeZ;              ///< Extremal endcap z coordinate
 };
 
 } // namespace pandora

@@ -37,6 +37,12 @@ void HighGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *cons
 
     this->StoreDetectorOuterEdge(pGeometryHelper);
 
+    // Cache sine and cosine of angles used to project hit positions onto polygonal calorimeter surfaces
+    GeometryHelper::FillAngleVector(pGeometryHelper->GetECalBarrelParameters().GetInnerSymmetryOrder(),
+        pGeometryHelper->GetECalBarrelParameters().GetInnerPhiCoordinate(), m_eCalBarrelAngleVector);
+    GeometryHelper::FillAngleVector(pGeometryHelper->GetMuonBarrelParameters().GetInnerSymmetryOrder(),
+        pGeometryHelper->GetMuonBarrelParameters().GetInnerPhiCoordinate(), m_muonBarrelAngleVector);
+
     // Cache information used to identify overlap regions
     m_barrelInnerR = pGeometryHelper->GetECalBarrelParameters().GetInnerRCoordinate();
     m_endCapInnerZ = pGeometryHelper->GetECalEndCapParameters().GetInnerZCoordinate();
@@ -49,35 +55,46 @@ void HighGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *cons
     const float endCapOuterRMuon = pGeometryHelper->GetMuonEndCapParameters().GetOuterRCoordinate();
 
     // Cache corrections to be applied in barrel/endcap overlap regions
-    const GeometryType geometryType(GeometryHelper::GetInstance()->GetGeometryType());
+    const bool IsEnclosingEndCap(endCapOuterR > m_barrelInnerR);
 
-    m_rCorrection = ((ENCLOSING_ENDCAP != geometryType) ? 0.f : m_barrelInnerR * ((m_endCapInnerZ / barrelOuterZ) - 1.f));
-    m_zCorrection = ((ENCLOSING_BARREL != geometryType) ? 0.f : m_endCapInnerZ * ((m_barrelInnerR / endCapOuterR) - 1.f));
-    m_rCorrectionMuon = ((ENCLOSING_ENDCAP != geometryType) ? 0.f : m_barrelInnerRMuon * ((m_endCapInnerZMuon / barrelOuterZMuon) - 1.f));
-    m_zCorrectionMuon = ((ENCLOSING_BARREL != geometryType) ? 0.f : m_endCapInnerZMuon * ((m_barrelInnerRMuon / endCapOuterRMuon) - 1.f));
+    m_rCorrection = ((!IsEnclosingEndCap) ? 0.f : m_barrelInnerR * ((m_endCapInnerZ / barrelOuterZ) - 1.f));
+    m_zCorrection = ((IsEnclosingEndCap) ? 0.f : m_endCapInnerZ * ((m_barrelInnerR / endCapOuterR) - 1.f));
+    m_rCorrectionMuon = ((!IsEnclosingEndCap) ? 0.f : m_barrelInnerRMuon * ((m_endCapInnerZMuon / barrelOuterZMuon) - 1.f));
+    m_zCorrectionMuon = ((IsEnclosingEndCap) ? 0.f : m_endCapInnerZMuon * ((m_barrelInnerRMuon / endCapOuterRMuon) - 1.f));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 PseudoLayer HighGranularityPseudoLayerCalculator::GetPseudoLayer(const CartesianVector &positionVector) const
 {
-    static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
-
     const float zCoordinate(std::fabs(positionVector.GetZ()));
-    const float rCoordinate(pGeometryHelper->GetMaximumECalBarrelRadius(positionVector.GetX(), positionVector.GetY()));
-    const float rCoordinateMuon(pGeometryHelper->GetMaximumMuonBarrelRadius(positionVector.GetX(), positionVector.GetY()));
+
+    if (zCoordinate > m_endCapEdgeZ)
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+
+    const float rCoordinate(GeometryHelper::GetMaximumRadius(m_eCalBarrelAngleVector, positionVector.GetX(), positionVector.GetY()));
+    const float rCoordinateMuon(GeometryHelper::GetMaximumRadius(m_muonBarrelAngleVector, positionVector.GetX(), positionVector.GetY()));
+
+    if ((rCoordinateMuon > m_barrelEdgeR) || (rCoordinate > m_barrelEdgeR))
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
 
     PseudoLayer pseudoLayer;
 
     if ((zCoordinate < m_endCapInnerZMuon) && (rCoordinateMuon < m_barrelInnerRMuon))
     {
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetPseudoLayer(rCoordinate, zCoordinate, m_rCorrection,
-            m_zCorrection, m_barrelInnerR, m_endCapInnerZ, pseudoLayer));
+        const StatusCode statusCode(this->GetPseudoLayer(rCoordinate, zCoordinate, m_rCorrection, m_zCorrection, m_barrelInnerR,
+            m_endCapInnerZ, pseudoLayer));
+
+        if (STATUS_CODE_SUCCESS != statusCode)
+            throw StatusCodeException(statusCode);
     }
     else
     {
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetPseudoLayer(rCoordinateMuon, zCoordinate, m_rCorrectionMuon,
-            m_zCorrectionMuon, m_barrelInnerRMuon, m_endCapInnerZMuon, pseudoLayer));
+        const StatusCode statusCode(this->GetPseudoLayer(rCoordinateMuon, zCoordinate, m_rCorrectionMuon, m_zCorrectionMuon,
+            m_barrelInnerRMuon, m_endCapInnerZMuon, pseudoLayer));
+
+        if (STATUS_CODE_SUCCESS != statusCode)
+            throw StatusCodeException(statusCode);
     }
 
     // Reserve pseudo layer(s) for track projections
@@ -101,23 +118,23 @@ void HighGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHel
 void HighGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper)
 {
     // Find extremal barrel and endcap coordinates. Necessary to guard against e.g. user-specified dummy muon coordinates.
-    const float barrelEdgeR(std::max(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
+    m_barrelEdgeR = (std::max(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
         pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate(),
         pGeometryHelper->GetMuonBarrelParameters().GetOuterRCoordinate()) ));
 
-    const float endCapEdgeZ(std::max(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate(), std::max(
+    m_endCapEdgeZ = (std::max(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate(), std::max(
         pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate(),
         pGeometryHelper->GetMuonEndCapParameters().GetOuterZCoordinate()) ));
 
-    if ((m_barrelLayerPositions.end() != std::upper_bound(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end(), barrelEdgeR)) ||
-        (m_endCapLayerPositions.end() != std::upper_bound(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end(), endCapEdgeZ)))
+    if ((m_barrelLayerPositions.end() != std::upper_bound(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end(), m_barrelEdgeR)) ||
+        (m_endCapLayerPositions.end() != std::upper_bound(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end(), m_endCapEdgeZ)))
     {
         std::cout << "PseudoLayerCalculator: Layers specified outside detector edge." << std::endl;
         throw StatusCodeException(STATUS_CODE_FAILURE);
     }
 
-    m_barrelLayerPositions.push_back(barrelEdgeR);
-    m_endCapLayerPositions.push_back(endCapEdgeZ);
+    m_barrelLayerPositions.push_back(m_barrelEdgeR);
+    m_endCapLayerPositions.push_back(m_endCapEdgeZ);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,11 +144,11 @@ StatusCode HighGranularityPseudoLayerCalculator::GetPseudoLayer(const float rCoo
 {
     if (zCoordinate < endCapInnerZ)
     {
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindMatchingLayer(rCoordinate, m_barrelLayerPositions, pseudoLayer));
+        return this->FindMatchingLayer(rCoordinate, m_barrelLayerPositions, pseudoLayer);
     }
     else if (rCoordinate < barrelInnerR)
     {
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FindMatchingLayer(zCoordinate, m_endCapLayerPositions, pseudoLayer));
+        return this->FindMatchingLayer(zCoordinate, m_endCapLayerPositions, pseudoLayer);
     }
     else
     {
@@ -145,9 +162,8 @@ StatusCode HighGranularityPseudoLayerCalculator::GetPseudoLayer(const float rCoo
             return STATUS_CODE_NOT_FOUND;
 
         pseudoLayer = std::max(bestBarrelLayer, bestEndCapLayer);
+        return STATUS_CODE_SUCCESS;
     }
-
-    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

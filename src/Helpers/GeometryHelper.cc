@@ -51,22 +51,6 @@ PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector, PseudoLayer &pseudoLayer) const
-{
-    try
-    {
-        pseudoLayer = m_pPseudoLayerCalculator->GetPseudoLayer(positionVector);
-    }
-    catch (StatusCodeException &statusCodeException)
-    {
-        return statusCodeException.GetStatusCode();
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 bool GeometryHelper::IsOutsideECal(const CartesianVector &position) const
 {
     static const float eCalBarrelOuterR(GetECalBarrelParameters().GetOuterRCoordinate());
@@ -89,31 +73,11 @@ bool GeometryHelper::IsOutsideECal(const CartesianVector &position) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool GeometryHelper::IsOutsideHCal(const CartesianVector &position) const
-{
-    static const float hCalBarrelOuterR(GetHCalBarrelParameters().GetOuterRCoordinate());
-    static const float hCalEndCapOuterZ(GetHCalEndCapParameters().GetOuterZCoordinate());
-
-    if (position.GetZ() > hCalEndCapOuterZ)
-        return true;
-
-    static const unsigned int hCalBarrelOuterSymmetry(GetHCalBarrelParameters().GetOuterSymmetryOrder());
-    static const float hCalBarrelOuterPhi(GetHCalBarrelParameters().GetOuterPhiCoordinate());
-
-    static const float hCalBarrelMaxRadius(this->GetMaximumRadius(hCalBarrelOuterSymmetry, hCalBarrelOuterPhi, 0.f, hCalBarrelOuterR));
-    const float maxRadius(this->GetMaximumRadius(hCalBarrelOuterSymmetry, hCalBarrelOuterPhi, position.GetX(), position.GetY()));
-
-    if (maxRadius > hCalBarrelMaxRadius)
-        return true;
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 bool GeometryHelper::IsInECalGapRegion(const CartesianVector &position) const
 {
-    if (ENCLOSING_ENDCAP == m_geometryType)
+    static const bool isEnclosingEndCap(GetECalEndCapParameters().GetOuterRCoordinate() > GetECalBarrelParameters().GetInnerRCoordinate());
+
+    if (isEnclosingEndCap)
     {
         static const float eCalBarrelOuterZCoordinate(GetECalBarrelParameters().GetOuterZCoordinate());
         static const float eCalEndCapInnerZCoordinate(GetECalEndCapParameters().GetInnerZCoordinate());
@@ -122,7 +86,7 @@ bool GeometryHelper::IsInECalGapRegion(const CartesianVector &position) const
 
         return ((z > eCalBarrelOuterZCoordinate) && (z < eCalEndCapInnerZCoordinate));
     }
-    else if (ENCLOSING_BARREL == m_geometryType)
+    else
     {
         static const float eCalEndCapOuterRCoordinate(GetECalEndCapParameters().GetOuterRCoordinate());
         static const float eCalBarrelInnerZCoordinate(GetECalBarrelParameters().GetInnerRCoordinate());
@@ -151,7 +115,7 @@ bool GeometryHelper::IsInDetectorGapRegion(const CartesianVector &position) cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float GeometryHelper::GetMaximumRadius(const unsigned int symmetryOrder, const float phi0, const float x, const float y) const
+float GeometryHelper::GetMaximumRadius(const unsigned int symmetryOrder, const float phi0, const float x, const float y)
 {
     static const float twoPi = static_cast<float>(2. * std::acos(-1.));
 
@@ -169,6 +133,39 @@ float GeometryHelper::GetMaximumRadius(const unsigned int symmetryOrder, const f
     }
 
     return maxRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float GeometryHelper::GetMaximumRadius(const AngleVector &angleVector, const float x, const float y)
+{
+    if (angleVector.size() <= 2)
+        return std::sqrt((x * x) + (y * y));
+
+    float maxRadius(0.);
+    for (AngleVector::const_iterator iter = angleVector.begin(), iterEnd = angleVector.end(); iter != iterEnd; ++iter)
+    {
+        const float radius((x * iter->first) + (y * iter->second));
+
+        if (radius > maxRadius)
+            maxRadius = radius;
+    }
+
+    return maxRadius;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void GeometryHelper::FillAngleVector(const unsigned int symmetryOrder, const float phi0, AngleVector &angleVector)
+{
+    static const float twoPi = static_cast<float>(2. * std::acos(-1.));
+    angleVector.clear();
+
+    for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)
+    {
+        const float phi = phi0 + ((twoPi * static_cast<float>(iSymmetry)) / static_cast<float>(symmetryOrder));
+        angleVector.push_back(std::make_pair(std::cos(phi), std::sin(phi)));
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -221,57 +218,56 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
             throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
         }
 
-        m_mainTrackerInnerRadius = geometryParameters.m_mainTrackerInnerRadius.Get();
-        m_mainTrackerOuterRadius = geometryParameters.m_mainTrackerOuterRadius.Get();
-        m_mainTrackerZExtent     = geometryParameters.m_mainTrackerZExtent.Get();
+        m_mainTrackerInnerRadius = geometryParameters.m_mainTrackerInnerRadius;
+        m_mainTrackerOuterRadius = geometryParameters.m_mainTrackerOuterRadius;
+        m_mainTrackerZExtent = geometryParameters.m_mainTrackerZExtent;
 
-        m_coilInnerRadius        = geometryParameters.m_coilInnerRadius.Get();
-        m_coilOuterRadius        = geometryParameters.m_coilOuterRadius.Get();
-        m_coilZExtent            = geometryParameters.m_coilZExtent.Get();
+        m_coilInnerRadius = geometryParameters.m_coilInnerRadius;
+        m_coilOuterRadius = geometryParameters.m_coilOuterRadius;
+        m_coilZExtent = geometryParameters.m_coilZExtent;
 
-        m_nRadLengthsInZGap      = geometryParameters.m_nRadLengthsInZGap.Get();
-        m_nIntLengthsInZGap      = geometryParameters.m_nIntLengthsInZGap.Get();
-        m_nRadLengthsInRadialGap = geometryParameters.m_nRadLengthsInRadialGap.Get();
-        m_nIntLengthsInRadialGap = geometryParameters.m_nIntLengthsInRadialGap.Get();
+        m_eCalBarrelParameters.Initialize("ECalBarrelParameters", geometryParameters.m_eCalBarrelParameters);
+        m_hCalBarrelParameters.Initialize("HCalBarrelParameters", geometryParameters.m_hCalBarrelParameters);
+        m_muonBarrelParameters.Initialize("MuonBarrelParameters", geometryParameters.m_muonBarrelParameters);
 
-        m_eCalBarrelParameters.Initialize(geometryParameters.m_eCalBarrelParameters);
-        m_hCalBarrelParameters.Initialize(geometryParameters.m_hCalBarrelParameters);
-        m_muonBarrelParameters.Initialize(geometryParameters.m_muonBarrelParameters);
-
-        m_eCalEndCapParameters.Initialize(geometryParameters.m_eCalEndCapParameters);
-        m_hCalEndCapParameters.Initialize(geometryParameters.m_hCalEndCapParameters);
-        m_muonEndCapParameters.Initialize(geometryParameters.m_muonEndCapParameters);
+        m_eCalEndCapParameters.Initialize("ECalEndCapParameters", geometryParameters.m_eCalEndCapParameters);
+        m_hCalEndCapParameters.Initialize("HCalEndCapParameters", geometryParameters.m_hCalEndCapParameters);
+        m_muonEndCapParameters.Initialize("MuonEndCapParameters", geometryParameters.m_muonEndCapParameters);
 
         for (PandoraApi::GeometryParameters::SubDetectorParametersMap::const_iterator iter = geometryParameters.m_additionalSubDetectors.begin(),
             iterEnd = geometryParameters.m_additionalSubDetectors.end(); iter != iterEnd; ++iter)
         {
             SubDetectorParameters subDetectorParameters;
-            subDetectorParameters.Initialize(iter->second);
+            subDetectorParameters.Initialize(iter->first, iter->second);
+
+            if (!subDetectorParameters.IsInitialized())
+                continue;
 
             if (!m_additionalSubDetectors.insert(SubDetectorParametersMap::value_type(iter->first, subDetectorParameters)).second)
                 throw StatusCodeException(STATUS_CODE_FAILURE);
         }
 
-        if (0.f == m_eCalBarrelParameters.GetOuterZCoordinate())
-        {
-            m_geometryType = TEST_BEAM;
-        }
-        else if (m_eCalEndCapParameters.GetOuterRCoordinate() > m_eCalBarrelParameters.GetInnerRCoordinate())
-        {
-            m_geometryType = ENCLOSING_ENDCAP;
-        }
-        else
-        {
-            m_geometryType = ENCLOSING_BARREL;
-        }
-
-        this->FillAngleVector(m_eCalBarrelParameters.GetInnerSymmetryOrder(), m_eCalBarrelParameters.GetInnerPhiCoordinate(), m_eCalBarrelAngleVector);
-        this->FillAngleVector(m_hCalBarrelParameters.GetInnerSymmetryOrder(), m_hCalBarrelParameters.GetInnerPhiCoordinate(), m_hCalBarrelAngleVector);
-        this->FillAngleVector(m_muonBarrelParameters.GetInnerSymmetryOrder(), m_muonBarrelParameters.GetInnerPhiCoordinate(), m_muonBarrelAngleVector);
-
         m_isInitialized = true;
-        m_pBFieldCalculator->Initialize(this);
-        m_pPseudoLayerCalculator->Initialize(this);
+
+        try
+        {
+            m_pBFieldCalculator->Initialize(this);
+        }
+        catch (StatusCodeException &statusCodeException)
+        {
+            std::cout << "GeometryHelper: Failed to initialize bfield calculator: " << statusCodeException.ToString() << std::endl;
+            throw statusCodeException;
+        }
+
+        try
+        {
+            m_pPseudoLayerCalculator->Initialize(this);
+        }
+        catch (StatusCodeException &statusCodeException)
+        {
+            std::cout << "GeometryHelper: Failed to initialize pseudo layer calculator: " << statusCodeException.ToString() << std::endl;
+            throw statusCodeException;
+        }
     }
     catch (StatusCodeException &statusCodeException)
     {
@@ -328,39 +324,6 @@ StatusCode GeometryHelper::CreateConcentricGap(const PandoraApi::ConcentricGap::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void GeometryHelper::FillAngleVector(const unsigned int symmetryOrder, const float phi0, AngleVector &angleVector) const
-{
-    static const float twoPi = static_cast<float>(2. * std::acos(-1.));
-    angleVector.clear();
-
-    for (unsigned int iSymmetry = 0; iSymmetry < symmetryOrder; ++iSymmetry)
-    {
-        const float phi = phi0 + ((twoPi * static_cast<float>(iSymmetry)) / static_cast<float>(symmetryOrder));
-        angleVector.push_back(std::make_pair(std::cos(phi), std::sin(phi)));
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float GeometryHelper::GetMaximumRadius(const AngleVector &angleVector, const float x, const float y) const
-{
-    if (angleVector.size() <= 2)
-        return std::sqrt((x * x) + (y * y));
-
-    float maxRadius(0.);
-    for (AngleVector::const_iterator iter = angleVector.begin(), iterEnd = angleVector.end(); iter != iterEnd; ++iter)
-    {
-        const float radius((x * iter->first) + (y * iter->second));
-
-        if (radius > maxRadius)
-            maxRadius = radius;
-    }
-
-    return maxRadius;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode GeometryHelper::SetBFieldCalculator(BFieldCalculator *pBFieldCalculator)
 {
     if (m_isInitialized)
@@ -392,45 +355,54 @@ StatusCode GeometryHelper::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseu
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void GeometryHelper::SubDetectorParameters::Initialize(const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters)
+GeometryHelper::SubDetectorParameters::SubDetectorParameters() :
+    m_isInitialized(false)
 {
-    m_innerRCoordinate      = inputParameters.m_innerRCoordinate.Get();
-    m_innerZCoordinate      = inputParameters.m_innerZCoordinate.Get();
-    m_innerPhiCoordinate    = inputParameters.m_innerPhiCoordinate.Get();
-    m_innerSymmetryOrder    = inputParameters.m_innerSymmetryOrder.Get();
-    m_outerRCoordinate      = inputParameters.m_outerRCoordinate.Get();
-    m_outerZCoordinate      = inputParameters.m_outerZCoordinate.Get();
-    m_outerPhiCoordinate    = inputParameters.m_outerPhiCoordinate.Get();
-    m_outerSymmetryOrder    = inputParameters.m_outerSymmetryOrder.Get();
-    m_nLayers               = inputParameters.m_nLayers.Get();
+}
 
-    if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void GeometryHelper::SubDetectorParameters::Initialize(const std::string &subDetectorName,
+    const PandoraApi::GeometryParameters::SubDetectorParameters &inputParameters)
+{
+    try
     {
-        std::cout << "GeometryHelper: Invalid number of entries in layer parameters list." << std::endl;
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+        m_innerRCoordinate = inputParameters.m_innerRCoordinate.Get();
+        m_innerZCoordinate = inputParameters.m_innerZCoordinate.Get();
+        m_innerPhiCoordinate = inputParameters.m_innerPhiCoordinate.Get();
+        m_innerSymmetryOrder = inputParameters.m_innerSymmetryOrder.Get();
+        m_outerRCoordinate = inputParameters.m_outerRCoordinate.Get();
+        m_outerZCoordinate = inputParameters.m_outerZCoordinate.Get();
+        m_outerPhiCoordinate = inputParameters.m_outerPhiCoordinate.Get();
+        m_outerSymmetryOrder = inputParameters.m_outerSymmetryOrder.Get();
+        m_nLayers = inputParameters.m_nLayers.Get();
+
+        if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
+        {
+            std::cout << "GeometryHelper: Invalid number of entries in layer parameters list for " << subDetectorName << std::endl;
+            throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+        }
+
+        for (PandoraApi::GeometryParameters::LayerParametersList::const_iterator iter = inputParameters.m_layerParametersList.begin();
+            iter != inputParameters.m_layerParametersList.end(); ++iter)
+        {
+            LayerParameters layerParameters;
+            layerParameters.m_closestDistanceToIp = iter->m_closestDistanceToIp.Get();
+            layerParameters.m_nRadiationLengths = iter->m_nRadiationLengths.Get();
+            layerParameters.m_nInteractionLengths = iter->m_nInteractionLengths.Get();
+
+            m_layerParametersList.push_back(layerParameters);
+        }
+
+        m_isInitialized = true;
     }
-
-    float cumulativeRadiationLengths(0.);
-    float cumulativeInteractionLengths(0.);
-
-    for (PandoraApi::GeometryParameters::LayerParametersList::const_iterator iter = inputParameters.m_layerParametersList.begin();
-        iter != inputParameters.m_layerParametersList.end(); ++iter)
+    catch (StatusCodeException &statusCodeException)
     {
-        LayerParameters layerParameters;
-        layerParameters.m_closestDistanceToIp = iter->m_closestDistanceToIp.Get();
+        if (STATUS_CODE_NOT_INITIALIZED != statusCodeException.GetStatusCode())
+            throw statusCodeException;
 
-        const float nRadiationLengths(iter->m_nRadiationLengths.Get());
-        const float nInteractionLengths(iter->m_nInteractionLengths.Get());
-
-        cumulativeRadiationLengths += nRadiationLengths;
-        cumulativeInteractionLengths += nInteractionLengths;
-
-        layerParameters.m_nRadiationLengths = nRadiationLengths;
-        layerParameters.m_nInteractionLengths = nInteractionLengths;
-        layerParameters.m_cumulativeRadiationLengths = cumulativeRadiationLengths;
-        layerParameters.m_cumulativeInteractionLengths = cumulativeInteractionLengths;
-
-        m_layerParametersList.push_back(layerParameters);
+        std::cout << "GeometryHelper: " << subDetectorName << " not initialized." << std::endl;
+        m_isInitialized = false;
     }
 }
 
