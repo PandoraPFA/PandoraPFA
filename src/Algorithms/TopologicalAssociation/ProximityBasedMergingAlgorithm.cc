@@ -167,7 +167,7 @@ StatusCode ProximityBasedMergingAlgorithm::GetGenericDistanceBetweenClusters(con
         for (CaloHitList::const_iterator hitIterP = iterP->second->begin(), hitIterPEnd = iterP->second->end(); hitIterP != hitIterPEnd; ++hitIterP)
         {
             const CartesianVector &positionP((*hitIterP)->GetPositionVector());
-            const CartesianVector directionP(positionP.GetUnitVector());
+            const CartesianVector &directionP((*hitIterP)->GetExpectedDirection());
 
             // For each hit, consider distance to all hits in daughter cluster that lie within +/-m_nLayersToExamine
             const PseudoLayer firstExaminationLayer((iLayer > m_nAdjacentLayersToExamine) ? iLayer - m_nAdjacentLayersToExamine : 0);

@@ -115,6 +115,13 @@ public:
     const TrackState &GetTrackStateAtECal() const;
 
     /**
+     *  @brief  Whether the ecal projection is to an endcap
+     * 
+     *  @return boolean
+     */
+    bool IsProjectedToEndCap() const;
+
+    /**
      *  @brief  Whether the track reaches the ecal
      * 
      *  @return boolean
@@ -134,13 +141,6 @@ public:
      *  @return boolean
      */
     bool CanFormClusterlessPfo() const;
-
-    /**
-     *  @brief  Get the list of calorimeter track state projections
-     * 
-     *  @return address of the list of calorimeter track state projections
-     */
-    const TrackStateList &GetCalorimeterProjections() const;
 
     /**
      *  @brief  Get the helix fit to the ecal track state
@@ -282,11 +282,10 @@ private:
     const TrackState        m_trackStateAtEnd;          ///< The track state at the end of the track, units mm and GeV
     const TrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
 
+    const bool              m_isProjectedToEndCap;      ///< Whether the ecal projection is to an endcap
     const bool              m_reachesECal;              ///< Whether the track reaches the ecal
     const bool              m_canFormPfo;               ///< Whether track should form a pfo, if it has an associated cluster
     const bool              m_canFormClusterlessPfo;    ///< Whether track should form a pfo, even if it has no associated cluster
-
-    TrackStateList          m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
 
     const Helix             *m_pHelixFitAtECal;         ///< Helix fit to the ecal track state
 
@@ -415,6 +414,13 @@ inline const TrackState &Track::GetTrackStateAtECal() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline bool Track::IsProjectedToEndCap() const
+{
+    return m_isProjectedToEndCap;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline bool Track::ReachesECal() const
 {
     return m_reachesECal;
@@ -432,13 +438,6 @@ inline bool Track::CanFormPfo() const
 inline bool Track::CanFormClusterlessPfo() const
 {
     return m_canFormClusterlessPfo;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline const TrackStateList &Track::GetCalorimeterProjections() const
-{
-    return m_calorimeterProjections;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

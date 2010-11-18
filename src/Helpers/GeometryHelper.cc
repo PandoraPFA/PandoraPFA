@@ -73,35 +73,6 @@ bool GeometryHelper::IsOutsideECal(const CartesianVector &position) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool GeometryHelper::IsInECalGapRegion(const CartesianVector &position) const
-{
-    static const bool isEnclosingEndCap(GetECalEndCapParameters().GetOuterRCoordinate() > GetECalBarrelParameters().GetInnerRCoordinate());
-
-    if (isEnclosingEndCap)
-    {
-        static const float eCalBarrelOuterZCoordinate(GetECalBarrelParameters().GetOuterZCoordinate());
-        static const float eCalEndCapInnerZCoordinate(GetECalEndCapParameters().GetInnerZCoordinate());
-
-        const float z(std::fabs(position.GetZ()));
-
-        return ((z > eCalBarrelOuterZCoordinate) && (z < eCalEndCapInnerZCoordinate));
-    }
-    else
-    {
-        static const float eCalEndCapOuterRCoordinate(GetECalEndCapParameters().GetOuterRCoordinate());
-        static const float eCalBarrelInnerZCoordinate(GetECalBarrelParameters().GetInnerRCoordinate());
-
-        const float x(position.GetX()), y(position.GetY());
-        const float r(std::sqrt((x * x) + (y * y)));
-
-        return ((r > eCalEndCapOuterRCoordinate) && (r < eCalBarrelInnerZCoordinate));
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 bool GeometryHelper::IsInDetectorGapRegion(const CartesianVector &position) const
 {
     for (DetectorGapList::const_iterator iter = m_detectorGapList.begin(), iterEnd = m_detectorGapList.end(); iter != iterEnd; ++iter)

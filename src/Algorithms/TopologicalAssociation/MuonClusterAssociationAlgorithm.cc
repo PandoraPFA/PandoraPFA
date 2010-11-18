@@ -52,7 +52,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
         // Calculate muon cluster properties
         const PseudoLayer muonClusterInnerLayer(pMuonCluster->GetInnerPseudoLayer());
         const CartesianVector muonInnerCentroid(pMuonCluster->GetCentroid(muonClusterInnerLayer));
-        const CartesianVector muonDirection(muonInnerCentroid.GetUnitVector());
+        const CartesianVector &muonDirection(pMuonCluster->GetInitialDirection());
 
         float energyLostInCoil(0.);
 

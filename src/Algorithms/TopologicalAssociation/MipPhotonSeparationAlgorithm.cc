@@ -292,7 +292,7 @@ StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pClus
     if (0 == m_maxTrackSeparation)
         return STATUS_CODE_FAILURE;
 
-    const CartesianVector hitPosition(pCaloHit->GetPositionVector());
+    const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
 
     const CartesianVector &trackSeedPosition(pTrack->GetTrackStateAtECal().GetPosition());
     const CartesianVector positionDifference(hitPosition - trackSeedPosition);

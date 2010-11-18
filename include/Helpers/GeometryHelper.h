@@ -284,15 +284,6 @@ public:
     bool IsOutsideECal(const CartesianVector &position) const;
 
     /**
-     *  @brief  Whether a specified position is in the gap region between the ecal barrel and ecal endcap
-     *
-     *  @param  position the specified position
-     *
-     *  @return boolean
-     */
-    bool IsInECalGapRegion(const CartesianVector &position) const;
-
-    /**
      *  @brief  Whether a specified position is in a detector gap region
      * 
      *  @param  position the specified position

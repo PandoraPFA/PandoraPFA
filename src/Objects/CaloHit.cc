@@ -16,13 +16,15 @@ namespace pandora
 
 CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_positionVector(caloHitParameters.m_positionVector.Get()),
-    m_normalVector(caloHitParameters.m_normalVector.Get()),
+    m_expectedDirection(caloHitParameters.m_expectedDirection.Get().GetUnitVector()),
+    m_cellNormalVector(caloHitParameters.m_cellNormalVector.Get().GetUnitVector()),
     m_cellSizeU(caloHitParameters.m_cellSizeU.Get()),
     m_cellSizeV(caloHitParameters.m_cellSizeV.Get()),
     m_cellThickness(caloHitParameters.m_cellThickness.Get()),
     m_cellLengthScale(std::sqrt(m_cellSizeU * m_cellSizeV)),
-    m_nRadiationLengths(caloHitParameters.m_nRadiationLengths.Get()),
-    m_nInteractionLengths(caloHitParameters.m_nInteractionLengths.Get()),
+    m_nCellRadiationLengths(caloHitParameters.m_nCellRadiationLengths.Get()),
+    m_nCellInteractionLengths(caloHitParameters.m_nCellInteractionLengths.Get()),
+    m_nRadiationLengthsFromIp(caloHitParameters.m_nRadiationLengthsFromIp.Get()),
     m_nInteractionLengthsFromIp(caloHitParameters.m_nInteractionLengthsFromIp.Get()),
     m_time(caloHitParameters.m_time.Get()),
     m_inputEnergy(caloHitParameters.m_inputEnergy.Get()),

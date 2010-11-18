@@ -26,7 +26,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_isFixedPhoton(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
-    m_initialDirection(pCaloHit->GetPositionVector().GetUnitVector()),
+    m_initialDirection(pCaloHit->GetExpectedDirection()),
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
@@ -54,10 +54,15 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     if (NULL == pCaloHitList)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(*iter));
+    CartesianVector initialDirection;
 
-    m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
+    for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+    {
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(*iter));
+        initialDirection += (*iter)->GetExpectedDirection();
+    }
+
+    m_initialDirection = initialDirection.GetUnitVector();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -483,7 +488,15 @@ void Cluster::RemoveTrackSeed()
 
     if (!m_orderedCaloHitList.empty())
     {
-        m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
+        CartesianVector initialDirection;
+        CaloHitList *pCaloHitList(m_orderedCaloHitList.begin()->second);
+
+        for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+        {
+            initialDirection += (*iter)->GetExpectedDirection();
+        }
+
+        m_initialDirection = initialDirection.GetUnitVector();
     }
     else
     {

@@ -48,12 +48,14 @@ public:
     {
     public:
         pandora::InputCartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
-        pandora::InputCartesianVector   m_normalVector;             ///< Unit normal to sampling layer, pointing outwards from the origin
+        pandora::InputCartesianVector   m_expectedDirection;        ///< Unit vector in direction of expected hit propagation
+        pandora::InputCartesianVector   m_cellNormalVector;         ///< Unit normal to sampling layer, pointing outwards from the origin
         pandora::InputFloat             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
         pandora::InputFloat             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
         pandora::InputFloat             m_cellThickness;            ///< Thickness of cell, units mm
-        pandora::InputFloat             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
-        pandora::InputFloat             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
+        pandora::InputFloat             m_nCellRadiationLengths;    ///< Absorber material in front of cell, units radiation lengths
+        pandora::InputFloat             m_nCellInteractionLengths;  ///< Absorber material in front of cell, units interaction lengths
+        pandora::InputFloat             m_nRadiationLengthsFromIp;  ///< Absorber material between cell and IP, units radiation lengths
         pandora::InputFloat             m_nInteractionLengthsFromIp;///< Absorber material between cell and IP, units interaction lengths
         pandora::InputFloat             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
         pandora::InputFloat             m_inputEnergy;              ///< Corrected energy of calorimeter cell in user framework, units GeV
@@ -83,10 +85,10 @@ public:
         pandora::InputTrackState        m_trackStateAtStart;        ///< Track state at the start of the track, units mm and GeV
         pandora::InputTrackState        m_trackStateAtEnd;          ///< Track state at the end of the track, units mm and GeV
         pandora::InputTrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal, units mm and GeV
+        pandora::InputBool              m_isProjectedToEndCap;      ///< Whether the ecal projection is to an endcap
         pandora::InputBool              m_reachesECal;              ///< Whether the track reaches the ecal
         pandora::InputBool              m_canFormPfo;               ///< Whether track should form a pfo, if it has an associated cluster
         pandora::InputBool              m_canFormClusterlessPfo;    ///< Whether track should form a pfo, even if it has no associated cluster
-        pandora::InputTrackStateList    m_calorimeterProjections;   ///< A list of alternative track state projections to the calorimeters
         pandora::InputAddress           m_pParentAddress;           ///< Address of the parent track in the user framework
     };
 

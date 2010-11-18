@@ -74,11 +74,21 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
 
     if (associatedTrackList.empty())
     {
+        // As there is no associated track, use hits in the shower start layer to specify cone direction
+        const OrderedCaloHitList &orderedCaloHitList(pClusterJ->GetOrderedCaloHitList());
         const PseudoLayer showerStartLayer(pClusterJ->GetShowerStartLayer());
-        const CartesianVector showerStartCentroid(pClusterJ->GetCentroid(showerStartLayer));
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(showerStartLayer);
 
-        coneApex = showerStartCentroid;
-        coneDirection = showerStartCentroid.GetUnitVector();
+        if (orderedCaloHitList.end() == iter)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
+
+        CartesianVector hitDirection;
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            hitDirection += (*hitIter)->GetExpectedDirection();
+
+        coneDirection = hitDirection.GetUnitVector();
+        coneApex = pClusterJ->GetCentroid(showerStartLayer);
     }
     else
     {
@@ -184,10 +194,7 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
 
             if (iLayer != currentLayer)
             {
-                if (!pGeometryHelper->IsInECalGapRegion(intersectionPoint))
-                {
-                    layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
-                }
+                layerCount += ((iLayer > currentLayer) ? iLayer - currentLayer : currentLayer - iLayer);
                 currentLayer = iLayer;
             }
         }

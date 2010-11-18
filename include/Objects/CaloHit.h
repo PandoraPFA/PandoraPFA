@@ -40,11 +40,18 @@ public:
     const CartesianVector &GetPositionVector() const;
 
     /**
+     *  @brief  Get the unit vector in direction of expected hit propagation
+     * 
+     *  @return the expected direction
+     */
+    const CartesianVector &GetExpectedDirection() const;
+
+    /**
      *  @brief  Get the unit vector normal to the sampling layer, pointing outwards from the origin
      * 
      *  @return the normal vector
      */
-    const CartesianVector &GetNormalVector() const;
+    const CartesianVector &GetCellNormalVector() const;
 
     /**
      *  @brief  Get the u dimension of cell (up in ENDCAP, along beam in BARREL), units mm
@@ -79,14 +86,21 @@ public:
      * 
      *  @return the absorber material in front of cell in radiation lengths
      */
-    float GetNRadiationLengths() const;
+    float GetNCellRadiationLengths() const;
 
     /**
      *  @brief  Get the absorber material in front of cell, units interaction lengths
      * 
      *  @return the absorber material in front of cell in interaction lengths
      */
-    float GetNInteractionLengths() const;
+    float GetNCellInteractionLengths() const;
+
+    /**
+     *  @brief  Get the absorber material between cell and interaction point, units radiation lengths
+     * 
+     *  @return the absorber material between cell and interaction point in radiation lengths
+     */
+    float GetNRadiationLengthsFromIp() const;
 
     /**
      *  @brief  Get the absorber material between cell and interaction point, units interaction lengths
@@ -268,15 +282,17 @@ private:
     StatusCode SetMCParticle(MCParticle *const pMCParticle);
 
     const CartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
-    const CartesianVector   m_normalVector;             ///< Unit normal to the sampling layer, pointing outwards from the origin
+    const CartesianVector   m_expectedDirection;        ///< Unit vector in direction of expected hit propagation
+    const CartesianVector   m_cellNormalVector;         ///< Unit normal to the sampling layer, pointing outwards from the origin
 
     const float             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
     const float             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
     const float             m_cellThickness;            ///< Thickness of cell, units mm
     const float             m_cellLengthScale;          ///< Typical length scale of cell, std::sqrt(CellSizeU * CellSizeV), units mm
 
-    const float             m_nRadiationLengths;        ///< Absorber material in front of cell, units radiation lengths
-    const float             m_nInteractionLengths;      ///< Absorber material in front of cell, units interaction lengths
+    const float             m_nCellRadiationLengths;    ///< Absorber material in front of cell, units radiation lengths
+    const float             m_nCellInteractionLengths;  ///< Absorber material in front of cell, units interaction lengths
+    const float             m_nRadiationLengthsFromIp;  ///< Absorber material between cell and interaction point, units radiation lengths
     const float             m_nInteractionLengthsFromIp;///< Absorber material between cell and interaction point, units interaction lengths
 
     const float             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
@@ -341,9 +357,16 @@ inline const CartesianVector &CaloHit::GetPositionVector() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const CartesianVector &CaloHit::GetNormalVector() const
+inline const CartesianVector &CaloHit::GetExpectedDirection() const
 {
-    return m_normalVector;
+    return m_expectedDirection;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &CaloHit::GetCellNormalVector() const
+{
+    return m_cellNormalVector;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -376,16 +399,23 @@ inline float CaloHit::GetCellLengthScale() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float CaloHit::GetNRadiationLengths() const
+inline float CaloHit::GetNCellRadiationLengths() const
 {
-    return m_nRadiationLengths;
+    return m_nCellRadiationLengths;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float CaloHit::GetNInteractionLengths() const
+inline float CaloHit::GetNCellInteractionLengths() const
 {
-    return m_nInteractionLengths;
+    return m_nCellInteractionLengths;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetNRadiationLengthsFromIp() const
+{
+    return m_nRadiationLengthsFromIp;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

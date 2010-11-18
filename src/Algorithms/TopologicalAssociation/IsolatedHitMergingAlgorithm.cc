@@ -135,7 +135,7 @@ float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluste
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
 
     // Apply simple preselection using cosine of opening angle between the hit and cluster directions
-    const float cosOpeningAngle(hitPosition.GetCosOpeningAngle(pCluster->GetInitialDirection()));
+    const float cosOpeningAngle(pCaloHit->GetExpectedDirection().GetCosOpeningAngle(pCluster->GetInitialDirection()));
 
     if (cosOpeningAngle >= m_minCosOpeningAngle)
     {

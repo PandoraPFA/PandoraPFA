@@ -546,7 +546,7 @@ StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, 
     if (0 == m_maxTrackSeedSeparation)
         return STATUS_CODE_FAILURE;
 
-    const CartesianVector hitPosition(pCaloHit->GetPositionVector());
+    const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
 
     const CartesianVector &trackSeedPosition(pCluster->GetTrackSeed()->GetTrackStateAtECal().GetPosition());
     const CartesianVector positionDifference(hitPosition - trackSeedPosition);

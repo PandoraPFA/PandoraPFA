@@ -29,6 +29,7 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_trackStateAtStart(trackParameters.m_trackStateAtStart.Get()),
     m_trackStateAtEnd(trackParameters.m_trackStateAtEnd.Get()),
     m_trackStateAtECal(trackParameters.m_trackStateAtECal.Get()),
+    m_isProjectedToEndCap(trackParameters.m_isProjectedToEndCap.Get()),
     m_reachesECal(trackParameters.m_reachesECal.Get()),
     m_canFormPfo(trackParameters.m_canFormPfo.Get()),
     m_canFormClusterlessPfo(trackParameters.m_canFormClusterlessPfo.Get()),
@@ -37,12 +38,6 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_pParentAddress(trackParameters.m_pParentAddress.Get()),
     m_isAvailable(true)
 {
-    for (InputTrackStateList::const_iterator iter = trackParameters.m_calorimeterProjections.begin(),
-        iterEnd = trackParameters.m_calorimeterProjections.end(); iter != iterEnd; ++iter)
-    {
-        m_calorimeterProjections.push_back(new TrackState(*iter));
-    }
-
     // Consistency checks
     if (0.f == m_energyAtDca)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -59,12 +54,6 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
 
 Track::~Track()
 {
-    for (TrackStateList::iterator iter = m_calorimeterProjections.begin(),
-        iterEnd = m_calorimeterProjections.end(); iter != iterEnd; ++iter)
-    {
-        delete *iter;
-    }
-
     delete m_pHelixFitAtECal;
 
     m_parentTrackList.clear();

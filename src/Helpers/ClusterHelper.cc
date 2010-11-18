@@ -566,29 +566,13 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, con
     if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
         return STATUS_CODE_NOT_FOUND;
 
-    bool distanceFound(false);
     float minDistance(std::numeric_limits<float>::max());
 
-    if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(pTrack->GetTrackStateAtECal(), pCluster, maxSearchLayer, parallelDistanceCut, minDistance))
-        distanceFound = true;
-
-    const TrackStateList &trackStateList(pTrack->GetCalorimeterProjections());
-    for (TrackStateList::const_iterator iter = trackStateList.begin(), iterEnd = trackStateList.end(); iter != iterEnd; ++iter)
+    if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack->GetTrackStateAtECal(), pCluster, maxSearchLayer,
+        parallelDistanceCut, minDistance))
     {
-        const TrackState *const pTrackState = *iter;
-        float altProjectionDistance(std::numeric_limits<float>::max());
-
-        if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(*pTrackState, pCluster, maxSearchLayer, parallelDistanceCut, altProjectionDistance))
-        {
-            distanceFound = true;
-
-            if (altProjectionDistance < minDistance)
-                minDistance = altProjectionDistance;
-        }
-    }
-
-    if (!distanceFound)
         return STATUS_CODE_NOT_FOUND;
+    }
 
     trackClusterDistance = minDistance;
     return STATUS_CODE_SUCCESS;

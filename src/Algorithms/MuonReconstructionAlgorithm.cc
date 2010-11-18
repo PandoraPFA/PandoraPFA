@@ -244,7 +244,7 @@ StatusCode MuonReconstructionAlgorithm::AddCaloHits(const ClusterList *const pMu
                 const CartesianVector &caloHitPosition(pCaloHit->GetPositionVector());
                 const CartesianVector helixDirection(pHelix->GetExtrapolatedMomentum(caloHitPosition).GetUnitVector());
 
-                if (caloHitPosition.GetCosOpeningAngle(helixDirection) < m_minHelixCaloHitCosAngle)
+                if (pCaloHit->GetExpectedDirection().GetCosOpeningAngle(helixDirection) < m_minHelixCaloHitCosAngle)
                     continue;
 
                 if (ENDCAP == pCaloHit->GetDetectorRegion())

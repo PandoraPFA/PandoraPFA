@@ -68,12 +68,11 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            // ATTN: This direction measure introduces a difference wrt old Pandora
-            float cosOpeningAngle(std::fabs((*hitIter)->GetNormalVector().GetCosOpeningAngle(clusterDirection)));
+            float cosOpeningAngle(std::fabs((*hitIter)->GetCellNormalVector().GetCosOpeningAngle(clusterDirection)));
             cosOpeningAngle = std::max(cosOpeningAngle, m_showerProfileMinCosAngle);
 
             energyInLayer += (*hitIter)->GetElectromagneticEnergy();
-            nRadiationLengthsInLayer += (*hitIter)->GetNRadiationLengths() / cosOpeningAngle;
+            nRadiationLengthsInLayer += (*hitIter)->GetNCellRadiationLengths() / cosOpeningAngle;
         }
 
         eCalEnergy += energyInLayer;
@@ -265,12 +264,12 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            float cosOpeningAngle(std::fabs((*hitIter)->GetNormalVector().GetCosOpeningAngle(clusterDirection)));
+            float cosOpeningAngle(std::fabs((*hitIter)->GetCellNormalVector().GetCosOpeningAngle(clusterDirection)));
             cosOpeningAngle = std::max(cosOpeningAngle, m_photonIdMinCosAngle);
 
             const float hitEnergy((*hitIter)->GetElectromagneticEnergy());
             energyInLayer += hitEnergy;
-            nRadiationLengthsInLayer += (*hitIter)->GetNRadiationLengths() / cosOpeningAngle;
+            nRadiationLengthsInLayer += (*hitIter)->GetNCellRadiationLengths() / cosOpeningAngle;
 
             const float radialDistance(((*hitIter)->GetPositionVector() - clusterIntercept).GetCrossProduct(clusterDirection).GetMagnitude());
             hitEnergyDistanceVector.push_back(HitEnergyDistance(hitEnergy, radialDistance));
@@ -448,7 +447,7 @@ bool ParticleIdHelper::IsMuonFastDefault(const Cluster *const pCluster)
                 layersECal.insert(layer);
 
                 energyECal += pCaloHit->GetHadronicEnergy();
-                directionCosine += momentum.GetCosOpeningAngle(pCaloHit->GetNormalVector());
+                directionCosine += momentum.GetCosOpeningAngle(pCaloHit->GetCellNormalVector());
             }
 
             else if (pCaloHit->GetHitType() == HCAL)
