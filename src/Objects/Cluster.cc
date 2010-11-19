@@ -31,7 +31,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_isAvailable(true)
 {
     if (NULL == pCaloHit)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(pCaloHit));
 }
@@ -51,14 +51,22 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
-    if (NULL == pCaloHitList)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    CartesianVector initialDirection;
+    if ((NULL == pCaloHitList) || (pCaloHitList->empty()))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(*iter));
+    }
+
+    if (m_orderedCaloHitList.empty())
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    CartesianVector initialDirection(0.f, 0.f, 0.f);
+    CaloHitList *pInnerLayerCaloHitList(m_orderedCaloHitList.begin()->second);
+
+    for (CaloHitList::const_iterator iter = pInnerLayerCaloHitList->begin(), iterEnd = pInnerLayerCaloHitList->end(); iter != iterEnd; ++iter)
+    {
         initialDirection += (*iter)->GetExpectedDirection();
     }
 
@@ -80,7 +88,7 @@ Cluster::Cluster(Track *pTrack) :
     m_isAvailable(true)
 {
     if (NULL == pTrack)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SetTrackSeed(pTrack));
 }
@@ -488,7 +496,7 @@ void Cluster::RemoveTrackSeed()
 
     if (!m_orderedCaloHitList.empty())
     {
-        CartesianVector initialDirection;
+        CartesianVector initialDirection(0.f, 0.f, 0.f);
         CaloHitList *pCaloHitList(m_orderedCaloHitList.begin()->second);
 
         for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)

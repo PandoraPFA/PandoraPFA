@@ -82,7 +82,7 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
         if (orderedCaloHitList.end() == iter)
             throw StatusCodeException(STATUS_CODE_FAILURE);
 
-        CartesianVector hitDirection;
+        CartesianVector hitDirection(0.f, 0.f, 0.f);
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
             hitDirection += (*hitIter)->GetExpectedDirection();
