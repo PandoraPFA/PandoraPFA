@@ -23,8 +23,6 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
-    static const float endCapZPosition(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetInnerZCoordinate());
-
     // Loop over all unassociated tracks in the current track list
     for (TrackVector::const_iterator iterT = trackVector.begin(), iterTEnd = trackVector.end(); iterT != iterTEnd; ++iterT)
     {
@@ -38,10 +36,10 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
             continue;
 
         // Use only tracks that reach the ecal endcap, not barrel
-        const float trackECalZPosition(pTrack->GetTrackStateAtECal().GetPosition().GetZ());
-
-        if (std::fabs(trackECalZPosition) > endCapZPosition - m_maxEndCapDeltaZ)
+        if (!pTrack->IsProjectedToEndCap())
             continue;
+
+        const float trackECalZPosition(pTrack->GetTrackStateAtECal().GetPosition().GetZ());
 
         // Extract information from the track
         const Helix *const pHelix(pTrack->GetHelixFitAtECal());
@@ -85,7 +83,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
             // Ensure that cluster is in same endcap region as track
             const float clusterZPosition(pCluster->GetCentroid(innerLayer).GetZ());
 
-            if (endCapZPosition - std::fabs(clusterZPosition) > m_maxEndCapDeltaZ)
+            if (std::fabs(trackECalZPosition) - std::fabs(clusterZPosition) > m_maxTrackClusterDeltaZ)
                 continue;
 
             if (clusterZPosition * trackECalZPosition < 0.f)
@@ -230,9 +228,9 @@ float LoopingTrackAssociationAlgorithm::GetMeanDeltaR(Cluster *const pCluster, c
 
 StatusCode LoopingTrackAssociationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_maxEndCapDeltaZ = 50.f;
+    m_maxTrackClusterDeltaZ = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxEndCapDeltaZ", m_maxEndCapDeltaZ));
+        "MaxTrackClusterDeltaZ", m_maxTrackClusterDeltaZ));
 
     m_minHitsInCluster = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

@@ -33,7 +33,6 @@ StatusCode TrackRecoveryAlgorithm::Run()
             continue;
 
         // To avoid tracks split along main track z-axis, examine number of parent/daughter tracks and start z coordinate
-        const float zEnd(std::fabs(pTrack->GetTrackStateAtEnd().GetPosition().GetZ()));
         const float zStart(std::fabs(pTrack->GetTrackStateAtStart().GetPosition().GetZ()));
 
         if (!pTrack->GetDaughterTrackList().empty())
@@ -94,9 +93,7 @@ StatusCode TrackRecoveryAlgorithm::Run()
             continue;
 
         // Should track be associated with "best" cluster? Depends on whether track reaches ECal EndCap or Barrel:
-        static const float mainTrackerZExtent(GeometryHelper::GetInstance()->GetMainTrackerZExtent());
-
-        if (zEnd > mainTrackerZExtent - m_endCapMaxDeltaZ)
+        if (pTrack->IsProjectedToEndCap())
         {
             if ( (smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance1) ||
                 ((smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance2) && (pBestCluster->GetTrackComparisonEnergy() < trackEnergy)) )
@@ -127,10 +124,6 @@ StatusCode TrackRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_maxAbsoluteTrackClusterChi = 2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxAbsoluteTrackClusterChi", m_maxAbsoluteTrackClusterChi));
-
-    m_endCapMaxDeltaZ = 200.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "EndCapMaxDeltaZ", m_endCapMaxDeltaZ));
 
     m_endCapMaxTrackClusterDistance1 = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

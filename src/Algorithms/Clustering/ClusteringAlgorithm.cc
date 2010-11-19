@@ -58,10 +58,6 @@ StatusCode ClusteringAlgorithm::Run()
 
 StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVector) const
 {
-    // m_clusterSeedStrategy:   0, no track seeding;
-    //                          1, non-radial barrel tracks; 2, non-radial barrel and endcap tracks;
-    //                          3, all tracks; 4, all tracks that can be used to form a pfo;
-
     if (0 == m_clusterSeedStrategy)
         return STATUS_CODE_SUCCESS;
 
@@ -71,32 +67,19 @@ StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVec
     for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
         Track *pTrack = *iter;
+
+        if (!pTrack->CanFormPfo())
+            continue;
+
         bool useTrack(false);
 
-        if (3 == m_clusterSeedStrategy)
-            useTrack = true;
-
-        if ((4 == m_clusterSeedStrategy) && pTrack->CanFormPfo())
-            useTrack = true;
-
-        if (!useTrack)
+        if (2 == m_clusterSeedStrategy)
         {
-            const CartesianVector &seedPosition(pTrack->GetTrackStateAtECal().GetPosition());
-            const CartesianVector &seedMomentum(pTrack->GetTrackStateAtECal().GetMomentum());
-            const float magnitudesSquared(seedPosition.GetMagnitudeSquared() * seedMomentum.GetMagnitudeSquared());
-
-            if (0 >= magnitudesSquared)
-                continue;
-
-            const float cosTheta(seedPosition.GetDotProduct(seedMomentum) / std::sqrt(magnitudesSquared));
-
-            if (cosTheta < m_trackSeedMaxCosTheta)
-            {
-                static const float eCalEndCapZCoordinate(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetInnerZCoordinate());
-
-                if ((2 == m_clusterSeedStrategy) || (std::fabs(seedPosition.GetZ()) < eCalEndCapZCoordinate))
-                    useTrack = true;
-            }
+            useTrack = true;
+        }
+        else if ((1 == m_clusterSeedStrategy) && pTrack->IsProjectedToEndCap())
+        {
+            useTrack = true;
         }
 
         if (useTrack)
@@ -599,7 +582,7 @@ StatusCode ClusteringAlgorithm::RemoveEmptyClusters(ClusterVector &clusterVector
 StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     // Track seeding parameters
-    m_clusterSeedStrategy = 4;
+    m_clusterSeedStrategy = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterSeedStrategy", m_clusterSeedStrategy));
 
