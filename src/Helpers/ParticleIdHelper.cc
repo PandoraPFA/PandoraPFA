@@ -6,7 +6,6 @@
  *  $Log: $
  */
 
-#include "Helpers/GeometryHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 #include "Helpers/XmlHelper.h"
 
@@ -25,34 +24,31 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
     // 1. Construct cluster profile.
     const float clusterEnergy(pCluster->GetElectromagneticEnergy() - pCluster->GetIsolatedElectromagneticEnergy());
 
-    if(clusterEnergy <= 0.f || (pCluster->GetNCaloHits() < 1))
+    if (clusterEnergy <= 0.f || (pCluster->GetNCaloHits() < 1))
         return STATUS_CODE_INVALID_PARAMETER;
 
-    // Initialize profile
-    float *pProfile = new float[m_showerProfileNBins];
-    for(unsigned int iBin = 0; iBin < m_showerProfileNBins; ++iBin)
-    {
-        pProfile[iBin] = 0.f;
-    }
-
     // Extract information from the cluster
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
-
-    if (innerPseudoLayer > nECalLayers)
+    if (pCluster->GetInnerLayerHitType() != ECAL)
         return STATUS_CODE_NOT_FOUND;
 
     const CartesianVector &clusterDirection(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
         pCluster->GetFitToAllHitsResult().GetDirection() : pCluster->GetInitialDirection());
 
-    // Examine layers to construct profile
-    float eCalEnergy(0.f);
-    float nRadiationLengths(0.f);
-    float nRadiationLengthsInLastLayer(0.f);
-    unsigned int profileEndBin(0);
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    // Initialize profile
+    FloatVector profile;
+    for (unsigned int iBin = 0; iBin < m_showerProfileNBins; ++iBin)
+    {
+        profile.push_back(0.f);
+    }
 
-    for (PseudoLayer iLayer = innerPseudoLayer; iLayer <= nECalLayers; ++iLayer)
+    // Examine layers to construct profile
+    float eCalEnergy(0.f), nRadiationLengths(0.f), nRadiationLengthsInLastLayer(0.f);
+    unsigned int profileEndBin(0);
+
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
+
+    for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {
         OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
 
@@ -63,17 +59,27 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
         }
 
         // Extract information from calo hits
+        bool isOutsideECal(false);
         float energyInLayer(0.f);
         float nRadiationLengthsInLayer(0.f);
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
+            if ((*hitIter)->GetHitType() != ECAL)
+            {
+                isOutsideECal = true;
+                break;
+            }
+
             float cosOpeningAngle(std::fabs((*hitIter)->GetCellNormalVector().GetCosOpeningAngle(clusterDirection)));
             cosOpeningAngle = std::max(cosOpeningAngle, m_showerProfileMinCosAngle);
 
             energyInLayer += (*hitIter)->GetElectromagneticEnergy();
             nRadiationLengthsInLayer += (*hitIter)->GetNCellRadiationLengths() / cosOpeningAngle;
         }
+
+        if (isOutsideECal)
+            break;
 
         eCalEnergy += energyInLayer;
         nRadiationLengthsInLayer /= static_cast<float>(iter->second->size());
@@ -107,7 +113,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
                 delta -= 1.f - endPosition + endBin;
             }
 
-            pProfile[iBin] += energyInLayer * (delta / deltaPosition);
+            profile[iBin] += energyInLayer * (delta / deltaPosition);
         }
     }
 
@@ -119,7 +125,6 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
     // 2. Construct expected cluster profile
     const double a(m_showerProfileParameter0 + m_showerProfileParameter1 * std::log(clusterEnergy / m_showerProfileCriticalEnergy));
 #ifdef __GNUC__
-//    const double gammaA(std::exp(gamma(a)));
     const double gammaA(std::exp(lgamma(a)));
 #else
     const double gammaA(0.);
@@ -128,20 +133,19 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 #endif
 
     float t(0.f);
-    float *pExpectedProfile = new float[m_showerProfileNBins];
-
+    FloatVector expectedProfile;
     for (unsigned int iBin = 0; iBin < m_showerProfileNBins; ++iBin)
     {
         t += m_showerProfileBinWidth;
-        pExpectedProfile[iBin] = static_cast<float>(clusterEnergy / 2. * std::pow(t / 2.f, static_cast<float>(a - 1.)) *
-            std::exp(-t / 2.) * m_showerProfileBinWidth / gammaA);
+        expectedProfile.push_back(static_cast<float>(clusterEnergy / 2. * std::pow(t / 2.f, static_cast<float>(a - 1.)) *
+            std::exp(-t / 2.) * m_showerProfileBinWidth / gammaA));
     }
 
     // 3. Compare the cluster profile with the expected profile
     unsigned int binOffsetAtMinDifference(0);
     float minProfileDifference(std::numeric_limits<float>::max());
 
-    for (unsigned int iBinOffset = 0; iBinOffset < nECalLayers; ++iBinOffset)
+    for (unsigned int iBinOffset = 0; iBinOffset < profileEndBin; ++iBinOffset)
     {
         float profileDifference(0.);
 
@@ -149,11 +153,11 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
         {
             if (iBin < iBinOffset)
             {
-                profileDifference += pProfile[iBin];
+                profileDifference += profile[iBin];
             }
             else
             {
-                profileDifference += std::fabs(pExpectedProfile[iBin - iBinOffset] - pProfile[iBin]);
+                profileDifference += std::fabs(expectedProfile[iBin - iBinOffset] - profile[iBin]);
             }
         }
 
@@ -170,9 +174,6 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
     showerProfileStart =  binOffsetAtMinDifference * m_showerProfileBinWidth;
     showerProfileDiscrepancy = minProfileDifference / eCalEnergy;
 
-    delete [] pProfile;
-    delete [] pExpectedProfile;
-
     return STATUS_CODE_SUCCESS;
 }
 
@@ -181,10 +182,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 {
     // Reject clusters starting outside ecal
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
-
-    if (innerPseudoLayer > nECalLayers)
+    if (pCluster->GetInnerLayerHitType() != ECAL)
         return false;
 
     // Cut on cluster mip fraction
@@ -247,6 +245,7 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
     HitEnergyDistanceVector hitEnergyDistanceVector;
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
 
     for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {

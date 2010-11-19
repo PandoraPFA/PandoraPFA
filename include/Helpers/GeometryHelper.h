@@ -275,15 +275,6 @@ public:
     const DetectorGapList &GetDetectorGapList() const;
 
     /**
-     *  @brief  Whether a specified position is outside of the ecal region
-     * 
-     *  @param  position the specified position
-     * 
-     *  @return boolean
-     */
-    bool IsOutsideECal(const CartesianVector &position) const;
-
-    /**
      *  @brief  Whether a specified position is in a detector gap region
      * 
      *  @param  position the specified position

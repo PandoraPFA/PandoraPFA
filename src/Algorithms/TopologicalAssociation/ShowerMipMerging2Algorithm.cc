@@ -27,8 +27,6 @@ StatusCode ShowerMipMerging2Algorithm::Run()
 
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-
     // Loop over all candidate parent clusters
     for (ClusterVector::const_iterator iterI = clusterVector.begin(); iterI != clusterVector.end(); ++iterI)
     {
@@ -82,7 +80,7 @@ StatusCode ShowerMipMerging2Algorithm::Run()
                 continue;
 
             // Cut on perpendicular distance between fit direction and centroid difference vector.
-            const bool isDaughterOutsideECal(daughterInnerLayer > nECalLayers);
+            const bool isDaughterOutsideECal(pDaughterCluster->GetInnerLayerHitType() != ECAL);
             const float perpendicularDistanceCut(isDaughterOutsideECal ? m_perpendicularDistanceCutHcal : m_perpendicularDistanceCutEcal);
 
             const CartesianVector parentCrossProduct(parentClusterFitResult.GetDirection().GetCrossProduct(centroidDifference));

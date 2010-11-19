@@ -51,28 +51,6 @@ PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool GeometryHelper::IsOutsideECal(const CartesianVector &position) const
-{
-    static const float eCalBarrelOuterR(GetECalBarrelParameters().GetOuterRCoordinate());
-    static const float eCalEndCapOuterZ(GetECalEndCapParameters().GetOuterZCoordinate());
-
-    if (position.GetZ() > eCalEndCapOuterZ)
-        return true;
-
-    static const unsigned int eCalBarrelOuterSymmetry(GetECalBarrelParameters().GetOuterSymmetryOrder());
-    static const float eCalBarrelOuterPhi(GetECalBarrelParameters().GetOuterPhiCoordinate());
-
-    static const float eCalBarrelMaxRadius(this->GetMaximumRadius(eCalBarrelOuterSymmetry, eCalBarrelOuterPhi, 0.f, eCalBarrelOuterR));
-    const float maxRadius(this->GetMaximumRadius(eCalBarrelOuterSymmetry, eCalBarrelOuterPhi, position.GetX(), position.GetY()));
-
-    if (maxRadius > eCalBarrelMaxRadius)
-        return true;
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 bool GeometryHelper::IsInDetectorGapRegion(const CartesianVector &position) const
 {
     for (DetectorGapList::const_iterator iter = m_detectorGapList.begin(), iterEnd = m_detectorGapList.end(); iter != iterEnd; ++iter)

@@ -20,8 +20,6 @@ StatusCode BrokenTracksAlgorithm::Run()
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
-    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
-
     // Fit a straight line to start and end of all clusters in the current list
     ClusterFitRelationList clusterFitRelationList;
 
@@ -80,7 +78,6 @@ StatusCode BrokenTracksAlgorithm::Run()
                 continue;
 
             const PseudoLayer daughterInnerLayer(pDaughterCluster->GetInnerPseudoLayer());
-            const CartesianVector daughterInnerCentroid(pDaughterCluster->GetCentroid(daughterInnerLayer));
 
             // Basic cut on layer separation between the two clusters
             if (daughterInnerLayer <= parentOuterLayer)
@@ -93,7 +90,7 @@ StatusCode BrokenTracksAlgorithm::Run()
                 continue;
 
             // Cut on distance of closest approach between start and end fits
-            const bool isDaughterOutsideECal(pGeometryHelper->IsOutsideECal(daughterInnerCentroid));
+            const bool isDaughterOutsideECal(pDaughterCluster->GetInnerLayerHitType() != ECAL);
             const float trackMergeCut(isDaughterOutsideECal ? m_trackMergeCutHcal : m_trackMergeCutEcal);
             float fitResultsClosestApproach(std::numeric_limits<float>::max());
 
@@ -104,6 +101,7 @@ StatusCode BrokenTracksAlgorithm::Run()
                 continue;
 
             // Cut on perpendicular distance between fit directions and centroid difference vector.
+            const CartesianVector daughterInnerCentroid(pDaughterCluster->GetCentroid(daughterInnerLayer));
             const CartesianVector centroidDifference(daughterInnerCentroid - parentOuterCentroid);
             const float trackMergePerpCut(isDaughterOutsideECal ? m_trackMergePerpCutHcal : m_trackMergePerpCutEcal);
 

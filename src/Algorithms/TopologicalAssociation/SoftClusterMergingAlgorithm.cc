@@ -140,10 +140,7 @@ bool SoftClusterMergingAlgorithm::CanMergeSoftCluster(const Cluster *const pDaug
     if ((closestDistance < m_closestDistanceCut2) && (daughterInnerLayer > m_innerLayerCut2))
         return true;
 
-    static const PseudoLayer nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
-
-    if (closestDistance < ((daughterOuterLayer < nECalLayers) ? m_maxClusterDistanceECal : m_maxClusterDistanceHCal))
+    if (closestDistance < ((pDaughterCluster->GetOuterLayerHitType() == ECAL) ? m_maxClusterDistanceECal : m_maxClusterDistanceHCal))
     {
         if ((pDaughterCluster->GetHadronicEnergy() < m_minClusterHadEnergy) || (pDaughterCluster->GetNCaloHits() < m_minHitsInCluster))
             return true;

@@ -374,6 +374,69 @@ void Cluster::CalculateFitToAllHitsResult() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void Cluster::CalculateLayerHitType(const PseudoLayer pseudoLayer, InputHitType &layerHitType) const
+{
+    OrderedCaloHitList::const_iterator listIter = m_orderedCaloHitList.find(pseudoLayer);
+
+    if ((m_orderedCaloHitList.end() == listIter) || (listIter->second->empty()))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    HitTypeToEnergyMap hitTypeToEnergyMap;
+
+    for (CaloHitList::const_iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
+    {
+        HitTypeToEnergyMap::iterator mapIter = hitTypeToEnergyMap.find((*iter)->GetHitType());
+
+        if (hitTypeToEnergyMap.end() != mapIter)
+        {
+            mapIter->second += (*iter)->GetHadronicEnergy();
+            continue;
+        }
+
+        if (!hitTypeToEnergyMap.insert(HitTypeToEnergyMap::value_type((*iter)->GetHitType(), (*iter)->GetHadronicEnergy())).second)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
+    }
+
+    float highestEnergy(0.f);
+
+    for (HitTypeToEnergyMap::const_iterator iter = hitTypeToEnergyMap.begin(), iterEnd = hitTypeToEnergyMap.end(); iter != iterEnd; ++iter)
+    {
+        if (iter->second > highestEnergy)
+        {
+            layerHitType = iter->first;
+            highestEnergy = iter->second;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Cluster::CalculateLayerPathLengths(const PseudoLayer pseudoLayer, InputFloat &nRadiationLengths, InputFloat &nInteractionLengths) const
+{
+    OrderedCaloHitList::const_iterator iter = m_orderedCaloHitList.find(pseudoLayer);
+
+    if (m_orderedCaloHitList.end() == iter)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    const unsigned int nHits(iter->second->size());
+
+    if (0 == nHits)
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    float radiationLengthSum(0.f), interactionLengthSum(0.f);
+
+    for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+    {
+        radiationLengthSum += (*hitIter)->GetNRadiationLengthsFromIp();
+        interactionLengthSum += (*hitIter)->GetNInteractionLengthsFromIp();
+    }
+
+    nRadiationLengths = radiationLengthSum / static_cast<float>(nHits);
+    nInteractionLengths = interactionLengthSum / static_cast<float>(nHits);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode Cluster::ResetProperties()
 {
     if (!m_orderedCaloHitList.empty())
