@@ -30,9 +30,6 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
-    if (NULL == pCaloHit)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(pCaloHit));
 }
 
@@ -51,26 +48,13 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
-    if ((NULL == pCaloHitList) || (pCaloHitList->empty()))
+    if (pCaloHitList->empty())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
-    {
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddCaloHit(*iter));
-    }
 
-    if (m_orderedCaloHitList.empty())
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-
-    CartesianVector initialDirection(0.f, 0.f, 0.f);
-    CaloHitList *pInnerLayerCaloHitList(m_orderedCaloHitList.begin()->second);
-
-    for (CaloHitList::const_iterator iter = pInnerLayerCaloHitList->begin(), iterEnd = pInnerLayerCaloHitList->end(); iter != iterEnd; ++iter)
-    {
-        initialDirection += (*iter)->GetExpectedDirection();
-    }
-
-    m_initialDirection = initialDirection.GetUnitVector();
+    this->CalculateInitialDirection();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,13 +68,11 @@ Cluster::Cluster(Track *pTrack) :
     m_isolatedHadronicEnergy(0),
     m_isFixedPhoton(false),
     m_isMipTrack(true),
+    m_pTrackSeed(pTrack),
+    m_initialDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector()),
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
-    if (NULL == pTrack)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SetTrackSeed(pTrack));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -374,6 +356,26 @@ void Cluster::CalculateFitToAllHitsResult() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void Cluster::CalculateInitialDirection() const
+{
+    if (!m_orderedCaloHitList.empty())
+    {
+        CartesianVector initialDirection(0.f, 0.f, 0.f);
+        CaloHitList *pCaloHitList(m_orderedCaloHitList.begin()->second);
+
+        for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+            initialDirection += (*iter)->GetExpectedDirection();
+
+        m_initialDirection = initialDirection.GetUnitVector();
+    }
+    else
+    {
+        m_initialDirection.Reset();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void Cluster::CalculateLayerHitType(const PseudoLayer pseudoLayer, InputHitType &layerHitType) const
 {
     OrderedCaloHitList::const_iterator listIter = m_orderedCaloHitList.find(pseudoLayer);
@@ -539,40 +541,6 @@ StatusCode Cluster::RemoveTrackAssociation(Track *const pTrack)
     m_associatedTrackList.erase(iter);
 
     return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode Cluster::SetTrackSeed(Track *const pTrack)
-{
-    m_pTrackSeed = pTrack;
-    m_initialDirection = pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector();
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void Cluster::RemoveTrackSeed()
-{
-    m_pTrackSeed = NULL;
-
-    if (!m_orderedCaloHitList.empty())
-    {
-        CartesianVector initialDirection(0.f, 0.f, 0.f);
-        CaloHitList *pCaloHitList(m_orderedCaloHitList.begin()->second);
-
-        for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
-        {
-            initialDirection += (*iter)->GetExpectedDirection();
-        }
-
-        m_initialDirection = initialDirection.GetUnitVector();
-    }
-    else
-    {
-        m_initialDirection.Reset();
-    }
 }
 
 } // namespace pandora

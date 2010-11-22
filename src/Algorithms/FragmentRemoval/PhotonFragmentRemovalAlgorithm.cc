@@ -126,11 +126,9 @@ bool PhotonFragmentRemovalAlgorithm::IsPhotonLike(Cluster *const pDaughterCluste
     if (pDaughterCluster->IsPhotonFast())
         return true;
 
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    const PseudoLayer innerPseudoLayer(pDaughterCluster->GetInnerPseudoLayer());
     const ClusterHelper::ClusterFitResult &clusterFitResult(pDaughterCluster->GetFitToAllHitsResult());
 
-    if ((innerPseudoLayer < nECalLayers) && (innerPseudoLayer < m_photonLikeMaxInnerLayer) &&
+    if ((pDaughterCluster->GetInnerLayerHitType() == ECAL) && (pDaughterCluster->GetInnerPseudoLayer() < m_photonLikeMaxInnerLayer) &&
         (clusterFitResult.IsFitSuccessful()) && (clusterFitResult.GetRadialDirectionCosine() > m_photonLikeMinDCosR) &&
         (pDaughterCluster->GetShowerProfileStart() < m_photonLikeMaxShowerStart) &&
         (pDaughterCluster->GetShowerProfileDiscrepancy() < m_photonLikeMaxProfileDiscrepancy))

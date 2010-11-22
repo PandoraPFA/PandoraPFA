@@ -440,6 +440,11 @@ private:
     void CalculateFitToAllHitsResult() const;
 
     /**
+     *  @brief  Calculate cluster initial direction
+     */
+    void CalculateInitialDirection() const;
+
+    /**
      *  @brief  Calculate the typical hit type for a specified layer
      * 
      *  @param  pseudoLayer the pseudo layer
@@ -486,13 +491,6 @@ private:
      *  @param  pTrack the address of the track with which the cluster is no longer associated
      */
     StatusCode RemoveTrackAssociation(Track *const pTrack);
-
-    /**
-     *  @brief  Set the track with which the cluster is seeded, updating the initial direction measurement.
-     * 
-     *  @param  pTrack address of the track seed
-     */
-    StatusCode SetTrackSeed(Track *const pTrack);
 
     /**
      *  @brief  Remove the track seed, changing the initial direction measurement.
@@ -726,7 +724,7 @@ inline PseudoLayer Cluster::GetOuterPseudoLayer() const
 inline const CartesianVector &Cluster::GetInitialDirection() const
 {
     if (!m_initialDirection.IsInitialized())
-        m_initialDirection = (this->GetCentroid(this->GetInnerPseudoLayer())).GetUnitVector();
+        this->CalculateInitialDirection();
 
     return m_initialDirection;
 }
@@ -940,6 +938,14 @@ inline void Cluster::ResetOutdatedProperties()
 inline bool Cluster::IsAvailable() const
 {
     return m_isAvailable;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void Cluster::RemoveTrackSeed()
+{
+    m_pTrackSeed = NULL;
+    this->CalculateInitialDirection();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

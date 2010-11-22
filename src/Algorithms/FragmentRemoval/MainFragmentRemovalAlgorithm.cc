@@ -259,10 +259,7 @@ float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ChargedCluste
     {
         coneEvidence = chargedClusterContact.GetConeFraction1() + chargedClusterContact.GetConeFraction2() + chargedClusterContact.GetConeFraction3();
 
-        static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-        const PseudoLayer daughterInnerLayer(chargedClusterContact.GetDaughterCluster()->GetInnerPseudoLayer());
-
-        if (daughterInnerLayer < nECalLayers)
+        if (chargedClusterContact.GetDaughterCluster()->GetInnerLayerHitType() == ECAL)
             coneEvidence *= m_coneEvidenceECalMultiplier;
     }
 
