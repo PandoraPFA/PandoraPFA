@@ -30,8 +30,6 @@ StatusCode PhotonRecoveryAlgorithm::Run()
 
 void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *const pClusterList) const
 {
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-
     for (ClusterList::const_iterator iter = pClusterList->begin(), iterEnd = pClusterList->end(); iter != iterEnd; ++iter)
     {
         Cluster *pCluster = *iter;
@@ -45,14 +43,14 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
 
         // Apply simple initial cuts
         const float electroMagneticEnergy(pCluster->GetElectromagneticEnergy());
-        const PseudoLayer layer90(this->GetLayer90(pCluster));
+
+        if (electroMagneticEnergy < m_minElectromagneticEnergy)
+            continue;
+
         const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
 
-        if ((electroMagneticEnergy < m_minElectromagneticEnergy) || (layer90 >= nECalLayers + m_maxLayer90LayersOutsideECal) ||
-            (innerPseudoLayer >= static_cast<unsigned int>(nECalLayers * m_maxInnerLayerAsECalFraction)))
-        {
+        if ((innerPseudoLayer >= m_maxInnerLayer) || (pCluster->GetInnerLayerHitType() != ECAL))
             continue;
-        }
 
         // Cut on cluster shower profile properties
         bool isPhoton(false);
@@ -64,11 +62,6 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
         if (electroMagneticEnergy > m_profileStartEnergyCut)
         {
             profileStartCut = m_profileStartCut2;
-        }
-
-        if (layer90 > nECalLayers)
-        {
-            profileStartCut = m_profileStartCut3;
         }
 
         float profileDiscrepancyCut(m_profileDiscrepancyCut1);
@@ -84,7 +77,7 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
             isPhoton = true;
         }
         else if ((showerProfileDiscrepancy > m_minProfileDiscrepancy) && (showerProfileDiscrepancy < m_profileDiscrepancyCut2) &&
-            (showerProfileStart < m_profileStartCut4))
+            (showerProfileStart < m_profileStartCut3))
         {
             isPhoton = true;
         }
@@ -94,10 +87,10 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
         {
             const ClusterHelper::ClusterFitResult &currentFitResult(pCluster->GetCurrentFitResult());
 
-            if ((innerPseudoLayer < m_maxInnerLayer) &&
-                (pCluster->GetMipFraction() - m_maxMipFraction < std::numeric_limits<float>::epsilon()) &&
-                (this->GetBarrelEndCapEnergySplit(pCluster) < m_maxBarrelEndCapSplit) &&
-                (currentFitResult.IsFitSuccessful()) && (currentFitResult.GetRadialDirectionCosine() > m_minRadialDirectionCosine))
+            if ((innerPseudoLayer < m_maxOverlapInnerLayer) &&
+                (pCluster->GetMipFraction() - m_maxOverlapMipFraction < std::numeric_limits<float>::epsilon()) &&
+                (currentFitResult.IsFitSuccessful()) && (currentFitResult.GetRadialDirectionCosine() > m_minOverlapRadialDirectionCosine) &&
+                (this->GetBarrelEndCapEnergySplit(pCluster) < m_maxBarrelEndCapSplit))
             {
                 isPhoton = true;
             }
@@ -109,26 +102,6 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
             pCluster->SetIsFixedPhotonFlag(true);
         }
     }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-PseudoLayer PhotonRecoveryAlgorithm::GetLayer90(const Cluster *const pCluster) const
-{
-    float electromagneticEnergy90(0.f);
-    const float totalElectromagneticEnergy(pCluster->GetElectromagneticEnergy() - pCluster->GetIsolatedElectromagneticEnergy());
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
-    {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-            electromagneticEnergy90 += (*hitIter)->GetElectromagneticEnergy();
-
-        if (electromagneticEnergy90 > 0.9 * totalElectromagneticEnergy)
-            return iter->first;
-    }
-
-    throw StatusCodeException(STATUS_CODE_NOT_FOUND);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -222,13 +195,9 @@ StatusCode PhotonRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinElectromagneticEnergy", m_minElectromagneticEnergy));
 
-    m_maxLayer90LayersOutsideECal = 5;
+    m_maxInnerLayer = 14;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxLayer90LayersOutsideECal", m_maxLayer90LayersOutsideECal));
-
-    m_maxInnerLayerAsECalFraction = 0.5f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxInnerLayerAsECalFraction", m_maxInnerLayerAsECalFraction));
+        "MaxInnerLayer", m_maxInnerLayer));
 
     m_profileStartCut1 = 4.1f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -241,10 +210,6 @@ StatusCode PhotonRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_profileStartCut2 = 5.1f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ProfileStartCut2", m_profileStartCut2));
-
-    m_profileStartCut3 = 2.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ProfileStartCut3", m_profileStartCut3));
 
     m_profileDiscrepancyCut1 = 0.4f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -270,25 +235,25 @@ StatusCode PhotonRecoveryAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ProfileDiscrepancyCut2", m_profileDiscrepancyCut2));
 
-    m_profileStartCut4 = 2.75f;
+    m_profileStartCut3 = 2.75f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ProfileStartCut4", m_profileStartCut4));
+        "ProfileStartCut3", m_profileStartCut3));
 
-    m_maxInnerLayer = 10;
+    m_maxOverlapInnerLayer = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxInnerLayer", m_maxInnerLayer));
+        "MaxOverlapInnerLayer", m_maxOverlapInnerLayer));
 
-    m_maxMipFraction = 0.5f;
+    m_maxOverlapMipFraction = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxMipFraction", m_maxMipFraction));
+        "MaxOverlapMipFraction", m_maxOverlapMipFraction));
+
+    m_minOverlapRadialDirectionCosine = 0.9f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinOverlapRadialDirectionCosine", m_minOverlapRadialDirectionCosine));
 
     m_maxBarrelEndCapSplit = 0.9f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxBarrelEndCapSplit", m_maxBarrelEndCapSplit));
-
-    m_minRadialDirectionCosine = 0.9f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MinRadialDirectionCosine", m_minRadialDirectionCosine));
 
     // Soft photon id
     m_softPhotonMinCaloHits = 0;

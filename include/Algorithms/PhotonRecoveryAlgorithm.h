@@ -37,15 +37,6 @@ private:
     void FindPhotonsIdentifiedAsHadrons(const pandora::ClusterList *const pClusterList) const;
 
     /**
-     *  @brief  Get the layer by which 90% of a cluster's electromagnetic energy has been deposited
-     * 
-     *  @param  pCluster address of the cluster
-     * 
-     *  @return the layer 90
-     */
-    pandora::PseudoLayer GetLayer90(const pandora::Cluster *const pCluster) const;
-
-    /**
      *  @brief  Get the maximum of 1) the fraction of total cluster electromagnetic energy deposited in the barrel, or
      *          2) the fraction of total cluster electromagnetic energy deposited in the endcap
      * 
@@ -74,14 +65,12 @@ private:
     std::string     m_trackClusterAssociationAlgName;   ///< The name of the track-cluster association algorithm to run
 
     float           m_minElectromagneticEnergy;         ///< Minimum cluster electromagnetic energy for identification as a photon
-    unsigned int    m_maxLayer90LayersOutsideECal;      ///< Maximum number of layers that cluster layer90 can exist outside of the ecal
-    float           m_maxInnerLayerAsECalFraction;      ///< Cluster inner layer must be below maximum fraction of number of ecal layers
+    unsigned int    m_maxInnerLayer;                    ///< Maximum cluster inner layer
 
     float           m_profileStartCut1;                 ///< Initial cut on shower profile start for identification as a photon
     float           m_profileStartEnergyCut;            ///< Electromagnetic energy above which shower profile start cut will be altered
     float           m_profileStartCut2;                 ///< Cut on shower profile start for clusters passing energy cut
-    float           m_profileStartCut3;                 ///< Cut on shower profile start for clusters with layer 90 outside of the ecal
-    float           m_profileStartCut4;                 ///< Cut on shower profile start for clusters also passing profile discrepancy cuts
+    float           m_profileStartCut3;                 ///< Cut on shower profile start for clusters also passing profile discrepancy cuts
 
     float           m_profileDiscrepancyCut1;           ///< Initial cut on shower profile discrepancy for identification as a photon
     float           m_profileDiscrepancyEnergyCut;      ///< Electromagnetic energy above which profile discrepancy cut will be altered
@@ -90,10 +79,10 @@ private:
     float           m_minProfileDiscrepancy;            ///< Minimum shower profile discrepancy for identification as a photon
     float           m_profileDiscrepancyCut2;           ///< Cut on shower profile discrepancy for clusters also passing profile start cuts
 
-    unsigned int    m_maxInnerLayer;                    ///< Maximum inner layer for clusters in barrel-endcap overlap region
-    float           m_maxMipFraction;                   ///< Maximum mip fraction for clusters in barrel-endcap overlap region
+    unsigned int    m_maxOverlapInnerLayer;             ///< Maximum inner layer for clusters in barrel-endcap overlap region
+    float           m_maxOverlapMipFraction;            ///< Maximum mip fraction for clusters in barrel-endcap overlap region
+    float           m_minOverlapRadialDirectionCosine;  ///< Minimum radial direction cosine for clusters in barrel-endcap overlap region
     float           m_maxBarrelEndCapSplit;             ///< Maximum barrel-endcap electromagnetic energy split for cluster
-    float           m_minRadialDirectionCosine;         ///< Minimum radial direction cosine for clusters in barrel-endcap overlap region
 
     unsigned int    m_softPhotonMinCaloHits;            ///< Soft photon id min number of calo hits in cluster
     unsigned int    m_softPhotonMaxCaloHits;            ///< Soft photon id max number of calo hits in cluster

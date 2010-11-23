@@ -20,8 +20,6 @@ StatusCode LoopingTracksAlgorithm::Run()
     ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-
     // Fit a straight line to the last n occupied pseudo layers in each cluster and store results
     ClusterFitRelationList clusterFitRelationList;
 
@@ -52,8 +50,7 @@ StatusCode LoopingTracksAlgorithm::Run()
         const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetClusterFitResult());
 
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
-        const bool isParentOutsideECal(parentOuterLayer > nECalLayers);
-        const bool isParentDeepInHCal(parentOuterLayer > nECalLayers + m_nDeepInHCalLayers);
+        const bool isParentOutsideECal(pParentCluster->GetOuterLayerHitType() != ECAL);
 
         ClusterFitRelation *pBestClusterFitRelation(NULL);
         float minFitResultsApproach(std::numeric_limits<float>::max());
@@ -71,11 +68,6 @@ StatusCode LoopingTracksAlgorithm::Run()
             // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
             const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
 
-            const bool isDaughterOutsideECal(daughterOuterLayer > nECalLayers);
-            const bool isDaughterDeepInHCal(daughterOuterLayer > nECalLayers + m_nDeepInHCalLayers);
-            const bool isOutsideECal(isParentOutsideECal && isDaughterOutsideECal);
-            const bool isDeepInHCal(isParentDeepInHCal && isDaughterDeepInHCal);
-
             // Apply loose cuts to examine suitability of merging clusters before proceeding
             const PseudoLayer outerLayerDifference((parentOuterLayer > daughterOuterLayer) ? (parentOuterLayer - daughterOuterLayer) :
                 (daughterOuterLayer - parentOuterLayer));
@@ -88,8 +80,11 @@ StatusCode LoopingTracksAlgorithm::Run()
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
+            const bool isDaughterOutsideECal(pDaughterCluster->GetOuterLayerHitType() != ECAL);
+            const bool isOutsideECal(isParentOutsideECal && isDaughterOutsideECal);
+
             // Check that cluster fit directions are compatible with looping track hypothesis
-            const float fitDirectionDotProductCut(isDeepInHCal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
+            const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
             const float fitDirectionDotProduct(parentClusterFitResult.GetDirection().GetDotProduct(daughterClusterFitResult.GetDirection()));
 
             if (fitDirectionDotProduct > fitDirectionDotProductCut)
@@ -100,7 +95,7 @@ StatusCode LoopingTracksAlgorithm::Run()
 
             // Cut on distance of closest approach between hits in outer layers of the two clusters
             const float closestHitDistance(this->GetClosestDistanceBetweenOuterLayerHits(pParentCluster, pDaughterCluster));
-            const float closestHitDistanceCut(isDeepInHCal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
+            const float closestHitDistanceCut(isOutsideECal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
 
             if (closestHitDistance > closestHitDistanceCut)
                 continue;
@@ -118,7 +113,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             // Merge clusters if they are in HCal, otherwise look for "good" features (bit ad hoc) ...
             unsigned int nGoodFeatures(0);
 
-            if (!isDeepInHCal)
+            if (!isOutsideECal)
             {
                 if (fitDirectionDotProduct < m_goodFeaturesMaxFitDotProduct)
                     nGoodFeatures++;
@@ -134,7 +129,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             }
 
             // Now have sufficient information to decide whether to join clusters
-            if (isDeepInHCal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
+            if (isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
                 pBestClusterFitRelation = *iterJ;
                 minFitResultsApproach = fitResultsClosestApproach;
@@ -209,10 +204,6 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_fitChi2Cut = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitChi2Cut", m_fitChi2Cut));
-
-    m_nDeepInHCalLayers = 10;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "NDeepInHCalLayers", m_nDeepInHCalLayers));
 
     m_canMergeMinMipFraction = 0.7f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

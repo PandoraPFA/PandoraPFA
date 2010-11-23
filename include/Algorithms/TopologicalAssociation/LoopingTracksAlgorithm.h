@@ -103,8 +103,6 @@ private:
     unsigned int    m_nLayersToFit;                     ///< The number of occupied pseudolayers to use in fit to the end of the cluster
     float           m_fitChi2Cut;                       ///< The chi2 cut to apply to fit results
 
-    unsigned int    m_nDeepInHCalLayers;                ///< Number of HCal layers beyond which cluster is declared to be "deep in HCal"
-
     float           m_canMergeMinMipFraction;           ///< The minimum mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The maximum all hit fit rms for clusters (flagged as photons) to be merged
 
