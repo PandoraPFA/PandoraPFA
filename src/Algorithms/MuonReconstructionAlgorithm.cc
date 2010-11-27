@@ -401,8 +401,6 @@ StatusCode MuonReconstructionAlgorithm::TidyLists(const std::string &inputTrackL
 
 StatusCode MuonReconstructionAlgorithm::GetPfoComponents(TrackList &pfoTrackList, OrderedCaloHitList &pfoCaloHitList, ClusterList &pfoClusterList) const
 {
-    pfoTrackList.clear(); pfoCaloHitList.clear(); pfoClusterList.clear();
-
     const ParticleFlowObjectList *pPfoList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
 

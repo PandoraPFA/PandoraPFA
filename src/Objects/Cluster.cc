@@ -442,7 +442,7 @@ void Cluster::CalculateLayerPathLengths(const PseudoLayer pseudoLayer, InputFloa
 StatusCode Cluster::ResetProperties()
 {
     if (!m_orderedCaloHitList.empty())
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_orderedCaloHitList.Reset());
+        m_orderedCaloHitList.Reset();
 
     m_isolatedCaloHitList.clear();
 

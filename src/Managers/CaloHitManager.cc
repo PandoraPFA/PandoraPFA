@@ -396,6 +396,7 @@ StatusCode CaloHitManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
         if (m_nameToOrderedCaloHitListMap.end() == iter)
             return STATUS_CODE_FAILURE;
 
+        iter->second->Reset();
         delete iter->second;
         m_nameToOrderedCaloHitListMap.erase(iter);
     }
@@ -420,7 +421,7 @@ StatusCode CaloHitManager::ResetForNextEvent()
 
     for (NameToOrderedCaloHitListMap::iterator listIter = m_nameToOrderedCaloHitListMap.begin(); listIter != m_nameToOrderedCaloHitListMap.end();)
     {
-        listIter->second->clear();
+        listIter->second->Reset();
         delete listIter->second;
         m_nameToOrderedCaloHitListMap.erase(listIter++);
     }

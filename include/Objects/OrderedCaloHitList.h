@@ -103,7 +103,7 @@ public:
     /**
      *  @brief  Reset the ordered calo hit list, emptying its contents
      */
-    StatusCode Reset();
+    void Reset();
 
     /**
      *  @brief  Get a simple list of all the calo hits in the ordered calo hit list (no ordering by pseudolayer)

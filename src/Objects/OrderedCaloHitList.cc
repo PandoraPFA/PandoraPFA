@@ -119,7 +119,7 @@ unsigned int OrderedCaloHitList::GetNCaloHitsInPseudoLayer(const PseudoLayer pse
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode OrderedCaloHitList::Reset()
+void OrderedCaloHitList::Reset()
 {
     for (OrderedCaloHitList::iterator iter = this->begin(), iterEnd = this->end(); iter != iterEnd; ++iter)
         delete iter->second;
@@ -127,9 +127,7 @@ StatusCode OrderedCaloHitList::Reset()
     this->clear();
 
     if (!this->empty())
-        return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
+        throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,7 +148,7 @@ bool OrderedCaloHitList::operator= (const OrderedCaloHitList &rhs)
         return true;
 
     if (!this->empty())
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->Reset());
+        this->Reset();
 
     return (STATUS_CODE_SUCCESS == this->Add(rhs));
 }
