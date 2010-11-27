@@ -121,6 +121,11 @@ public:
 
 private:
     /**
+     *  @brief  Clear the ordered calo hit list
+     */
+    void clear();
+
+    /**
      *  @brief  Add a calo hit to a specified pseudo layer
      * 
      *  @param  pCaloHit the address of the calo hit
@@ -149,6 +154,13 @@ inline StatusCode OrderedCaloHitList::Add(CaloHit *const pCaloHit)
 inline StatusCode OrderedCaloHitList::Remove(CaloHit *const pCaloHit)
 {
     return this->Remove(pCaloHit, pCaloHit->GetPseudoLayer());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void OrderedCaloHitList::clear()
+{
+    std::map<PseudoLayer, CaloHitList *>::clear();
 }
 
 } // namespace pandora
