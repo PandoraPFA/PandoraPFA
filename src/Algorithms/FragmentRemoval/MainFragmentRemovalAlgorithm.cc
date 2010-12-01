@@ -335,9 +335,6 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     if ((outerLayer - innerLayer < m_layerCorrectionLayerSpan) && (innerLayer > m_layerCorrectionMinInnerLayer))
         layerCorrection = m_layerCorrection5;
 
-    if (std::abs(static_cast<int>(correctionLayer) - static_cast<int>(m_layerCorrectionFragmentLayer)) < m_layerCorrectionLayersToFragmentLayer)
-        layerCorrection = m_layerCorrection6;
-
     // 2. Leaving cluster corrections
     float leavingCorrection(0.f);
 
@@ -828,18 +825,6 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     m_layerCorrection5 = -2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerCorrection5", m_layerCorrection5));
-
-    m_layerCorrectionFragmentLayer = 29;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayerCorrectionFragmentLayer", m_layerCorrectionFragmentLayer));
-
-    m_layerCorrectionLayersToFragmentLayer = 4;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayerCorrectionLayersToFragmentLayer", m_layerCorrectionLayersToFragmentLayer));
-
-    m_layerCorrection6 = -3.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayerCorrection6", m_layerCorrection6));
 
     // Leaving correction
     m_leavingCorrection = 5.f;

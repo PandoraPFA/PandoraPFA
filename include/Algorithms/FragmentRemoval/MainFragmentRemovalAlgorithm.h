@@ -283,10 +283,6 @@ private:
     float               m_layerCorrectionMinInnerLayer;             ///< Daughter min inner layer for layer correction contribution 5
     float               m_layerCorrection5;                         ///< Layer correction contribution 5
 
-    unsigned int        m_layerCorrectionFragmentLayer;             ///< Layer near which expect fragments e.g. due to granularity change
-    int                 m_layerCorrectionLayersToFragmentLayer;     ///< Number of layers between correction and fragment layer
-    float               m_layerCorrection6;                         ///< Layer correction contribution 6
-
     float               m_leavingCorrection;                        ///< Correction for clusters leaving calorimeters
 
     float               m_energyCorrectionThreshold;                ///< Energy correction threshold
