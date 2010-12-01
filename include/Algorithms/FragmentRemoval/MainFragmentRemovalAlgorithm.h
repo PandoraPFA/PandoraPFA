@@ -231,8 +231,8 @@ private:
     float               m_contactCutCloseHitFraction2;              ///< Close hit fraction 2 value to store cluster contact info
     float               m_contactCutMeanDistanceToHelix;            ///< Mean distance to helix value to store cluster contact info
     float               m_contactCutClosestDistanceToHelix;         ///< Closest distance to helix value to store cluster contact info
-    unsigned int        m_contactCutLayersFromECal;                 ///< Inner layer "n" layers below ecal-end marks cluster as "near ecal"
-    float               m_contactCutNearECalDistance;               ///< Hit separation for "near ecal" clusters to store contact info
+    float               m_contactCutMaxHitDistance;                 ///< Hit separation to store contact info
+    unsigned int        m_contactCutMinDaughterInnerLayer;          ///< Min daughter cluster inner layer to store contact info
 
     float               m_maxChi2;                                  ///< Pre-selection: new chi2 value to allow cluster merging
     float               m_maxGlobalChi2;                            ///< Pre-selection: new global chi2 value to allow cluster merging
@@ -271,28 +271,32 @@ private:
     float               m_distanceWeight;                           ///< Weight for distance of closest approach evidence
     float               m_trackExtrapolationWeight;                 ///< Weight for track extrapolation evidence
 
+    unsigned int        m_layerCorrectionLayerValue1;               ///< Max value of correction layer for layer correction contribution 1
+    unsigned int        m_layerCorrectionLayerValue3;               ///< Max value of correction layer for layer correction contribution 3
+    unsigned int        m_layerCorrectionLayerValue2;               ///< Max value of correction layer for layer correction contribution 2
     float               m_layerCorrection1;                         ///< Layer correction contribution 1
     float               m_layerCorrection2;                         ///< Layer correction contribution 2
     float               m_layerCorrection3;                         ///< Layer correction contribution 3
-    float               m_layerCorrection4;                         ///< Layer correction contribution 4
-    float               m_layerCorrection5;                         ///< Layer correction contribution 5
-    float               m_layerCorrection6;                         ///< Layer correction contribution 6
-
-    unsigned int        m_nDeepInHCalLayers;                        ///< First hcal layer that can be considered as "deep" in the hcal
+    float               m_layerCorrection4;                         ///< Layer correction contribution 4, applied if 1,2,3 not applicable
 
     float               m_layerCorrectionLayerSpan;                 ///< Daughter layer span for layer correction contribution 5
     float               m_layerCorrectionMinInnerLayer;             ///< Daughter min inner layer for layer correction contribution 5
-    float               m_layerCorrectionLayersFromECal;            ///< Daughter layers from ecal for layer correction contribution 6
+    float               m_layerCorrection5;                         ///< Layer correction contribution 5
+
+    unsigned int        m_layerCorrectionFragmentLayer;             ///< Layer near which expect fragments e.g. due to granularity change
+    int                 m_layerCorrectionLayersToFragmentLayer;     ///< Number of layers between correction and fragment layer
+    float               m_layerCorrection6;                         ///< Layer correction contribution 6
 
     float               m_leavingCorrection;                        ///< Correction for clusters leaving calorimeters
 
     float               m_energyCorrectionThreshold;                ///< Energy correction threshold
 
     float               m_lowEnergyCorrectionThreshold;             ///< Low energy correction threshold
-    unsigned int        m_lowEnergyCorrectionNHitLayers1;           ///< Number of hit layers for low energy correction contribution 1
-    unsigned int        m_lowEnergyCorrectionNHitLayers2;           ///< Number of hit layers for low energy correction contribution 2
+    unsigned int        m_lowEnergyCorrectionNHitLayers1;           ///< Number of hit layers below which to apply contribution 1
     float               m_lowEnergyCorrection1;                     ///< Low energy correction contribution 1
+    unsigned int        m_lowEnergyCorrectionNHitLayers2;           ///< Number of hit layers below which to apply contribution 2   
     float               m_lowEnergyCorrection2;                     ///< Low energy correction contribution 2
+    unsigned int        m_lowEnergyCorrectionNHitLayers3;           ///< Number of hit layers above which to apply contribution 3
     float               m_lowEnergyCorrection3;                     ///< Low energy correction contribution 3
 
     float               m_angularCorrectionOffset;                  ///< Offset value for angular correction

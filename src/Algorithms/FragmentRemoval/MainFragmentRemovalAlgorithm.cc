@@ -133,11 +133,8 @@ bool MainFragmentRemovalAlgorithm::PassesClusterContactCuts(const ChargedCluster
         return true;
     }
 
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    const PseudoLayer daughterInnerLayer(chargedClusterContact.GetDaughterCluster()->GetInnerPseudoLayer());
-
-    return ((chargedClusterContact.GetDistanceToClosestHit() < m_contactCutNearECalDistance) &&
-        (daughterInnerLayer + m_contactCutLayersFromECal > nECalLayers));
+    return ((chargedClusterContact.GetDistanceToClosestHit() < m_contactCutMaxHitDistance) &&
+        (chargedClusterContact.GetDaughterCluster()->GetInnerPseudoLayer() > m_contactCutMinDaughterInnerLayer));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -315,36 +312,30 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
     // 1. Layer corrections
     float layerCorrection(0.f);
 
-    static const unsigned int nECalLayers(GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers());
-    static const unsigned int halfECal(nECalLayers / 2);
-
-    const PseudoLayer innerLayer(pDaughterCluster->GetInnerPseudoLayer());
-    const PseudoLayer outerLayer(pDaughterCluster->GetOuterPseudoLayer());
-
-    if (correctionLayer <= halfECal)
+    if (correctionLayer < m_layerCorrectionLayerValue1)
     {
         layerCorrection = m_layerCorrection1;
     }
-
-    if ((correctionLayer > halfECal) && (correctionLayer <= nECalLayers))
+    else if (correctionLayer < m_layerCorrectionLayerValue2)
     {
         layerCorrection = m_layerCorrection2;
     }
-
-    if (correctionLayer > nECalLayers)
+    else if (correctionLayer < m_layerCorrectionLayerValue3)
     {
         layerCorrection = m_layerCorrection3;
     }
-
-    if (correctionLayer > nECalLayers + m_nDeepInHCalLayers)
+    else
     {
         layerCorrection = m_layerCorrection4;
     }
 
+    const PseudoLayer innerLayer(pDaughterCluster->GetInnerPseudoLayer());
+    const PseudoLayer outerLayer(pDaughterCluster->GetOuterPseudoLayer());
+
     if ((outerLayer - innerLayer < m_layerCorrectionLayerSpan) && (innerLayer > m_layerCorrectionMinInnerLayer))
         layerCorrection = m_layerCorrection5;
 
-    if (std::abs(static_cast<int>(correctionLayer) - static_cast<int>(nECalLayers)) < m_layerCorrectionLayersFromECal)
+    if (std::abs(static_cast<int>(correctionLayer) - static_cast<int>(m_layerCorrectionFragmentLayer)) < m_layerCorrectionLayersToFragmentLayer)
         layerCorrection = m_layerCorrection6;
 
     // 2. Leaving cluster corrections
@@ -373,7 +364,7 @@ float MainFragmentRemovalAlgorithm::GetRequiredEvidenceForMerge(Cluster *const p
         if (nHitLayers < m_lowEnergyCorrectionNHitLayers2)
             lowEnergyCorrection += m_lowEnergyCorrection2;
 
-        if (correctionLayer > nECalLayers)
+        if (correctionLayer > m_lowEnergyCorrectionNHitLayers3)
             lowEnergyCorrection += m_lowEnergyCorrection3;
     }
 
@@ -647,13 +638,13 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ContactCutClosestDistanceToHelix", m_contactCutClosestDistanceToHelix));
 
-    m_contactCutLayersFromECal = 10;
+    m_contactCutMaxHitDistance = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ContactCutLayersFromECal", m_contactCutLayersFromECal));
+        "ContactCutMaxHitDistance", m_contactCutMaxHitDistance));
 
-    m_contactCutNearECalDistance = 250.f;
+    m_contactCutMinDaughterInnerLayer = 19;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ContactCutNearECalDistance", m_contactCutNearECalDistance));
+        "ContactCutMinDaughterInnerLayer", m_contactCutMinDaughterInnerLayer));
 
     // Track-cluster consistency Chi2 values
     m_maxChi2 = 16.f;
@@ -798,6 +789,18 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
         "TrackExtrapolationWeight", m_trackExtrapolationWeight));
 
     // Required evidence: Layer correction
+    m_layerCorrectionLayerValue1 = 15;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionLayerValue1", m_layerCorrectionLayerValue1));
+
+    m_layerCorrectionLayerValue2 = 30;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionLayerValue2", m_layerCorrectionLayerValue2));
+
+    m_layerCorrectionLayerValue3 = 50;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionLayerValue3", m_layerCorrectionLayerValue3));
+
     m_layerCorrection1 = 2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerCorrection1", m_layerCorrection1));
@@ -814,18 +817,6 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerCorrection4", m_layerCorrection4));
 
-    m_layerCorrection5 = -2.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayerCorrection5", m_layerCorrection5));
-
-    m_layerCorrection6 = -3.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayerCorrection6", m_layerCorrection6));
-
-    m_nDeepInHCalLayers = 20;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "NDeepInHCalLayers", m_nDeepInHCalLayers));
-
     m_layerCorrectionLayerSpan = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerCorrectionLayerSpan", m_layerCorrectionLayerSpan));
@@ -834,9 +825,21 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LayerCorrectionMinInnerLayer", m_layerCorrectionMinInnerLayer));
 
-    m_layerCorrectionLayersFromECal = 4;
+    m_layerCorrection5 = -2.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayerCorrectionLayersFromECal", m_layerCorrectionLayersFromECal));
+        "LayerCorrection5", m_layerCorrection5));
+
+    m_layerCorrectionFragmentLayer = 29;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionFragmentLayer", m_layerCorrectionFragmentLayer));
+
+    m_layerCorrectionLayersToFragmentLayer = 4;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrectionLayersToFragmentLayer", m_layerCorrectionLayersToFragmentLayer));
+
+    m_layerCorrection6 = -3.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LayerCorrection6", m_layerCorrection6));
 
     // Leaving correction
     m_leavingCorrection = 5.f;
@@ -860,6 +863,10 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     m_lowEnergyCorrectionNHitLayers2 = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "LowEnergyCorrectionNHitLayers2", m_lowEnergyCorrectionNHitLayers2));
+
+    m_lowEnergyCorrectionNHitLayers3 = 29;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "LowEnergyCorrectionNHitLayers3", m_lowEnergyCorrectionNHitLayers3));
 
     m_lowEnergyCorrection1 = -1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
