@@ -1,3 +1,42 @@
+Introduced new api parameters to help remove geometry dependence from pandora algorithms.
+New api parameter: expected calo hit direction (removes assumption that expected hit propagation direction is radial).
+New api parameter: number of radition lengths between calo hit position and the ip.
+New api parameter: whether track ecal projection is to an endcap
+Renamed calo hit api parameters for number of cell radiation and interaction lengths and cell normal vector.
+Client applications no longer need to specify irrelevant subdetectors.
+Removed assumptions about ILD-like geometry from GeometryHelper, moving assumptions into client application code such as pseudolayer calculator.
+StatusCodeException backtraces now only generated if source is compiled with defined pre-processor keyword "BACKTRACE".
+Improved OrderedCaloHitList memory management.
+Tidied calculation of cluster initial direction.
+Added methods to cluster class to calculate typical inner/outer layer hit types, plus mean inner/outer layer radiation/interaction lengths.
+Removed geometry usage from most pandora algorithms.
+Removed GeometryHelper IsOutsideECal function.
+Improve OrderedCaloHitList memory management.
+
+************************************************************************
+CREATE CLIC_CDR BRANCH
+************************************************************************
+Added muon reconstruction algorithm, which complete muon particle flow object construction before the standard pandora reconstruction.
+Improved PrimaryClustering algorithm to account for possible deletion of clusters during topological association algorithms.
+Improved cluster and track preparation algorithms to deal with content already used in particle flow objects.
+Improved em shower identification, cutting on number of radiation lengths in front of layer90 and shower max layer.
+Improved em shower identification, cutting on shower transverse profile and energy fraction above "high" number of radiation lengths.
+Improved SoftClusterMerging algorithm to avoid adding isolated photons to low energy electrons.
+Removed unused muon hit information from main fragment removal algorithm.
+Moved StatusCode enum and StatusCodeException class to namespace pandora.
+Added default/null lists to cluster, calo hit and track managers.
+Restructured track input list mechanics.
+Added apis to "drop" current lists.
+Addressed warnings produced when early reconstruction removes all hits/tracks/etc. from an event.
+Removed error message in case where no pfos are formed.
+Removed initial division of calo hit list in muon and non-muon lists from the calo hit manager.
+Forbade negative b-field values at helix construction time. For now, user should flip charge sign.
+Removed unused helix constructor.
+Added BFieldCalculator functionality.
+Client application must now specify pseudolayer calculator and bfield calculators.
+Removed TrackSelection algorithm and replaced with EventPreparation algorithm.
+Provided a gnu makefile.
+
 ************************************************************************
 TAG V00-03 FOR ILCSOFT USAGE
 ************************************************************************
