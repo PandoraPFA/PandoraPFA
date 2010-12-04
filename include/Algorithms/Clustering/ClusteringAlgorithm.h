@@ -228,6 +228,8 @@ private:
     unsigned int    m_nLayersSpannedForFit;         ///< Min number of layers spanned by cluster before current direction fit is performed
     unsigned int    m_nLayersSpannedForApproxFit;   ///< If current fit fails, but cluster spans enough layers, calculate an approximate fit
     unsigned int    m_nLayersToFit;                 ///< Number of layers (from outermost layer) to examine in current direction fit
+    float           m_nLayersToFitLowMipCut;        ///< Low cluster mip fraction threshold, below which may need to fit more layers
+    unsigned int    m_nLayersToFitLowMipMultiplier; ///< Number of layers to fit multiplier for low mip fraction clusters
 
     float           m_fitSuccessDotProductCut1;     ///< 1. Min value of dot product (current fit dir dot initial dir) for fit success
     float           m_fitSuccessChi2Cut1;           ///< 1. Max value of fit chi2 for fit success

@@ -250,11 +250,15 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVe
 
         if (nLayersSpanned > m_nLayersSpannedForFit)
         {
-            const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
             PseudoLayer nLayersToFit(m_nLayersToFit);
-            if (pCluster->GetMipFraction() < 0.5)
-                nLayersToFit *= 2;
+
+            if (pCluster->GetMipFraction() - m_nLayersToFitLowMipCut < std::numeric_limits<float>::epsilon())
+                nLayersToFit *= m_nLayersToFitLowMipMultiplier;
+
+//            const PseudoLayer startLayer( (nLayersSpanned > nLayersToFit) ? (outerLayer - nLayersToFit) : innerLayer);
+//            (void) ClusterHelper::FitLayers(pCluster, startLayer, outerLayer, clusterFitResult);
+
+            const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
             const PseudoLayer startLayer( (nLayersSpanned > nLayersToFit) ? (outerLayer - nLayersToFit) : innerLayer);
             for (PseudoLayer iLayer = startLayer; iLayer <= outerLayer; ++iLayer)
@@ -698,6 +702,14 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_nLayersToFit = 8;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NLayersToFit", m_nLayersToFit));
+
+    m_nLayersToFitLowMipCut = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NLayersToFitLowMipCut", m_nLayersToFitLowMipCut));
+
+    m_nLayersToFitLowMipMultiplier = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NLayersToFitLowMipMultiplier", m_nLayersToFitLowMipMultiplier));
 
     m_fitSuccessDotProductCut1 = 0.75f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

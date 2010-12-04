@@ -378,6 +378,17 @@ public:
 
 private:
     /**
+     *  @brief  Fit points in a general region
+     * 
+     *  @param  clusterFitPointList list of cluster fit points
+     *  @param  centralPosition central position of the cluster fit points
+     *  @param  centralDirection central direction of normal to cluster fit calorimeter cells
+     *  @param  clusterFitResult to receive the cluster fit result
+     */
+    static StatusCode FitGeneralPoints(const ClusterFitPointList &clusterFitPointList, const CartesianVector &centralPosition,
+        const CartesianVector &centralDirection, ClusterFitResult &clusterFitResult);
+
+    /**
      *  @brief  Fit points in barrel region
      * 
      *  @param  clusterFitPointList list of cluster fit points
