@@ -202,8 +202,7 @@ StatusCode ClusterHelper::FitGeneralPoints(const ClusterFitPointList &clusterFit
     const double cosTheta(centralDirection.GetCosOpeningAngle(chosenAxis));
     const double sinTheta(std::sin(std::acos(cosTheta)));
 
-    const CartesianVector rotationAxis((std::fabs(cosTheta) > 0.99) ? centralDirection : centralDirection.GetCrossProduct(chosenAxis).GetUnitVector());
-    //const CartesianVector rotationAxis(centralDirection.GetCrossProduct(chosenAxis).GetUnitVector());
+    const CartesianVector rotationAxis((std::fabs(cosTheta) > 0.99) ? CartesianVector(1.f, 0.f, 0.f) : centralDirection.GetCrossProduct(chosenAxis).GetUnitVector());
 
     for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
