@@ -29,6 +29,7 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_trackStateAtStart(trackParameters.m_trackStateAtStart.Get()),
     m_trackStateAtEnd(trackParameters.m_trackStateAtEnd.Get()),
     m_trackStateAtECal(trackParameters.m_trackStateAtECal.Get()),
+    m_timeAtECal(trackParameters.m_timeAtECal.Get()),
     m_isProjectedToEndCap(trackParameters.m_isProjectedToEndCap.Get()),
     m_reachesECal(trackParameters.m_reachesECal.Get()),
     m_canFormPfo(trackParameters.m_canFormPfo.Get()),

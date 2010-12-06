@@ -378,35 +378,15 @@ public:
 
 private:
     /**
-     *  @brief  Fit points in a general region
+     *  @brief  Perform linear fit to cluster fit points
      * 
      *  @param  clusterFitPointList list of cluster fit points
      *  @param  centralPosition central position of the cluster fit points
      *  @param  centralDirection central direction of normal to cluster fit calorimeter cells
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitGeneralPoints(const ClusterFitPointList &clusterFitPointList, const CartesianVector &centralPosition,
+    static StatusCode PerformLinearFit(const ClusterFitPointList &clusterFitPointList, const CartesianVector &centralPosition,
         const CartesianVector &centralDirection, ClusterFitResult &clusterFitResult);
-
-    /**
-     *  @brief  Fit points in barrel region
-     * 
-     *  @param  clusterFitPointList list of cluster fit points
-     *  @param  cosTheta cosine of coordinate rotation angle
-     *  @param  sinTheta sine of coordinate rotation angle
-     *  @param  clusterFitResult to receive the cluster fit result
-     */
-    static StatusCode FitBarrelPoints(const ClusterFitPointList &clusterFitPointList, const float cosTheta, const float sinTheta,
-        ClusterFitResult &clusterFitResult);
-
-    /**
-     *  @brief  Fit points in endcap region
-     * 
-     *  @param  clusterFitPointList list of cluster fit points
-     *  @param  isPositiveZ whether fit is to endcap in region of positive or negative z coordinate
-     *  @param  clusterFitResult to receive the cluster fit result
-     */
-    static StatusCode FitEndCapPoints(const ClusterFitPointList &clusterFitPointList, const bool isPositiveZ, ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Read the cluster helper settings

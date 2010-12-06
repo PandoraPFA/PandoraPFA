@@ -115,6 +115,13 @@ public:
     const TrackState &GetTrackStateAtECal() const;
 
     /**
+     *  @brief  Get the (sometimes projected) time at the ecal
+     * 
+     *  @return the time at the ecal
+     */
+    float GetTimeAtECal() const;
+
+    /**
      *  @brief  Whether the ecal projection is to an endcap
      * 
      *  @return boolean
@@ -282,8 +289,10 @@ private:
     const TrackState        m_trackStateAtEnd;          ///< The track state at the end of the track, units mm and GeV
     const TrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
 
+    const float             m_timeAtECal;               ///< The (sometimes projected) time at the ecal, units ns
+
     const bool              m_isProjectedToEndCap;      ///< Whether the ecal projection is to an endcap
-    const bool              m_reachesECal;              ///< Whether the track reaches the ecal
+    const bool              m_reachesECal;              ///< Whether the track actually reaches the ecal
     const bool              m_canFormPfo;               ///< Whether track should form a pfo, if it has an associated cluster
     const bool              m_canFormClusterlessPfo;    ///< Whether track should form a pfo, even if it has no associated cluster
 
@@ -410,6 +419,13 @@ inline const TrackState &Track::GetTrackStateAtEnd() const
 inline const TrackState &Track::GetTrackStateAtECal() const
 {
     return m_trackStateAtECal;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Track::GetTimeAtECal() const
+{
+    return m_timeAtECal;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
