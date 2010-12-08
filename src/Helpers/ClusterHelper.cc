@@ -179,14 +179,12 @@ StatusCode ClusterHelper::FitPoints(const ClusterFitPointList &clusterFitPointLi
 
     if (std::fabs(meanZ) > eCalEndCapZPosition)
     {
-        (void) PerformLinearFit(clusterFitPointList, CartesianVector(meanX, meanY, meanZ), CartesianVector(0, 0, (meanZ > 0) ? 1 : -1), clusterFitResult);
+        return PerformLinearFit(clusterFitPointList, CartesianVector(meanX, meanY, meanZ), CartesianVector(0, 0, (meanZ > 0) ? 1 : -1), clusterFitResult);
     }
     else
     {
-        (void) PerformLinearFit(clusterFitPointList, CartesianVector(meanX, meanY, meanZ), CartesianVector(meanX / rXY, meanY / rXY, 0), clusterFitResult);
+        return PerformLinearFit(clusterFitPointList, CartesianVector(meanX, meanY, meanZ), CartesianVector(meanX / rXY, meanY / rXY, 0), clusterFitResult);
     }
-
-    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
