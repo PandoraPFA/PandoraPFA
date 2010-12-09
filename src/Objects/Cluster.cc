@@ -350,7 +350,7 @@ void Cluster::CalculateShowerProfile() const
 
 void Cluster::CalculateFitToAllHitsResult() const
 {
-    (void) ClusterHelper::FitPoints(this, m_fitToAllHitsResult);
+    (void) ClusterHelper::FitFullCluster(this, m_fitToAllHitsResult);
     m_isFitUpToDate = true;
 }
 

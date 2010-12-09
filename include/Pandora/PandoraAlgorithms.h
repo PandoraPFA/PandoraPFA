@@ -28,6 +28,7 @@
 #include "Algorithms/Clustering/ClusteringAlgorithm.h"
 #include "Algorithms/Clustering/ECalPhotonClusteringAlgorithm.h"
 #include "Algorithms/Clustering/ForcedClusteringAlgorithm.h"
+#include "Algorithms/Clustering/InwardClusteringAlgorithm.h"
 
 #include "Algorithms/FragmentRemoval/MainFragmentRemovalAlgorithm.h"
 #include "Algorithms/FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
@@ -94,6 +95,7 @@
     d("Clustering",                             ClusteringAlgorithm::Factory)                               \
     d("ECalPhotonClustering",                   ECalPhotonClusteringAlgorithm::Factory)                     \
     d("ForcedClustering",                       ForcedClusteringAlgorithm::Factory)                         \
+    d("InwardClustering",                       InwardClusteringAlgorithm::Factory)                         \
     d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                      \
     d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                   \
     d("PhotonFragmentRemoval",                  PhotonFragmentRemovalAlgorithm::Factory)                    \

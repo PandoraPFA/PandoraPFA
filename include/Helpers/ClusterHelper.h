@@ -39,10 +39,12 @@ public:
          *  @brief  Constructor
          * 
          *  @param  position the position vector of the fit point
-         *  @param  cellThickness the thickness of the cell in which the point was recorded
+         *  @param  cellNormalVector the unit normal vector to the cell in which the point was recorded
+         *  @param  cellSize the size of the cell in which the point was recorded
          *  @param  pseudoLayer the pseudolayer in which the point was recorded
          */
-        ClusterFitPoint(const CartesianVector &position, const float cellThickness, const PseudoLayer pseudoLayer);
+        ClusterFitPoint(const CartesianVector &position, const CartesianVector &cellNormalVector, const float cellSize,
+            const PseudoLayer pseudoLayer);
 
         /**
          *  @brief  Get the position vector of the fit point
@@ -50,6 +52,13 @@ public:
          *  @return the position vector of the fit point
          */
         const CartesianVector &GetPosition() const;
+
+        /**
+         *  @brief  Get the unit normal vector to the cell in which the point was recorded
+         * 
+         *  @return the unit normal vector to the cell in which the point was recorded
+         */
+        const CartesianVector &GetCellNormalVector() const;
 
         /**
          *  @brief  Get the size of the cell in which the point was recorded
@@ -67,6 +76,7 @@ public:
 
     private:
         CartesianVector         m_position;              ///< The position vector of the fit point
+        CartesianVector         m_cellNormalVector;      ///< The  unit normal vector to the cell in which the point was recorded
         float                   m_cellSize;              ///< The size of the cell in which the point was recorded
         PseudoLayer             m_pseudoLayer;           ///< The pseudolayer in which the point was recorded
     };
@@ -201,6 +211,14 @@ public:
     static StatusCode FitEnd(const Cluster *const pCluster, const unsigned int maxOccupiedLayers, ClusterFitResult &clusterFitResult);
 
     /**
+     *  @brief  Fit all points in a cluster
+     * 
+     *  @param  pCluster the cluster containing the ordered list of calo hits to fit
+     *  @param  clusterFitResult to receive the cluster fit result
+     */
+    static StatusCode FitFullCluster(const Cluster *const pCluster, ClusterFitResult &clusterFitResult);
+
+    /**
      *  @brief  Fit all cluster points within the specified (inclusive) pseudolayer range
      * 
      *  @param  pCluster the cluster containing the ordered list of calo hits to fit
@@ -212,12 +230,15 @@ public:
         ClusterFitResult &clusterFitResult);
 
     /**
-     *  @brief  Fit all points in a cluster
+     *  @brief  Fit all cluster centroids within the specified (inclusive) pseudolayer range
      * 
      *  @param  pCluster the cluster containing the ordered list of calo hits to fit
+     *  @param  startLayer the start of the pseudolayer range
+     *  @param  endLayer the end of the pseudolayer range
      *  @param  clusterFitResult to receive the cluster fit result
      */
-    static StatusCode FitPoints(const Cluster *const pCluster, ClusterFitResult &clusterFitResult);
+    static StatusCode FitLayerCentroids(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
+        ClusterFitResult &clusterFitResult);
 
     /**
      *  @brief  Perform linear regression of x vs d and y vs d and z vs d (assuming same error on all hits)
@@ -412,6 +433,13 @@ private:
 inline const CartesianVector &ClusterHelper::ClusterFitPoint::GetPosition() const
 {
     return m_position;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CartesianVector &ClusterHelper::ClusterFitPoint::GetCellNormalVector() const
+{
+    return m_cellNormalVector;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

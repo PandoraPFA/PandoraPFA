@@ -87,6 +87,31 @@ StatusCode ClusterHelper::FitEnd(const Cluster *const pCluster, const unsigned i
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ClusterHelper::FitFullCluster(const Cluster *const pCluster, ClusterFitResult &clusterFitResult)
+{
+    const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
+    const unsigned int listSize(orderedCaloHitList.size());
+
+    if (0 == listSize)
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    if (listSize < 2)
+        return STATUS_CODE_OUT_OF_RANGE;
+
+    ClusterFitPointList clusterFitPointList;
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            clusterFitPointList.push_back(ClusterFitPoint(*hitIter));
+        }
+    }
+
+    return FitPoints(clusterFitPointList, clusterFitResult);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ClusterHelper::FitLayers(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
     ClusterFitResult &clusterFitResult)
 {
@@ -124,8 +149,12 @@ StatusCode ClusterHelper::FitLayers(const Cluster *const pCluster, const PseudoL
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::FitPoints(const Cluster *const pCluster, ClusterFitResult &clusterFitResult)
+StatusCode ClusterHelper::FitLayerCentroids(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
+    ClusterFitResult &clusterFitResult)
 {
+    if (startLayer >= endLayer)
+        return STATUS_CODE_INVALID_PARAMETER;
+
     const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
     const unsigned int listSize(orderedCaloHitList.size());
 
@@ -138,10 +167,25 @@ StatusCode ClusterHelper::FitPoints(const Cluster *const pCluster, ClusterFitRes
     ClusterFitPointList clusterFitPointList;
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
+        const PseudoLayer pseudoLayer(iter->first);
+
+        if (startLayer > pseudoLayer)
+            continue;
+
+        if (endLayer < pseudoLayer)
+            break;
+
+        float cellLengthScaleSum(0.f);
+        CartesianVector cellNormalVectorSum(0.f, 0.f, 0.f);
+
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            clusterFitPointList.push_back(ClusterFitPoint(*hitIter));
+            cellLengthScaleSum += (*hitIter)->GetCellLengthScale();
+            cellNormalVectorSum += (*hitIter)->GetCellNormalVector();
         }
+
+        clusterFitPointList.push_back(ClusterFitPoint(pCluster->GetCentroid(pseudoLayer), cellNormalVectorSum.GetUnitVector(),
+            cellLengthScaleSum / static_cast<float>(iter->second->size()), pseudoLayer));
     }
 
     return FitPoints(clusterFitPointList, clusterFitResult);
@@ -153,38 +197,20 @@ StatusCode ClusterHelper::FitPoints(const ClusterFitPointList &clusterFitPointLi
 {
     const unsigned int nFitPoints(clusterFitPointList.size());
 
-    if (nFitPoints <= 1)
+    if (nFitPoints < 2)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    float sumX(0.), sumY(0.), sumZ(0.);
     clusterFitResult.Reset();
+    CartesianVector positionSum(0.f, 0.f, 0.f);
+    CartesianVector normalVectorSum(0.f, 0.f, 0.f);
 
     for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
-        sumX += iter->GetPosition().GetX();
-        sumY += iter->GetPosition().GetY();
-        sumZ += iter->GetPosition().GetZ();
+        positionSum += iter->GetPosition();
+        normalVectorSum += iter->GetCellNormalVector();
     }
 
-    const float meanX(sumX / static_cast<float>(nFitPoints));
-    const float meanY(sumY / static_cast<float>(nFitPoints));
-    const float meanZ(sumZ / static_cast<float>(nFitPoints));
-
-    const float rXY(std::sqrt(meanX * meanX + meanY * meanY));
-
-    if (rXY == 0.f)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    static const float eCalEndCapZPosition(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetInnerZCoordinate());
-
-    if (std::fabs(meanZ) > eCalEndCapZPosition)
-    {
-        return PerformLinearFit(clusterFitPointList, CartesianVector(meanX, meanY, meanZ), CartesianVector(0, 0, (meanZ > 0) ? 1 : -1), clusterFitResult);
-    }
-    else
-    {
-        return PerformLinearFit(clusterFitPointList, CartesianVector(meanX, meanY, meanZ), CartesianVector(meanX / rXY, meanY / rXY, 0), clusterFitResult);
-    }
+    return PerformLinearFit(clusterFitPointList, positionSum * (1.f / static_cast<float>(nFitPoints)), normalVectorSum.GetUnitVector(), clusterFitResult);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -317,14 +343,14 @@ StatusCode ClusterHelper::PerformLinearFit(const ClusterFitPointList &clusterFit
         clusterFitResult.SetRms(static_cast<float>(std::sqrt(rms / nPoints)));
         clusterFitResult.SetRadialDirectionCosine(dirCosR);
         clusterFitResult.SetSuccessFlag(true);
+
+        return STATUS_CODE_SUCCESS;
     }
     catch (StatusCodeException &statusCodeException)
     {
         clusterFitResult.SetSuccessFlag(false);
         return statusCodeException.GetStatusCode();
     }
-
-    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -789,21 +815,24 @@ bool ClusterHelper::DoesFitCrossGapRegion(const ClusterFitResult &clusterFitResu
 
 ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :
     m_position(pCaloHit->GetPositionVector()),
+    m_cellNormalVector(pCaloHit->GetCellNormalVector()),
     m_cellSize(pCaloHit->GetCellLengthScale()),
     m_pseudoLayer(pCaloHit->GetPseudoLayer())
 {
-    if (!m_position.IsInitialized() || (0 == m_cellSize))
+    if (!m_position.IsInitialized() || (!m_cellNormalVector.IsInitialized()) || (0.f == m_cellSize))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position, const float cellSize, const PseudoLayer pseudoLayer) :
+ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position, const CartesianVector &cellNormalVector, const float cellSize,
+        const PseudoLayer pseudoLayer) :
     m_position(position),
+    m_cellNormalVector(cellNormalVector.GetUnitVector()),
     m_cellSize(cellSize),
     m_pseudoLayer(pseudoLayer)
 {
-    if (!m_position.IsInitialized() || (0 == m_cellSize))
+    if (!m_position.IsInitialized() || (!m_cellNormalVector.IsInitialized()) || (0.f == m_cellSize))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 

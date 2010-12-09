@@ -11,6 +11,7 @@
 #include "Pandora/StatusCodes.h"
 
 #include <cmath>
+#include <limits>
 
 namespace pandora
 {
@@ -406,7 +407,9 @@ inline bool CartesianVector::operator==(const CartesianVector &rhs) const
     if (!m_isInitialized)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    return ((m_x == rhs.GetX()) && (m_y == rhs.GetY()) && (m_z == rhs.GetZ()));
+    return ( (std::fabs(m_x - rhs.GetX()) < std::numeric_limits<float>::epsilon()) &&
+        (std::fabs(m_y - rhs.GetY()) < std::numeric_limits<float>::epsilon()) &&
+        (std::fabs(m_z - rhs.GetZ()) < std::numeric_limits<float>::epsilon()) );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,23 +1,23 @@
 /**
- *  @file   PandoraPFANew/src/Algorithms/Clustering/ClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/src/Algorithms/Clustering/InwardClusteringAlgorithm.cc
  * 
- *  @brief  Implementation of the clustering algorithm class.
+ *  @brief  Implementation of the inward clustering algorithm class.
  * 
  *  $Log: $
  */
 
-#include "Algorithms/Clustering/ClusteringAlgorithm.h"
+#include "Algorithms/Clustering/InwardClusteringAlgorithm.h"
 
 #include "Pandora/AlgorithmHeaders.h"
 
 using namespace pandora;
 
-unsigned int CustomHitOrder::m_hitSortingStrategy = 0;
-const float ClusteringAlgorithm::FLOAT_MAX = std::numeric_limits<float>::max();
+unsigned int InwardClusteringAlgorithm::CustomHitOrder::m_hitSortingStrategy = 0;
+const float InwardClusteringAlgorithm::FLOAT_MAX = std::numeric_limits<float>::max();
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::Run()
+StatusCode InwardClusteringAlgorithm::Run()
 {
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
@@ -26,9 +26,8 @@ StatusCode ClusteringAlgorithm::Run()
         return STATUS_CODE_SUCCESS;
 
     ClusterVector clusterVector;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SeedClustersWithTracks(clusterVector));
 
-    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+    for (OrderedCaloHitList::const_reverse_iterator iter = pOrderedCaloHitList->rbegin(), iterEnd = pOrderedCaloHitList->rend(); iter != iterEnd; ++iter)
     {
         const PseudoLayer pseudoLayer(iter->first);
         CustomSortedCaloHitList customSortedCaloHitList;
@@ -56,46 +55,7 @@ StatusCode ClusteringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::SeedClustersWithTracks(ClusterVector &clusterVector) const
-{
-    if (0 == m_clusterSeedStrategy)
-        return STATUS_CODE_SUCCESS;
-
-    const TrackList *pTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
-
-    for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
-    {
-        Track *pTrack = *iter;
-
-        if (!pTrack->CanFormPfo())
-            continue;
-
-        bool useTrack(false);
-
-        if (2 == m_clusterSeedStrategy)
-        {
-            useTrack = true;
-        }
-        else if ((1 == m_clusterSeedStrategy) && pTrack->IsProjectedToEndCap())
-        {
-            useTrack = true;
-        }
-
-        if (useTrack)
-        {
-            Cluster *pCluster = NULL;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pTrack, pCluster));
-            clusterVector.push_back(pCluster);
-        }
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
+StatusCode InwardClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
     ClusterVector &clusterVector) const
 {
     for (CustomSortedCaloHitList::iterator iter = pCustomSortedCaloHitList->begin(), iterEnd = pCustomSortedCaloHitList->end();
@@ -108,10 +68,10 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
         float smallestGenericDistance(m_genericDistanceCut);
         const PseudoLayer layersToStepBack((ECAL == pCaloHit->GetHitType()) ? m_layersToStepBackECal : m_layersToStepBackHCal);
 
-        // Associate with existing clusters in stepBack layers. If stepBackLayer == pseudoLayer, will examine TRACK_PROJECTION_LAYER.
+        // Associate with existing clusters in stepBack layers.
         for (PseudoLayer stepBackLayer = 1; (stepBackLayer <= layersToStepBack) && (stepBackLayer <= pseudoLayer); ++stepBackLayer)
         {
-            const PseudoLayer searchLayer(pseudoLayer - stepBackLayer);
+            const PseudoLayer searchLayer(pseudoLayer + stepBackLayer);
 
             // See if hit should be associated with any existing clusters
             for (ClusterVector::iterator clusterIter = clusterVector.begin(), clusterIterEnd = clusterVector.end();
@@ -162,7 +122,7 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
+StatusCode InwardClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, CustomSortedCaloHitList *const pCustomSortedCaloHitList,
     ClusterVector &clusterVector) const
 {
     while (!pCustomSortedCaloHitList->empty())
@@ -231,7 +191,7 @@ StatusCode ClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer, Cus
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVector) const
+StatusCode InwardClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVector) const
 {
     // TODO replace this eventually - it remains only to reproduce old pandora results
     for (ClusterVector::iterator iter = clusterVector.begin(), iterEnd = clusterVector.end(); iter != iterEnd; ++iter)
@@ -255,8 +215,8 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVe
             if (pCluster->GetMipFraction() - m_nLayersToFitLowMipCut < std::numeric_limits<float>::epsilon())
                 nLayersToFit *= m_nLayersToFitLowMipMultiplier;
 
-            const PseudoLayer startLayer( (nLayersSpanned > nLayersToFit) ? (outerLayer - nLayersToFit) : innerLayer);
-            (void) ClusterHelper::FitLayerCentroids(pCluster, startLayer, outerLayer, clusterFitResult);
+            const PseudoLayer endLayer( (nLayersSpanned > nLayersToFit) ? (innerLayer + nLayersToFit) : outerLayer);
+            (void) ClusterHelper::FitLayerCentroids(pCluster, innerLayer, endLayer, clusterFitResult);
 
             if (clusterFitResult.IsFitSuccessful())
             {
@@ -289,75 +249,37 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
+StatusCode InwardClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
     float &genericDistance) const
 {
-    // Cone approach measurement to track projections
-    if ((searchLayer == TRACK_PROJECTION_LAYER) && (pCluster->IsTrackSeeded()))
-    {
-        return this->GetConeApproachDistanceToHit(pCaloHit, pCluster->GetTrackSeed()->GetTrackStateAtECal().GetPosition(),
-            pCluster->GetInitialDirection(), genericDistance);
-    }
-
     OrderedCaloHitList::const_iterator clusterHitListIter = pCluster->GetOrderedCaloHitList().find(searchLayer);
     if (pCluster->GetOrderedCaloHitList().end() == clusterHitListIter)
         return STATUS_CODE_UNCHANGED;
 
     const CaloHitList *pClusterCaloHitList = clusterHitListIter->second;
-
-    const bool useTrackSeed(m_shouldUseTrackSeed && pCluster->IsTrackSeeded());
-    const bool followInitialDirection(m_shouldFollowInitialDirection && pCluster->IsTrackSeeded() && (searchLayer > m_trackSeedCutOffLayer));
-    float initialDirectionDistance(FLOAT_MAX), currentDirectionDistance(FLOAT_MAX), trackSeedDistance(FLOAT_MAX);
+    float initialDirectionDistance(FLOAT_MAX), currentDirectionDistance(FLOAT_MAX);
 
     // Cone approach measurements
-    if (!useTrackSeed || (searchLayer > m_trackSeedCutOffLayer))
-    {
-        if (searchLayer == pCaloHit->GetPseudoLayer())
-        {
-            return this->GetDistanceToHitInSameLayer(pCaloHit, pClusterCaloHitList, genericDistance);
-        }
+    if (searchLayer == pCaloHit->GetPseudoLayer())
+        return this->GetDistanceToHitInSameLayer(pCaloHit, pClusterCaloHitList, genericDistance);
 
-        // Measurement using initial cluster direction
-        StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList, pCluster->GetInitialDirection(),
-            initialDirectionDistance);
+    // Measurement using initial cluster direction
+    StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList, pCluster->GetInitialDirection(),
+        initialDirectionDistance);
+
+    if ((STATUS_CODE_SUCCESS != statusCode) && (STATUS_CODE_UNCHANGED != statusCode))
+        return statusCode;
+
+    // Measurement using current cluster direction
+    if (pCluster->GetCurrentFitResult().IsFitSuccessful())
+    {
+        StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList, pCluster->GetCurrentFitResult().GetDirection(),
+            currentDirectionDistance);
 
         if (STATUS_CODE_SUCCESS == statusCode)
         {
-            if (followInitialDirection)
-                initialDirectionDistance /= 5.;
-        }
-        else if (STATUS_CODE_UNCHANGED != statusCode)
-        {
-            return statusCode;
-        }
-
-        // Measurement using current cluster direction
-        if (pCluster->GetCurrentFitResult().IsFitSuccessful())
-        {
-            StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList,
-                pCluster->GetCurrentFitResult().GetDirection(), currentDirectionDistance);
-
-            if (STATUS_CODE_SUCCESS == statusCode)
-            {
-                if ((currentDirectionDistance < m_genericDistanceCut) && pCluster->IsMipTrack())
-                    currentDirectionDistance /= 5.;
-            }
-            else if (STATUS_CODE_UNCHANGED != statusCode)
-            {
-                return statusCode;
-            }
-        }
-    }
-
-    // Seed track distance measurements
-    if (useTrackSeed && !followInitialDirection)
-    {
-        StatusCode statusCode = this->GetDistanceToTrackSeed(pCluster, pCaloHit, searchLayer, trackSeedDistance);
-
-        if (STATUS_CODE_SUCCESS == statusCode)
-        {
-            if (trackSeedDistance < m_genericDistanceCut)
-                trackSeedDistance /= 5.;
+            if ((currentDirectionDistance < m_genericDistanceCut) && pCluster->IsMipTrack())
+                currentDirectionDistance /= 5.;
         }
         else if (STATUS_CODE_UNCHANGED != statusCode)
         {
@@ -366,7 +288,7 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
     }
 
     // Identify best measurement of generic distance
-    const float smallestDistance(std::min(trackSeedDistance, std::min(initialDirectionDistance, currentDirectionDistance)));
+    const float smallestDistance(std::min(initialDirectionDistance, currentDirectionDistance));
     if (smallestDistance < genericDistance)
     {
         genericDistance = smallestDistance;
@@ -380,7 +302,7 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList,
+StatusCode InwardClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList,
     float &distance) const
 {
     const float dCut ((ECAL == pCaloHit->GetHitType()) ?
@@ -418,7 +340,7 @@ StatusCode ClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const pCalo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList,
+StatusCode InwardClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList,
     const CartesianVector &clusterDirection, float &distance) const
 {
     bool hitFound(false);
@@ -448,7 +370,7 @@ StatusCode ClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCal
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCaloHit, const CartesianVector &clusterPosition,
+StatusCode InwardClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCaloHit, const CartesianVector &clusterPosition,
     const CartesianVector &clusterDirection, float &distance) const
 {
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
@@ -478,72 +400,7 @@ StatusCode ClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCal
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
-    float &distance) const
-{
-    if (searchLayer < m_maxLayersToTrackSeed)
-        return this->GetDistanceToTrackSeed(pCluster, pCaloHit, distance);
-
-    const int searchLayerInt(static_cast<int>(searchLayer));
-    const int startLayer(std::max(0, searchLayerInt - static_cast<int>(m_maxLayersToTrackLikeHit)));
-
-    const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
-
-    for (int iLayer = startLayer; iLayer < searchLayerInt; ++iLayer)
-    {
-        OrderedCaloHitList::const_iterator listIter = orderedCaloHitList.find(iLayer);
-        if (orderedCaloHitList.end() == listIter)
-            continue;
-
-        for (CaloHitList::const_iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
-        {
-            float tempDistance(FLOAT_MAX);
-            PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrackSeed(pCluster, *iter,
-                tempDistance));
-
-            if (tempDistance < m_genericDistanceCut)
-                return this->GetDistanceToTrackSeed(pCluster, pCaloHit, distance);
-        }
-    }
-
-    return STATUS_CODE_UNCHANGED;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, float &distance) const
-{
-    if (0 == m_maxTrackSeedSeparation)
-        return STATUS_CODE_FAILURE;
-
-    const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
-
-    const CartesianVector &trackSeedPosition(pCluster->GetTrackSeed()->GetTrackStateAtECal().GetPosition());
-    const CartesianVector positionDifference(hitPosition - trackSeedPosition);
-    const float separation(positionDifference.GetMagnitude());
-
-    if (separation < m_maxTrackSeedSeparation)
-    {
-        const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
-        const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
-
-        const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
-            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
-
-        if (0 == dCut)
-            return STATUS_CODE_FAILURE;
-
-        distance = dPerp / dCut;
-        return STATUS_CODE_SUCCESS;
-    }
-
-    return STATUS_CODE_UNCHANGED;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusteringAlgorithm::RemoveEmptyClusters(ClusterVector &clusterVector) const
+StatusCode InwardClusteringAlgorithm::RemoveEmptyClusters(ClusterVector &clusterVector) const
 {
     ClusterList clusterDeletionList;
 
@@ -566,17 +423,8 @@ StatusCode ClusteringAlgorithm::RemoveEmptyClusters(ClusterVector &clusterVector
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode InwardClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    // Track seeding parameters
-    m_clusterSeedStrategy = 2;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ClusterSeedStrategy", m_clusterSeedStrategy));
-
-    m_trackSeedMaxCosTheta = 0.7f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackSeedMaxCosTheta", m_trackSeedMaxCosTheta));
-
     // High level clustering parameters
     CustomHitOrder::m_hitSortingStrategy = 0;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -605,18 +453,6 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_genericDistanceCut = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GenericDistanceCut", m_genericDistanceCut));
-
-    m_shouldUseTrackSeed = true;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShouldUseTrackSeed", m_shouldUseTrackSeed));
-
-    m_trackSeedCutOffLayer = 0;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackSeedCutOffLayer", m_trackSeedCutOffLayer));
-
-    m_shouldFollowInitialDirection = false;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShouldFollowInitialDirection", m_shouldFollowInitialDirection));
 
     // Same layer distance parameters
     m_sameLayerPadWidthsECal = 2.8f;
@@ -655,23 +491,6 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_minClusterDirProjection = -10.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterDirProjection", m_minClusterDirProjection));
-
-    // Track seed distance parameters
-    m_trackPathWidth = 2.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackPathWidth", m_trackPathWidth));
-
-    m_maxTrackSeedSeparation = 250.f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxTrackSeedSeparation", m_maxTrackSeedSeparation));
-
-    m_maxLayersToTrackSeed = 3;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxLayersToTrackSeed", m_maxLayersToTrackSeed));
-
-    m_maxLayersToTrackLikeHit = 3;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxLayersToTrackLikeHit", m_maxLayersToTrackLikeHit));
 
     // Cluster current direction and mip track parameters
     m_nLayersSpannedForFit = 6;
