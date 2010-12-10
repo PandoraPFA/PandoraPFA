@@ -152,65 +152,84 @@ StatusCode ClusterHelper::FitLayers(const Cluster *const pCluster, const PseudoL
 StatusCode ClusterHelper::FitLayerCentroids(const Cluster *const pCluster, const PseudoLayer startLayer, const PseudoLayer endLayer,
     ClusterFitResult &clusterFitResult)
 {
-    if (startLayer >= endLayer)
-        return STATUS_CODE_INVALID_PARAMETER;
-
-    const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
-    const unsigned int listSize(orderedCaloHitList.size());
-
-    if (0 == listSize)
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    if (listSize < 2)
-        return STATUS_CODE_OUT_OF_RANGE;
-
-    ClusterFitPointList clusterFitPointList;
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    try
     {
-        const PseudoLayer pseudoLayer(iter->first);
+        if (startLayer >= endLayer)
+            return STATUS_CODE_INVALID_PARAMETER;
 
-        if (startLayer > pseudoLayer)
-            continue;
+        const OrderedCaloHitList &orderedCaloHitList = pCluster->GetOrderedCaloHitList();
+        const unsigned int listSize(orderedCaloHitList.size());
 
-        if (endLayer < pseudoLayer)
-            break;
+        if (0 == listSize)
+            return STATUS_CODE_NOT_INITIALIZED;
 
-        float cellLengthScaleSum(0.f);
-        CartesianVector cellNormalVectorSum(0.f, 0.f, 0.f);
+        if (listSize < 2)
+            return STATUS_CODE_OUT_OF_RANGE;
 
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        ClusterFitPointList clusterFitPointList;
+        for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
         {
-            cellLengthScaleSum += (*hitIter)->GetCellLengthScale();
-            cellNormalVectorSum += (*hitIter)->GetCellNormalVector();
+            const PseudoLayer pseudoLayer(iter->first);
+
+            if (startLayer > pseudoLayer)
+                continue;
+
+            if (endLayer < pseudoLayer)
+                break;
+
+            float cellLengthScaleSum(0.f);
+            CartesianVector cellNormalVectorSum(0.f, 0.f, 0.f);
+
+            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+            {
+                cellLengthScaleSum += (*hitIter)->GetCellLengthScale();
+                cellNormalVectorSum += (*hitIter)->GetCellNormalVector();
+            }
+
+            clusterFitPointList.push_back(ClusterFitPoint(pCluster->GetCentroid(pseudoLayer), cellNormalVectorSum.GetUnitVector(),
+                cellLengthScaleSum / static_cast<float>(iter->second->size()), pseudoLayer));
         }
 
-        clusterFitPointList.push_back(ClusterFitPoint(pCluster->GetCentroid(pseudoLayer), cellNormalVectorSum.GetUnitVector(),
-            cellLengthScaleSum / static_cast<float>(iter->second->size()), pseudoLayer));
+        return FitPoints(clusterFitPointList, clusterFitResult);
     }
-
-    return FitPoints(clusterFitPointList, clusterFitResult);
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "ClusterHelper: linear fit to cluster failed. " << std::endl;
+        clusterFitResult.SetSuccessFlag(false);
+        return statusCodeException.GetStatusCode();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ClusterHelper::FitPoints(const ClusterFitPointList &clusterFitPointList, ClusterFitResult &clusterFitResult)
 {
-    const unsigned int nFitPoints(clusterFitPointList.size());
-
-    if (nFitPoints < 2)
-        return STATUS_CODE_INVALID_PARAMETER;
-
-    clusterFitResult.Reset();
-    CartesianVector positionSum(0.f, 0.f, 0.f);
-    CartesianVector normalVectorSum(0.f, 0.f, 0.f);
-
-    for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
+    try
     {
-        positionSum += iter->GetPosition();
-        normalVectorSum += iter->GetCellNormalVector();
-    }
+        const unsigned int nFitPoints(clusterFitPointList.size());
 
-    return PerformLinearFit(clusterFitPointList, positionSum * (1.f / static_cast<float>(nFitPoints)), normalVectorSum.GetUnitVector(), clusterFitResult);
+        if (nFitPoints < 2)
+            return STATUS_CODE_INVALID_PARAMETER;
+
+        clusterFitResult.Reset();
+        CartesianVector positionSum(0.f, 0.f, 0.f);
+        CartesianVector normalVectorSum(0.f, 0.f, 0.f);
+
+        for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
+        {
+            positionSum += iter->GetPosition();
+            normalVectorSum += iter->GetCellNormalVector();
+        }
+
+        return PerformLinearFit(clusterFitPointList, positionSum * (1.f / static_cast<float>(nFitPoints)), normalVectorSum.GetUnitVector(),
+            clusterFitResult);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "ClusterHelper: linear fit to cluster failed. " << std::endl;
+        clusterFitResult.SetSuccessFlag(false);
+        return statusCodeException.GetStatusCode();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -218,139 +237,128 @@ StatusCode ClusterHelper::FitPoints(const ClusterFitPointList &clusterFitPointLi
 StatusCode ClusterHelper::PerformLinearFit(const ClusterFitPointList &clusterFitPointList, const CartesianVector &centralPosition,
     const CartesianVector &centralDirection, ClusterFitResult &clusterFitResult)
 {
-    try
+    // Extract the data
+    double sumP(0.), sumQ(0.), sumR(0.);
+    double sumPR(0.), sumQR(0.), sumRR(0.);
+
+    static const CartesianVector chosenAxis(0.f, 0.f, 1.f);
+    const double cosTheta(centralDirection.GetCosOpeningAngle(chosenAxis));
+    const double sinTheta(std::sin(std::acos(cosTheta)));
+
+    const CartesianVector rotationAxis((std::fabs(cosTheta) > 0.99) ? CartesianVector(1.f, 0.f, 0.f) :
+        centralDirection.GetCrossProduct(chosenAxis).GetUnitVector());
+
+    for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
-        // Extract the data
-        double sumP(0.), sumQ(0.), sumR(0.);
-        double sumPR(0.), sumQR(0.), sumRR(0.);
+        const CartesianVector position(iter->GetPosition() - centralPosition);
 
-        static const CartesianVector chosenAxis(0.f, 0.f, 1.f);
-        const double cosTheta(centralDirection.GetCosOpeningAngle(chosenAxis));
-        const double sinTheta(std::sin(std::acos(cosTheta)));
+        const double p( (cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * position.GetX() +
+            (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * position.GetY() +
+            (rotationAxis.GetX() * rotationAxis.GetZ() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * position.GetZ() );
+        const double q( (rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * position.GetX() +
+            (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * position.GetY() +
+            (rotationAxis.GetY() * rotationAxis.GetZ() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * position.GetZ() );
+        const double r( (rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetY() * sinTheta) * position.GetX() +
+            (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetX() * sinTheta) * position.GetY() +
+            (cosTheta + rotationAxis.GetZ() * rotationAxis.GetZ() * (1. - cosTheta)) * position.GetZ() );
 
-        const CartesianVector rotationAxis((std::fabs(cosTheta) > 0.99) ? CartesianVector(1.f, 0.f, 0.f) : centralDirection.GetCrossProduct(chosenAxis).GetUnitVector());
+        sumP += p; sumQ += q; sumR += r;
+        sumPR += p * r; sumQR += q * r; sumRR += r * r;
+    }
 
-        for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
-        {
-            const CartesianVector position(iter->GetPosition() - centralPosition);
+    // Perform the fit
+    const double nPoints(static_cast<double>(clusterFitPointList.size()));
+    const double denominatorR(sumR * sumR - nPoints * sumRR);
 
-            const double p( (cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * position.GetX() +
-                (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * position.GetY() +
-                (rotationAxis.GetX() * rotationAxis.GetZ() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * position.GetZ() );
+    if (0. == denominatorR)
+        return STATUS_CODE_FAILURE;
 
-            const double q( (rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * position.GetX() +
-                (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * position.GetY() +
-                (rotationAxis.GetY() * rotationAxis.GetZ() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * position.GetZ() );
+    const double aP((sumR * sumP - nPoints * sumPR) / denominatorR);
+    const double bP((sumP - aP * sumR) / nPoints);
+    const double aQ((sumR * sumQ - nPoints * sumQR) / denominatorR);
+    const double bQ((sumQ - aQ * sumR) / nPoints);
 
-            const double r( (rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetY() * sinTheta) * position.GetX() +
-                (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetX() * sinTheta) * position.GetY() +
-                (cosTheta + rotationAxis.GetZ() * rotationAxis.GetZ() * (1. - cosTheta)) * position.GetZ() );
+    // Extract direction and intercept
+    const double magnitude(std::sqrt(1. + aP * aP + aQ * aQ));
+    const double dirP(aP / magnitude), dirQ(aQ / magnitude), dirR(1. / magnitude);
 
-            sumP += p; sumQ += q; sumR += r;
-            sumPR += p * r; sumQR += q * r; sumRR += r * r;
-        }
+    CartesianVector direction(
+        static_cast<float>((cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * dirP +
+            (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * dirQ +
+            (rotationAxis.GetX() * rotationAxis.GetZ() * (1. - cosTheta) - rotationAxis.GetY() * sinTheta) * dirR),
+        static_cast<float>((rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * dirP +
+            (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * dirQ +
+            (rotationAxis.GetY() * rotationAxis.GetZ() * (1. - cosTheta) + rotationAxis.GetX() * sinTheta) * dirR),
+        static_cast<float>((rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * dirP +
+            (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * dirQ +
+            (cosTheta + rotationAxis.GetZ() * rotationAxis.GetZ() * (1. - cosTheta)) * dirR) );
 
-        // Perform the fit
-        const double nPoints(static_cast<double>(clusterFitPointList.size()));
-        const double denominatorR(sumR * sumR - nPoints * sumRR);
+    CartesianVector intercept(centralPosition + CartesianVector(
+        static_cast<float>((cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * bP +
+            (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * bQ),
+        static_cast<float>((rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * bP +
+            (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * bQ),
+        static_cast<float>((rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * bP +
+            (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * bQ) ));
 
-        if (0. == denominatorR)
-            return STATUS_CODE_FAILURE;
+    // Extract radial direction cosine
+    float dirCosR(direction.GetDotProduct(intercept) / intercept.GetMagnitude());
 
-        const double aP((sumR * sumP - nPoints * sumPR) / denominatorR);
-        const double bP((sumP - aP * sumR) / nPoints);
-        const double aQ((sumR * sumQ - nPoints * sumQR) / denominatorR);
-        const double bQ((sumQ - aQ * sumR) / nPoints);
+    if (0.f > dirCosR)
+    {
+        dirCosR = -dirCosR;
+        direction = direction * -1.f;
+    }
 
-        // Extract direction and intercept
-        const double magnitude(std::sqrt(1. + aP * aP + aQ * aQ));
-        const double dirP(aP / magnitude), dirQ(aQ / magnitude), dirR(1. / magnitude);
+    // Now calculate something like a chi2
+    double chi2_P(0.), chi2_Q(0.), rms(0.);
+    double sumA(0.), sumL(0.), sumAL(0.), sumLL(0.);
 
-        CartesianVector direction(
-            static_cast<float>((cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * dirP +
-                (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * dirQ +
-                (rotationAxis.GetX() * rotationAxis.GetZ() * (1. - cosTheta) - rotationAxis.GetY() * sinTheta) * dirR),
-            static_cast<float>((rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * dirP +
-                (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * dirQ +
-                (rotationAxis.GetY() * rotationAxis.GetZ() * (1. - cosTheta) + rotationAxis.GetX() * sinTheta) * dirR),
-            static_cast<float>((rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * dirP +
-                (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * dirQ +
-                (cosTheta + rotationAxis.GetZ() * rotationAxis.GetZ() * (1. - cosTheta)) * dirR) );
+    for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
+    {
+        const CartesianVector position(iter->GetPosition() - centralPosition);
 
-        CartesianVector intercept(centralPosition + CartesianVector(
-            static_cast<float>((cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * bP +
-                (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * bQ),
-            static_cast<float>((rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * bP +
-                (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * bQ),
-            static_cast<float>((rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * bP +
-                (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * bQ) ));
+        const double p( (cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * position.GetX() +
+            (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * position.GetY() +
+            (rotationAxis.GetX() * rotationAxis.GetZ() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * position.GetZ() );
+        const double q( (rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * position.GetX() +
+            (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * position.GetY() +
+            (rotationAxis.GetY() * rotationAxis.GetZ() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * position.GetZ() );
+        const double r( (rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetY() * sinTheta) * position.GetX() +
+            (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetX() * sinTheta) * position.GetY() +
+            (cosTheta + rotationAxis.GetZ() * rotationAxis.GetZ() * (1. - cosTheta)) * position.GetZ() );
 
-        // Extract radial direction cosine
-        float dirCosR(direction.GetDotProduct(intercept) / intercept.GetMagnitude());
+        const double error(iter->GetCellSize() / 3.46);
+        const double chiP((p - aP * r - bP) / error);
+        const double chiQ((q - aQ * r - bQ) / error);
 
-        if (0.f > dirCosR)
-        {
-            dirCosR = -dirCosR;
+        chi2_P += chiP * chiP;
+        chi2_Q += chiQ * chiQ;
+
+        const CartesianVector difference(iter->GetPosition() - intercept);
+        rms += (direction.GetCrossProduct(difference)).GetMagnitudeSquared();
+
+        const float a(direction.GetDotProduct(difference));
+        const float l(static_cast<float>(iter->GetPseudoLayer()));
+        sumA += a; sumL += l; sumAL += a * l; sumLL += l * l;
+    }
+
+    const double denominatorL(sumL * sumL - nPoints * sumLL);
+
+    if (0. != denominatorL)
+    {
+        if (0. > ((sumL * sumA - nPoints * sumAL) / denominatorL))
             direction = direction * -1.f;
-        }
-
-        // Now calculate something like a chi2
-        double chi2_P(0.), chi2_Q(0.), rms(0.);
-        double sumA(0.), sumL(0.), sumAL(0.), sumLL(0.);
-
-        for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
-        {
-            const CartesianVector position(iter->GetPosition() - centralPosition);
-
-            const double p( (cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * position.GetX() +
-                (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * position.GetY() +
-                (rotationAxis.GetX() * rotationAxis.GetZ() * (1. - cosTheta) + rotationAxis.GetY() * sinTheta) * position.GetZ() );
-
-            const double q( (rotationAxis.GetY() * rotationAxis.GetX() * (1. - cosTheta) + rotationAxis.GetZ() * sinTheta) * position.GetX() +
-                (cosTheta + rotationAxis.GetY() * rotationAxis.GetY() * (1. - cosTheta)) * position.GetY() +
-                (rotationAxis.GetY() * rotationAxis.GetZ() * (1. - cosTheta) - rotationAxis.GetX() * sinTheta) * position.GetZ() );
-
-            const double r( (rotationAxis.GetZ() * rotationAxis.GetX() * (1. - cosTheta) - rotationAxis.GetY() * sinTheta) * position.GetX() +
-                (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetX() * sinTheta) * position.GetY() +
-                (cosTheta + rotationAxis.GetZ() * rotationAxis.GetZ() * (1. - cosTheta)) * position.GetZ() );
-
-            const double error(iter->GetCellSize() / 3.46);
-            const double chiP((p - aP * r - bP) / error);
-            const double chiQ((q - aQ * r - bQ) / error);
-
-            chi2_P += chiP * chiP;
-            chi2_Q += chiQ * chiQ;
-
-            const CartesianVector difference(iter->GetPosition() - intercept);
-            rms += (direction.GetCrossProduct(difference)).GetMagnitudeSquared();
-
-            const float a(direction.GetDotProduct(difference));
-            const float l(static_cast<float>(iter->GetPseudoLayer()));
-            sumA += a; sumL += l; sumAL += a * l; sumLL += l * l;
-        }
-
-        const double denominatorL(sumL * sumL - nPoints * sumLL);
-
-        if (0. != denominatorL)
-        {
-            if (0. > ((sumL * sumA - nPoints * sumAL) / denominatorL))
-                direction = direction * -1.f;
-        }
-
-        clusterFitResult.SetDirection(direction);
-        clusterFitResult.SetIntercept(intercept);
-        clusterFitResult.SetChi2(static_cast<float>((chi2_P + chi2_Q) / nPoints));
-        clusterFitResult.SetRms(static_cast<float>(std::sqrt(rms / nPoints)));
-        clusterFitResult.SetRadialDirectionCosine(dirCosR);
-        clusterFitResult.SetSuccessFlag(true);
-
-        return STATUS_CODE_SUCCESS;
     }
-    catch (StatusCodeException &statusCodeException)
-    {
-        clusterFitResult.SetSuccessFlag(false);
-        return statusCodeException.GetStatusCode();
-    }
+
+    clusterFitResult.SetDirection(direction);
+    clusterFitResult.SetIntercept(intercept);
+    clusterFitResult.SetChi2(static_cast<float>((chi2_P + chi2_Q) / nPoints));
+    clusterFitResult.SetRms(static_cast<float>(std::sqrt(rms / nPoints)));
+    clusterFitResult.SetRadialDirectionCosine(dirCosR);
+    clusterFitResult.SetSuccessFlag(true);
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
