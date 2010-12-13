@@ -1,19 +1,19 @@
 /**
- *  @file   PandoraPFANew/src/Utilities/HighGranularityPseudoLayerCalculator.cc
+ *  @file   PandoraPFANew/src/Utilities/FineGranularityPseudoLayerCalculator.cc
  * 
- *  @brief  Implementation of the high granularity pseudo layer calculator class.
+ *  @brief  Implementation of the fine granularity pseudo layer calculator class.
  * 
  *  $Log: $
  */
 
-#include "Utilities/HighGranularityPseudoLayerCalculator.h"
+#include "Utilities/FineGranularityPseudoLayerCalculator.h"
 
 #include <algorithm>
 
 namespace pandora
 {
 
-void HighGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *const pGeometryHelper)
+void FineGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *const pGeometryHelper)
 {
     // Cache all relevant layer positions in ordered lists, demanding no duplicates
     this->StoreLayerPositions(pGeometryHelper->GetECalBarrelParameters().GetLayerParametersList(), m_barrelLayerPositions);
@@ -65,7 +65,7 @@ void HighGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer HighGranularityPseudoLayerCalculator::GetPseudoLayer(const CartesianVector &positionVector) const
+PseudoLayer FineGranularityPseudoLayerCalculator::GetPseudoLayer(const CartesianVector &positionVector) const
 {
     const float zCoordinate(std::fabs(positionVector.GetZ()));
 
@@ -103,7 +103,7 @@ PseudoLayer HighGranularityPseudoLayerCalculator::GetPseudoLayer(const Cartesian
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void HighGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHelper::LayerParametersList &layerParametersList,
+void FineGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHelper::LayerParametersList &layerParametersList,
     LayerPositionList &LayerPositionList)
 {
     for (GeometryHelper::LayerParametersList::const_iterator iter = layerParametersList.begin(), iterEnd = layerParametersList.end();
@@ -115,7 +115,7 @@ void HighGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHel
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void HighGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper)
+void FineGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper)
 {
     // Find extremal barrel and endcap coordinates. Necessary to guard against e.g. user-specified dummy muon coordinates.
     m_barrelEdgeR = (std::max(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
@@ -139,7 +139,7 @@ void HighGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const Geometry
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode HighGranularityPseudoLayerCalculator::GetPseudoLayer(const float rCoordinate, const float zCoordinate, const float rCorrection,
+StatusCode FineGranularityPseudoLayerCalculator::GetPseudoLayer(const float rCoordinate, const float zCoordinate, const float rCorrection,
     const float zCorrection, const float barrelInnerR, const float endCapInnerZ, PseudoLayer &pseudoLayer) const
 {
     if (zCoordinate < endCapInnerZ)
@@ -168,7 +168,7 @@ StatusCode HighGranularityPseudoLayerCalculator::GetPseudoLayer(const float rCoo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode HighGranularityPseudoLayerCalculator::FindMatchingLayer(const float position, const LayerPositionList &layerPositionList,
+StatusCode FineGranularityPseudoLayerCalculator::FindMatchingLayer(const float position, const LayerPositionList &layerPositionList,
     PseudoLayer &layer) const
 {
     LayerPositionList::const_iterator upperIter = std::upper_bound(layerPositionList.begin(), layerPositionList.end(), position);

@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/include/Utilities/HighGranularityPseudoLayerCalculator.h
+ *  @file   PandoraPFANew/include/Utilities/FineGranularityPseudoLayerCalculator.h
  * 
- *  @brief  Header file for the high granularity pseudo layer calculator class.
+ *  @brief  Header file for the fine granularity pseudo layer calculator class.
  * 
  *  $Log: $
  */
-#ifndef HIGH_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H
-#define HIGH_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H 1
+#ifndef FINE_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H
+#define FINE_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H 1
 
 #include "Helpers/GeometryHelper.h"
 
@@ -16,9 +16,9 @@ namespace pandora
 {
 
 /**
- *  @brief  HighGranularityPseudoLayerCalculator class
+ *  @brief  FineGranularityPseudoLayerCalculator class
  */
-class HighGranularityPseudoLayerCalculator : public PseudoLayerCalculator
+class FineGranularityPseudoLayerCalculator : public PseudoLayerCalculator
 {
 private:
     void Initialize(const GeometryHelper *const pGeometryHelper);
@@ -85,4 +85,4 @@ private:
 
 } // namespace pandora
 
-#endif // #ifndef HIGH_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H
+#endif // #ifndef FINE_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H
