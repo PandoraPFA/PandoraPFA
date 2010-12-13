@@ -664,9 +664,9 @@ bool ECalPhotonClusteringAlgorithm::IsPhoton( Cluster* &pPhotonCandidateCluster,
 
     for( TrackList::const_iterator itTrack = pTrackList->begin(), itTrackEnd = pTrackList->end(); itTrack != itTrackEnd; ++itTrack )
     {
-        const TrackState& trackStateAtECal = (*itTrack)->GetTrackStateAtECal();
-        const CartesianVector trackMomentumDirection = trackStateAtECal.GetMomentum().GetUnitVector();
-        const CartesianVector trackPosition = trackStateAtECal.GetPosition();
+        const TrackState& trackStateAtCalorimeter = (*itTrack)->GetTrackStateAtCalorimeter();
+        const CartesianVector trackMomentumDirection = trackStateAtCalorimeter.GetMomentum().GetUnitVector();
+        const CartesianVector trackPosition = trackStateAtCalorimeter.GetPosition();
 //         const TrackState& trackStateAtEnd = (*itTrack)->GetTrackStateAtEnd();
 //         const CartesianVector trackMomentumDirection = trackStateAtEnd.GetMomentum().GetUnitVector();
 //         const CartesianVector trackPosition = trackStateAtEnd.GetPosition();

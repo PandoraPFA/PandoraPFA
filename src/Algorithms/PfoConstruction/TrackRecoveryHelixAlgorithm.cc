@@ -44,9 +44,9 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             continue;
 
         // Extract track information
-        const Helix *const pHelix(pTrack->GetHelixFitAtECal());
+        const Helix *const pHelix(pTrack->GetHelixFitAtCalorimeter());
         const float trackEnergy(pTrack->GetEnergyAtDca());
-        const float trackECalZPosition(pTrack->GetTrackStateAtECal().GetPosition().GetZ());
+        const float trackCalorimeterZPosition(pTrack->GetTrackStateAtCalorimeter().GetPosition().GetZ());
 
         for (ClusterList::const_iterator iterC = pClusterList->begin(), iterCEnd = pClusterList->end(); iterC != iterCEnd; ++iterC)
         {
@@ -55,12 +55,12 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             if (!pCluster->GetAssociatedTrackList().empty() || (0 == pCluster->GetNCaloHits()) || pCluster->IsPhotonFast())
                 continue;
 
-            // Cut on z-coordinate separation between track ecal projection and the cluster
+            // Cut on z-coordinate separation between track calorimeter projection and the cluster
             const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
             const float clusterZPosition(pCluster->GetCentroid(innerLayer).GetZ());
 
-            if ((std::fabs(trackECalZPosition) > (std::fabs(clusterZPosition) + m_maxTrackClusterDeltaZ)) ||
-                (trackECalZPosition * clusterZPosition < 0.f))
+            if ((std::fabs(trackCalorimeterZPosition) > (std::fabs(clusterZPosition) + m_maxTrackClusterDeltaZ)) ||
+                (trackCalorimeterZPosition * clusterZPosition < 0.f))
             {
                 continue;
             }
@@ -71,8 +71,8 @@ StatusCode TrackRecoveryHelixAlgorithm::GetTrackAssociationInfoMap(TrackAssociat
             if (std::fabs(chi) > m_maxAbsoluteTrackClusterChi)
                 continue;
 
-            // Cut on number of layers crossed by track helix in its motion between ecal projection and the cluster
-            const PseudoLayer nLayersCrossed(FragmentRemovalHelper::GetNLayersCrossed(pHelix, trackECalZPosition, clusterZPosition));
+            // Cut on number of layers crossed by track helix in its motion between calorimeter projection and the cluster
+            const PseudoLayer nLayersCrossed(FragmentRemovalHelper::GetNLayersCrossed(pHelix, trackCalorimeterZPosition, clusterZPosition));
 
             if (nLayersCrossed > m_maxLayersCrossed)
                 continue;

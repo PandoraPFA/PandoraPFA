@@ -121,7 +121,7 @@ private:
     float           m_fitResultsClosestApproachCutFine; ///< Fine granularity cut on closest distance of approach between two cluster fits
     float           m_fitResultsClosestApproachCutCoarse; ///< Coarse granularity cut on closest distance of approach between two cluster fits
 
-    unsigned int    m_nGoodFeaturesForClusterMerge;     ///< Number of identified "good features" required to merge ecal clusters
+    unsigned int    m_nGoodFeaturesForClusterMerge;     ///< Number of identified "good features" required to merge fine granularity clusters
 
     float           m_goodFeaturesMaxFitDotProduct;     ///< Max dot product between cluster fit directions for good feature
     float           m_goodFeaturesMaxFitApproach;       ///< Max distance of closest approach between cluster fit results for good feature

@@ -35,14 +35,14 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
         if (!pTrack->GetDaughterTrackList().empty())
             continue;
 
-        // Use only tracks that reach the ecal endcap, not barrel
+        // Use only tracks that reach endcap, not barrel
         if (!pTrack->IsProjectedToEndCap())
             continue;
 
-        const float trackECalZPosition(pTrack->GetTrackStateAtECal().GetPosition().GetZ());
+        const float trackCalorimeterZPosition(pTrack->GetTrackStateAtCalorimeter().GetPosition().GetZ());
 
         // Extract information from the track
-        const Helix *const pHelix(pTrack->GetHelixFitAtECal());
+        const Helix *const pHelix(pTrack->GetHelixFitAtCalorimeter());
         const float helixOmega(pHelix->GetOmega());
 
         if (0.f == helixOmega)
@@ -74,7 +74,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
             if ((pCluster->GetNCaloHits() < m_minHitsInCluster) || (pCluster->GetOrderedCaloHitList().size() < m_minOccupiedLayersInCluster))
                 continue;
 
-            // Demand that cluster starts in first few layers of ecal
+            // Demand that cluster starts in first few layers
             const PseudoLayer innerLayer(pCluster->GetInnerPseudoLayer());
 
             if (innerLayer > m_maxClusterInnerLayer)
@@ -83,10 +83,10 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
             // Ensure that cluster is in same endcap region as track
             const float clusterZPosition(pCluster->GetCentroid(innerLayer).GetZ());
 
-            if (std::fabs(trackECalZPosition) - std::fabs(clusterZPosition) > m_maxTrackClusterDeltaZ)
+            if (std::fabs(trackCalorimeterZPosition) - std::fabs(clusterZPosition) > m_maxTrackClusterDeltaZ)
                 continue;
 
-            if (clusterZPosition * trackECalZPosition < 0.f)
+            if (clusterZPosition * trackCalorimeterZPosition < 0.f)
                 continue;
 
             // Check consistency of track momentum and cluster energy

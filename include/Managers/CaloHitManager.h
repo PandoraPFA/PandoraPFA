@@ -60,8 +60,8 @@ private:
     StatusCode OrderInputCaloHits();
 
     /**
-     *  @brief  Calculate calo hit properties for the muon and input ordered calo hit lists. The properties include
-     *          density weights, isolation flags, possible mip flags and surrounding energy
+     *  @brief  Calculate calo hit properties for input ordered calo hit list. The properties include density weights,
+     *          isolation flags, possible mip flags and surrounding energy
      */
     StatusCode CalculateCaloHitProperties() const;
 

@@ -299,11 +299,11 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
 
             if (pCluster != NULL)
             {
-                FORMATTED_OUTPUT_TRACK(trackId, mcId, pTrack->CanFormPfo(), pTrack->ReachesECal(), trackEnergy, mcEnergy, clusterEnergy, chi, leaving, fCharged, fPhoton, fNeutral);
+                FORMATTED_OUTPUT_TRACK(trackId, mcId, pTrack->CanFormPfo(), pTrack->ReachesCalorimeter(), trackEnergy, mcEnergy, clusterEnergy, chi, leaving, fCharged, fPhoton, fNeutral);
             }
             else
             {
-                FORMATTED_OUTPUT_TRACK(trackId, mcId, pTrack->CanFormPfo(), pTrack->ReachesECal(), trackEnergy, mcEnergy, " ", chi, " ", " ", " ", " ");
+                FORMATTED_OUTPUT_TRACK(trackId, mcId, pTrack->CanFormPfo(), pTrack->ReachesCalorimeter(), trackEnergy, mcEnergy, " ", chi, " ", " ", " ", " ");
             }
 
             if (badChi)

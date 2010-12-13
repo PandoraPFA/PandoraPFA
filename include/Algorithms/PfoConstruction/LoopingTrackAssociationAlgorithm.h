@@ -39,7 +39,7 @@ private:
      */
     float GetMeanDeltaR(pandora::Cluster *const pCluster, const float helixXCentre, const float helixYCentre, const float helixRadius) const;
 
-    float           m_maxTrackClusterDeltaZ;            ///< Max z separation between track ecal projection and cluster start
+    float           m_maxTrackClusterDeltaZ;            ///< Max z separation between track calorimeter projection and cluster start
 
     unsigned int    m_minHitsInCluster;                 ///< Min number of calo hits in cluster
     unsigned int    m_minOccupiedLayersInCluster;       ///< Min number of occupied layers in cluster

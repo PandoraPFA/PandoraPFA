@@ -108,32 +108,32 @@ public:
     const TrackState &GetTrackStateAtEnd() const;
 
     /**
-     *  @brief  Get the (sometimes projected) track state at the ecal
+     *  @brief  Get the (sometimes projected) track state at the calorimeter
      * 
-     *  @return the track state at the ecal
+     *  @return the track state at the calorimeter
      */
-    const TrackState &GetTrackStateAtECal() const;
+    const TrackState &GetTrackStateAtCalorimeter() const;
 
     /**
-     *  @brief  Get the (sometimes projected) time at the ecal
+     *  @brief  Get the (sometimes projected) time at the calorimeter
      * 
-     *  @return the time at the ecal
+     *  @return the time at the calorimeter
      */
-    float GetTimeAtECal() const;
+    float GetTimeAtCalorimeter() const;
 
     /**
-     *  @brief  Whether the ecal projection is to an endcap
+     *  @brief  Whether the track reaches the calorimeter
+     * 
+     *  @return boolean
+     */
+    bool ReachesCalorimeter() const;
+
+    /**
+     *  @brief  Whether the calorimeter projection is to an endcap
      * 
      *  @return boolean
      */
     bool IsProjectedToEndCap() const;
-
-    /**
-     *  @brief  Whether the track reaches the ecal
-     * 
-     *  @return boolean
-     */
-    bool ReachesECal() const;
 
     /**
      *  @brief  Whether track should form a pfo, if it has an associated cluster
@@ -150,11 +150,11 @@ public:
     bool CanFormClusterlessPfo() const;
 
     /**
-     *  @brief  Get the helix fit to the ecal track state
+     *  @brief  Get the helix fit to the calorimeter track state
      * 
-     *  @return address of the helix fit to the ecal track state
+     *  @return address of the helix fit to the calorimeter track state
      */
-    const Helix *GetHelixFitAtECal() const;
+    const Helix *GetHelixFitAtCalorimeter() const;
 
     /**
      *  @brief  Whether the track has an associated cluster
@@ -287,16 +287,16 @@ private:
 
     const TrackState        m_trackStateAtStart;        ///< The track state at the start of the track, units mm and GeV
     const TrackState        m_trackStateAtEnd;          ///< The track state at the end of the track, units mm and GeV
-    const TrackState        m_trackStateAtECal;         ///< The (sometimes projected) track state at the ecal
 
-    const float             m_timeAtECal;               ///< The (sometimes projected) time at the ecal, units ns
+    const TrackState        m_trackStateAtCalorimeter;  ///< The (sometimes projected) track state at the calorimeter, units mm and GeV
+    const float             m_timeAtCalorimeter;        ///< The (sometimes projected) time at the calorimeter, units ns
+    const bool              m_reachesCalorimeter;       ///< Whether the track actually reaches the calorimeter
+    const bool              m_isProjectedToEndCap;      ///< Whether the calorimeter projection is to an endcap
 
-    const bool              m_isProjectedToEndCap;      ///< Whether the ecal projection is to an endcap
-    const bool              m_reachesECal;              ///< Whether the track actually reaches the ecal
     const bool              m_canFormPfo;               ///< Whether track should form a pfo, if it has an associated cluster
     const bool              m_canFormClusterlessPfo;    ///< Whether track should form a pfo, even if it has no associated cluster
 
-    const Helix             *m_pHelixFitAtECal;         ///< Helix fit to the ecal track state
+    const Helix             *m_pHelixFitAtCalorimeter;  ///< Helix fit to the calorimeter track state
 
     Cluster                 *m_pAssociatedCluster;      ///< The address of an associated cluster
     const MCParticle        *m_pMCParticle;             ///< The address of the associated MC particle
@@ -416,16 +416,23 @@ inline const TrackState &Track::GetTrackStateAtEnd() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const TrackState &Track::GetTrackStateAtECal() const
+inline const TrackState &Track::GetTrackStateAtCalorimeter() const
 {
-    return m_trackStateAtECal;
+    return m_trackStateAtCalorimeter;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Track::GetTimeAtECal() const
+inline float Track::GetTimeAtCalorimeter() const
 {
-    return m_timeAtECal;
+    return m_timeAtCalorimeter;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Track::ReachesCalorimeter() const
+{
+    return m_reachesCalorimeter;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -433,13 +440,6 @@ inline float Track::GetTimeAtECal() const
 inline bool Track::IsProjectedToEndCap() const
 {
     return m_isProjectedToEndCap;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool Track::ReachesECal() const
-{
-    return m_reachesECal;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -458,9 +458,9 @@ inline bool Track::CanFormClusterlessPfo() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const Helix *Track::GetHelixFitAtECal() const
+inline const Helix *Track::GetHelixFitAtCalorimeter() const
 {
-    return m_pHelixFitAtECal;
+    return m_pHelixFitAtCalorimeter;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

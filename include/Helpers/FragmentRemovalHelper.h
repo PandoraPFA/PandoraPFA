@@ -37,7 +37,7 @@ public:
 
     /**
      *  @brief  Get the fraction of calo hits in cluster I that lie within a cone along the direction of cluster J.
-     *          If cluster J has an associated track, it's projected position and direction at the ecal will be used to define cone,
+     *          If cluster J has an associated track, it's projected position and direction at the calorimeter will be used to define cone,
      *          otherwise cone will be radial and its axis will pass through centroid of cluster J at its showerstart layer.
      * 
      *  @param  pClusterI address of the cluster for which the fraction is calculated

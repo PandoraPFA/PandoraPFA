@@ -294,7 +294,7 @@ StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pClus
 
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
 
-    const CartesianVector &trackSeedPosition(pTrack->GetTrackStateAtECal().GetPosition());
+    const CartesianVector &trackSeedPosition(pTrack->GetTrackStateAtCalorimeter().GetPosition());
     const CartesianVector positionDifference(hitPosition - trackSeedPosition);
     const float separation(positionDifference.GetMagnitude());
 

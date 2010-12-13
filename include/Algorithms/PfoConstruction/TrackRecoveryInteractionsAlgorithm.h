@@ -33,7 +33,7 @@ private:
 
     float           m_trackClusterDistanceCut;          ///< Must pass 1 / 3 cuts: max distance between track and cluster
     float           m_clusterEnergyCut;                 ///< Must pass 1 / 3 cuts: max cluster hadronic energy
-    float           m_directionCosineCut;               ///< Must pass 1 / 3 cuts: min cos angle between track to ecal proj. and track to cluster
+    float           m_directionCosineCut;               ///< Must pass 1 / 3 cuts: min cos angle between track to calorimeter proj. and track to cluster
 
     float           m_maxTrackAssociationChi;           ///< Max value of track-cluster consistency chi to allow track-cluster association
 

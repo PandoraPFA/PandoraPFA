@@ -69,7 +69,7 @@ Cluster::Cluster(Track *pTrack) :
     m_isFixedPhoton(false),
     m_isMipTrack(true),
     m_pTrackSeed(pTrack),
-    m_initialDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector()),
+    m_initialDirection(pTrack->GetTrackStateAtCalorimeter().GetMomentum().GetUnitVector()),
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {

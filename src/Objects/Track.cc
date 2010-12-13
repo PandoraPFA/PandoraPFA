@@ -28,10 +28,10 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     m_energyAtDca(std::sqrt(m_mass * m_mass + m_momentumMagnitudeAtDca * m_momentumMagnitudeAtDca)),
     m_trackStateAtStart(trackParameters.m_trackStateAtStart.Get()),
     m_trackStateAtEnd(trackParameters.m_trackStateAtEnd.Get()),
-    m_trackStateAtECal(trackParameters.m_trackStateAtECal.Get()),
-    m_timeAtECal(trackParameters.m_timeAtECal.Get()),
+    m_trackStateAtCalorimeter(trackParameters.m_trackStateAtCalorimeter.Get()),
+    m_timeAtCalorimeter(trackParameters.m_timeAtCalorimeter.Get()),
+    m_reachesCalorimeter(trackParameters.m_reachesCalorimeter.Get()),
     m_isProjectedToEndCap(trackParameters.m_isProjectedToEndCap.Get()),
-    m_reachesECal(trackParameters.m_reachesECal.Get()),
     m_canFormPfo(trackParameters.m_canFormPfo.Get()),
     m_canFormClusterlessPfo(trackParameters.m_canFormClusterlessPfo.Get()),
     m_pAssociatedCluster(NULL),
@@ -46,16 +46,16 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
     if (0 == m_charge)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-    // Obtain helix fit to track state at ecal
+    // Obtain helix fit to track state at calorimeter
     static const float bField(GeometryHelper::GetInstance()->GetBField(CartesianVector(0.f, 0.f, 0.f)));
-    m_pHelixFitAtECal = new Helix(m_trackStateAtECal.GetPosition(), m_trackStateAtECal.GetMomentum(), static_cast<float>(m_charge), bField);
+    m_pHelixFitAtCalorimeter = new Helix(m_trackStateAtCalorimeter.GetPosition(), m_trackStateAtCalorimeter.GetMomentum(), static_cast<float>(m_charge), bField);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 Track::~Track()
 {
-    delete m_pHelixFitAtECal;
+    delete m_pHelixFitAtCalorimeter;
 
     m_parentTrackList.clear();
     m_siblingTrackList.clear();

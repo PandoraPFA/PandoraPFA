@@ -92,7 +92,7 @@ StatusCode TrackRecoveryAlgorithm::Run()
         if (NULL == pBestCluster)
             continue;
 
-        // Should track be associated with "best" cluster? Depends on whether track reaches ECal EndCap or Barrel:
+        // Should track be associated with "best" cluster? Depends on whether track reaches EndCap or Barrel:
         if (pTrack->IsProjectedToEndCap())
         {
             if ( (smallestTrackClusterDistance < m_endCapMaxTrackClusterDistance1) ||

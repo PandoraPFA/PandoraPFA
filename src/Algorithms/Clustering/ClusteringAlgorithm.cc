@@ -296,7 +296,7 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
     // Cone approach measurement to track projections
     if ((searchLayer == TRACK_PROJECTION_LAYER) && (pCluster->IsTrackSeeded()))
     {
-        return this->GetConeApproachDistanceToHit(pCaloHit, pCluster->GetTrackSeed()->GetTrackStateAtECal().GetPosition(),
+        return this->GetConeApproachDistanceToHit(pCaloHit, pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter().GetPosition(),
             pCluster->GetInitialDirection(), genericDistance);
     }
 
@@ -519,7 +519,7 @@ StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, 
 
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
 
-    const CartesianVector &trackSeedPosition(pCluster->GetTrackSeed()->GetTrackStateAtECal().GetPosition());
+    const CartesianVector &trackSeedPosition(pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter().GetPosition());
     const CartesianVector positionDifference(hitPosition - trackSeedPosition);
     const float separation(positionDifference.GetMagnitude());
 

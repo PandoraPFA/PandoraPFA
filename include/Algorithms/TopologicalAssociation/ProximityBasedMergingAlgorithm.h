@@ -77,7 +77,7 @@ private:
     float           m_closeHitThreshold;                ///< Threshold distance for labelling hits in parent and daughter as "close"
     float           m_minCloseHitFraction;              ///< Max fraction of daughter cluster hits that must be close to parent hits
 
-    float           m_maxHelixPathlengthToDaughter;     ///< Max path length from helix ecal intersection to daughter cluster z coordinate
+    float           m_maxHelixPathlengthToDaughter;     ///< Max path length from helix calorimeter intersection to daughter cluster z coordinate
     unsigned int    m_helixDistanceNLayers;             ///< Layers to examine to calculate distance from helix to hits in daughter cluster
     unsigned int    m_helixDistanceMaxOccupiedLayers;   ///< Max number of occupied layers to consider in helix-cluster distance calculation
     float           m_maxClusterHelixDistance;          ///< Max distance between parent cluster associated helix projections and daughter

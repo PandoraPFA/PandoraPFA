@@ -572,7 +572,7 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, con
 
     float minDistance(std::numeric_limits<float>::max());
 
-    if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack->GetTrackStateAtECal(), pCluster, maxSearchLayer,
+    if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack->GetTrackStateAtCalorimeter(), pCluster, maxSearchLayer,
         parallelDistanceCut, minDistance))
     {
         return STATUS_CODE_NOT_FOUND;

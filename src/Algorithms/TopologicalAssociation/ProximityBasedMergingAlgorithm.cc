@@ -237,8 +237,8 @@ bool ProximityBasedMergingAlgorithm::IsClusterFragment(const Cluster *const pPar
 
     for (TrackList::const_iterator trackIter = parentTrackList.begin(), trackIterEnd = parentTrackList.end(); trackIter != trackIterEnd; ++trackIter)
     {
-        // First sanity check helix pathlength from ecal surface to daughter cluster candidate
-        const Helix *const pHelix((*trackIter)->GetHelixFitAtECal());
+        // First sanity check helix pathlength from calorimeter surface to daughter cluster candidate
+        const Helix *const pHelix((*trackIter)->GetHelixFitAtCalorimeter());
         const CartesianVector &momentum(pHelix->GetMomentum());
         const float deltaZ(std::fabs(pHelix->GetReferencePoint().GetZ() - daughterZCoordinate));
 

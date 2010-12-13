@@ -37,7 +37,7 @@ StatusCode ForcedClusteringAlgorithm::Run()
     for (TrackList::const_iterator iter = pTrackList->begin(), iterEnd = pTrackList->end(); iter != iterEnd; ++iter)
     {
         Track *pTrack = *iter;
-        const Helix *const pHelix(pTrack->GetHelixFitAtECal());
+        const Helix *const pHelix(pTrack->GetHelixFitAtCalorimeter());
         const float trackEnergy(pTrack->GetEnergyAtDca());
 
         Cluster *pCluster = NULL;

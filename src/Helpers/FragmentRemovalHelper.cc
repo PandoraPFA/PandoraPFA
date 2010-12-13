@@ -94,8 +94,8 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
     {
         const Track *const pTrack(*(associatedTrackList.begin()));
 
-        coneApex = pTrack->GetTrackStateAtECal().GetPosition();
-        coneDirection = pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector();
+        coneApex = pTrack->GetTrackStateAtCalorimeter().GetPosition();
+        coneDirection = pTrack->GetTrackStateAtCalorimeter().GetMomentum().GetUnitVector();
     }
 
     return FragmentRemovalHelper::GetFractionOfHitsInCone(pClusterI, coneApex, coneDirection, coneCosineHalfAngle);
@@ -105,8 +105,8 @@ float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClust
 
 float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pCluster, const Track *const pTrack, const float coneCosineHalfAngle)
 {
-    const CartesianVector coneApex(pTrack->GetTrackStateAtECal().GetPosition());
-    const CartesianVector coneDirection(pTrack->GetTrackStateAtECal().GetMomentum().GetUnitVector());
+    const CartesianVector coneApex(pTrack->GetTrackStateAtCalorimeter().GetPosition());
+    const CartesianVector coneDirection(pTrack->GetTrackStateAtCalorimeter().GetMomentum().GetUnitVector());
 
     return FragmentRemovalHelper::GetFractionOfHitsInCone(pCluster, coneApex, coneDirection, coneCosineHalfAngle);
 }

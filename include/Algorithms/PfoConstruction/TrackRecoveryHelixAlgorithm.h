@@ -86,9 +86,9 @@ private:
      */
     pandora::StatusCode MakeTrackClusterAssociations(TrackAssociationInfoMap &trackAssociationInfoMap) const;
 
-    float           m_maxTrackClusterDeltaZ;            ///< Max z separation between track ecal projection and cluster to allow association
+    float           m_maxTrackClusterDeltaZ;            ///< Max z separation between track calorimeter projection and cluster to allow association
     float           m_maxAbsoluteTrackClusterChi;       ///< Max absolute track-cluster consistency chi value to allow association
-    unsigned int    m_maxLayersCrossed;                 ///< Max number of layers crossed by track helix between ecal projection and cluster
+    unsigned int    m_maxLayersCrossed;                 ///< Max number of layers crossed by track helix between calorimeter projection and cluster
 
     unsigned int    m_maxSearchLayer;                   ///< Max pseudo layer to examine when calculating track-cluster distance
     float           m_parallelDistanceCut;              ///< Max allowed projection of track-hit separation along track direction

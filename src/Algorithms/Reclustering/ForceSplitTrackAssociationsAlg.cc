@@ -75,7 +75,7 @@ StatusCode ForceSplitTrackAssociationsAlg::Run()
                 for (TrackToClusterMap::const_iterator mapIter = trackToClusterMap.begin(), mapIterEnd = trackToClusterMap.end();
                     mapIter != mapIterEnd; ++mapIter)
                 {
-                    const Helix *const pHelix(mapIter->first->GetHelixFitAtECal());
+                    const Helix *const pHelix(mapIter->first->GetHelixFitAtCalorimeter());
 
                     CartesianVector helixSeparation;
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint(hitPosition, helixSeparation));

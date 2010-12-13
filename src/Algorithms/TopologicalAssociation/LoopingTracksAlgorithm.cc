@@ -110,7 +110,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             if ((fitResultsClosestApproach > fitResultsClosestApproachCut) || (fitResultsClosestApproach > minFitResultsApproach))
                 continue;
 
-            // Merge clusters if they are in HCal, otherwise look for "good" features (bit ad hoc) ...
+            // Merge clusters if they are in region of coarse granularity, otherwise look for "good" features (bit ad hoc) ...
             unsigned int nGoodFeatures(0);
 
             if (isFineGranularity)

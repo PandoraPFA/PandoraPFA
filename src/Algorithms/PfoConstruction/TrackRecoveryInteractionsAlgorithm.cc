@@ -74,14 +74,14 @@ StatusCode TrackRecoveryInteractionsAlgorithm::Run()
 
         if ((smallestTrackClusterDistance > m_trackClusterDistanceCut) && (clusterEnergy > m_clusterEnergyCut))
         {
-            const CartesianVector &trackECalPosition(pTrack->GetTrackStateAtECal().GetPosition());
+            const CartesianVector &trackCalorimeterPosition(pTrack->GetTrackStateAtCalorimeter().GetPosition());
             const CartesianVector &trackerEndPosition(pTrack->GetTrackStateAtEnd().GetPosition());
             const CartesianVector innerLayerCentroid(pBestCluster->GetCentroid(pBestCluster->GetInnerPseudoLayer()));
 
-            const CartesianVector trackerToTrackECalUnitVector((trackECalPosition - trackerEndPosition).GetUnitVector());
+            const CartesianVector trackerToTrackCalorimeterUnitVector((trackCalorimeterPosition - trackerEndPosition).GetUnitVector());
             const CartesianVector trackerToClusterUnitVector((innerLayerCentroid - trackerEndPosition).GetUnitVector());
 
-            const float directionCosine(trackerToClusterUnitVector.GetDotProduct(trackerToTrackECalUnitVector));
+            const float directionCosine(trackerToClusterUnitVector.GetDotProduct(trackerToTrackCalorimeterUnitVector));
 
             if (directionCosine < m_directionCosineCut)
                 continue;

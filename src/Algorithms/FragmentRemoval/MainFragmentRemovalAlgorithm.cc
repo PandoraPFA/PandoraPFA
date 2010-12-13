@@ -507,18 +507,18 @@ void ChargedClusterContact::ClusterHelixComparison(Cluster *const pDaughterClust
     {
         // Extract track information
         trackEnergySum += (*iter)->GetEnergyAtDca();
-        const Helix *const pHelix = (*iter)->GetHelixFitAtECal();
-        const float trackECalZPosition((*iter)->GetTrackStateAtECal().GetPosition().GetZ());
+        const Helix *const pHelix = (*iter)->GetHelixFitAtCalorimeter();
+        const float trackCalorimeterZPosition((*iter)->GetTrackStateAtCalorimeter().GetPosition().GetZ());
 
         // Check proximity of track projection and cluster
-        if ((std::fabs(trackECalZPosition) > (std::fabs(clusterZPosition) + parameters.m_maxTrackClusterDeltaZ)) ||
-            (trackECalZPosition * clusterZPosition < 0.f))
+        if ((std::fabs(trackCalorimeterZPosition) > (std::fabs(clusterZPosition) + parameters.m_maxTrackClusterDeltaZ)) ||
+            (trackCalorimeterZPosition * clusterZPosition < 0.f))
         {
             continue;
         }
 
         // Check number of layers crossed by helix
-        const PseudoLayer nLayersCrossed(FragmentRemovalHelper::GetNLayersCrossed(pHelix, trackECalZPosition, clusterZPosition));
+        const PseudoLayer nLayersCrossed(FragmentRemovalHelper::GetNLayersCrossed(pHelix, trackCalorimeterZPosition, clusterZPosition));
 
         if (nLayersCrossed > parameters.m_maxLayersCrossedByHelix)
             continue;

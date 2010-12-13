@@ -66,7 +66,7 @@ protected:
         pandora::Cluster *const pOriginalCluster, pandora::Cluster *&pMipCluster, pandora::Cluster *&pPhotonCluster) const;
 
     /**
-     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface
+     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the calorimeter surface
      * 
      *  @param  pCluster address of the cluster
      *  @param  pTrack address of the track

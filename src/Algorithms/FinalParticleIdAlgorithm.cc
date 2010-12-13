@@ -34,6 +34,10 @@ StatusCode FinalParticleIdAlgorithm::Run()
         if (0 == charge)
             return STATUS_CODE_FAILURE;
 
+        // Ignore particle flow objects already tagged as electrons or muons
+        if ((std::abs(pParticleFlowObject->GetParticleId()) == E_MINUS) || (std::abs(pParticleFlowObject->GetParticleId()) == MU_MINUS))
+            continue;
+
         Cluster *pCluster = *(clusterList.begin());
 
         // Run fast electron id, followed by fast muon id

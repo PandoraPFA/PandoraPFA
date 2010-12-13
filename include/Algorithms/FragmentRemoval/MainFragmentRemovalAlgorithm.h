@@ -198,16 +198,6 @@ private:
     pandora::PseudoLayer GetClusterCorrectionLayer(const pandora::Cluster *const pDaughterCluster) const;
 
     /**
-     *  @brief  Get the number of muon hits deemed to be compatible with a parent candidate cluster. Compatibility is assessed
-     *          via comparison between cluster and hit directions w.r.t. the interaction point
-     * 
-     *  @param  pCluster address of the parent candidate cluster
-     * 
-     *  @return the number of muon hits compatible with the parent cluster
-     */
-    unsigned int GetNCompatibleMuonHits(const pandora::Cluster *const pParentCluster);
-
-    /**
      *  @brief  Get the list of clusters for which cluster contact information will be affected by a specified cluster merge
      * 
      *  @param  chargedClusterContactMap the cluster contact map

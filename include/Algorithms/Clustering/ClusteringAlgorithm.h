@@ -162,7 +162,7 @@ private:
         const pandora::CartesianVector &clusterDirection, float &distance) const;
 
     /**
-     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface, ONLY calculated if:
+     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the calorimeter surface, ONLY calculated if:
      *          1) the calo hit is within the first m_maxLayersToTrackSeed OR
      *          2) cluster contains a hit consistent with the track seed within the last m_maxLayersToTrackLikeHit
      * 
@@ -175,7 +175,7 @@ private:
         pandora::PseudoLayer searchLayer, float &distance) const;
 
     /**
-     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the ecal surface
+     *  @brief  Get the distance between a calo hit and the track seed (projected) position at the calorimeter surface
      * 
      *  @param  pCluster address of the cluster
      *  @param  pCaloHit address of the calo hit

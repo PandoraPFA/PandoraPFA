@@ -98,7 +98,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
                 continue;
 
             // Extract track helix fit
-            const Helix *const pHelix(pTrack->GetHelixFitAtECal());
+            const Helix *const pHelix(pTrack->GetHelixFitAtCalorimeter());
 
             // Compare cluster and helix directions
             CartesianVector muonEntryPoint;
@@ -227,7 +227,7 @@ StatusCode MuonReconstructionAlgorithm::AddCaloHits(const ClusterList *const pMu
             continue;
 
         Track *pTrack = *(trackList.begin());
-        const Helix *const pHelix(pTrack->GetHelixFitAtECal());
+        const Helix *const pHelix(pTrack->GetHelixFitAtCalorimeter());
 
         for (OrderedCaloHitList::const_iterator layerIter = pOrderedCaloHitList->begin(), layerIterEnd = pOrderedCaloHitList->end(); layerIter != layerIterEnd; ++layerIter)
         {

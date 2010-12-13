@@ -182,7 +182,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
 bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 {
-    // Reject clusters starting outside ecal
+    // Reject clusters starting outside inner fine granularity detectors
     if (GeometryHelper::GetHitTypeGranularity(pCluster->GetInnerLayerHitType()) > FINE)
         return false;
 
@@ -424,7 +424,7 @@ bool ParticleIdHelper::IsMuonFastDefault(const Cluster *const pCluster)
     typedef std::set<PseudoLayer> LayerList;
     LayerList pseudoLayersECal, pseudoLayersHCal, pseudoLayersMuon, layersECal, layersHCal;
 
-    const CartesianVector &momentum(pTrack->GetTrackStateAtECal().GetMomentum());
+    const CartesianVector &momentum(pTrack->GetTrackStateAtCalorimeter().GetMomentum());
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)

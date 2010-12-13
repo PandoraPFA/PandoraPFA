@@ -312,7 +312,7 @@ public:
     static StatusCode GetClosestIntraLayerDistance(const Cluster *const pClusterI, const Cluster *const pClusterJ, float &intraLayerDistance);
 
     /**
-     *  @brief  Get the distance of closest approach between the projected track direction at ecal the hits within a cluster.
+     *  @brief  Get the distance of closest approach between the projected track direction at calorimeter and the hits within a cluster.
      *          Note that only a specified number of layers are examined.
      * 
      *  @param  pTrack address of the track
