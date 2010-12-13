@@ -90,12 +90,13 @@ StatusCode BrokenTracksAlgorithm::Run()
                 continue;
 
             // Cut on distance of closest approach between start and end fits
-            const bool isDaughterOutsideECal(pDaughterCluster->GetInnerLayerHitType() != ECAL);
-            const float trackMergeCut(isDaughterOutsideECal ? m_trackMergeCutHcal : m_trackMergeCutEcal);
             float fitResultsClosestApproach(std::numeric_limits<float>::max());
 
             if (STATUS_CODE_SUCCESS != ClusterHelper::GetFitResultsClosestApproach(parentClusterFitResult, daughterClusterFitResult, fitResultsClosestApproach))
                 continue;
+
+            const bool isDaughterFineGranularity(GeometryHelper::GetHitTypeGranularity(pDaughterCluster->GetInnerLayerHitType()) <= FINE);
+            const float trackMergeCut(isDaughterFineGranularity ? m_trackMergeCutFine : m_trackMergeCutCoarse);
 
             if (fitResultsClosestApproach > trackMergeCut)
                 continue;
@@ -103,7 +104,7 @@ StatusCode BrokenTracksAlgorithm::Run()
             // Cut on perpendicular distance between fit directions and centroid difference vector.
             const CartesianVector daughterInnerCentroid(pDaughterCluster->GetCentroid(daughterInnerLayer));
             const CartesianVector centroidDifference(daughterInnerCentroid - parentOuterCentroid);
-            const float trackMergePerpCut(isDaughterOutsideECal ? m_trackMergePerpCutHcal : m_trackMergePerpCutEcal);
+            const float trackMergePerpCut(isDaughterFineGranularity ? m_trackMergePerpCutFine : m_trackMergePerpCutCoarse);
 
             const CartesianVector parentCrossProduct(parentClusterFitResult.GetDirection().GetCrossProduct(centroidDifference));
             const float parentPerpendicularDistance(parentCrossProduct.GetMagnitude());
@@ -200,21 +201,21 @@ StatusCode BrokenTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FitDirectionDotProductCut", m_fitDirectionDotProductCut));
 
-    m_trackMergeCutEcal = 45.f;
+    m_trackMergeCutFine = 45.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackMergeCutEcal", m_trackMergeCutEcal));
+        "TrackMergeCutFine", m_trackMergeCutFine));
 
-    m_trackMergeCutHcal = 45.f;
+    m_trackMergeCutCoarse = 45.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackMergeCutHcal", m_trackMergeCutHcal));
+        "TrackMergeCutCoarse", m_trackMergeCutCoarse));
 
-    m_trackMergePerpCutEcal = 50.f;
+    m_trackMergePerpCutFine = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackMergePerpCutEcal", m_trackMergePerpCutEcal));
+        "TrackMergePerpCutFine", m_trackMergePerpCutFine));
 
-    m_trackMergePerpCutHcal = 75.f;
+    m_trackMergePerpCutCoarse = 75.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackMergePerpCutHcal", m_trackMergePerpCutHcal));
+        "TrackMergePerpCutCoarse", m_trackMergePerpCutCoarse));
 
     m_maxLayerDifference = 10;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

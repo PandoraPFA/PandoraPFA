@@ -256,8 +256,8 @@ float MainFragmentRemovalAlgorithm::GetTotalEvidenceForMerge(const ChargedCluste
     {
         coneEvidence = chargedClusterContact.GetConeFraction1() + chargedClusterContact.GetConeFraction2() + chargedClusterContact.GetConeFraction3();
 
-        if (chargedClusterContact.GetDaughterCluster()->GetInnerLayerHitType() == ECAL)
-            coneEvidence *= m_coneEvidenceECalMultiplier;
+        if (GeometryHelper::GetHitTypeGranularity(chargedClusterContact.GetDaughterCluster()->GetInnerLayerHitType()) <= FINE)
+            coneEvidence *= m_coneEvidenceFineGranularityMultiplier;
     }
 
     // 3. Track extrapolation
@@ -699,9 +699,9 @@ StatusCode MainFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ConeEvidenceFraction1", m_coneEvidenceFraction1));
 
-    m_coneEvidenceECalMultiplier = 0.5f;
+    m_coneEvidenceFineGranularityMultiplier = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ConeEvidenceECalMultiplier", m_coneEvidenceECalMultiplier));
+        "ConeEvidenceFineGranularityMultiplier", m_coneEvidenceFineGranularityMultiplier));
 
     // Track extrapolation evidence
     m_closestTrackEvidence1 = 200.f;

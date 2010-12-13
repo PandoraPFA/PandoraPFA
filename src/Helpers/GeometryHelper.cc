@@ -22,6 +22,9 @@ namespace pandora
 bool GeometryHelper::m_instanceFlag = false;
 GeometryHelper* GeometryHelper::m_pGeometryHelper = NULL;
 
+GeometryHelper::HitTypeToGranularityMap GeometryHelper::m_hitTypeToGranularityMap = GeometryHelper::GetDefaultHitTypeToGranularityMap();
+float GeometryHelper::m_gapTolerance = 0.f;
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 GeometryHelper *GeometryHelper::GetInstance()
@@ -358,7 +361,33 @@ void GeometryHelper::SubDetectorParameters::Initialize(const std::string &subDet
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float GeometryHelper::m_gapTolerance = 0.f;
+GeometryHelper::HitTypeToGranularityMap GeometryHelper::GetDefaultHitTypeToGranularityMap()
+{
+    HitTypeToGranularityMap hitTypeToGranularityMap;
+
+    if (!hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(INNER_DETECTOR, FINE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(ECAL, FINE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(HCAL, COARSE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(MUON, VERY_COARSE)).second )
+    {
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+    }
+
+    return hitTypeToGranularityMap;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::SetHitTypeGranularity(const HitType hitType, const Granularity granularity)
+{
+    HitTypeToGranularityMap::iterator iter = m_hitTypeToGranularityMap.find(hitType);
+
+    if (m_hitTypeToGranularityMap.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+    iter->second = granularity;
+    return STATUS_CODE_SUCCESS;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -198,8 +198,8 @@ private:
     bool            m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm
     bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
 
-    unsigned int    m_layersToStepBackECal;         ///< Number of layers to step back when associating an ecal hit to clusters
-    unsigned int    m_layersToStepBackHCal;         ///< Number of layers to step back when associating an hcal hit to clusters
+    unsigned int    m_layersToStepBackFine;         ///< Number of layers to step back when associating a fine granularity hit to clusters
+    unsigned int    m_layersToStepBackCoarse;       ///< Number of layers to step back when associating a coarse granularity hit to clusters
 
     unsigned int    m_clusterFormationStrategy;     ///< Flag determining when to add "best" calo hit found to clusters
     float           m_genericDistanceCut;           ///< Generic distance cut to apply throughout algorithm
@@ -208,14 +208,14 @@ private:
     unsigned int    m_trackSeedCutOffLayer;         ///< Pseudo layer beyond which track seed is no longer considered
     bool            m_shouldFollowInitialDirection; ///< Whether the cluster should grow preferentially in its initial direction
 
-    float           m_sameLayerPadWidthsECal;       ///< ECal adjacent pad widths used to calculate generic distance to same layer hit
-    float           m_sameLayerPadWidthsHCal;       ///< HCal adjacent pad widths used to calculate generic distance to same layer hit
+    float           m_sameLayerPadWidthsFine;       ///< Fine adjacent pad widths used to calculate generic distance to same layer hit
+    float           m_sameLayerPadWidthsCoarse;     ///< Coarse adjacent pad widths used to calculate generic distance to same layer hit
 
     float           m_coneApproachMaxSeparation;    ///< Maximum separation between calo hit and specified cluster position
-    float           m_tanConeAngleECal;             ///< ECal tan cone angle used to calculate cone approach distance
-    float           m_tanConeAngleHCal;             ///< HCal tan cone angle used to calculate cone approach distance
-    float           m_additionalPadWidthsECal;      ///< ECal adjacent pad widths used to calculate cone approach distance
-    float           m_additionalPadWidthsHCal;      ///< HCal adjacent pad widths used to calculate cone approach distance
+    float           m_tanConeAngleFine;             ///< Fine tan cone angle used to calculate cone approach distance
+    float           m_tanConeAngleCoarse;           ///< Coarse tan cone angle used to calculate cone approach distance
+    float           m_additionalPadWidthsFine;      ///< Fine adjacent pad widths used to calculate cone approach distance
+    float           m_additionalPadWidthsCoarse;    ///< Coarse adjacent pad widths used to calculate cone approach distance
     float           m_maxClusterDirProjection;      ///< Max projection of cluster-hit separation in cluster dir to calculate cone distance
     float           m_minClusterDirProjection;      ///< Min projection of cluster-hit separation in cluster dir to calculate cone distance
 

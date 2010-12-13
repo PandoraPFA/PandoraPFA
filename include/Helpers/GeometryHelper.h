@@ -284,6 +284,15 @@ public:
     bool IsInDetectorGapRegion(const CartesianVector &position) const;
 
     /**
+     *  @brief  Get the granularity level specified for a given calorimeter hit type
+     * 
+     *  @param  hitType the calorimeter hit type
+     * 
+     *  @return the granularity
+     */
+    static Granularity GetHitTypeGranularity(const HitType hitType);
+
+    /**
      *  @brief  Get the maximum polygon radius
      * 
      *  @param  symmetryOrder the polygon symmetry order
@@ -370,6 +379,23 @@ private:
      */
     StatusCode SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator);
 
+    typedef std::map<HitType, Granularity> HitTypeToGranularityMap;
+
+    /**
+     *  @brief  Get the default hit type to granularity map
+     * 
+     *  @return the default hit type to granularity map
+     */
+    static HitTypeToGranularityMap GetDefaultHitTypeToGranularityMap();
+
+    /**
+     *  @brief  Set the granularity level to be associated with a specified hit type
+     * 
+     *  @param  hitType the specified hit type
+     *  @param  granularity the specified granularity
+     */
+    static StatusCode SetHitTypeGranularity(const HitType hitType, const Granularity granularity);
+
     /**
      *  @brief  Read the cluster helper settings
      * 
@@ -377,31 +403,32 @@ private:
      */
     static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    bool                        m_isInitialized;            ///< Whether the geometry helper is initialized
-    BFieldCalculator           *m_pBFieldCalculator;        ///< Address of the bfield calculator
-    PseudoLayerCalculator      *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
+    bool                            m_isInitialized;            ///< Whether the geometry helper is initialized
+    BFieldCalculator               *m_pBFieldCalculator;        ///< Address of the bfield calculator
+    PseudoLayerCalculator          *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
 
-    SubDetectorParameters       m_eCalBarrelParameters;     ///< The ecal barrel parameters
-    SubDetectorParameters       m_eCalEndCapParameters;     ///< The ecal end cap parameters
-    SubDetectorParameters       m_hCalBarrelParameters;     ///< The hcal barrel parameters
-    SubDetectorParameters       m_hCalEndCapParameters;     ///< The hcal end cap parameters
-    SubDetectorParameters       m_muonBarrelParameters;     ///< The muon detector barrel parameters
-    SubDetectorParameters       m_muonEndCapParameters;     ///< The muon detector end cap parameters
+    SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
+    SubDetectorParameters           m_eCalEndCapParameters;     ///< The ecal end cap parameters
+    SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
+    SubDetectorParameters           m_hCalEndCapParameters;     ///< The hcal end cap parameters
+    SubDetectorParameters           m_muonBarrelParameters;     ///< The muon detector barrel parameters
+    SubDetectorParameters           m_muonEndCapParameters;     ///< The muon detector end cap parameters
 
-    InputFloat                  m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
-    InputFloat                  m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
-    InputFloat                  m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
-    InputFloat                  m_coilInnerRadius;          ///< The coil inner radius, units mm
-    InputFloat                  m_coilOuterRadius;          ///< The coil outer radius, units mm
-    InputFloat                  m_coilZExtent;              ///< The coil z extent, units mm
+    InputFloat                      m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
+    InputFloat                      m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
+    InputFloat                      m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
+    InputFloat                      m_coilInnerRadius;          ///< The coil inner radius, units mm
+    InputFloat                      m_coilOuterRadius;          ///< The coil outer radius, units mm
+    InputFloat                      m_coilZExtent;              ///< The coil z extent, units mm
 
-    SubDetectorParametersMap    m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
-    DetectorGapList             m_detectorGapList;          ///< List of gaps in the active detector volume
+    SubDetectorParametersMap        m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
+    DetectorGapList                 m_detectorGapList;          ///< List of gaps in the active detector volume
 
-    static bool                 m_instanceFlag;             ///< The geometry helper instance flag
-    static GeometryHelper      *m_pGeometryHelper;          ///< The geometry helper instance
+    static bool                     m_instanceFlag;             ///< The geometry helper instance flag
+    static GeometryHelper          *m_pGeometryHelper;          ///< The geometry helper instance
 
-    static float                m_gapTolerance;             ///< Tolerance allowed when declaring a point to be "in" a gap region, units mm
+    static HitTypeToGranularityMap  m_hitTypeToGranularityMap;  ///< The hit type to granularity map
+    static float                    m_gapTolerance;             ///< Tolerance allowed when declaring a point to be "in" a gap region, units mm
 
     friend class Pandora;
     friend class PandoraApiImpl;
@@ -525,6 +552,18 @@ inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditi
 inline const GeometryHelper::DetectorGapList &GeometryHelper::GetDetectorGapList() const
 {
     return m_detectorGapList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline Granularity GeometryHelper::GetHitTypeGranularity(const HitType hitType)
+{
+    HitTypeToGranularityMap::const_iterator iter = m_hitTypeToGranularityMap.find(hitType);
+
+    if (m_hitTypeToGranularityMap.end() != iter)
+        return iter->second;
+
+    throw StatusCodeException(STATUS_CODE_NOT_FOUND);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

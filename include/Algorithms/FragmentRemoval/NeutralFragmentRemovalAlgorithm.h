@@ -169,7 +169,7 @@ private:
     float               m_contactEvidence3;                         ///< Contact evidence contribution 3
 
     float               m_coneEvidenceFraction1;                    ///< Cone fraction 1 value required for cone evidence contribution
-    float               m_coneEvidenceECalMultiplier;               ///< Cone evidence multiplier for daughter clusters starting in ecal
+    float               m_coneEvidenceFineGranularityMultiplier;    ///< Cone evidence multiplier for fine granularity daughter clusters
 
     float               m_distanceEvidence1;                        ///< Offset for distance evidence contribution 1
     float               m_distanceEvidence1d;                       ///< Denominator for distance evidence contribution 1

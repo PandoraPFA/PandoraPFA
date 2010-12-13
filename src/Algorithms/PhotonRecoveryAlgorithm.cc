@@ -49,7 +49,7 @@ void PhotonRecoveryAlgorithm::FindPhotonsIdentifiedAsHadrons(const ClusterList *
 
         const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
 
-        if ((innerPseudoLayer >= m_maxInnerLayer) || (pCluster->GetInnerLayerHitType() != ECAL))
+        if ((innerPseudoLayer >= m_maxInnerLayer) || (GeometryHelper::GetHitTypeGranularity(pCluster->GetInnerLayerHitType()) > FINE))
             continue;
 
         // Cut on cluster shower profile properties

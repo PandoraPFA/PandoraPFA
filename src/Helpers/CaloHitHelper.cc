@@ -7,6 +7,7 @@
  */
 
 #include "Helpers/CaloHitHelper.h"
+#include "Helpers/GeometryHelper.h"
 #include "Helpers/XmlHelper.h"
 
 #include "Objects/CaloHit.h"
@@ -191,7 +192,8 @@ unsigned int CaloHitHelper::IsolationCountNearbyHits(const CaloHit *const pCaloH
 {
     const CartesianVector &positionVector(pCaloHit->GetPositionVector());
     const float positionMagnitude(positionVector.GetMagnitude());
-    const float isolationCutDistance((pCaloHit->GetHitType() == ECAL) ? m_isolationCutDistanceECal : m_isolationCutDistanceHCal);
+    const float isolationCutDistance((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+        m_isolationCutDistanceFine : m_isolationCutDistanceCoarse);
 
     unsigned int nearbyHitsFound = 0;
 
@@ -535,7 +537,8 @@ void CaloHitHelper::ApplySimpleIsolationScheme(const CaloHitVector &caloHitVecto
     for (CaloHitVector::const_iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
     {
         CaloHit *pCaloHit = *iter;
-        const float isolationDensityWeightCut((ECAL == pCaloHit->GetHitType()) ? m_isolationDensityWeightCutECal : m_isolationDensityWeightCutHCal);
+        const float isolationDensityWeightCut((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+            m_isolationDensityWeightCutFine : m_isolationDensityWeightCutCoarse);
 
         if (pCaloHit->GetDensityWeight() < isolationDensityWeightCut)
             pCaloHit->SetIsolatedFlag(true);
@@ -550,11 +553,11 @@ float CaloHitHelper::m_densityWeightContribution = 100.f;
 unsigned int CaloHitHelper::m_densityWeightPower = 2;
 unsigned int CaloHitHelper::m_densityWeightNLayers = 2;
 bool CaloHitHelper::m_shouldUseSimpleIsolationScheme = false;
-float CaloHitHelper::m_isolationDensityWeightCutECal = 0.1f;
-float CaloHitHelper::m_isolationDensityWeightCutHCal = 0.1f;
+float CaloHitHelper::m_isolationDensityWeightCutFine = 0.1f;
+float CaloHitHelper::m_isolationDensityWeightCutCoarse = 0.1f;
 unsigned int CaloHitHelper::m_isolationNLayers = 2;
-float CaloHitHelper::m_isolationCutDistanceECal = 25.f;
-float CaloHitHelper::m_isolationCutDistanceHCal = 200.f;
+float CaloHitHelper::m_isolationCutDistanceFine = 25.f;
+float CaloHitHelper::m_isolationCutDistanceCoarse = 200.f;
 unsigned int CaloHitHelper::m_isolationMaxNearbyHits = 2;
 float CaloHitHelper::m_mipLikeMipCut = 5.f;
 unsigned int CaloHitHelper::m_mipNCellsForNearbyHit = 2;
@@ -583,19 +586,19 @@ StatusCode CaloHitHelper::ReadSettings(const TiXmlHandle xmlHandle)
         "ShouldUseSimpleIsolationScheme", m_shouldUseSimpleIsolationScheme));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationDensityWeightCutECal", m_isolationDensityWeightCutECal));
+        "IsolationDensityWeightCutFine", m_isolationDensityWeightCutFine));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationDensityWeightCutHCal", m_isolationDensityWeightCutHCal));
+        "IsolationDensityWeightCutCoarse", m_isolationDensityWeightCutCoarse));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "IsolationNLayers", m_isolationNLayers));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationCutDistanceECal", m_isolationCutDistanceECal));
+        "IsolationCutDistanceFine", m_isolationCutDistanceFine));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationCutDistanceHCal", m_isolationCutDistanceHCal));
+        "IsolationCutDistanceCoarse", m_isolationCutDistanceCoarse));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "IsolationMaxNearbyHits", m_isolationMaxNearbyHits));

@@ -44,8 +44,8 @@ private:
 
     float           m_maxFitDirectionDotProduct;        ///< Max dot product between fit direction and centroid difference unit vectors
 
-    float           m_perpendicularDistanceCutEcal;     ///< ECal cut on perp. distance between fit direction and centroid difference
-    float           m_perpendicularDistanceCutHcal;     ///< HCal cut on perp. distance between fit direction and centroid difference
+    float           m_perpendicularDistanceCutFine;     ///< Fine granularity cut on perp. distance between fit direction and centroid difference
+    float           m_perpendicularDistanceCutCoarse;   ///< Coarse granularity cut on perp. distance between fit direction and centroid difference
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

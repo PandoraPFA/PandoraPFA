@@ -130,13 +130,13 @@ StatusCode MuonPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     // Read base class settings
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MipPhotonSeparationAlgorithm::ReadSettings(xmlHandle));
 
-    m_additionalPadWidthsECal = 0.7071f;
+    m_additionalPadWidthsFine = 0.7071f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
+        "AdditionalPadWidthsFine", m_additionalPadWidthsFine));
 
-    m_additionalPadWidthsHCal = 0.7071f;
+    m_additionalPadWidthsCoarse = 0.7071f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
+        "AdditionalPadWidthsCoarse", m_additionalPadWidthsCoarse));
 
     m_highEnergyMuonCut = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

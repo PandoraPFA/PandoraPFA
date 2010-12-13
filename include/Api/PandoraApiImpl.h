@@ -117,6 +117,14 @@ public:
     StatusCode SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator) const;
 
     /**
+     *  @brief  Set the granularity level to be associated with a specified hit type
+     * 
+     *  @param  hitType the specified hit type
+     *  @param  granularity the specified granularity
+     */
+    StatusCode SetHitTypeGranularity(const HitType hitType, const Granularity granularity) const;
+
+    /**
      *  @brief  Register an energy correction function
      * 
      *  @param  functionName the name/label associated with the energy correction function

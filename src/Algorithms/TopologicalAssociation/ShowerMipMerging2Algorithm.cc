@@ -80,11 +80,11 @@ StatusCode ShowerMipMerging2Algorithm::Run()
                 continue;
 
             // Cut on perpendicular distance between fit direction and centroid difference vector.
-            const bool isDaughterOutsideECal(pDaughterCluster->GetInnerLayerHitType() != ECAL);
-            const float perpendicularDistanceCut(isDaughterOutsideECal ? m_perpendicularDistanceCutHcal : m_perpendicularDistanceCutEcal);
-
             const CartesianVector parentCrossProduct(parentClusterFitResult.GetDirection().GetCrossProduct(centroidDifference));
             const float perpendicularDistance(parentCrossProduct.GetMagnitude());
+
+            const float perpendicularDistanceCut((GeometryHelper::GetHitTypeGranularity(pDaughterCluster->GetInnerLayerHitType()) <= FINE) ?
+                m_perpendicularDistanceCutFine : m_perpendicularDistanceCutCoarse);
 
             if (perpendicularDistance > perpendicularDistanceCut)
                 continue;
@@ -151,13 +151,13 @@ StatusCode ShowerMipMerging2Algorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxFitDirectionDotProduct", m_maxFitDirectionDotProduct));
 
-    m_perpendicularDistanceCutEcal = 50.f;
+    m_perpendicularDistanceCutFine = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PerpendicularDistanceCutEcal", m_perpendicularDistanceCutEcal));
+        "PerpendicularDistanceCutFine", m_perpendicularDistanceCutFine));
 
-    m_perpendicularDistanceCutHcal = 75.f;
+    m_perpendicularDistanceCutCoarse = 75.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PerpendicularDistanceCutHcal", m_perpendicularDistanceCutHcal));
+        "PerpendicularDistanceCutCoarse", m_perpendicularDistanceCutCoarse));
 
     return STATUS_CODE_SUCCESS;
 }

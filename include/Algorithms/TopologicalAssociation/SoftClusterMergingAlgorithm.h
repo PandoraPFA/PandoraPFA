@@ -67,8 +67,8 @@ private:
     float           m_closestDistanceCut2;                  ///< 2nd pair of cuts: max distance between daughter and parent clusters
     unsigned int    m_innerLayerCut2;                       ///< 2nd pair of cuts: max daughter inner pseudo layer
 
-    float           m_maxClusterDistanceECal;               ///< The maximum distance between parent and ecal daughter cluster
-    float           m_maxClusterDistanceHCal;               ///< The maximum distance between parent and hcal daughter cluster
+    float           m_maxClusterDistanceFine;               ///< Fine granularity max distance between parent and daughter clusters
+    float           m_maxClusterDistanceCoarse;             ///< Coarse granularity max distance between parent and daughter clusters
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

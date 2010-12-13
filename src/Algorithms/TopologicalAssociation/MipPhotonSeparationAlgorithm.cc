@@ -303,9 +303,9 @@ StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pClus
         const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
         const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeparation)));
 
-        const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
-            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
+        const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+            flexibility * (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
+            flexibility * (m_additionalPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
 
         if (0 == dCut)
             return STATUS_CODE_FAILURE;
@@ -382,13 +382,13 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxTrackSeparation", m_maxTrackSeparation));
 
-    m_additionalPadWidthsECal = 2.5f;
+    m_additionalPadWidthsFine = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
+        "AdditionalPadWidthsFine", m_additionalPadWidthsFine));
 
-    m_additionalPadWidthsHCal = 2.5f;
+    m_additionalPadWidthsCoarse = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
+        "AdditionalPadWidthsCoarse", m_additionalPadWidthsCoarse));
 
     return STATUS_CODE_SUCCESS;
 }

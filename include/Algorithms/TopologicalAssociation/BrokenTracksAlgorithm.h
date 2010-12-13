@@ -117,11 +117,11 @@ private:
     float           m_maxFitRms;                        ///< The max value of the start/end fit rms for cluster to be considered
 
     float           m_fitDirectionDotProductCut;        ///< Cut on max value of dot product between cluster fit directions
-    float           m_trackMergeCutEcal;                ///< ECal cut on closest distance of approach between two cluster fit results
-    float           m_trackMergeCutHcal;                ///< HCal cut on closest distance of approach between two cluster fit results
+    float           m_trackMergeCutFine;                ///< Fine granularity cut on closest distance of approach between two cluster fits
+    float           m_trackMergeCutCoarse;              ///< Coarse granularity cut on closest distance of approach between two cluster fits
 
-    float           m_trackMergePerpCutEcal;            ///< ECal cut on perp. distance between fit directions and centroid difference
-    float           m_trackMergePerpCutHcal;            ///< HCal cut on perp. distance between fit directions and centroid difference
+    float           m_trackMergePerpCutFine;            ///< Fine granularity cut on perp. distance between fit directions and centroid difference
+    float           m_trackMergePerpCutCoarse;          ///< Coarse granularity cut on perp. distance between fit directions and centroid difference
 
     unsigned int    m_maxLayerDifference;               ///< The max difference (for merging) between cluster outer and inner pseudo layers
     float           m_maxCentroidDifference;            ///< The max difference (for merging) between cluster outer and inner centroids

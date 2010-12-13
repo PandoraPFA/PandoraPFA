@@ -110,7 +110,8 @@ bool NeutralFragmentRemovalAlgorithm::IsPhotonLike(Cluster *const pDaughterClust
 
     const ClusterHelper::ClusterFitResult &clusterFitResult(pDaughterCluster->GetFitToAllHitsResult());
 
-    if ((pDaughterCluster->GetInnerLayerHitType() == ECAL) && (pDaughterCluster->GetInnerPseudoLayer() < m_photonLikeMaxInnerLayer) &&
+    if ((GeometryHelper::GetHitTypeGranularity(pDaughterCluster->GetInnerLayerHitType()) <= FINE) &&
+        (pDaughterCluster->GetInnerPseudoLayer() < m_photonLikeMaxInnerLayer) &&
         (clusterFitResult.IsFitSuccessful()) && (clusterFitResult.GetRadialDirectionCosine() > m_photonLikeMinDCosR) &&
         (pDaughterCluster->GetShowerProfileStart() < m_photonLikeMaxShowerStart) &&
         (pDaughterCluster->GetShowerProfileDiscrepancy() < m_photonLikeMaxProfileDiscrepancy))
@@ -204,8 +205,8 @@ float NeutralFragmentRemovalAlgorithm::GetEvidenceForMerge(const NeutralClusterC
     {
         coneEvidence = neutralClusterContact.GetConeFraction1() + neutralClusterContact.GetConeFraction2() + neutralClusterContact.GetConeFraction3();
 
-        if (neutralClusterContact.GetDaughterCluster()->GetInnerLayerHitType() == ECAL)
-            coneEvidence *= m_coneEvidenceECalMultiplier;
+        if (GeometryHelper::GetHitTypeGranularity(neutralClusterContact.GetDaughterCluster()->GetInnerLayerHitType()) <= FINE)
+            coneEvidence *= m_coneEvidenceFineGranularityMultiplier;
     }
 
     // 3. Distance of closest approach
@@ -388,9 +389,9 @@ StatusCode NeutralFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ConeEvidenceFraction1", m_coneEvidenceFraction1));
 
-    m_coneEvidenceECalMultiplier = 0.5f;
+    m_coneEvidenceFineGranularityMultiplier = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ConeEvidenceECalMultiplier", m_coneEvidenceECalMultiplier));
+        "ConeEvidenceFineGranularityMultiplier", m_coneEvidenceFineGranularityMultiplier));
 
     // Distance of closest approach evidence
     m_distanceEvidence1 = 100.f;

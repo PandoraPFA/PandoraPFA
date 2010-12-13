@@ -128,7 +128,8 @@ bool PhotonFragmentRemovalAlgorithm::IsPhotonLike(Cluster *const pDaughterCluste
 
     const ClusterHelper::ClusterFitResult &clusterFitResult(pDaughterCluster->GetFitToAllHitsResult());
 
-    if ((pDaughterCluster->GetInnerLayerHitType() == ECAL) && (pDaughterCluster->GetInnerPseudoLayer() < m_photonLikeMaxInnerLayer) &&
+    if ((GeometryHelper::GetHitTypeGranularity(pDaughterCluster->GetInnerLayerHitType()) <= FINE) &&
+        (pDaughterCluster->GetInnerPseudoLayer() < m_photonLikeMaxInnerLayer) &&
         (clusterFitResult.IsFitSuccessful()) && (clusterFitResult.GetRadialDirectionCosine() > m_photonLikeMinDCosR) &&
         (pDaughterCluster->GetShowerProfileStart() < m_photonLikeMaxShowerStart) &&
         (pDaughterCluster->GetShowerProfileDiscrepancy() < m_photonLikeMaxProfileDiscrepancy))

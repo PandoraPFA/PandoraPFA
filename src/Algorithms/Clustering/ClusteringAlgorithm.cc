@@ -106,7 +106,8 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
         Cluster *pBestCluster = NULL;
         float bestClusterEnergy(0.f);
         float smallestGenericDistance(m_genericDistanceCut);
-        const PseudoLayer layersToStepBack((ECAL == pCaloHit->GetHitType()) ? m_layersToStepBackECal : m_layersToStepBackHCal);
+        const PseudoLayer layersToStepBack((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+            m_layersToStepBackFine : m_layersToStepBackCoarse);
 
         // Associate with existing clusters in stepBack layers. If stepBackLayer == pseudoLayer, will examine TRACK_PROJECTION_LAYER.
         for (PseudoLayer stepBackLayer = 1; (stepBackLayer <= layersToStepBack) && (stepBackLayer <= pseudoLayer); ++stepBackLayer)
@@ -383,9 +384,9 @@ StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster,
 StatusCode ClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList,
     float &distance) const
 {
-    const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-        (m_sameLayerPadWidthsECal * pCaloHit->GetCellLengthScale()) :
-        (m_sameLayerPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
+    const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+        (m_sameLayerPadWidthsFine * pCaloHit->GetCellLengthScale()) :
+        (m_sameLayerPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
 
     if (0 == dCut)
         return STATUS_CODE_FAILURE;
@@ -460,9 +461,9 @@ StatusCode ClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const pCal
     const float dPerp (clusterDirection.GetCrossProduct(positionDifference).GetMagnitude());
     const float dAlong(clusterDirection.GetDotProduct(positionDifference));
 
-    const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-        (std::fabs(dAlong) * m_tanConeAngleECal) + (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
-        (std::fabs(dAlong) * m_tanConeAngleHCal) + (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
+    const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+        (std::fabs(dAlong) * m_tanConeAngleFine) + (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
+        (std::fabs(dAlong) * m_tanConeAngleCoarse) + (m_additionalPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
 
     if (0 == dCut)
         return STATUS_CODE_FAILURE;
@@ -527,9 +528,9 @@ StatusCode ClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, 
         const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
         const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
 
-        const float dCut ((ECAL == pCaloHit->GetHitType()) ?
-            flexibility * (m_additionalPadWidthsECal * pCaloHit->GetCellLengthScale()) :
-            flexibility * (m_additionalPadWidthsHCal * pCaloHit->GetCellLengthScale()) );
+        const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+            flexibility * (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
+            flexibility * (m_additionalPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
 
         if (0 == dCut)
             return STATUS_CODE_FAILURE;
@@ -590,13 +591,13 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShouldUseIsolatedHits", m_shouldUseIsolatedHits));
 
-    m_layersToStepBackECal = 3;
+    m_layersToStepBackFine = 3;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayersToStepBackECal", m_layersToStepBackECal));
+        "LayersToStepBackFine", m_layersToStepBackFine));
 
-    m_layersToStepBackHCal = 3;
+    m_layersToStepBackCoarse = 3;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LayersToStepBackHCal", m_layersToStepBackHCal));
+        "LayersToStepBackCoarse", m_layersToStepBackCoarse));
 
     m_clusterFormationStrategy = 0;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -619,34 +620,34 @@ StatusCode ClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "ShouldFollowInitialDirection", m_shouldFollowInitialDirection));
 
     // Same layer distance parameters
-    m_sameLayerPadWidthsECal = 2.8f;
+    m_sameLayerPadWidthsFine = 2.8f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "SameLayerPadWidthsECal", m_sameLayerPadWidthsECal));
+        "SameLayerPadWidthsFine", m_sameLayerPadWidthsFine));
 
-    m_sameLayerPadWidthsHCal = 1.8f;
+    m_sameLayerPadWidthsCoarse = 1.8f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "SameLayerPadWidthsHCal", m_sameLayerPadWidthsHCal));
+        "SameLayerPadWidthsCoarse", m_sameLayerPadWidthsCoarse));
 
     // Cone approach distance parameters
     m_coneApproachMaxSeparation = 1000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ConeApproachMaxSeparation", m_coneApproachMaxSeparation));
 
-    m_tanConeAngleECal = 0.3f;
+    m_tanConeAngleFine = 0.3f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TanConeAngleECal", m_tanConeAngleECal));
+        "TanConeAngleFine", m_tanConeAngleFine));
 
-    m_tanConeAngleHCal = 0.5f;
+    m_tanConeAngleCoarse = 0.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TanConeAngleHCal", m_tanConeAngleHCal));
+        "TanConeAngleCoarse", m_tanConeAngleCoarse));
 
-    m_additionalPadWidthsECal = 2.5f;
+    m_additionalPadWidthsFine = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsECal", m_additionalPadWidthsECal));
+        "AdditionalPadWidthsFine", m_additionalPadWidthsFine));
 
-    m_additionalPadWidthsHCal = 2.5f;
+    m_additionalPadWidthsCoarse = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "AdditionalPadWidthsHCal", m_additionalPadWidthsHCal));
+        "AdditionalPadWidthsCoarse", m_additionalPadWidthsCoarse));
 
     m_maxClusterDirProjection = 200.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

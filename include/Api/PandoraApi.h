@@ -299,6 +299,16 @@ public:
     static pandora::StatusCode SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator);
 
     /**
+     *  @brief  Set the granularity level to be associated with a specified hit type
+     * 
+     *  @param  pandora the pandora instance to register the hit type to granularity relationship
+     *  @param  hitType the specified hit type
+     *  @param  granularity the specified granularity
+     */
+    static pandora::StatusCode SetHitTypeGranularity(const pandora::Pandora &pandora, const pandora::HitType hitType,
+        const pandora::Granularity granularity);
+
+    /**
      *  @brief  Register an energy correction function
      * 
      *  @param  pandora the pandora instance with which to register the energy correction function

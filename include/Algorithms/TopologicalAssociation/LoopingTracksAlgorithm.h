@@ -112,14 +112,14 @@ private:
     unsigned int    m_maxOuterLayerDifference;          ///< The maximum difference (for merging) between cluster outer pseudo layers
     float           m_maxCentroidDifference;            ///< The maximum difference (for merging) between cluster outer layer centroids
 
-    float           m_fitDirectionDotProductCutECal;    ///< ECal cut on max value of dot product between cluster fit directions
-    float           m_fitDirectionDotProductCutHCal;    ///< Deep in HCal cut on max value of dot product between cluster fit directions
+    float           m_fitDirectionDotProductCutFine;    ///< Fine granularity cut on max value of dot product between cluster fit directions
+    float           m_fitDirectionDotProductCutCoarse;  ///< Coarse granularity cut on max value of dot product between cluster fit directions
 
-    float           m_closestHitDistanceCutECal;        ///< ECal cut on distance between cluster hits in outermost pseudolayers
-    float           m_closestHitDistanceCutHCal;        ///< Deep in HCal cut on distance between cluster hits in outermost pseudolayers
+    float           m_closestHitDistanceCutFine;        ///< Fine granularity cut on distance between cluster hits in outermost pseudolayers
+    float           m_closestHitDistanceCutCoarse;      ///< Coarse granularity cut on distance between cluster hits in outermost pseudolayers
 
-    float           m_fitResultsClosestApproachCutECal; ///< ECal cut on closest distance of approach between two cluster fit results
-    float           m_fitResultsClosestApproachCutHCal; ///< HCal cut on closest distance of approach between two cluster fit results
+    float           m_fitResultsClosestApproachCutFine; ///< Fine granularity cut on closest distance of approach between two cluster fits
+    float           m_fitResultsClosestApproachCutCoarse; ///< Coarse granularity cut on closest distance of approach between two cluster fits
 
     unsigned int    m_nGoodFeaturesForClusterMerge;     ///< Number of identified "good features" required to merge ecal clusters
 

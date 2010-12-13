@@ -140,13 +140,13 @@ bool SoftClusterMergingAlgorithm::CanMergeSoftCluster(const Cluster *const pDaug
     if ((closestDistance < m_closestDistanceCut2) && (daughterInnerLayer > m_innerLayerCut2))
         return true;
 
-    if (closestDistance < ((pDaughterCluster->GetOuterLayerHitType() == ECAL) ? m_maxClusterDistanceECal : m_maxClusterDistanceHCal))
-    {
-        if ((pDaughterCluster->GetHadronicEnergy() < m_minClusterHadEnergy) || (pDaughterCluster->GetNCaloHits() < m_minHitsInCluster))
-            return true;
-    }
+    const float distanceCut((GeometryHelper::GetHitTypeGranularity(pDaughterCluster->GetOuterLayerHitType()) <= FINE) ?
+        m_maxClusterDistanceFine : m_maxClusterDistanceCoarse);
 
-    return false;
+    if (closestDistance > distanceCut)
+        return false;
+
+    return ((pDaughterCluster->GetHadronicEnergy() < m_minClusterHadEnergy) || (pDaughterCluster->GetNCaloHits() < m_minHitsInCluster));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -199,13 +199,13 @@ StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "InnerLayerCut2", m_innerLayerCut2));
 
-    m_maxClusterDistanceECal = 100.f;
+    m_maxClusterDistanceFine = 100.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxClusterDistanceECal", m_maxClusterDistanceECal));
+        "MaxClusterDistanceFine", m_maxClusterDistanceFine));
 
-    m_maxClusterDistanceHCal = 250.f;
+    m_maxClusterDistanceCoarse = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxClusterDistanceHCal", m_maxClusterDistanceHCal));
+        "MaxClusterDistanceCoarse", m_maxClusterDistanceCoarse));
 
     m_minHitsInCluster = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

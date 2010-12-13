@@ -6,6 +6,7 @@
  *  $Log: $
  */
 
+#include "Helpers/GeometryHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 #include "Helpers/XmlHelper.h"
 
@@ -28,7 +29,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
         return STATUS_CODE_INVALID_PARAMETER;
 
     // Extract information from the cluster
-    if (pCluster->GetInnerLayerHitType() != ECAL)
+    if (GeometryHelper::GetHitTypeGranularity(pCluster->GetInnerLayerHitType()) > FINE)
         return STATUS_CODE_NOT_FOUND;
 
     const CartesianVector &clusterDirection(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
@@ -59,15 +60,15 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
         }
 
         // Extract information from calo hits
-        bool isOutsideECal(false);
+        bool isFineGranularity(true);
         float energyInLayer(0.f);
         float nRadiationLengthsInLayer(0.f);
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            if ((*hitIter)->GetHitType() != ECAL)
+            if (GeometryHelper::GetHitTypeGranularity((*hitIter)->GetHitType()) > FINE)
             {
-                isOutsideECal = true;
+                isFineGranularity = false;
                 break;
             }
 
@@ -78,7 +79,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
             nRadiationLengthsInLayer += (*hitIter)->GetNCellRadiationLengths() / cosOpeningAngle;
         }
 
-        if (isOutsideECal)
+        if (!isFineGranularity)
             break;
 
         eCalEnergy += energyInLayer;
@@ -182,7 +183,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 {
     // Reject clusters starting outside ecal
-    if (pCluster->GetInnerLayerHitType() != ECAL)
+    if (GeometryHelper::GetHitTypeGranularity(pCluster->GetInnerLayerHitType()) > FINE)
         return false;
 
     // Cut on cluster mip fraction

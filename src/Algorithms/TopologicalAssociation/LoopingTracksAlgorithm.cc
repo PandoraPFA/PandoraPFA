@@ -50,7 +50,7 @@ StatusCode LoopingTracksAlgorithm::Run()
         const ClusterHelper::ClusterFitResult &parentClusterFitResult((*iterI)->GetClusterFitResult());
 
         const PseudoLayer parentOuterLayer(pParentCluster->GetOuterPseudoLayer());
-        const bool isParentOutsideECal(pParentCluster->GetOuterLayerHitType() != ECAL);
+        const bool isParentFineGranularity(GeometryHelper::GetHitTypeGranularity(pParentCluster->GetOuterLayerHitType()) <= FINE);
 
         ClusterFitRelation *pBestClusterFitRelation(NULL);
         float minFitResultsApproach(std::numeric_limits<float>::max());
@@ -65,10 +65,9 @@ StatusCode LoopingTracksAlgorithm::Run()
             Cluster *pDaughterCluster((*iterJ)->GetCluster());
             const ClusterHelper::ClusterFitResult &daughterClusterFitResult((*iterJ)->GetClusterFitResult());
 
-            // Are both clusters outside of the ecal region? If so, relax cluster compatibility checks.
+            // Apply loose cuts to examine suitability of merging clusters before proceeding
             const PseudoLayer daughterOuterLayer(pDaughterCluster->GetOuterPseudoLayer());
 
-            // Apply loose cuts to examine suitability of merging clusters before proceeding
             const PseudoLayer outerLayerDifference((parentOuterLayer > daughterOuterLayer) ? (parentOuterLayer - daughterOuterLayer) :
                 (daughterOuterLayer - parentOuterLayer));
 
@@ -80,11 +79,12 @@ StatusCode LoopingTracksAlgorithm::Run()
             if (centroidDifference.GetMagnitude() > m_maxCentroidDifference)
                 continue;
 
-            const bool isDaughterOutsideECal(pDaughterCluster->GetOuterLayerHitType() != ECAL);
-            const bool isOutsideECal(isParentOutsideECal && isDaughterOutsideECal);
+            // Are both clusters contained within fine granularity region? If not, relax cluster compatibility checks.
+            const bool isDaughterFineGranularity(GeometryHelper::GetHitTypeGranularity(pDaughterCluster->GetOuterLayerHitType()) <= FINE);
+            const bool isFineGranularity(isParentFineGranularity && isDaughterFineGranularity);
 
             // Check that cluster fit directions are compatible with looping track hypothesis
-            const float fitDirectionDotProductCut(isOutsideECal ? m_fitDirectionDotProductCutHCal : m_fitDirectionDotProductCutECal);
+            const float fitDirectionDotProductCut(isFineGranularity ? m_fitDirectionDotProductCutFine : m_fitDirectionDotProductCutCoarse);
             const float fitDirectionDotProduct(parentClusterFitResult.GetDirection().GetDotProduct(daughterClusterFitResult.GetDirection()));
 
             if (fitDirectionDotProduct > fitDirectionDotProductCut)
@@ -95,13 +95,13 @@ StatusCode LoopingTracksAlgorithm::Run()
 
             // Cut on distance of closest approach between hits in outer layers of the two clusters
             const float closestHitDistance(this->GetClosestDistanceBetweenOuterLayerHits(pParentCluster, pDaughterCluster));
-            const float closestHitDistanceCut(isOutsideECal ? m_closestHitDistanceCutHCal : m_closestHitDistanceCutECal);
+            const float closestHitDistanceCut(isFineGranularity ? m_closestHitDistanceCutFine : m_closestHitDistanceCutCoarse);
 
             if (closestHitDistance > closestHitDistanceCut)
                 continue;
 
             // Cut on distance of closest approach between fit extrapolations
-            const float fitResultsClosestApproachCut(isOutsideECal ? m_fitResultsClosestApproachCutHCal : m_fitResultsClosestApproachCutECal);
+            const float fitResultsClosestApproachCut(isFineGranularity ? m_fitResultsClosestApproachCutFine : m_fitResultsClosestApproachCutCoarse);
             float fitResultsClosestApproach(std::numeric_limits<float>::max());
 
             if (STATUS_CODE_SUCCESS != ClusterHelper::GetFitResultsClosestApproach(parentClusterFitResult, daughterClusterFitResult, fitResultsClosestApproach))
@@ -113,7 +113,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             // Merge clusters if they are in HCal, otherwise look for "good" features (bit ad hoc) ...
             unsigned int nGoodFeatures(0);
 
-            if (!isOutsideECal)
+            if (isFineGranularity)
             {
                 if (fitDirectionDotProduct < m_goodFeaturesMaxFitDotProduct)
                     nGoodFeatures++;
@@ -129,7 +129,7 @@ StatusCode LoopingTracksAlgorithm::Run()
             }
 
             // Now have sufficient information to decide whether to join clusters
-            if (isOutsideECal || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
+            if (!isFineGranularity || (nGoodFeatures >= m_nGoodFeaturesForClusterMerge))
             {
                 pBestClusterFitRelation = *iterJ;
                 minFitResultsApproach = fitResultsClosestApproach;
@@ -229,29 +229,29 @@ StatusCode LoopingTracksAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxCentroidDifference", m_maxCentroidDifference));
 
-    m_fitDirectionDotProductCutECal = -0.1f;
+    m_fitDirectionDotProductCutFine = -0.1f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "FitDirectionDotProductCutECal", m_fitDirectionDotProductCutECal));
+        "FitDirectionDotProductCutFine", m_fitDirectionDotProductCutFine));
 
-    m_fitDirectionDotProductCutHCal = 0.f;
+    m_fitDirectionDotProductCutCoarse = 0.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "FitDirectionDotProductCutHCal", m_fitDirectionDotProductCutHCal));
+        "FitDirectionDotProductCutCoarse", m_fitDirectionDotProductCutCoarse));
 
-    m_closestHitDistanceCutECal = 250.f;
+    m_closestHitDistanceCutFine = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ClosestHitDistanceCutECal", m_closestHitDistanceCutECal));
+        "ClosestHitDistanceCutFine", m_closestHitDistanceCutFine));
 
-    m_closestHitDistanceCutHCal = 500.f;
+    m_closestHitDistanceCutCoarse = 500.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ClosestHitDistanceCutHCal", m_closestHitDistanceCutHCal));
+        "ClosestHitDistanceCutCoarse", m_closestHitDistanceCutCoarse));
 
-    m_fitResultsClosestApproachCutECal = 50.f;
+    m_fitResultsClosestApproachCutFine = 50.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "FitResultsClosestApproachCutECal", m_fitResultsClosestApproachCutECal));
+        "FitResultsClosestApproachCutFine", m_fitResultsClosestApproachCutFine));
 
-    m_fitResultsClosestApproachCutHCal = 200.f;
+    m_fitResultsClosestApproachCutCoarse = 200.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "FitResultsClosestApproachCutHCal", m_fitResultsClosestApproachCutHCal));
+        "FitResultsClosestApproachCutCoarse", m_fitResultsClosestApproachCutCoarse));
 
     m_nGoodFeaturesForClusterMerge = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

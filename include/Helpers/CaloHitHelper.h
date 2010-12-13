@@ -203,12 +203,12 @@ private:
     static unsigned int             m_densityWeightNLayers;             ///< Number of adjacent layers to use in density weight calculation
 
     static bool                     m_shouldUseSimpleIsolationScheme;   ///< Whether to use the simple (density weight cut) isolation scheme
-    static float                    m_isolationDensityWeightCutECal;    ///< ECal isolation density weight cut
-    static float                    m_isolationDensityWeightCutHCal;    ///< HCal isolation density weight cut
+    static float                    m_isolationDensityWeightCutFine;    ///< Fine granularity isolation density weight cut
+    static float                    m_isolationDensityWeightCutCoarse;  ///< Coarse granularity isolation density weight cut
 
     static unsigned int             m_isolationNLayers;                 ///< Number of adjacent layers to use in isolation calculation
-    static float                    m_isolationCutDistanceECal;         ///< ECal isolation cut distance, units mm
-    static float                    m_isolationCutDistanceHCal;         ///< HCal isolation cut distance, units mm
+    static float                    m_isolationCutDistanceFine;         ///< Fine granularity isolation cut distance, units mm
+    static float                    m_isolationCutDistanceCoarse;       ///< Coarse granularity isolation cut distance, units mm
     static unsigned int             m_isolationMaxNearbyHits;           ///< Max number of "nearby" hits for a hit to be considered isolated
 
     static float                    m_mipLikeMipCut;                    ///< Mip equivalent energy cut for hit to be flagged as possible mip

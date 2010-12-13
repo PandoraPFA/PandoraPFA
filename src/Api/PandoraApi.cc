@@ -101,6 +101,14 @@ pandora::StatusCode PandoraApi::SetPseudoLayerCalculator(const pandora::Pandora 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+pandora::StatusCode PandoraApi::SetHitTypeGranularity(const pandora::Pandora &pandora, const pandora::HitType hitType,
+    const pandora::Granularity granularity)
+{
+    return pandora.GetPandoraApiImpl()->SetHitTypeGranularity(hitType, granularity);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraApi::RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
     const pandora::EnergyCorrectionType energyCorrectionType, pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction)
 {

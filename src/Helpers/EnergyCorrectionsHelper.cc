@@ -63,12 +63,12 @@ void EnergyCorrectionsHelper::CleanCluster(const Cluster *const pCluster, float 
     if (0. == clusterHadronicEnergy)
         throw StatusCodeException(STATUS_CODE_FAILURE);
 
-    bool isOutsideECal(false);
+    bool isFineGranularity(true);
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    // Loop over all constituent ecal hits, looking for anomalies
+    // Loop over all constituent inner layer fine granularity hits, looking for anomalies
     for (OrderedCaloHitList::const_iterator layerIter = orderedCaloHitList.begin(), layerIterEnd = orderedCaloHitList.end();
-        (layerIter != layerIterEnd) && !isOutsideECal; ++layerIter)
+        (layerIter != layerIterEnd) && isFineGranularity; ++layerIter)
     {
         const PseudoLayer pseudoLayer(layerIter->first);
 
@@ -77,9 +77,9 @@ void EnergyCorrectionsHelper::CleanCluster(const Cluster *const pCluster, float 
         {
             CaloHit *pCaloHit = *hitIter;
 
-            if (ECAL != pCaloHit->GetHitType())
+            if (GeometryHelper::GetHitTypeGranularity((*hitIter)->GetHitType()) > FINE)
             {
-                isOutsideECal = true;
+                isFineGranularity = false;
                 break;
             }
 

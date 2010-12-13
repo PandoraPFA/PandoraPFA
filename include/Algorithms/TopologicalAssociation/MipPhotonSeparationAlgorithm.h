@@ -98,8 +98,8 @@ protected:
     float           m_genericDistanceCut;           ///< Generic distance cut to apply throughout algorithm
     float           m_trackPathWidth;               ///< Track path width, used to determine whether hits are associated with seed track
     float           m_maxTrackSeparation;           ///< Maximum distance between a calo hit and track seed
-    float           m_additionalPadWidthsECal;      ///< ECal adjacent pad widths used to calculate cone approach distance
-    float           m_additionalPadWidthsHCal;      ///< HCal adjacent pad widths used to calculate cone approach distance
+    float           m_additionalPadWidthsFine;      ///< Fine granularity adjacent pad widths used to calculate cone approach distance
+    float           m_additionalPadWidthsCoarse;    ///< Coarse granularity adjacent pad widths used to calculate cone approach distance
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
