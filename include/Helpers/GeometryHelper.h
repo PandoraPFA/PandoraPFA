@@ -177,6 +177,20 @@ public:
     PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
 
     /**
+     *  @brief  Get the inner detector barrel parameters
+     * 
+     *  @return The inner detector barrel parameters
+     */
+    const SubDetectorParameters &GetInDetBarrelParameters() const;
+
+    /**
+     *  @brief  Get the inner detector end cap parameters
+     * 
+     *  @return The inner detector end cap parameters
+     */
+    const SubDetectorParameters &GetInDetEndCapParameters() const;
+
+    /**
      *  @brief  Get the ecal barrel parameters
      * 
      *  @return The ecal barrel parameters
@@ -407,6 +421,8 @@ private:
     BFieldCalculator               *m_pBFieldCalculator;        ///< Address of the bfield calculator
     PseudoLayerCalculator          *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
 
+    SubDetectorParameters           m_inDetBarrelParameters;    ///< The inner detector barrel parameters
+    SubDetectorParameters           m_inDetEndCapParameters;    ///< The inner detector end cap parameters
     SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
     SubDetectorParameters           m_eCalEndCapParameters;     ///< The ecal end cap parameters
     SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
@@ -426,7 +442,6 @@ private:
 
     static bool                     m_instanceFlag;             ///< The geometry helper instance flag
     static GeometryHelper          *m_pGeometryHelper;          ///< The geometry helper instance
-
     static HitTypeToGranularityMap  m_hitTypeToGranularityMap;  ///< The hit type to granularity map
     static float                    m_gapTolerance;             ///< Tolerance allowed when declaring a point to be "in" a gap region, units mm
 
@@ -437,11 +452,22 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetInDetBarrelParameters() const
+{
+    return m_inDetBarrelParameters;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetInDetEndCapParameters() const
+{
+    return m_inDetEndCapParameters;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalBarrelParameters() const
 {
-    if (!m_eCalBarrelParameters.IsInitialized())
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     return m_eCalBarrelParameters;
 }
 
@@ -449,9 +475,6 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalBarre
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCapParameters() const
 {
-    if (!m_eCalEndCapParameters.IsInitialized())
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     return m_eCalEndCapParameters;
 }
 
@@ -459,9 +482,6 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCa
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarrelParameters() const
 {
-    if (!m_hCalBarrelParameters.IsInitialized())
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     return m_hCalBarrelParameters;
 }
 
@@ -469,9 +489,6 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarre
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalEndCapParameters() const
 {
-    if (!m_hCalEndCapParameters.IsInitialized())
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     return m_hCalEndCapParameters;
 }
 
@@ -479,9 +496,6 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalEndCa
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonBarrelParameters() const
 {
-    if (!m_muonBarrelParameters.IsInitialized())
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     return m_muonBarrelParameters;
 }
 
@@ -489,9 +503,6 @@ inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonBarre
 
 inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonEndCapParameters() const
 {
-    if (!m_muonEndCapParameters.IsInitialized())
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     return m_muonEndCapParameters;
 }
 
@@ -578,9 +589,6 @@ inline float GeometryHelper::GetGapTolerance()
 
 inline bool GeometryHelper::SubDetectorParameters::IsInitialized() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     return m_isInitialized;
 }
 

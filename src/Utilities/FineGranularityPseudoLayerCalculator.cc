@@ -13,54 +13,27 @@
 namespace pandora
 {
 
+FineGranularityPseudoLayerCalculator::FineGranularityPseudoLayerCalculator() :
+    PseudoLayerCalculator(),
+    m_barrelInnerR(),
+    m_endCapInnerZ(),
+    m_barrelInnerRMuon(),
+    m_endCapInnerZMuon(),
+    m_rCorrection(0.f),
+    m_zCorrection(0.f),
+    m_rCorrectionMuon(0.f),
+    m_zCorrectionMuon(0.f),
+    m_barrelEdgeR(),
+    m_endCapEdgeZ()
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void FineGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *const pGeometryHelper)
 {
-    // Cache all relevant layer positions in ordered lists, demanding no duplicates
-    this->StoreLayerPositions(pGeometryHelper->GetECalBarrelParameters().GetLayerParametersList(), m_barrelLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetECalEndCapParameters().GetLayerParametersList(), m_endCapLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetHCalBarrelParameters().GetLayerParametersList(), m_barrelLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetHCalEndCapParameters().GetLayerParametersList(), m_endCapLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetMuonBarrelParameters().GetLayerParametersList(), m_barrelLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetMuonEndCapParameters().GetLayerParametersList(), m_endCapLayerPositions);
-
-    std::sort(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end());
-    std::sort(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end());
-
-    LayerPositionList::const_iterator barrelIter = std::unique(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end());
-    LayerPositionList::const_iterator endcapIter = std::unique(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end());
-
-    if ((m_barrelLayerPositions.end() != barrelIter) || (m_endCapLayerPositions.end() != endcapIter))
-    {
-        std::cout << "PseudoLayerCalculator: Duplicate layer position detected." << std::endl;
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-    }
-
-    this->StoreDetectorOuterEdge(pGeometryHelper);
-
-    // Cache sine and cosine of angles used to project hit positions onto polygonal calorimeter surfaces
-    GeometryHelper::FillAngleVector(pGeometryHelper->GetECalBarrelParameters().GetInnerSymmetryOrder(),
-        pGeometryHelper->GetECalBarrelParameters().GetInnerPhiCoordinate(), m_eCalBarrelAngleVector);
-    GeometryHelper::FillAngleVector(pGeometryHelper->GetMuonBarrelParameters().GetInnerSymmetryOrder(),
-        pGeometryHelper->GetMuonBarrelParameters().GetInnerPhiCoordinate(), m_muonBarrelAngleVector);
-
-    // Cache information used to identify overlap regions
-    m_barrelInnerR = pGeometryHelper->GetECalBarrelParameters().GetInnerRCoordinate();
-    m_endCapInnerZ = pGeometryHelper->GetECalEndCapParameters().GetInnerZCoordinate();
-    m_barrelInnerRMuon = pGeometryHelper->GetMuonBarrelParameters().GetInnerRCoordinate();
-    m_endCapInnerZMuon = pGeometryHelper->GetMuonEndCapParameters().GetInnerZCoordinate();
-
-    const float barrelOuterZ = pGeometryHelper->GetECalBarrelParameters().GetOuterZCoordinate();
-    const float endCapOuterR = pGeometryHelper->GetECalEndCapParameters().GetOuterRCoordinate();
-    const float barrelOuterZMuon = pGeometryHelper->GetMuonBarrelParameters().GetOuterZCoordinate();
-    const float endCapOuterRMuon = pGeometryHelper->GetMuonEndCapParameters().GetOuterRCoordinate();
-
-    // Cache corrections to be applied in barrel/endcap overlap regions
-    const bool IsEnclosingEndCap(endCapOuterR > m_barrelInnerR);
-
-    m_rCorrection = ((!IsEnclosingEndCap) ? 0.f : m_barrelInnerR * ((m_endCapInnerZ / barrelOuterZ) - 1.f));
-    m_zCorrection = ((IsEnclosingEndCap) ? 0.f : m_endCapInnerZ * ((m_barrelInnerR / endCapOuterR) - 1.f));
-    m_rCorrectionMuon = ((!IsEnclosingEndCap) ? 0.f : m_barrelInnerRMuon * ((m_endCapInnerZMuon / barrelOuterZMuon) - 1.f));
-    m_zCorrectionMuon = ((IsEnclosingEndCap) ? 0.f : m_endCapInnerZMuon * ((m_barrelInnerRMuon / endCapOuterRMuon) - 1.f));
+    this->StoreLayerPositions(pGeometryHelper);
+    this->StoreOverlapCorrectionDetails(pGeometryHelper);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,42 +72,6 @@ PseudoLayer FineGranularityPseudoLayerCalculator::GetPseudoLayer(const Cartesian
 
     // Reserve pseudo layer(s) for track projections
     return (1 + TRACK_PROJECTION_LAYER + pseudoLayer);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void FineGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHelper::LayerParametersList &layerParametersList,
-    LayerPositionList &LayerPositionList)
-{
-    for (GeometryHelper::LayerParametersList::const_iterator iter = layerParametersList.begin(), iterEnd = layerParametersList.end();
-        iter != iterEnd; ++iter)
-    {
-        LayerPositionList.push_back(iter->m_closestDistanceToIp);
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void FineGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper)
-{
-    // Find extremal barrel and endcap coordinates. Necessary to guard against e.g. user-specified dummy muon coordinates.
-    m_barrelEdgeR = (std::max(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
-        pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate(),
-        pGeometryHelper->GetMuonBarrelParameters().GetOuterRCoordinate()) ));
-
-    m_endCapEdgeZ = (std::max(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate(), std::max(
-        pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate(),
-        pGeometryHelper->GetMuonEndCapParameters().GetOuterZCoordinate()) ));
-
-    if ((m_barrelLayerPositions.end() != std::upper_bound(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end(), m_barrelEdgeR)) ||
-        (m_endCapLayerPositions.end() != std::upper_bound(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end(), m_endCapEdgeZ)))
-    {
-        std::cout << "PseudoLayerCalculator: Layers specified outside detector edge." << std::endl;
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-    }
-
-    m_barrelLayerPositions.push_back(m_barrelEdgeR);
-    m_endCapLayerPositions.push_back(m_endCapEdgeZ);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -196,6 +133,113 @@ StatusCode FineGranularityPseudoLayerCalculator::FindMatchingLayer(const float p
     }
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void FineGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHelper *const pGeometryHelper)
+{
+    // Cache all relevant layer positions in ordered lists, demanding no duplicates
+    this->StoreLayerPositions(pGeometryHelper->GetInDetBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(pGeometryHelper->GetInDetEndCapParameters(), m_endCapLayerPositions);
+    this->StoreLayerPositions(pGeometryHelper->GetECalBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(pGeometryHelper->GetECalEndCapParameters(), m_endCapLayerPositions);
+    this->StoreLayerPositions(pGeometryHelper->GetHCalBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(pGeometryHelper->GetHCalEndCapParameters(), m_endCapLayerPositions);
+    this->StoreLayerPositions(pGeometryHelper->GetMuonBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(pGeometryHelper->GetMuonEndCapParameters(), m_endCapLayerPositions);
+
+    if (m_barrelLayerPositions.empty() || m_endCapLayerPositions.empty())
+    {
+        std::cout << "PseudoLayerCalculator: No layer positions specified." << std::endl;
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+    }
+
+    std::sort(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end());
+    std::sort(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end());
+
+    LayerPositionList::const_iterator barrelIter = std::unique(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end());
+    LayerPositionList::const_iterator endcapIter = std::unique(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end());
+
+    if ((m_barrelLayerPositions.end() != barrelIter) || (m_endCapLayerPositions.end() != endcapIter))
+    {
+        std::cout << "PseudoLayerCalculator: Duplicate layer position detected." << std::endl;
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+    }
+
+    this->StoreDetectorOuterEdge(pGeometryHelper);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void FineGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHelper::SubDetectorParameters &subDetectorParameters,
+    LayerPositionList &LayerPositionList)
+{
+    if (!subDetectorParameters.IsInitialized())
+        return;
+
+    const GeometryHelper::LayerParametersList &layerParametersList(subDetectorParameters.GetLayerParametersList());
+
+    for (GeometryHelper::LayerParametersList::const_iterator iter = layerParametersList.begin(), iterEnd = layerParametersList.end();
+        iter != iterEnd; ++iter)
+    {
+        LayerPositionList.push_back(iter->m_closestDistanceToIp);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void FineGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper)
+{
+    // Find extremal barrel and endcap coordinates. Necessary to guard against e.g. user-specified dummy muon coordinates.
+    m_barrelEdgeR = (std::max(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
+        pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate(),
+        pGeometryHelper->GetMuonBarrelParameters().GetOuterRCoordinate()) ));
+
+    m_endCapEdgeZ = (std::max(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate(), std::max(
+        pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate(),
+        pGeometryHelper->GetMuonEndCapParameters().GetOuterZCoordinate()) ));
+
+    if ((m_barrelLayerPositions.end() != std::upper_bound(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end(), m_barrelEdgeR)) ||
+        (m_endCapLayerPositions.end() != std::upper_bound(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end(), m_endCapEdgeZ)))
+    {
+        std::cout << "PseudoLayerCalculator: Layers specified outside detector edge." << std::endl;
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+    }
+
+    m_barrelLayerPositions.push_back(m_barrelEdgeR);
+    m_endCapLayerPositions.push_back(m_endCapEdgeZ);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void FineGranularityPseudoLayerCalculator::StoreOverlapCorrectionDetails(const GeometryHelper *const pGeometryHelper)
+{
+    // TODO tidy, not strictly overlap stuff.
+    // Cache sine and cosine of angles used to project hit positions onto polygonal calorimeter surfaces
+    GeometryHelper::FillAngleVector(pGeometryHelper->GetECalBarrelParameters().GetInnerSymmetryOrder(),
+        pGeometryHelper->GetECalBarrelParameters().GetInnerPhiCoordinate(), m_eCalBarrelAngleVector);
+    GeometryHelper::FillAngleVector(pGeometryHelper->GetMuonBarrelParameters().GetInnerSymmetryOrder(),
+        pGeometryHelper->GetMuonBarrelParameters().GetInnerPhiCoordinate(), m_muonBarrelAngleVector);
+
+    // Cache information used to identify overlap regions
+    m_barrelInnerR = pGeometryHelper->GetECalBarrelParameters().GetInnerRCoordinate();
+    m_endCapInnerZ = pGeometryHelper->GetECalEndCapParameters().GetInnerZCoordinate();
+    m_barrelInnerRMuon = pGeometryHelper->GetMuonBarrelParameters().GetInnerRCoordinate();
+    m_endCapInnerZMuon = pGeometryHelper->GetMuonEndCapParameters().GetInnerZCoordinate();
+
+    const float barrelOuterZ = pGeometryHelper->GetECalBarrelParameters().GetOuterZCoordinate();
+    const float endCapOuterR = pGeometryHelper->GetECalEndCapParameters().GetOuterRCoordinate();
+    const float barrelOuterZMuon = pGeometryHelper->GetMuonBarrelParameters().GetOuterZCoordinate();
+    const float endCapOuterRMuon = pGeometryHelper->GetMuonEndCapParameters().GetOuterRCoordinate();
+
+    // Cache corrections to be applied in barrel/endcap overlap regions
+    const bool IsEnclosingEndCap(endCapOuterR > m_barrelInnerR);
+
+    m_rCorrection = ((!IsEnclosingEndCap) ? 0.f : m_barrelInnerR * ((m_endCapInnerZ / barrelOuterZ) - 1.f));
+    m_zCorrection = ((IsEnclosingEndCap) ? 0.f : m_endCapInnerZ * ((m_barrelInnerR / endCapOuterR) - 1.f));
+    m_rCorrectionMuon = ((!IsEnclosingEndCap) ? 0.f : m_barrelInnerRMuon * ((m_endCapInnerZMuon / barrelOuterZMuon) - 1.f));
+    m_zCorrectionMuon = ((IsEnclosingEndCap) ? 0.f : m_endCapInnerZMuon * ((m_barrelInnerRMuon / endCapOuterRMuon) - 1.f));
 }
 
 } // namespace pandora

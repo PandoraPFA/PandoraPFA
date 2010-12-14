@@ -146,6 +146,8 @@ public:
 
         typedef std::map<std::string, SubDetectorParameters> SubDetectorParametersMap;
 
+        SubDetectorParameters           m_inDetBarrelParameters;    ///< The inner detector barrel parameters
+        SubDetectorParameters           m_inDetEndCapParameters;    ///< The inner detector end cap parameters
         SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
         SubDetectorParameters           m_eCalEndCapParameters;     ///< the ecal end cap parameters
         SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters

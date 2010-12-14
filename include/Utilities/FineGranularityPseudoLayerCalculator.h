@@ -20,25 +20,15 @@ namespace pandora
  */
 class FineGranularityPseudoLayerCalculator : public PseudoLayerCalculator
 {
+public:
+    /**
+     *  @brief  Default constructor
+     */
+    FineGranularityPseudoLayerCalculator();
+
 private:
     void Initialize(const GeometryHelper *const pGeometryHelper);
     PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
-
-    typedef std::vector<float> LayerPositionList;
-
-    /**
-     *  @brief  Store barrel and endcap layer positions upon initialization
-     * 
-     *  @param  layerParametersList the layer parameters list
-     */
-    void StoreLayerPositions(const GeometryHelper::LayerParametersList &layerParametersList, LayerPositionList &LayerPositionList);
-
-    /**
-     *  @brief  Store positions of barrel and endcap outer edges upon initialization
-     * 
-     *  @param  pGeometryHelper address of the geometry helper
-     */
-    void StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper);
 
     /**
      *  @brief  Get the appropriate pseudolayer for a specified parameters
@@ -54,6 +44,8 @@ private:
     StatusCode GetPseudoLayer(const float rCoordinate, const float zCoordinate, const float rCorrection, const float zCorrection, 
         const float barrelInnerR, const float endCapInnerZ, PseudoLayer &pseudoLayer) const;
 
+    typedef std::vector<float> LayerPositionList;
+
     /**
      *  @brief  Find the layer number corresponding to a specified position, via reference to a specified layer position list
      * 
@@ -62,6 +54,35 @@ private:
      *  @param  layer to receive the layer number
      */
     StatusCode FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, unsigned int &layer) const;
+
+    /**
+     *  @brief  Store all revelevant barrel and endcap layer positions upon initialization
+     * 
+     *  @param  pGeometryHelper the geometry helper
+     */
+    void StoreLayerPositions(const GeometryHelper *const pGeometryHelper);
+
+    /**
+     *  @brief  Store barrel and endcap layer positions upon initialization
+     * 
+     *  @param  subDetectorParameters the sub detector parameters
+     *  @param  layerParametersList the layer parameters list
+     */
+    void StoreLayerPositions(const GeometryHelper::SubDetectorParameters &subDetectorParameters, LayerPositionList &LayerPositionList);
+
+    /**
+     *  @brief  Store positions of barrel and endcap outer edges upon initialization
+     * 
+     *  @param  pGeometryHelper address of the geometry helper
+     */
+    void StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper);
+
+    /**
+     *  @brief  Store all details revelevant to barrel/endcap overlap corrections
+     * 
+     *  @param  pGeometryHelper the geometry helper
+     */
+    void StoreOverlapCorrectionDetails(const GeometryHelper *const pGeometryHelper);
 
     LayerPositionList               m_barrelLayerPositions;     ///< List of barrel layer positions
     LayerPositionList               m_endCapLayerPositions;     ///< List of endcap layer positions
@@ -73,7 +94,7 @@ private:
     float                           m_endCapInnerZ;             ///< Endcap inner z position
     float                           m_barrelInnerRMuon;         ///< Muon barrel inner radius
     float                           m_endCapInnerZMuon;         ///< Muon endcap inner z position
-            
+
     float                           m_rCorrection;              ///< Barrel/endcap overlap r correction
     float                           m_zCorrection;              ///< Barrel/endcap overlap z correction
     float                           m_rCorrectionMuon;          ///< Muon barrel/endcap overlap r correction

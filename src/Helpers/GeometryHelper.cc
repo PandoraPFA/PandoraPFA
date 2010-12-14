@@ -21,7 +21,6 @@ namespace pandora
 
 bool GeometryHelper::m_instanceFlag = false;
 GeometryHelper* GeometryHelper::m_pGeometryHelper = NULL;
-
 GeometryHelper::HitTypeToGranularityMap GeometryHelper::m_hitTypeToGranularityMap = GeometryHelper::GetDefaultHitTypeToGranularityMap();
 float GeometryHelper::m_gapTolerance = 0.f;
 
@@ -178,10 +177,12 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
         m_coilOuterRadius = geometryParameters.m_coilOuterRadius;
         m_coilZExtent = geometryParameters.m_coilZExtent;
 
+        m_eCalBarrelParameters.Initialize("InnerDetectorBarrelParameters", geometryParameters.m_inDetBarrelParameters);
         m_eCalBarrelParameters.Initialize("ECalBarrelParameters", geometryParameters.m_eCalBarrelParameters);
         m_hCalBarrelParameters.Initialize("HCalBarrelParameters", geometryParameters.m_hCalBarrelParameters);
         m_muonBarrelParameters.Initialize("MuonBarrelParameters", geometryParameters.m_muonBarrelParameters);
 
+        m_eCalEndCapParameters.Initialize("InnerDetectorEndCapParameters", geometryParameters.m_inDetEndCapParameters);
         m_eCalEndCapParameters.Initialize("ECalEndCapParameters", geometryParameters.m_eCalEndCapParameters);
         m_hCalEndCapParameters.Initialize("HCalEndCapParameters", geometryParameters.m_hCalEndCapParameters);
         m_muonEndCapParameters.Initialize("MuonEndCapParameters", geometryParameters.m_muonEndCapParameters);
@@ -353,7 +354,7 @@ void GeometryHelper::SubDetectorParameters::Initialize(const std::string &subDet
         if (STATUS_CODE_NOT_INITIALIZED != statusCodeException.GetStatusCode())
             throw statusCodeException;
 
-        std::cout << "GeometryHelper: " << subDetectorName << " not initialized." << std::endl;
+        std::cout << "GeometryHelper: " << subDetectorName << " not specified." << std::endl;
         m_isInitialized = false;
     }
 }
