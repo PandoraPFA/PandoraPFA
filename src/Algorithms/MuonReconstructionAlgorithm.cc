@@ -97,6 +97,9 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             if (pTrack->GetEnergyAtDca() < m_minTrackCandidateEnergy)
                 continue;
 
+            if (pTrack->IsProjectedToEndCap() && (pTrack->GetTrackStateAtCalorimeter().GetPosition().GetZ() * clusterInnerCentroid.GetZ() < 0.f))
+                continue;
+
             // Extract track helix fit
             const Helix *const pHelix(pTrack->GetHelixFitAtCalorimeter());
 
