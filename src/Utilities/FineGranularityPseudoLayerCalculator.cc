@@ -79,8 +79,8 @@ PseudoLayer FineGranularityPseudoLayerCalculator::GetPseudoLayer(const Cartesian
             throw StatusCodeException(statusCode);
     }
 
-    // Reserve pseudo layer(s) for track projections
-    return (1 + TRACK_PROJECTION_LAYER + pseudoLayer);
+    // Reserve a pseudo layer for track projections, etc.
+    return (1 + pseudoLayer);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

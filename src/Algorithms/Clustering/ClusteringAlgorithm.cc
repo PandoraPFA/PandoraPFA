@@ -109,7 +109,7 @@ StatusCode ClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoLayer
         const PseudoLayer layersToStepBack((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
             m_layersToStepBackFine : m_layersToStepBackCoarse);
 
-        // Associate with existing clusters in stepBack layers. If stepBackLayer == pseudoLayer, will examine TRACK_PROJECTION_LAYER.
+        // Associate with existing clusters in stepBack layers. If stepBackLayer == pseudoLayer, will examine track projections
         for (PseudoLayer stepBackLayer = 1; (stepBackLayer <= layersToStepBack) && (stepBackLayer <= pseudoLayer); ++stepBackLayer)
         {
             const PseudoLayer searchLayer(pseudoLayer - stepBackLayer);
@@ -293,8 +293,10 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVe
 StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
     float &genericDistance) const
 {
+    static const PseudoLayer firstLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
+
     // Cone approach measurement to track projections
-    if ((searchLayer == TRACK_PROJECTION_LAYER) && (pCluster->IsTrackSeeded()))
+    if (pCluster->IsTrackSeeded() && ((searchLayer == 0) || (searchLayer < firstLayer)))
     {
         return this->GetConeApproachDistanceToHit(pCaloHit, pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter().GetPosition(),
             pCluster->GetInitialDirection(), genericDistance);

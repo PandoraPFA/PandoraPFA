@@ -48,6 +48,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
     const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
 
     for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {
@@ -89,7 +90,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
         // Account for layers before start of cluster
         if (innerPseudoLayer == iLayer)
-            nRadiationLengths *= static_cast<float>(innerPseudoLayer - TRACK_PROJECTION_LAYER);
+            nRadiationLengths *= static_cast<float>(innerPseudoLayer + 1 - firstPseudoLayer);
 
         // Finally, create the profile
         const float endPosition(nRadiationLengths / m_showerProfileBinWidth);
@@ -102,7 +103,6 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
         for (unsigned int iBin = startBin; iBin <= endBin; ++iBin)
         {
-            // TODO Should delta be a multiple of bin widths?
             float delta(1.f);
 
             if (startBin == iBin)
@@ -247,6 +247,7 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
     const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
 
     for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {
@@ -283,7 +284,7 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
         // Cut on number of radiation lengths before cluster start
         if (innerPseudoLayer == iLayer)
         {
-            nRadiationLengths *= static_cast<float>(innerPseudoLayer - TRACK_PROJECTION_LAYER);
+            nRadiationLengths *= static_cast<float>(innerPseudoLayer + 1 - firstPseudoLayer);
 
             if (nRadiationLengths > m_photonIdMaxInnerLayerRadLengths)
                 return false;

@@ -111,8 +111,6 @@ typedef const void * Uid;
 typedef std::map<Uid, MCParticle *> UidToMCParticleMap;
 typedef std::map<Track *, Cluster *> TrackToClusterMap;
 
-static const unsigned int TRACK_PROJECTION_LAYER = 0; // TODO remove this global constant
-
 } // namespace pandora
 
 #endif // #ifndef PANDORA_INTERNAL_H

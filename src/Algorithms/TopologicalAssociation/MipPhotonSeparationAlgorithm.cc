@@ -58,7 +58,7 @@ StatusCode MipPhotonSeparationAlgorithm::Run()
 bool MipPhotonSeparationAlgorithm::ShouldFragmentCluster(Cluster *const pCluster, Track *const pTrack, PseudoLayer &showerStartLayer,
     PseudoLayer &showerEndLayer) const
 {
-    static const PseudoLayer firstPseudoLayer(TRACK_PROJECTION_LAYER + 1);
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
 
     PseudoLayer mipRegion1StartLayer(LAYER_MAX), mipRegion1EndLayer(LAYER_MAX);
     PseudoLayer mipRegion2StartLayer(LAYER_MAX), mipRegion2EndLayer(LAYER_MAX);

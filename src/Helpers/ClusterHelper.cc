@@ -723,6 +723,10 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
         {
             return showerStartLayer;
         }
+
+        // Be careful when decrementing unsigned ints
+        if (0 == iLayer)
+            break;
     }
 
     return showerStartLayer;

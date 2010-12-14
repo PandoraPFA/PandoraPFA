@@ -56,7 +56,7 @@ StatusCode EnergyCorrectionsHelper::EnergyCorrection(const Cluster *const pClust
 
 void EnergyCorrectionsHelper::CleanCluster(const Cluster *const pCluster, float &correctedHadronicEnergy)
 {
-    static const PseudoLayer firstPseudoLayer(TRACK_PROJECTION_LAYER + 1);
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
 
     const float clusterHadronicEnergy(pCluster->GetHadronicEnergy());
 
