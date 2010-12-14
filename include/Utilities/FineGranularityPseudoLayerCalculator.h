@@ -12,13 +12,10 @@
 
 #include "Utilities/PseudoLayerCalculator.h"
 
-namespace pandora
-{
-
 /**
  *  @brief  FineGranularityPseudoLayerCalculator class
  */
-class FineGranularityPseudoLayerCalculator : public PseudoLayerCalculator
+class FineGranularityPseudoLayerCalculator : public pandora::PseudoLayerCalculator
 {
 public:
     /**
@@ -27,8 +24,8 @@ public:
     FineGranularityPseudoLayerCalculator();
 
 private:
-    void Initialize(const GeometryHelper *const pGeometryHelper);
-    PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
+    void Initialize(const pandora::GeometryHelper *const pGeometryHelper);
+    pandora::PseudoLayer GetPseudoLayer(const pandora::CartesianVector &positionVector) const;
 
     /**
      *  @brief  Get the appropriate pseudolayer for a specified parameters
@@ -41,8 +38,8 @@ private:
      *  @param  endCapInnerZ the endcap inner z coordinate
      *  @param  pseudoLayer to receive the appropriate pseudolayer
      */
-    StatusCode GetPseudoLayer(const float rCoordinate, const float zCoordinate, const float rCorrection, const float zCorrection, 
-        const float barrelInnerR, const float endCapInnerZ, PseudoLayer &pseudoLayer) const;
+    pandora::StatusCode GetPseudoLayer(const float rCoordinate, const float zCoordinate, const float rCorrection, const float zCorrection, 
+        const float barrelInnerR, const float endCapInnerZ, pandora::PseudoLayer &pseudoLayer) const;
 
     typedef std::vector<float> LayerPositionList;
 
@@ -53,57 +50,62 @@ private:
      *  @param  layerPositionList the specified layer position list
      *  @param  layer to receive the layer number
      */
-    StatusCode FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, unsigned int &layer) const;
+    pandora::StatusCode FindMatchingLayer(const float position, const LayerPositionList &layerPositionList, unsigned int &layer) const;
 
     /**
      *  @brief  Store all revelevant barrel and endcap layer positions upon initialization
      * 
      *  @param  pGeometryHelper the geometry helper
      */
-    void StoreLayerPositions(const GeometryHelper *const pGeometryHelper);
+    void StoreLayerPositions(const pandora::GeometryHelper *const pGeometryHelper);
 
     /**
-     *  @brief  Store barrel and endcap layer positions upon initialization
+     *  @brief  Store subdetector layer positions upon initialization
      * 
      *  @param  subDetectorParameters the sub detector parameters
      *  @param  layerParametersList the layer parameters list
      */
-    void StoreLayerPositions(const GeometryHelper::SubDetectorParameters &subDetectorParameters, LayerPositionList &LayerPositionList);
+    void StoreLayerPositions(const pandora::GeometryHelper::SubDetectorParameters &subDetectorParameters, LayerPositionList &LayerPositionList);
 
     /**
      *  @brief  Store positions of barrel and endcap outer edges upon initialization
      * 
      *  @param  pGeometryHelper address of the geometry helper
      */
-    void StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper);
+    void StoreDetectorOuterEdge(const pandora::GeometryHelper *const pGeometryHelper);
 
     /**
-     *  @brief  Store all details revelevant to barrel/endcap overlap corrections
+     *  @brief  Store sine and cosine of angles used to project hit positions onto polygonal calorimeter surfaces upon initialization
+     * 
+     *  @param  pGeometryHelper address of the geometry helper
+     */
+    void StorePolygonAngles(const pandora::GeometryHelper *const pGeometryHelper);
+
+    /**
+     *  @brief  Store all details revelevant to barrel/endcap overlap corrections upon initialization
      * 
      *  @param  pGeometryHelper the geometry helper
      */
-    void StoreOverlapCorrectionDetails(const GeometryHelper *const pGeometryHelper);
+    void StoreOverlapCorrectionDetails(const pandora::GeometryHelper *const pGeometryHelper);
 
-    LayerPositionList               m_barrelLayerPositions;     ///< List of barrel layer positions
-    LayerPositionList               m_endCapLayerPositions;     ///< List of endcap layer positions
+    LayerPositionList                       m_barrelLayerPositions;     ///< List of barrel layer positions
+    LayerPositionList                       m_endCapLayerPositions;     ///< List of endcap layer positions
 
-    GeometryHelper::AngleVector     m_eCalBarrelAngleVector;    ///< The ecal barrel angle vector
-    GeometryHelper::AngleVector     m_muonBarrelAngleVector;    ///< The muon barrel angle vector
+    pandora::GeometryHelper::AngleVector    m_eCalBarrelAngleVector;    ///< The ecal barrel angle vector
+    pandora::GeometryHelper::AngleVector    m_muonBarrelAngleVector;    ///< The muon barrel angle vector
 
-    float                           m_barrelInnerR;             ///< Barrel inner radius
-    float                           m_endCapInnerZ;             ///< Endcap inner z position
-    float                           m_barrelInnerRMuon;         ///< Muon barrel inner radius
-    float                           m_endCapInnerZMuon;         ///< Muon endcap inner z position
+    float                                   m_barrelInnerR;             ///< Barrel inner radius
+    float                                   m_endCapInnerZ;             ///< Endcap inner z position
+    float                                   m_barrelInnerRMuon;         ///< Muon barrel inner radius
+    float                                   m_endCapInnerZMuon;         ///< Muon endcap inner z position
 
-    float                           m_rCorrection;              ///< Barrel/endcap overlap r correction
-    float                           m_zCorrection;              ///< Barrel/endcap overlap z correction
-    float                           m_rCorrectionMuon;          ///< Muon barrel/endcap overlap r correction
-    float                           m_zCorrectionMuon;          ///< Muon barrel/endcap overlap z correction
+    float                                   m_rCorrection;              ///< Barrel/endcap overlap r correction
+    float                                   m_zCorrection;              ///< Barrel/endcap overlap z correction
+    float                                   m_rCorrectionMuon;          ///< Muon barrel/endcap overlap r correction
+    float                                   m_zCorrectionMuon;          ///< Muon barrel/endcap overlap z correction
 
-    float                           m_barrelEdgeR;              ///< Extremal barrel r coordinate
-    float                           m_endCapEdgeZ;              ///< Extremal endcap z coordinate
+    float                                   m_barrelEdgeR;              ///< Extremal barrel r coordinate
+    float                                   m_endCapEdgeZ;              ///< Extremal endcap z coordinate
 };
-
-} // namespace pandora
 
 #endif // #ifndef FINE_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H
