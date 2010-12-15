@@ -1330,11 +1330,11 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( const Cluste
         float peakheight = 0.;
         int   ipeak =0;
         int   jpeak =0;
-        float peakenergy=0;
-        float xbar=0;
-        float ybar=0;
-        float xxbar=0;
-        float yybar=0;
+        //float peakenergy=0;
+        //float xbar=0;
+        //float ybar=0;
+        //float xxbar=0;
+        //float yybar=0;
         std::vector<CaloHit*> longitudinalProfile[m_maximumNumberOfLayers];
     
         for(int i=1; i<nbins-1; i++){
@@ -1358,17 +1358,17 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( const Cluste
             int pcurrent = pend;
             point[0][0] = ipeak;
             point[0][1] = jpeak;
-            peakenergy=tprofile[ipeak][jpeak];
-      
+            //peakenergy=tprofile[ipeak][jpeak];
+
             for(unsigned int i=0;i<=endLayer;i++){
                 for(unsigned int ihit=0;ihit<tlprofile[ipeak][jpeak][i].size();ihit++)
                     longitudinalProfile[i].push_back(tlprofile[ipeak][jpeak][i][ihit]);
             }
 
-            xbar=(ipeak-ioffset)*tprofile[ipeak][jpeak];
-            ybar=(jpeak-ioffset)*tprofile[ipeak][jpeak];
-            xxbar=(ipeak-ioffset)*(ipeak-ioffset)*tprofile[ipeak][jpeak];
-            yybar=(jpeak-ioffset)*(jpeak-ioffset)*tprofile[ipeak][jpeak];
+            //xbar=(ipeak-ioffset)*tprofile[ipeak][jpeak];
+            //ybar=(jpeak-ioffset)*tprofile[ipeak][jpeak];
+            //xxbar=(ipeak-ioffset)*(ipeak-ioffset)*tprofile[ipeak][jpeak];
+            //yybar=(jpeak-ioffset)*(jpeak-ioffset)*tprofile[ipeak][jpeak];
             assigned[ipeak][jpeak]=true;
             dmin = std::sqrt(static_cast<float>((ipeak-ioffset)*(ipeak-ioffset)+ (jpeak-ioffset)*(jpeak-ioffset)));
             npeaks++;
@@ -1386,15 +1386,15 @@ pandora::Cluster* ECalPhotonClusteringAlgorithm::TransverseProfile( const Cluste
                                 if(!assigned[is][js]){
                                     if(tprofile[is][js]<height*1.5){
                                         assigned[is][js]=true;
-                                        peakenergy+=tprofile[is][js];
+                                        //peakenergy+=tprofile[is][js];
                                         for(unsigned int i=0;i<=endLayer;i++){
                                             for(unsigned int ihit=0;ihit<tlprofile[is][js][i].size();ihit++)
                                                 longitudinalProfile[i].push_back(tlprofile[is][js][i][ihit]);
                                         }
-                                        xbar+= (is-ioffset)*tprofile[is][js];
-                                        ybar+= (js-ioffset)*tprofile[is][js];
-                                        xxbar+= (is-ioffset)*(is-ioffset)*tprofile[is][js];
-                                        yybar+= (js-ioffset)*(js-ioffset)*tprofile[is][js];
+                                        //xbar+= (is-ioffset)*tprofile[is][js];
+                                        //ybar+= (js-ioffset)*tprofile[is][js];
+                                        //xxbar+= (is-ioffset)*(is-ioffset)*tprofile[is][js];
+                                        //yybar+= (js-ioffset)*(js-ioffset)*tprofile[is][js];
                                         pcurrent++;
                                         point[pcurrent][0] = is;
                                         point[pcurrent][1] = js;
@@ -1451,13 +1451,13 @@ float ECalPhotonClusteringAlgorithm::GetTruePhotonContribution(const Cluster* cl
 
     OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
 
-    for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
+    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
     {
         // int pseudoLayer = itLyr->first;
         CaloHitList::const_iterator itCaloHit    = itLyr->second->begin();
         CaloHitList::const_iterator itCaloHitEnd = itLyr->second->end();
 
-        for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
+        for( ; itCaloHit != itCaloHitEnd; ++itCaloHit )
         {
             // sum up the true energies from the MC-particles (don't double count the MCParticles)
             const MCParticle *pMCParticle = NULL; 
@@ -1495,7 +1495,7 @@ void ECalPhotonClusteringAlgorithm::GetClusterProperties(const Cluster* cluster,
 
     // loop over all layers
     OrderedCaloHitList pOrderedCaloHitList = cluster->GetOrderedCaloHitList();
-    for( OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++ )
+    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
     {
         // int pseudoLayer = itLyr->first;
         CaloHitList::iterator itCaloHit    = itLyr->second->begin();
@@ -1504,7 +1504,7 @@ void ECalPhotonClusteringAlgorithm::GetClusterProperties(const Cluster* cluster,
         unsigned int layerNumber = itLyr->first;
 
         // loop over al calohits
-        for( ; itCaloHit != itCaloHitEnd; itCaloHit++ )
+        for( ; itCaloHit != itCaloHitEnd; ++itCaloHit )
         {
             const CartesianVector& position  = (*itCaloHit)->GetPositionVector();
             // mean position of hits
@@ -2051,7 +2051,7 @@ void Axis::Print( std::ostream& os )
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram1D::Histogram1D( const std::string histogramName, int numberBins, float from, float to )
+Histogram1D::Histogram1D( const std::string &histogramName, int numberBins, float from, float to )
 {
     // create empty bins
 
@@ -2062,7 +2062,7 @@ Histogram1D::Histogram1D( const std::string histogramName, int numberBins, float
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram1D::SetDimensions( const std::string histogramName, int numberBins, float from, float to )
+void Histogram1D::SetDimensions( const std::string &histogramName, int numberBins, float from, float to )
 {
     // create empty bins
     name = histogramName;
@@ -2073,7 +2073,7 @@ void Histogram1D::SetDimensions( const std::string histogramName, int numberBins
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram1D::SetDimensions( const std::string histogramName, const std::vector<float>& binBorders )
+void Histogram1D::SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders )
 {
     // create empty bins
     name = histogramName;
@@ -2293,7 +2293,7 @@ void Histogram1D::Print( std::ostream& os )
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram2D::Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
+Histogram2D::Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
 {
     // create empty bins
     SetDimensions( histogramName, numberBinsX, fromX, toX, numberBinsY, fromY, toY );
@@ -2301,14 +2301,14 @@ Histogram2D::Histogram2D( const std::string histogramName, int numberBinsX, floa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram2D::Histogram2D( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
+Histogram2D::Histogram2D( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
 {
     SetDimensions( histogramName, binBorders, numberBinsY, fromY, toY );
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram2D::Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
+Histogram2D::Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
 {
     SetDimensions( histogramName, numberBinsX, fromX, toX, binBorders );
 }
@@ -2316,7 +2316,7 @@ Histogram2D::Histogram2D( const std::string histogramName, int numberBinsX, floa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Histogram2D::Histogram2D( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
+Histogram2D::Histogram2D( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
 {
     SetDimensions( histogramName, binBordersX, binBordersY );
 }
@@ -2324,7 +2324,7 @@ Histogram2D::Histogram2D( const std::string histogramName, const std::vector<flo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
+void Histogram2D::SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY )
 {
     // create empty bins
     name = histogramName;
@@ -2336,7 +2336,7 @@ void Histogram2D::SetDimensions( const std::string histogramName, int numberBins
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
+void Histogram2D::SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY )
 {
     // create empty bins
     name = histogramName;
@@ -2348,7 +2348,7 @@ void Histogram2D::SetDimensions( const std::string histogramName, const std::vec
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
+void Histogram2D::SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders )
 {
     // create empty bins
     name = histogramName;
@@ -2360,7 +2360,7 @@ void Histogram2D::SetDimensions( const std::string histogramName, int numberBins
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Histogram2D::SetDimensions( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
+void Histogram2D::SetDimensions( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY )
 {
     // create empty bins
     name = histogramName;

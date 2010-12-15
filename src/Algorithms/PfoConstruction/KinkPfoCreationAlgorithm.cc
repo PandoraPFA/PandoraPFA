@@ -454,7 +454,7 @@ StatusCode KinkPfoCreationAlgorithm::MergeClustersFromPfoListToPfo(ParticleFlowO
 
         const ClusterList &clusterList(pPfoToMerge->GetClusterList());
 
-        for (ClusterList::const_iterator clusterIter = clusterList.begin(), clusterIterEnd = clusterList.end(); clusterIter != clusterIterEnd; clusterIter++)
+        for (ClusterList::const_iterator clusterIter = clusterList.begin(), clusterIterEnd = clusterList.end(); clusterIter != clusterIterEnd; ++clusterIter)
         {
             clustersToAdd.insert(*clusterIter);
         }
@@ -470,7 +470,7 @@ StatusCode KinkPfoCreationAlgorithm::MergeClustersFromPfoListToPfo(ParticleFlowO
         }
     }
 
-    for (ClusterList::const_iterator clusterIter = clustersToAdd.begin(), clusterIterEnd = clustersToAdd.end(); clusterIter != clusterIterEnd; clusterIter++)
+    for (ClusterList::const_iterator clusterIter = clustersToAdd.begin(), clusterIterEnd = clustersToAdd.end(); clusterIter != clusterIterEnd; ++clusterIter)
     {
         try
         {

@@ -162,11 +162,18 @@ StatusCode OrderedCaloHitList::Add(CaloHit *const pCaloHit, const PseudoLayer ps
     if (this->end() == iter)
     {
         CaloHitList *pCaloHitList = new CaloHitList;
+
         if (!pCaloHitList->insert(pCaloHit).second)
+        {
+            delete pCaloHitList;
             return STATUS_CODE_FAILURE;
+        }
 
         if (!(this->insert(OrderedCaloHitList::value_type(pseudoLayer, pCaloHitList)).second))
+        {
+            delete pCaloHitList;
             return STATUS_CODE_FAILURE;
+        }
     }
     else
     {

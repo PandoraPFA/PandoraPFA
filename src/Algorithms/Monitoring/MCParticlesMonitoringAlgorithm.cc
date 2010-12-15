@@ -257,13 +257,13 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
             const OrderedCaloHitList *pOrderedCaloHitList = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
 
-            for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; itLyr++)
+            for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; ++itLyr)
             {
                 // int pseudoLayer = itLyr->first;
                 CaloHitList::iterator itCaloHit = itLyr->second->begin();
                 CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
 
-                for( ; itCaloHit != itCaloHitEnd; itCaloHit++)
+                for( ; itCaloHit != itCaloHitEnd; ++itCaloHit)
                 {
                     CaloHit *pCaloHit = (*itCaloHit);
 
@@ -346,13 +346,13 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
                 {
                     const OrderedCaloHitList &pOrderedCaloHitList = pCluster->GetOrderedCaloHitList();
 
-                    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; itLyr++)
+                    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
                     {
                         // int pseudoLayer = itLyr->first;
                         CaloHitList::iterator itCaloHit = itLyr->second->begin();
                         CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
 
-                        for( ; itCaloHit != itCaloHitEnd; itCaloHit++)
+                        for( ; itCaloHit != itCaloHitEnd; ++itCaloHit)
                         {
                             CaloHit *pCaloHit = (*itCaloHit);
 

@@ -81,11 +81,11 @@ namespace pandora
 
 	Histogram1D();
 	Histogram1D( const TiXmlElement &xmlElement );
-	Histogram1D( const std::string histogramName, int numberBins, float from, float to );
-	Histogram1D( const std::string histogramName, const std::vector<float>& binBorders );
+	Histogram1D( const std::string &histogramName, int numberBins, float from, float to );
+	Histogram1D( const std::string &histogramName, const std::vector<float>& binBorders );
 
-	void SetDimensions( const std::string histogramName, int numberBins, float from, float to );
-	void SetDimensions( const std::string histogramName, const std::vector<float>& binBorders );
+	void SetDimensions( const std::string &histogramName, int numberBins, float from, float to );
+	void SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders );
 
 	void Fill( float value, float weight = 1.0 );
 
@@ -133,15 +133,15 @@ namespace pandora
 
 	Histogram2D();
 	Histogram2D( const TiXmlElement &xmlElement );
-	Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
-	Histogram2D( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY );
-	Histogram2D( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
-	Histogram2D( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+	Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+	Histogram2D( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY );
+	Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+	Histogram2D( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
 
-	void SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
-	void SetDimensions( const std::string histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
-	void SetDimensions( const std::string histogramName, const std::vector<float>& binBorders, int numberBinsX, float fromX, float toX );
-	void SetDimensions( const std::string histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+	void SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+	void SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+	void SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsX, float fromX, float toX );
+	void SetDimensions( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
 
 	void Fill( float x, float y, float weight = 1.0 );
 

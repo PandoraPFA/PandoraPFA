@@ -445,7 +445,6 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
             const MCParticle* mcLargestContribution = NULL;
             float largestContribution = -1.f;
             float totalContributions = 0.f;
-            float eContributionFromSelectedPDG = 0.f;
             float energyOfLargestAndMatchingMC = 0.f;
             for (MCParticleEnergyMap::iterator itMcE = mcParticleEnergyMap.begin(), itMcEEnd = mcParticleEnergyMap.end(); itMcE != itMcEEnd; ++itMcE )
             {
@@ -460,11 +459,6 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
                     mcLargestContribution = mc;
                     if( (mc != NULL) && (mc->GetParticleId()==m_particleId ) )
                         energyOfLargestAndMatchingMC = mc->GetEnergy();
-                }
-
-                if ( (mc != NULL) && (mc->GetParticleId()==m_particleId) )
-                {
-                    eContributionFromSelectedPDG += eContrib;
                 }
             }
 

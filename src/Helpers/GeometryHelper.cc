@@ -135,11 +135,8 @@ GeometryHelper::~GeometryHelper()
     for (DetectorGapList::const_iterator iter = m_detectorGapList.begin(), iterEnd = m_detectorGapList.end(); iter != iterEnd; ++iter)
         delete *iter;
 
-    if (NULL != m_pBFieldCalculator)
-        delete m_pBFieldCalculator;
-
-    if (NULL != m_pPseudoLayerCalculator)
-        delete m_pPseudoLayerCalculator;
+    delete m_pBFieldCalculator;
+    delete m_pPseudoLayerCalculator;
 
     m_detectorGapList.clear();
     m_instanceFlag = false;
@@ -282,9 +279,7 @@ StatusCode GeometryHelper::SetBFieldCalculator(BFieldCalculator *pBFieldCalculat
     if (m_isInitialized)
         return STATUS_CODE_NOT_ALLOWED;
 
-    if (NULL != m_pBFieldCalculator)
-        delete m_pBFieldCalculator;
-
+    delete m_pBFieldCalculator;
     m_pBFieldCalculator = pBFieldCalculator;
 
     return STATUS_CODE_SUCCESS;
@@ -297,9 +292,7 @@ StatusCode GeometryHelper::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseu
     if (m_isInitialized)
         return STATUS_CODE_NOT_ALLOWED;
 
-    if (NULL != m_pPseudoLayerCalculator)
-        delete m_pPseudoLayerCalculator;
-
+    delete m_pPseudoLayerCalculator;
     m_pPseudoLayerCalculator = pPseudoLayerCalculator;
 
     return STATUS_CODE_SUCCESS;

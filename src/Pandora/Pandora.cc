@@ -31,19 +31,46 @@ namespace pandora
 {
 
 Pandora::Pandora() :
-    m_pCaloHitManager(new CaloHitManager),
-    m_pClusterManager(new ClusterManager),
-    m_pGeometryHelper(GeometryHelper::GetInstance()),
-    m_pMCManager(new MCManager),
-    m_pParticleFlowObjectManager(new ParticleFlowObjectManager),
-    m_pPluginManager(new PluginManager),
-    m_pTrackManager(new TrackManager),
-    m_pPandoraSettings(PandoraSettings::GetInstance())
+    m_pAlgorithmManager(NULL),
+    m_pCaloHitManager(NULL),
+    m_pClusterManager(NULL),
+    m_pGeometryHelper(NULL),
+    m_pMCManager(NULL),
+    m_pParticleFlowObjectManager(NULL),
+    m_pPluginManager(NULL),
+    m_pTrackManager(NULL),
+    m_pPandoraSettings(NULL),
+    m_pPandoraApiImpl(NULL),
+    m_pPandoraContentApiImpl(NULL),
+    m_pPandoraImpl(NULL)
 {
-    m_pAlgorithmManager = new AlgorithmManager(this);
-    m_pPandoraApiImpl = new PandoraApiImpl(this);
-    m_pPandoraContentApiImpl = new PandoraContentApiImpl(this);
-    m_pPandoraImpl = new PandoraImpl(this);
+    try
+    {
+        m_pAlgorithmManager = new AlgorithmManager(this);
+        m_pCaloHitManager = new CaloHitManager;
+        m_pClusterManager = new ClusterManager;
+        m_pGeometryHelper = GeometryHelper::GetInstance();
+        m_pMCManager = new MCManager;
+        m_pParticleFlowObjectManager = new ParticleFlowObjectManager;
+        m_pPluginManager = new PluginManager;
+        m_pTrackManager = new TrackManager;
+        m_pPandoraSettings = PandoraSettings::GetInstance();
+        m_pPandoraApiImpl = new PandoraApiImpl(this);
+        m_pPandoraContentApiImpl = new PandoraContentApiImpl(this);
+        m_pPandoraImpl = new PandoraImpl(this);
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create pandora instance " << statusCodeException.ToString() << std::endl;
+        delete this;
+        throw statusCodeException;
+    }
+    catch (...)
+    {
+        std::cout << "Failed to create pandora instance " << std::endl;
+        delete this;
+        throw;
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
