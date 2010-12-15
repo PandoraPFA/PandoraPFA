@@ -293,7 +293,7 @@ StatusCode ClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clusterVe
 StatusCode ClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
     float &genericDistance) const
 {
-    static const PseudoLayer firstLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
+    static const PseudoLayer firstLayer(GeometryHelper::GetInstance()->GetPseudoLayerAtIp());
 
     // Cone approach measurement to track projections
     if (pCluster->IsTrackSeeded() && ((searchLayer == 0) || (searchLayer < firstLayer)))

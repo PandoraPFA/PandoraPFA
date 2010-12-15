@@ -48,7 +48,7 @@ StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluste
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
     const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
-    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayerAtIp());
 
     for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {
@@ -247,7 +247,7 @@ bool ParticleIdHelper::IsElectromagneticShower(const Cluster *const pCluster)
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
     const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
-    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayer(CartesianVector(0.f, 0.f, 0.f)));
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayerAtIp());
 
     for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {

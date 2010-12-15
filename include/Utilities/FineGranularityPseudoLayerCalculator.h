@@ -26,6 +26,7 @@ public:
 private:
     void Initialize(const pandora::GeometryHelper *const pGeometryHelper);
     pandora::PseudoLayer GetPseudoLayer(const pandora::CartesianVector &positionVector) const;
+    pandora::PseudoLayer GetPseudoLayerAtIp() const;
 
     /**
      *  @brief  Get the appropriate pseudolayer for a specified parameters
@@ -107,5 +108,13 @@ private:
     float                                   m_barrelEdgeR;              ///< Extremal barrel r coordinate
     float                                   m_endCapEdgeZ;              ///< Extremal endcap z coordinate
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline pandora::PseudoLayer FineGranularityPseudoLayerCalculator::GetPseudoLayerAtIp() const
+{
+    static const pandora::PseudoLayer pseudoLayerAtIp(this->GetPseudoLayer(pandora::CartesianVector(0.f, 0.f, 0.f)));
+    return pseudoLayerAtIp;
+}
 
 #endif // #ifndef FINE_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H

@@ -53,6 +53,13 @@ PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+PseudoLayer GeometryHelper::GetPseudoLayerAtIp() const
+{
+    return m_pPseudoLayerCalculator->GetPseudoLayerAtIp();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 bool GeometryHelper::IsInDetectorGapRegion(const CartesianVector &position) const
 {
     for (DetectorGapList::const_iterator iter = m_detectorGapList.begin(), iterEnd = m_detectorGapList.end(); iter != iterEnd; ++iter)

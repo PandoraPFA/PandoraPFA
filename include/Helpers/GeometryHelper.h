@@ -177,6 +177,14 @@ public:
     PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
 
     /**
+     *  @brief  Get the pseudolayer assigned to a point at the ip, i.e. the initial offset for pseudolayer values
+     *          and the start of the pseudolayer scale
+     * 
+     *  @return the pseudolayer assigned to a point at the ip
+     */
+    PseudoLayer GetPseudoLayerAtIp() const;
+
+    /**
      *  @brief  Get the inner detector barrel parameters
      * 
      *  @return The inner detector barrel parameters

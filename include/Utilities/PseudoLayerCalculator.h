@@ -40,6 +40,14 @@ protected:
      */
     virtual PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const = 0;
 
+    /**
+     *  @brief  Get the pseudolayer assigned to a point at the ip, i.e. the initial offset for pseudolayer values
+     *          and the start of the pseudolayer scale
+     * 
+     *  @return the pseudolayer assigned to a point at the ip
+     */
+    virtual PseudoLayer GetPseudoLayerAtIp() const = 0;
+
     friend class GeometryHelper;
 };
 
