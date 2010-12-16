@@ -376,12 +376,13 @@ StatusCode InwardClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *cons
 {
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
     const CartesianVector positionDifference(hitPosition - clusterPosition);
+    const CartesianVector clusterInwardDirection(clusterDirection * -1.);
 
     if (positionDifference.GetMagnitude() > m_coneApproachMaxSeparation)
         return STATUS_CODE_UNCHANGED;
 
-    const float dPerp (clusterDirection.GetCrossProduct(positionDifference).GetMagnitude());
-    const float dAlong(clusterDirection.GetDotProduct(positionDifference));
+    const float dPerp (clusterInwardDirection.GetCrossProduct(positionDifference).GetMagnitude());
+    const float dAlong(clusterInwardDirection.GetDotProduct(positionDifference));
 
     const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
         (std::fabs(dAlong) * m_tanConeAngleFine) + (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
