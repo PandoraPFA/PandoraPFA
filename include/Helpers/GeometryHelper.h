@@ -123,6 +123,13 @@ public:
         unsigned int GetOuterSymmetryOrder() const;
 
         /**
+         *  @brief  Whether a second subdetector exists, equivalent to a reflection in z=0 plane
+         * 
+         *  @return boolean
+         */
+        bool IsMirroredInZ() const;
+
+        /**
          *  @brief  Get the number of layers in the detector section
          * 
          *  @return The number of layers in the detector section
@@ -146,6 +153,7 @@ public:
         float                   m_outerZCoordinate;     ///< Outer cylindrical polar z coordinate, origin interaction point, units mm
         float                   m_outerPhiCoordinate;   ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
         unsigned int            m_outerSymmetryOrder;   ///< Order of symmetry of the outermost edge of subdetector
+        bool                    m_isMirroredInZ;        ///< Whether a second subdetector exists, equivalent to a reflection in z=0 plane
         unsigned int            m_nLayers;              ///< The number of layers in the detector section
         LayerParametersList     m_layerParametersList;  ///< The list of layer parameters for the detector section
     };
@@ -678,6 +686,16 @@ inline unsigned int GeometryHelper::SubDetectorParameters::GetOuterSymmetryOrder
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     return m_outerSymmetryOrder;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool GeometryHelper::SubDetectorParameters::IsMirroredInZ() const
+{
+    if (!m_isInitialized)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_isMirroredInZ;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

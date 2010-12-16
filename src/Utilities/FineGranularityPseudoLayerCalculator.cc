@@ -184,6 +184,12 @@ void FineGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHel
     if (!subDetectorParameters.IsInitialized())
         return;
 
+    if (!subDetectorParameters.IsMirroredInZ())
+    {
+        std::cout << "FineGranularityPseudoLayerCalculator: Error, detector must be symmetrical about z=0 plane." << std::endl;
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    }
+
     const GeometryHelper::LayerParametersList &layerParametersList(subDetectorParameters.GetLayerParametersList());
 
     for (GeometryHelper::LayerParametersList::const_iterator iter = layerParametersList.begin(), iterEnd = layerParametersList.end();
@@ -201,9 +207,9 @@ void FineGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const Geometry
         pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate(),
         pGeometryHelper->GetMuonBarrelParameters().GetOuterRCoordinate()) ));
 
-    m_endCapEdgeZ = (std::max(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate(), std::max(
-        pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate(),
-        pGeometryHelper->GetMuonEndCapParameters().GetOuterZCoordinate()) ));
+    m_endCapEdgeZ = (std::max(std::fabs(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate()), std::max(
+        std::fabs(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate()),
+        std::fabs(pGeometryHelper->GetMuonEndCapParameters().GetOuterZCoordinate())) ));
 
     if ((m_barrelLayerPositions.end() != std::upper_bound(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end(), m_barrelEdgeR)) ||
         (m_endCapLayerPositions.end() != std::upper_bound(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end(), m_endCapEdgeZ)))
@@ -232,13 +238,13 @@ void FineGranularityPseudoLayerCalculator::StorePolygonAngles(const GeometryHelp
 void FineGranularityPseudoLayerCalculator::StoreOverlapCorrectionDetails(const GeometryHelper *const pGeometryHelper)
 {
     m_barrelInnerR = pGeometryHelper->GetECalBarrelParameters().GetInnerRCoordinate();
-    m_endCapInnerZ = pGeometryHelper->GetECalEndCapParameters().GetInnerZCoordinate();
+    m_endCapInnerZ = std::fabs(pGeometryHelper->GetECalEndCapParameters().GetInnerZCoordinate());
     m_barrelInnerRMuon = pGeometryHelper->GetMuonBarrelParameters().GetInnerRCoordinate();
-    m_endCapInnerZMuon = pGeometryHelper->GetMuonEndCapParameters().GetInnerZCoordinate();
+    m_endCapInnerZMuon = std::fabs(pGeometryHelper->GetMuonEndCapParameters().GetInnerZCoordinate());
 
-    const float barrelOuterZ = pGeometryHelper->GetECalBarrelParameters().GetOuterZCoordinate();
+    const float barrelOuterZ = std::fabs(pGeometryHelper->GetECalBarrelParameters().GetOuterZCoordinate());
     const float endCapOuterR = pGeometryHelper->GetECalEndCapParameters().GetOuterRCoordinate();
-    const float barrelOuterZMuon = pGeometryHelper->GetMuonBarrelParameters().GetOuterZCoordinate();
+    const float barrelOuterZMuon = std::fabs(pGeometryHelper->GetMuonBarrelParameters().GetOuterZCoordinate());
     const float endCapOuterRMuon = pGeometryHelper->GetMuonEndCapParameters().GetOuterRCoordinate();
 
     const bool IsEnclosingEndCap(endCapOuterR > m_barrelInnerR);

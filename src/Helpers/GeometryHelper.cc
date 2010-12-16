@@ -328,7 +328,15 @@ void GeometryHelper::SubDetectorParameters::Initialize(const std::string &subDet
         m_outerZCoordinate = inputParameters.m_outerZCoordinate.Get();
         m_outerPhiCoordinate = inputParameters.m_outerPhiCoordinate.Get();
         m_outerSymmetryOrder = inputParameters.m_outerSymmetryOrder.Get();
+        m_isMirroredInZ = inputParameters.m_isMirroredInZ.Get();
         m_nLayers = inputParameters.m_nLayers.Get();
+
+        if ((m_innerRCoordinate < 0.f) || (m_outerRCoordinate < 0.f) ||
+            (m_isMirroredInZ && ((m_innerZCoordinate < 0.f) || (m_outerZCoordinate < 0.f))))
+        {
+            std::cout << "GeometryHelper: Invalid coordinate specified for " << subDetectorName << std::endl;
+            throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+        }
 
         if (inputParameters.m_layerParametersList.empty() || (m_nLayers != inputParameters.m_layerParametersList.size()))
         {

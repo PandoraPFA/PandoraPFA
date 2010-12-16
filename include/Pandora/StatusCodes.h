@@ -168,7 +168,7 @@ inline StatusCodeException::StatusCodeException(const StatusCode statusCode) :
     size_t stackDepth = backtrace(stackAddresses, maxDepth);
     char **stackStrings = backtrace_symbols(stackAddresses, stackDepth);
 
-    m_backTrace = "BackTrace\n    ";
+    m_backTrace = "\nBackTrace\n    ";
 
     for (size_t i = 1; i < stackDepth; ++i)
     {

@@ -140,6 +140,7 @@ public:
             pandora::InputFloat         m_outerZCoordinate;         ///< Outer cylindrical polar z coordinate, origin interaction point, units mm
             pandora::InputFloat         m_outerPhiCoordinate;       ///< Outer cylindrical polar phi coordinate (angle wrt cartesian x axis)
             pandora::InputUInt          m_outerSymmetryOrder;       ///< Order of symmetry of the outermost edge of subdetector
+            pandora::InputBool          m_isMirroredInZ;            ///< Whether to construct a second subdetector, via reflection in z=0 plane
             pandora::InputUInt          m_nLayers;                  ///< The number of layers in the detector section
             LayerParametersList         m_layerParametersList;      ///< The list of layer parameters for the detector section
         };
@@ -149,10 +150,10 @@ public:
         SubDetectorParameters           m_inDetBarrelParameters;    ///< The inner detector barrel parameters
         SubDetectorParameters           m_inDetEndCapParameters;    ///< The inner detector end cap parameters
         SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
-        SubDetectorParameters           m_eCalEndCapParameters;     ///< the ecal end cap parameters
+        SubDetectorParameters           m_eCalEndCapParameters;     ///< The ecal end cap parameters
         SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
         SubDetectorParameters           m_hCalEndCapParameters;     ///< The hcal end cap parameters
-        SubDetectorParameters           m_muonBarrelParameters;     ///< the muon detector barrel parameters
+        SubDetectorParameters           m_muonBarrelParameters;     ///< The muon detector barrel parameters
         SubDetectorParameters           m_muonEndCapParameters;     ///< The muon detector end cap parameters
         pandora::InputFloat             m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
         pandora::InputFloat             m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm

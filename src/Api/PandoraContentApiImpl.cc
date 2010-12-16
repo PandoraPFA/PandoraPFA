@@ -131,7 +131,8 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
     }
     catch (StatusCodeException &statusCodeException)
     {
-        std::cout << "Failure in algorithm " << iter->first << ", " << iter->second->GetAlgorithmType() << ", " << statusCodeException.ToString() << std::endl;
+        std::cout << "Failure in algorithm " << iter->first << ", " << iter->second->GetAlgorithmType() << ", " << statusCodeException.ToString()
+                  << statusCodeException.GetBackTrace() << std::endl;
     }
     catch (...)
     {
