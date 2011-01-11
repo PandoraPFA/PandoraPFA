@@ -143,6 +143,14 @@ public:
     StatusCode RegisterParticleIdFunction(const std::string &functionName, ParticleIdFunction *pParticleIdFunction) const;
 
     /**
+     *  @brief  Register a pandora settings function to e.g. read settings for a registered particle id or energy correction function
+     * 
+     *  @param  xmlTagName the name of the xml tag (within the <pandora></pandora> tags) containing the settings
+     *  @param  pSettingsFunction pointer to the pandora settings function
+     */
+    StatusCode RegisterSettingsFunction(const std::string &xmlTagName, SettingsFunction *pSettingsFunction) const;
+
+    /**
      *  @brief  Reset pandora to process another event
      */
     StatusCode ResetForNextEvent() const;

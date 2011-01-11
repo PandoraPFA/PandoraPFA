@@ -22,6 +22,8 @@
 #include "Managers/PluginManager.h"
 #include "Managers/TrackManager.h"
 
+#include "Pandora/PandoraSettings.h"
+
 namespace pandora
 {
 
@@ -166,6 +168,13 @@ StatusCode PandoraApiImpl::RegisterEnergyCorrectionFunction(const std::string &f
 StatusCode PandoraApiImpl::RegisterParticleIdFunction(const std::string &functionName, ParticleIdFunction *pParticleIdFunction) const
 {
     return m_pPandora->m_pPluginManager->RegisterParticleIdFunction(functionName, pParticleIdFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraApiImpl::RegisterSettingsFunction(const std::string &xmlTagName, SettingsFunction *pSettingsFunction) const
+{
+    return m_pPandora->m_pPandoraSettings->RegisterSettingsFunction(xmlTagName, pSettingsFunction);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

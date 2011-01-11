@@ -125,6 +125,14 @@ pandora::StatusCode PandoraApi::RegisterParticleIdFunction(const pandora::Pandor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+pandora::StatusCode PandoraApi::RegisterSettingsFunction(const pandora::Pandora &pandora, const std::string &xmlTagName,
+    pandora::SettingsFunction *pSettingsFunction)
+{
+    return pandora.GetPandoraApiImpl()->RegisterSettingsFunction(xmlTagName, pSettingsFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraApi::Reset(const pandora::Pandora &pandora)
 {
     return pandora.GetPandoraApiImpl()->ResetForNextEvent();

@@ -94,14 +94,37 @@ private:
     ~PandoraSettings();
 
     /**
+     *  @brief  Register a pandora settings function to e.g. read settings for a registered particle id or energy correction function
+     * 
+     *  @param  xmlTagName the name of the xml tag (within the <pandora></pandora> tags) containing the settings
+     *  @param  pSettingsFunction pointer to the pandora settings function
+     */
+    StatusCode RegisterSettingsFunction(const std::string &xmlTagName, SettingsFunction *pSettingsFunction);
+
+    /**
      *  @brief  Initialize pandora settings
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
     StatusCode Initialize(const TiXmlHandle *const pXmlHandle);
 
-    static PandoraSettings *m_pPandoraSettings;             ///< The pandora settings instance
+    /**
+     *  @brief  Run all registered settings functions
+     * 
+     *  @param  pXmlHandle address of the relevant xml handle
+     */
+    StatusCode RunRegisteredSettingsFunctions(const TiXmlHandle *const pXmlHandle) const;
 
+    /**
+     *  @brief  Read global pandora settings
+     * 
+     *  @param  pXmlHandle address of the relevant xml handle
+     */
+    StatusCode ReadGlobalSettings(const TiXmlHandle *const pXmlHandle);
+
+    typedef std::map<SettingsFunction *, std::string> SettingsFunctionToNameMap;
+
+    static PandoraSettings *m_pPandoraSettings;             ///< The pandora settings instance
     bool            m_isInitialized;                        ///< Whether the pandora settings have been initialized
     static bool     m_instanceFlag;                         ///< The pandora settings instance flag
 
@@ -116,7 +139,10 @@ private:
     float           m_mcPfoSelectionLowEnergyNPCutOff;      ///< Low energy cut-off for selection of protons/neutrons as MCPFOs
     bool            m_shouldCollapseMCParticlesToPfoTarget; ///< Whether to collapse mc particle decay chains down to just the pfo target
 
+    SettingsFunctionToNameMap m_settingsFunctionToNameMap;  ///< The settings function to xml tag name map
+
     friend class Pandora;
+    friend class PandoraApiImpl;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

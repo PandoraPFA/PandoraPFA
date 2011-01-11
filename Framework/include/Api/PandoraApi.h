@@ -317,7 +317,7 @@ public:
      *  @param  pandora the pandora instance with which to register the energy correction function
      *  @param  functionName the name/label associated with the energy correction function
      *  @param  energyCorrectionType the energy correction type
-     *  @param  energyCorrectionFunction pointer to an energy correction function
+     *  @param  pEnergyCorrectionFunction pointer to an energy correction function
      */
     static pandora::StatusCode RegisterEnergyCorrectionFunction(const pandora::Pandora &pandora, const std::string &functionName,
         const pandora::EnergyCorrectionType energyCorrectionType, pandora::EnergyCorrectionFunction *pEnergyCorrectionFunction);
@@ -327,10 +327,20 @@ public:
      * 
      *  @param  pandora the pandora instance with which to register the particle id function
      *  @param  functionName the name/label associated with the particle id function
-     *  @param  particleIdFunction pointer to a particle id function
+     *  @param  pParticleIdFunction pointer to a particle id function
      */
     static pandora::StatusCode RegisterParticleIdFunction(const pandora::Pandora &pandora, const std::string &functionName,
         pandora::ParticleIdFunction *pParticleIdFunction);
+
+    /**
+     *  @brief  Register a pandora settings function to e.g. read settings for a registered particle id or energy correction function
+     * 
+     *  @param  pandora the pandora instance with which to register the pandora settings function
+     *  @param  xmlTagName the name of the xml tag (within the <pandora></pandora> tags) containing the settings
+     *  @param  pSettingsFunction pointer to the pandora settings function
+     */
+    static pandora::StatusCode RegisterSettingsFunction(const pandora::Pandora &pandora, const std::string &xmlTagName,
+        pandora::SettingsFunction *pSettingsFunction);
 
     /**
      *  @brief  Reset pandora to process another event

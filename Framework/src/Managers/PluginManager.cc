@@ -6,6 +6,8 @@
  *  $Log: $
  */
 
+#include "Helpers/EnergyCorrectionsHelper.h"
+#include "Helpers/ParticleIdHelper.h"
 #include "Helpers/XmlHelper.h"
 
 #include "Managers/PluginManager.h"

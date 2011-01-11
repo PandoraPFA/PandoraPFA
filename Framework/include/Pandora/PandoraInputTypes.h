@@ -15,6 +15,8 @@
 #include "Pandora/PdgTable.h"
 #include "Pandora/StatusCodes.h"
 
+#include "Xml/tinyxml.h"
+
 #include <cmath>
 #include <vector>
 
@@ -172,6 +174,7 @@ typedef std::vector<CaloHitAddressList> ClusterAddressList;
 
 typedef void (EnergyCorrectionFunction)(const Cluster *const, float &);
 typedef bool (ParticleIdFunction)(const Cluster *const);
+typedef pandora::StatusCode (SettingsFunction)(const TiXmlHandle xmlHandle);
 
 typedef std::vector<EnergyCorrectionFunction *> EnergyCorrectionFunctionVector;
 
