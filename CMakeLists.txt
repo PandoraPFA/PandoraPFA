@@ -35,6 +35,7 @@ IF( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" )
 ENDIF()
 
 #---------------- 32/64 bit issues ---------------------------------------
+
 IF( CMAKE_SIZEOF_VOID_P EQUAL 4 )
     MESSAGE( STATUS "32 bit architecture detected" )
 ENDIF()
@@ -57,6 +58,38 @@ IF( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     ELSE()
         MESSAGE( STATUS "Build in native 64 bit mode" )
     ENDIF()
+ENDIF()
+
+#-------------------------------------------------------------------------
+
+FIND_PACKAGE( Doxygen )
+
+IF( DOXYGEN_FOUND )
+    ADD_CUSTOM_COMMAND(
+        OUTPUT  "${PROJECT_SOURCE_DIR}/doc/html"
+        COMMAND "${DOXYGEN_EXECUTABLE}"
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/doc"
+        COMMENT "Building API Documentation..."
+        VERBATIM )
+    # add doc target
+    ADD_CUSTOM_TARGET( doc DEPENDS
+        "${PROJECT_SOURCE_DIR}/doc/html" )
+ELSE()
+    MESSAGE( STATUS "Doxygen not found in your system!!" )
+    IF( INSTALL_DOC )
+        MESSAGE( STATUS "INSTALL_DOC forced to OFF" )
+        SET( INSTALL_DOC OFF )
+    ENDIF()
+ENDIF()
+
+# install documentation
+IF( INSTALL_DOC )
+    # make sure doxygen is executed (make doc) before make install
+    INSTALL( CODE "EXEC_PROGRAM(${CMAKE_BUILD_TOOL} ${PROJECT_BINARY_DIR} ARGS doc)" )
+    # install documentation
+    INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/doc"
+            DESTINATION .
+            PATTERN "*CVS*" EXCLUDE )
 ENDIF()
 
 #-------------------------------------------------------------------------
