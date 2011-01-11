@@ -20,6 +20,6 @@ all:
 	(cd KMeansClustering; make $(ARGUMENTS))
 
 clean:
-	(cd Framework; make clean)
-	(cd Algorithms; make clean)
-	(cd KMeansClustering; make clean)
+	(cd Framework; make clean $(ARGUMENTS))
+	(cd Algorithms; make clean $(ARGUMENTS))
+	(cd KMeansClustering; make clean $(ARGUMENTS))
