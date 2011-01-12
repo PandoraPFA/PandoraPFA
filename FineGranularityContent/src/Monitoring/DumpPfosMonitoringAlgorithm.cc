@@ -420,8 +420,12 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
 
             if (pCluster != NULL)
             {
-                FORMATTED_OUTPUT_NEUTRAL(clusterEnergy, fCharged, fPhoton, fNeutral, pCluster->GetInnerPseudoLayer(),
-                    pCluster->GetOuterPseudoLayer(), pCluster->GetShowerProfileStart(), pCluster->GetShowerProfileDiscrepancy());
+                const float showerProfileStart(pCluster->GetShowerProfileStart());
+                const float showerProfileDiscrepancy(pCluster->GetShowerProfileDiscrepancy());
+
+                FORMATTED_OUTPUT_NEUTRAL(clusterEnergy, fCharged, fPhoton, fNeutral, pCluster->GetInnerPseudoLayer(), pCluster->GetOuterPseudoLayer(),
+                    ((showerProfileStart == std::numeric_limits<float>::max()) ? -99 : showerProfileStart),
+                    ((showerProfileDiscrepancy == std::numeric_limits<float>::max()) ? -99 : showerProfileDiscrepancy));
             }
 
             if (badTrackMatch)

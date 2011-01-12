@@ -78,6 +78,8 @@
 
 #include "FineGranularityEnergyCorrections.h"
 #include "FineGranularityParticleId.h"
+#include "FineGranularityPseudoLayerCalculator.h"
+#include "FineGranularityShowerProfileCalculator.h"
 
 /**
  *  @brief  FineGranularityContent class
@@ -163,18 +165,56 @@ public:
         d("ParticleId",                                         &FineGranularityParticleId::ReadSettings)
 
     /**
-     *  @brief  Register the fine granularity content with pandora
+     *  @brief  Register all the fine granularity content with pandora
      * 
      *  @param  pandora the pandora instance with which to register content
      */
-    static pandora::StatusCode Register(pandora::Pandora &pandora);
+    static pandora::StatusCode RegisterAll(pandora::Pandora &pandora);
+
+    /**
+     *  @brief  Register all the fine granularity algorithms with pandora
+     * 
+     *  @param  pandora the pandora instance with which to register content
+     */
+    static pandora::StatusCode RegisterAlgorithms(pandora::Pandora &pandora);
+
+    /**
+     *  @brief  Register all the fine granularity helper functions with pandora
+     * 
+     *  @param  pandora the pandora instance with which to register content
+     */
+    static pandora::StatusCode RegisterHelperFunctions(pandora::Pandora &pandora);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::StatusCode FineGranularityContent::Register(pandora::Pandora &pandora)
+inline pandora::StatusCode FineGranularityContent::RegisterAll(pandora::Pandora &pandora)
+{
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, FineGranularityContent::RegisterAlgorithms(pandora));
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, FineGranularityContent::RegisterHelperFunctions(pandora));
+
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerCalculator(pandora,
+        new FineGranularityPseudoLayerCalculator()));
+
+    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetShowerProfileCalculator(pandora,
+        new FineGranularityShowerProfileCalculator()));
+
+    return pandora::STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline pandora::StatusCode FineGranularityContent::RegisterAlgorithms(pandora::Pandora &pandora)
 {
     FINE_GRANULARITY_ALGORITHM_LIST(PANDORA_REGISTER_ALGORITHM);
+
+    return pandora::STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline pandora::StatusCode FineGranularityContent::RegisterHelperFunctions(pandora::Pandora &pandora)
+{
     FINE_GRANULARITY_ENERGY_CORRECTION_LIST(PANDORA_REGISTER_ENERGY_CORRECTION);
     FINE_GRANULARITY_PARTICLE_ID_LIST(PANDORA_REGISTER_PARTICLE_ID);
     FINE_GRANULARITY_SETTINGS_LIST(PANDORA_REGISTER_SETTINGS);

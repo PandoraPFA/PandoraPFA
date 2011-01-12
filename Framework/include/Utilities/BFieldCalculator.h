@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/Framework/include/Utilities/BFieldCalculator.h
  * 
- *  @brief  Header file for the bfield calculator class.
+ *  @brief  Header file for the bfield calculator interface class.
  * 
  *  $Log: $
  */

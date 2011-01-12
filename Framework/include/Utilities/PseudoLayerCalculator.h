@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/Framework/include/Utilities/PseudoLayerCalculator.h
  * 
- *  @brief  Header file for the pseudo layer calculator class.
+ *  @brief  Header file for the pseudo layer calculator interface class.
  * 
  *  $Log: $
  */

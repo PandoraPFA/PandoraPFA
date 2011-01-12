@@ -343,10 +343,8 @@ void Cluster::CalculateShowerStartLayer() const
 
 void Cluster::CalculateShowerProfile() const
 {
-    float showerProfileStart(0.), showerProfileDiscrepancy(0.);
-
-    PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, ParticleIdHelper::CalculateShowerProfile(this,
-        showerProfileStart, showerProfileDiscrepancy));
+    float showerProfileStart(std::numeric_limits<float>::max()), showerProfileDiscrepancy(std::numeric_limits<float>::max());
+    ParticleIdHelper::CalculateShowerProfile(this, showerProfileStart, showerProfileDiscrepancy);
 
     if (!(m_showerProfileStart = showerProfileStart) || !(m_showerProfileDiscrepancy = showerProfileDiscrepancy))
         throw StatusCodeException(STATUS_CODE_FAILURE);

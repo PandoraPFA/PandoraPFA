@@ -302,6 +302,14 @@ public:
     static pandora::StatusCode SetPseudoLayerCalculator(const pandora::Pandora &pandora, pandora::PseudoLayerCalculator *pPseudoLayerCalculator);
 
     /**
+     *  @brief  Set the shower profile calculator used by pandora
+     * 
+     *  @param  pandora the pandora instance to register the shower profile calculator with
+     *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
+     */
+    static pandora::StatusCode SetShowerProfileCalculator(const pandora::Pandora &pandora, pandora::ShowerProfileCalculator *pShowerProfileCalculator);
+
+    /**
      *  @brief  Set the granularity level to be associated with a specified hit type
      * 
      *  @param  pandora the pandora instance to register the hit type to granularity relationship

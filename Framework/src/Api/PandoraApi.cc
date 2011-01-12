@@ -101,6 +101,13 @@ pandora::StatusCode PandoraApi::SetPseudoLayerCalculator(const pandora::Pandora 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+pandora::StatusCode PandoraApi::SetShowerProfileCalculator(const pandora::Pandora &pandora, pandora::ShowerProfileCalculator *pShowerProfileCalculator)
+{
+    return pandora.GetPandoraApiImpl()->SetShowerProfileCalculator(pShowerProfileCalculator);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraApi::SetHitTypeGranularity(const pandora::Pandora &pandora, const pandora::HitType hitType,
     const pandora::Granularity granularity)
 {

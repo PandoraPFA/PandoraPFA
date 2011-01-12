@@ -25,6 +25,7 @@ class MCParticle;
 class OrderedCaloHitList;
 class ParticleFlowObject;
 class PseudoLayerCalculator;
+class ShowerProfileCalculator;
 class Track;
 class TrackState;
 

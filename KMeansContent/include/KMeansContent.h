@@ -20,16 +20,16 @@ public:
         d("KMeansClustering",                       KMeansClusteringAlgorithm::Factory)
 
     /**
-     *  @brief  Register the k means clustering algorithms with pandora
+     *  @brief  Register all the k means clustering algorithms with pandora
      * 
      *  @param  pandora the pandora instance with which to register algorithms
      */
-    static pandora::StatusCode Register(pandora::Pandora &pandora);
+    static pandora::StatusCode RegisterAll(pandora::Pandora &pandora);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::StatusCode KMeansContent::Register(pandora::Pandora &pandora)
+inline pandora::StatusCode KMeansContent::RegisterAll(pandora::Pandora &pandora)
 {
     K_MEANS_CLUSTERING_ALGORITHM_LIST(PANDORA_REGISTER_ALGORITHM);
 

@@ -13,6 +13,7 @@
 
 #include "Helpers/CaloHitHelper.h"
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/ParticleIdHelper.h"
 
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
@@ -146,6 +147,13 @@ StatusCode PandoraApiImpl::SetBFieldCalculator(BFieldCalculator *pBFieldCalculat
 StatusCode PandoraApiImpl::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator) const
 {
     return m_pPandora->m_pGeometryHelper->SetPseudoLayerCalculator(pPseudoLayerCalculator);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraApiImpl::SetShowerProfileCalculator(ShowerProfileCalculator *pShowerProfileCalculator) const
+{
+    return ParticleIdHelper::SetShowerProfileCalculator(pShowerProfileCalculator);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

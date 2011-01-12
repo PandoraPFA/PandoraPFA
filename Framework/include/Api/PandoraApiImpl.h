@@ -117,6 +117,13 @@ public:
     StatusCode SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator) const;
 
     /**
+     *  @brief  Set the shower profile calculator used by pandora
+     * 
+     *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
+     */
+    StatusCode SetShowerProfileCalculator(ShowerProfileCalculator *pShowerProfileCalculator) const;
+
+    /**
      *  @brief  Set the granularity level to be associated with a specified hit type
      * 
      *  @param  hitType the specified hit type
