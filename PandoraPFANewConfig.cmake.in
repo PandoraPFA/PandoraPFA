@@ -1,75 +1,58 @@
 ###############################################
-# cmake configuration file for PandoraPFANew
+# cmake configuration file for @PROJECT_NAME@
 # @author Jan Engels, DESY
 ###############################################
 
-SET( PandoraFramework_FOUND FALSE )
-MARK_AS_ADVANCED( PandoraFramework_FOUND )
+SET( @PROJECT_NAME@_FOUND FALSE )
+MARK_AS_ADVANCED( @PROJECT_NAME@_FOUND )
 
 # do not store find results in cache
-SET( PandoraFramework_INCLUDE_DIR PandoraFramework_INCLUDE_DIR-NOTFOUND )
+SET( @PROJECT_NAME@_INCLUDE_DIR @PROJECT_NAME@_INCLUDE_DIR-NOTFOUND )
 
-FIND_PATH( PandoraFramework_INCLUDE_DIR
-    NAMES StatusCodes.h
-    PATHS @CMAKE_INSTALL_PREFIX@
-    PATH_SUFFIXES Framework/include/Pandora
-    NO_DEFAULT_PATH
+FIND_PATH( @PROJECT_NAME@_INCLUDE_DIR
+	NAMES StatusCodes.h
+	PATHS @CMAKE_INSTALL_PREFIX@
+	PATH_SUFFIXES include Framework/include/Pandora
+	NO_DEFAULT_PATH
 )
-IF( NOT PandoraFramework_INCLUDE_DIR )
-    MESSAGE( STATUS "Check for PandoraFramework: ${PandoraFramework_HOME}"
-                    " -- failed to find PandoraFramework include directory!!" )
-ELSE( NOT PandoraFramework_INCLUDE_DIR )
-    MARK_AS_ADVANCED( PandoraFramework_INCLUDE_DIR )
-ENDIF( NOT PandoraFramework_INCLUDE_DIR )
+IF( NOT @PROJECT_NAME@_INCLUDE_DIR )
+    MESSAGE( STATUS "Check for @PROJECT_NAME@: ${@PROJECT_NAME@_HOME}"
+					" -- failed to find @PROJECT_NAME@ include directory!!" )
+ELSE( NOT @PROJECT_NAME@_INCLUDE_DIR )
+    MARK_AS_ADVANCED( @PROJECT_NAME@_INCLUDE_DIR )
+ENDIF( NOT @PROJECT_NAME@_INCLUDE_DIR )
 
 
 # do not store find results in cache
-SET( PandoraFramework_LIB PandoraFramework_LIB-NOTFOUND )
+SET( @PROJECT_NAME@_LIB @PROJECT_NAME@_LIB-NOTFOUND )
 
-FIND_LIBRARY( PandoraFramework_LIB
-    NAMES PandoraFramework
-    PATHS @CMAKE_INSTALL_PREFIX@
-    PATH_SUFFIXES lib
-    NO_DEFAULT_PATH
+FIND_LIBRARY( @PROJECT_NAME@_LIB
+	NAMES @PROJECT_NAME@
+	PATHS @CMAKE_INSTALL_PREFIX@
+	PATH_SUFFIXES lib
+	NO_DEFAULT_PATH
 )
-IF( NOT PandoraFramework_LIB )
-    MESSAGE( STATUS "Check for PandoraFramework: ${PandoraFramework_HOME}"
-                    " -- failed to find PandoraFramework library!!" )
-ELSE( NOT PandoraFramework_LIB )
-    MARK_AS_ADVANCED( PandoraFramework_LIB )
-ENDIF( NOT PandoraFramework_LIB )
-
-# do not store find results in cache
-SET( PandoraAlgorithms_LIB PandoraAlgorithms_LIB-NOTFOUND )
-
-FIND_LIBRARY( PandoraAlgorithms_LIB
-    NAMES PandoraAlgorithms
-    PATHS @CMAKE_INSTALL_PREFIX@
-    PATH_SUFFIXES lib
-    NO_DEFAULT_PATH
-)
-IF( NOT PandoraAlgorithms_LIB )
-    MESSAGE( STATUS "Check for PandoraAlgorithms: ${PandoraAlgorithms_HOME}"
-                    " -- failed to find PandoraAlgorithms library!!" )
-ELSE( NOT PandoraAlgorithms_LIB )
-    MARK_AS_ADVANCED( PandoraAlgorithms_LIB )
-ENDIF( NOT PandoraAlgorithms_LIB )
+IF( NOT @PROJECT_NAME@_LIB )
+    MESSAGE( STATUS "Check for @PROJECT_NAME@: ${@PROJECT_NAME@_HOME}"
+					" -- failed to find @PROJECT_NAME@ library!!" )
+ELSE( NOT @PROJECT_NAME@_LIB )
+    MARK_AS_ADVANCED( @PROJECT_NAME@_LIB )
+ENDIF( NOT @PROJECT_NAME@_LIB )
 
 
 # set variables and display results
-IF( PandoraFramework_INCLUDE_DIR AND PandoraFramework_LIB AND PandoraAlgorithms_LIB )
-    SET( PandoraFramework_FOUND TRUE )
-    SET( PandoraFramework_INCLUDE_DIRS ${PandoraFramework_INCLUDE_DIR} )
-    SET( PandoraFramework_LIBRARY_DIRS "@CMAKE_INSTALL_PREFIX@/lib" )
-    SET( PandoraFramework_LIBRARIES ${PandoraFramework_LIB} ${PandoraAlgorithms_LIB} )
-    #SET( PandoraFramework_DEFINITIONS "-Wno-long-long" )
-    MARK_AS_ADVANCED( PandoraFramework_INCLUDE_DIRS PandoraFramework_LIBRARY_DIRS PandoraFramework_LIBRARIES )
-    MESSAGE( STATUS "Check for PandoraFramework: ${PandoraFramework_HOME} -- works" )
-ELSE( PandoraFramework_INCLUDE_DIR AND PandoraFramework_LIB AND PandoraAlgorithms_LIB )
-    IF( PandoraFramework_FIND_REQUIRED )
-        MESSAGE( FATAL_ERROR "Check for PandoraFramework: ${PandoraFramework_HOME} -- failed!!" )
-    ELSE( PandoraFramework_FIND_REQUIRED )
-        MESSAGE( STATUS "Check for PandoraFramework: ${PandoraFramework_HOME}"
-                        " -- failed!! will skip this package..." )
-    ENDIF( PandoraFramework_FIND_REQUIRED )
-ENDIF( PandoraFramework_INCLUDE_DIR AND PandoraFramework_LIB AND PandoraAlgorithms_LIB )
+IF( @PROJECT_NAME@_INCLUDE_DIR AND @PROJECT_NAME@_LIB )
+    SET( @PROJECT_NAME@_FOUND TRUE )
+    SET( @PROJECT_NAME@_INCLUDE_DIRS ${@PROJECT_NAME@_INCLUDE_DIR} )
+    SET( @PROJECT_NAME@_LIBRARY_DIRS "@CMAKE_INSTALL_PREFIX@/lib" )
+	SET( @PROJECT_NAME@_LIBRARIES ${@PROJECT_NAME@_LIB} )
+    MARK_AS_ADVANCED( @PROJECT_NAME@_INCLUDE_DIRS @PROJECT_NAME@_LIBRARY_DIRS @PROJECT_NAME@_LIBRARIES )
+	MESSAGE( STATUS "Check for @PROJECT_NAME@: ${@PROJECT_NAME@_HOME} -- works" )
+ELSE( @PROJECT_NAME@_INCLUDE_DIR AND @PROJECT_NAME@_LIB )
+	IF( @PROJECT_NAME@_FIND_REQUIRED )
+		MESSAGE( FATAL_ERROR "Check for @PROJECT_NAME@: ${@PROJECT_NAME@_HOME} -- failed!!" )
+    ELSE( @PROJECT_NAME@_FIND_REQUIRED )
+        MESSAGE( STATUS "Check for @PROJECT_NAME@: ${@PROJECT_NAME@_HOME}"
+						" -- failed!! will skip this package..." )
+    ENDIF( @PROJECT_NAME@_FIND_REQUIRED )
+ENDIF( @PROJECT_NAME@_INCLUDE_DIR AND @PROJECT_NAME@_LIB )

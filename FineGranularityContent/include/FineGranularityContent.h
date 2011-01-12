@@ -1,12 +1,12 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FineGranularityAlgorithms.h
+ *  @file   PandoraPFANew/Algorithms/include/FineGranularityContent.h
  * 
- *  @brief  Header file detailing algorithms for use with a fine granularity particle flow detector
+ *  @brief  Header file detailing content for use with a fine granularity particle flow detector
  * 
  *  $Log: $
  */
-#ifndef FINE_GRANULARITY_ALGORITHMS_H
-#define FINE_GRANULARITY_ALGORITHMS_H 1
+#ifndef FINE_GRANULARITY_CONTENT_H
+#define FINE_GRANULARITY_CONTENT_H 1
 
 #include "EventPreparationAlgorithm.h"
 #include "FinalParticleIdAlgorithm.h"
@@ -79,9 +79,9 @@
 #include "FineGranularityEnergyCorrections.h"
 
 /**
- *  @brief  FineGranularityAlgorithms class
+ *  @brief  FineGranularityContent class
  */
-class FineGranularityAlgorithms
+class FineGranularityContent
 {
 public:
     #define FINE_GRANULARITY_ALGORITHM_LIST(d)                                                                                  \
@@ -168,16 +168,16 @@ public:
         }
 
     /**
-     *  @brief  Register the fine granularity particle flow algorithms with pandora
+     *  @brief  Register the fine granularity content with pandora
      * 
-     *  @param  pandora the pandora instance with which to register algorithms
+     *  @param  pandora the pandora instance with which to register content
      */
-    static pandora::StatusCode RegisterContent(pandora::Pandora &pandora);
+    static pandora::StatusCode Register(pandora::Pandora &pandora);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::StatusCode FineGranularityAlgorithms::RegisterContent(pandora::Pandora &pandora)
+inline pandora::StatusCode FineGranularityContent::Register(pandora::Pandora &pandora)
 {
     FINE_GRANULARITY_ALGORITHM_LIST(CREATE_FINE_GRANULARITY_ALGORITHM);
     FINE_GRANULARITY_ENERGY_CORRECTION_LIST(REGISTER_FINE_GRANULARITY_ENERGY_CORRECTION);
@@ -188,4 +188,4 @@ inline pandora::StatusCode FineGranularityAlgorithms::RegisterContent(pandora::P
     return pandora::STATUS_CODE_SUCCESS;
 }
 
-#endif // #ifndef FINE_GRANULARITY_ALGORITHMS_H
+#endif // #ifndef FINE_GRANULARITY_CONTENT_H

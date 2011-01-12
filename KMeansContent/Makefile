@@ -35,7 +35,7 @@ endif
 
 LDFLAGS = $(LIBS) -Wl,-rpath
 
-LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraKMeansClustering.so
+LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraKMeansContent.so
 
 all: $(SOURCES) $(OBJECTS)
 	$(CC) $(OBJECTS) $(LIBS) -shared -o $(LIBRARY)

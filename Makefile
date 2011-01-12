@@ -16,10 +16,10 @@ endif
 
 all:
 	(cd Framework; make $(ARGUMENTS))
-	(cd Algorithms; make $(ARGUMENTS))
-	(cd KMeansClustering; make $(ARGUMENTS))
+	(cd FineGranularityContent; make $(ARGUMENTS))
+	(cd KMeansContent; make $(ARGUMENTS))
 
 clean:
 	(cd Framework; make clean $(ARGUMENTS))
-	(cd Algorithms; make clean $(ARGUMENTS))
-	(cd KMeansClustering; make clean $(ARGUMENTS))
+	(cd FineGranularityContent; make clean $(ARGUMENTS))
+	(cd KMeansContent; make clean $(ARGUMENTS))

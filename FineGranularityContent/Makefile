@@ -42,7 +42,7 @@ endif
 
 LDFLAGS = $(LIBS) -Wl,-rpath
 
-LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraAlgorithms.so
+LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraFineGranularityContent.so
 
 all: $(SOURCES) $(OBJECTS)
 	$(CC) $(OBJECTS) $(LIBS) -shared -o $(LIBRARY)
