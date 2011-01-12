@@ -6,7 +6,12 @@
  *  $Log: $
  */
 
-#include "Pandora/AlgorithmHeaders.h"
+#include "Helpers/GeometryHelper.h"
+#include "Helpers/ReclusterHelper.h"
+#include "Helpers/XmlHelper.h"
+
+#include "Objects/Cluster.h"
+#include "Objects/Track.h"
 
 #include "FineGranularityEnergyCorrections.h"
 

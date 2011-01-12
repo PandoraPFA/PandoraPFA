@@ -77,6 +77,7 @@
 #include "TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
 
 #include "FineGranularityEnergyCorrections.h"
+#include "FineGranularityParticleId.h"
 
 /**
  *  @brief  FineGranularityContent class
@@ -146,26 +147,19 @@ public:
         d("SoftClusterMerging",                     SoftClusterMergingAlgorithm::Factory)                                       \
         d("TrackClusterAssociation",                TrackClusterAssociationAlgorithm::Factory)
 
-    #define CREATE_FINE_GRANULARITY_ALGORITHM(a, b)                                                                             \
-        {                                                                                                                       \
-            const pandora::StatusCode statusCode(PandoraApi::RegisterAlgorithmFactory(pandora, a, new b));                      \
-                                                                                                                                \
-            if (pandora::STATUS_CODE_SUCCESS != statusCode)                                                                     \
-                return statusCode;                                                                                              \
-        }
-
     #define FINE_GRANULARITY_ENERGY_CORRECTION_LIST(d)                                                                          \
         d("CleanClusters",          pandora::HADRONIC,          &FineGranularityEnergyCorrections::CleanCluster)                \
         d("ScaleHotHadrons",        pandora::HADRONIC,          &FineGranularityEnergyCorrections::ScaleHotHadronEnergy)        \
         d("MuonCoilCorrection",     pandora::HADRONIC,          &FineGranularityEnergyCorrections::ApplyMuonEnergyCorrection)
 
-    #define REGISTER_FINE_GRANULARITY_ENERGY_CORRECTION(a, b, c)                                                                \
-        {                                                                                                                       \
-            const pandora::StatusCode statusCode(PandoraApi::RegisterEnergyCorrectionFunction(pandora, a, b, c));               \
-                                                                                                                                \
-            if (pandora::STATUS_CODE_SUCCESS != statusCode)                                                                     \
-                return statusCode;                                                                                              \
-        }
+    #define FINE_GRANULARITY_PARTICLE_ID_LIST(d)                                                                                \
+        d("FineGranularityPhotonId",                            &FineGranularityParticleId::FineGranularityPhotonId)            \
+        d("FineGranularityElectronId",                          &FineGranularityParticleId::FineGranularityElectronId)          \
+        d("FineGranularityMuonId",                              &FineGranularityParticleId::FineGranularityMuonId)
+
+    #define FINE_GRANULARITY_SETTINGS_LIST(d)                                                                                   \
+        d("EnergyCorrections",                                  &FineGranularityEnergyCorrections::ReadSettings)                \
+        d("ParticleId",                                         &FineGranularityParticleId::ReadSettings)
 
     /**
      *  @brief  Register the fine granularity content with pandora
@@ -179,11 +173,10 @@ public:
 
 inline pandora::StatusCode FineGranularityContent::Register(pandora::Pandora &pandora)
 {
-    FINE_GRANULARITY_ALGORITHM_LIST(CREATE_FINE_GRANULARITY_ALGORITHM);
-    FINE_GRANULARITY_ENERGY_CORRECTION_LIST(REGISTER_FINE_GRANULARITY_ENERGY_CORRECTION);
-
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::RegisterSettingsFunction(pandora, "EnergyCorrections",
-        &FineGranularityEnergyCorrections::ReadSettings));
+    FINE_GRANULARITY_ALGORITHM_LIST(PANDORA_REGISTER_ALGORITHM);
+    FINE_GRANULARITY_ENERGY_CORRECTION_LIST(PANDORA_REGISTER_ENERGY_CORRECTION);
+    FINE_GRANULARITY_PARTICLE_ID_LIST(PANDORA_REGISTER_PARTICLE_ID);
+    FINE_GRANULARITY_SETTINGS_LIST(PANDORA_REGISTER_SETTINGS);
 
     return pandora::STATUS_CODE_SUCCESS;
 }

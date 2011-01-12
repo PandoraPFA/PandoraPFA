@@ -28,15 +28,47 @@ class PseudoLayerCalculator;
 class Track;
 class TrackState;
 
+// Macro allowing use of pandora monitoring to be quickly included/excluded via pre-processor flag
 #ifdef MONITORING
-    #define PANDORA_MONITORING_API(command)                         \
-    if (PandoraSettings::GetInstance()->IsMonitoringEnabled())      \
-    {                                                               \
-        PandoraMonitoringApi::command;                              \
+    #define PANDORA_MONITORING_API(command)                                                                 \
+    if (PandoraSettings::GetInstance()->IsMonitoringEnabled())                                              \
+    {                                                                                                       \
+        PandoraMonitoringApi::command;                                                                      \
     }
 #else
     #define PANDORA_MONITORING_API(command)
 #endif
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+// Macros for registering lists of algorithms, energy corrections functions, particle id functions or settings functions
+#define PANDORA_REGISTER_ALGORITHM(a, b)                                                                    \
+{                                                                                                           \
+    const pandora::StatusCode statusCode(PandoraApi::RegisterAlgorithmFactory(pandora, a, new b));          \
+    if (pandora::STATUS_CODE_SUCCESS != statusCode)                                                         \
+        return statusCode;                                                                                  \
+}
+
+#define PANDORA_REGISTER_ENERGY_CORRECTION(a, b, c)                                                         \
+{                                                                                                           \
+    const pandora::StatusCode statusCode(PandoraApi::RegisterEnergyCorrectionFunction(pandora, a, b, c));   \
+    if (pandora::STATUS_CODE_SUCCESS != statusCode)                                                         \
+        return statusCode;                                                                                  \
+}
+
+#define PANDORA_REGISTER_PARTICLE_ID(a, b)                                                                  \
+{                                                                                                           \
+    const pandora::StatusCode statusCode(PandoraApi::RegisterParticleIdFunction(pandora, a, b));            \
+    if (pandora::STATUS_CODE_SUCCESS != statusCode)                                                         \
+        return statusCode;                                                                                  \
+}
+
+#define PANDORA_REGISTER_SETTINGS(a, b)                                                                     \
+{                                                                                                           \
+    const pandora::StatusCode statusCode(PandoraApi::RegisterSettingsFunction(pandora, a, b));              \
+    if (pandora::STATUS_CODE_SUCCESS != statusCode)                                                         \
+        return statusCode;                                                                                  \
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

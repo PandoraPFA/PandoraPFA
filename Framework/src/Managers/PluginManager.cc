@@ -12,14 +12,11 @@
 
 #include "Managers/PluginManager.h"
 
-#include "Pandora/PandoraPlugins.h"
-
 namespace pandora
 {
 
 PluginManager::PluginManager()
 {
-    PANDORA_REGISTER_ALL_PLUGINS();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
