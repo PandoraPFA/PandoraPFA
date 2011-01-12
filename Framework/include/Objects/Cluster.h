@@ -134,11 +134,25 @@ public:
     float GetIsolatedHadronicEnergy() const;
 
     /**
-     *  @brief  Whether the cluster has been flagged as a fixed photon
+     *  @brief  Whether the cluster has been flagged as a fixed photon cluster
      * 
      *  @return boolean
      */
     bool IsFixedPhoton() const;
+
+    /**
+     *  @brief  Whether the cluster has been flagged as a fixed electron cluster
+     * 
+     *  @return boolean
+     */
+    bool IsFixedElectron() const;
+
+    /**
+     *  @brief  Whether the cluster has been flagged as a fixed muon cluster
+     * 
+     *  @return boolean
+     */
+    bool IsFixedMuon() const;
 
     /**
      *  @brief  Whether the cluster has been flagged as a section of mip track
@@ -338,6 +352,20 @@ public:
     void SetIsFixedPhotonFlag(bool isFixedPhotonFlag);
 
     /**
+     *  @brief  Set the is fixed electron flag for the cluster
+     * 
+     *  @param  isFixedElectronFlag the is fixed electron flag
+     */
+    void SetIsFixedElectronFlag(bool isFixedElectronFlag);
+
+    /**
+     *  @brief  Set the is fixed muon flag for the cluster
+     * 
+     *  @param  isFixedMuonFlag the is fixed muon flag
+     */
+    void SetIsFixedMuonFlag(bool isFixedMuonFlag);
+
+    /**
      *  @brief  Set the is mip track for the cluster
      * 
      *  @param  isMipTrackFlag the is mip track flag
@@ -520,6 +548,9 @@ private:
     double                      m_isolatedHadronicEnergy;       ///< Sum of hadronic energy measures of isolated calo hits, units GeV
 
     bool                        m_isFixedPhoton;                ///< Whether the cluster has been flagged as a fixed photon cluster
+    bool                        m_isFixedElectron;              ///< Whether the cluster has been flagged as a fixed electron cluster
+    bool                        m_isFixedMuon;                  ///< Whether the cluster has been flagged as a fixed muon cluster
+
     bool                        m_isMipTrack;                   ///< Whether the cluster has been flagged as a section of mip track
     const Track                *m_pTrackSeed;                   ///< Address of the track with which the cluster is seeded
 
@@ -679,6 +710,20 @@ inline float Cluster::GetIsolatedHadronicEnergy() const
 inline bool Cluster::IsFixedPhoton() const
 {
     return m_isFixedPhoton;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Cluster::IsFixedElectron() const
+{
+    return m_isFixedElectron;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Cluster::IsFixedMuon() const
+{
+    return m_isFixedMuon;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -889,6 +934,20 @@ inline void Cluster::SetIsFixedPhotonFlag(bool isFixedPhotonFlag)
 {
     m_isPhotonFast.Reset();
     m_isFixedPhoton = isFixedPhotonFlag;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void Cluster::SetIsFixedElectronFlag(bool isFixedElectronFlag)
+{
+    m_isFixedElectron = isFixedElectronFlag;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void Cluster::SetIsFixedMuonFlag(bool isFixedMuonFlag)
+{
+    m_isFixedMuon = isFixedMuonFlag;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

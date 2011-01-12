@@ -13,12 +13,108 @@
 #include "Objects/Cluster.h"
 #include "Objects/Track.h"
 
-#include <algorithm>
 #include <cmath>
-#include <limits>
 
 namespace pandora
 {
+
+bool ParticleIdHelper::IsEmShowerFast(const Cluster *const pCluster)
+{
+    if (NULL == m_pEmShowerFastFunction)
+        return false;
+
+    return (*m_pEmShowerFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsEmShowerFull(const Cluster *const pCluster)
+{
+    if (NULL == m_pEmShowerFullFunction)
+        return false;
+
+    return (*m_pEmShowerFullFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsPhotonFast(const Cluster *const pCluster)
+{
+    if (pCluster->IsFixedPhoton())
+        return true;
+
+    if (NULL == m_pPhotonFastFunction)
+        return false;
+
+    return (*m_pPhotonFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsPhotonFull(const Cluster *const pCluster)
+{
+    if (pCluster->IsFixedPhoton())
+        return true;
+
+    if (NULL == m_pPhotonFullFunction)
+        return false;
+
+    return (*m_pPhotonFullFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsElectronFast(const Cluster *const pCluster)
+{
+    if (pCluster->IsFixedElectron())
+        return true;
+
+    if (NULL == m_pElectronFastFunction)
+        return false;
+
+    return (*m_pElectronFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsElectronFull(const Cluster *const pCluster)
+{
+    if (pCluster->IsFixedElectron())
+        return true;
+
+    if (NULL == m_pElectronFullFunction)
+        return false;
+
+    return (*m_pElectronFullFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsMuonFast(const Cluster *const pCluster)
+{
+    if (pCluster->IsFixedMuon())
+        return true;
+
+    if (NULL == m_pMuonFastFunction)
+        return false;
+
+    return (*m_pMuonFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool ParticleIdHelper::IsMuonFull(const Cluster *const pCluster)
+{
+    if (pCluster->IsFixedMuon())
+        return true;
+
+   if (NULL == m_pMuonFullFunction)
+        return false;
+
+    return (*m_pMuonFullFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ParticleIdHelper::CalculateShowerProfile(const Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy)
 {

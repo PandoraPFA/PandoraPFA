@@ -24,6 +24,8 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_isolatedElectromagneticEnergy(0),
     m_isolatedHadronicEnergy(0),
     m_isFixedPhoton(false),
+    m_isFixedElectron(false),
+    m_isFixedMuon(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_initialDirection(pCaloHit->GetExpectedDirection()),
@@ -43,6 +45,8 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     m_isolatedElectromagneticEnergy(0),
     m_isolatedHadronicEnergy(0),
     m_isFixedPhoton(false),
+    m_isFixedElectron(false),
+    m_isFixedMuon(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_isFitUpToDate(false),
@@ -67,6 +71,8 @@ Cluster::Cluster(Track *pTrack) :
     m_isolatedElectromagneticEnergy(0),
     m_isolatedHadronicEnergy(0),
     m_isFixedPhoton(false),
+    m_isFixedElectron(false),
+    m_isFixedMuon(false),
     m_isMipTrack(true),
     m_pTrackSeed(pTrack),
     m_initialDirection(pTrack->GetTrackStateAtCalorimeter().GetMomentum().GetUnitVector()),
@@ -460,7 +466,11 @@ StatusCode Cluster::ResetProperties()
     m_outerPseudoLayer.Reset();
 
     m_currentFitResult.Reset();
+
     m_isFixedPhoton = false;
+    m_isFixedElectron = false;
+    m_isFixedMuon = false;
+
     this->ResetOutdatedProperties();
 
     return STATUS_CODE_SUCCESS;

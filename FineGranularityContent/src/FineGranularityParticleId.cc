@@ -14,6 +14,10 @@
 
 #include "FineGranularityParticleId.h"
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
 using namespace pandora;
 
 bool FineGranularityParticleId::FineGranularityEmShowerId(const Cluster *const pCluster)
@@ -182,10 +186,6 @@ bool FineGranularityParticleId::FineGranularityEmShowerId(const Cluster *const p
 
 bool FineGranularityParticleId::FineGranularityPhotonId(const Cluster *const pCluster)
 {
-    // Already flagged as a fixed photon by an algorithm - overrides fast photon id
-    if (pCluster->IsFixedPhoton())
-        return true;
-
     // Cluster with associated tracks is not a photon
     if (!pCluster->GetAssociatedTrackList().empty())
         return false;
