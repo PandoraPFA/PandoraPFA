@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Cheating/CheatingPfoCreationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Cheating/CheatingPfoCreationAlgorithm.h
  * 
  *  @brief  Header file for the cheating pfo creation algorithm class.
  * 

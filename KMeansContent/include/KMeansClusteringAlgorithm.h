@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/KMeansClustering/include/KMeansClusteringAlgorithm.h
+ *  @file   PandoraPFANew/KMeansContent/include/KMeansClusteringAlgorithm.h
  * 
  *  @brief  Header file for the k-means clustering algorithm class.
  * 

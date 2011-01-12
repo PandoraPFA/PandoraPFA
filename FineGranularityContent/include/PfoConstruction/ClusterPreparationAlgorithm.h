@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/PfoConstruction/ClusterPreparationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/PfoConstruction/ClusterPreparationAlgorithm.h
  * 
  *  @brief  Header file for the cluster preparation algorithm class.
  * 

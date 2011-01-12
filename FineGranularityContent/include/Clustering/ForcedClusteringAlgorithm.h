@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Clustering/ForcedClusteringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Clustering/ForcedClusteringAlgorithm.h
  * 
  *  @brief  Header file for the forced clustering algorithm class.
  * 

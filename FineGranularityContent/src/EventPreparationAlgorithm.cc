@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/EventPreparationAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/EventPreparationAlgorithm.cc
  * 
  *  @brief  Implementation of the event preparation algorithm class.
  * 

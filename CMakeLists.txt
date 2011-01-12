@@ -131,9 +131,9 @@ IF( DEFINED PandoraMonitoring_HOME )
     CHECK_DEPS()
 ENDIF()
 
-ADD_SUBDIRECTORY( Framework PandoraFramework )
-ADD_SUBDIRECTORY( FineGranularityContent PandoraFineGranularityContent )
-ADD_SUBDIRECTORY( KMeansContent PandoraKMeansContent )
+ADD_SUBDIRECTORY( Framework )
+ADD_SUBDIRECTORY( FineGranularityContent )
+ADD_SUBDIRECTORY( KMeansContent )
 
 # create uninstall configuration file 
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake_uninstall.cmake.in"

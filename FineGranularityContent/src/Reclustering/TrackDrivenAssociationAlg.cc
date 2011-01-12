@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Reclustering/TrackDrivenAssociationAlg.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Reclustering/TrackDrivenAssociationAlg.cc
  * 
  *  @brief  Implementation of the track driven association algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/BackscatteredTracksAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/BackscatteredTracksAlgorithm.h
  * 
  *  @brief  Header file for the backscattered tracks algorithm class.
  * 

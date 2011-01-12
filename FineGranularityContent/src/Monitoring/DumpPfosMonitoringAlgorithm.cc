@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Monitoring/DumpPfosMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Monitoring/DumpPfosMonitoringAlgorithm.cc
  * 
  *  @brief  Implementation of the dump pfos monitoring algorithm class
  * 

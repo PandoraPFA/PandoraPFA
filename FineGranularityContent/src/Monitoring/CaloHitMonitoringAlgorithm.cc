@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Monitoring/CaloHitMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Monitoring/CaloHitMonitoringAlgorithm.cc
  * 
  *  @brief  Implementation of the calo hit monitoring algorithm class.
  * 

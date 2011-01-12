@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/FragmentRemoval/PhotonFragmentRemovalAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/FragmentRemoval/PhotonFragmentRemovalAlgorithm.cc
  * 
  *  @brief  Implementation of the photon fragment removal algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Clustering/InwardClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Clustering/InwardClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the inward clustering algorithm class.
  * 

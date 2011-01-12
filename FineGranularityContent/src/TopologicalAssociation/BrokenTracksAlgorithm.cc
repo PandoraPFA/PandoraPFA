@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociation/BrokenTracksAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociation/BrokenTracksAlgorithm.cc
  * 
  *  @brief  Implementation of the broken tracks algorithm class.
  * 

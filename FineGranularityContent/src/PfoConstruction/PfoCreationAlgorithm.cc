@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PfoConstruction/PfoCreationAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PfoConstruction/PfoCreationAlgorithm.cc
  * 
  *  @brief  Implementation of the pfo creation algorithm class.
  * 

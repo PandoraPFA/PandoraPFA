@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Cheating/PerfectNeutralHadronClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Cheating/PerfectNeutralHadronClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the cheating photon clustering algorithm class
  * 

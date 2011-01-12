@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FineGranularityParticleId.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/FineGranularityParticleId.h
  * 
  *  @brief  Header file for the fine granularity particle id class.
  * 

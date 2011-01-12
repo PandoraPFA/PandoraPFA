@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PfoConstruction/TrackRecoveryInteractionsAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PfoConstruction/TrackRecoveryInteractionsAlgorithm.cc
  * 
  *  @brief  Implementation of the track recovery interactions algorithm class.
  * 

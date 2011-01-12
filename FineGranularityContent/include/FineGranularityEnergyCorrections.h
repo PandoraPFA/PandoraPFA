@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FineGranularityEnergyCorrections.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/FineGranularityEnergyCorrections.h
  * 
  *  @brief  Header file for the fine granularity energy corrections class.
  * 

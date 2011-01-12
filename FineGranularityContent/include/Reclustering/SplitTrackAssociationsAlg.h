@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Reclustering/SplitTrackAssociationsAlg.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Reclustering/SplitTrackAssociationsAlg.h
  * 
  *  @brief  Header file for the split track associations algorithm class.
  * 

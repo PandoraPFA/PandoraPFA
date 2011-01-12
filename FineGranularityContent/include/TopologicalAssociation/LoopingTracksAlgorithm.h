@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/LoopingTracksAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/LoopingTracksAlgorithm.h
  * 
  *  @brief  Header file for the looping tracks algorithm class.
  * 

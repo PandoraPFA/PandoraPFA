@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Monitoring/EnergyMonitoringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Monitoring/EnergyMonitoringAlgorithm.h
  * 
  *  @brief  Header file for the energy monitoring algorithm
  * 

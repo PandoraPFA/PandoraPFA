@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/FinalParticleIdAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/FinalParticleIdAlgorithm.cc
  * 
  *  @brief  Implementation of the final particle id algorithm class.
  * 

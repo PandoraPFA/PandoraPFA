@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociationAlgorithm.h
  * 
  *  @brief  Header file for the topological association algorithm class.
  * 

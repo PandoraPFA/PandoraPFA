@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Monitoring/EfficiencyMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Monitoring/EfficiencyMonitoringAlgorithm.cc
  * 
  *  @brief  Implementation of the energy monitoring algorithm class 
  * 

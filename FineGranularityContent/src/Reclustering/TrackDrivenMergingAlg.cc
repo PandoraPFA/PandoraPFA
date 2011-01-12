@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Reclustering/TrackDrivenMergingAlg.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Reclustering/TrackDrivenMergingAlg.cc
  * 
  *  @brief  Implementation of the track driven merging algorithm class.
  * 

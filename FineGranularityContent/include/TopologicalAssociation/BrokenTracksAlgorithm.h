@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/BrokenTracksAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/BrokenTracksAlgorithm.h
  * 
  *  @brief  Header file for the broken tracks algorithm class.
  * 

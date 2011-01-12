@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/MipPhotonSeparationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/MipPhotonSeparationAlgorithm.h
  * 
  *  @brief  Header file for the mip-photon separation algorithm class.
  * 

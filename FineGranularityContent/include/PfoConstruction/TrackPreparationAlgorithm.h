@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/PfoConstruction/TrackPreparationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/PfoConstruction/TrackPreparationAlgorithm.h
  * 
  *  @brief  Header file for the track preparation algorithm class.
  * 

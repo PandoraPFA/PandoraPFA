@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Clustering/ClusteringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Clustering/ClusteringAlgorithm.h
  * 
  *  @brief  Header file for the clustering algorithm class.
  * 

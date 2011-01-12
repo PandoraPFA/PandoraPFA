@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/IsolatedHitMergingAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/IsolatedHitMergingAlgorithm.h
  * 
  *  @brief  Header file for the isolated hit merging algorithm class.
  * 

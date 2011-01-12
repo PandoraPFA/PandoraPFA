@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/ProximityBasedMergingAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/ProximityBasedMergingAlgorithm.h
  * 
  *  @brief  Header file for the proximity based merging algorithm class.
  * 

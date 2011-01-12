@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Monitoring/VisualMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Monitoring/VisualMonitoringAlgorithm.cc
  * 
  *  @brief  Implementation of the visual monitoring algorithm class 
  * 

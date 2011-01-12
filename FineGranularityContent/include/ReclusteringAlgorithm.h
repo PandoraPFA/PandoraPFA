@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/ReclusteringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/ReclusteringAlgorithm.h
  * 
  *  @brief  Header file for the reclustering algorithm class.
  * 

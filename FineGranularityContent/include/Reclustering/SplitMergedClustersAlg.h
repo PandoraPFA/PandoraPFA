@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Reclustering/SplitMergedClustersAlg.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Reclustering/SplitMergedClustersAlg.h
  * 
  *  @brief  Header file for the split merged clusters algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PfoConstruction/TrackRecoveryAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PfoConstruction/TrackRecoveryAlgorithm.cc
  * 
  *  @brief  Implementation of the track recovery algorithm class.
  * 

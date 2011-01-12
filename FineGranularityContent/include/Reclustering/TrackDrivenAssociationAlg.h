@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Reclustering/TrackDrivenAssociationAlg.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Reclustering/TrackDrivenAssociationAlg.h
  * 
  *  @brief  Header file for the track driven association algorithm class.
  * 

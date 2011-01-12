@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FragmentRemoval/PhotonFragmentRemovalAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/FragmentRemoval/PhotonFragmentRemovalAlgorithm.h
  * 
  *  @brief  Header file for the photon fragment removal algorithm class.
  * 

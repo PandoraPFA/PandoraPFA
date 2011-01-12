@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Reclustering/ExitingTrackAlg.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Reclustering/ExitingTrackAlg.h
  * 
  *  @brief  Header file for the exiting track algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Reclustering/ExitingTrackAlg.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Reclustering/ExitingTrackAlg.cc
  * 
  *  @brief  Implementation of the exiting track algorithm class.
  * 

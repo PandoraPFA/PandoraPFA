@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/EventPreparationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/EventPreparationAlgorithm.h
  * 
  *  @brief  Header file for the track selection algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/PfoConstruction/PfoCreationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/PfoConstruction/PfoCreationAlgorithm.h
  * 
  *  @brief  Header file for the pfo creation algorithm class.
  * 

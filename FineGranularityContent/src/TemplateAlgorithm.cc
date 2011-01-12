@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TemplateAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TemplateAlgorithm.cc
  * 
  *  @brief  Implementation of the template algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociation/ProximityBasedMergingAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociation/ProximityBasedMergingAlgorithm.cc
  * 
  *  @brief  Implementation of the proximity based merging algorithm class.
  * 

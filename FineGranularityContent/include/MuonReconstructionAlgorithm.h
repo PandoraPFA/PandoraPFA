@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/MuonReconstructionAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/MuonReconstructionAlgorithm.h
  * 
  *  @brief  Header file for the muon reconstruction algorithm class.
  * 

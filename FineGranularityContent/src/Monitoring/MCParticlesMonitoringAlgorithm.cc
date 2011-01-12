@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Monitoring/MCParticlesMonitoringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Monitoring/MCParticlesMonitoringAlgorithm.cc
  * 
  *  @brief  Implementation of an algorithm to monitor the mc particles
  * 

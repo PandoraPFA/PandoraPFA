@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/ReclusteringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/ReclusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the reclustering algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Cheating/PerfectFragmentRemovalAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Cheating/PerfectFragmentRemovalAlgorithm.cc
  * 
  *  @brief  Implementation of the cheating clustering algorithm class
  * 

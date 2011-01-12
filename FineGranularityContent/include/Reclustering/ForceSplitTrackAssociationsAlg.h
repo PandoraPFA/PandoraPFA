@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Reclustering/ForceSplitTrackAssociationsAlg.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Reclustering/ForceSplitTrackAssociationsAlg.h
  * 
  *  @brief  Header file for the force split track associations algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/PfoConstruction/LoopingTrackAssociationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/PfoConstruction/LoopingTrackAssociationAlgorithm.h
  * 
  *  @brief  Header file for the looping track association algorithm class.
  * 

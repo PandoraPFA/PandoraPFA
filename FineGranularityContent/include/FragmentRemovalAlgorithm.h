@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FragmentRemovalAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/FragmentRemovalAlgorithm.h
  * 
  *  @brief  Header file for the fragment removal algorithm class.
  * 

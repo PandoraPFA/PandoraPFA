@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TemplateAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TemplateAlgorithm.h
  * 
  *  @brief  Header file for the template algorithm class.
  * 

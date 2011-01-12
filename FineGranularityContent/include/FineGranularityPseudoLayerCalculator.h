@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FineGranularityPseudoLayerCalculator.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/FineGranularityPseudoLayerCalculator.h
  * 
  *  @brief  Header file for the fine granularity pseudo layer calculator class.
  * 

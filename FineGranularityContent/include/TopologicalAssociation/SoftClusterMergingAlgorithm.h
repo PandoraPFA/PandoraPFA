@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/SoftClusterMergingAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/SoftClusterMergingAlgorithm.h
  * 
  *  @brief  Header file for the soft cluster merging algorithm class.
  * 

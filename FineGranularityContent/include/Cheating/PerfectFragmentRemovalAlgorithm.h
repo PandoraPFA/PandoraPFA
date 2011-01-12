@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Cheating/PerfectFragmentRemovalAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Cheating/PerfectFragmentRemovalAlgorithm.h
  * 
  *  @brief  Header file for the cheating clustering algorithm class.
  * 

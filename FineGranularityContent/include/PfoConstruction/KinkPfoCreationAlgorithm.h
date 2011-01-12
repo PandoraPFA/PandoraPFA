@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/KinkPfoCreationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/KinkPfoCreationAlgorithm.h
  * 
  *  @brief  Header file for the kink pfo creation algorithm class.
  * 

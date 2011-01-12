@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FineGranularityContent.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/FineGranularityContent.h
  * 
  *  @brief  Header file detailing content for use with a fine granularity particle flow detector
  * 

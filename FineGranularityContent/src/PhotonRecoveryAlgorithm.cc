@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PhotonRecoveryAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PhotonRecoveryAlgorithm.cc
  * 
  *  @brief  Implementation of the photon recovery algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Cheating/CheatingTrackToClusterMatching.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Cheating/CheatingTrackToClusterMatching.h
  * 
  *  @brief  Header file for the cheating clustering algorithm class.
  * 

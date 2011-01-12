@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Cheating/PerfectClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Cheating/PerfectClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the cheating clustering algorithm class
  * 

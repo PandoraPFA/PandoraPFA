@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Monitoring/VisualMonitoringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Monitoring/VisualMonitoringAlgorithm.h
  * 
  *  @brief  Header file for the visual monitoring algorithm class
  * 

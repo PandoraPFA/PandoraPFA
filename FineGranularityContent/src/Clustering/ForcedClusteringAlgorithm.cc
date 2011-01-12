@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Clustering/ForcedClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Clustering/ForcedClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the forced clustering algorithm class.
  * 

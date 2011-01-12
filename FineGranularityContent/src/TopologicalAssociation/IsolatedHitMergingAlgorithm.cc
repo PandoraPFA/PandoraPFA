@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociation/IsolatedHitMergingAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociation/IsolatedHitMergingAlgorithm.cc
  * 
  *  @brief  Implementation of the isolated hit merging algorithm class.
  * 

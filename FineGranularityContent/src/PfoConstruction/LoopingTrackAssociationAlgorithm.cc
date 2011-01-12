@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PfoConstruction/LoopingTrackAssociationAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PfoConstruction/LoopingTrackAssociationAlgorithm.cc
  * 
  *  @brief  Implementation of the looping track association algorithm class.
  * 

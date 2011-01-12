@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/MuonClusterAssociationAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/MuonClusterAssociationAlgorithm.h
  * 
  *  @brief  Header file for the muon cluster association algorithm class.
  * 

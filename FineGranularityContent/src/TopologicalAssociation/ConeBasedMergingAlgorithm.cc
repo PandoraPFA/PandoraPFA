@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociation/ConeBasedMergingAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociation/ConeBasedMergingAlgorithm.cc
  * 
  *  @brief  Implementation of the cone based merging algorithm class.
  * 

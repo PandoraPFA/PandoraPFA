@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/TopologicalAssociation/ShowerMipMerging2Algorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/TopologicalAssociation/ShowerMipMerging2Algorithm.h
  * 
  *  @brief  Header file for the shower mip merging 2 algorithm class.
  * 

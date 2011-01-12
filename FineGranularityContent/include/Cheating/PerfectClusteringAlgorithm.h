@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Cheating/PerfectClusteringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Cheating/PerfectClusteringAlgorithm.h
  * 
  *  @brief  Header file for the cheating clustering algorithm class.
  * 

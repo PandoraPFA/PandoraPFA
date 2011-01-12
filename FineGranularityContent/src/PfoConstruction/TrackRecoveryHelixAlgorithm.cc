@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PfoConstruction/TrackRecoveryHelixAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PfoConstruction/TrackRecoveryHelixAlgorithm.cc
  * 
  *  @brief  Implementation of the track recovery helix algorithm class.
  * 

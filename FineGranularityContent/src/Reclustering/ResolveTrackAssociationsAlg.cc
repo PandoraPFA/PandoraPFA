@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Reclustering/ResolveTrackAssociationsAlg.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Reclustering/ResolveTrackAssociationsAlg.cc
  * 
  *  @brief  Implementation of the resolve track associations algorithm class.
  * 

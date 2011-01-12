@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/KMeansClustering/src/KMeansClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/KMeansContent/src/KMeansClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the k-means clustering algorithm class.
  * 

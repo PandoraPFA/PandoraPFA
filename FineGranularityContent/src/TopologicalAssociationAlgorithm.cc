@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociationAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociationAlgorithm.cc
  * 
  *  @brief  Implementation of the topological association algorithm class.
  * 

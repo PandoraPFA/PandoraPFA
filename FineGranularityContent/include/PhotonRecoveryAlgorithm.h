@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/PhotonRecoveryAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/PhotonRecoveryAlgorithm.h
  * 
  *  @brief  Header file for the photon recovery algorithm class.
  * 

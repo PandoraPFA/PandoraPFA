@@ -1,30 +1,30 @@
 ########################################################
-# cmake file for building PandoraPFANew Algorithms
+# cmake file for building Pandora FineGranularityContent
 ########################################################
 
 # project name
-PROJECT( PandoraFineGranularityContent )
+PROJECT( FineGranularityContent )
 
 # project version
-SET( PandoraFineGranularityContent_MAJOR_VERSION 1 )
-SET( PandoraFineGranularityContent_MINOR_VERSION 0 )
-SET( PandoraFineGranularityContent_PATCH_LEVEL 0 )
+SET( FineGranularityContent_MAJOR_VERSION 1 )
+SET( FineGranularityContent_MINOR_VERSION 0 )
+SET( FineGranularityContent_PATCH_LEVEL 0 )
 
 # library *nix style versioning
-SET( PandoraFineGranularityContent_SOVERSION "${PandoraFineGranularityContent_MAJOR_VERSION}.${PandoraFineGranularityContent_MINOR_VERSION}" )
-SET( PandoraFineGranularityContent_VERSION "${PandoraFineGranularityContent_SOVERSION}.${PandoraFineGranularityContent_PATCH_LEVEL}" )
+SET( FineGranularityContent_SOVERSION "${FineGranularityContent_MAJOR_VERSION}.${FineGranularityContent_MINOR_VERSION}" )
+SET( FineGranularityContent_VERSION "${FineGranularityContent_SOVERSION}.${FineGranularityContent_PATCH_LEVEL}" )
 
-INCLUDE_DIRECTORIES( ${PandoraFineGranularityContent_SOURCE_DIR}/include )
-INCLUDE_DIRECTORIES( ${PandoraFramework_SOURCE_DIR}/include )
+INCLUDE_DIRECTORIES( ${FineGranularityContent_SOURCE_DIR}/include )
+INCLUDE_DIRECTORIES( ${Framework_SOURCE_DIR}/include )
 
-AUX_SOURCE_DIRECTORY( src/ PandoraFineGranularityContent_SRCS )
-AUX_SOURCE_DIRECTORY( src/Cheating PandoraFineGranularityContent_SRCS )
-AUX_SOURCE_DIRECTORY( src/Clustering PandoraFineGranularityContent_SRCS )
-AUX_SOURCE_DIRECTORY( src/FragmentRemoval PandoraFineGranularityContent_SRCS )
-AUX_SOURCE_DIRECTORY( src/Monitoring PandoraFineGranularityContent_SRCS )
-AUX_SOURCE_DIRECTORY( src/PfoConstruction PandoraFineGranularityContent_SRCS )
-AUX_SOURCE_DIRECTORY( src/Reclustering PandoraFineGranularityContent_SRCS )
-AUX_SOURCE_DIRECTORY( src/TopologicalAssociation PandoraFineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/ FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/Cheating FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/Clustering FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/FragmentRemoval FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/Monitoring FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/PfoConstruction FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/Reclustering FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( src/TopologicalAssociation FineGranularityContent_SRCS )
 
 # require proper C++
 ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
@@ -32,14 +32,14 @@ ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
 # need long long for int64 for now
 ADD_DEFINITIONS( "-Wno-long-long -Wno-sign-compare -fno-strict-aliasing" )
 
-ADD_LIBRARY( lib_PandoraFineGranularityContent ${PandoraFineGranularityContent_SRCS} )
+ADD_LIBRARY( lib_PandoraFineGranularityContent ${FineGranularityContent_SRCS} )
 
 TARGET_LINK_LIBRARIES( lib_PandoraFineGranularityContent lib_PandoraFramework )
 
 SET_TARGET_PROPERTIES( lib_PandoraFineGranularityContent PROPERTIES
     # create *nix style library versions + symbolic links
-    VERSION ${PandoraFineGranularityContent_VERSION}
-    SOVERSION ${PandoraFineGranularityContent_SOVERSION}
+    VERSION ${FineGranularityContent_VERSION}
+    SOVERSION ${FineGranularityContent_SOVERSION}
     # allow creating static and shared libs without conflicts
     CLEAN_DIRECT_OUTPUT 1
     # avoid conflicts between library and binary target names

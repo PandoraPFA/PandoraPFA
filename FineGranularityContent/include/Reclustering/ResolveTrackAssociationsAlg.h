@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Reclustering/ResolveTrackAssociationsAlg.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Reclustering/ResolveTrackAssociationsAlg.h
  * 
  *  @brief  Header file for the resolve track associations algorithm class.
  * 

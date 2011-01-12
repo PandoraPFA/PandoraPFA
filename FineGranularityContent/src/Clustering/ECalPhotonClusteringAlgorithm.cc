@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/ECalPhotonClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/ECalPhotonClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the photon clustering algorithm class.
  * 

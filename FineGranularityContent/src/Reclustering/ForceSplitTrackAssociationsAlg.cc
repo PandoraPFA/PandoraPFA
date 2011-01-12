@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Reclustering/ForceSplitTrackAssociationsAlg.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Reclustering/ForceSplitTrackAssociationsAlg.cc
  * 
  *  @brief  Implementation of the force split track associations algorithm class.
  * 

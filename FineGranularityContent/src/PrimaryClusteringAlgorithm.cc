@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PrimaryClusteringAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PrimaryClusteringAlgorithm.cc
  * 
  *  @brief  Implementation of the primary clustering algorithm class.
  * 

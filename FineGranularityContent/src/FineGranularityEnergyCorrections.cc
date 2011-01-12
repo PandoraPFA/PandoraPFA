@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/FineGranularityEnergyCorrections.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/FineGranularityEnergyCorrections.cc
  * 
  *  @brief  Implementation of the fine granularity energy corrections class.
  * 

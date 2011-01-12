@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/FinalParticleIdAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/FinalParticleIdAlgorithm.h
  * 
  *  @brief  Header file for the final particle id algorithm class.
  * 

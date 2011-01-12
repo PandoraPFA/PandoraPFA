@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/PfoConstruction/TrackPreparationAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/PfoConstruction/TrackPreparationAlgorithm.cc
  * 
  *  @brief  Implementation of the track preparation algorithm class.
  * 

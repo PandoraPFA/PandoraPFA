@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Cheating/CheatingTrackToClusterMatching.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Cheating/CheatingTrackToClusterMatching.cc
  * 
  *  @brief  Implementation of the cheating clustering algorithm class
  * 

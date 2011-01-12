@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Clustering/ECalPhotonClusteringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Clustering/ECalPhotonClusteringAlgorithm.h
  * 
  *  @brief  Header file for the ecal photon clustering algorithm class.
  * 

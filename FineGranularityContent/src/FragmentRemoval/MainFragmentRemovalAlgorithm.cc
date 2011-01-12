@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/FragmentRemoval/MainFragmentRemovalAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/FragmentRemoval/MainFragmentRemovalAlgorithm.cc
  * 
  *  @brief  Implementation of the main fragment removal algorithm class.
  * 

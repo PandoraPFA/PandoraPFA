@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Cheating/PerfectPhotonClusteringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Cheating/PerfectPhotonClusteringAlgorithm.h
  * 
  *  @brief  Header file for the cheating photon clustering algorithm class.
  * 

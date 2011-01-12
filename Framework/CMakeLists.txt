@@ -1,29 +1,29 @@
 ########################################################
-# cmake file for building PandoraPFANew Framework
+# cmake file for building Pandora Framework
 ########################################################
 
 # project name
-PROJECT( PandoraFramework )
+PROJECT( Framework )
 
 # project version
-SET( PandoraFramework_MAJOR_VERSION 1 )
-SET( PandoraFramework_MINOR_VERSION 0 )
-SET( PandoraFramework_PATCH_LEVEL 0 )
+SET( Framework_MAJOR_VERSION 1 )
+SET( Framework_MINOR_VERSION 0 )
+SET( Framework_PATCH_LEVEL 0 )
 
 # library *nix style versioning
-SET( PandoraFramework_SOVERSION "${PandoraFramework_MAJOR_VERSION}.${PandoraFramework_MINOR_VERSION}" )
-SET( PandoraFramework_VERSION "${PandoraFramework_SOVERSION}.${PandoraFramework_PATCH_LEVEL}" )
+SET( Framework_SOVERSION "${Framework_MAJOR_VERSION}.${Framework_MINOR_VERSION}" )
+SET( Framework_VERSION "${Framework_SOVERSION}.${Framework_PATCH_LEVEL}" )
 
-INCLUDE_DIRECTORIES( ${PandoraFramework_SOURCE_DIR}/include )
+INCLUDE_DIRECTORIES( ${Framework_SOURCE_DIR}/include )
 
-AUX_SOURCE_DIRECTORY( src PandoraFramework_SRCS )
-AUX_SOURCE_DIRECTORY( src/Api PandoraFramework_SRCS )
-AUX_SOURCE_DIRECTORY( src/Helpers PandoraFramework_SRCS )
-AUX_SOURCE_DIRECTORY( src/Managers PandoraFramework_SRCS )
-AUX_SOURCE_DIRECTORY( src/Objects PandoraFramework_SRCS )
-AUX_SOURCE_DIRECTORY( src/Pandora PandoraFramework_SRCS )
-AUX_SOURCE_DIRECTORY( src/Utilities PandoraFramework_SRCS )
-AUX_SOURCE_DIRECTORY( src/Xml PandoraFramework_SRCS )
+AUX_SOURCE_DIRECTORY( src Framework_SRCS )
+AUX_SOURCE_DIRECTORY( src/Api Framework_SRCS )
+AUX_SOURCE_DIRECTORY( src/Helpers Framework_SRCS )
+AUX_SOURCE_DIRECTORY( src/Managers Framework_SRCS )
+AUX_SOURCE_DIRECTORY( src/Objects Framework_SRCS )
+AUX_SOURCE_DIRECTORY( src/Pandora Framework_SRCS )
+AUX_SOURCE_DIRECTORY( src/Utilities Framework_SRCS )
+AUX_SOURCE_DIRECTORY( src/Xml Framework_SRCS )
 
 # require proper C++
 ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
@@ -31,12 +31,12 @@ ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
 # need long long for int64 for now
 ADD_DEFINITIONS( "-Wno-long-long -Wno-sign-compare -fno-strict-aliasing" )
 
-ADD_LIBRARY( lib_PandoraFramework ${PandoraFramework_SRCS} )
+ADD_LIBRARY( lib_PandoraFramework ${Framework_SRCS} )
 
 SET_TARGET_PROPERTIES( lib_PandoraFramework PROPERTIES
     # create *nix style library versions + symbolic links
-    VERSION ${PandoraFramework_VERSION}
-    SOVERSION ${PandoraFramework_SOVERSION}
+    VERSION ${Framework_VERSION}
+    SOVERSION ${Framework_SOVERSION}
     # allow creating static and shared libs without conflicts
     CLEAN_DIRECT_OUTPUT 1
     # avoid conflicts between library and binary target names

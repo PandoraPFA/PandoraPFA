@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/Reclustering/SplitMergedClustersAlg.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/Reclustering/SplitMergedClustersAlg.cc
  * 
  *  @brief  Implementation of the split merged clusters algorithm class.
  * 

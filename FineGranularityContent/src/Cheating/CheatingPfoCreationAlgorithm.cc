@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/CheatingCheatingPfoCreationAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/CheatingCheatingPfoCreationAlgorithm.cc
  * 
  *  @brief  Implementation of the cheating pfo creation algorithm class.
  * 

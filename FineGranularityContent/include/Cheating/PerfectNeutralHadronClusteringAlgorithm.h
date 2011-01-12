@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Cheating/PerfectNeutralHadronClusteringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Cheating/PerfectNeutralHadronClusteringAlgorithm.h
  * 
  *  @brief  Header file for the cheating neutral hadron clustering algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociation/TrackClusterAssociationAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociation/TrackClusterAssociationAlgorithm.cc
  * 
  *  @brief  Implementation of the track-cluster association algorithm class.
  * 

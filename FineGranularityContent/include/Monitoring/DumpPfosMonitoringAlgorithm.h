@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Monitoring/DumpPfosMonitoringAlgorithm.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Monitoring/DumpPfosMonitoringAlgorithm.h
  * 
  *  @brief  Header file for the dump pfos monitoring algorithm class
  * 

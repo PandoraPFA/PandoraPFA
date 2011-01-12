@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociation/BackscatteredTracks2Algorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociation/BackscatteredTracks2Algorithm.cc
  * 
  *  @brief  Implementation of the backscattered tracks 2 algorithm class.
  * 

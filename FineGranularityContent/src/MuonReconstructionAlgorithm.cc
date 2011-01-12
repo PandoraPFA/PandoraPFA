@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/MuonReconstructionAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/MuonReconstructionAlgorithm.cc
  * 
  *  @brief  Implementation of the muon reconstruction algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/FineGranularityParticleId.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/FineGranularityParticleId.cc
  * 
  *  @brief  Implementation of the fine granularity particle id class.
  * 

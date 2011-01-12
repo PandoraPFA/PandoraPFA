@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/include/Reclustering/TrackDrivenMergingAlg.h
+ *  @file   PandoraPFANew/FineGranularityContent/include/Reclustering/TrackDrivenMergingAlg.h
  * 
  *  @brief  Header file for the track driven merging algorithm class.
  * 

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/TopologicalAssociation/ShowerMipMerging3Algorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/TopologicalAssociation/ShowerMipMerging3Algorithm.cc
  * 
  *  @brief  Implementation of the shower mip merging 3 algorithm class.
  * 

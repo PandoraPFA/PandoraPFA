@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Algorithms/src/FragmentRemoval/NeutralFragmentRemovalAlgorithm.cc
+ *  @file   PandoraPFANew/FineGranularityContent/src/FragmentRemoval/NeutralFragmentRemovalAlgorithm.cc
  * 
  *  @brief  Implementation of the neutral fragment removal algorithm class.
  * 
