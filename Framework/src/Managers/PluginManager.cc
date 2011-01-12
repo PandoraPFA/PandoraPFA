@@ -43,10 +43,18 @@ StatusCode PluginManager::RegisterEnergyCorrectionFunction(const std::string &fu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PluginManager::RegisterParticleIdFunction(const std::string &functionName, ParticleIdFunction *pParticleIdFunction)
+StatusCode PluginManager::InitializeEnergyCorrectionFunctions(const TiXmlHandle *const pXmlHandle, const std::string &xmlTagName,
+    const EnergyCorrectionType energyCorrectionType, EnergyCorrectionFunctionVector &energyCorrectionFunctionVector)
 {
-    if (!m_particleIdFunctionMap.insert(ParticleIdFunctionMap::value_type(functionName, pParticleIdFunction)).second)
-        return STATUS_CODE_ALREADY_PRESENT;
+    StringVector requestedFunctionNames;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(*pXmlHandle,
+        xmlTagName, requestedFunctionNames));
+
+    if (!requestedFunctionNames.empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignEnergyCorrectionFunctions(requestedFunctionNames,
+            energyCorrectionType, energyCorrectionFunctionVector));
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -73,20 +81,6 @@ StatusCode PluginManager::AssignEnergyCorrectionFunctions(const StringVector &fu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PluginManager::AssignParticleIdFunction(const std::string &functionName, ParticleIdFunction *&pParticleIdFunction) const
-{
-    ParticleIdFunctionMap::const_iterator iter = m_particleIdFunctionMap.find(functionName);
-
-    if (m_particleIdFunctionMap.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    pParticleIdFunction = iter->second;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 PluginManager::EnergyCorrectionFunctionMap &PluginManager::GetEnergyCorrectionFunctionMap(const EnergyCorrectionType energyCorrectionType)
 {
     switch (energyCorrectionType)
@@ -104,89 +98,74 @@ PluginManager::EnergyCorrectionFunctionMap &PluginManager::GetEnergyCorrectionFu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PluginManager::RegisterParticleIdFunction(const std::string &functionName, ParticleIdFunction *pParticleIdFunction)
+{
+    if (!m_particleIdFunctionMap.insert(ParticleIdFunctionMap::value_type(functionName, pParticleIdFunction)).second)
+        return STATUS_CODE_ALREADY_PRESENT;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PluginManager::InitializeParticleIdFunction(const TiXmlHandle *const pXmlHandle, const std::string &xmlTagName,
+    ParticleIdFunction *&pParticleIdFunction)
+{
+    std::string requestedFunctionName;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
+        xmlTagName, requestedFunctionName));
+
+    if (!requestedFunctionName.empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignParticleIdFunction(requestedFunctionName, pParticleIdFunction));
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PluginManager::AssignParticleIdFunction(const std::string &functionName, ParticleIdFunction *&pParticleIdFunction) const
+{
+    ParticleIdFunctionMap::const_iterator iter = m_particleIdFunctionMap.find(functionName);
+
+    if (m_particleIdFunctionMap.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+    pParticleIdFunction = iter->second;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 {
     // Energy correction functions
-    StringVector hadEnergyCorrectionFunctionNames;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(*pXmlHandle,
-        "HadronicEnergyCorrectionFunctions", hadEnergyCorrectionFunctionNames));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeEnergyCorrectionFunctions(pXmlHandle,
+        "HadronicEnergyCorrectionFunctions", HADRONIC, EnergyCorrectionsHelper::m_hadEnergyCorrectionFunctions));
 
-    if (!hadEnergyCorrectionFunctionNames.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignEnergyCorrectionFunctions(hadEnergyCorrectionFunctionNames,
-            HADRONIC, EnergyCorrectionsHelper::m_hadEnergyCorrectionFunctions));
-    }
-
-    StringVector emEnergyCorrectionFunctionNames;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(*pXmlHandle,
-        "ElectromagneticEnergyCorrectionFunctions", emEnergyCorrectionFunctionNames));
-
-    if (!emEnergyCorrectionFunctionNames.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignEnergyCorrectionFunctions(emEnergyCorrectionFunctionNames,
-            ELECTROMAGNETIC, EnergyCorrectionsHelper::m_emEnergyCorrectionFunctions));
-    }
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeEnergyCorrectionFunctions(pXmlHandle,
+        "ElectromagneticEnergyCorrectionFunctions", ELECTROMAGNETIC, EnergyCorrectionsHelper::m_emEnergyCorrectionFunctions));
 
     // Particle id functions
-    std::string photonFastFunctionName;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFastFunction", photonFastFunctionName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "PhotonFastFunction", ParticleIdHelper::m_pPhotonFastFunction));
 
-    if (!photonFastFunctionName.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignParticleIdFunction(photonFastFunctionName,
-            ParticleIdHelper::m_pPhotonFastFunction));
-    }
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "PhotonFullFunction", ParticleIdHelper::m_pPhotonFullFunction));
 
-    std::string photonFullFunctionName;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "PhotonFullFunction", photonFullFunctionName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "ElectronFastFunction", ParticleIdHelper::m_pElectronFastFunction));
 
-    if (!photonFullFunctionName.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignParticleIdFunction(photonFullFunctionName,
-            ParticleIdHelper::m_pPhotonFullFunction));
-    }
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "ElectronFullFunction", ParticleIdHelper::m_pElectronFullFunction));
 
-    std::string electronFastFunctionName;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "ElectronFastFunction", electronFastFunctionName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "MuonFastFunction", ParticleIdHelper::m_pMuonFastFunction));
 
-    if (!electronFastFunctionName.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignParticleIdFunction(electronFastFunctionName,
-            ParticleIdHelper::m_pElectronFastFunction));
-    }
-
-    std::string electronFullFunctionName;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "ElectronFullFunction", electronFullFunctionName));
-
-    if (!electronFullFunctionName.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignParticleIdFunction(electronFullFunctionName,
-            ParticleIdHelper::m_pElectronFullFunction));
-    }
-
-    std::string muonFastFunctionName;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "MuonFastFunction", muonFastFunctionName));
-
-    if (!muonFastFunctionName.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignParticleIdFunction(muonFastFunctionName,
-            ParticleIdHelper::m_pMuonFastFunction));
-    }
-
-    std::string muonFullFunctionName;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
-        "MuonFullFunction", muonFullFunctionName));
-
-    if (!muonFullFunctionName.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AssignParticleIdFunction(muonFullFunctionName,
-            ParticleIdHelper::m_pMuonFullFunction));
-    }
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "MuonFullFunction", ParticleIdHelper::m_pMuonFullFunction));
 
     return STATUS_CODE_SUCCESS;
 }
