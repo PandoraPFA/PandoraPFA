@@ -153,6 +153,7 @@ public:
         d("MuonCoilCorrection",     pandora::HADRONIC,          &FineGranularityEnergyCorrections::ApplyMuonEnergyCorrection)
 
     #define FINE_GRANULARITY_PARTICLE_ID_LIST(d)                                                                                \
+        d("FineGranularityEmShowerId",                          &FineGranularityParticleId::FineGranularityEmShowerId)          \
         d("FineGranularityPhotonId",                            &FineGranularityParticleId::FineGranularityPhotonId)            \
         d("FineGranularityElectronId",                          &FineGranularityParticleId::FineGranularityElectronId)          \
         d("FineGranularityMuonId",                              &FineGranularityParticleId::FineGranularityMuonId)

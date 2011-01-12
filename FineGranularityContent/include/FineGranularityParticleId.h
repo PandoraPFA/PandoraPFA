@@ -21,6 +21,15 @@ class FineGranularityParticleId
 {
 public:
     /**
+     *  @brief  Whether a cluster is a candidate electromagnetic shower
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool FineGranularityEmShowerId(const pandora::Cluster *const pCluster);
+
+    /**
      *  @brief  Photon identification for use with fine granularity particle flow detectors
      * 
      *  @param  pCluster address of the cluster
@@ -55,6 +64,42 @@ public:
     static pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
 private:
+    typedef std::pair<float, float> HitEnergyDistance;
+    typedef std::vector<HitEnergyDistance> HitEnergyDistanceVector;
+
+    /**
+     *  @brief  Sort HitEnergyDistance objects by increasing distance
+     * 
+     *  @param  lhs the first hit energy distance pair
+     *  @param  rhs the second hit energy distance pair
+     */
+    static bool SortHitsByDistance(const HitEnergyDistance &lhs, const HitEnergyDistance &rhs);
+
+    static float        m_emShowerIdMipCut_0;               ///< Default cluster mip fraction cut for emshw id
+    static float        m_emShowerIdMipCutEnergy_1;         ///< Energy above which mip fraction cut value 1 is applied
+    static float        m_emShowerIdMipCut_1;               ///< Cluster mip fraction cut value 1
+    static float        m_emShowerIdMipCutEnergy_2;         ///< Energy above which mip fraction cut value 2 is applied
+    static float        m_emShowerIdMipCut_2;               ///< Cluster mip fraction cut value 2
+    static float        m_emShowerIdMipCutEnergy_3;         ///< Energy above which mip fraction cut value 3 is applied
+    static float        m_emShowerIdMipCut_3;               ///< Cluster mip fraction cut value 3
+    static float        m_emShowerIdMipCutEnergy_4;         ///< Energy above which mip fraction cut value 4 is applied
+    static float        m_emShowerIdMipCut_4;               ///< Cluster mip fraction cut value 4
+    static float        m_emShowerIdDCosRCutEnergy;         ///< Energy at which emshw id cut (on cluster fit result dCosR) changes
+    static float        m_emShowerIdDCosRLowECut;           ///< Low energy cut on cluster fit result dCosR
+    static float        m_emShowerIdDCosRHighECut;          ///< High energy cut on cluster fit result dCosR
+    static float        m_emShowerIdRmsCutEnergy;           ///< Energy at which emshw id cut (on cluster fit result rms) changes
+    static float        m_emShowerIdRmsLowECut;             ///< Low energy cut on cluster fit result rms
+    static float        m_emShowerIdRmsHighECut;            ///< High energy cut on cluster fit result rms
+    static float        m_emShowerIdMinCosAngle;            ///< Min angular correction used to adjust radiation length measures
+    static float        m_emShowerIdMaxInnerLayerRadLengths;///< Max number of radiation lengths before cluster inner layer
+    static float        m_emShowerIdMinLayer90RadLengths;   ///< Min number of radiation lengths before cluster layer90
+    static float        m_emShowerIdMaxLayer90RadLengths;   ///< Max number of radiation lengths before cluster layer90
+    static float        m_emShowerIdMinShowerMaxRadLengths; ///< Min number of radiation lengths before cluster shower max layer
+    static float        m_emShowerIdMaxShowerMaxRadLengths; ///< Max number of radiation lengths before cluster shower max layer
+    static float        m_emShowerIdHighRadLengths;         ///< Max number of radiation lengths expected to be spanned by em shower
+    static float        m_emShowerIdMaxHighRadLengthEnergyFraction;   ///< Max fraction of cluster energy above max expected radiation lengths
+    static float        m_emShowerIdMaxRadial90;            ///< Max value of transverse profile radial90
+
     static unsigned int m_electronIdMaxInnerLayer;          ///< Max inner psuedo layer for fast electron id
     static float        m_electronIdMaxEnergy;              ///< Max electromagnetic energy for fast electron id
     static float        m_electronIdMaxProfileStart;        ///< Max shower profile start for fast electron id
@@ -111,5 +156,12 @@ private:
     static float        m_muonIdMaxMuonHitsCut1;            ///< Parameter 1 for max muon hits cut: cut = par0 + (par1 * trackEnergy)
     static float        m_muonIdMaxMuonHitsCutMinValue;     ///< Min value of max muon hits cut
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool FineGranularityParticleId::SortHitsByDistance(const HitEnergyDistance &lhs, const HitEnergyDistance &rhs)
+{
+    return (lhs.second < rhs.second);
+}
 
 #endif // #ifndef FINE_GRANULARITY_PARTICLE_ID_H

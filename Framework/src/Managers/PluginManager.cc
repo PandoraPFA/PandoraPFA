@@ -150,6 +150,12 @@ StatusCode PluginManager::InitializePlugins(const TiXmlHandle *const pXmlHandle)
 
     // Particle id functions
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "EmShowerFastFunction", ParticleIdHelper::m_pEmShowerFastFunction));
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
+        "EmShowerFullFunction", ParticleIdHelper::m_pEmShowerFullFunction));
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,
         "PhotonFastFunction", ParticleIdHelper::m_pPhotonFastFunction));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->InitializeParticleIdFunction(pXmlHandle,

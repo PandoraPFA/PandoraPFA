@@ -377,10 +377,6 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
             m_neutralRecoAsNeutralEnergy += clusterEnergy * fNeutral;
         }
 
-        float showerProfileStart(0.);
-        float showerProfileDiscrepancy(0.);
-        (void) ParticleIdHelper::CalculateShowerProfile(pCluster, showerProfileStart, showerProfileDiscrepancy);
-
         const bool badConfusion((clusterEnergy * fCharged) > m_minConfusionEnergyToDisplay);
         const bool badFragment((fCharged > 0.8f) && ((clusterEnergy * fCharged) > m_fragmentEnergyToDisplay));
         bool badTrackMatch((fCharged > 0.95f) && ((clusterEnergy * fCharged) >m_fragmentEnergyToDisplay));
@@ -425,7 +421,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
             if (pCluster != NULL)
             {
                 FORMATTED_OUTPUT_NEUTRAL(clusterEnergy, fCharged, fPhoton, fNeutral, pCluster->GetInnerPseudoLayer(),
-                    pCluster->GetOuterPseudoLayer(), showerProfileStart, showerProfileDiscrepancy);
+                    pCluster->GetOuterPseudoLayer(), pCluster->GetShowerProfileStart(), pCluster->GetShowerProfileDiscrepancy());
             }
 
             if (badTrackMatch)

@@ -24,6 +24,24 @@ class ParticleIdHelper
 {
 public:
     /**
+     *  @brief  Provide fast identification of whether a cluster is an electromagnetic shower
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsEmShowerFast(const Cluster *const pCluster);
+
+    /**
+     *  @brief  Provide a more detailed identification of whether a cluster is an electromagnetic shower
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return boolean
+     */
+    static bool IsEmShowerFull(const Cluster *const pCluster);
+
+    /**
      *  @brief  Provide fast identification of whether a cluster is a photon
      * 
      *  @param  pCluster address of the cluster
@@ -86,27 +104,7 @@ public:
      */
     static StatusCode CalculateShowerProfile(const Cluster *const pCluster, float &showerProfileStart, float &showerProfileDiscrepancy);
 
-    /**
-     *  @brief  Whether a cluster is a candidate electromagnetic shower
-     * 
-     *  @param  pCluster address of the cluster
-     * 
-     *  @return boolean
-     */
-    static bool IsElectromagneticShower(const Cluster *const pCluster);
-
 private:
-    typedef std::pair<float, float> HitEnergyDistance;
-    typedef std::vector<HitEnergyDistance> HitEnergyDistanceVector;
-
-    /**
-     *  @brief  Sort HitEnergyDistance objects by increasing distance
-     * 
-     *  @param  lhs the first hit energy distance pair
-     *  @param  rhs the second hit energy distance pair
-     */
-    static bool SortHitsByDistance(const HitEnergyDistance &lhs, const HitEnergyDistance &rhs);
-
     /**
      *  @brief  Read the particle id helper settings
      * 
@@ -114,6 +112,8 @@ private:
      */
     static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
+    static ParticleIdFunction *m_pEmShowerFastFunction;     ///< The fast electromagnetic shower id function pointer
+    static ParticleIdFunction *m_pEmShowerFullFunction;     ///< The full electromagnetic shower id function pointer
     static ParticleIdFunction *m_pPhotonFastFunction;       ///< The fast photon id function pointer
     static ParticleIdFunction *m_pPhotonFullFunction;       ///< The full photon id function pointer
     static ParticleIdFunction *m_pElectronFastFunction;     ///< The fast electron id function pointer
@@ -129,34 +129,29 @@ private:
     static float        m_showerProfileParameter1;          ///< Parameter1, used to calculate argument for gamma function
     static float        m_showerProfileMaxDifference;       ///< Max difference between current and best shower profile comparisons
 
-    static float        m_photonIdMipCut_0;                 ///< Default cluster mip fraction cut for photon id
-    static float        m_photonIdMipCutEnergy_1;           ///< Energy above which mip fraction cut value 1 is applied
-    static float        m_photonIdMipCut_1;                 ///< Cluster mip fraction cut value 1
-    static float        m_photonIdMipCutEnergy_2;           ///< Energy above which mip fraction cut value 2 is applied
-    static float        m_photonIdMipCut_2;                 ///< Cluster mip fraction cut value 2
-    static float        m_photonIdMipCutEnergy_3;           ///< Energy above which mip fraction cut value 3 is applied
-    static float        m_photonIdMipCut_3;                 ///< Cluster mip fraction cut value 3
-    static float        m_photonIdMipCutEnergy_4;           ///< Energy above which mip fraction cut value 4 is applied
-    static float        m_photonIdMipCut_4;                 ///< Cluster mip fraction cut value 4
-    static float        m_photonIdDCosRCutEnergy;           ///< Energy at which photon id cut (on cluster fit result dCosR) changes
-    static float        m_photonIdDCosRLowECut;             ///< Low energy cut on cluster fit result dCosR
-    static float        m_photonIdDCosRHighECut;            ///< High energy cut on cluster fit result dCosR
-    static float        m_photonIdRmsCutEnergy;             ///< Energy at which photon id cut (on cluster fit result rms) changes
-    static float        m_photonIdRmsLowECut;               ///< Low energy cut on cluster fit result rms
-    static float        m_photonIdRmsHighECut;              ///< High energy cut on cluster fit result rms
-    static float        m_photonIdMinCosAngle;              ///< Min angular correction used to adjust radiation length measures
-    static float        m_photonIdMaxInnerLayerRadLengths;  ///< Max number of radiation lengths before cluster inner layer
-    static float        m_photonIdMinLayer90RadLengths;     ///< Min number of radiation lengths before cluster layer90
-    static float        m_photonIdMaxLayer90RadLengths;     ///< Max number of radiation lengths before cluster layer90
-    static float        m_photonIdMinShowerMaxRadLengths;   ///< Min number of radiation lengths before cluster shower max layer
-    static float        m_photonIdMaxShowerMaxRadLengths;   ///< Max number of radiation lengths before cluster shower max layer
-    static float        m_photonIdHighRadLengths;           ///< Max number of radiation lengths expected to be spanned by em shower
-    static float        m_photonIdMaxHighRadLengthEnergyFraction;   ///< Max fraction of cluster energy above max expected radiation lengths
-    static float        m_photonIdMaxRadial90;              ///< Max value of transverse profile radial90
-
     friend class PandoraSettings;
     friend class PluginManager;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsEmShowerFast(const Cluster *const pCluster)
+{
+    if (NULL == m_pEmShowerFastFunction)
+        return false;
+
+    return (*m_pEmShowerFastFunction)(pCluster);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool ParticleIdHelper::IsEmShowerFull(const Cluster *const pCluster)
+{
+    if (NULL == m_pEmShowerFullFunction)
+        return false;
+
+    return (*m_pEmShowerFullFunction)(pCluster);
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -216,13 +211,6 @@ inline bool ParticleIdHelper::IsMuonFull(const Cluster *const pCluster)
         return false;
 
     return (*m_pMuonFullFunction)(pCluster);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool ParticleIdHelper::SortHitsByDistance(const HitEnergyDistance &lhs, const HitEnergyDistance &rhs)
-{
-    return (lhs.second < rhs.second);
 }
 
 } // namespace pandora

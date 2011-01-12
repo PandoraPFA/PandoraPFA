@@ -6,7 +6,7 @@
  *  $Log: $
  */
 
-#include "Helpers/ParticleIdHelper.h"
+#include "Helpers/GeometryHelper.h"
 #include "Helpers/XmlHelper.h"
 
 #include "Objects/Cluster.h"
@@ -15,6 +15,170 @@
 #include "FineGranularityParticleId.h"
 
 using namespace pandora;
+
+bool FineGranularityParticleId::FineGranularityEmShowerId(const Cluster *const pCluster)
+{
+    // Reject clusters starting outside inner fine granularity detectors
+    if (GeometryHelper::GetHitTypeGranularity(pCluster->GetInnerLayerHitType()) > FINE)
+        return false;
+
+    // Cut on cluster mip fraction
+    const float totalElectromagneticEnergy(pCluster->GetElectromagneticEnergy() - pCluster->GetIsolatedElectromagneticEnergy());
+
+    float mipCut(m_emShowerIdMipCut_0);
+
+    if (totalElectromagneticEnergy > m_emShowerIdMipCutEnergy_1)
+    {
+        mipCut = m_emShowerIdMipCut_1;
+    }
+    else if (totalElectromagneticEnergy > m_emShowerIdMipCutEnergy_2)
+    {
+        mipCut = m_emShowerIdMipCut_2;
+    }
+    else if (totalElectromagneticEnergy > m_emShowerIdMipCutEnergy_3)
+    {
+        mipCut = m_emShowerIdMipCut_3;
+    }
+    else if (totalElectromagneticEnergy > m_emShowerIdMipCutEnergy_4)
+    {
+        mipCut = m_emShowerIdMipCut_4;
+    }
+
+    if (pCluster->GetMipFraction() > mipCut)
+        return false;
+
+    // Cut on results of fit to all hits in cluster
+    float dCosR(0.f);
+    float clusterRms(0.f);
+
+    const ClusterHelper::ClusterFitResult &clusterFitResult(pCluster->GetFitToAllHitsResult());
+
+    if (clusterFitResult.IsFitSuccessful())
+    {
+        dCosR = clusterFitResult.GetRadialDirectionCosine();
+        clusterRms = clusterFitResult.GetRms();
+    }
+
+    const float dCosRCut(totalElectromagneticEnergy < m_emShowerIdDCosRCutEnergy ? m_emShowerIdDCosRLowECut : m_emShowerIdDCosRHighECut);
+
+    if (dCosR < dCosRCut)
+        return false;
+
+    const float rmsCut(totalElectromagneticEnergy < m_emShowerIdRmsCutEnergy ? m_emShowerIdRmsLowECut : m_emShowerIdRmsHighECut);
+
+    if (clusterRms > rmsCut)
+        return false;
+
+    const CartesianVector &clusterDirection(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
+        pCluster->GetFitToAllHitsResult().GetDirection() : pCluster->GetInitialDirection());
+
+    const CartesianVector &clusterIntercept(pCluster->GetFitToAllHitsResult().IsFitSuccessful() ?
+        pCluster->GetFitToAllHitsResult().GetIntercept() : CartesianVector(0.f, 0.f, 0.f));
+
+    // Calculate properties of longitudinal shower profile: layer90 and shower max layer
+    bool foundLayer90(false);
+    float layer90EnergySum(0.f), showerMaxRadLengths(0.f), energyAboveHighRadLengths(0.f);
+    float nRadiationLengths(0.f), nRadiationLengthsInLastLayer(0.f), maxEnergyInlayer(0.f);
+    HitEnergyDistanceVector hitEnergyDistanceVector;
+
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayerAtIp());
+
+    for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
+    {
+        OrderedCaloHitList::const_iterator iter = orderedCaloHitList.find(iLayer);
+
+        if ((orderedCaloHitList.end() == iter) || (iter->second->empty()))
+        {
+            nRadiationLengths += nRadiationLengthsInLastLayer;
+            continue;
+        }
+
+        // Extract information from the calo hits
+        float energyInLayer(0.f);
+        float nRadiationLengthsInLayer(0.f);
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            float cosOpeningAngle(std::fabs((*hitIter)->GetCellNormalVector().GetCosOpeningAngle(clusterDirection)));
+            cosOpeningAngle = std::max(cosOpeningAngle, m_emShowerIdMinCosAngle);
+
+            const float hitEnergy((*hitIter)->GetElectromagneticEnergy());
+            energyInLayer += hitEnergy;
+            nRadiationLengthsInLayer += (*hitIter)->GetNCellRadiationLengths() / cosOpeningAngle;
+
+            const float radialDistance(((*hitIter)->GetPositionVector() - clusterIntercept).GetCrossProduct(clusterDirection).GetMagnitude());
+            hitEnergyDistanceVector.push_back(HitEnergyDistance(hitEnergy, radialDistance));
+        }
+
+        layer90EnergySum += energyInLayer;
+        nRadiationLengthsInLayer /= static_cast<float>(iter->second->size());
+        nRadiationLengthsInLastLayer = nRadiationLengthsInLayer;
+        nRadiationLengths += nRadiationLengthsInLayer;
+
+        // Cut on number of radiation lengths before cluster start
+        if (innerPseudoLayer == iLayer)
+        {
+            nRadiationLengths *= static_cast<float>(innerPseudoLayer + 1 - firstPseudoLayer);
+
+            if (nRadiationLengths > m_emShowerIdMaxInnerLayerRadLengths)
+                return false;
+        }
+
+        // Cut on number of radiation lengths before longitudinal layer90
+        if (!foundLayer90 && (layer90EnergySum > 0.9f * totalElectromagneticEnergy))
+        {
+            foundLayer90 = true;
+
+            if ((nRadiationLengths < m_emShowerIdMinLayer90RadLengths) || (nRadiationLengths > m_emShowerIdMaxLayer90RadLengths))
+                return false;
+        }
+
+        // Identify number of radiation lengths before shower max layer
+        if (energyInLayer > maxEnergyInlayer)
+        {
+            showerMaxRadLengths = nRadiationLengths;
+            maxEnergyInlayer = energyInLayer;
+        }
+
+        // Count energy above specified "high" number of radiation lengths
+        if (nRadiationLengths > m_emShowerIdHighRadLengths)
+        {
+            energyAboveHighRadLengths += energyInLayer;
+        }
+    }
+
+    // Cut on longitudinal shower profile properties
+    if ((showerMaxRadLengths < m_emShowerIdMinShowerMaxRadLengths) || (showerMaxRadLengths > m_emShowerIdMaxShowerMaxRadLengths))
+        return false;
+
+    if (energyAboveHighRadLengths > m_emShowerIdMaxHighRadLengthEnergyFraction * totalElectromagneticEnergy)
+        return false;
+
+    // Cut on transverse shower profile properties
+    std::sort(hitEnergyDistanceVector.begin(), hitEnergyDistanceVector.end(), FineGranularityParticleId::SortHitsByDistance);
+    float radial90EnergySum(0.f), radial90(std::numeric_limits<float>::max());
+
+    for (HitEnergyDistanceVector::const_iterator iter = hitEnergyDistanceVector.begin(), iterEnd = hitEnergyDistanceVector.end(); iter != iterEnd; ++iter)
+    {
+        radial90EnergySum += iter->first;
+
+        if (radial90EnergySum > 0.9f * totalElectromagneticEnergy)
+        {
+            radial90 = iter->second;
+            break;
+        }
+    }
+
+    if (radial90 > m_emShowerIdMaxRadial90)
+        return false;
+
+    // Anything remaining at this point is classed as an electromagnetic shower
+    return true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 bool FineGranularityParticleId::FineGranularityPhotonId(const Cluster *const pCluster)
 {
@@ -26,7 +190,7 @@ bool FineGranularityParticleId::FineGranularityPhotonId(const Cluster *const pCl
     if (!pCluster->GetAssociatedTrackList().empty())
         return false;
 
-    return ParticleIdHelper::IsElectromagneticShower(pCluster);
+    return FineGranularityParticleId::FineGranularityEmShowerId(pCluster);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,7 +204,7 @@ bool FineGranularityParticleId::FineGranularityElectronId(const Cluster *const p
 
     const float electromagneticEnergy(pCluster->GetElectromagneticEnergy());
 
-    if (!ParticleIdHelper::IsElectromagneticShower(pCluster) && ((pCluster->GetInnerPseudoLayer() > m_electronIdMaxInnerLayer) ||
+    if (!FineGranularityParticleId::FineGranularityEmShowerId(pCluster) && ((pCluster->GetInnerPseudoLayer() > m_electronIdMaxInnerLayer) ||
         (electromagneticEnergy > m_electronIdMaxEnergy)))
     {
         return false;
@@ -351,11 +515,100 @@ float FineGranularityParticleId::m_muonIdMaxMuonHitsCut0 = 0.f;
 float FineGranularityParticleId::m_muonIdMaxMuonHitsCut1 = 0.2f;
 float FineGranularityParticleId::m_muonIdMaxMuonHitsCutMinValue = 30.f;
 
+float FineGranularityParticleId::m_emShowerIdMipCut_0 = 0.9f;
+float FineGranularityParticleId::m_emShowerIdMipCutEnergy_1 = 15.f;
+float FineGranularityParticleId::m_emShowerIdMipCut_1 = 0.3f;
+float FineGranularityParticleId::m_emShowerIdMipCutEnergy_2 = 7.5f;
+float FineGranularityParticleId::m_emShowerIdMipCut_2 = 0.4f;
+float FineGranularityParticleId::m_emShowerIdMipCutEnergy_3 = 3.f;
+float FineGranularityParticleId::m_emShowerIdMipCut_3 = 0.6f;
+float FineGranularityParticleId::m_emShowerIdMipCutEnergy_4 = 1.5f;
+float FineGranularityParticleId::m_emShowerIdMipCut_4 = 0.7f;
+float FineGranularityParticleId::m_emShowerIdDCosRCutEnergy = 1.5f;
+float FineGranularityParticleId::m_emShowerIdDCosRLowECut = 0.94f;
+float FineGranularityParticleId::m_emShowerIdDCosRHighECut = 0.95f;
+float FineGranularityParticleId::m_emShowerIdRmsCutEnergy = 40.f;
+float FineGranularityParticleId::m_emShowerIdRmsLowECut = 40.f;
+float FineGranularityParticleId::m_emShowerIdRmsHighECut = 90.f;
+float FineGranularityParticleId::m_emShowerIdMinCosAngle = 0.3f;
+float FineGranularityParticleId::m_emShowerIdMaxInnerLayerRadLengths = 10.f;
+float FineGranularityParticleId::m_emShowerIdMinLayer90RadLengths = 4.f;
+float FineGranularityParticleId::m_emShowerIdMaxLayer90RadLengths = 30.f;
+float FineGranularityParticleId::m_emShowerIdMinShowerMaxRadLengths = 0.f;
+float FineGranularityParticleId::m_emShowerIdMaxShowerMaxRadLengths = 25.f;
+float FineGranularityParticleId::m_emShowerIdHighRadLengths = 40.f;
+float FineGranularityParticleId::m_emShowerIdMaxHighRadLengthEnergyFraction = 0.04f;
+float FineGranularityParticleId::m_emShowerIdMaxRadial90 = 40.f;
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode FineGranularityParticleId::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    // Fast electron id settings
+    // Electromagnetic shower id settings
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCut_0", m_emShowerIdMipCut_0));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCutEnergy_1", m_emShowerIdMipCutEnergy_1));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCut_1", m_emShowerIdMipCut_1));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCutEnergy_2", m_emShowerIdMipCutEnergy_2));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCut_2", m_emShowerIdMipCut_2));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCutEnergy_3", m_emShowerIdMipCutEnergy_3));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCut_3", m_emShowerIdMipCut_3));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCutEnergy_4", m_emShowerIdMipCutEnergy_4));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMipCut_4", m_emShowerIdMipCut_4));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdDCosRCutEnergy", m_emShowerIdDCosRCutEnergy));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdDCosRLowECut", m_emShowerIdDCosRLowECut));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdDCosRHighECut", m_emShowerIdDCosRHighECut));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdRmsCutEnergy", m_emShowerIdRmsCutEnergy));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdRmsLowECut", m_emShowerIdRmsLowECut));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdRmsHighECut", m_emShowerIdRmsHighECut));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMinCosAngle", m_emShowerIdMinCosAngle));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMaxInnerLayerRadLengths", m_emShowerIdMaxInnerLayerRadLengths));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMinLayer90RadLengths", m_emShowerIdMinLayer90RadLengths));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMaxLayer90RadLengths", m_emShowerIdMaxLayer90RadLengths));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMinShowerMaxRadLengths", m_emShowerIdMinShowerMaxRadLengths));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EmShowerIdMaxShowerMaxRadLengths", m_emShowerIdMaxShowerMaxRadLengths));
+
+    // Electron id settings
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ElectronIdMaxInnerLayer", m_electronIdMaxInnerLayer));
 
@@ -374,149 +627,149 @@ StatusCode FineGranularityParticleId::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ElectronIdMaxResidualEOverP", m_electronIdMaxResidualEOverP));
 
-    // Fast muon id settings
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    // Muon id settings
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMaxInnerLayer", m_muonIdMaxInnerLayer));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinTrackEnergy", m_muonIdMinTrackEnergy));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMaxHCalHitEnergy", m_muonIdMaxHCalHitEnergy));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinECalLayers", m_muonIdMinECalLayers));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinHCalLayers", m_muonIdMinHCalLayers));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdShouldPerformGapCheck", m_muonIdShouldPerformGapCheck));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinHCalLayersForGapCheck", m_muonIdMinHCalLayersForGapCheck));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinMuonHitsForGapCheck", m_muonIdMinMuonHitsForGapCheck));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalEnergyCut0", m_muonIdECalEnergyCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalEnergyCut1", m_muonIdECalEnergyCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalEnergyCut0", m_muonIdHCalEnergyCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalEnergyCut1", m_muonIdHCalEnergyCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinECalLayersForFit", m_muonIdMinECalLayersForFit));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinHCalLayersForFit", m_muonIdMinHCalLayersForFit));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinMuonLayersForFit", m_muonIdMinMuonLayersForFit));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalFitInnerLayer", m_muonIdECalFitInnerLayer));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalFitOuterLayer", m_muonIdECalFitOuterLayer));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalFitInnerLayer", m_muonIdHCalFitInnerLayer));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalFitOuterLayer", m_muonIdHCalFitOuterLayer));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalRmsCut0", m_muonIdECalRmsCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalRmsCut1", m_muonIdECalRmsCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalMaxRmsCut", m_muonIdECalMaxRmsCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalRmsCut0", m_muonIdHCalRmsCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalRmsCut1", m_muonIdHCalRmsCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalMaxRmsCut", m_muonIdHCalMaxRmsCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalMipFractionCut0", m_muonIdECalMipFractionCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalMipFractionCut1", m_muonIdECalMipFractionCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalMaxMipFractionCut", m_muonIdECalMaxMipFractionCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalMipFractionCut0", m_muonIdHCalMipFractionCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalMipFractionCut1", m_muonIdHCalMipFractionCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalMaxMipFractionCut", m_muonIdHCalMaxMipFractionCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalHitsPerLayerCut0", m_muonIdECalHitsPerLayerCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalHitsPerLayerCut1", m_muonIdECalHitsPerLayerCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdECalMaxHitsPerLayerCut", m_muonIdECalMaxHitsPerLayerCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalHitsPerLayerCut0", m_muonIdHCalHitsPerLayerCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalHitsPerLayerCut1", m_muonIdHCalHitsPerLayerCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdHCalMaxHitsPerLayerCut", m_muonIdHCalMaxHitsPerLayerCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdCurlingTrackEnergy", m_muonIdCurlingTrackEnergy));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdInBarrelHitFraction", m_muonIdInBarrelHitFraction));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdTightMipFractionCut", m_muonIdTightMipFractionCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdTightMipFractionECalCut", m_muonIdTightMipFractionECalCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdTightMipFractionHCalCut", m_muonIdTightMipFractionHCalCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinMuonHitsCut", m_muonIdMinMuonHitsCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMinMuonTrackSegmentHitsCut", m_muonIdMinMuonTrackSegmentHitsCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMuonRmsCut", m_muonIdMuonRmsCut));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMaxMuonHitsCut0", m_muonIdMaxMuonHitsCut0));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMaxMuonHitsCut1", m_muonIdMaxMuonHitsCut1));
 
-   PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MuonIdMaxMuonHitsCutMinValue", m_muonIdMaxMuonHitsCutMinValue));
 
     return STATUS_CODE_SUCCESS;

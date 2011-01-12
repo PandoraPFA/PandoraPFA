@@ -297,7 +297,7 @@ void Cluster::PerformEnergyCorrections() const
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, EnergyCorrectionsHelper::EnergyCorrection(this, correctedElectromagneticEnergy,
         correctedHadronicEnergy));
 
-    if (ParticleIdHelper::IsElectromagneticShower(this))
+    if (ParticleIdHelper::IsEmShowerFast(this))
     {
         trackComparisonEnergy = correctedElectromagneticEnergy;
     }
