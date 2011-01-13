@@ -734,6 +734,34 @@ PseudoLayer ClusterHelper::GetShowerStartLayer(const Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+float ClusterHelper::GetEnergyWeightedMeanTime(const Cluster *const pCluster)
+{
+    if (0 == pCluster->GetNCaloHits())
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    float energySum(0.f);
+    float energyTimeProductSum(0.f);
+
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            const float hadronicEnergy((*hitIter)->GetHadronicEnergy());
+            energySum += hadronicEnergy;
+            energyTimeProductSum += (hadronicEnergy * (*hitIter)->GetTime());
+        }
+    }
+
+    if ((energySum < std::numeric_limits<float>::epsilon()) || (energyTimeProductSum < std::numeric_limits<float>::epsilon()))
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    return energyTimeProductSum / energySum;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 bool ClusterHelper::IsClusterLeavingDetector(const Cluster *const pCluster)
 {
     if (!pCluster->ContainsHitInOuterSamplingLayer())

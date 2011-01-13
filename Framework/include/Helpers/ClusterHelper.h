@@ -360,6 +360,15 @@ public:
     static PseudoLayer GetShowerStartLayer(const Cluster *const pCluster);
 
     /**
+     *  @brief  Get the energy-weighted mean time of the non-isolated hits in a specified cluster, units ns
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return The energy-weighted mean time, units ns
+     */
+    static float GetEnergyWeightedMeanTime(const Cluster *const pCluster);
+
+    /**
      *  @brief  Whether a cluster should be considered as leaving the calorimeters, leading to leakage of its energy
      * 
      *  @param  pCluster address of the cluster
