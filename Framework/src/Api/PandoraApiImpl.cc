@@ -55,19 +55,19 @@ StatusCode PandoraApiImpl::CreateObject<PandoraApi::MCParticleParameters>(const 
 template <>
 StatusCode PandoraApiImpl::CreateObject<PandoraApi::GeometryParameters>(const PandoraApi::GeometryParameters &geometryParameters) const
 {
-    return m_pPandora->m_pGeometryHelper->Initialize(geometryParameters);
+    return GeometryHelper::Initialize(geometryParameters);
 }
 
 template <>
 StatusCode PandoraApiImpl::CreateObject<PandoraApi::BoxGapParameters>(const PandoraApi::BoxGapParameters &gapParameters) const
 {
-    return m_pPandora->m_pGeometryHelper->CreateBoxGap(gapParameters);
+    return GeometryHelper::CreateBoxGap(gapParameters);
 }
 
 template <>
 StatusCode PandoraApiImpl::CreateObject<PandoraApi::ConcentricGapParameters>(const PandoraApi::ConcentricGapParameters &gapParameters) const
 {
-    return m_pPandora->m_pGeometryHelper->CreateConcentricGap(gapParameters);
+    return GeometryHelper::CreateConcentricGap(gapParameters);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,14 +139,14 @@ StatusCode PandoraApiImpl::GetParticleFlowObjects(ParticleFlowObjectList &partic
 
 StatusCode PandoraApiImpl::SetBFieldCalculator(BFieldCalculator *pBFieldCalculator) const
 {
-    return m_pPandora->m_pGeometryHelper->SetBFieldCalculator(pBFieldCalculator);
+    return GeometryHelper::SetBFieldCalculator(pBFieldCalculator);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode PandoraApiImpl::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator) const
 {
-    return m_pPandora->m_pGeometryHelper->SetPseudoLayerCalculator(pPseudoLayerCalculator);
+    return GeometryHelper::SetPseudoLayerCalculator(pPseudoLayerCalculator);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ StatusCode PandoraApiImpl::SetShowerProfileCalculator(ShowerProfileCalculator *p
 
 StatusCode PandoraApiImpl::SetHitTypeGranularity(const HitType hitType, const Granularity granularity) const
 {
-    return m_pPandora->m_pGeometryHelper->SetHitTypeGranularity(hitType, granularity);
+    return GeometryHelper::SetHitTypeGranularity(hitType, granularity);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

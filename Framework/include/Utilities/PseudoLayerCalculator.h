@@ -8,9 +8,9 @@
 #ifndef PSEUDO_LAYER_CALCULATOR_H
 #define PSEUDO_LAYER_CALCULATOR_H 1
 
-#include "Helpers/GeometryHelper.h"
-
 #include "Objects/CartesianVector.h"
+
+#include "Pandora/PandoraInternal.h"
 
 class TiXmlHandle;
 
@@ -29,18 +29,18 @@ protected:
     virtual ~PseudoLayerCalculator();
 
     /**
-     *  @brief  Initialize the pseudo layer calculator using information from geometry helper
-     * 
-     *  @param  pGeometryHelper address of the geometry helper
+     *  @brief  Initialize pseudo layer calculator geometry information. This function will receive a callback from the pandora
+     *          GeometryHelper when the geometry has been initialized.
      */
-    virtual void Initialize(const GeometryHelper *const pGeometryHelper);
+    virtual void InitializeGeometry();
 
     /**
-     *  @brief  Initialize the pseudo layer calculator using information from xml file
+     *  @brief  Read pseudo layer calculator settings from xml. This function will receive a callback if the top level xml tags
+     *          <PseudoLayerCalculator></PseudoLayerCalculator> are present.
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
-    virtual void Initialize(const TiXmlHandle *const pXmlHandle);
+    virtual void ReadSettings(const TiXmlHandle *const pXmlHandle);
 
     /**
      *  @brief  Get the appropriate pseudolayer for a specified position vector
@@ -70,13 +70,13 @@ inline PseudoLayerCalculator::~PseudoLayerCalculator()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void PseudoLayerCalculator::Initialize(const GeometryHelper *const /*pGeometryHelper*/)
+inline void PseudoLayerCalculator::InitializeGeometry()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void PseudoLayerCalculator::Initialize(const TiXmlHandle *const /*pXmlHandle*/)
+inline void PseudoLayerCalculator::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
 {
 }
 

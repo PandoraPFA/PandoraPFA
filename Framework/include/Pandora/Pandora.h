@@ -17,7 +17,6 @@ namespace pandora
 class AlgorithmManager;
 class CaloHitManager;
 class ClusterManager;
-class GeometryHelper;
 class MCManager;
 class PandoraApiImpl;
 class PandoraContentApiImpl;
@@ -74,7 +73,6 @@ private:
     AlgorithmManager            *m_pAlgorithmManager;           ///< The algorithm manager
     CaloHitManager              *m_pCaloHitManager;             ///< The hit manager
     ClusterManager              *m_pClusterManager;             ///< The cluster manager
-    GeometryHelper              *m_pGeometryHelper;             ///< The geometry helper
     MCManager                   *m_pMCManager;                  ///< The MC manager
     ParticleFlowObjectManager   *m_pParticleFlowObjectManager;  ///< The particle flow object manager
     PluginManager               *m_pPluginManager;              ///< The pandora plugin manager

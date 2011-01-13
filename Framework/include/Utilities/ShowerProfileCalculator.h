@@ -29,11 +29,12 @@ protected:
     virtual ~ShowerProfileCalculator();
 
     /**
-     *  @brief  Initialize the shower profile calculator using information from xml file
+     *  @brief  Read shower profile calculator settings from xml. This function will receive a callback if the top level xml tags
+     *          <ShowerProfileCalculator></ShowerProfileCalculator> are present.
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
-    virtual void Initialize(const TiXmlHandle *const pXmlHandle);
+    virtual void ReadSettings(const TiXmlHandle *const pXmlHandle);
 
     /**
      *  @brief  Get the shower profile for a cluster and compare it with the expected profile for a photon
@@ -55,7 +56,7 @@ inline ShowerProfileCalculator::~ShowerProfileCalculator()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void ShowerProfileCalculator::Initialize(const TiXmlHandle *const /*pXmlHandle*/)
+inline void ShowerProfileCalculator::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
 {
 }
 

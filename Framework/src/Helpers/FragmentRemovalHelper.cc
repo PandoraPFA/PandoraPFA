@@ -169,13 +169,11 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(zStart, referencePoint, intersectionPoint));
 
     static const PseudoLayer MAX_LAYER(std::numeric_limits<unsigned int>::max());
-    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
-
     PseudoLayer startLayer(MAX_LAYER);
 
     try
     {
-        startLayer = pGeometryHelper->GetPseudoLayer(intersectionPoint);
+        startLayer = GeometryHelper::GetPseudoLayer(intersectionPoint);
     }
     catch (StatusCodeException &)
     {
@@ -190,7 +188,7 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
 
         try
         {
-            const PseudoLayer iLayer(pGeometryHelper->GetPseudoLayer(intersectionPoint));
+            const PseudoLayer iLayer(GeometryHelper::GetPseudoLayer(intersectionPoint));
 
             if (iLayer != currentLayer)
             {

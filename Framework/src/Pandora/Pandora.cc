@@ -11,8 +11,6 @@
 #include "Api/PandoraContentApi.h"
 #include "Api/PandoraContentApiImpl.h"
 
-#include "Helpers/GeometryHelper.h"
-
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
 #include "Managers/ClusterManager.h"
@@ -34,7 +32,6 @@ Pandora::Pandora() :
     m_pAlgorithmManager(NULL),
     m_pCaloHitManager(NULL),
     m_pClusterManager(NULL),
-    m_pGeometryHelper(NULL),
     m_pMCManager(NULL),
     m_pParticleFlowObjectManager(NULL),
     m_pPluginManager(NULL),
@@ -48,7 +45,6 @@ Pandora::Pandora() :
         m_pAlgorithmManager = new AlgorithmManager(this);
         m_pCaloHitManager = new CaloHitManager;
         m_pClusterManager = new ClusterManager;
-        m_pGeometryHelper = GeometryHelper::GetInstance();
         m_pMCManager = new MCManager;
         m_pParticleFlowObjectManager = new ParticleFlowObjectManager;
         m_pPluginManager = new PluginManager;
@@ -78,7 +74,6 @@ Pandora::~Pandora()
     delete m_pAlgorithmManager;
     delete m_pCaloHitManager;
     delete m_pClusterManager;
-    delete m_pGeometryHelper;
     delete m_pMCManager;
     delete m_pParticleFlowObjectManager;
     delete m_pPluginManager;

@@ -87,7 +87,7 @@ bool FineGranularityParticleId::FineGranularityEmShowerId(const Cluster *const p
 
     const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
     const PseudoLayer innerPseudoLayer(pCluster->GetInnerPseudoLayer());
-    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayerAtIp());
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetPseudoLayerAtIp());
 
     for (PseudoLayer iLayer = innerPseudoLayer, outerPseudoLayer = pCluster->GetOuterPseudoLayer(); iLayer <= outerPseudoLayer; ++iLayer)
     {

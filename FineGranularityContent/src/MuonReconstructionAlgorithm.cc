@@ -46,10 +46,9 @@ StatusCode MuonReconstructionAlgorithm::Run()
 
 StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *const pMuonClusterList) const
 {
-    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
-    static const float coilMidPointR(0.5f * (pGeometryHelper->GetCoilOuterRadius() + pGeometryHelper->GetCoilInnerRadius()));
-    static const float muonBarrelBField(pGeometryHelper->GetBField(CartesianVector(pGeometryHelper->GetMuonBarrelParameters().GetInnerRCoordinate(), 0.f, 0.f)));
-    static const float muonEndCapBField(pGeometryHelper->GetBField(CartesianVector(0.f, 0.f, std::fabs(pGeometryHelper->GetMuonEndCapParameters().GetInnerZCoordinate()))));
+    static const float coilMidPointR(0.5f * (GeometryHelper::GetCoilOuterRadius() + GeometryHelper::GetCoilInnerRadius()));
+    static const float muonBarrelBField(GeometryHelper::GetBField(CartesianVector(GeometryHelper::GetMuonBarrelParameters().GetInnerRCoordinate(), 0.f, 0.f)));
+    static const float muonEndCapBField(GeometryHelper::GetBField(CartesianVector(0.f, 0.f, std::fabs(GeometryHelper::GetMuonEndCapParameters().GetInnerZCoordinate()))));
 
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*this, pTrackList));
@@ -158,7 +157,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
 
 StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHelix, const bool isPositiveZ, CartesianVector &muonEntryPoint) const
 {
-    static const float muonEndCapInnerZ(std::fabs(GeometryHelper::GetInstance()->GetMuonEndCapParameters().GetInnerZCoordinate()));
+    static const float muonEndCapInnerZ(std::fabs(GeometryHelper::GetMuonEndCapParameters().GetInnerZCoordinate()));
 
     float minTime(std::numeric_limits<float>::max());
     const CartesianVector &referencePoint(pHelix->GetReferencePoint());
@@ -166,9 +165,9 @@ StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHe
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointInZ(isPositiveZ ? muonEndCapInnerZ : -muonEndCapInnerZ,
         referencePoint, muonEntryPoint, minTime));
 
-    static const unsigned int muonBarrelInnerSymmetry = GeometryHelper::GetInstance()->GetMuonBarrelParameters().GetInnerSymmetryOrder();
-    static const float muonBarrelInnerPhi = GeometryHelper::GetInstance()->GetMuonBarrelParameters().GetInnerPhiCoordinate();
-    static const float muonBarrelInnerR = GeometryHelper::GetInstance()->GetMuonBarrelParameters().GetInnerRCoordinate();
+    static const unsigned int muonBarrelInnerSymmetry = GeometryHelper::GetMuonBarrelParameters().GetInnerSymmetryOrder();
+    static const float muonBarrelInnerPhi = GeometryHelper::GetMuonBarrelParameters().GetInnerPhiCoordinate();
+    static const float muonBarrelInnerR = GeometryHelper::GetMuonBarrelParameters().GetInnerRCoordinate();
 
     if (muonBarrelInnerSymmetry > 0)
     {
@@ -213,8 +212,8 @@ StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHe
 
 StatusCode MuonReconstructionAlgorithm::AddCaloHits(const ClusterList *const pMuonClusterList, const std::string &inputCaloHitListName) const
 {
-    static const float hCalEndCapInnerR(GeometryHelper::GetInstance()->GetHCalEndCapParameters().GetInnerRCoordinate());
-    static const float eCalEndCapInnerR(GeometryHelper::GetInstance()->GetECalEndCapParameters().GetInnerRCoordinate());
+    static const float hCalEndCapInnerR(GeometryHelper::GetHCalEndCapParameters().GetInnerRCoordinate());
+    static const float eCalEndCapInnerR(GeometryHelper::GetECalEndCapParameters().GetInnerRCoordinate());
 
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetOrderedCaloHitList(*this, inputCaloHitListName, pOrderedCaloHitList));

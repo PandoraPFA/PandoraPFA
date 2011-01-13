@@ -70,7 +70,7 @@ StatusCode ECalPhotonClusteringAlgorithm::Initialize()
 
 
     // set object variables:
-    m_nECalLayers = GeometryHelper::GetInstance()->GetECalBarrelParameters().GetNLayers();
+    m_nECalLayers = GeometryHelper::GetECalBarrelParameters().GetNLayers();
 
 
     const bool produceSignalConfigFile     = m_produceConfigurationFiles.find("signal")     != std::string::npos;

@@ -162,18 +162,13 @@ public:
     typedef std::vector<DetectorGap *> DetectorGapList;
 
     /**
-     *  @brief  Get the geometry helper singleton
-     */
-    static GeometryHelper *GetInstance();
-
-    /**
      *  @brief  Get the bfield value for a specified position vector
      * 
      *  @param  positionVector the specified position
      * 
      *  @return the bfield, units Tesla
      */
-    float GetBField(const CartesianVector &positionVector) const;
+    static float GetBField(const CartesianVector &positionVector);
 
     /**
      *  @brief  Get the appropriate pseudolayer for a specified position vector
@@ -182,7 +177,7 @@ public:
      * 
      *  @return the appropriate pseudolayer
      */
-    PseudoLayer GetPseudoLayer(const CartesianVector &positionVector) const;
+    static PseudoLayer GetPseudoLayer(const CartesianVector &positionVector);
 
     /**
      *  @brief  Get the pseudolayer assigned to a point at the ip, i.e. the initial offset for pseudolayer values
@@ -190,119 +185,119 @@ public:
      * 
      *  @return the pseudolayer assigned to a point at the ip
      */
-    PseudoLayer GetPseudoLayerAtIp() const;
+    static PseudoLayer GetPseudoLayerAtIp();
 
     /**
      *  @brief  Get the inner detector barrel parameters
      * 
      *  @return The inner detector barrel parameters
      */
-    const SubDetectorParameters &GetInDetBarrelParameters() const;
+    static const SubDetectorParameters &GetInDetBarrelParameters();
 
     /**
      *  @brief  Get the inner detector end cap parameters
      * 
      *  @return The inner detector end cap parameters
      */
-    const SubDetectorParameters &GetInDetEndCapParameters() const;
+    static const SubDetectorParameters &GetInDetEndCapParameters();
 
     /**
      *  @brief  Get the ecal barrel parameters
      * 
      *  @return The ecal barrel parameters
      */
-    const SubDetectorParameters &GetECalBarrelParameters() const;
+    static const SubDetectorParameters &GetECalBarrelParameters();
 
     /**
      *  @brief  Get the ecal end cap parameters
      * 
      *  @return The ecal end cap parameters
      */
-    const SubDetectorParameters &GetECalEndCapParameters() const;
+    static const SubDetectorParameters &GetECalEndCapParameters();
 
     /**
      *  @brief  Get the hcal barrel parameters
      * 
      *  @return The hcal barrel parameters
      */
-    const SubDetectorParameters &GetHCalBarrelParameters() const;
+    static const SubDetectorParameters &GetHCalBarrelParameters();
 
     /**
      *  @brief  Get the hcal end cap parameters
      * 
      *  @return The hcal end cap parameters
      */
-    const SubDetectorParameters &GetHCalEndCapParameters() const;
+    static const SubDetectorParameters &GetHCalEndCapParameters();
 
     /**
      *  @brief  Get the muon detector barrel parameters
      * 
      *  @return The muon detector barrel parameters
      */
-    const SubDetectorParameters &GetMuonBarrelParameters() const;
+    static const SubDetectorParameters &GetMuonBarrelParameters();
 
     /**
      *  @brief  Get the muon detector end cap parameters
      * 
      *  @return The muon detector end cap parameters
      */
-    const SubDetectorParameters &GetMuonEndCapParameters() const;
+    static const SubDetectorParameters &GetMuonEndCapParameters();
 
     /**
      *  @brief  Get the main tracker inner radius, units mm
      * 
      *  @return The main tracker inner radius
      */
-    float GetMainTrackerInnerRadius() const;
+    static float GetMainTrackerInnerRadius();
 
     /**
      *  @brief  Get the main tracker outer radius, units mm
      * 
      *  @return The main tracker outer radius
      */
-    float GetMainTrackerOuterRadius() const;
+    static float GetMainTrackerOuterRadius();
 
     /**
      *  @brief  Get the main tracker z extent, units mm
      * 
      *  @return The main tracker z extent
      */
-    float GetMainTrackerZExtent() const;
+    static float GetMainTrackerZExtent();
 
     /**
      *  @brief  Get the coil inner radius, units mm
      * 
      *  @return The coil inner radius
      */
-    float GetCoilInnerRadius() const;
+    static float GetCoilInnerRadius();
 
     /**
      *  @brief  Get the coil outer radius, units mm
      * 
      *  @return The coil outer radius
      */
-    float GetCoilOuterRadius() const;
+    static float GetCoilOuterRadius();
 
     /**
      *  @brief  Get the coil z extent, units mm
      * 
      *  @return The coil z extent
      */
-    float GetCoilZExtent() const;
+    static float GetCoilZExtent();
 
     /**
      *  @brief  Get the map from name to parameters for any additional sub detectors
      * 
      *  @return The map from name to parameters
      */
-    const SubDetectorParametersMap &GetAdditionalSubDetectors() const;
+    static const SubDetectorParametersMap &GetAdditionalSubDetectors();
 
     /**
      *  @brief  Get the list of gaps in the active detector volume
      * 
      *  @return The list of gaps in the active detector volume
      */
-    const DetectorGapList &GetDetectorGapList() const;
+    static const DetectorGapList &GetDetectorGapList();
 
     /**
      *  @brief  Whether a specified position is in a detector gap region
@@ -311,7 +306,7 @@ public:
      * 
      *  @return boolean
      */
-    bool IsInDetectorGapRegion(const CartesianVector &position) const;
+    static bool IsInDetectorGapRegion(const CartesianVector &position);
 
     /**
      *  @brief  Get the granularity level specified for a given calorimeter hit type
@@ -365,49 +360,39 @@ public:
 
 private:
     /**
-     *  @brief  Constructor
-     */
-    GeometryHelper();
-
-    /**
-     *  @brief  Destructor
-     */
-    ~GeometryHelper();
-
-    /**
      *  @brief  Initialize the geometry helper
      * 
      *  @param  geometryParameters the geometry parameters
      */
-    StatusCode Initialize(const PandoraApi::GeometryParameters &geometryParameters);
+    static StatusCode Initialize(const PandoraApi::GeometryParameters &geometryParameters);
 
     /**
      *  @brief  Create box gap
      * 
      *  @param  gapParameters the gap parameters
      */
-    StatusCode CreateBoxGap(const PandoraApi::BoxGap::Parameters &gapParameters);
+    static StatusCode CreateBoxGap(const PandoraApi::BoxGap::Parameters &gapParameters);
 
     /**
      *  @brief  Create concentric gap
      * 
      *  @param  gapParameters the gap parameters
      */
-    StatusCode CreateConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
+    static StatusCode CreateConcentricGap(const PandoraApi::ConcentricGap::Parameters &gapParameters);
 
     /**
      *  @brief  Set the bfield calculator
      * 
      *  @param  pBFieldCalculator address of the bfield calculator
      */
-    StatusCode SetBFieldCalculator(BFieldCalculator *pBFieldCalculator);
+    static StatusCode SetBFieldCalculator(BFieldCalculator *pBFieldCalculator);
 
     /**
      *  @brief  Set the pseudo layer calculator
      * 
      *  @param  pPseudoLayerCalculator address of the pseudo layer calculator
      */
-    StatusCode SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator);
+    static StatusCode SetPseudoLayerCalculator(PseudoLayerCalculator *pPseudoLayerCalculator);
 
     typedef std::map<HitType, Granularity> HitTypeToGranularityMap;
 
@@ -433,140 +418,137 @@ private:
      */
     static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
-    bool                            m_isInitialized;            ///< Whether the geometry helper is initialized
-    BFieldCalculator               *m_pBFieldCalculator;        ///< Address of the bfield calculator
-    PseudoLayerCalculator          *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
+    static bool                     m_isInitialized;            ///< Whether the geometry helper is initialized
+    static BFieldCalculator        *m_pBFieldCalculator;        ///< Address of the bfield calculator
+    static PseudoLayerCalculator   *m_pPseudoLayerCalculator;   ///< Address of the pseudolayer calculator
 
-    SubDetectorParameters           m_inDetBarrelParameters;    ///< The inner detector barrel parameters
-    SubDetectorParameters           m_inDetEndCapParameters;    ///< The inner detector end cap parameters
-    SubDetectorParameters           m_eCalBarrelParameters;     ///< The ecal barrel parameters
-    SubDetectorParameters           m_eCalEndCapParameters;     ///< The ecal end cap parameters
-    SubDetectorParameters           m_hCalBarrelParameters;     ///< The hcal barrel parameters
-    SubDetectorParameters           m_hCalEndCapParameters;     ///< The hcal end cap parameters
-    SubDetectorParameters           m_muonBarrelParameters;     ///< The muon detector barrel parameters
-    SubDetectorParameters           m_muonEndCapParameters;     ///< The muon detector end cap parameters
+    static SubDetectorParameters    m_inDetBarrelParameters;    ///< The inner detector barrel parameters
+    static SubDetectorParameters    m_inDetEndCapParameters;    ///< The inner detector end cap parameters
+    static SubDetectorParameters    m_eCalBarrelParameters;     ///< The ecal barrel parameters
+    static SubDetectorParameters    m_eCalEndCapParameters;     ///< The ecal end cap parameters
+    static SubDetectorParameters    m_hCalBarrelParameters;     ///< The hcal barrel parameters
+    static SubDetectorParameters    m_hCalEndCapParameters;     ///< The hcal end cap parameters
+    static SubDetectorParameters    m_muonBarrelParameters;     ///< The muon detector barrel parameters
+    static SubDetectorParameters    m_muonEndCapParameters;     ///< The muon detector end cap parameters
 
-    InputFloat                      m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
-    InputFloat                      m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
-    InputFloat                      m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
-    InputFloat                      m_coilInnerRadius;          ///< The coil inner radius, units mm
-    InputFloat                      m_coilOuterRadius;          ///< The coil outer radius, units mm
-    InputFloat                      m_coilZExtent;              ///< The coil z extent, units mm
+    static InputFloat               m_mainTrackerInnerRadius;   ///< The main tracker inner radius, units mm
+    static InputFloat               m_mainTrackerOuterRadius;   ///< The main tracker outer radius, units mm
+    static InputFloat               m_mainTrackerZExtent;       ///< The main tracker z extent, units mm
+    static InputFloat               m_coilInnerRadius;          ///< The coil inner radius, units mm
+    static InputFloat               m_coilOuterRadius;          ///< The coil outer radius, units mm
+    static InputFloat               m_coilZExtent;              ///< The coil z extent, units mm
 
-    SubDetectorParametersMap        m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
-    DetectorGapList                 m_detectorGapList;          ///< List of gaps in the active detector volume
+    static SubDetectorParametersMap m_additionalSubDetectors;   ///< Map from name to parameters for any additional subdetectors
+    static DetectorGapList          m_detectorGapList;          ///< List of gaps in the active detector volume
 
-    static bool                     m_instanceFlag;             ///< The geometry helper instance flag
-    static GeometryHelper          *m_pGeometryHelper;          ///< The geometry helper instance
     static HitTypeToGranularityMap  m_hitTypeToGranularityMap;  ///< The hit type to granularity map
     static float                    m_gapTolerance;             ///< Tolerance allowed when declaring a point to be "in" a gap region, units mm
 
-    friend class Pandora;
     friend class PandoraApiImpl;
     friend class PandoraSettings;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetInDetBarrelParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetInDetBarrelParameters()
 {
     return m_inDetBarrelParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetInDetEndCapParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetInDetEndCapParameters()
 {
     return m_inDetEndCapParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalBarrelParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalBarrelParameters()
 {
     return m_eCalBarrelParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCapParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetECalEndCapParameters()
 {
     return m_eCalEndCapParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarrelParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalBarrelParameters()
 {
     return m_hCalBarrelParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalEndCapParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetHCalEndCapParameters()
 {
     return m_hCalEndCapParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonBarrelParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonBarrelParameters()
 {
     return m_muonBarrelParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonEndCapParameters() const
+inline const GeometryHelper::SubDetectorParameters &GeometryHelper::GetMuonEndCapParameters()
 {
     return m_muonEndCapParameters;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::GetMainTrackerInnerRadius() const
+inline float GeometryHelper::GetMainTrackerInnerRadius()
 {
     return m_mainTrackerInnerRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::GetMainTrackerOuterRadius() const
+inline float GeometryHelper::GetMainTrackerOuterRadius()
 {
     return m_mainTrackerOuterRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::GetMainTrackerZExtent() const
+inline float GeometryHelper::GetMainTrackerZExtent()
 {
     return m_mainTrackerZExtent.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::GetCoilInnerRadius() const
+inline float GeometryHelper::GetCoilInnerRadius()
 {
     return m_coilInnerRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::GetCoilOuterRadius() const
+inline float GeometryHelper::GetCoilOuterRadius()
 {
     return m_coilOuterRadius.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float GeometryHelper::GetCoilZExtent() const
+inline float GeometryHelper::GetCoilZExtent()
 {
     return m_coilZExtent.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditionalSubDetectors() const
+inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditionalSubDetectors()
 {
     if (!m_isInitialized)
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
@@ -576,7 +558,7 @@ inline const GeometryHelper::SubDetectorParametersMap &GeometryHelper::GetAdditi
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline const GeometryHelper::DetectorGapList &GeometryHelper::GetDetectorGapList() const
+inline const GeometryHelper::DetectorGapList &GeometryHelper::GetDetectorGapList()
 {
     return m_detectorGapList;
 }

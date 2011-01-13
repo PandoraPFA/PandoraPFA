@@ -47,7 +47,7 @@ Track::Track(const PandoraApi::TrackParameters &trackParameters) :
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     // Obtain helix fit to track state at calorimeter
-    static const float bField(GeometryHelper::GetInstance()->GetBField(CartesianVector(0.f, 0.f, 0.f)));
+    static const float bField(GeometryHelper::GetBField(CartesianVector(0.f, 0.f, 0.f)));
     m_pHelixFitAtCalorimeter = new Helix(m_trackStateAtCalorimeter.GetPosition(), m_trackStateAtCalorimeter.GetMomentum(), static_cast<float>(m_charge), bField);
 }
 

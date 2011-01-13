@@ -8,8 +8,6 @@
 #ifndef BFIELD_CALCULATOR_H
 #define BFIELD_CALCULATOR_H 1
 
-#include "Helpers/GeometryHelper.h"
-
 #include "Objects/CartesianVector.h"
 
 class TiXmlHandle;
@@ -29,18 +27,18 @@ protected:
     virtual ~BFieldCalculator();
 
     /**
-     *  @brief  Initialize the bfield calculator using information from geometry helper
-     * 
-     *  @param  pGeometryHelper address of the geometry helper
+     *  @brief  Initialize bfield calculator geometry information. This function will receive a callback from the pandora
+     *          GeometryHelper when the geometry has been initialized.
      */
-    virtual void Initialize(const GeometryHelper *const pGeometryHelper);
+    virtual void InitializeGeometry();
 
     /**
-     *  @brief  Initialize the bfield calculator using information from xml file
+     *  @brief  Read bfield calculator settings from xml.This function will receive a callback if the top level xml tags
+     *          <BFieldCalculator></BFieldCalculator> are present.
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
-    virtual void Initialize(const TiXmlHandle *const pXmlHandle);
+    virtual void ReadSettings(const TiXmlHandle *const pXmlHandle);
 
     /**
      *  @brief  Get the bfield value for a specified position vector
@@ -62,13 +60,13 @@ inline BFieldCalculator::~BFieldCalculator()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void BFieldCalculator::Initialize(const GeometryHelper *const /*pGeometryHelper*/)
+inline void BFieldCalculator::InitializeGeometry()
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void BFieldCalculator::Initialize(const TiXmlHandle *const /*pXmlHandle*/)
+inline void BFieldCalculator::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
 {
 }
 

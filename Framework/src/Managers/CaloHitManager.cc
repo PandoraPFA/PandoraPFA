@@ -106,15 +106,13 @@ void CaloHitManager::DeleteNullList()
 
 StatusCode CaloHitManager::OrderInputCaloHits()
 {
-    static const GeometryHelper *const pGeometryHelper = GeometryHelper::GetInstance();
-
     OrderedCaloHitList orderedCaloHitList;
 
     for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
     {
         try
         {
-            PseudoLayer pseudoLayer = pGeometryHelper->GetPseudoLayer((*iter)->GetPositionVector());
+            PseudoLayer pseudoLayer = GeometryHelper::GetPseudoLayer((*iter)->GetPositionVector());
             PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->SetPseudoLayer(pseudoLayer));
             PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*iter));
         }

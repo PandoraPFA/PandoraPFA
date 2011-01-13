@@ -809,13 +809,11 @@ bool ClusterHelper::DoesFitCrossGapRegion(const ClusterFitResult &clusterFitResu
     const CartesianVector fitStartPosition(fitIntercept + (fitDirection * fitStartDistance));
     const CartesianVector fitPropagation(fitDirection * propagationDistance);
 
-    static const GeometryHelper *const pGeometryHelper(GeometryHelper::GetInstance());
-
     for (unsigned int i = 0; i < nSamplingPoints; ++i)
     {
         const CartesianVector fitPosition(fitStartPosition + (fitPropagation * (static_cast<float>(i) / static_cast<float>(nSamplingPoints))));
 
-        if (pGeometryHelper->IsInDetectorGapRegion(fitPosition))
+        if (GeometryHelper::IsInDetectorGapRegion(fitPosition))
             return true;
     }
 

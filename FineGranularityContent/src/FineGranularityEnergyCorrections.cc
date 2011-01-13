@@ -19,7 +19,7 @@ using namespace pandora;
 
 void FineGranularityEnergyCorrections::CleanCluster(const Cluster *const pCluster, float &correctedHadronicEnergy)
 {
-    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetInstance()->GetPseudoLayerAtIp());
+    static const PseudoLayer firstPseudoLayer(GeometryHelper::GetPseudoLayerAtIp());
 
     const float clusterHadronicEnergy(pCluster->GetHadronicEnergy());
 
@@ -152,7 +152,7 @@ void FineGranularityEnergyCorrections::ApplyMuonEnergyCorrection(const Cluster *
     const float centroidX(muonInnerLayerCentroid.GetX()), centroidY(muonInnerLayerCentroid.GetY());
 
     const float muonInnerLayerRadius(std::sqrt(centroidX * centroidX + centroidY * centroidY));
-    static const float coilInnerRadius(GeometryHelper::GetInstance()->GetCoilInnerRadius());
+    static const float coilInnerRadius(GeometryHelper::GetCoilInnerRadius());
 
     if (muonInnerLayerRadius < coilInnerRadius)
         return;

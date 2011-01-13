@@ -167,7 +167,7 @@ StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
     if ((NULL != pShowerProfileXmlElement) && (NULL != m_pShowerProfileCalculator))
     {
         const TiXmlHandle xmlHandle(pShowerProfileXmlElement);
-        m_pShowerProfileCalculator->Initialize(&xmlHandle);
+        m_pShowerProfileCalculator->ReadSettings(&xmlHandle);
     }
 
     return STATUS_CODE_SUCCESS;

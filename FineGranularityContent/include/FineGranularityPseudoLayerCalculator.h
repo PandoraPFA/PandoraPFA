@@ -24,7 +24,7 @@ public:
     FineGranularityPseudoLayerCalculator();
 
 private:
-    void Initialize(const pandora::GeometryHelper *const pGeometryHelper);
+    void InitializeGeometry();
     pandora::PseudoLayer GetPseudoLayer(const pandora::CartesianVector &positionVector) const;
     pandora::PseudoLayer GetPseudoLayerAtIp() const;
 
@@ -55,10 +55,8 @@ private:
 
     /**
      *  @brief  Store all revelevant barrel and endcap layer positions upon initialization
-     * 
-     *  @param  pGeometryHelper the geometry helper
      */
-    void StoreLayerPositions(const pandora::GeometryHelper *const pGeometryHelper);
+    void StoreLayerPositions();
 
     /**
      *  @brief  Store subdetector layer positions upon initialization
@@ -70,24 +68,18 @@ private:
 
     /**
      *  @brief  Store positions of barrel and endcap outer edges upon initialization
-     * 
-     *  @param  pGeometryHelper address of the geometry helper
      */
-    void StoreDetectorOuterEdge(const pandora::GeometryHelper *const pGeometryHelper);
+    void StoreDetectorOuterEdge();
 
     /**
      *  @brief  Store sine and cosine of angles used to project hit positions onto polygonal calorimeter surfaces upon initialization
-     * 
-     *  @param  pGeometryHelper address of the geometry helper
      */
-    void StorePolygonAngles(const pandora::GeometryHelper *const pGeometryHelper);
+    void StorePolygonAngles();
 
     /**
      *  @brief  Store all details revelevant to barrel/endcap overlap corrections upon initialization
-     * 
-     *  @param  pGeometryHelper the geometry helper
      */
-    void StoreOverlapCorrectionDetails(const pandora::GeometryHelper *const pGeometryHelper);
+    void StoreOverlapCorrectionDetails();
 
     LayerPositionList                       m_barrelLayerPositions;     ///< List of barrel layer positions
     LayerPositionList                       m_endCapLayerPositions;     ///< List of endcap layer positions

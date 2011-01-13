@@ -29,18 +29,18 @@ FineGranularityPseudoLayerCalculator::FineGranularityPseudoLayerCalculator() :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void FineGranularityPseudoLayerCalculator::Initialize(const GeometryHelper *const pGeometryHelper)
+void FineGranularityPseudoLayerCalculator::InitializeGeometry()
 {
     try
     {
-        this->StoreLayerPositions(pGeometryHelper);
-        this->StoreDetectorOuterEdge(pGeometryHelper);
-        this->StorePolygonAngles(pGeometryHelper);
-        this->StoreOverlapCorrectionDetails(pGeometryHelper);
+        this->StoreLayerPositions();
+        this->StoreDetectorOuterEdge();
+        this->StorePolygonAngles();
+        this->StoreOverlapCorrectionDetails();
     }
     catch (StatusCodeException &statusCodeException)
     {
-        std::cout << "FineGranularityPseudoLayerCalculator: Incomplete geometry - consider using a custom PseudoLayerCalculator." << std::endl;
+        std::cout << "FineGranularityPseudoLayerCalculator: Incomplete geometry - consider using a different PseudoLayerCalculator." << std::endl;
         throw statusCodeException;
     }
 }
@@ -146,16 +146,16 @@ StatusCode FineGranularityPseudoLayerCalculator::FindMatchingLayer(const float p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void FineGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHelper *const pGeometryHelper)
+void FineGranularityPseudoLayerCalculator::StoreLayerPositions()
 {
-    this->StoreLayerPositions(pGeometryHelper->GetInDetBarrelParameters(), m_barrelLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetInDetEndCapParameters(), m_endCapLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetECalBarrelParameters(), m_barrelLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetECalEndCapParameters(), m_endCapLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetHCalBarrelParameters(), m_barrelLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetHCalEndCapParameters(), m_endCapLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetMuonBarrelParameters(), m_barrelLayerPositions);
-    this->StoreLayerPositions(pGeometryHelper->GetMuonEndCapParameters(), m_endCapLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetInDetBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetInDetEndCapParameters(), m_endCapLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetECalBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetECalEndCapParameters(), m_endCapLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetHCalBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetHCalEndCapParameters(), m_endCapLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetMuonBarrelParameters(), m_barrelLayerPositions);
+    this->StoreLayerPositions(GeometryHelper::GetMuonEndCapParameters(), m_endCapLayerPositions);
 
     if (m_barrelLayerPositions.empty() || m_endCapLayerPositions.empty())
     {
@@ -201,15 +201,15 @@ void FineGranularityPseudoLayerCalculator::StoreLayerPositions(const GeometryHel
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void FineGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const GeometryHelper *const pGeometryHelper)
+void FineGranularityPseudoLayerCalculator::StoreDetectorOuterEdge()
 {
-    m_barrelEdgeR = (std::max(pGeometryHelper->GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
-        pGeometryHelper->GetHCalBarrelParameters().GetOuterRCoordinate(),
-        pGeometryHelper->GetMuonBarrelParameters().GetOuterRCoordinate()) ));
+    m_barrelEdgeR = (std::max(GeometryHelper::GetECalBarrelParameters().GetOuterRCoordinate(), std::max(
+        GeometryHelper::GetHCalBarrelParameters().GetOuterRCoordinate(),
+        GeometryHelper::GetMuonBarrelParameters().GetOuterRCoordinate()) ));
 
-    m_endCapEdgeZ = (std::max(std::fabs(pGeometryHelper->GetECalEndCapParameters().GetOuterZCoordinate()), std::max(
-        std::fabs(pGeometryHelper->GetHCalEndCapParameters().GetOuterZCoordinate()),
-        std::fabs(pGeometryHelper->GetMuonEndCapParameters().GetOuterZCoordinate())) ));
+    m_endCapEdgeZ = (std::max(std::fabs(GeometryHelper::GetECalEndCapParameters().GetOuterZCoordinate()), std::max(
+        std::fabs(GeometryHelper::GetHCalEndCapParameters().GetOuterZCoordinate()),
+        std::fabs(GeometryHelper::GetMuonEndCapParameters().GetOuterZCoordinate())) ));
 
     if ((m_barrelLayerPositions.end() != std::upper_bound(m_barrelLayerPositions.begin(), m_barrelLayerPositions.end(), m_barrelEdgeR)) ||
         (m_endCapLayerPositions.end() != std::upper_bound(m_endCapLayerPositions.begin(), m_endCapLayerPositions.end(), m_endCapEdgeZ)))
@@ -224,28 +224,28 @@ void FineGranularityPseudoLayerCalculator::StoreDetectorOuterEdge(const Geometry
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void FineGranularityPseudoLayerCalculator::StorePolygonAngles(const GeometryHelper *const pGeometryHelper)
+void FineGranularityPseudoLayerCalculator::StorePolygonAngles()
 {
-    GeometryHelper::FillAngleVector(pGeometryHelper->GetECalBarrelParameters().GetInnerSymmetryOrder(),
-        pGeometryHelper->GetECalBarrelParameters().GetInnerPhiCoordinate(), m_eCalBarrelAngleVector);
+    GeometryHelper::FillAngleVector(GeometryHelper::GetECalBarrelParameters().GetInnerSymmetryOrder(),
+        GeometryHelper::GetECalBarrelParameters().GetInnerPhiCoordinate(), m_eCalBarrelAngleVector);
 
-    GeometryHelper::FillAngleVector(pGeometryHelper->GetMuonBarrelParameters().GetInnerSymmetryOrder(),
-        pGeometryHelper->GetMuonBarrelParameters().GetInnerPhiCoordinate(), m_muonBarrelAngleVector);
+    GeometryHelper::FillAngleVector(GeometryHelper::GetMuonBarrelParameters().GetInnerSymmetryOrder(),
+        GeometryHelper::GetMuonBarrelParameters().GetInnerPhiCoordinate(), m_muonBarrelAngleVector);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void FineGranularityPseudoLayerCalculator::StoreOverlapCorrectionDetails(const GeometryHelper *const pGeometryHelper)
+void FineGranularityPseudoLayerCalculator::StoreOverlapCorrectionDetails()
 {
-    m_barrelInnerR = pGeometryHelper->GetECalBarrelParameters().GetInnerRCoordinate();
-    m_endCapInnerZ = std::fabs(pGeometryHelper->GetECalEndCapParameters().GetInnerZCoordinate());
-    m_barrelInnerRMuon = pGeometryHelper->GetMuonBarrelParameters().GetInnerRCoordinate();
-    m_endCapInnerZMuon = std::fabs(pGeometryHelper->GetMuonEndCapParameters().GetInnerZCoordinate());
+    m_barrelInnerR = GeometryHelper::GetECalBarrelParameters().GetInnerRCoordinate();
+    m_endCapInnerZ = std::fabs(GeometryHelper::GetECalEndCapParameters().GetInnerZCoordinate());
+    m_barrelInnerRMuon = GeometryHelper::GetMuonBarrelParameters().GetInnerRCoordinate();
+    m_endCapInnerZMuon = std::fabs(GeometryHelper::GetMuonEndCapParameters().GetInnerZCoordinate());
 
-    const float barrelOuterZ = std::fabs(pGeometryHelper->GetECalBarrelParameters().GetOuterZCoordinate());
-    const float endCapOuterR = pGeometryHelper->GetECalEndCapParameters().GetOuterRCoordinate();
-    const float barrelOuterZMuon = std::fabs(pGeometryHelper->GetMuonBarrelParameters().GetOuterZCoordinate());
-    const float endCapOuterRMuon = pGeometryHelper->GetMuonEndCapParameters().GetOuterRCoordinate();
+    const float barrelOuterZ = std::fabs(GeometryHelper::GetECalBarrelParameters().GetOuterZCoordinate());
+    const float endCapOuterR = GeometryHelper::GetECalEndCapParameters().GetOuterRCoordinate();
+    const float barrelOuterZMuon = std::fabs(GeometryHelper::GetMuonBarrelParameters().GetOuterZCoordinate());
+    const float endCapOuterRMuon = GeometryHelper::GetMuonEndCapParameters().GetOuterRCoordinate();
 
     const bool IsEnclosingEndCap(endCapOuterR > m_barrelInnerR);
     m_rCorrection = ((!IsEnclosingEndCap) ? 0.f : m_barrelInnerR * ((m_endCapInnerZ / barrelOuterZ) - 1.f));

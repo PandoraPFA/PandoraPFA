@@ -19,48 +19,28 @@
 namespace pandora
 {
 
-bool GeometryHelper::m_instanceFlag = false;
-GeometryHelper* GeometryHelper::m_pGeometryHelper = NULL;
-GeometryHelper::HitTypeToGranularityMap GeometryHelper::m_hitTypeToGranularityMap = GeometryHelper::GetDefaultHitTypeToGranularityMap();
-float GeometryHelper::m_gapTolerance = 0.f;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-GeometryHelper *GeometryHelper::GetInstance()
-{
-    if (!m_instanceFlag)
-    {
-        m_pGeometryHelper = new GeometryHelper();
-        m_instanceFlag = true;
-    }
-
-    return m_pGeometryHelper;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-float GeometryHelper::GetBField(const CartesianVector &positionVector) const
+float GeometryHelper::GetBField(const CartesianVector &positionVector)
 {
     return m_pBFieldCalculator->GetBField(positionVector);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector) const
+PseudoLayer GeometryHelper::GetPseudoLayer(const CartesianVector &positionVector)
 {
     return m_pPseudoLayerCalculator->GetPseudoLayer(positionVector);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-PseudoLayer GeometryHelper::GetPseudoLayerAtIp() const
+PseudoLayer GeometryHelper::GetPseudoLayerAtIp()
 {
     return m_pPseudoLayerCalculator->GetPseudoLayerAtIp();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool GeometryHelper::IsInDetectorGapRegion(const CartesianVector &position) const
+bool GeometryHelper::IsInDetectorGapRegion(const CartesianVector &position)
 {
     for (DetectorGapList::const_iterator iter = m_detectorGapList.begin(), iterEnd = m_detectorGapList.end(); iter != iterEnd; ++iter)
     {
@@ -128,29 +108,6 @@ void GeometryHelper::FillAngleVector(const unsigned int symmetryOrder, const flo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-GeometryHelper::GeometryHelper() :
-    m_isInitialized(false),
-    m_pBFieldCalculator(NULL),
-    m_pPseudoLayerCalculator(NULL)
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-GeometryHelper::~GeometryHelper()
-{
-    for (DetectorGapList::const_iterator iter = m_detectorGapList.begin(), iterEnd = m_detectorGapList.end(); iter != iterEnd; ++iter)
-        delete *iter;
-
-    delete m_pBFieldCalculator;
-    delete m_pPseudoLayerCalculator;
-
-    m_detectorGapList.clear();
-    m_instanceFlag = false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geometryParameters)
 {
     try
@@ -208,7 +165,7 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
 
         try
         {
-            m_pBFieldCalculator->Initialize(this);
+            m_pBFieldCalculator->InitializeGeometry();
         }
         catch (StatusCodeException &statusCodeException)
         {
@@ -218,7 +175,7 @@ StatusCode GeometryHelper::Initialize(const PandoraApi::GeometryParameters &geom
 
         try
         {
-            m_pPseudoLayerCalculator->Initialize(this);
+            m_pPseudoLayerCalculator->InitializeGeometry();
         }
         catch (StatusCodeException &statusCodeException)
         {
@@ -306,6 +263,100 @@ StatusCode GeometryHelper::SetPseudoLayerCalculator(PseudoLayerCalculator *pPseu
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+GeometryHelper::HitTypeToGranularityMap GeometryHelper::GetDefaultHitTypeToGranularityMap()
+{
+    HitTypeToGranularityMap hitTypeToGranularityMap;
+
+    if (!hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(INNER_DETECTOR, FINE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(ECAL, FINE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(HCAL, COARSE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(MUON, VERY_COARSE)).second )
+    {
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+    }
+
+    return hitTypeToGranularityMap;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::SetHitTypeGranularity(const HitType hitType, const Granularity granularity)
+{
+    HitTypeToGranularityMap::iterator iter = m_hitTypeToGranularityMap.find(hitType);
+
+    if (m_hitTypeToGranularityMap.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+    iter->second = granularity;
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool GeometryHelper::m_isInitialized = false;
+BFieldCalculator *GeometryHelper::m_pBFieldCalculator = NULL;
+PseudoLayerCalculator *GeometryHelper::m_pPseudoLayerCalculator = NULL;
+
+GeometryHelper::HitTypeToGranularityMap GeometryHelper::m_hitTypeToGranularityMap = GeometryHelper::GetDefaultHitTypeToGranularityMap();
+float GeometryHelper::m_gapTolerance = 0.f;
+
+GeometryHelper::SubDetectorParameters GeometryHelper::m_inDetBarrelParameters;
+GeometryHelper::SubDetectorParameters GeometryHelper::m_inDetEndCapParameters;
+GeometryHelper::SubDetectorParameters GeometryHelper::m_eCalBarrelParameters;
+GeometryHelper::SubDetectorParameters GeometryHelper::m_eCalEndCapParameters;
+GeometryHelper::SubDetectorParameters GeometryHelper::m_hCalBarrelParameters;
+GeometryHelper::SubDetectorParameters GeometryHelper::m_hCalEndCapParameters;
+GeometryHelper::SubDetectorParameters GeometryHelper::m_muonBarrelParameters;
+GeometryHelper::SubDetectorParameters GeometryHelper::m_muonEndCapParameters;
+
+InputFloat GeometryHelper::m_mainTrackerInnerRadius;
+InputFloat GeometryHelper::m_mainTrackerOuterRadius;
+InputFloat GeometryHelper::m_mainTrackerZExtent;
+InputFloat GeometryHelper::m_coilInnerRadius;
+InputFloat GeometryHelper::m_coilOuterRadius;
+InputFloat GeometryHelper::m_coilZExtent;
+
+GeometryHelper::SubDetectorParametersMap GeometryHelper::m_additionalSubDetectors;
+GeometryHelper::DetectorGapList GeometryHelper::m_detectorGapList;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode GeometryHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
+{
+    // Read main geometry helper settings
+    TiXmlElement *pXmlElement(pXmlHandle->FirstChild("GeometryHelper").Element());
+
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "GapTolerance", m_gapTolerance));
+    }
+
+    // Read bfield calculator settings
+    TiXmlElement *pBFieldXmlElement(pXmlHandle->FirstChild("BFieldCalculator").Element());
+
+    if ((NULL != pBFieldXmlElement) && (NULL != m_pBFieldCalculator))
+    {
+        const TiXmlHandle xmlHandle(pBFieldXmlElement);
+        m_pBFieldCalculator->ReadSettings(&xmlHandle);
+    }
+
+    // Read pseudo layer calculator settings
+    TiXmlElement *pPseudoLayerXmlElement(pXmlHandle->FirstChild("PseudoLayerCalculator").Element());
+
+    if ((NULL != pPseudoLayerXmlElement) && (NULL != m_pPseudoLayerCalculator))
+    {
+        const TiXmlHandle xmlHandle(pPseudoLayerXmlElement);
+        m_pPseudoLayerCalculator->ReadSettings(&xmlHandle);
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 GeometryHelper::SubDetectorParameters::SubDetectorParameters() :
@@ -365,75 +416,6 @@ void GeometryHelper::SubDetectorParameters::Initialize(const std::string &subDet
         std::cout << "GeometryHelper: " << subDetectorName << " not specified." << std::endl;
         m_isInitialized = false;
     }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-GeometryHelper::HitTypeToGranularityMap GeometryHelper::GetDefaultHitTypeToGranularityMap()
-{
-    HitTypeToGranularityMap hitTypeToGranularityMap;
-
-    if (!hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(INNER_DETECTOR, FINE)).second ||
-        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(ECAL, FINE)).second ||
-        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(HCAL, COARSE)).second ||
-        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(MUON, VERY_COARSE)).second )
-    {
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-    }
-
-    return hitTypeToGranularityMap;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode GeometryHelper::SetHitTypeGranularity(const HitType hitType, const Granularity granularity)
-{
-    HitTypeToGranularityMap::iterator iter = m_hitTypeToGranularityMap.find(hitType);
-
-    if (m_hitTypeToGranularityMap.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    iter->second = granularity;
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode GeometryHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
-{
-    // Read main geometry helper settings
-    TiXmlElement *pXmlElement(pXmlHandle->FirstChild("GeometryHelper").Element());
-
-    if (NULL != pXmlElement)
-    {
-        const TiXmlHandle xmlHandle(pXmlElement);
-
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-            "GapTolerance", m_gapTolerance));
-    }
-
-    // Read bfield calculator settings
-    TiXmlElement *pBFieldXmlElement(pXmlHandle->FirstChild("BFieldCalculator").Element());
-    BFieldCalculator *pBFieldCalculator(GeometryHelper::GetInstance()->m_pBFieldCalculator);
-
-    if ((NULL != pBFieldXmlElement) && (NULL != pBFieldCalculator))
-    {
-        const TiXmlHandle xmlHandle(pBFieldXmlElement);
-        pBFieldCalculator->Initialize(&xmlHandle);
-    }
-
-    // Read pseudo layer calculator settings
-    TiXmlElement *pPseudoLayerXmlElement(pXmlHandle->FirstChild("PseudoLayerCalculator").Element());
-    PseudoLayerCalculator *pPseudoLayerCalculator(GeometryHelper::GetInstance()->m_pPseudoLayerCalculator);
-
-    if ((NULL != pPseudoLayerXmlElement) && (NULL != pPseudoLayerCalculator))
-    {
-        const TiXmlHandle xmlHandle(pPseudoLayerXmlElement);
-        pPseudoLayerCalculator->Initialize(&xmlHandle);
-    }
-
-    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora
