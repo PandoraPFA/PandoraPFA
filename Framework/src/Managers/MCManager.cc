@@ -134,9 +134,9 @@ StatusCode MCManager::ApplyPfoSelectionRules(MCParticle *const pMCParticle, MCPa
     if (!pMCParticle->IsInitialized())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    static const float selectionRadius(PandoraSettings::GetInstance()->GetMCPfoSelectionRadius());
-    static const float selectionMomentum(PandoraSettings::GetInstance()->GetMCPfoSelectionMomentum());
-    static const float selectionEnergyCutOffProtonsNeutrons(PandoraSettings::GetInstance()->GetMCPfoSelectionLowEnergyNeutronProtonCutOff());
+    static const float selectionRadius(PandoraSettings::GetMCPfoSelectionRadius());
+    static const float selectionMomentum(PandoraSettings::GetMCPfoSelectionMomentum());
+    static const float selectionEnergyCutOffProtonsNeutrons(PandoraSettings::GetMCPfoSelectionLowEnergyNeutronProtonCutOff());
 
     const int particleId(pMCParticle->GetParticleId());
 
@@ -175,7 +175,7 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
     if (m_uidToMCParticleMap.empty())
         return STATUS_CODE_SUCCESS;
 
-    static const bool shouldCollapseMCParticlesToPfoTarget(PandoraSettings::GetInstance()->ShouldCollapseMCParticlesToPfoTarget());
+    static const bool shouldCollapseMCParticlesToPfoTarget(PandoraSettings::ShouldCollapseMCParticlesToPfoTarget());
 
     for (UidRelationMap::const_iterator relationIter = uidRelationMap.begin(), relationIterEnd = uidRelationMap.end();
         relationIter != relationIterEnd; ++relationIter)
@@ -225,7 +225,7 @@ StatusCode MCManager::GetMCParticleList(MCParticleList &mcParticleList) const
 
 StatusCode MCManager::DeleteNonPfoTargets()
 {
-    static const bool shouldCollapseMCParticlesToPfoTarget(PandoraSettings::GetInstance()->ShouldCollapseMCParticlesToPfoTarget());
+    static const bool shouldCollapseMCParticlesToPfoTarget(PandoraSettings::ShouldCollapseMCParticlesToPfoTarget());
 
     if (!shouldCollapseMCParticlesToPfoTarget)
         return STATUS_CODE_SUCCESS;

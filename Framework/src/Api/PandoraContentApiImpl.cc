@@ -117,7 +117,7 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 
     try
     {
-        static const bool shouldDisplayAlgorithmInfo(PandoraSettings::GetInstance()->ShouldDisplayAlgorithmInfo());
+        static const bool shouldDisplayAlgorithmInfo(PandoraSettings::ShouldDisplayAlgorithmInfo());
 
         if (shouldDisplayAlgorithmInfo)
         {

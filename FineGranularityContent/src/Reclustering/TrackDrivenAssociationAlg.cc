@@ -197,7 +197,7 @@ StatusCode TrackDrivenAssociationAlg::Run()
                     trackEnergy += (*trackIter)->GetEnergyAtDca();
                 }
 
-                static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+                static const float hadronicEnergyResolution(PandoraSettings::GetHadronicEnergyResolution());
                 const float sigmaE(hadronicEnergyResolution * trackEnergy / std::sqrt(trackEnergy));
 
                 float alpha((trackEnergy - clusterEnergy) / excessEnergy);

@@ -23,7 +23,6 @@ class PandoraApiImpl;
 class PandoraContentApiImpl;
 class PandoraImpl;
 class ParticleFlowObjectManager;
-class PandoraSettings;
 class PluginManager;
 class TrackManager;
 
@@ -80,8 +79,6 @@ private:
     ParticleFlowObjectManager   *m_pParticleFlowObjectManager;  ///< The particle flow object manager
     PluginManager               *m_pPluginManager;              ///< The pandora plugin manager
     TrackManager                *m_pTrackManager;               ///< The track manager
-
-    PandoraSettings             *m_pPandoraSettings;            ///< The pandora settings
 
     PandoraApiImpl              *m_pPandoraApiImpl;             ///< The pandora api implementation
     PandoraContentApiImpl       *m_pPandoraContentApiImpl;      ///< The pandora content api implementation

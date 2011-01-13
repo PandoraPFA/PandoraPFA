@@ -27,7 +27,7 @@ float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluste
     for (TrackList::const_iterator trackIter = trackList.begin(), trackIterEnd = trackList.end(); trackIter != trackIterEnd; ++trackIter)
         trackEnergySum += (*trackIter)->GetEnergyAtDca();
 
-    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+    static const float hadronicEnergyResolution(PandoraSettings::GetHadronicEnergyResolution());
 
     if ((0. == trackEnergySum) || (0. == hadronicEnergyResolution))
         throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -42,7 +42,7 @@ float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluste
 
 float ReclusterHelper::GetTrackClusterCompatibility(const float clusterEnergy, const float trackEnergy)
 {
-    static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+    static const float hadronicEnergyResolution(PandoraSettings::GetHadronicEnergyResolution());
 
     if ((0. == trackEnergy) || (0. == hadronicEnergyResolution))
         throw StatusCodeException(STATUS_CODE_FAILURE);

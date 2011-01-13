@@ -43,7 +43,7 @@ StatusCode TrackRecoveryAlgorithm::Run()
 
         // Extract track energy resolution information
         const float trackEnergy(pTrack->GetEnergyAtDca());
-        static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+        static const float hadronicEnergyResolution(PandoraSettings::GetHadronicEnergyResolution());
 
         if ((0. == trackEnergy) || (0. == hadronicEnergyResolution))
             return STATUS_CODE_FAILURE;

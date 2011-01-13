@@ -32,7 +32,7 @@ class TrackState;
 // Macro allowing use of pandora monitoring to be quickly included/excluded via pre-processor flag
 #ifdef MONITORING
     #define PANDORA_MONITORING_API(command)                                                                 \
-    if (PandoraSettings::GetInstance()->IsMonitoringEnabled())                                              \
+    if (PandoraSettings::IsMonitoringEnabled())                                                             \
     {                                                                                                       \
         PandoraMonitoringApi::command;                                                                      \
     }

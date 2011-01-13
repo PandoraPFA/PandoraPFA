@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/FineGranularityContent/src/TemplateAlgorithm.cc
+ *  @file   PandoraPFANew/Framework/src/Pandora/TemplateAlgorithm.cc
  * 
  *  @brief  Implementation of the template algorithm class.
  * 
@@ -7,8 +7,7 @@
  */
 
 #include "Pandora/AlgorithmHeaders.h"
-
-#include "TemplateAlgorithm.h"
+#include "Pandora/TemplateAlgorithm.h"
 
 using namespace pandora;
 

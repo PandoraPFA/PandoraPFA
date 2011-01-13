@@ -90,7 +90,7 @@ StatusCode ProximityBasedMergingAlgorithm::Run()
 
             if (trackEnergySum > 0.)
             {
-                static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+                static const float hadronicEnergyResolution(PandoraSettings::GetHadronicEnergyResolution());
                 const float sigmaE(hadronicEnergyResolution * trackEnergySum / std::sqrt(trackEnergySum));
 
                 if (0. == sigmaE)

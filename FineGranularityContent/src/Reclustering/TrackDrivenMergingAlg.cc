@@ -47,7 +47,7 @@ StatusCode TrackDrivenMergingAlg::Run()
             trackEnergySum += (*trackIter)->GetEnergyAtDca();
         }
 
-        static const float hadronicEnergyResolution(PandoraSettings::GetInstance()->GetHadronicEnergyResolution());
+        static const float hadronicEnergyResolution(PandoraSettings::GetHadronicEnergyResolution());
 
         if ((0. == trackEnergySum) || (0. == hadronicEnergyResolution))
             return STATUS_CODE_FAILURE;

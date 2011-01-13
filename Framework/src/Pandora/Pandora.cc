@@ -39,7 +39,6 @@ Pandora::Pandora() :
     m_pParticleFlowObjectManager(NULL),
     m_pPluginManager(NULL),
     m_pTrackManager(NULL),
-    m_pPandoraSettings(NULL),
     m_pPandoraApiImpl(NULL),
     m_pPandoraContentApiImpl(NULL),
     m_pPandoraImpl(NULL)
@@ -54,7 +53,6 @@ Pandora::Pandora() :
         m_pParticleFlowObjectManager = new ParticleFlowObjectManager;
         m_pPluginManager = new PluginManager;
         m_pTrackManager = new TrackManager;
-        m_pPandoraSettings = PandoraSettings::GetInstance();
         m_pPandoraApiImpl = new PandoraApiImpl(this);
         m_pPandoraContentApiImpl = new PandoraContentApiImpl(this);
         m_pPandoraImpl = new PandoraImpl(this);
@@ -85,7 +83,6 @@ Pandora::~Pandora()
     delete m_pParticleFlowObjectManager;
     delete m_pPluginManager;
     delete m_pTrackManager;
-    delete m_pPandoraSettings;
     delete m_pPandoraApiImpl;
     delete m_pPandoraContentApiImpl;
     delete m_pPandoraImpl;
@@ -126,7 +123,7 @@ StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
         const TiXmlHandle xmlDocumentHandle(&xmlDocument);
         const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraSettings->Initialize(&xmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraSettings::Initialize(&xmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializeAlgorithms(&xmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->InitializePlugins(&xmlHandle));
     }

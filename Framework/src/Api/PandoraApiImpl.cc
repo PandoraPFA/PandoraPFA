@@ -182,7 +182,7 @@ StatusCode PandoraApiImpl::RegisterParticleIdFunction(const std::string &functio
 
 StatusCode PandoraApiImpl::RegisterSettingsFunction(const std::string &xmlTagName, SettingsFunction *pSettingsFunction) const
 {
-    return m_pPandora->m_pPandoraSettings->RegisterSettingsFunction(xmlTagName, pSettingsFunction);
+    return PandoraSettings::RegisterSettingsFunction(xmlTagName, pSettingsFunction);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
