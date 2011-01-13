@@ -69,10 +69,10 @@ public:
      *  @param  ay y component of vector normal to specified plane
      *  @param  referencePoint the reference point of the helix
      *  @param  intersectionPoint to receive the coordinates of the intersection point
-     *  @param  time to receive the generic time (the ratio of helix length from reference point to intersection)
+     *  @param  genericTime to receive the generic time (helix length, from reference point to intersection, divided by particle momentum)
      */
     StatusCode GetPointInXY(const float x0, const float y0, const float ax, const float ay, const CartesianVector &referencePoint,
-        CartesianVector &intersectionPoint, float &time) const;
+        CartesianVector &intersectionPoint, float &genericTime) const;
 
     /**
      *  @brief  Get helix intersection point with a plane perpendicular to z axis.
@@ -89,10 +89,10 @@ public:
      *  @param  zPlane the z coordinate for the specified plane
      *  @param  referencePoint the reference point of the helix
      *  @param  intersectionPoint to receive the coordinates of the intersection point
-     *  @param  time to receive the generic time (the ratio of helix length from reference point to intersection)
+     *  @param  genericTime to receive the generic time (helix length, from reference point to intersection, divided by particle momentum)
      */
     StatusCode GetPointInZ(const float zPlane, const CartesianVector &referencePoint, CartesianVector &intersectionPoint,
-        float &time) const;
+        float &genericTime) const;
 
     /**
      *  @brief  Get coordinates of helix intersection with cylinder, aligned along z-axis
@@ -109,10 +109,10 @@ public:
      *  @param  radius the radius of the cylinder
      *  @param  referencePoint the reference point of the helix
      *  @param  intersectionPoint to receive the coordinates of the intersection point
-     *  @param  time to receive the generic time (the ratio of helix length from reference point to intersection)
+     *  @param  genericTime to receive the generic time (helix length, from reference point to intersection, divided by particle momentum)
      */
     StatusCode GetPointOnCircle(const float radius, const CartesianVector &referencePoint, CartesianVector &intersectionPoint,
-        float &time) const;
+        float &genericTime) const;
 
     /**
      *  @brief  Get distance of the closest approach of helix to an arbitrary point in space
@@ -133,9 +133,9 @@ public:
      *          x component: distance in R-Phi plane
      *          y-component: distance along Z axis
      *          z-component: 3D distance magnitude
-     *  @param  time to receive the generic time (the ratio of helix length from reference point to intersection)
+     *  @param  genericTime to receive the generic time (helix length, from reference point to intersection, divided by particle momentum)
      */
-    StatusCode GetDistanceToPoint(const CartesianVector &point, CartesianVector &distance, float &time) const;
+    StatusCode GetDistanceToPoint(const CartesianVector &point, CartesianVector &distance, float &genericTime) const;
 
     /**
      *  @brief  Get distance between two helices
@@ -273,32 +273,32 @@ private:
 inline StatusCode Helix::GetPointInXY(const float x0, const float y0, const float ax, const float ay, const CartesianVector &referencePoint,
     CartesianVector &intersectionPoint) const
 {
-    float time;
-    return this->GetPointInXY(x0, y0, ax, ay, referencePoint, intersectionPoint, time);
+    float genericTime;
+    return this->GetPointInXY(x0, y0, ax, ay, referencePoint, intersectionPoint, genericTime);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline StatusCode Helix::GetPointInZ(const float zPlane, const CartesianVector &referencePoint, CartesianVector &intersectionPoint) const
 {
-    float time;
-    return this->GetPointInZ(zPlane, referencePoint, intersectionPoint, time);
+    float genericTime;
+    return this->GetPointInZ(zPlane, referencePoint, intersectionPoint, genericTime);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline StatusCode Helix::GetPointOnCircle(const float radius, const CartesianVector &referencePoint, CartesianVector &intersectionPoint) const
 {
-    float time;
-    return this->GetPointOnCircle(radius, referencePoint, intersectionPoint, time);
+    float genericTime;
+    return this->GetPointOnCircle(radius, referencePoint, intersectionPoint, genericTime);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline StatusCode Helix::GetDistanceToPoint(const CartesianVector &point, CartesianVector &distance) const
 {
-    float time;
-    return this->GetDistanceToPoint(point, distance, time);
+    float genericTime;
+    return this->GetDistanceToPoint(point, distance, genericTime);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

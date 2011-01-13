@@ -126,7 +126,7 @@ Helix::Helix(const CartesianVector &position, const CartesianVector &momentum, c
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode Helix::GetPointInXY(const float x0, const float y0, const float ax, const float ay, const CartesianVector &referencePoint,
-        CartesianVector &intersectionPoint, float &time) const
+        CartesianVector &intersectionPoint, float &genericTime) const
 {
     const float AA(std::sqrt(ax * ax + ay * ay));
 
@@ -183,13 +183,13 @@ StatusCode Helix::GetPointInXY(const float x0, const float y0, const float ax, c
 
     if (tt1 < tt2)
     {
-        time = tt1;
-        intersectionPoint.SetValues(xx1, yy1, referencePoint.GetZ() + time * m_momentum.GetZ());
+        genericTime = tt1;
+        intersectionPoint.SetValues(xx1, yy1, referencePoint.GetZ() + genericTime * m_momentum.GetZ());
     }
     else
     {
-        time = tt2;
-        intersectionPoint.SetValues(xx2, yy2, referencePoint.GetZ() + time * m_momentum.GetZ());
+        genericTime = tt2;
+        intersectionPoint.SetValues(xx2, yy2, referencePoint.GetZ() + genericTime * m_momentum.GetZ());
     }
 
     return STATUS_CODE_SUCCESS;
@@ -198,15 +198,15 @@ StatusCode Helix::GetPointInXY(const float x0, const float y0, const float ax, c
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode Helix::GetPointInZ(const float zPlane, const CartesianVector &referencePoint, CartesianVector &intersectionPoint,
-    float &time) const
+    float &genericTime) const
 {
     if (m_momentum.GetZ() == 0.)
         return STATUS_CODE_NOT_FOUND;
 
-    time = (zPlane - referencePoint.GetZ()) / m_momentum.GetZ();
+    genericTime = (zPlane - referencePoint.GetZ()) / m_momentum.GetZ();
 
     const float phi0(std::atan2(referencePoint.GetY() - m_yCentre, referencePoint.GetX() - m_xCentre));
-    const float phi(phi0 - m_charge * m_pxy * time / m_radius);
+    const float phi(phi0 - m_charge * m_pxy * genericTime / m_radius);
 
     intersectionPoint.SetValues(m_xCentre + m_radius * std::cos(phi), m_yCentre + m_radius * std::sin(phi), zPlane);
 
@@ -216,7 +216,7 @@ StatusCode Helix::GetPointInZ(const float zPlane, const CartesianVector &referen
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode Helix::GetPointOnCircle(const float radius, const CartesianVector &referencePoint, CartesianVector &intersectionPoint,
-    float &time) const
+    float &genericTime) const
 {
     const float distCenterToIP(std::sqrt(m_xCentre * m_xCentre + m_yCentre * m_yCentre));
 
@@ -277,13 +277,13 @@ StatusCode Helix::GetPointOnCircle(const float radius, const CartesianVector &re
     // Previously returned both xx1, xx2, etc.
     if (tt1 < tt2)
     {
-        time = tt1;
-        intersectionPoint.SetValues(xx1, yy1, referencePoint.GetZ() + time * m_momentum.GetZ());
+        genericTime = tt1;
+        intersectionPoint.SetValues(xx1, yy1, referencePoint.GetZ() + genericTime * m_momentum.GetZ());
     }
     else
     {
-        time = tt2;
-        intersectionPoint.SetValues(xx2, yy2, referencePoint.GetZ() + time * m_momentum.GetZ());
+        genericTime = tt2;
+        intersectionPoint.SetValues(xx2, yy2, referencePoint.GetZ() + genericTime * m_momentum.GetZ());
     }
 
     return STATUS_CODE_SUCCESS;
@@ -291,7 +291,7 @@ StatusCode Helix::GetPointOnCircle(const float radius, const CartesianVector &re
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode Helix::GetDistanceToPoint(const CartesianVector &point, CartesianVector &distance, float &time) const
+StatusCode Helix::GetDistanceToPoint(const CartesianVector &point, CartesianVector &distance, float &genericTime) const
 {
     const float phi(std::atan2(point.GetY() - m_yCentre, point.GetX() - m_xCentre));
     const float phi0(std::atan2(m_referencePoint.GetY() - m_yCentre, m_referencePoint.GetX() - m_xCentre));
@@ -330,11 +330,11 @@ StatusCode Helix::GetDistanceToPoint(const CartesianVector &point, CartesianVect
 
     if (std::fabs(m_momentum.GetZ()) > 0)
     {
-        time = (zOnHelix - m_referencePoint.GetZ()) / m_momentum.GetZ();
+        genericTime = (zOnHelix - m_referencePoint.GetZ()) / m_momentum.GetZ();
     }
     else
     {
-        time = m_charge * m_radius * dPhi / m_pxy;
+        genericTime = m_charge * m_radius * dPhi / m_pxy;
     }
 
     return STATUS_CODE_SUCCESS;
@@ -441,12 +441,12 @@ StatusCode Helix::GetDistanceToHelix(const Helix *const pHelix, CartesianVector 
         }
 
         const float pxy2(pHelix->GetPxy());
-        const float time21(-charge2 * deltaPhi21 * rad2 / pxy2);
-        const float time22(-charge2 * deltaPhi22 * rad2 / pxy2);
+        const float genericTime21(-charge2 * deltaPhi21 * rad2 / pxy2);
+        const float genericTime22(-charge2 * deltaPhi22 * rad2 / pxy2);
 
         const float pz2(pHelix->GetMomentum().GetZ());
-        const float Z21(referencePoint2.GetZ() + time21 * pz2);
-        const float Z22(referencePoint2.GetZ() + time22 * pz2);
+        const float Z21(referencePoint2.GetZ() + genericTime21 * pz2);
+        const float Z22(referencePoint2.GetZ() + genericTime22 * pz2);
 
         const CartesianVector temp21(xSect1, ySect1, Z21);
         const CartesianVector temp22(xSect2, ySect2, Z22);
@@ -478,12 +478,12 @@ StatusCode Helix::GetDistanceToHelix(const Helix *const pHelix, CartesianVector 
         }
 
         const float pxy1(m_pxy);
-        const float time11(-charge1 * deltaPhi11 * rad1 / pxy1);
-        const float time12(-charge1 * deltaPhi12 * rad1 / pxy1);
+        const float genericTime11(-charge1 * deltaPhi11 * rad1 / pxy1);
+        const float genericTime12(-charge1 * deltaPhi12 * rad1 / pxy1);
 
         const float pz1(m_momentum.GetZ());
-        const float Z11(referencePoint1.GetZ() + time11 * pz1);
-        const float Z12(referencePoint1.GetZ() + time12 * pz1);
+        const float Z11(referencePoint1.GetZ() + genericTime11 * pz1);
+        const float Z12(referencePoint1.GetZ() + genericTime12 * pz1);
 
         const CartesianVector temp11(xSect1, ySect1, Z11);
         const CartesianVector temp12(xSect2, ySect2, Z12);

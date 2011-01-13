@@ -159,11 +159,11 @@ StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHe
 {
     static const float muonEndCapInnerZ(std::fabs(GeometryHelper::GetMuonEndCapParameters().GetInnerZCoordinate()));
 
-    float minTime(std::numeric_limits<float>::max());
+    float minGenericTime(std::numeric_limits<float>::max());
     const CartesianVector &referencePoint(pHelix->GetReferencePoint());
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointInZ(isPositiveZ ? muonEndCapInnerZ : -muonEndCapInnerZ,
-        referencePoint, muonEntryPoint, minTime));
+        referencePoint, muonEntryPoint, minGenericTime));
 
     static const unsigned int muonBarrelInnerSymmetry = GeometryHelper::GetMuonBarrelParameters().GetInnerSymmetryOrder();
     static const float muonBarrelInnerPhi = GeometryHelper::GetMuonBarrelParameters().GetInnerPhiCoordinate();
@@ -179,14 +179,14 @@ StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHe
             const float phi(twopi_n * static_cast<float>(i) + muonBarrelInnerPhi);
 
             CartesianVector barrelEntryPoint;
-            float time(std::numeric_limits<float>::max());
+            float genericTime(std::numeric_limits<float>::max());
 
             const StatusCode statusCode(pHelix->GetPointInXY(muonBarrelInnerR * std::cos(phi), muonBarrelInnerR * std::sin(phi),
-                 std::cos(phi + 0.5f * pi), std::sin(phi + 0.5f * pi), referencePoint, barrelEntryPoint, time));
+                 std::cos(phi + 0.5f * pi), std::sin(phi + 0.5f * pi), referencePoint, barrelEntryPoint, genericTime));
 
-            if ((STATUS_CODE_SUCCESS == statusCode) && (time < minTime))
+            if ((STATUS_CODE_SUCCESS == statusCode) && (genericTime < minGenericTime))
             {
-                minTime = time;
+                minGenericTime = genericTime;
                 muonEntryPoint = barrelEntryPoint;
             }
         }
@@ -194,13 +194,13 @@ StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHe
     else
     {
         CartesianVector barrelEntryPoint;
-        float time(std::numeric_limits<float>::max());
+        float genericTime(std::numeric_limits<float>::max());
 
-        const StatusCode statusCode(pHelix->GetPointOnCircle(muonBarrelInnerR, referencePoint, barrelEntryPoint, time));
+        const StatusCode statusCode(pHelix->GetPointOnCircle(muonBarrelInnerR, referencePoint, barrelEntryPoint, genericTime));
 
-        if ((STATUS_CODE_SUCCESS == statusCode) && (time < minTime))
+        if ((STATUS_CODE_SUCCESS == statusCode) && (genericTime < minGenericTime))
         {
-            minTime = time;
+            minGenericTime = genericTime;
             muonEntryPoint = barrelEntryPoint;
         }
     }
