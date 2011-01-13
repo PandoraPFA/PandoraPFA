@@ -8,11 +8,8 @@
 #ifndef PSEUDO_LAYER_CALCULATOR_H
 #define PSEUDO_LAYER_CALCULATOR_H 1
 
-#include "Objects/CartesianVector.h"
-
-#include "Pandora/PandoraInternal.h"
-
-class TiXmlHandle;
+#include "Helpers/GeometryHelper.h"
+#include "Helpers/XmlHelper.h"
 
 namespace pandora
 {

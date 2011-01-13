@@ -8,8 +8,6 @@
 #ifndef FINE_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H
 #define FINE_GRANULARITY_PSEUDO_LAYER_CALCULATOR_H 1
 
-#include "Helpers/GeometryHelper.h"
-
 #include "Utilities/PseudoLayerCalculator.h"
 
 /**

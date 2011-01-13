@@ -8,14 +8,10 @@
 #ifndef SHOWER_PROFILE_CALCULATOR_H
 #define SHOWER_PROFILE_CALCULATOR_H 1
 
-class TiXmlHandle;
+#include "Helpers/XmlHelper.h"
 
 namespace pandora
 {
-
-class Cluster;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  ShowerProfileCalculator class
