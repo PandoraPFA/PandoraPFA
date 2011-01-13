@@ -15,11 +15,11 @@ ifdef MONITORING
 endif
 
 all:
-	(cd Framework; make $(ARGUMENTS))
-	(cd FineGranularityContent; make $(ARGUMENTS))
-	(cd KMeansContent; make $(ARGUMENTS))
+	(cd $(PROJECT_DIR)/Framework; make $(ARGUMENTS))
+	(cd $(PROJECT_DIR)/FineGranularityContent; make $(ARGUMENTS))
+	(cd $(PROJECT_DIR)/KMeansContent; make $(ARGUMENTS))
 
 clean:
-	(cd Framework; make clean $(ARGUMENTS))
-	(cd FineGranularityContent; make clean $(ARGUMENTS))
-	(cd KMeansContent; make clean $(ARGUMENTS))
+	(cd $(PROJECT_DIR)/Framework; make clean $(ARGUMENTS))
+	(cd $(PROJECT_DIR)/FineGranularityContent; make clean $(ARGUMENTS))
+	(cd $(PROJECT_DIR)/KMeansContent; make clean $(ARGUMENTS))
