@@ -10,6 +10,10 @@
 
 #include "Helpers/GeometryHelper.h"
 
+#include "Objects/CartesianVector.h"
+
+class TiXmlHandle;
+
 namespace pandora
 {
 
@@ -25,11 +29,18 @@ protected:
     virtual ~BFieldCalculator();
 
     /**
-     *  @brief  Initialize the bfield calculator
+     *  @brief  Initialize the bfield calculator using information from geometry helper
      * 
-     *  @param  pGeometryHelper
+     *  @param  pGeometryHelper address of the geometry helper
      */
     virtual void Initialize(const GeometryHelper *const pGeometryHelper);
+
+    /**
+     *  @brief  Initialize the bfield calculator using information from xml file
+     * 
+     *  @param  pXmlHandle address of the relevant xml handle
+     */
+    virtual void Initialize(const TiXmlHandle *const pXmlHandle);
 
     /**
      *  @brief  Get the bfield value for a specified position vector
@@ -52,6 +63,12 @@ inline BFieldCalculator::~BFieldCalculator()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline void BFieldCalculator::Initialize(const GeometryHelper *const /*pGeometryHelper*/)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void BFieldCalculator::Initialize(const TiXmlHandle *const /*pXmlHandle*/)
 {
 }
 

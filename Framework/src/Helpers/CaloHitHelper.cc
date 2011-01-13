@@ -565,52 +565,59 @@ unsigned int CaloHitHelper::m_mipMaxNearbyHits = 1;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitHelper::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode CaloHitHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "CaloHitMaxSeparation", m_caloHitMaxSeparation));
+    TiXmlElement *pXmlElement(pXmlHandle->FirstChild("CaloHitHelper").Element());
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationCaloHitMaxSeparation", m_isolationCaloHitMaxSeparation));
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "DensityWeightContribution", m_densityWeightContribution));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "CaloHitMaxSeparation", m_caloHitMaxSeparation));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "DensityWeightPower", m_densityWeightPower));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "IsolationCaloHitMaxSeparation", m_isolationCaloHitMaxSeparation));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "DensityWeightNLayers", m_densityWeightNLayers));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "DensityWeightContribution", m_densityWeightContribution));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShouldUseSimpleIsolationScheme", m_shouldUseSimpleIsolationScheme));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "DensityWeightPower", m_densityWeightPower));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationDensityWeightCutFine", m_isolationDensityWeightCutFine));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "DensityWeightNLayers", m_densityWeightNLayers));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationDensityWeightCutCoarse", m_isolationDensityWeightCutCoarse));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "ShouldUseSimpleIsolationScheme", m_shouldUseSimpleIsolationScheme));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationNLayers", m_isolationNLayers));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "IsolationDensityWeightCutFine", m_isolationDensityWeightCutFine));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationCutDistanceFine", m_isolationCutDistanceFine));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "IsolationDensityWeightCutCoarse", m_isolationDensityWeightCutCoarse));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationCutDistanceCoarse", m_isolationCutDistanceCoarse));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "IsolationNLayers", m_isolationNLayers));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "IsolationMaxNearbyHits", m_isolationMaxNearbyHits));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "IsolationCutDistanceFine", m_isolationCutDistanceFine));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MipLikeMipCut", m_mipLikeMipCut));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "IsolationCutDistanceCoarse", m_isolationCutDistanceCoarse));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MipNCellsForNearbyHit", m_mipNCellsForNearbyHit));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "IsolationMaxNearbyHits", m_isolationMaxNearbyHits));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MipMaxNearbyHits", m_mipMaxNearbyHits));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "MipLikeMipCut", m_mipLikeMipCut));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "MipNCellsForNearbyHit", m_mipNCellsForNearbyHit));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "MipMaxNearbyHits", m_mipMaxNearbyHits));
+    }
 
     return STATUS_CODE_SUCCESS;
 }

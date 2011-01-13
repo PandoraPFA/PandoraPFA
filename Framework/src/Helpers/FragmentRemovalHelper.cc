@@ -313,8 +313,15 @@ StatusCode FragmentRemovalHelper::GetClusterContactDetails(const Cluster *const 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FragmentRemovalHelper::ReadSettings(const TiXmlHandle /*xmlHandle*/)
+StatusCode FragmentRemovalHelper::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
 {
+    /*TiXmlElement *pXmlElement(pXmlHandle->FirstChild("FragmentRemovalHelper").Element());
+
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
+    }*/
+
     return STATUS_CODE_SUCCESS;
 }
 

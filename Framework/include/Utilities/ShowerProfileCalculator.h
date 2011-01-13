@@ -8,8 +8,14 @@
 #ifndef SHOWER_PROFILE_CALCULATOR_H
 #define SHOWER_PROFILE_CALCULATOR_H 1
 
+class TiXmlHandle;
+
 namespace pandora
 {
+
+class Cluster;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  ShowerProfileCalculator class
@@ -23,9 +29,9 @@ protected:
     virtual ~ShowerProfileCalculator();
 
     /**
-     *  @brief  Initialize the shower profile layer calculator
+     *  @brief  Initialize the shower profile calculator using information from xml file
      * 
-     *  @param  pXmlHandle
+     *  @param  pXmlHandle address of the relevant xml handle
      */
     virtual void Initialize(const TiXmlHandle *const pXmlHandle);
 

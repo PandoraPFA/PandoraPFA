@@ -14,7 +14,7 @@
 
 #include "Utilities/ShowerProfileCalculator.h"
 
-#include "Xml/tinyxml.h"
+class TiXmlHandle;
 
 namespace pandora
 {
@@ -117,9 +117,9 @@ private:
     /**
      *  @brief  Read the particle id helper settings
      * 
-     *  @param  xmlHandle the relevant xml handle
+     *  @param  pXmlHandle address of the relevant xml handle
      */
-    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
     static ParticleIdFunction      *m_pEmShowerFastFunction;        ///< The fast electromagnetic shower id function pointer
     static ParticleIdFunction      *m_pEmShowerFullFunction;        ///< The full electromagnetic shower id function pointer

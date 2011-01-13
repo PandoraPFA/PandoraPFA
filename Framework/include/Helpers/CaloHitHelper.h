@@ -11,7 +11,7 @@
 #include "Pandora/PandoraInternal.h"
 #include "Pandora/StatusCodes.h"
 
-#include "Xml/tinyxml.h"
+class TiXmlHandle;
 
 namespace pandora
 {
@@ -180,9 +180,9 @@ private:
     /**
      *  @brief  Read the calo hit helper settings
      * 
-     *  @param  xmlHandle the relevant xml handle
+     *  @param  pXmlHandle address of the relevant xml handle
      */
-    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
     typedef std::map<CaloHit *, bool> CaloHitUsageMap;
     typedef std::map<std::string, CaloHitUsageMap *> NameToCaloHitUsageMap;

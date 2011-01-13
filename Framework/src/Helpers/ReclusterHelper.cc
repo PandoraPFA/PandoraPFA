@@ -102,8 +102,15 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ReclusterHelper::ReadSettings(const TiXmlHandle /*xmlHandle*/)
+StatusCode ReclusterHelper::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
 {
+    /*TiXmlElement *pXmlElement(pXmlHandle->FirstChild("ReclusterHelper").Element());
+
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
+    }*/
+
     return STATUS_CODE_SUCCESS;
 }
 

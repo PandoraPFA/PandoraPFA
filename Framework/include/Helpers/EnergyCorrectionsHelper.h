@@ -12,7 +12,7 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/StatusCodes.h"
 
-#include "Xml/tinyxml.h"
+class TiXmlHandle;
 
 namespace pandora
 {
@@ -36,9 +36,9 @@ private:
     /**
      *  @brief  Read the energy corrections helper settings
      * 
-     *  @param  xmlHandle the relevant xml handle
+     *  @param  pXmlHandle address of the relevant xml handle
      */
-    static pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
     static EnergyCorrectionFunctionVector m_hadEnergyCorrectionFunctions;   ///< The hadronic energy correction function vector
     static EnergyCorrectionFunctionVector m_emEnergyCorrectionFunctions;    ///< The electromagnetic energy correction function vector

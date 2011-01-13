@@ -71,52 +71,15 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         if (m_isInitialized)
             return STATUS_CODE_ALREADY_INITIALIZED;
 
-        // Calo hit helper settings
-        TiXmlElement *pXmlElement = pXmlHandle->FirstChild("CaloHitHelper").Element();
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ReadSettings(pXmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::ReadSettings(pXmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, EnergyCorrectionsHelper::ReadSettings(pXmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemovalHelper::ReadSettings(pXmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, GeometryHelper::ReadSettings(pXmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ParticleIdHelper::ReadSettings(pXmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ReadSettings(pXmlHandle));
 
-        if (NULL != pXmlElement)
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ReadSettings(TiXmlHandle(pXmlElement)));
-
-        // Cluster helper settings
-        pXmlElement = pXmlHandle->FirstChild("ClusterHelper").Element();
-
-        if (NULL != pXmlElement)
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ClusterHelper::ReadSettings(TiXmlHandle(pXmlElement)));
-
-        // Energy corrections helper settings
-        pXmlElement = pXmlHandle->FirstChild("EnergyCorrectionsHelper").Element();
-
-        if (NULL != pXmlElement)
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, EnergyCorrectionsHelper::ReadSettings(TiXmlHandle(pXmlElement)));
-
-        // Fragment removal helper settings
-        pXmlElement = pXmlHandle->FirstChild("FragmentRemovalHelper").Element();
-
-        if (NULL != pXmlElement)
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemovalHelper::ReadSettings(TiXmlHandle(pXmlElement)));
-
-        // Geometry helper settings
-        pXmlElement = pXmlHandle->FirstChild("GeometryHelper").Element();
-
-        if (NULL != pXmlElement)
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, GeometryHelper::ReadSettings(TiXmlHandle(pXmlElement)));
-
-        // Particle id helper settings
-        pXmlElement = pXmlHandle->FirstChild("ParticleIdHelper").Element();
-
-        if (NULL != pXmlElement)
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ParticleIdHelper::ReadSettings(TiXmlHandle(pXmlElement)));
-
-        // Recluster helper settings
-        pXmlElement = pXmlHandle->FirstChild("ReclusterHelper").Element();
-
-        if (NULL != pXmlElement)
-            PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ReadSettings(TiXmlHandle(pXmlElement)));
-
-        // Previously registered settings functions
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RunRegisteredSettingsFunctions(pXmlHandle));
-
-        // Global pandora settings
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadGlobalSettings(pXmlHandle));
 
         m_isInitialized = true;

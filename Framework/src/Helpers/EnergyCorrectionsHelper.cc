@@ -50,8 +50,15 @@ StatusCode EnergyCorrectionsHelper::EnergyCorrection(const Cluster *const pClust
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EnergyCorrectionsHelper::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode EnergyCorrectionsHelper::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
 {
+    /*TiXmlElement *pXmlElement(pXmlHandle->FirstChild("EnergyCorrectionsHelper").Element());
+
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
+    }*/
+
     return STATUS_CODE_SUCCESS;
 }
 

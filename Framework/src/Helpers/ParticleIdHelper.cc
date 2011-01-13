@@ -151,10 +151,24 @@ StatusCode ParticleIdHelper::SetShowerProfileCalculator(ShowerProfileCalculator 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode ParticleIdHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 {
-    if (NULL != m_pShowerProfileCalculator)
+    // Read main particle id helper settings
+    /*TiXmlElement *pXmlElement(pXmlHandle->FirstChild("ParticleIdHelper").Element());
+
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
+    }*/
+
+    // Read shower profile calculator settings
+    TiXmlElement *pShowerProfileXmlElement(pXmlHandle->FirstChild("ShowerProfileCalculator").Element());
+
+    if ((NULL != pShowerProfileXmlElement) && (NULL != m_pShowerProfileCalculator))
+    {
+        const TiXmlHandle xmlHandle(pShowerProfileXmlElement);
         m_pShowerProfileCalculator->Initialize(&xmlHandle);
+    }
 
     return STATUS_CODE_SUCCESS;
 }

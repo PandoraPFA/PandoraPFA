@@ -400,10 +400,38 @@ StatusCode GeometryHelper::SetHitTypeGranularity(const HitType hitType, const Gr
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode GeometryHelper::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode GeometryHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "GapTolerance", m_gapTolerance));
+    // Read main geometry helper settings
+    TiXmlElement *pXmlElement(pXmlHandle->FirstChild("GeometryHelper").Element());
+
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "GapTolerance", m_gapTolerance));
+    }
+
+    // Read bfield calculator settings
+    TiXmlElement *pBFieldXmlElement(pXmlHandle->FirstChild("BFieldCalculator").Element());
+    BFieldCalculator *pBFieldCalculator(GeometryHelper::GetInstance()->m_pBFieldCalculator);
+
+    if ((NULL != pBFieldXmlElement) && (NULL != pBFieldCalculator))
+    {
+        const TiXmlHandle xmlHandle(pBFieldXmlElement);
+        pBFieldCalculator->Initialize(&xmlHandle);
+    }
+
+    // Read pseudo layer calculator settings
+    TiXmlElement *pPseudoLayerXmlElement(pXmlHandle->FirstChild("PseudoLayerCalculator").Element());
+    PseudoLayerCalculator *pPseudoLayerCalculator(GeometryHelper::GetInstance()->m_pPseudoLayerCalculator);
+
+    if ((NULL != pPseudoLayerXmlElement) && (NULL != pPseudoLayerCalculator))
+    {
+        const TiXmlHandle xmlHandle(pPseudoLayerXmlElement);
+        pPseudoLayerCalculator->Initialize(&xmlHandle);
+    }
 
     return STATUS_CODE_SUCCESS;
 }

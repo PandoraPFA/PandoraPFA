@@ -11,7 +11,7 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
 
-#include "Xml/tinyxml.h"
+class TiXmlHandle;
 
 namespace pandora
 {
@@ -170,9 +170,9 @@ private:
     /**
      *  @brief  Read the recluster helper settings
      * 
-     *  @param  xmlHandle the relevant xml handle
+     *  @param  pXmlHandle address of the relevant xml handle
      */
-    static StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
     friend class PandoraSettings;
 };

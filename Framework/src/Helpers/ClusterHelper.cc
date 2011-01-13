@@ -860,25 +860,32 @@ float ClusterHelper::m_leavingShowerLikeEnergyInOuterLayers = 1.f;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterHelper::ReadSettings(const TiXmlHandle xmlHandle)
+StatusCode ClusterHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShowerStartMipFraction", m_showerStartMipFraction));
+    TiXmlElement *pXmlElement(pXmlHandle->FirstChild("ClusterHelper").Element());
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShowerStartNonMipLayers", m_showerStartNonMipLayers));
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LeavingNOuterLayersToExamine", m_leavingNOuterLayersToExamine));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "ShowerStartMipFraction", m_showerStartMipFraction));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LeavingMipLikeNOccupiedLayers", m_leavingMipLikeNOccupiedLayers));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "ShowerStartNonMipLayers", m_showerStartNonMipLayers));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LeavingShowerLikeNOccupiedLayers", m_leavingShowerLikeNOccupiedLayers));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LeavingNOuterLayersToExamine", m_leavingNOuterLayersToExamine));
 
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "LeavingShowerLikeEnergyInOuterLayers", m_leavingShowerLikeEnergyInOuterLayers));
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LeavingMipLikeNOccupiedLayers", m_leavingMipLikeNOccupiedLayers));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LeavingShowerLikeNOccupiedLayers", m_leavingShowerLikeNOccupiedLayers));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LeavingShowerLikeEnergyInOuterLayers", m_leavingShowerLikeEnergyInOuterLayers));
+    }
 
     return STATUS_CODE_SUCCESS;
 }

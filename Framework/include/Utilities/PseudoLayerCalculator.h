@@ -10,6 +10,10 @@
 
 #include "Helpers/GeometryHelper.h"
 
+#include "Objects/CartesianVector.h"
+
+class TiXmlHandle;
+
 namespace pandora
 {
 
@@ -25,11 +29,18 @@ protected:
     virtual ~PseudoLayerCalculator();
 
     /**
-     *  @brief  Initialize the pseudo layer calculator
+     *  @brief  Initialize the pseudo layer calculator using information from geometry helper
      * 
-     *  @param  pGeometryHelper
+     *  @param  pGeometryHelper address of the geometry helper
      */
     virtual void Initialize(const GeometryHelper *const pGeometryHelper);
+
+    /**
+     *  @brief  Initialize the pseudo layer calculator using information from xml file
+     * 
+     *  @param  pXmlHandle address of the relevant xml handle
+     */
+    virtual void Initialize(const TiXmlHandle *const pXmlHandle);
 
     /**
      *  @brief  Get the appropriate pseudolayer for a specified position vector
@@ -60,6 +71,12 @@ inline PseudoLayerCalculator::~PseudoLayerCalculator()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline void PseudoLayerCalculator::Initialize(const GeometryHelper *const /*pGeometryHelper*/)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline void PseudoLayerCalculator::Initialize(const TiXmlHandle *const /*pXmlHandle*/)
 {
 }
 
