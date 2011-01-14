@@ -54,9 +54,9 @@ private:
     KMdataArray        pts;        // the data points
     KCtree*        kcTree;        // kc-tree for the points
 private:                // copy functions (not implemented)
-    KMdata(const KMdata& p)        // copy constructor
+    KMdata(const KMdata& /*p*/)        // copy constructor
       { assert(false); }
-    KMdata& operator=(const KMdata& p)    // assignment operator
+    KMdata& operator=(const KMdata& /*p*/)    // assignment operator
       { assert(false);  return *this; }
 public:
     KMdata(int d, int n);        // standard constructor

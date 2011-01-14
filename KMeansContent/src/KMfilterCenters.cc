@@ -227,7 +227,7 @@ void KMfilterCenters::swapOneCenter(        // swap one center
 //  print centers and distortions
 //----------------------------------------------------------------------
 
-void KMfilterCenters::print(bool fancy)        // print centers and distortion
+void KMfilterCenters::print(bool /*fancy*/)        // print centers and distortion
 {
     for (int j = 0; j < kCtrs; j++) {
     *kmOut << "    " << setw(4) << j << "\t";

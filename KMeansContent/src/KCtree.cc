@@ -405,7 +405,7 @@ void KCsplit::sampleCtr(            // sample from splitting node
 
 void KCleaf::sampleCtr(                // sample from leaf node
     KMpoint        c,            // the sampled point (returned)
-    KMorthRect        &bnd_box)        // bounding box for current node
+    KMorthRect        &/*bnd_box*/)        // bounding box for current node
 {
     int ri = kmRanInt(n_data);            // generate random index
     kmCopyPt(kcDim, kcPoints[bkt[ri]], c);    // copy to destination
@@ -815,7 +815,7 @@ static bool pruneTest(
 //----------------------------------------------------------------------
 
 static void postNeigh(
-    KCptr        p,            // the node posting
+    KCptr        /*p*/,            // the node posting
     KMpoint        sum,            // the sum of coordinates
     double        sumSq,            // the sum of squares
     int            n_data,            // number of points
