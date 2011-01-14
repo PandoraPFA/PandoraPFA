@@ -24,12 +24,12 @@ public:
      * 
      *  @param  pandora the pandora instance with which to register algorithms
      */
-    static pandora::StatusCode RegisterAll(pandora::Pandora &pandora);
+    static pandora::StatusCode RegisterAlgorithms(pandora::Pandora &pandora);
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline pandora::StatusCode KMeansContent::RegisterAll(pandora::Pandora &pandora)
+inline pandora::StatusCode KMeansContent::RegisterAlgorithms(pandora::Pandora &pandora)
 {
     K_MEANS_CLUSTERING_ALGORITHM_LIST(PANDORA_REGISTER_ALGORITHM);
 

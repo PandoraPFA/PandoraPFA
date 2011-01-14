@@ -78,6 +78,7 @@
 
 #include "FineGranularityEnergyCorrections.h"
 #include "FineGranularityParticleId.h"
+
 #include "FineGranularityPseudoLayerCalculator.h"
 #include "FineGranularityShowerProfileCalculator.h"
 
@@ -165,13 +166,6 @@ public:
         d("ParticleId",                                         &FineGranularityParticleId::ReadSettings)
 
     /**
-     *  @brief  Register all the fine granularity content with pandora
-     * 
-     *  @param  pandora the pandora instance with which to register content
-     */
-    static pandora::StatusCode RegisterAll(pandora::Pandora &pandora);
-
-    /**
      *  @brief  Register all the fine granularity algorithms with pandora
      * 
      *  @param  pandora the pandora instance with which to register content
@@ -185,22 +179,6 @@ public:
      */
     static pandora::StatusCode RegisterHelperFunctions(pandora::Pandora &pandora);
 };
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline pandora::StatusCode FineGranularityContent::RegisterAll(pandora::Pandora &pandora)
-{
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, FineGranularityContent::RegisterAlgorithms(pandora));
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, FineGranularityContent::RegisterHelperFunctions(pandora));
-
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetPseudoLayerCalculator(pandora,
-        new FineGranularityPseudoLayerCalculator()));
-
-    PANDORA_RETURN_RESULT_IF(pandora::STATUS_CODE_SUCCESS, !=, PandoraApi::SetShowerProfileCalculator(pandora,
-        new FineGranularityShowerProfileCalculator()));
-
-    return pandora::STATUS_CODE_SUCCESS;
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
