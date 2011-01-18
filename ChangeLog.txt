@@ -1,3 +1,39 @@
+Restructured PandoraPFANew, dividing content into separate libraries for framework, fine granularity content and k-means clustering content.
+Moved all content specific to fine granularity detectors from framework (e.g. helper classes) to fine granularity content library.
+Updated CMake files to reflect restructuring of PandoraPFANew.
+Updated standalone makefile to reflect restructuring of PandoraPFANew.
+Added simple content registration options for FineGranularity and k-means content libraries.
+Improved interface classes for BField, ShowerProfile and PseudoLayer calculators
+Added ShowerProfileCalculator interface class and SetShowerProfileCalculator api.
+Changed default values for shower profile start and discrepancy to float max.
+Added ability to register IsEmShowerFast/Full helper functions.
+Added RegisterSettingsFunction api for parsing custom, non-algorithm, xml snippets.
+Improved xml configuration of helper classes and utility classes.
+PandoraSettings and GeometryHelper are no longer singletons.
+Added first implemetation of k-means clustering algorithm.
+Added implementation of InwardClustering algorithm.
+Implemented customisable hit type to granularity mapping, allowing specific references to ECal, HCal etc. to be removed from algorithms.
+Renamed HighGranularityPseudoLayerCalculator to FineGranularityPseudoLayerCalculator, for consistency.
+Added ClusterHelper::FitGeneralPoints function, removing specific barrel and endcap linear fits.
+Improved exception handling for linear cluster fits.
+Added FitLayerCentroids cluster helper function.
+Tidied UpdateClusterProperties method in clustering algorithm.
+Altered CartesianVector operator== to account for limited floating point accuracy.
+Added fixed particle id functionality.
+Added GetEnergyWeightedMeanTime cluster helper function.
+Updated helix interface and usage of helix class in muon reconstruction algorithm.
+Added inner detector parameters to GeometryHelper and PandoraApi.
+Removed TRACK_PROJECTION_LAYER constant and replaced with PseudoLayerCalculator::GetPseudoLayerAtIp functionality.
+Changed uninitialized behaviour of GeometryHelper::SubDetectorParameters class.
+FinalParticleId algorithm now skips pfos already flagged as electrons or muons.
+New api parameter: track time at calorimeter.
+New api parameter: IsMirroredInZ subdetector parameter.
+Renamed api parameter: "track state at ecal" parameters to "track state at calorimeter".
+Addressed CppCheck (static analysis package) warnings.
+
+************************************************************************
+TAG V00-04 FOR ILCSOFT USAGE
+************************************************************************
 Introduced new api parameters to help remove geometry dependence from pandora algorithms.
 New api parameter: expected calo hit direction (removes assumption that expected hit propagation direction is radial).
 New api parameter: number of radition lengths between calo hit position and the ip.
