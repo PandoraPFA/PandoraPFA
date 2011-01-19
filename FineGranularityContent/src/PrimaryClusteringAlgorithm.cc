@@ -41,7 +41,7 @@ StatusCode PrimaryClusteringAlgorithm::Run()
     }
 
     // Unless specified, return current calo hit list to that when algorithm started
-    if (m_restoreOriginalCaloHitList)
+    if (m_restoreOriginalCaloHitList && !m_inputCaloHitListName.empty())
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, originalCaloHitListName));
     }
