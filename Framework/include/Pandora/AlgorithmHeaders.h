@@ -23,6 +23,7 @@
 #include "Objects/CartesianVector.h"
 #include "Objects/Cluster.h"
 #include "Objects/Helix.h"
+#include "Objects/Histograms.h"
 #include "Objects/MCParticle.h"
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/ParticleFlowObject.h"
