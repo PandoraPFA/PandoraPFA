@@ -40,7 +40,7 @@ public:
      * 
      *  @return The number of x bins
      */
-    unsigned int GetNBinsX() const;
+    int GetNBinsX() const;
 
     /**
      *  @brief  Get the min binned x value
@@ -73,6 +73,42 @@ public:
     float GetBinContent(const int binX) const;
 
     /**
+     *  @brief  Get the cumulative sum of bin entries in the histogram (excluding overflow and underflow bins)
+     * 
+     *  @return The cumulative sum
+     */
+    float GetCumulativeSum() const;
+
+    /**
+     *  @brief  Get the cumulative sum of bin entries in a specified range of the histogram (excluding overflow and underflow bins)
+     * 
+     *  @param  xLowBin bin at start of specified x range
+     *  @param  xHighBin bin at end of specified x range
+     * 
+     *  @return The cumulative sum
+     */
+    float GetCumulativeSum(const int xLowBin, const int xHighBin) const;
+
+    /**
+     *  @brief  Get the maximum value in the histogram and the corresponding bin number (excludes overflow and underflow bins)
+     * 
+     *  @param  maximumValue to receive the maximum value
+     *  @param  maximumBinX to receive the coordinate of the bin containing the maximum value
+     */
+    void GetMaximum(float &maximumValue, int &maximumBinX) const;
+
+    /**
+     *  @brief  Get the maximum value in a specified range of the histogram and the corresponding bin numbers (excludes overflow
+     *          and underflow bins)
+     * 
+     *  @param  xLowBin bin at start of specified x range
+     *  @param  xHighBin bin at end of specified x range
+     *  @param  maximumValue to receive the maximum value
+     *  @param  maximumBinX to receive the coordinate of the bin containing the maximum value
+     */
+    void GetMaximum(const int xLowBin, const int xHighBin, float &maximumValue, int &maximumBinX) const;
+
+    /**
      *  @brief  Get the mean x value of entries in the histogram (excluding overflow and underflow bins)
      * 
      *  @return The mean x value
@@ -80,26 +116,31 @@ public:
     float GetMeanX() const;
 
     /**
+     *  @brief  Get the mean x value of entries in a specified range of the histogram (excluding overflow and underflow bins)
+     * 
+     *  @param  xLowBin bin at start of specified x range
+     *  @param  xHighBin bin at end of specified x range
+     * 
+     *  @return The mean x value
+     */
+    float GetMeanX(const int xLowBin, const int xHighBin) const;
+
+    /**
      *  @brief  Get the standard deviation of entries in the histogram (excluding overflow and underflow bins)
      * 
-     *  @return The standard deviation
+     *  @return The standard deviation of x entries
      */
     float GetStandardDeviationX() const;
 
     /**
-     *  @brief  Get the cumulative sum of bin entries in the histogram (excluding overflow and underflow bins)
+     *  @brief  Get the standard deviation of x entries in a specified range of the histogram (excluding overflow and underflow bins)
      * 
-     *  @return The cumulative sum
-     */
-    float GetCumulativeSumX() const;
-
-    /**
-     *  @brief  Get the maximum value in the histogram and the corresponding bin number (excludes overflow and underflow bins)
+     *  @param  xLowBin bin at start of specified x range
+     *  @param  xHighBin bin at end of specified x range
      * 
-     *  @param  maximumValueX to receive the maximum value
-     *  @param  maximumBinX to receive the coordinate of the bin containing the maximum value
+     *  @return The standard deviation of x entries
      */
-    void GetMaximumX(float &maximumValueX, int &maximumBinX) const;
+    float GetStandardDeviationX(const int xLowBin, const int xHighBin) const;
 
     /**
      *  @brief  Set the contents of a specified bin
@@ -122,7 +163,7 @@ private:
 
     HistogramMap        m_histogramMap;         ///< The histogram map
 
-    const unsigned int  m_nBinsX;               ///< The number of x bins
+    const int           m_nBinsX;               ///< The number of x bins
     const float         m_xLow;                 ///< The min binned x value
     const float         m_xHigh;                ///< The max binned x value
     float               m_xBinWidth;            ///< The x bin width
@@ -147,7 +188,8 @@ public:
      *  @param  yLow min binned y value
      *  @param  yHigh max binned y value
      */
-    TwoDHistogram(const unsigned int nBinsX, const float xLow, const float xHigh, const unsigned int nBinsY, const float yLow, const float yHigh);
+    TwoDHistogram(const unsigned int nBinsX, const float xLow, const float xHigh, const unsigned int nBinsY, const float yLow,
+        const float yHigh);
 
     /**
      *  @brief  Copy constructor
@@ -161,7 +203,7 @@ public:
      * 
      *  @return The number of x bins
      */
-    unsigned int GetNBinsX() const;
+    int GetNBinsX() const;
 
     /**
      *  @brief  Get the min binned x value
@@ -189,7 +231,7 @@ public:
      * 
      *  @return The number of y bins
      */
-    unsigned int GetNBinsY() const;
+    int GetNBinsY() const;
 
     /**
      *  @brief  Get the min binned y value
@@ -223,113 +265,123 @@ public:
     float GetBinContent(const int binX, const int binY) const;
 
     /**
-     *  @brief  Get the mean x value of entries in the histogram (excluding overflow and underflow bins) corresponding to
-     *          the specified y range
+     *  @brief  Get the cumulative sum of bin entries in the histogram (excluding overflow and underflow bins)
      * 
+     *  @return The cumulative sum
+     */
+    float GetCumulativeSum() const;
+
+    /**
+     *  @brief  Get the cumulative sum of bin entries in a specified range of the histogram (excluding overflow and underflow bins)
+     * 
+     *  @param  xLowBin bin at start of specified x range
+     *  @param  xHighBin bin at end of specified x range
+     *  @param  yLowBin bin at start of specified y range
+     *  @param  yHighBin bin at end of specified y range
+     * 
+     *  @return The cumulative sum
+     */
+    float GetCumulativeSum(const int xLowBin, const int xHighBin, const int yLowBin, const int yHighBin) const;
+
+    /**
+     *  @brief  Get the maximum value in the histogram and the corresponding bin numbers (excludes overflow and underflow bins)
+     * 
+     *  @param  maximumValue to receive the maximum value
+     *  @param  maximumBinX to receive the x coordinate of the bin containing the maximum value
+     *  @param  maximumBinY to receive the y coordinate of the bin containing the maximum value
+     */
+    void GetMaximum(float &maximumValue, int &maximumBinX, int &maximumBinY) const;
+
+    /**
+     *  @brief  Get the maximum value in a specified range of the histogram and the corresponding bin numbers (excludes overflow
+     *          and underflow bins)
+     * 
+     *  @param  xLowBin bin at start of specified x range
+     *  @param  xHighBin bin at end of specified x range
+     *  @param  yLowBin bin at start of specified y range
+     *  @param  yHighBin bin at end of specified y range
+     *  @param  maximumValue to receive the maximum value
+     *  @param  maximumBinX to receive the x coordinate of the bin containing the maximum value
+     *  @param  maximumBinY to receive the y coordinate of the bin containing the maximum value
+     */
+    void GetMaximum(const int xLowBin, const int xHighBin, const int yLowBin, const int yHighBin, float &maximumValue, int &maximumBinX,
+        int &maximumBinY) const;
+
+    /**
+     *  @brief  Get the mean x value of entries in the histogram (excluding overflow and underflow bins)
+     * 
+     *  @return The mean x value
+     */
+    float GetMeanX() const;
+
+    /**
+     *  @brief  Get the mean x value of entries in a specified range of the histogram (excluding overflow and underflow bins)
+     * 
+     *  @param  xLowBin bin at start of specified x range
+     *  @param  xHighBin bin at end of specified x range
      *  @param  yLowBin bin at start of specified y range
      *  @param  yHighBin bin at end of specified y range
      * 
      *  @return The mean x value
      */
-    float GetMeanX() const;
-    float GetMeanX(const int yBin) const;
-    float GetMeanX(const int yLowBin, const int yHighBin) const;
+    float GetMeanX(const int xLowBin, const int xHighBin, const int yLowBin, const int yHighBin) const;
 
     /**
-     *  @brief  Get the standard deviation of x entries in the histogram (excluding overflow and underflow bins) corresponding to
-     *          the specified y range
+     *  @brief  Get the standard deviation of x entries in the histogram (excluding overflow and underflow bins)
      * 
-     *  @param  yLowBin bin at start of specified y range
-     *  @param  yHighBin bin at end of specified y range
-     * 
-     *  @return The standard deviation
+     *  @return The standard deviation of x entries
      */
     float GetStandardDeviationX() const;
-    float GetStandardDeviationX(const int yBin) const;
-    float GetStandardDeviationX(const int yLowBin, const int yHighBin) const;
 
     /**
-     *  @brief  Get the cumulative sum of x bin entries in the histogram (excluding overflow and underflow bins)
-     * 
-     *  @param  yLowBin bin at start of specified y range
-     *  @param  yHighBin bin at end of specified y range
-     * 
-     *  @return The cumulative sum
-     */
-    float GetCumulativeSumX() const;
-    float GetCumulativeSumX(const int yBin) const;
-    float GetCumulativeSumX(const int yLowBin, const int yHighBin) const;
-
-    /**
-     *  @brief  Get the maximum value in the x histogram and the corresponding bin number (excludes overflow and underflow bins)
-     * 
-     *  @param  yLowBin bin at start of specified y range
-     *  @param  yHighBin bin at end of specified y range
-     *  @param  maximumValueX to receive the maximum value
-     *  @param  maximumBinX to receive the coordinate of the bin containing the maximum value
-     */
-    void GetMaximumX(float &maximumValueX, int &maximumBinX) const;
-    void GetMaximumX(const int yBin, float &maximumValueX, int &maximumBinX) const;
-    void GetMaximumX(const int yLowBin, const int yHighBin, float &maximumValueX, int &maximumBinX) const;
-
-    /**
-     *  @brief  Get the mean y value of entries in the histogram (excluding overflow and underflow bins) corresponding to
-     *          the specified x range
+     *  @brief  Get the standard deviation of x entries in a specified range of the histogram (excluding overflow and underflow bins)
      * 
      *  @param  xLowBin bin at start of specified x range
      *  @param  xHighBin bin at end of specified x range
+     *  @param  yLowBin bin at start of specified y range
+     *  @param  yHighBin bin at end of specified y range
+     * 
+     *  @return The standard deviation of x entries
+     */
+    float GetStandardDeviationX(const int xLowBin, const int xHighBin, const int yLowBin, const int yHighBin) const;
+
+    /**
+     *  @brief  Get the mean y value of entries in the histogram (excluding overflow and underflow bins)
      * 
      *  @return The mean y value
      */
     float GetMeanY() const;
-    float GetMeanY(const int xBin) const;
-    float GetMeanY(const int xLowBin, const int xHighBin) const;
 
     /**
-     *  @brief  Get the standard deviation of yentries in the histogram (excluding overflow and underflow bins) corresponding to
-     *          the specified x range
+     *  @brief  Get the mean y value of entries in a specified range of the histogram (excluding overflow and underflow bins)
      * 
      *  @param  xLowBin bin at start of specified x range
      *  @param  xHighBin bin at end of specified x range
+     *  @param  yLowBin bin at start of specified y range
+     *  @param  yHighBin bin at end of specified y range
      * 
-     *  @return The standard deviation
+     *  @return The mean y value
+     */
+    float GetMeanY(const int xLowBin, const int xHighBin, const int yLowBin, const int yHighBin) const;
+
+    /**
+     *  @brief  Get the standard deviation of y entries in the histogram (excluding overflow and underflow bins)
+     * 
+     *  @return The standard deviation of y entries
      */
     float GetStandardDeviationY() const;
-    float GetStandardDeviationY(const int xBin) const;
-    float GetStandardDeviationY(const int xLowBin, const int xHighBin) const;
 
     /**
-     *  @brief  Get the cumulative sum of y bin entries in the histogram (excluding overflow and underflow bins)
+     *  @brief  Get the standard deviation of y entries in a specified range of the histogram (excluding overflow and underflow bins)
      * 
      *  @param  xLowBin bin at start of specified x range
      *  @param  xHighBin bin at end of specified x range
+     *  @param  yLowBin bin at start of specified y range
+     *  @param  yHighBin bin at end of specified y range
      * 
-     *  @return The cumulative sum
+     *  @return The standard deviation of y entries
      */
-    float GetCumulativeSumY() const;
-    float GetCumulativeSumY(const int xBin) const;
-    float GetCumulativeSumY(const int xLowBin, const int xHighBin) const;
-
-    /**
-     *  @brief  Get the maximum value in they histogram and the corresponding bin number (excludes overflow and underflow bins)
-     * 
-     *  @param  xLowBin bin at start of specified x range
-     *  @param  xHighBin bin at end of specified x range
-     *  @param  maximumValueY to receive the maximum value
-     *  @param  maximumBinY to receive the coordinate of the bin containing the maximum value
-     */
-    void GetMaximumY(float &maximumValueY, int &maximumBin) const;
-    void GetMaximumY(const int xBin, float &maximumValueY, int &maximumBinY) const;
-    void GetMaximumY(const int xLowBin, const int xHighBin, float &maximumValueY, int &maximumBinY) const;
-
-    /**
-     *  @brief  Get the maximum value in the histogram and the corresponding bin numbers
-     * 
-     *  @param  maximumValueXY to receive the maximum value
-     *  @param  maximumBinX to receive the x coordinate of the bin containing the maximum value
-     *  @param  maximumBinY to receive the y coordinate of the bin containing the maximum value
-     */
-    void GetMaximumXY(float &maximumValueXY, int &maximumBinX, int &maximumBinY) const;
+    float GetStandardDeviationY(const int xLowBin, const int xHighBin, const int yLowBin, const int yHighBin) const;
 
     /**
      *  @brief  Set the contents of a specified bin
@@ -356,21 +408,21 @@ private:
     TwoDHistogramMap    m_xyHistogramMap;       ///< The x->y->value 2d histogram map
     TwoDHistogramMap    m_yxHistogramMap;       ///< The y->x->value 2d histogram map
 
-    unsigned int        m_nBinsX;               ///< The number of x bins
-    float               m_xLow;                 ///< The min binned x value
-    float               m_xHigh;                ///< The max binned x value
+    const int           m_nBinsX;               ///< The number of x bins
+    const float         m_xLow;                 ///< The min binned x value
+    const float         m_xHigh;                ///< The max binned x value
     float               m_xBinWidth;            ///< The x bin width
 
-    unsigned int        m_nBinsY;               ///< The number of y bins
-    float               m_yLow;                 ///< The min binned y value
-    float               m_yHigh;                ///< The max binned y value
+    const int           m_nBinsY;               ///< The number of y bins
+    const float         m_yLow;                 ///< The min binned y value
+    const float         m_yHigh;                ///< The max binned y value
     float               m_yBinWidth;            ///< The y bin width
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline unsigned int Histogram::GetNBinsX() const
+inline int Histogram::GetNBinsX() const
 {
     return m_nBinsX;
 }
@@ -397,9 +449,37 @@ inline float Histogram::GetXBinWidth() const
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Histogram::GetCumulativeSum() const
+{
+    return this->GetCumulativeSum(0, m_nBinsX);
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline unsigned int TwoDHistogram::GetNBinsX() const
+inline void Histogram::GetMaximum(float &maximumValue, int &maximumBinX) const
+{
+    return this->GetMaximum(0, m_nBinsX, maximumValue, maximumBinX);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Histogram::GetMeanX() const
+{
+    return this->GetMeanX(0, m_nBinsX);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float Histogram::GetStandardDeviationX() const
+{
+    return this->GetStandardDeviationX(0, m_nBinsX);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline int TwoDHistogram::GetNBinsX() const
 {
     return m_nBinsX;
 }
@@ -427,7 +507,7 @@ inline float TwoDHistogram::GetXBinWidth() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline unsigned int TwoDHistogram::GetNBinsY() const
+inline int TwoDHistogram::GetNBinsY() const
 {
     return m_nBinsY;
 }
@@ -455,114 +535,44 @@ inline float TwoDHistogram::GetYBinWidth() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float TwoDHistogram::GetMeanX() const
+inline float TwoDHistogram::GetCumulativeSum() const
 {
-    return this->GetMeanX(0, m_nBinsY);
+    return this->GetCumulativeSum(0, m_nBinsX, 0, m_nBinsY);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float TwoDHistogram::GetMeanX(const int yBin) const
+inline void TwoDHistogram::GetMaximum(float &maximumValue, int &maximumBinX, int &maximumBinY) const
 {
-    return this->GetMeanX(yBin, yBin);
+    return this->GetMaximum(0, m_nBinsX, 0, m_nBinsY, maximumValue, maximumBinX, maximumBinY);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float TwoDHistogram::GetMeanX() const
+{
+    return this->GetMeanX(0, m_nBinsX, 0, m_nBinsY);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float TwoDHistogram::GetStandardDeviationX() const
 {
-    return this->GetStandardDeviationX(0, m_nBinsY);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TwoDHistogram::GetStandardDeviationX(const int yBin) const
-{
-    return this->GetStandardDeviationX(yBin, yBin);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TwoDHistogram::GetCumulativeSumX() const
-{
-    return this->GetCumulativeSumX(0, m_nBinsY);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TwoDHistogram::GetCumulativeSumX(const int yBin) const
-{
-    return this->GetCumulativeSumX(yBin, yBin);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline void TwoDHistogram::GetMaximumX(float &maximumValueX, int &maximumBinX) const
-{
-    return this->GetMaximumX(0, m_nBinsY, maximumValueX, maximumBinX);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline void TwoDHistogram::GetMaximumX(const int yBin, float &maximumValueX, int &maximumBinX) const
-{
-    return this->GetMaximumX(yBin, yBin, maximumValueX, maximumBinX);
+    return this->GetStandardDeviationX(0, m_nBinsX, 0, m_nBinsY);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float TwoDHistogram::GetMeanY() const
 {
-    return this->GetMeanY(0, m_nBinsX);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TwoDHistogram::GetMeanY(const int xBin) const
-{
-    return this->GetMeanY(xBin, xBin);
+    return this->GetMeanY(0, m_nBinsX, 0, m_nBinsY);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float TwoDHistogram::GetStandardDeviationY() const
 {
-    return this->GetStandardDeviationY(0, m_nBinsX);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TwoDHistogram::GetStandardDeviationY(const int xBin) const
-{
-    return this->GetStandardDeviationY(xBin, xBin);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TwoDHistogram::GetCumulativeSumY() const
-{
-    return this->GetCumulativeSumY(0, m_nBinsX);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float TwoDHistogram::GetCumulativeSumY(const int xBin) const
-{
-    return this->GetCumulativeSumY(xBin, xBin);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline void TwoDHistogram::GetMaximumY(float &maximumValueY, int &maximumBinY) const
-{
-    return this->GetMaximumX(0, m_nBinsX, maximumValueY, maximumBinY);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline void TwoDHistogram::GetMaximumY(const int xBin, float &maximumValueY, int &maximumBinY) const
-{
-    return this->GetMaximumX(xBin, xBin, maximumValueY, maximumBinY);
+    return this->GetStandardDeviationY(0, m_nBinsX, 0, m_nBinsY);
 }
 
 } // namespace pandora
