@@ -463,7 +463,7 @@ StatusCode MuonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinTrackCandidateEnergy", m_minTrackCandidateEnergy));
 
-    m_minHelixClusterCosAngle = 0.995f;
+    m_minHelixClusterCosAngle = 0.98f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHelixClusterCosAngle", m_minHelixClusterCosAngle));
 
