@@ -18,53 +18,53 @@ namespace pandora
 {
     class Axis {
     public:
-	typedef std::map<float,int> BinMap;
+    typedef std::map<float,int> BinMap;
 
-	class WrongBinNumber {};
-	class WrongLimits    {};
-	class XmlError {};
-	class NotAxis {};
+    class WrongBinNumber {};
+    class WrongLimits    {};
+    class XmlError {};
+    class NotAxis {};
 
-	Axis();
-	Axis( int bins, float from, float to );
-	Axis( const std::vector<float>& binBorders );
+    Axis();
+    Axis( int bins, float from, float to );
+    Axis( const std::vector<float>& binBorders );
 
-	void SetDimensions( int bins, float from, float to );
-	void SetDimensions( const std::vector<float>& binBorders );
+    void SetDimensions( int bins, float from, float to );
+    void SetDimensions( const std::vector<float>& binBorders );
 
-	int GetBinForValue( float value );
-	
-	int GetNumberBins() const;
-	float GetMinValue() const;
-	float GetMaxValue() const;
+    int GetBinForValue( float value );
+    
+    int GetNumberBins() const;
+    float GetMinValue() const;
+    float GetMaxValue() const;
 
-	void WriteToXml ( TiXmlElement * xmlElement );
-	void ReadFromXml( const TiXmlElement &xmlElement );
+    void WriteToXml ( TiXmlElement * xmlElement );
+    void ReadFromXml( const TiXmlElement &xmlElement );
 
-	void Print( std::ostream& );
+    void Print( std::ostream& );
 
     private:
-	int numberBins;
-	float minValue;
-	float maxValue;
-	float k;
+    int numberBins;
+    float minValue;
+    float maxValue;
+    float k;
        
-	bool regularBins;
+    bool regularBins;
 
-	BinMap bins;
+    BinMap bins;
 
-	friend class Histogram1D;
-	friend class Histogram2D;
+    friend class Histogram1D;
+    friend class Histogram2D;
     };
 
     inline float Axis::GetMinValue() const
     {
-	return minValue;
+    return minValue;
     }
 
     inline float Axis::GetMaxValue() const 
     {
-	return maxValue;
+    return maxValue;
     }
 
 
@@ -72,107 +72,107 @@ namespace pandora
 
     class Histogram1D {
     public:
-	typedef std::map<int,float> MapOfBins;
+    typedef std::map<int,float> MapOfBins;
 
-	class XmlError {};
-	class NotHistogram1D {};
-	class DifferentBinning {};
+    class XmlError {};
+    class NotHistogram1D {};
+    class DifferentBinning {};
 
 
-	Histogram1D();
-	Histogram1D( const TiXmlElement &xmlElement );
-	Histogram1D( const std::string &histogramName, int numberBins, float from, float to );
-	Histogram1D( const std::string &histogramName, const std::vector<float>& binBorders );
+    Histogram1D();
+    Histogram1D( const TiXmlElement &xmlElement );
+    Histogram1D( const std::string &histogramName, int numberBins, float from, float to );
+    Histogram1D( const std::string &histogramName, const std::vector<float>& binBorders );
 
-	void SetDimensions( const std::string &histogramName, int numberBins, float from, float to );
-	void SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders );
+    void SetDimensions( const std::string &histogramName, int numberBins, float from, float to );
+    void SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders );
 
-	void Fill( float value, float weight = 1.0 );
+    void Fill( float value, float weight = 1.0 );
 
-	float GetBinContent( int bin );
-	float Get( float value );
+    float GetBinContent( int bin );
+    float Get( float value );
 
-	float GetSumOfEntries();
-	void Scale( float value );
+    float GetSumOfEntries();
+    void Scale( float value );
 
-	void Add( Histogram1D &histogram );
+    void Add( Histogram1D &histogram );
 
-	void WriteToXml ( TiXmlElement * &xmlElement );
-	void ReadFromXml( const TiXmlElement &xmlElement );
+    void WriteToXml ( TiXmlElement * &xmlElement );
+    void ReadFromXml( const TiXmlElement &xmlElement );
 
-	void Print( std::ostream& );
+    void Print( std::ostream& );
 
-	float GetSumOfWeights() { return sumOfWeights; } // get sum of filled in weights (not changed when the histogram is scaled)
+    float GetSumOfWeights() { return sumOfWeights; } // get sum of filled in weights (not changed when the histogram is scaled)
 
-	const Axis& GetAxis() { return axis; }
+    const Axis& GetAxis() { return axis; }
 
-	static void TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter);
+    static void TokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter);
 
     private:
-	void CreateEmptyBins();
+    void CreateEmptyBins();
 
-	std::string name;
-	Axis axis;
-	
-	MapOfBins bins;
+    std::string name;
+    Axis axis;
+    
+    MapOfBins bins;
 
-	float sumOfWeights;
+    float sumOfWeights;
     };
 
 
     class Histogram2D {
     public:
-	typedef std::map<int,float> MapOfBins;
-	typedef std::map<int,MapOfBins> MapOfMapOfBins;
+    typedef std::map<int,float> MapOfBins;
+    typedef std::map<int,MapOfBins> MapOfMapOfBins;
 
-	class XmlError {};
-	class NotHistogram2D {};
-	class DataStructureError {};
-	class DifferentBinning {};
+    class XmlError {};
+    class NotHistogram2D {};
+    class DataStructureError {};
+    class DifferentBinning {};
 
 
-	Histogram2D();
-	Histogram2D( const TiXmlElement &xmlElement );
-	Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
-	Histogram2D( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY );
-	Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
-	Histogram2D( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+    Histogram2D();
+    Histogram2D( const TiXmlElement &xmlElement );
+    Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+    Histogram2D( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsY, float fromY, float toY );
+    Histogram2D( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+    Histogram2D( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
 
-	void SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
-	void SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
-	void SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsX, float fromX, float toX );
-	void SetDimensions( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
+    void SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, int numberBinsY, float fromY, float toY );
+    void SetDimensions( const std::string &histogramName, int numberBinsX, float fromX, float toX, const std::vector<float>& binBorders );
+    void SetDimensions( const std::string &histogramName, const std::vector<float>& binBorders, int numberBinsX, float fromX, float toX );
+    void SetDimensions( const std::string &histogramName, const std::vector<float>& binBordersX, const std::vector<float>& binBordersY );
 
-	void Fill( float x, float y, float weight = 1.0 );
+    void Fill( float x, float y, float weight = 1.0 );
 
-	float GetBinContent( int binX, int binY );
-	float Get( float valueX, float valueY );
+    float GetBinContent( int binX, int binY );
+    float Get( float valueX, float valueY );
 
-	float GetSumOfEntries();
-	void Scale( float value );
+    float GetSumOfEntries();
+    void Scale( float value );
 
-	void Add( Histogram2D &histogramToAdd );
+    void Add( Histogram2D &histogramToAdd );
 
-	void WriteToXml ( TiXmlElement * &xmlElement );
-	void ReadFromXml( const TiXmlElement &xmlElement );
+    void WriteToXml ( TiXmlElement * &xmlElement );
+    void ReadFromXml( const TiXmlElement &xmlElement );
 
-	void Print( std::ostream& );
-	void Print( std::string );
+    void Print( std::ostream& );
+    void Print( std::string );
 
-	float GetSumOfWeights() { return sumOfWeights; } // get sum of filled in weights (not changed when the histogram is scaled)
+    float GetSumOfWeights() { return sumOfWeights; } // get sum of filled in weights (not changed when the histogram is scaled)
 
-	const Axis& GetAxisX() { return axisX; }
-	const Axis& GetAxisY() { return axisY; }
+    const Axis& GetAxisX() { return axisX; }
+    const Axis& GetAxisY() { return axisY; }
 
     private:
-	void CreateEmptyBins();
+    void CreateEmptyBins();
 
-	std::string name;
-	Axis axisX, axisY;
-	
-	MapOfMapOfBins bins;
+    std::string name;
+    Axis axisX, axisY;
+    
+    MapOfMapOfBins bins;
 
-	float sumOfWeights;
+    float sumOfWeights;
 
     };
 
@@ -184,23 +184,23 @@ namespace pandora
 
         class FileNotFound {};
 
-	static PhotonIDLikelihoodCalculator* Instance();
-	float  PID(float E, float rms, float frac, float start);
-	void Delete();
+    static PhotonIDLikelihoodCalculator* Instance();
+    float  PID(float E, float rms, float frac, float start);
+    void Delete();
 
-	void WriteXmlSig( const std::string& fileName );
-	void WriteXmlBkg( const std::string& fileName );
-	void LoadXml(  const pandora::StringVector& fileNamesSig, const pandora::StringVector& fileNamesBkg, bool dontTakeLastFileName = false );
+    void WriteXmlSig( const std::string& fileName );
+    void WriteXmlBkg( const std::string& fileName );
+    void LoadXml(  const pandora::StringVector& fileNamesSig, const pandora::StringVector& fileNamesBkg, bool dontTakeLastFileName = false );
 
-	Histogram1D energySig;
-	Histogram1D energyBkg;
+    Histogram1D energySig;
+    Histogram1D energyBkg;
 
-	Histogram2D rmsSig;
-	Histogram2D fracSig;
-	Histogram2D startSig;
-	Histogram2D rmsBkg;
-	Histogram2D fracBkg;
-	Histogram2D startBkg;
+    Histogram2D rmsSig;
+    Histogram2D fracSig;
+    Histogram2D startSig;
+    Histogram2D rmsBkg;
+    Histogram2D fracBkg;
+    Histogram2D startBkg;
 
 
     protected:
@@ -208,11 +208,11 @@ namespace pandora
 
     private:
         static PhotonIDLikelihoodCalculator* _instance;
-	
-	static bool fromXml;
+    
+    static bool fromXml;
 
-	void ReadXmlSignal(      const std::string& fileNameSig );
-	void ReadXmlBackground(  const std::string& fileNameBkg );
+    void ReadXmlSignal(      const std::string& fileNameSig );
+    void ReadXmlBackground(  const std::string& fileNameBkg );
 
     };
 
@@ -250,7 +250,7 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
         /**
          * @brief Constructor
          */
-	RunningMeanRMS() : m_mean(0), m_nEvents(0), m_weights(0), m_s2(0),m_Rms(0)
+    RunningMeanRMS() : m_mean(0), m_nEvents(0), m_weights(0), m_s2(0),m_Rms(0)
         {
         }
 
@@ -349,9 +349,9 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
          * @return
          */
         double CalcMean( double meanOld, double n, double valNew, double weightsumOld, double evweight ){
-	    const double epsilon = 1e-7;
-	    if( fabs(n - 0.)<epsilon ) 
-		    return valNew;
+        const double epsilon = 1e-7;
+        if( fabs(n - 0.)<epsilon ) 
+            return valNew;
             //        double meanNew = meanOld + ( valNew - meanOld )/(n +1 );
             double meanNew = (weightsumOld*meanOld + evweight*valNew) / (weightsumOld + evweight);
             return meanNew;
@@ -369,7 +369,7 @@ class ECalPhotonClusteringAlgorithm : public pandora::Algorithm
          */
         double CalcS2( double meanOld, double meanNew, double nNew, double s2Old, double valNew )
         {
-	    const double epsilon = 1e-7;
+        const double epsilon = 1e-7;
             if( fabs(nNew - 0.)<epsilon ) return 0.;
             double s2New = ( (nNew-1)*s2Old + (valNew-meanNew)*(valNew-meanOld) )/nNew;
             return s2New;

@@ -41,6 +41,7 @@
 #include "Monitoring/VisualMonitoringAlgorithm.h"
 #include "Monitoring/DumpPfosMonitoringAlgorithm.h"
 
+#include "PfoConstruction/CLICPfoSelectionAlgorithm.h"
 #include "PfoConstruction/ClusterPreparationAlgorithm.h"
 #include "PfoConstruction/LoopingTrackAssociationAlgorithm.h"
 #include "PfoConstruction/PfoCreationAlgorithm.h"
@@ -117,6 +118,7 @@ public:
         d("VisualMonitoring",                       VisualMonitoringAlgorithm::Factory)                                         \
         d("MCParticlesMonitoring",                  MCParticlesMonitoringAlgorithm::Factory)                                    \
         d("DumpPfosMonitoring",                     DumpPfosMonitoringAlgorithm::Factory)                                       \
+        d("CLICPfoSelection",                       CLICPfoSelectionAlgorithm::Factory)                                         \
         d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                                       \
         d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                                  \
         d("PfoCreation",                            PfoCreationAlgorithm::Factory)                                              \
