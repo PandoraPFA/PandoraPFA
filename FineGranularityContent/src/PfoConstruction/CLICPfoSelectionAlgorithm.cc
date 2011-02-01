@@ -119,13 +119,9 @@ StatusCode CLICPfoSelectionAlgorithm::Run()
                 if (!trackList.empty())
                 {
                     const Track *const pTrack(*(trackList.begin()));
-                    const float trackEnergy(pTrack->GetEnergyAtDca());
-
-                    if (trackEnergy < std::numeric_limits<float>::epsilon())
-                        return STATUS_CODE_FAILURE;
 
                     const float tof(pTrack->GetTrackStateAtCalorimeter().GetPosition().GetMagnitude() / 300.f);
-                    const float tTrack = (pTrack->GetTimeAtCalorimeter() / 300.f * trackEnergy) - tof;
+                    const float tTrack(pTrack->GetTimeAtCalorimeter() - tof);
 
                     meanTime -= tTrack;
                     meanTimeECal -= tTrack;
@@ -161,14 +157,14 @@ StatusCode CLICPfoSelectionAlgorithm::Run()
                 if (selectPfo && (pPfo->GetEnergy() > pfoEnergyToDisplay) && m_displaySelectedPfos)
                 {
                     std::cout << " SELECTED PFO " << pPfo->GetParticleId() << " tracks = " << trackList.size() << " e = " << pPfo->GetEnergy()
-                              << " pt = " << pfoPt << " nc = " << pfoClusterList.size() << " t = " << meanTime << " ne =" << nECalHits
+                              << " pt = " << pfoPt << " nc = " << pfoClusterList.size() << " t = " << meanTime << " ne = " << nECalHits
                               << " te = " << meanTimeECal << " nhe = " << nHCalEndCapHits << " the = " << meanTimeHCalEndCap << std::endl;
                 }
 
                 if (!selectPfo && (pPfo->GetEnergy() > pfoEnergyToDisplay) && m_displayRejectedPfos)
                 {
                     std::cout << " REJECTED PFO " << pPfo->GetParticleId() << " tracks = " << trackList.size() << " e = " << pPfo->GetEnergy()
-                              << " pt = " << pfoPt << " nc = " << pfoClusterList.size() << " t = " << meanTime << " ne =" << nECalHits
+                              << " pt = " << pfoPt << " nc = " << pfoClusterList.size() << " t = " << meanTime << " ne = " << nECalHits
                               << " te = " << meanTimeECal << " nhe = " << nHCalEndCapHits << " the = " << meanTimeHCalEndCap << std::endl;
                 }
             }
@@ -277,7 +273,7 @@ StatusCode CLICPfoSelectionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MonitoringPfoEnergyToDisplay", m_monitoringPfoEnergyToDisplay));
 
-    m_farForwardCosTheta = 0.95f;
+    m_farForwardCosTheta = 0.975f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "FarForwardCosTheta", m_farForwardCosTheta));
 
