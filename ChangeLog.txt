@@ -1,3 +1,9 @@
+************************************************************************
+TAG V00-05 FOR ILCSOFT USAGE
+************************************************************************
+Updated CMake files to use new ILCUTIL package.
+Added CLICPfoSelection algorithm.
+Added one and two dimensional histogram classes.
 Restructured PandoraPFANew, dividing content into separate libraries for framework, fine granularity content and k-means clustering content.
 Moved all content specific to fine granularity detectors from framework (e.g. helper classes) to fine granularity content library.
 Updated CMake files to reflect restructuring of PandoraPFANew.
