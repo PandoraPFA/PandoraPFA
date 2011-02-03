@@ -12,6 +12,7 @@
 #       if REQUIRED is NOT set components may or may not be available
 #
 #   PandoraPFANew_ROOT       : path to this PandoraPFANew installation
+#   PandoraPFANew_VERSION    : package version
 #   PandoraPFANew_LIBRARIES  : list of PandoraPFANew libraries (NOT including COMPONENTS)
 #   PandoraPFANew_INCLUDE_DIRS  : list of paths to be used with INCLUDE_DIRECTORIES
 #   PandoraPFANew_LIBRARY_DIRS  : list of paths to be used with LINK_DIRECTORIES
@@ -24,6 +25,7 @@
 ##############################################################################
 
 SET( PandoraPFANew_ROOT "@CMAKE_INSTALL_PREFIX@" )
+SET( PandoraPFANew_VERSION "@PandoraPFANew_VERSION@" )
 
 
 # ---------- include dirs -----------------------------------------------------

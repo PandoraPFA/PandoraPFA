@@ -23,7 +23,7 @@ FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES REQUIRED )
 # load default settings from ILCSOFT_CMAKE_MODULES
 INCLUDE( ilcsoft_default_settings )
 
-#FIND_PACKAGE( PandoraMonitoring QUIET )
+FIND_PACKAGE( PandoraMonitoring QUIET )
 
 IF( PandoraMonitoring_FOUND )
     ADD_DEFINITIONS( -DMONITORING )
@@ -31,9 +31,9 @@ IF( PandoraMonitoring_FOUND )
     LINK_LIBRARIES( "${PandoraMonitoring_LIBRARIES}" )
 ELSEIF( PandoraMonitoring_DIR )
     # get rid of developer warning
-#    IF(COMMAND CMAKE_POLICY)
-#      CMAKE_POLICY(SET CMP0015 NEW)
-#    ENDIF()
+    IF(COMMAND CMAKE_POLICY)
+        CMAKE_POLICY(SET CMP0015 NEW)
+    ENDIF()
     ADD_DEFINITIONS( -DMONITORING )
     INCLUDE_DIRECTORIES( "${PandoraMonitoring_DIR}/include" )
     LINK_DIRECTORIES( "${PandoraMonitoring_DIR}/lib" )
