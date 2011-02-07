@@ -189,7 +189,8 @@ void VisualMonitoringAlgorithm::VisualizeClusterList(const std::string &listName
         }
     }
 
-    PANDORA_MONITORING_API(VisualizeClusters(pClusterList, listName.empty() ? "currentClusters" : listName.c_str(), AUTO));
+    PANDORA_MONITORING_API(VisualizeClusters(pClusterList, listName.empty() ? "currentClusters" : listName.c_str(), (m_hitColors.find("particleid") != std::string::npos) ?
+        AUTOID : (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: (m_hitColors.find("iterate") != std::string::npos ? AUTOITER: AUTO)));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -205,7 +206,7 @@ void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
     }
 
     PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", (m_hitColors.find("particleid") != std::string::npos) ?
-        AUTOID : (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: AUTO));
+        AUTOID : (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: (m_hitColors.find("iterate") != std::string::npos ? AUTOITER: AUTO)));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
