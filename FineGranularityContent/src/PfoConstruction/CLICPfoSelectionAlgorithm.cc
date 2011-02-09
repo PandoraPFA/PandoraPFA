@@ -101,7 +101,7 @@ StatusCode CLICPfoSelectionAlgorithm::Run()
         if (!pfoClusterList.empty())
         {
             for (ClusterList::const_iterator clusterIter = pfoClusterList.begin(), clusterIterEnd = pfoClusterList.end();
-                clusterIter != clusterIterEnd; clusterIter++)
+                clusterIter != clusterIterEnd; ++clusterIter)
             {
                 Cluster *pCluster = *clusterIter;
 

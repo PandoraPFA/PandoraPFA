@@ -115,8 +115,8 @@ StatusCode KMeansClusteringAlgorithm::Run()
         ++hitIndex;
     }
 
-    delete closeCtr;
-    delete sqDist;
+    delete [] closeCtr;
+    delete [] sqDist;
 
     return STATUS_CODE_SUCCESS;
 }

@@ -19,8 +19,11 @@ namespace pandora
 
 class BFieldCalculator;
 class CaloHit;
+class CartesianVector;
 class Cluster;
+class DetectorGap;
 class Helix;
+class Histogram;
 class MCParticle;
 class OrderedCaloHitList;
 class ParticleFlowObject;
@@ -28,6 +31,7 @@ class PseudoLayerCalculator;
 class ShowerProfileCalculator;
 class Track;
 class TrackState;
+class TwoDHistogram;
 
 // Macro allowing use of pandora monitoring to be quickly included/excluded via pre-processor flag
 #ifdef MONITORING
