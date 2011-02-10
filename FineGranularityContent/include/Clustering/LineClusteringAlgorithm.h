@@ -42,22 +42,22 @@ private:
         TwoDLine(const float xPointOnLine, const float yPointOnLine, const float rotationAngle);
 
         /**
-         *  @brief  Get the hough space r coordinate of the straight line
+         *  @brief  Get the Hough space r coordinate of the straight line
          * 
-         *  @return the hough space r coordinate
+         *  @return the Hough space r coordinate
          */
         float GetHoughSpaceR() const;
 
         /**
-         *  @brief  Get the hough space theta coordinate of the straight line
+         *  @brief  Get the Hough space theta coordinate of the straight line
          * 
-         *  @return the hough space theta coordinate
+         *  @return the Hough space theta coordinate
          */
         float GetHoughSpaceTheta() const;
 
     private:
-        const float m_houghSpaceR;                  ///< The hough space r coordinate of the straight line
-        const float m_houghSpaceTheta;              ///< The hough space theta coordinate of the straight line
+        const float m_houghSpaceR;                  ///< The Hough space r coordinate of the straight line
+        const float m_houghSpaceTheta;              ///< The Hough space theta coordinate of the straight line
     };
 
     pandora::StatusCode Run();
@@ -71,32 +71,42 @@ private:
     pandora::StatusCode GetListOfAvailableCaloHits(pandora::CaloHitList &caloHitList) const;
 
     /**
-     *  @brief  Fill hough space histograms for the calo hits in a specified list
+     *  @brief  Fill Hough space histograms for the calo hits in a specified list
      * 
      *  @param  caloHitList the specified list of available calo hits
-     *  @param  twoDHistogram_XY to receive the populated hough space histogram for 2D lines in the x-y plane
-     *  @param  twoDHistogram_YZ to receive the populated hough space histogram for 2D lines in the y-z plane
+     *  @param  twoDHistogram_XY to receive the populated Hough space histogram for 2D lines in the x-y plane
+     *  @param  twoDHistogram_YZ to receive the populated Hough space histogram for 2D lines in the y-z plane
      */
     void FillHoughSpaceHistograms(const pandora::CaloHitList &caloHitList, pandora::TwoDHistogram &twoDHistogram_XY,
         pandora::TwoDHistogram &twoDHistogram_YZ) const;
 
     /**
-     *  @brief  Use the results of the hough transforms in the x-y and y-z planes to identify straight-line clusters
+     *  @brief  Use the results of the Hough transforms in the x-y and y-z planes to identify straight-line clusters
      * 
      *  @param  caloHitList the specified list of available calo hits
      *  @param  useXY whether to use the 2D line in the x-y plane to identify calo hits
      *  @param  useYZ whether to use the 2D line in the y-z plane to identify calo hits
-     *  @param  peakR_XY the peak hough space R value for clustering in the x-y plane
-     *  @param  peakTheta_XY the peak hough space theta value for clustering in the x-y plane
-     *  @param  peakR_YZ the peak hough space R value for clustering in the y-z plane
-     *  @param  peakTheta_YZ the peak hough space theta value for clustering in the y-z plane
+     *  @param  peakR_XY the peak Hough space R value for clustering in the x-y plane
+     *  @param  peakTheta_XY the peak Hough space theta value for clustering in the x-y plane
+     *  @param  peakR_YZ the peak Hough space R value for clustering in the y-z plane
+     *  @param  peakTheta_YZ the peak Hough space theta value for clustering in the y-z plane
      *  @param  pCluster to receive the address of the cluster
      */
     pandora::StatusCode CreateCluster(const pandora::CaloHitList &caloHitList, const bool useXY, const bool useYZ, const float peakR_XY,
         const float peakTheta_XY, const float peakR_YZ, const float peakTheta_YZ, pandora::Cluster *&pCluster) const;
 
     bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
+    unsigned int    m_minCaloHitsForClustering;     ///< Minimum number of available calo hits to proceed with clustering
+
     unsigned int    m_nLines;                       ///< The number of lines to examined through each point (uniformly spaced in angle)
+    unsigned int    m_nHoughSpaceRBins;             ///< The number of histogram bins for the Hough space r coordinate
+    float           m_minHoughSpaceR;               ///< The histogram minimum value for the Hough space r coordinate
+    float           m_maxHoughSpaceR;               ///< The histogram maximum value for the Hough space r coordinate
+
+    float           m_minHoughSpacePeakEntries;     ///< The minimum number of entries in the hough space peak to proceed with clustering
+    float           m_hitToLineTolerance;           ///< The maximum distance between line and candidate calo hit, units: cell length scales
+
+    bool            m_houghSpaceMonitoring;         ///< Whether to draw Hough space histograms, if monitoring is enabled
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

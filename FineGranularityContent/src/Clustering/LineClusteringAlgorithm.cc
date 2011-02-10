@@ -23,7 +23,7 @@ StatusCode LineClusteringAlgorithm::Run()
         CaloHitList caloHitList;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetListOfAvailableCaloHits(caloHitList));
 
-        if (caloHitList.size() < 5)
+        if (caloHitList.size() < m_minCaloHitsForClustering)
             break;
 
         // Create histograms
@@ -32,31 +32,33 @@ StatusCode LineClusteringAlgorithm::Run()
         const float minTheta(-thetaOffset);
         const float maxTheta(thetaOffset + (pi * (static_cast<float>(m_nLines - 1) / static_cast<float>(m_nLines))));
 
-        TwoDHistogram twoDHistogram_XY(m_nLines, minTheta, maxTheta, 750, -6000, 6000);
-        TwoDHistogram twoDHistogram_YZ(m_nLines, minTheta, maxTheta, 750, -6000, 6000);
+        TwoDHistogram twoDHistogram_XY(m_nLines, minTheta, maxTheta, m_nHoughSpaceRBins, m_minHoughSpaceR, m_maxHoughSpaceR);
+        TwoDHistogram twoDHistogram_YZ(m_nLines, minTheta, maxTheta, m_nHoughSpaceRBins, m_minHoughSpaceR, m_maxHoughSpaceR);
         this->FillHoughSpaceHistograms(caloHitList, twoDHistogram_XY, twoDHistogram_YZ);
 
-        // Identify straight lines corresponding to narrow peak in hough space
-        float maximumValue_XY(0.f);
-        int maximumThetaBin_XY(-1), maximumRBin_XY(-1);
+        // Identify peak in x-y Hough space
+        float maximumValue_XY(0.f); int maximumThetaBin_XY(-1), maximumRBin_XY(-1);
         twoDHistogram_XY.GetMaximum(maximumValue_XY, maximumThetaBin_XY, maximumRBin_XY);
         const float peakTheta_XY(twoDHistogram_XY.GetXLow() + (twoDHistogram_XY.GetXBinWidth() * static_cast<float>(0.5 + maximumThetaBin_XY)));
         const float peakR_XY(twoDHistogram_XY.GetYLow() + (twoDHistogram_XY.GetYBinWidth() * static_cast<float>(0.5 + maximumRBin_XY)));
 
-        float maximumValue_YZ(0.f);
-        int maximumThetaBin_YZ(-1), maximumRBin_YZ(-1);
+        // Identify peak in y-z Hough space
+        float maximumValue_YZ(0.f); int maximumThetaBin_YZ(-1), maximumRBin_YZ(-1);
         twoDHistogram_YZ.GetMaximum(maximumValue_YZ, maximumThetaBin_YZ, maximumRBin_YZ);
         const float peakTheta_YZ(twoDHistogram_YZ.GetXLow() + (twoDHistogram_YZ.GetXBinWidth() * static_cast<float>(0.5 + maximumThetaBin_YZ)));
         const float peakR_YZ(twoDHistogram_YZ.GetYLow() + (twoDHistogram_YZ.GetYBinWidth() * static_cast<float>(0.5 + maximumRBin_YZ)));
 
-        PANDORA_MONITORING_API(DrawPandoraHistogram(twoDHistogram_XY, "colz"));
-        PANDORA_MONITORING_API(DrawPandoraHistogram(twoDHistogram_YZ, "colz"));
-
         // Conditions to terminate clustering
-        if ((maximumValue_XY < 5) || (maximumValue_YZ < 5))
+        if ((maximumValue_XY < m_minHoughSpacePeakEntries) || (maximumValue_YZ < m_minHoughSpacePeakEntries))
         {
             std::cout << "LineClusteringAlgorithm: Too few hits on line, halting clustering." << std::endl;
             break;
+        }
+
+        if (m_houghSpaceMonitoring)
+        {
+            PANDORA_MONITORING_API(DrawPandoraHistogram(twoDHistogram_XY, "colz"));
+            PANDORA_MONITORING_API(DrawPandoraHistogram(twoDHistogram_YZ, "colz"));
         }
 
         // Use straight lines to create cluster
@@ -67,7 +69,7 @@ StatusCode LineClusteringAlgorithm::Run()
         if (NULL != pCluster)
             continue;
 
-        // Conditions to revert to 2d approach
+        // Conditions to revert to 2D approach
         if (maximumValue_XY > maximumValue_YZ)
         {
             std::cout << "LineClusteringAlgorithm: Large peak discrepancy - reverting to 2d xy approach." << std::endl;
@@ -84,7 +86,7 @@ StatusCode LineClusteringAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateCluster(caloHitList, useXY, useYZ, peakR_XY, peakTheta_XY,
             peakR_YZ, peakTheta_YZ, pCluster));
 
-        // Terminate if 2d clustering is still unsuccessful
+        // Terminate if 2D clustering is still unsuccessful
         if (NULL == pCluster)
             break;
     }
@@ -129,14 +131,10 @@ void LineClusteringAlgorithm::FillHoughSpaceHistograms(const CaloHitList &caloHi
         for (unsigned int iLine = 0; iLine < m_nLines; ++iLine)
         {
             const TwoDLine twoDLine_XY(xPosition, yPosition, pi * static_cast<float>(iLine) / static_cast<float>(m_nLines));
-            const float houghSpaceR_XY(twoDLine_XY.GetHoughSpaceR());
-            const float houghSpaceTheta_XY(twoDLine_XY.GetHoughSpaceTheta());
-            twoDHistogram_XY.Fill(houghSpaceTheta_XY, houghSpaceR_XY);
+            twoDHistogram_XY.Fill(twoDLine_XY.GetHoughSpaceTheta(), twoDLine_XY.GetHoughSpaceR());
 
             const TwoDLine twoDLine_YZ(yPosition, zPosition, pi * static_cast<float>(iLine) / static_cast<float>(m_nLines));
-            const float houghSpaceR_YZ(twoDLine_YZ.GetHoughSpaceR());
-            const float houghSpaceTheta_YZ(twoDLine_YZ.GetHoughSpaceTheta());
-            twoDHistogram_YZ.Fill(houghSpaceTheta_YZ, houghSpaceR_YZ);
+            twoDHistogram_YZ.Fill(twoDLine_YZ.GetHoughSpaceTheta(), twoDLine_YZ.GetHoughSpaceR());
         }
     }
 }
@@ -159,8 +157,8 @@ StatusCode LineClusteringAlgorithm::CreateCluster(const CaloHitList &caloHitList
         const float hitR_XY(pCaloHit->GetPositionVector().GetX() * cosPeakTheta_XY + pCaloHit->GetPositionVector().GetY() * sinPeakTheta_XY);
         const float hitR_YZ(pCaloHit->GetPositionVector().GetY() * cosPeakTheta_YZ + pCaloHit->GetPositionVector().GetZ() * sinPeakTheta_YZ);
 
-        if ((!useXY || std::fabs(hitR_XY - peakR_XY) < (2.f * pCaloHit->GetCellLengthScale())) &&
-            (!useYZ || std::fabs(hitR_YZ - peakR_YZ) < (2.f * pCaloHit->GetCellLengthScale())) )
+        if ((!useXY || std::fabs(hitR_XY - peakR_XY) < (m_hitToLineTolerance * pCaloHit->GetCellLengthScale())) &&
+            (!useYZ || std::fabs(hitR_YZ - peakR_YZ) < (m_hitToLineTolerance * pCaloHit->GetCellLengthScale())) )
         {
             if (NULL == pCluster)
             {
@@ -184,12 +182,40 @@ StatusCode LineClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShouldUseIsolatedHits", m_shouldUseIsolatedHits));
 
+    m_minCaloHitsForClustering = 5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinCaloHitsForClustering", m_minCaloHitsForClustering));
+
     m_nLines = 1000;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "NLines", m_nLines));
 
     if (0 == m_nLines)
         return STATUS_CODE_INVALID_PARAMETER;
+
+    m_nHoughSpaceRBins = 750;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NHoughSpaceRBins", m_nHoughSpaceRBins));
+
+    m_minHoughSpaceR = -6000.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHoughSpaceR", m_minHoughSpaceR));
+
+    m_maxHoughSpaceR = 6000.f;;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxHoughSpaceR", m_maxHoughSpaceR));
+
+    m_minHoughSpacePeakEntries = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHoughSpacePeakEntries", m_minHoughSpacePeakEntries));
+
+    m_hitToLineTolerance = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HitToLineTolerance", m_hitToLineTolerance));
+
+    m_houghSpaceMonitoring = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "HoughSpaceMonitoring", m_houghSpaceMonitoring));
 
     return STATUS_CODE_SUCCESS;
 }
