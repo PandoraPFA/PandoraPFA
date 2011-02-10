@@ -71,6 +71,7 @@ enum TrackErrorTypes
     std::right << std::setw(widthFloat)    <<    "mc"      <<                                   \
     std::left  << std::setw(widthFlag)     <<    ")"       <<                                   \
     std::right << std::setw(widthFloat)    <<    "Eclust"  <<                                   \
+    std::right << std::setw(widthFloat)    <<    "tclust"  <<                                   \
     std::right << std::setw(widthFloat)    <<    "chi"     <<                                   \
     std::right << std::setw(widthFlag)     <<    "L"       <<                                   \
     std::right << std::setw(widthSmallFloat)    <<    "fC" <<                                   \
@@ -78,7 +79,7 @@ enum TrackErrorTypes
     std::right << std::setw(widthSmallFloat)    <<    "fN" <<                                   \
     std::endl
 
-#define FORMATTED_OUTPUT_TRACK(N1, N2, FLAG1, FLAG2, E1, E2, E3, E4, FLAG3, E5, E6, E7)         \
+#define FORMATTED_OUTPUT_TRACK(N1, N2, FLAG1, FLAG2, E1, E2, E3, E4, E5, FLAG3, E6, E7, E8) \
     std::cout  <<                                                                               \
     std::right << std::setw(widthInt)      <<    N1        <<                                   \
     std::right << std::setw(widthFlag)     <<    "("       <<                                   \
@@ -92,27 +93,30 @@ enum TrackErrorTypes
     std::left  << std::setw(widthFlag)     <<    ")"       <<                                   \
     std::right << std::setw(widthFloat)    <<    E3        <<                                   \
     std::right << std::setw(widthFloat)    <<    E4        <<                                   \
+    std::right << std::setw(widthFloat)    <<    E5        <<                                   \
     std::right << std::setw(widthFlag)     <<    FLAG3     <<                                   \
-    std::right << std::setw(widthSmallFloat) <<  E5        <<                                   \
     std::right << std::setw(widthSmallFloat) <<  E6        <<                                   \
-    std::right << std::setw(widthSmallFloat) <<  E7
+    std::right << std::setw(widthSmallFloat) <<  E7        <<                                   \
+    std::right << std::setw(widthSmallFloat) <<  E8
 
-#define FORMATTED_OUTPUT_NEUTRAL(E1, E2, E3, E4, N1, N2, E5, E6)                                \
+#define FORMATTED_OUTPUT_NEUTRAL(E1, E2, E3, E4, E5, N1, N2, E6, E7)	\
     std::cout  <<                                                                               \
     std::right << std::setw(widthFloat)      <<  E1        <<                                   \
+    std::right << std::setw(widthFloat)      <<  E2        <<                                   \
     std::right << std::setw(widthInt4)       <<  "     "   <<                                   \
-    std::right << std::setw(widthSmallFloat) <<  E2        <<                                   \
     std::right << std::setw(widthSmallFloat) <<  E3        <<                                   \
     std::right << std::setw(widthSmallFloat) <<  E4        <<                                   \
+    std::right << std::setw(widthSmallFloat) <<  E5        <<                                   \
     std::right << std::setw(widthInt4)     <<    N1        <<                                   \
     std::left  << std::setw(widthFlag)     <<    "-"       <<                                   \
     std::left  << std::setw(widthInt4)     <<    N2        <<                                   \
-    std::right << std::setw(widthFloat)    <<    E5        <<                                   \
-    std::right << std::setw(widthFloat)    <<    E6
+    std::right << std::setw(widthFloat)    <<    E6        <<                                   \
+    std::right << std::setw(widthFloat)    <<    E7
 
 #define FORMATTED_OUTPUT_NEUTRAL_TITLE()                                                        \
     std::cout  <<                                                                               \
     std::right << std::setw(widthFloat)    <<    "Eclust"  <<                                   \
+    std::right << std::setw(widthFloat)    <<    "tclust"  <<                                   \
     std::right << std::setw(widthInt4)     <<    "     "   <<                                   \
     std::right << std::setw(widthSmallFloat) <<  "fC"      <<                                   \
     std::right << std::setw(widthSmallFloat) <<  "fP"      <<                                   \
@@ -121,6 +125,29 @@ enum TrackErrorTypes
     std::right << std::setw(widthFloat)      <<   "sStart" <<                                   \
     std::right << std::setw(widthFloat)      <<   "sDisc"  <<                                   \
     std::endl
+
+
+#define FORMATTED_OUTPUT_GOODENERGY(E1, E2, E3, E4) 			                        \
+    std::cout  <<                                                                               \
+    std::right << std::setw(22) <<  "Unconfused energy : " <<                                   \
+    std::right << std::setw(widthBigFloat)      <<  E1        <<                                   \
+    std::right << std::setw(widthBigFloat)      <<  E2        <<                                   \
+    std::right << std::setw(widthBigFloat)      <<  E3        <<                                   \
+    std::right << std::setw(4)  <<  " : "    <<                                                 \
+    std::right << std::setw(widthBigFloat)      <<  E4        <<                                   \
+    std::endl;
+
+
+#define FORMATTED_OUTPUT_BADENERGY(E1, E2, E3, E4) 			                        \
+    std::cout  <<                                                                               \
+    std::right << std::setw(22) <<  "Confused   energy : " <<                                   \
+    std::right << std::setw(widthBigFloat)      <<  E1        <<                                   \
+    std::right << std::setw(widthBigFloat)      <<  E2        <<                                   \
+    std::right << std::setw(widthBigFloat)      <<  E3        <<                                   \
+    std::right << std::setw(4)  <<  " : "    <<                                                 \
+    std::right << std::setw(widthBigFloat)      <<  E4        <<                                   \
+    std::endl;
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,9 +166,12 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    ~DumpPfosMonitoringAlgorithm();
+
 private:
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode Initialize();
 
     /**
      *  @brief  DumpChargedPfo
@@ -184,6 +214,8 @@ private:
     void ClusterEnergyFractions(const pandora::Cluster *pCluster, float &fCharged, float &fPhoton, float &fneutral,
         const pandora::MCParticle *&pBestMatchedMcPfo) const;
 
+    float ClusterTime(const pandora::Cluster *pCluster) const;
+
     typedef std::set<const pandora::MCParticle*> MCParticleList;
     typedef std::vector<pandora::ParticleFlowObject*> ParticleFlowObjectVector;
 
@@ -204,6 +236,13 @@ private:
     float                   m_neutralRecoAsTrackEnergy;                 ///< 
     float                   m_neutralRecoAsPhotonEnergy;                ///< 
     float                   m_neutralRecoAsNeutralEnergy;               ///< 
+
+    int                     m_count;                                    ///<
+    float                   m_photonOrNeutralRecoAsTrackEnergySum;      ///<
+    float                   m_photonOrNeutralRecoAsTrackEnergySum2;     ///<
+    float                   m_trackRecoAsPhotonOrNeutralEnergySum;      ///<
+    float                   m_trackRecoAsPhotonOrNeutralEnergySum2;     ///<
+    float                   m_confusionCorrelation;                     ///<
                     
     float                   m_minPfoEnergyToDisplay;                    ///< 
     float                   m_minAbsChiToDisplay;                       ///< 
@@ -214,6 +253,34 @@ private:
     float                   m_fragmentEnergyToDisplay;                  ///< 
     float                   m_photonIdEnergyToDisplay;                  ///< 
                     
+    float                   m_trackRecoAsTrackEnergySum;                ///< 
+    float                   m_trackRecoAsPhotonEnergySum;               ///< 
+    float                   m_trackRecoAsNeutralEnergySum;              ///< 
+    float                   m_photonRecoAsTrackEnergySum;               ///< 
+    float                   m_photonRecoAsPhotonEnergySum;              ///< 
+    float                   m_photonRecoAsNeutralEnergySum;             ///< 
+    float                   m_neutralRecoAsTrackEnergySum;              ///< 
+    float                   m_neutralRecoAsPhotonEnergySum;             ///< 
+    float                   m_neutralRecoAsNeutralEnergySum;            ///< 
+
+    float                   m_goodTrackEnergy;                          ///< 
+    float                   m_goodPhotonEnergy;                         ///< 
+    float                   m_goodIdedPhotonEnergy;                     ///< 
+    float                   m_goodNeutralEnergy;                        ///< 
+    float                   m_goodIdedNeutralEnergy;                    ///< 
+    float                   m_badTrackEnergy;                           ///< 
+    float                   m_badPhotonEnergy;                          ///< 
+    float                   m_badNeutralEnergy;                         ///< 
+    float                   m_goodTrackEnergySum;                       ///< 
+    float                   m_goodPhotonEnergySum;                      ///< 
+    float                   m_goodIdedPhotonEnergySum;                  ///< 
+    float                   m_goodNeutralEnergySum;                     ///< 
+    float                   m_goodIdedNeutralEnergySum;                 ///< 
+    float                   m_badTrackEnergySum;                        ///< 
+    float                   m_badPhotonEnergySum;                       ///< 
+    float                   m_badNeutralEnergySum;                      ///< 
+    float                   m_goodFractionCut;                          ///< 
+
     bool                    m_firstChargedPfoToPrint;                   ///< 
     bool                    m_firstNeutralPfoToPrint;                   ///< 
     bool                    m_firstPhotonPfoToPrint;                    ///< 
