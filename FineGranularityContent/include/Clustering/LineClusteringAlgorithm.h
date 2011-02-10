@@ -98,7 +98,12 @@ private:
     bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
     unsigned int    m_minCaloHitsForClustering;     ///< Minimum number of available calo hits to proceed with clustering
 
+    bool            m_useXY;                        ///< Whether to perform a Hough transform in the x-y plane
+    bool            m_useYZ;                        ///< Whether to perform a Hough transform in the y-z plane
+
     unsigned int    m_nLines;                       ///< The number of lines to examined through each point (uniformly spaced in angle)
+    float           m_minAbsCosAngleToHitDir;       ///< Min abs cos angle between line and expected hit dir for contribution to Hough transform
+
     unsigned int    m_nHoughSpaceRBins;             ///< The number of histogram bins for the Hough space r coordinate
     float           m_minHoughSpaceR;               ///< The histogram minimum value for the Hough space r coordinate
     float           m_maxHoughSpaceR;               ///< The histogram maximum value for the Hough space r coordinate
