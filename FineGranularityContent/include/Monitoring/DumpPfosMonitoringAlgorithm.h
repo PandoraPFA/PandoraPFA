@@ -79,7 +79,7 @@ enum TrackErrorTypes
     std::right << std::setw(widthSmallFloat)    <<    "fN" <<                                   \
     std::endl
 
-#define FORMATTED_OUTPUT_TRACK(N1, N2, FLAG1, FLAG2, E1, E2, E3, E4, E5, FLAG3, E6, E7, E8) \
+#define FORMATTED_OUTPUT_TRACK(N1, N2, FLAG1, FLAG2, E1, E2, E3, E4, E5, FLAG3, E6, E7, E8)     \
     std::cout  <<                                                                               \
     std::right << std::setw(widthInt)      <<    N1        <<                                   \
     std::right << std::setw(widthFlag)     <<    "("       <<                                   \
@@ -99,7 +99,7 @@ enum TrackErrorTypes
     std::right << std::setw(widthSmallFloat) <<  E7        <<                                   \
     std::right << std::setw(widthSmallFloat) <<  E8
 
-#define FORMATTED_OUTPUT_NEUTRAL(E1, E2, E3, E4, E5, N1, N2, E6, E7)	\
+#define FORMATTED_OUTPUT_NEUTRAL(E1, E2, E3, E4, E5, N1, N2, E6, E7)                            \
     std::cout  <<                                                                               \
     std::right << std::setw(widthFloat)      <<  E1        <<                                   \
     std::right << std::setw(widthFloat)      <<  E2        <<                                   \
@@ -127,25 +127,25 @@ enum TrackErrorTypes
     std::endl
 
 
-#define FORMATTED_OUTPUT_GOODENERGY(E1, E2, E3, E4) 			                        \
+#define FORMATTED_OUTPUT_GOODENERGY(E1, E2, E3, E4)                                             \
     std::cout  <<                                                                               \
-    std::right << std::setw(22) <<  "Unconfused energy : " <<                                   \
-    std::right << std::setw(widthBigFloat)      <<  E1        <<                                   \
-    std::right << std::setw(widthBigFloat)      <<  E2        <<                                   \
-    std::right << std::setw(widthBigFloat)      <<  E3        <<                                   \
-    std::right << std::setw(4)  <<  " : "    <<                                                 \
-    std::right << std::setw(widthBigFloat)      <<  E4        <<                                   \
+    std::right << std::setw(22) <<  "Unconfused energy : "    <<                                \
+    std::right << std::setw(widthBigFloat)      <<  E1        <<                                \
+    std::right << std::setw(widthBigFloat)      <<  E2        <<                                \
+    std::right << std::setw(widthBigFloat)      <<  E3        <<                                \
+    std::right << std::setw(4)  <<  " : "       <<                                              \
+    std::right << std::setw(widthBigFloat)      <<  E4        <<                                \
     std::endl;
 
 
-#define FORMATTED_OUTPUT_BADENERGY(E1, E2, E3, E4) 			                        \
+#define FORMATTED_OUTPUT_BADENERGY(E1, E2, E3, E4)                                              \
     std::cout  <<                                                                               \
     std::right << std::setw(22) <<  "Confused   energy : " <<                                   \
-    std::right << std::setw(widthBigFloat)      <<  E1        <<                                   \
-    std::right << std::setw(widthBigFloat)      <<  E2        <<                                   \
-    std::right << std::setw(widthBigFloat)      <<  E3        <<                                   \
-    std::right << std::setw(4)  <<  " : "    <<                                                 \
-    std::right << std::setw(widthBigFloat)      <<  E4        <<                                   \
+    std::right << std::setw(widthBigFloat)      <<  E1        <<                                \
+    std::right << std::setw(widthBigFloat)      <<  E2        <<                                \
+    std::right << std::setw(widthBigFloat)      <<  E3        <<                                \
+    std::right << std::setw(4)  <<  " : "       <<                                              \
+    std::right << std::setw(widthBigFloat)      <<  E4        <<                                \
     std::endl;
 
 
@@ -166,6 +166,9 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Destructor
+     */
     ~DumpPfosMonitoringAlgorithm();
 
 private:
@@ -214,6 +217,13 @@ private:
     void ClusterEnergyFractions(const pandora::Cluster *pCluster, float &fCharged, float &fPhoton, float &fneutral,
         const pandora::MCParticle *&pBestMatchedMcPfo) const;
 
+    /**
+     *  @brief  ClusterTime
+     * 
+     *  @param  pCluster
+     * 
+     *  @return the cluster time
+     */
     float ClusterTime(const pandora::Cluster *pCluster) const;
 
     typedef std::set<const pandora::MCParticle*> MCParticleList;
