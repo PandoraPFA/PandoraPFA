@@ -153,9 +153,7 @@ StatusCode TrackManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *c
 StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const TrackList &trackList,
     std::string &temporaryListName)
 {
-    if (trackList.empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
+    // ATTN: Previously couldn't create an empty temporary list. Now allow this for reclustering without reference to tracks.
     AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
 
     if (m_algorithmInfoMap.end() == iter)
