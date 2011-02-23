@@ -187,7 +187,7 @@ float FineGranularityShowerProfileCalculator::m_showerProfileMaxDifference = 0.1
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void FineGranularityShowerProfileCalculator::Initialize(const TiXmlHandle *const pXmlHandle)
+void FineGranularityShowerProfileCalculator::ReadSettings(const TiXmlHandle *const pXmlHandle)
 {
     PANDORA_THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(*pXmlHandle,
         "ShowerProfileBinWidth", m_showerProfileBinWidth));
