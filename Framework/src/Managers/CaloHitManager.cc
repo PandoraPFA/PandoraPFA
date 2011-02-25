@@ -263,7 +263,7 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
 StatusCode CaloHitManager::SaveList(const OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
 {
     if (m_nameToOrderedCaloHitListMap.end() != m_nameToOrderedCaloHitListMap.find(newListName))
-        return STATUS_CODE_ALREADY_PRESENT;
+        return this->AddCaloHitsToList(newListName, orderedCaloHitList);
 
     if (!m_nameToOrderedCaloHitListMap.insert(NameToOrderedCaloHitListMap::value_type(newListName, new OrderedCaloHitList)).second)
         return STATUS_CODE_ALREADY_PRESENT;
@@ -282,6 +282,9 @@ StatusCode CaloHitManager::AddCaloHitsToList(const std::string &listName, const 
 
     if (m_nameToOrderedCaloHitListMap.end() == listIter)
         return STATUS_CODE_NOT_FOUND;
+
+    if (listIter->second == &orderedCaloHitList)
+        return STATUS_CODE_INVALID_PARAMETER;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Add(orderedCaloHitList));
 
@@ -316,6 +319,9 @@ StatusCode CaloHitManager::RemoveCaloHitsFromList(const std::string &listName, c
 
     if (m_nameToOrderedCaloHitListMap.end() == listIter)
         return STATUS_CODE_NOT_FOUND;
+
+    if (listIter->second == &orderedCaloHitList)
+        return STATUS_CODE_INVALID_PARAMETER;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, listIter->second->Remove(orderedCaloHitList));
 

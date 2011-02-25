@@ -59,7 +59,12 @@ public:
 
 private:
     /**
-     *  @brief  Process event
+     *  @brief  Prepare event, calculating properties of input objects for later use in algorithms
+     */
+    StatusCode PrepareEvent();
+
+    /**
+     *  @brief  Process event, calling event prepare event function, then running the algorithms
      */
     StatusCode ProcessEvent();
 

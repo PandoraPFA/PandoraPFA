@@ -14,19 +14,43 @@
 
 using namespace pandora;
 
-StatusCode EventReadingAlgorithm::Run()
+EventReadingAlgorithm::EventReadingAlgorithm() :
+    m_pFileReader(NULL)
 {
-    FileReader fileReader(*this, "testfile.pndr");
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, fileReader.ReadEvent());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+EventReadingAlgorithm::~EventReadingAlgorithm()
+{
+    delete m_pFileReader;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode EventReadingAlgorithm::Initialize()
+{
+    m_pFileReader = new FileReader(*this, m_fileName);
 
     return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EventReadingAlgorithm::ReadSettings(const TiXmlHandle /*xmlHandle*/)
+StatusCode EventReadingAlgorithm::Run()
 {
-    // Read settings from xml file here
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pFileReader->ReadEvent());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RepeatEventPreparation(*this));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode EventReadingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
+        "FileName", m_fileName));
 
     return STATUS_CODE_SUCCESS;
 }

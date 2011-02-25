@@ -498,6 +498,11 @@ public:
      */
     StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
 
+    /**
+     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
+     */
+    StatusCode RepeatEventPreparation() const;
+
 private:
     /**
      *  @brief  Constructor

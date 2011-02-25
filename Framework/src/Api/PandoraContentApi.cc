@@ -482,6 +482,13 @@ pandora::StatusCode PandoraContentApi::GetMCParticleList(const pandora::Algorith
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::RepeatEventPreparation(const pandora::Algorithm &algorithm)
+{
+    return algorithm.GetPandoraContentApiImpl()->RepeatEventPreparation();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template pandora::StatusCode PandoraContentApi::Cluster::Create<pandora::CaloHit>(const pandora::Algorithm &algorithm, pandora::CaloHit *pCaloHit);

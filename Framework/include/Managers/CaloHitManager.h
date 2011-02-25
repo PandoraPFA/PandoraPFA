@@ -165,8 +165,8 @@ private:
     /**
      *  @brief  Add hits in a specified ordered calo hit list to an ordered calo hit list
      *
-     *   @param  listName the list to add the hits to
-      *  @param  orderedCaloHitList
+     *  @param  listName the list to add the hits to
+     *  @param  orderedCaloHitList the ordered list of calo hits to add
      */
     StatusCode AddCaloHitsToList(const std::string &listName, const OrderedCaloHitList &orderedCaloHitList);
 
@@ -182,7 +182,7 @@ private:
      *  @brief  Remove hits in a specified ordered calo hit list from an ordered calo hit list
      *
      *  @param  listName the list to remove the hits from
-     *  @param  orderedCaloHitList
+     *  @param  orderedCaloHitList the ordered list of calo hits to remove
      */
     StatusCode RemoveCaloHitsFromList(const std::string &listName, const OrderedCaloHitList &orderedCaloHitList);
 

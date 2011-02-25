@@ -709,6 +709,13 @@ StatusCode PandoraContentApiImpl::GetMCParticleList(MCParticleList &mcParticleLi
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraContentApiImpl::RepeatEventPreparation() const
+{
+    return m_pPandora->PrepareEvent();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 PandoraContentApiImpl::PandoraContentApiImpl(Pandora *pPandora) :
     m_pPandora(pPandora)
 {

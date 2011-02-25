@@ -175,13 +175,61 @@ StatusCode TrackManager::CreateTemporaryListAndSetCurrent(const Algorithm *const
 StatusCode TrackManager::SaveList(const TrackList &trackList, const std::string &newListName)
 {
     if (m_nameToTrackListMap.end() != m_nameToTrackListMap.find(newListName))
-        return STATUS_CODE_ALREADY_PRESENT;
+        return this->AddTracksToList(newListName, trackList);
 
     if (!m_nameToTrackListMap.insert(NameToTrackListMap::value_type(newListName, new TrackList)).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
     *(m_nameToTrackListMap[newListName]) = trackList;
     m_savedLists.insert(newListName);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::AddTracksToList(const std::string &listName, const TrackList &trackList)
+{
+    NameToTrackListMap::iterator listIter = m_nameToTrackListMap.find(listName);
+
+    if (m_nameToTrackListMap.end() == listIter)
+        return STATUS_CODE_NOT_FOUND;
+
+    TrackList *pSavedTrackList = listIter->second;
+
+    if (pSavedTrackList == &trackList)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+    {
+        if (!pSavedTrackList->insert(TrackList::value_type(*iter)).second)
+            return STATUS_CODE_ALREADY_PRESENT;
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::RemoveTracksFromList(const std::string &listName, const TrackList &trackList)
+{
+    NameToTrackListMap::iterator listIter = m_nameToTrackListMap.find(listName);
+
+    if (m_nameToTrackListMap.end() == listIter)
+        return STATUS_CODE_NOT_FOUND;
+
+    TrackList *pSavedTrackList = listIter->second;
+
+    if (pSavedTrackList == &trackList)
+        return STATUS_CODE_INVALID_PARAMETER;
+
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+    {
+        TrackList::iterator savedTrackIter = pSavedTrackList->find(*iter);
+
+        if (pSavedTrackList->end() != savedTrackIter)
+            pSavedTrackList->erase(savedTrackIter);
+    }
 
     return STATUS_CODE_SUCCESS;
 }

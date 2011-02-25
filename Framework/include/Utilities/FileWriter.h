@@ -119,6 +119,13 @@ inline StatusCode FileWriter::WriteVariable(const T &t)
 }
 
 template<>
+inline StatusCode FileWriter::WriteVariable(const std::string &t)
+{
+    // Not currently supported
+    return STATUS_CODE_INVALID_PARAMETER;
+}
+
+template<>
 inline StatusCode FileWriter::WriteVariable(const CartesianVector &t)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(t.GetX()));

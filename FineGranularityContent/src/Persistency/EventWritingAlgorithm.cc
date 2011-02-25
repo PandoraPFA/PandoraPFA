@@ -14,19 +14,47 @@
 
 using namespace pandora;
 
-StatusCode EventWritingAlgorithm::Run()
+EventWritingAlgorithm::EventWritingAlgorithm() :
+    m_pFileWriter(NULL)
 {
-    FileWriter fileWriter(*this, "testfile.pndr");
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, fileWriter.WriteEvent());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+EventWritingAlgorithm::~EventWritingAlgorithm()
+{
+    delete m_pFileWriter;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode EventWritingAlgorithm::Initialize()
+{
+    const FileMode fileMode(m_shouldOverwrite ? OVERWRITE : APPEND);
+    m_pFileWriter = new FileWriter(*this, m_fileName, fileMode);
 
     return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode EventWritingAlgorithm::ReadSettings(const TiXmlHandle /*xmlHandle*/)
+StatusCode EventWritingAlgorithm::Run()
 {
-    // Read settings from xml file here
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pFileWriter->WriteEvent());
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode EventWritingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
+        "FileName", m_fileName));
+
+    m_shouldOverwrite = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldOverwrite", m_shouldOverwrite));
 
     return STATUS_CODE_SUCCESS;
 }

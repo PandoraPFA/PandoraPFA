@@ -181,7 +181,7 @@ StatusCode FileReader::ReadCaloHit(bool checkObjectId)
     parameters.m_layer = layer;
     parameters.m_isInOuterSamplingLayer = isInOuterSamplingLayer;
     parameters.m_pParentAddress = pParentAddress;
-    // TODO FIX THIS PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(m_pAlgorithm->GetPandora(), parameters));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*(m_pAlgorithm->GetPandora()), parameters));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -246,7 +246,7 @@ StatusCode FileReader::ReadTrack(bool checkObjectId)
     parameters.m_canFormPfo = canFormPfo;
     parameters.m_canFormClusterlessPfo = canFormClusterlessPfo;
     parameters.m_pParentAddress = pParentAddress;
-    // TODO FIX THIS PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(m_pAlgorithm->GetPandora(), parameters));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*(m_pAlgorithm->GetPandora()), parameters));
 
     return STATUS_CODE_SUCCESS;
 }

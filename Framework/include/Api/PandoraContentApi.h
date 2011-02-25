@@ -629,6 +629,13 @@ public:
      *  @param  mcParticleList to receive the mc particle list
      */
     static pandora::StatusCode GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList);
+
+    /**
+     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
+     *
+     *  @param  algorithm the algorithm calling this function
+     */
+    static pandora::StatusCode RepeatEventPreparation(const pandora::Algorithm &algorithm);
 };
 
 #endif // #ifndef PANDORA_CONTENT_API_H

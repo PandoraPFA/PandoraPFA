@@ -85,12 +85,20 @@ Pandora::~Pandora()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode Pandora::ProcessEvent()
+StatusCode Pandora::PrepareEvent()
 {
-    // Prepare event
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->PrepareMCParticles());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->PrepareCaloHits());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandoraImpl->PrepareTracks());
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Pandora::ProcessEvent()
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareEvent());
 
     // Loop over algorithms
     const StringVector *const pPandoraAlgorithms = m_pAlgorithmManager->GetPandoraAlgorithms();

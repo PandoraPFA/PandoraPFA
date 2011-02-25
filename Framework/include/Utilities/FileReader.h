@@ -123,6 +123,13 @@ inline StatusCode FileReader::ReadVariable(T &t)
 }
 
 template<>
+inline StatusCode FileReader::ReadVariable(const std::string &t)
+{
+    // Not currently supported
+    return STATUS_CODE_INVALID_PARAMETER;
+}
+
+template<>
 inline StatusCode FileReader::ReadVariable(CartesianVector &t)
 {
     float x, y, z;

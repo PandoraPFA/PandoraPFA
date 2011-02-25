@@ -200,6 +200,9 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
     if (m_nameToClusterListMap.end() == temporaryClusterListIter)
         return STATUS_CODE_FAILURE;
 
+    if ((originalClusterListIter->second == &clustersToMove) || (temporaryClusterListIter->second == &clustersToMove))
+        return STATUS_CODE_INVALID_PARAMETER;
+
     for (ClusterList::const_iterator clusterIter = clustersToMove.begin(), clusterIterEnd = clustersToMove.end();
         clusterIter != clusterIterEnd; ++clusterIter)
     {
@@ -286,6 +289,9 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, c
             return STATUS_CODE_FAILURE;
     }
 
+    if ((sourceClusterListIter->second == &clustersToSave) || (targetClusterListIter->second == &clustersToSave))
+        return STATUS_CODE_INVALID_PARAMETER;
+
     for (ClusterList::const_iterator clusterIter = clustersToSave.begin(); clusterIter != clustersToSave.end();)
     {
         Cluster *pCluster = *clusterIter;
@@ -368,6 +374,9 @@ StatusCode ClusterManager::DeleteClusters(const ClusterList &clusterList, const 
 
     if (m_nameToClusterListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;
+
+    if (listIter->second == &clusterList)
+        return STATUS_CODE_INVALID_PARAMETER;
 
     for (ClusterList::const_iterator clusterIter = clusterList.begin(), clusterIterEnd = clusterList.end(); clusterIter != clusterIterEnd;
         ++clusterIter)

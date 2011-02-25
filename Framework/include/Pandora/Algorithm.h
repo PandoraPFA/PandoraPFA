@@ -77,10 +77,18 @@ protected:
      */
     StatusCode RegisterPandora(Pandora *pPandora);
 
+    /**
+     *  @brief  Get the address of the pandora object that will run the algorithm
+     * 
+     *  @return The address of the pandora object that will run the algorithm
+     */
+    const Pandora *GetPandora() const;
+
     Pandora            *m_pPandora;             ///< The pandora object that will run the algorithm
     std::string         m_algorithmType;        ///< The type of algorithm
 
     friend class AlgorithmManager;
+    friend class FileReader;
     friend class PandoraContentApiImpl;
 };
 
@@ -160,6 +168,13 @@ inline StatusCode Algorithm::RegisterPandora(Pandora *pPandora)
     m_pPandora = pPandora;
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const Pandora *Algorithm::GetPandora() const
+{
+    return m_pPandora;
 }
 
 } // namespace pandora

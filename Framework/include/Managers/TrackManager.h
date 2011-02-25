@@ -137,6 +137,22 @@ private:
     StatusCode SaveList(const TrackList &trackList, const std::string &newListName);
 
     /**
+     *  @brief  Add tracks to a saved list with a specified name
+     *
+     *  @param  listName the list to add the tracks to
+     *  @param  trackList the list of tracks to be added
+     */
+    StatusCode AddTracksToList(const std::string &listName, const TrackList &trackList);
+
+    /**
+     *  @brief  Remove tracks from a saved track list
+     *
+     *  @param  listName the list to remove the tracks from
+     *  @param  trackList the lsit of tracks to be removed
+     */
+    StatusCode RemoveTracksFromList(const std::string &listName, const TrackList &trackList);
+
+    /**
      *  @brief  Match tracks to their correct mc particles for particle flow
      *
      *  @param  trackToPfoTargetMap the track uid to mc pfo target map

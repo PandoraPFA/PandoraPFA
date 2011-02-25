@@ -10,6 +10,10 @@
 
 #include "Pandora/Algorithm.h"
 
+namespace pandora {class FileReader;}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  EventReadingAlgorithm class
  */
@@ -25,11 +29,23 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Default constructor
+     */
+    EventReadingAlgorithm();
+
+    /**
+     *  @brief  Destructor
+     */
+    ~EventReadingAlgorithm();
+
 private:
+    pandora::StatusCode Initialize();
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    pandora::FileReader    *m_pFileReader;      ///< Address of the file reader
+    std::string             m_fileName;         ///< Name of the output file
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

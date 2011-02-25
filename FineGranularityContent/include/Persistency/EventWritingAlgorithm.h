@@ -10,6 +10,10 @@
 
 #include "Pandora/Algorithm.h"
 
+namespace pandora {class FileWriter;}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  EventWritingAlgorithm class
  */
@@ -25,11 +29,24 @@ public:
         pandora::Algorithm *CreateAlgorithm() const;
     };
 
+    /**
+     *  @brief  Default constructor
+     */
+    EventWritingAlgorithm();
+
+    /**
+     *  @brief  Destructor
+     */
+    ~EventWritingAlgorithm();
+
 private:
+    pandora::StatusCode Initialize();
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    pandora::FileWriter    *m_pFileWriter;      ///< Address of the file writer
+    std::string             m_fileName;         ///< Name of the output file
+    bool                    m_shouldOverwrite;  ///< Whether to overwrite an existing file with the specified name, or append
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
