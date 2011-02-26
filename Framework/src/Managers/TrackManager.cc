@@ -101,6 +101,11 @@ void TrackManager::DeleteNullList()
 
 StatusCode TrackManager::CreateInputTrackList()
 {
+    NameToTrackListMap::iterator existingListIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() != existingListIter)
+        m_nameToTrackListMap.erase(existingListIter);
+
     TrackList trackList(m_inputTrackVector.begin(), m_inputTrackVector.end());
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(trackList, INPUT_LIST_NAME));

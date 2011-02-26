@@ -106,6 +106,11 @@ void CaloHitManager::DeleteNullList()
 
 StatusCode CaloHitManager::OrderInputCaloHits()
 {
+    NameToOrderedCaloHitListMap::iterator existingListIter = m_nameToOrderedCaloHitListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToOrderedCaloHitListMap.end() != existingListIter)
+        m_nameToOrderedCaloHitListMap.erase(existingListIter);
+
     OrderedCaloHitList orderedCaloHitList;
 
     for (CaloHitVector::iterator iter = m_inputCaloHitVector.begin(), iterEnd = m_inputCaloHitVector.end(); iter != iterEnd; ++iter)
