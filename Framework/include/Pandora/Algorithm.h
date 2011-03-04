@@ -39,6 +39,13 @@ public:
     virtual ~Algorithm();
 
     /**
+     *  @brief  Get the address of the pandora object that will run the algorithm
+     * 
+     *  @return The address of the pandora object that will run the algorithm
+     */
+    const Pandora *GetPandora() const;
+
+    /**
      *  @brief  Get the pandora content api impl
      * 
      *  @return Address of the pandora content api impl
@@ -76,13 +83,6 @@ protected:
      *  @param  pPandora address of the pandora object that will run the algorithm
      */
     StatusCode RegisterPandora(Pandora *pPandora);
-
-    /**
-     *  @brief  Get the address of the pandora object that will run the algorithm
-     * 
-     *  @return The address of the pandora object that will run the algorithm
-     */
-    const Pandora *GetPandora() const;
 
     Pandora            *m_pPandora;             ///< The pandora object that will run the algorithm
     std::string         m_algorithmType;        ///< The type of algorithm
@@ -136,6 +136,16 @@ inline Algorithm::~Algorithm()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline const Pandora *Algorithm::GetPandora() const
+{
+    if (NULL == m_pPandora)
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return m_pPandora;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline const PandoraContentApiImpl *Algorithm::GetPandoraContentApiImpl() const
 {
     if (NULL == m_pPandora)
@@ -168,13 +178,6 @@ inline StatusCode Algorithm::RegisterPandora(Pandora *pPandora)
     m_pPandora = pPandora;
 
     return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline const Pandora *Algorithm::GetPandora() const
-{
-    return m_pPandora;
 }
 
 } // namespace pandora

@@ -7,6 +7,7 @@
  */
 
 #include "Api/PandoraContentApi.h"
+#include "Api/PandoraContentApiImpl.h"
 
 #include "Objects/CaloHit.h"
 #include "Objects/OrderedCaloHitList.h"
@@ -17,8 +18,8 @@
 namespace pandora
 {
 
-FileWriter::FileWriter(const pandora::Algorithm &algorithm, const std::string &fileName, const FileMode fileMode) :
-    m_pAlgorithm(&algorithm)
+FileWriter::FileWriter(const pandora::Pandora &pandora, const std::string &fileName, const FileMode fileMode) :
+    m_pPandora(&pandora)
 {
     if (APPEND == fileMode)
     {
@@ -90,12 +91,15 @@ StatusCode FileWriter::WriteEvent()
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteEventHeader());
 
+    std::string orderedCaloHitListName;
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*m_pAlgorithm, pOrderedCaloHitList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->GetPandoraContentApiImpl()->GetCurrentOrderedCaloHitList(pOrderedCaloHitList,
+        orderedCaloHitListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteOrderedCaloHitList(*pOrderedCaloHitList));
 
+    std::string trackListName;
     const TrackList *pTrackList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentTrackList(*m_pAlgorithm, pTrackList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->GetPandoraContentApiImpl()->GetCurrentTrackList(pTrackList, trackListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteTrackList(*pTrackList));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteEventFooter());

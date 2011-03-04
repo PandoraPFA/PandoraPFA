@@ -17,10 +17,6 @@
 namespace pandora
 {
 
-class Algorithm;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 /**
  *  @brief  FileWriter class
  */
@@ -30,11 +26,11 @@ public:
     /**
      *  @brief  Constructor
      * 
-     *  @param  algorithm the algorithm creating the file writer
+     *  @param  algorithm the pandora instance to be used alongside the file writer
      *  @param  fileName the name of the output file
      *  @param  fileMode the mode for file writing
      */
-    FileWriter(const pandora::Algorithm &algorithm, const std::string &fileName, const FileMode fileMode = APPEND);
+    FileWriter(const pandora::Pandora &pandora, const std::string &fileName, const FileMode fileMode = APPEND);
 
     /**
      *  @brief  Destructor
@@ -98,7 +94,7 @@ private:
     template<typename T>
     StatusCode WriteVariable(const T &t);
 
-    const pandora::Algorithm *const m_pAlgorithm;           ///< Address of the algorithm that created the file writer
+    const pandora::Pandora *const   m_pPandora;             ///< Address of pandora instance to be used alongside the file writer
     std::ofstream::pos_type         m_position;             ///< The current position in the file
     std::ofstream::pos_type         m_eventPosition;        ///< The position of the start of the current event in the file
     std::ofstream                   m_fileStream;           ///< The stream class to write to the file

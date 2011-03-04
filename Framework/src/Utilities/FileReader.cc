@@ -11,15 +11,13 @@
 #include "Objects/CaloHit.h"
 #include "Objects/Track.h"
 
-#include "Pandora/Algorithm.h"
-
 #include "Utilities/FileReader.h"
 
 namespace pandora
 {
 
-FileReader::FileReader(const pandora::Algorithm &algorithm, const std::string &fileName) :
-    m_pAlgorithm(&algorithm),
+FileReader::FileReader(const pandora::Pandora &pandora, const std::string &fileName) :
+    m_pPandora(&pandora),
     m_position(0),
     m_eventPosition(0),
     m_eventSize(0)
@@ -186,7 +184,7 @@ StatusCode FileReader::ReadCaloHit(bool checkObjectId)
     parameters.m_layer = layer;
     parameters.m_isInOuterSamplingLayer = isInOuterSamplingLayer;
     parameters.m_pParentAddress = pParentAddress;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*(m_pAlgorithm->GetPandora()), parameters));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, parameters));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -251,7 +249,7 @@ StatusCode FileReader::ReadTrack(bool checkObjectId)
     parameters.m_canFormPfo = canFormPfo;
     parameters.m_canFormClusterlessPfo = canFormClusterlessPfo;
     parameters.m_pParentAddress = pParentAddress;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*(m_pAlgorithm->GetPandora()), parameters));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, parameters));
 
     return STATUS_CODE_SUCCESS;
 }

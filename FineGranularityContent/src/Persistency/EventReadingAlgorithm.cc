@@ -30,7 +30,7 @@ EventReadingAlgorithm::~EventReadingAlgorithm()
 
 StatusCode EventReadingAlgorithm::Initialize()
 {
-    m_pFileReader = new FileReader(*this, m_fileName);
+    m_pFileReader = new FileReader(*(this->GetPandora()), m_fileName);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pFileReader->GoToEvent(m_skipToEvent));
 
     return STATUS_CODE_SUCCESS;

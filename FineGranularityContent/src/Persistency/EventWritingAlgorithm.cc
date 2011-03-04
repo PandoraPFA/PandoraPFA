@@ -31,7 +31,7 @@ EventWritingAlgorithm::~EventWritingAlgorithm()
 StatusCode EventWritingAlgorithm::Initialize()
 {
     const FileMode fileMode(m_shouldOverwrite ? OVERWRITE : APPEND);
-    m_pFileWriter = new FileWriter(*this, m_fileName, fileMode);
+    m_pFileWriter = new FileWriter(*(this->GetPandora()), m_fileName, fileMode);
 
     return STATUS_CODE_SUCCESS;
 }
