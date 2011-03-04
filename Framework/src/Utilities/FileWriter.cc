@@ -53,7 +53,10 @@ StatusCode FileWriter::WriteEventHeader()
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pandoraFileHash));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(EVENT));
+
     m_eventPosition = m_fileStream.tellp();
+    const std::ofstream::pos_type dummyEventSize(0);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(dummyEventSize));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -63,6 +66,19 @@ StatusCode FileWriter::WriteEventHeader()
 StatusCode FileWriter::WriteEventFooter()
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(EVENT_END));
+    const std::ofstream::pos_type eventSize(m_fileStream.tellp() - m_eventPosition);
+
+    m_fileStream.seekp(m_eventPosition, std::ios::beg);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(eventSize));
+    m_fileStream.seekp(0, std::ios::end);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
     m_eventPosition = m_fileStream.tellp();
 
     return STATUS_CODE_SUCCESS;

@@ -46,6 +46,7 @@ private:
 
     pandora::FileReader    *m_pFileReader;      ///< Address of the file reader
     std::string             m_fileName;         ///< Name of the output file
+    unsigned int            m_skipToEvent;      ///< Index of first event to consider in input file
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -21,7 +21,8 @@ namespace pandora
 FileReader::FileReader(const pandora::Algorithm &algorithm, const std::string &fileName) :
     m_pAlgorithm(&algorithm),
     m_position(0),
-    m_eventPosition(0)
+    m_eventPosition(0),
+    m_eventSize(0)
 {
     m_fileStream.open(fileName.c_str(), std::ios::in | std::ios::binary);
 
@@ -49,6 +50,10 @@ StatusCode FileReader::ReadEventHeader()
         return STATUS_CODE_FAILURE;
 
     m_eventPosition = m_fileStream.tellg();
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(m_eventSize));
+
+    if (0 == m_eventSize)
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -253,22 +258,13 @@ StatusCode FileReader::ReadTrack(bool checkObjectId)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileReader::ReadAllCaloHitsInEvent()
-{
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode FileReader::ReadAllTracksInEvent()
-{
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode FileReader::GoToNextEvent()
 {
+    m_fileStream.seekg(m_eventPosition + m_eventSize, std::ios::beg);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
     return STATUS_CODE_SUCCESS;
 }
 
@@ -276,6 +272,21 @@ StatusCode FileReader::GoToNextEvent()
 
 StatusCode FileReader::GoToEvent(const unsigned int eventNumber)
 {
+    unsigned int nEventsRead(0);
+    m_fileStream.seekg(0, std::ios::beg);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
+    while (nEventsRead++ < eventNumber)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadEventHeader());
+        m_fileStream.seekg(m_eventPosition + m_eventSize, std::ios::beg);
+
+        if (!m_fileStream.good())
+            return STATUS_CODE_FAILURE;
+    }
+
     return STATUS_CODE_SUCCESS;
 }
 

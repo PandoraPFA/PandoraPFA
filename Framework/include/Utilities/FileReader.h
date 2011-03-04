@@ -70,16 +70,6 @@ public:
     StatusCode ReadTrack(bool checkObjectId = true);
 
     /**
-     *  @brief  Read all calo hits in the current event in the file, recreating the stored objects
-     */
-    StatusCode ReadAllCaloHitsInEvent();
-
-    /**
-     *  @brief  Read all tracks in the current event in the file, recreating the stored objects
-     */
-    StatusCode ReadAllTracksInEvent();
-
-    /**
      *  @brief  Skip to next event in the file
      */
     StatusCode GoToNextEvent();
@@ -101,6 +91,7 @@ private:
     const pandora::Algorithm *const m_pAlgorithm;       ///< Address of the algorithm that created the file writer
     std::ifstream::pos_type         m_position;         ///< The current position in the file
     std::ifstream::pos_type         m_eventPosition;    ///< The position of the start of the current event in the file
+    std::ifstream::pos_type         m_eventSize;        ///< The size of the current event in the file
     std::ifstream                   m_fileStream;       ///< The stream class to read from the file
 };
 
