@@ -112,10 +112,12 @@ private:
     /**
      *  @brief  Read a sub detector from the current position in the file
      * 
+     *  @param  subDetectorName to receive the sub detector name
      *  @param  pSubDetectorParameters address of the sub detector parameters to populate
      *  @param  checkComponentId whether to check the component id before deserializing
      */
-    StatusCode ReadSubDetector(PandoraApi::GeometryParameters::SubDetectorParameters *pSubDetectorParameters, bool checkComponentId = true);
+    StatusCode ReadSubDetector(std::string &subDetectorName, PandoraApi::GeometryParameters::SubDetectorParameters *pSubDetectorParameters,
+        bool checkComponentId = true);
 
     /**
      *  @brief  Read a box gap from the current position in the file

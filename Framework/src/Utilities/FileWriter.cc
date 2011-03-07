@@ -189,6 +189,9 @@ StatusCode FileWriter::WriteGeometryParameters()
     // Additional subdetectors
     const GeometryHelper::SubDetectorParametersMap &subDetectorParametersMap(GeometryHelper::GetAdditionalSubDetectors());
 
+    const unsigned int nAdditionalSubDetectors(subDetectorParametersMap.size());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(nAdditionalSubDetectors));
+
     for (GeometryHelper::SubDetectorParametersMap::const_iterator iter = subDetectorParametersMap.begin(), iterEnd = subDetectorParametersMap.end();
         iter != iterEnd; ++iter)
     {

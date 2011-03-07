@@ -227,12 +227,7 @@ StatusCode FileReader::ReadNextGeometryComponent()
         return STATUS_CODE_NOT_FOUND;
     }
 
-    if (SUB_DETECTOR == componentId)
-    {
-        PandoraApi::Geometry::Parameters::SubDetectorParameters subDetectorParameters;
-        return this->ReadSubDetector(&subDetectorParameters);
-    }
-    else if (BOX_GAP == componentId)
+    if (BOX_GAP == componentId)
     {
         return this->ReadBoxGap(false);
     }
@@ -289,15 +284,16 @@ StatusCode FileReader::ReadGeometryParameters()
         return STATUS_CODE_FAILURE;
 
     // Default subdetectors
+    std::string detectorName;
     PandoraApi::Geometry::Parameters parameters;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_inDetBarrelParameters)));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_inDetEndCapParameters)));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_eCalBarrelParameters)));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_eCalEndCapParameters)));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_hCalBarrelParameters)));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_hCalEndCapParameters)));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_muonBarrelParameters)));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_muonEndCapParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_inDetBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_inDetEndCapParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_eCalBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_eCalEndCapParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_hCalBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_hCalEndCapParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_muonBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(detectorName, &(parameters.m_muonEndCapParameters)));
 
     bool readMainTrackerDetails(false);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(readMainTrackerDetails));
@@ -332,7 +328,16 @@ StatusCode FileReader::ReadGeometryParameters()
     }
 
     // Additional subdetectors
-    
+    unsigned int nAdditionalSubDetectors(0);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nAdditionalSubDetectors));
+
+    for (unsigned int iSubDetector = 0; iSubDetector < nAdditionalSubDetectors; ++iSubDetector)
+    {
+        std::string subDetectorName;
+        PandoraApi::Geometry::Parameters::SubDetectorParameters subDetectorParameters;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(subDetectorName, &subDetectorParameters));
+        parameters.m_additionalSubDetectors.insert(std::make_pair(subDetectorName, subDetectorParameters));
+    }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::Create(*m_pPandora, parameters));
 
@@ -341,7 +346,8 @@ StatusCode FileReader::ReadGeometryParameters()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileReader::ReadSubDetector(PandoraApi::GeometryParameters::SubDetectorParameters *pSubDetectorParameters, bool checkComponentId)
+StatusCode FileReader::ReadSubDetector(std::string &subDetectorName, PandoraApi::GeometryParameters::SubDetectorParameters *pSubDetectorParameters,
+    bool checkComponentId)
 {
     if (GEOMETRY != m_containerId)
         return STATUS_CODE_FAILURE;
@@ -355,7 +361,6 @@ StatusCode FileReader::ReadSubDetector(PandoraApi::GeometryParameters::SubDetect
             return STATUS_CODE_FAILURE;
     }
 
-    std::string subDetectorName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(subDetectorName));
 
     bool isInitialized(false);
