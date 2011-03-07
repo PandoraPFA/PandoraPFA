@@ -8,11 +8,17 @@
 #ifndef FILE_WRITER_H
 #define FILE_WRITER_H 1
 
-#include "Pandora/PandoraInternal.h"
+#include "Helpers/GeometryHelper.h"
+
+#include "Pandora/Pandora.h"
 #include "Pandora/PandoraIO.h"
 #include "Pandora/StatusCodes.h"
 
+#include "Objects/CartesianVector.h"
+#include "Objects/TrackState.h"
+
 #include <fstream>
+#include <string>
 
 namespace pandora
 {
@@ -37,20 +43,48 @@ public:
      */
     ~FileWriter();
 
-   /**
-     *  @brief  Write the event header to the file
+    /**
+     *  @brief  Write the current geometry information to the file
      */
-    StatusCode WriteEventHeader();
-
-   /**
-     *  @brief  Write the event footer to the file
-     */
-    StatusCode WriteEventFooter();
+    StatusCode WriteGeometry();
 
     /**
      *  @brief  Write the current event to the file
      */
     StatusCode WriteEvent();
+
+    /**
+     *  @brief  Write the specified event components to the file
+     * 
+     *  @param  trackList the list of tracks to write to the file
+     *  @param  orderedCaloHitList the ordered list of calo hits to write to the file
+     */
+    StatusCode WriteEvent(const TrackList &trackList, const OrderedCaloHitList &orderedCaloHitList);
+
+private:
+   /**
+     *  @brief  Write the container header to the file
+     * 
+     *  @param  containerId the container id
+     */
+    StatusCode WriteHeader(const ContainerId containerId);
+
+    /**
+     *  @brief  Write the container footer to the file
+     */
+    StatusCode WriteFooter();
+
+    /**
+     *  @brief  Write the geometry parameters to the file
+     */
+    StatusCode WriteGeometryParameters();
+
+    /**
+     *  @brief  Write a sub detector to the current position in the file
+     * 
+     *  @param  pSubDetectorParameters address of the sub detector parameters
+     */
+    StatusCode WriteSubDetector(const GeometryHelper::SubDetectorParameters *const pSubDetectorParameters);
 
     /**
      *  @brief  Write a calo hit to the current position in the file
@@ -67,13 +101,6 @@ public:
     StatusCode WriteTrack(const Track *const pTrack);
 
     /**
-     *  @brief  Write a calo hit list to the current position in the file
-     * 
-     *  @param  caloHitList the calo hit list
-     */
-    StatusCode WriteCaloHitList(const CaloHitList &caloHitList);
-
-    /**
      *  @brief  Write a track list to the current position in the file
      * 
      *  @param  trackList the track list
@@ -87,7 +114,6 @@ public:
      */
     StatusCode WriteOrderedCaloHitList(const OrderedCaloHitList &orderedCaloHitList);
 
-private:
     /**
      *  @brief  Read a variable from the file
      */
@@ -95,8 +121,8 @@ private:
     StatusCode WriteVariable(const T &t);
 
     const pandora::Pandora *const   m_pPandora;             ///< Address of pandora instance to be used alongside the file writer
-    std::ofstream::pos_type         m_position;             ///< The current position in the file
-    std::ofstream::pos_type         m_eventPosition;        ///< The position of the start of the current event in the file
+    ContainerId                     m_containerId;          ///< The type of container currently being written to file
+    std::ofstream::pos_type         m_containerPosition;    ///< Position of start of the current event/geometry container object in file
     std::ofstream                   m_fileStream;           ///< The stream class to write to the file
 };
 
@@ -106,7 +132,6 @@ template<typename T>
 inline StatusCode FileWriter::WriteVariable(const T &t)
 {
     m_fileStream.write(reinterpret_cast<const char*>(&t), sizeof(T));
-    m_position = m_fileStream.tellp();
 
     if (!m_fileStream.good())
         return STATUS_CODE_FAILURE;

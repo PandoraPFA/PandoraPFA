@@ -16,15 +16,29 @@ const unsigned int pandoraFileHash(01110000);   ///< Look for hash ('p' in binar
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
- *  @brief  The object identification enum
+ *  @brief  The container identification enum
  */
-enum ObjectId
+enum ContainerId
 {
     EVENT,
+    GEOMETRY,
+    UNKNOWN_CONTAINER
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ *  @brief  The component identification enum
+ */
+enum ComponentId
+{
     CALO_HIT,
     TRACK,
     EVENT_END,
-    NUMBER_OF_OBJECTS
+    SUB_DETECTOR,
+    DETECTOR_GAP,
+    GEOMETRY_END,
+    UNKNOWN_COMPONENT
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

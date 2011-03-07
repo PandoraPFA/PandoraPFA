@@ -18,9 +18,9 @@ namespace pandora
 
 FileReader::FileReader(const pandora::Pandora &pandora, const std::string &fileName) :
     m_pPandora(&pandora),
-    m_position(0),
-    m_eventPosition(0),
-    m_eventSize(0)
+    m_containerId(UNKNOWN_CONTAINER),
+    m_containerPosition(0),
+    m_containerSize(0)
 {
     m_fileStream.open(fileName.c_str(), std::ios::in | std::ios::binary);
 
@@ -37,21 +37,17 @@ FileReader::~FileReader()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileReader::ReadEventHeader()
+StatusCode FileReader::ReadGeometry()
 {
-    unsigned int fileHash;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(fileHash));
-    ObjectId objectId(NUMBER_OF_OBJECTS);
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(objectId));
+    // What if not geometry?
 
-    if ((pandoraFileHash != fileHash) || (EVENT != objectId))
-        return STATUS_CODE_FAILURE;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadGeometryParameters());
 
-    m_eventPosition = m_fileStream.tellg();
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(m_eventSize));
+    ComponentId endOfGeometry(UNKNOWN_COMPONENT);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(endOfGeometry));
 
-    if (0 == m_eventSize)
-        return STATUS_CODE_FAILURE;
+    m_containerId = UNKNOWN_CONTAINER;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -60,11 +56,13 @@ StatusCode FileReader::ReadEventHeader()
 
 StatusCode FileReader::ReadEvent()
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadEventHeader());
+    // What if not event?
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
 
     try
     {
-        while (STATUS_CODE_SUCCESS == this->ReadNextObject())
+        while (STATUS_CODE_SUCCESS == this->ReadNextEventComponent())
             continue;
     }
     catch (StatusCodeException &statusCodeException)
@@ -72,15 +70,76 @@ StatusCode FileReader::ReadEvent()
         std::cout << " FileReader::ReadEvent() encountered unrecognized object in file: " << statusCodeException.ToString() << std::endl;
     }
 
+    m_containerId = UNKNOWN_CONTAINER;
+
     return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileReader::ReadNextObject()
+StatusCode FileReader::GoToNextEvent()
 {
-    ObjectId objectId(NUMBER_OF_OBJECTS);
-    const StatusCode statusCode(this->ReadVariable(objectId));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
+    m_fileStream.seekg(m_containerPosition + m_containerSize, std::ios::beg);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::GoToEvent(const unsigned int eventNumber)
+{
+    unsigned int nEventsRead(0);
+    m_fileStream.seekg(0, std::ios::beg);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
+    while (nEventsRead < eventNumber)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
+        m_fileStream.seekg(m_containerPosition + m_containerSize, std::ios::beg);
+
+        if (!m_fileStream.good())
+            return STATUS_CODE_FAILURE;
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadHeader()
+{
+    unsigned int fileHash;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(fileHash));
+
+    if (pandoraFileHash != fileHash)
+        return STATUS_CODE_FAILURE;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(m_containerId));
+
+    if ((EVENT != m_containerId) && (GEOMETRY != m_containerId))
+        return STATUS_CODE_FAILURE;
+
+    m_containerPosition = m_fileStream.tellg();
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(m_containerSize));
+
+    if (0 == m_containerSize)
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadNextEventComponent()
+{
+    ComponentId componentId(UNKNOWN_COMPONENT);
+    const StatusCode statusCode(this->ReadVariable(componentId));
 
     if (STATUS_CODE_SUCCESS != statusCode)
     {
@@ -90,16 +149,17 @@ StatusCode FileReader::ReadNextObject()
         return STATUS_CODE_NOT_FOUND;
     }
 
-    if (CALO_HIT == objectId)
+    if (CALO_HIT == componentId)
     {
         return this->ReadCaloHit(false);
     }
-    else if (TRACK == objectId)
+    else if (TRACK == componentId)
     {
         return this->ReadTrack(false);
     }
-    else if (EVENT_END == objectId)
+    else if (EVENT_END == componentId)
     {
+        m_containerId = UNKNOWN_CONTAINER;
         return STATUS_CODE_NOT_FOUND;
     }
 
@@ -108,14 +168,146 @@ StatusCode FileReader::ReadNextObject()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileReader::ReadCaloHit(bool checkObjectId)
+StatusCode FileReader::ReadGeometryParameters()
 {
-    if (checkObjectId)
-    {
-        ObjectId objectId(NUMBER_OF_OBJECTS);
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(objectId));
+    if (GEOMETRY != m_containerId)
+        return STATUS_CODE_FAILURE;
 
-        if (CALO_HIT != objectId)
+    PandoraApi::Geometry::Parameters parameters;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_inDetBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_inDetEndCapParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_eCalBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_eCalEndCapParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_hCalBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_hCalEndCapParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_muonBarrelParameters)));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_muonEndCapParameters)));
+
+    bool readMainTrackerDetails(false);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(readMainTrackerDetails));
+
+    if (readMainTrackerDetails)
+    {
+        float mainTrackerInnerRadius(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(mainTrackerInnerRadius));
+        float mainTrackerOuterRadius(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(mainTrackerOuterRadius));
+        float mainTrackerZExtent(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(mainTrackerZExtent));
+        parameters.m_mainTrackerInnerRadius = mainTrackerInnerRadius;
+        parameters.m_mainTrackerOuterRadius = mainTrackerOuterRadius;
+        parameters.m_mainTrackerZExtent = mainTrackerZExtent;
+    }
+
+    bool readCoilDetails(false);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(readCoilDetails));
+
+    if (readCoilDetails)
+    {
+        float coilInnerRadius(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(coilInnerRadius));
+        float coilOuterRadius(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(coilOuterRadius));
+        float coilZExtent(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(coilZExtent));
+        parameters.m_coilInnerRadius = coilInnerRadius;
+        parameters.m_coilOuterRadius = coilOuterRadius;
+        parameters.m_coilZExtent = coilZExtent;
+    }
+
+    // Additional subdetectors
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::Create(*m_pPandora, parameters));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadSubDetector(PandoraApi::GeometryParameters::SubDetectorParameters *pSubDetectorParameters, bool checkComponentId)
+{
+    if (GEOMETRY != m_containerId)
+        return STATUS_CODE_FAILURE;
+
+    if (checkComponentId)
+    {
+        ComponentId componentId(UNKNOWN_COMPONENT);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(componentId));
+
+        if (SUB_DETECTOR != componentId)
+            return STATUS_CODE_FAILURE;
+    }
+
+    bool isInitialized(false);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(isInitialized));
+
+    if (!isInitialized)
+        return STATUS_CODE_SUCCESS;
+
+    float innerRCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(innerRCoordinate));
+    float innerZCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(innerZCoordinate));
+    float innerPhiCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(innerPhiCoordinate));
+    unsigned int innerSymmetryOrder(0);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(innerSymmetryOrder));
+    float outerRCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(outerRCoordinate));
+    float outerZCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(outerZCoordinate));
+    float outerPhiCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(outerPhiCoordinate));
+    unsigned int outerSymmetryOrder(0);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(outerSymmetryOrder));
+    bool isMirroredInZ(false);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(isMirroredInZ));
+    unsigned int nLayers(0);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nLayers));
+
+    pSubDetectorParameters->m_innerRCoordinate = innerRCoordinate;
+    pSubDetectorParameters->m_innerZCoordinate = innerZCoordinate;
+    pSubDetectorParameters->m_innerPhiCoordinate = innerPhiCoordinate;
+    pSubDetectorParameters->m_innerSymmetryOrder = innerSymmetryOrder;
+    pSubDetectorParameters->m_outerRCoordinate = outerRCoordinate;
+    pSubDetectorParameters->m_outerZCoordinate = outerZCoordinate;
+    pSubDetectorParameters->m_outerPhiCoordinate = outerPhiCoordinate;
+    pSubDetectorParameters->m_outerSymmetryOrder = outerSymmetryOrder;
+    pSubDetectorParameters->m_isMirroredInZ = isMirroredInZ;
+    pSubDetectorParameters->m_nLayers = nLayers;
+
+    for (unsigned int iLayer = 0; iLayer < nLayers; ++iLayer)
+    {
+        float closestDistanceToIp(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(closestDistanceToIp));
+        float nRadiationLengths(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nRadiationLengths));
+        float nInteractionLengths(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nInteractionLengths));
+
+        PandoraApi::Geometry::Parameters::LayerParameters layerParameters;
+        layerParameters.m_closestDistanceToIp = closestDistanceToIp;
+        layerParameters.m_nRadiationLengths = nRadiationLengths;
+        layerParameters.m_nInteractionLengths = nInteractionLengths;
+        pSubDetectorParameters->m_layerParametersList.push_back(layerParameters);
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadCaloHit(bool checkComponentId)
+{
+    if (EVENT != m_containerId)
+        return STATUS_CODE_FAILURE;
+
+    if (checkComponentId)
+    {
+        ComponentId componentId(UNKNOWN_COMPONENT);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(componentId));
+
+        if (CALO_HIT != componentId)
             return STATUS_CODE_FAILURE;
     }
 
@@ -191,14 +383,17 @@ StatusCode FileReader::ReadCaloHit(bool checkObjectId)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileReader::ReadTrack(bool checkObjectId)
+StatusCode FileReader::ReadTrack(bool checkComponentId)
 {
-    if (checkObjectId)
-    {
-        ObjectId objectId(NUMBER_OF_OBJECTS);
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(objectId));
+    if (EVENT != m_containerId)
+        return STATUS_CODE_FAILURE;
 
-        if (TRACK != objectId)
+    if (checkComponentId)
+    {
+        ComponentId componentId(UNKNOWN_COMPONENT);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(componentId));
+
+        if (TRACK != componentId)
             return STATUS_CODE_FAILURE;
     }
 
@@ -250,40 +445,6 @@ StatusCode FileReader::ReadTrack(bool checkObjectId)
     parameters.m_canFormClusterlessPfo = canFormClusterlessPfo;
     parameters.m_pParentAddress = pParentAddress;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, parameters));
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode FileReader::GoToNextEvent()
-{
-    m_fileStream.seekg(m_eventPosition + m_eventSize, std::ios::beg);
-
-    if (!m_fileStream.good())
-        return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode FileReader::GoToEvent(const unsigned int eventNumber)
-{
-    unsigned int nEventsRead(0);
-    m_fileStream.seekg(0, std::ios::beg);
-
-    if (!m_fileStream.good())
-        return STATUS_CODE_FAILURE;
-
-    while (nEventsRead++ < eventNumber)
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadEventHeader());
-        m_fileStream.seekg(m_eventPosition + m_eventSize, std::ios::beg);
-
-        if (!m_fileStream.good())
-            return STATUS_CODE_FAILURE;
-    }
 
     return STATUS_CODE_SUCCESS;
 }

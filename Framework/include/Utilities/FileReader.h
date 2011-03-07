@@ -8,11 +8,17 @@
 #ifndef FILE_READER_H
 #define FILE_READER_H 1
 
-#include "Pandora/PandoraInternal.h"
+#include "Api/PandoraApi.h"
+
+#include "Pandora/Pandora.h"
 #include "Pandora/PandoraIO.h"
 #include "Pandora/StatusCodes.h"
 
+#include "Objects/CartesianVector.h"
+#include "Objects/TrackState.h"
+
 #include <fstream>
+#include <string>
 
 namespace pandora
 {
@@ -37,33 +43,14 @@ public:
     ~FileReader();
 
     /**
-     *  @brief  Read the event header from the current position in the file, checking for properly written event
+     *  @brief  Read the current geometry information from the file
      */
-    StatusCode ReadEventHeader();
+    StatusCode ReadGeometry();
 
     /**
      *  @brief  Read an entire pandora event from the file, recreating the stored objects
      */
     StatusCode ReadEvent();
-
-    /**
-     *  @brief  Read the next pandora object from the current position in the file, recreating the stored object
-     */
-    StatusCode ReadNextObject();
-
-    /**
-     *  @brief  Read a calo hit from the current position in the file, recreating the stored object
-     * 
-     *  @param  checkObjectId whether to check the object id before deserializing
-     */
-    StatusCode ReadCaloHit(bool checkObjectId = true);
-
-    /**
-     *  @brief  Read a track from the current position in the file, recreating the stored object
-     * 
-     *  @param  checkObjectId whether to check the object id before deserializing
-     */
-    StatusCode ReadTrack(bool checkObjectId = true);
 
     /**
      *  @brief  Skip to next event in the file
@@ -79,15 +66,52 @@ public:
 
 private:
     /**
+     *  @brief  Read the container header from the current position in the file, checking for properly written container
+     */
+    StatusCode ReadHeader();
+
+    /**
+     *  @brief  Read the next pandora event component from the current position in the file, recreating the stored component
+     */
+    StatusCode ReadNextEventComponent();
+
+    /**
+     *  @brief  Read the geometry parameters from the current position in the file
+     */
+    StatusCode ReadGeometryParameters();
+
+    /**
+     *  @brief  Read a sub detector from the current position in the file
+     * 
+     *  @param  pSubDetectorParameters address of the sub detector parameters to populate
+     *  @param  checkComponentId whether to check the component id before deserializing
+     */
+    StatusCode ReadSubDetector(PandoraApi::GeometryParameters::SubDetectorParameters *pSubDetectorParameters, bool checkComponentId = true);
+
+    /**
+     *  @brief  Read a calo hit from the current position in the file, recreating the stored object
+     * 
+     *  @param  checkComponentId whether to check the component id before deserializing
+     */
+    StatusCode ReadCaloHit(bool checkComponentId = true);
+
+    /**
+     *  @brief  Read a track from the current position in the file, recreating the stored object
+     * 
+     *  @param  checkComponentId whether to check the component id before deserializing
+     */
+    StatusCode ReadTrack(bool checkComponentId = true);
+
+    /**
      *  @brief  Read a variable from the file
      */
     template<typename T>
     StatusCode ReadVariable(T &t);
 
     const pandora::Pandora *const   m_pPandora;             ///< Address of pandora instance to be used alongside the file reader
-    std::ifstream::pos_type         m_position;             ///< The current position in the file
-    std::ifstream::pos_type         m_eventPosition;        ///< The position of the start of the current event in the file
-    std::ifstream::pos_type         m_eventSize;            ///< The size of the current event in the file
+    ContainerId                     m_containerId;          ///< The type of container currently being read from file
+    std::ifstream::pos_type         m_containerPosition;    ///< Position of start of the current event/geometry container object in file
+    std::ifstream::pos_type         m_containerSize;        ///< Size of the current event/geometry container object in the file
     std::ifstream                   m_fileStream;           ///< The stream class to read from the file
 };
 
@@ -98,7 +122,6 @@ inline StatusCode FileReader::ReadVariable(T &t)
 {
     char *pMemBlock = new char[sizeof(T)];
     m_fileStream.read(pMemBlock, sizeof(T));
-    m_position = m_fileStream.tellg();
 
     t = *(reinterpret_cast<T*>(pMemBlock));
     delete[] pMemBlock;
