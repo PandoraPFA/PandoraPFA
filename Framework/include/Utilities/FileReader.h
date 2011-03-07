@@ -53,9 +53,21 @@ public:
     StatusCode ReadEvent();
 
     /**
-     *  @brief  Skip to next event in the file
+     *  @brief  Skip to next geometry container in the file
+     */
+    StatusCode GoToNextGeometry();
+
+    /**
+     *  @brief  Skip to next event container in the file
      */
     StatusCode GoToNextEvent();
+
+    /**
+     *  @brief  Skip to a specified geometry number in the file
+     * 
+     *  @param  geometryNumber the geometry number
+     */
+    StatusCode GoToGeometry(const unsigned int geometryNumber);
 
     /**
      *  @brief  Skip to a specified event number in the file
@@ -66,9 +78,26 @@ public:
 
 private:
     /**
+     *  @brief  Skip to next container in the file
+     */
+    StatusCode GoToNextContainer();
+
+    /**
      *  @brief  Read the container header from the current position in the file, checking for properly written container
      */
     StatusCode ReadHeader();
+
+    /**
+     *  @brief  Get the id of the next container in the file without changing the current position in the file
+     * 
+     *  @return The id of the next container in the file
+     */
+    ContainerId GetNextContainerId();
+
+    /**
+     *  @brief  Read the next pandora geometry component from the current position in the file, recreating the stored component
+     */
+    StatusCode ReadNextGeometryComponent();
 
     /**
      *  @brief  Read the next pandora event component from the current position in the file, recreating the stored component
@@ -87,6 +116,20 @@ private:
      *  @param  checkComponentId whether to check the component id before deserializing
      */
     StatusCode ReadSubDetector(PandoraApi::GeometryParameters::SubDetectorParameters *pSubDetectorParameters, bool checkComponentId = true);
+
+    /**
+     *  @brief  Read a box gap from the current position in the file
+     * 
+     *  @param  checkComponentId whether to check the component id before deserializing
+     */
+    StatusCode ReadBoxGap(bool checkComponentId = true);
+
+    /**
+     *  @brief  Read a concentric gap from the current position in the file
+     * 
+     *  @param  checkComponentId whether to check the component id before deserializing
+     */
+    StatusCode ReadConcentricGap(bool checkComponentId = true);
 
     /**
      *  @brief  Read a calo hit from the current position in the file, recreating the stored object

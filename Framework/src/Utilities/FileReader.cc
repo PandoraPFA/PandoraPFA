@@ -39,13 +39,19 @@ FileReader::~FileReader()
 
 StatusCode FileReader::ReadGeometry()
 {
-    // What if not geometry?
-
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextGeometry());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadGeometryParameters());
 
-    ComponentId endOfGeometry(UNKNOWN_COMPONENT);
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(endOfGeometry));
+    try
+    {
+        while (STATUS_CODE_SUCCESS == this->ReadNextGeometryComponent())
+            continue;
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << " FileReader::ReadGeometry() encountered unrecognized object in file: " << statusCodeException.ToString() << std::endl;
+    }
 
     m_containerId = UNKNOWN_CONTAINER;
 
@@ -56,8 +62,7 @@ StatusCode FileReader::ReadGeometry()
 
 StatusCode FileReader::ReadEvent()
 {
-    // What if not event?
-
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextEvent());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
 
     try
@@ -77,13 +82,51 @@ StatusCode FileReader::ReadEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode FileReader::GoToNextGeometry()
+{
+    ContainerId containerId(this->GetNextContainerId());
+
+    while (GEOMETRY != containerId)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextContainer());
+        containerId = this->GetNextContainerId();
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode FileReader::GoToNextEvent()
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
-    m_fileStream.seekg(m_containerPosition + m_containerSize, std::ios::beg);
+    ContainerId containerId(this->GetNextContainerId());
+
+    while (EVENT != containerId)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextContainer());
+        containerId = this->GetNextContainerId();
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::GoToGeometry(const unsigned int geometryNumber)
+{
+    unsigned int nGeometriesRead(0);
+    m_fileStream.seekg(0, std::ios::beg);
 
     if (!m_fileStream.good())
         return STATUS_CODE_FAILURE;
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextGeometry());
+
+    while (nGeometriesRead < geometryNumber)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextGeometry());
+        nGeometriesRead++;
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -98,14 +141,26 @@ StatusCode FileReader::GoToEvent(const unsigned int eventNumber)
     if (!m_fileStream.good())
         return STATUS_CODE_FAILURE;
 
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextEvent());
+
     while (nEventsRead < eventNumber)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
-        m_fileStream.seekg(m_containerPosition + m_containerSize, std::ios::beg);
-
-        if (!m_fileStream.good())
-            return STATUS_CODE_FAILURE;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextEvent());
+        nEventsRead++;
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::GoToNextContainer()
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
+    m_fileStream.seekg(m_containerPosition + m_containerSize, std::ios::beg);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }
@@ -117,7 +172,7 @@ StatusCode FileReader::ReadHeader()
     unsigned int fileHash;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(fileHash));
 
-    if (pandoraFileHash != fileHash)
+    if (PANDORA_FILE_HASH != fileHash)
         return STATUS_CODE_FAILURE;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(m_containerId));
@@ -132,6 +187,61 @@ StatusCode FileReader::ReadHeader()
         return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+ContainerId FileReader::GetNextContainerId()
+{
+    const std::ifstream::pos_type initialPosition(m_fileStream.tellg());
+
+    unsigned int fileHash;
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(fileHash));
+
+    if (PANDORA_FILE_HASH != fileHash)
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    ContainerId containerId(UNKNOWN_CONTAINER);
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(containerId));
+
+    m_fileStream.seekg(initialPosition, std::ios::beg);
+
+    if (!m_fileStream.good())
+        throw StatusCodeException(STATUS_CODE_FAILURE);
+
+    return containerId;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadNextGeometryComponent()
+{
+    ComponentId componentId(UNKNOWN_COMPONENT);
+    const StatusCode statusCode(this->ReadVariable(componentId));
+
+    if (STATUS_CODE_SUCCESS != statusCode)
+    {
+        if (STATUS_CODE_NOT_FOUND != statusCode)
+            throw StatusCodeException(statusCode);
+
+        return STATUS_CODE_NOT_FOUND;
+    }
+
+    if (BOX_GAP == componentId)
+    {
+        return this->ReadBoxGap(false);
+    }
+    else if (CONCENTRIC_GAP == componentId)
+    {
+        return this->ReadConcentricGap(false);
+    }
+    else if (GEOMETRY_END == componentId)
+    {
+        m_containerId = UNKNOWN_CONTAINER;
+        return STATUS_CODE_NOT_FOUND;
+    }
+
+    throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -291,6 +401,88 @@ StatusCode FileReader::ReadSubDetector(PandoraApi::GeometryParameters::SubDetect
         layerParameters.m_nInteractionLengths = nInteractionLengths;
         pSubDetectorParameters->m_layerParametersList.push_back(layerParameters);
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadBoxGap(bool checkComponentId)
+{
+    if (GEOMETRY != m_containerId)
+        return STATUS_CODE_FAILURE;
+
+    if (checkComponentId)
+    {
+        ComponentId componentId(UNKNOWN_COMPONENT);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(componentId));
+
+        if (BOX_GAP != componentId)
+            return STATUS_CODE_FAILURE;
+    }
+
+    CartesianVector vertex(0.f, 0.f, 0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(vertex));
+    CartesianVector side1(0.f, 0.f, 0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(side1));
+    CartesianVector side2(0.f, 0.f, 0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(side2));
+    CartesianVector side3(0.f, 0.f, 0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(side3));
+
+    PandoraApi::BoxGap::Parameters parameters;
+    parameters.m_vertex = vertex;
+    parameters.m_side1 = side1;
+    parameters.m_side2 = side2;
+    parameters.m_side3 = side3;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::BoxGap::Create(*m_pPandora, parameters));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadConcentricGap(bool checkComponentId)
+{
+    if (GEOMETRY != m_containerId)
+        return STATUS_CODE_FAILURE;
+
+    if (checkComponentId)
+    {
+        ComponentId componentId(UNKNOWN_COMPONENT);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(componentId));
+
+        if (CONCENTRIC_GAP != componentId)
+            return STATUS_CODE_FAILURE;
+    }
+
+    float minZCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(minZCoordinate));
+    float maxZCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(maxZCoordinate));
+    float innerRCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(innerRCoordinate));
+    float innerPhiCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(innerPhiCoordinate));
+    unsigned int innerSymmetryOrder(0);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(innerSymmetryOrder));
+    float outerRCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(outerRCoordinate));
+    float outerPhiCoordinate(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(outerPhiCoordinate));
+    unsigned int outerSymmetryOrder(0);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(outerSymmetryOrder));
+
+    PandoraApi::ConcentricGap::Parameters parameters;
+    parameters.m_minZCoordinate = minZCoordinate;
+    parameters.m_maxZCoordinate = maxZCoordinate;
+    parameters.m_innerRCoordinate = innerRCoordinate;
+    parameters.m_innerPhiCoordinate = innerPhiCoordinate;
+    parameters.m_innerSymmetryOrder = innerSymmetryOrder;
+    parameters.m_outerRCoordinate = outerRCoordinate;
+    parameters.m_outerPhiCoordinate = outerPhiCoordinate;
+    parameters.m_outerSymmetryOrder = outerSymmetryOrder;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::ConcentricGap::Create(*m_pPandora, parameters));
 
     return STATUS_CODE_SUCCESS;
 }

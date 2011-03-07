@@ -87,6 +87,11 @@ private:
     StatusCode WriteSubDetector(const GeometryHelper::SubDetectorParameters *const pSubDetectorParameters);
 
     /**
+     *  @brief  Write the detector gap parameters to the file
+     */
+    StatusCode WriteDetectorGaps();
+
+    /**
      *  @brief  Write a calo hit to the current position in the file
      * 
      *  @param  pCaloHit address of the calo hit

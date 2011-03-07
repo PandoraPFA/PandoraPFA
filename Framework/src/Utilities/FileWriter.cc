@@ -12,6 +12,7 @@
 #include "Helpers/GeometryHelper.h"
 
 #include "Objects/CaloHit.h"
+#include "Objects/DetectorGap.h"
 #include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
 
@@ -56,6 +57,7 @@ StatusCode FileWriter::WriteGeometry()
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteHeader(GEOMETRY));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteGeometryParameters());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteDetectorGaps());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteFooter());
 
     return STATUS_CODE_SUCCESS;
@@ -87,8 +89,8 @@ StatusCode FileWriter::WriteEvent()
 StatusCode FileWriter::WriteEvent(const TrackList &trackList, const OrderedCaloHitList &orderedCaloHitList)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteHeader(EVENT));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteOrderedCaloHitList(orderedCaloHitList));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteTrackList(trackList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteOrderedCaloHitList(orderedCaloHitList));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteFooter());
 
     return STATUS_CODE_SUCCESS;
@@ -98,7 +100,7 @@ StatusCode FileWriter::WriteEvent(const TrackList &trackList, const OrderedCaloH
 
 StatusCode FileWriter::WriteHeader(const ContainerId containerId)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pandoraFileHash));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(PANDORA_FILE_HASH));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(containerId));
 
     m_containerPosition = m_fileStream.tellp();
@@ -184,6 +186,51 @@ StatusCode FileWriter::WriteGeometryParameters()
     }
 
     // Additional subdetectors
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileWriter::WriteDetectorGaps()
+{
+    if (GEOMETRY != m_containerId)
+        return STATUS_CODE_FAILURE;
+
+    const GeometryHelper::DetectorGapList &detectorGapList(GeometryHelper::GetDetectorGapList());
+
+    for (GeometryHelper::DetectorGapList::const_iterator iter = detectorGapList.begin(), iterEnd = detectorGapList.end(); iter != iterEnd; ++iter)
+    {
+        BoxGap *pBoxGap = NULL;
+        pBoxGap = dynamic_cast<BoxGap *>(*iter);
+
+        if (NULL != pBoxGap)
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(BOX_GAP));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pBoxGap->m_vertex));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pBoxGap->m_side1));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pBoxGap->m_side2));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pBoxGap->m_side3));
+            continue;
+        }
+
+        ConcentricGap *pConcentricGap = NULL;
+        pConcentricGap = dynamic_cast<ConcentricGap *>(*iter);
+
+        if (NULL != pConcentricGap)
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(CONCENTRIC_GAP));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_minZCoordinate));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_maxZCoordinate));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_innerRCoordinate));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_innerPhiCoordinate));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_innerSymmetryOrder));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_outerRCoordinate));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_outerPhiCoordinate));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pConcentricGap->m_outerSymmetryOrder));
+            continue;
+        }
+    }
 
     return STATUS_CODE_SUCCESS;
 }

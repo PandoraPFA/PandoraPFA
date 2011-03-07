@@ -11,7 +11,7 @@
 namespace pandora
 {
 
-const unsigned int pandoraFileHash(01110000);   ///< Look for hash ('p' in binary) each event to check integrity
+const unsigned int PANDORA_FILE_HASH(01110000); ///< Look for hash ('p' in binary) each event to check integrity
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -36,7 +36,8 @@ enum ComponentId
     TRACK,
     EVENT_END,
     SUB_DETECTOR,
-    DETECTOR_GAP,
+    BOX_GAP,
+    CONCENTRIC_GAP,
     GEOMETRY_END,
     UNKNOWN_COMPONENT
 };
@@ -50,7 +51,7 @@ enum FileMode
 {
     APPEND,
     OVERWRITE,
-    NUMBER_OF_MODES
+    UNKNOWN_MODE
 };
 
 } // namespace pandora
