@@ -176,10 +176,21 @@ inline StatusCode FileReader::ReadVariable(T &t)
 }
 
 template<>
-inline StatusCode FileReader::ReadVariable(const std::string &t)
+inline StatusCode FileReader::ReadVariable(std::string &t)
 {
-    // Not currently supported
-    return STATUS_CODE_INVALID_PARAMETER;
+    unsigned int stringSize;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(stringSize));
+
+    char *pMemBlock = new char[stringSize];
+    m_fileStream.read(pMemBlock, stringSize);
+
+    t = std::string(pMemBlock, stringSize);
+    delete[] pMemBlock;
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
 }
 
 template<>

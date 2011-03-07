@@ -169,7 +169,7 @@ StatusCode FileReader::GoToNextContainer()
 
 StatusCode FileReader::ReadHeader()
 {
-    unsigned int fileHash;
+    std::string fileHash;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(fileHash));
 
     if (PANDORA_FILE_HASH != fileHash)
@@ -195,7 +195,7 @@ ContainerId FileReader::GetNextContainerId()
 {
     const std::ifstream::pos_type initialPosition(m_fileStream.tellg());
 
-    unsigned int fileHash;
+    std::string fileHash;
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(fileHash));
 
     if (PANDORA_FILE_HASH != fileHash)
@@ -227,7 +227,12 @@ StatusCode FileReader::ReadNextGeometryComponent()
         return STATUS_CODE_NOT_FOUND;
     }
 
-    if (BOX_GAP == componentId)
+    if (SUB_DETECTOR == componentId)
+    {
+        PandoraApi::Geometry::Parameters::SubDetectorParameters subDetectorParameters;
+        return this->ReadSubDetector(&subDetectorParameters);
+    }
+    else if (BOX_GAP == componentId)
     {
         return this->ReadBoxGap(false);
     }
@@ -283,6 +288,7 @@ StatusCode FileReader::ReadGeometryParameters()
     if (GEOMETRY != m_containerId)
         return STATUS_CODE_FAILURE;
 
+    // Default subdetectors
     PandoraApi::Geometry::Parameters parameters;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_inDetBarrelParameters)));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadSubDetector(&(parameters.m_inDetEndCapParameters)));
@@ -326,6 +332,7 @@ StatusCode FileReader::ReadGeometryParameters()
     }
 
     // Additional subdetectors
+    
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Geometry::Create(*m_pPandora, parameters));
 
@@ -347,6 +354,9 @@ StatusCode FileReader::ReadSubDetector(PandoraApi::GeometryParameters::SubDetect
         if (SUB_DETECTOR != componentId)
             return STATUS_CODE_FAILURE;
     }
+
+    std::string subDetectorName;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(subDetectorName));
 
     bool isInitialized(false);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(isInitialized));

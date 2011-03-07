@@ -146,14 +146,15 @@ StatusCode FileWriter::WriteGeometryParameters()
     if (GEOMETRY != m_containerId)
         return STATUS_CODE_FAILURE;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetInDetBarrelParameters())));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetInDetEndCapParameters())));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetECalBarrelParameters())));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetECalEndCapParameters())));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetHCalBarrelParameters())));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetHCalEndCapParameters())));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetMuonBarrelParameters())));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(&(GeometryHelper::GetMuonEndCapParameters())));
+    // Default subdetectors
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("InDetBarrel", &(GeometryHelper::GetInDetBarrelParameters())));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("InDetEndCap", &(GeometryHelper::GetInDetEndCapParameters())));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("ECalBarrel", &(GeometryHelper::GetECalBarrelParameters())));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("ECalEndCap", &(GeometryHelper::GetECalEndCapParameters())));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("HCalBarrel", &(GeometryHelper::GetHCalBarrelParameters())));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("HCalEndCap", &(GeometryHelper::GetHCalEndCapParameters())));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("MuonBarrel", &(GeometryHelper::GetMuonBarrelParameters())));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector("MuonEndCap", &(GeometryHelper::GetMuonEndCapParameters())));
 
     try
     {
@@ -186,6 +187,13 @@ StatusCode FileWriter::WriteGeometryParameters()
     }
 
     // Additional subdetectors
+    const GeometryHelper::SubDetectorParametersMap &subDetectorParametersMap(GeometryHelper::GetAdditionalSubDetectors());
+
+    for (GeometryHelper::SubDetectorParametersMap::const_iterator iter = subDetectorParametersMap.begin(), iterEnd = subDetectorParametersMap.end();
+        iter != iterEnd; ++iter)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteSubDetector(iter->first, &iter->second));
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -237,12 +245,13 @@ StatusCode FileWriter::WriteDetectorGaps()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileWriter::WriteSubDetector(const GeometryHelper::SubDetectorParameters *const pSubDetectorParameters)
+StatusCode FileWriter::WriteSubDetector(const std::string &subDetectorName, const GeometryHelper::SubDetectorParameters *const pSubDetectorParameters)
 {
     if (GEOMETRY != m_containerId)
         return STATUS_CODE_FAILURE;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(SUB_DETECTOR));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(subDetectorName));
 
     const bool isInitialized(pSubDetectorParameters->IsInitialized());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(isInitialized));

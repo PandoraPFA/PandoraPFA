@@ -82,9 +82,10 @@ private:
     /**
      *  @brief  Write a sub detector to the current position in the file
      * 
+     *  @param  subDetectorName the sub detector name
      *  @param  pSubDetectorParameters address of the sub detector parameters
      */
-    StatusCode WriteSubDetector(const GeometryHelper::SubDetectorParameters *const pSubDetectorParameters);
+    StatusCode WriteSubDetector(const std::string &subDetectorName, const GeometryHelper::SubDetectorParameters *const pSubDetectorParameters);
 
     /**
      *  @brief  Write the detector gap parameters to the file
@@ -147,8 +148,14 @@ inline StatusCode FileWriter::WriteVariable(const T &t)
 template<>
 inline StatusCode FileWriter::WriteVariable(const std::string &t)
 {
-    // Not currently supported
-    return STATUS_CODE_INVALID_PARAMETER;
+    const unsigned int stringSize(t.size());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(stringSize));
+    m_fileStream.write(reinterpret_cast<const char*>(t.c_str()), stringSize);
+
+    if (!m_fileStream.good())
+        return STATUS_CODE_FAILURE;
+
+    return STATUS_CODE_SUCCESS;
 }
 
 template<>

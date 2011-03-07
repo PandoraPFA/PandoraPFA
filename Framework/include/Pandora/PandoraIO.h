@@ -11,7 +11,7 @@
 namespace pandora
 {
 
-const unsigned int PANDORA_FILE_HASH(01110000); ///< Look for hash ('p' in binary) each event to check integrity
+const std::string PANDORA_FILE_HASH("pandora"); ///< Look for hash each event to check integrity
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
