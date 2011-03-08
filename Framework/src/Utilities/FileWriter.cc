@@ -27,7 +27,12 @@ FileWriter::FileWriter(const pandora::Pandora &pandora, const std::string &fileN
 {
     if (APPEND == fileMode)
     {
-        m_fileStream.open(fileName.c_str(), std::ios::out | std::ios::binary | std::ios::app | std::ios::ate);
+        m_fileStream.open(fileName.c_str(), std::ios::out | std::ios::in | std::ios::binary | std::ios::ate);
+
+        if (!m_fileStream.is_open())
+        {
+            m_fileStream.open(fileName.c_str(), std::ios::out | std::ios::binary);
+        }
     }
     else if (OVERWRITE == fileMode)
     {
