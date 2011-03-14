@@ -148,6 +148,20 @@ private:
     StatusCode ReadTrack(bool checkComponentId = true);
 
     /**
+     *  @brief  Read a mc particle from the current position in the file, recreating the stored object
+     * 
+     *  @param  pMCParticle address of the mc particle
+     */
+    StatusCode ReadMCParticle(bool checkComponentId = true);
+
+    /**
+     *  @brief  Read a relationship from the current position in the file, recreating the stored relationship
+     * 
+     *  @param  pCaloHit address of the calo hit
+     */
+    StatusCode ReadRelationship(bool checkComponentId = true);
+
+    /**
      *  @brief  Read a variable from the file
      */
     template<typename T>

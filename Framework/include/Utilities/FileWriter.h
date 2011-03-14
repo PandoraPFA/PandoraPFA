@@ -50,16 +50,22 @@ public:
 
     /**
      *  @brief  Write the current event to the file
+     * 
+     *  @param  writeMCRelationships whether to write mc relationship information to the file
+     *  @param  writeTrackRelationships whether to write track relationship information to the file
      */
-    StatusCode WriteEvent();
+    StatusCode WriteEvent(const bool writeMCRelationships = true, const bool writeTrackRelationships = true);
 
     /**
      *  @brief  Write the specified event components to the file
      * 
-     *  @param  trackList the list of tracks to write to the file
      *  @param  orderedCaloHitList the ordered list of calo hits to write to the file
+     *  @param  trackList the list of tracks to write to the file
+     *  @param  writeMCRelationships whether to write mc relationship information to the file
+     *  @param  writeTrackRelationships whether to write track relationship information to the file
      */
-    StatusCode WriteEvent(const TrackList &trackList, const OrderedCaloHitList &orderedCaloHitList);
+    StatusCode WriteEvent(const OrderedCaloHitList &orderedCaloHitList, const TrackList &trackList, const bool writeMCRelationships = true,
+        const bool writeTrackRelationships = true);
 
 private:
    /**
@@ -102,9 +108,44 @@ private:
     /**
      *  @brief  Write a track to the current position in the file
      * 
-     *  @param   pTrack address of the track
+     *  @param  pTrack address of the track
      */
     StatusCode WriteTrack(const Track *const pTrack);
+
+    /**
+     *  @brief  Write a mc particle to the current position in the file
+     * 
+     *  @param  pMCParticle address of the mc particle
+     */
+    StatusCode WriteMCParticle(const MCParticle *const pMCParticle);
+
+    /**
+     *  @brief  Write a calo hit to mc particle relationship to the current position in the file
+     * 
+     *  @param  pCaloHit address of the calo hit
+     */
+    StatusCode WriteCaloHitToMCParticleRelationship(const CaloHit *const pCaloHit);
+
+    /**
+     *  @brief  Write a track to mc particle relationship to the current position in the file
+     * 
+     *  @param  pTrack address of the track
+     */
+    StatusCode WriteTrackToMCParticleRelationship(const Track *const pTrack);
+
+    /**
+     *  @brief  Write a mc particle parent/daughter relationship to the current position in the file
+     * 
+     *  @param  pMCParticle address of the mc particle
+     */
+    StatusCode WriteMCParticleRelationships(const MCParticle *const pMCParticle);
+
+    /**
+     *  @brief  Write a track sibling or parent/daughter relationship to the current position in the file
+     * 
+     *  @param  pTrack address of the track
+     */
+    StatusCode WriteTrackRelationships(const Track *const pTrack);
 
     /**
      *  @brief  Write a track list to the current position in the file
@@ -119,6 +160,50 @@ private:
      *  @param  orderedCaloHitList the ordered calo hit list
      */
     StatusCode WriteOrderedCaloHitList(const OrderedCaloHitList &orderedCaloHitList);
+
+    /**
+     *  @brief  Write a mc particle list to the current position in the file
+     * 
+     *  @param  mcParticleList the mc particle list
+     */
+    StatusCode WriteMCParticleList(const MCParticleList &mcParticleList);
+
+    /**
+     *  @brief  Write calo hit to mc particle relationships for a specified ordered calo hit list
+     * 
+     *  @param  orderedCaloHitList the ordered calo hit list
+     */
+    StatusCode WriteCaloHitToMCParticleRelationships(const OrderedCaloHitList &orderedCaloHitList);
+
+    /**
+     *  @brief  Write track to mc particle relationships for a specified track list
+     * 
+     *  @param  trackList the track list
+     */
+    StatusCode WriteTrackToMCParticleRelationships(const TrackList &trackList);
+
+    /**
+     *  @brief  Write mc particle relationships for a specified mc particle list
+     * 
+     *  @param  mcParticleList the mc particle list
+     */
+    StatusCode WriteMCParticleRelationships(const MCParticleList &mcParticleList);
+
+    /**
+     *  @brief  Write track relationships for a specified list of tracks
+     * 
+     *  @param  trackList the track list
+     */
+    StatusCode WriteTrackRelationships(const TrackList &trackList);
+
+    /**
+     *  @brief  Write a relationship between two objects with specified addresses
+     * 
+     *  @param  relationshipId the relationship id
+     *  @param  address1 first address to write
+     *  @param  address2 second address to write
+     */
+    StatusCode WriteRelationship(const RelationshipId relationshipId, const void *address1, const void *address2);
 
     /**
      *  @brief  Read a variable from the file

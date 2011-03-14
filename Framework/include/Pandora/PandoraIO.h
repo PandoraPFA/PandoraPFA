@@ -34,12 +34,29 @@ enum ComponentId
 {
     CALO_HIT,
     TRACK,
+    MC_PARTICLE,
+    RELATIONSHIP,
     EVENT_END,
     SUB_DETECTOR,
     BOX_GAP,
     CONCENTRIC_GAP,
     GEOMETRY_END,
     UNKNOWN_COMPONENT
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ *  @brief  The relationship identification enum
+ */
+enum RelationshipId
+{
+    CALO_HIT_TO_MC,
+    TRACK_TO_MC,
+    MC_PARENT_DAUGHTER,
+    TRACK_PARENT_DAUGHTER,
+    TRACK_SIBLING,
+    UNKNOWN_RELATIONSHIP
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

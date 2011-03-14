@@ -227,21 +227,18 @@ StatusCode FileReader::ReadNextGeometryComponent()
         return STATUS_CODE_NOT_FOUND;
     }
 
-    if (BOX_GAP == componentId)
+    switch (componentId)
     {
+    case BOX_GAP:
         return this->ReadBoxGap(false);
-    }
-    else if (CONCENTRIC_GAP == componentId)
-    {
+    case CONCENTRIC_GAP:
         return this->ReadConcentricGap(false);
-    }
-    else if (GEOMETRY_END == componentId)
-    {
+    case GEOMETRY_END:
         m_containerId = UNKNOWN_CONTAINER;
         return STATUS_CODE_NOT_FOUND;
+    default:
+        throw StatusCodeException(STATUS_CODE_FAILURE);
     }
-
-    throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -259,21 +256,22 @@ StatusCode FileReader::ReadNextEventComponent()
         return STATUS_CODE_NOT_FOUND;
     }
 
-    if (CALO_HIT == componentId)
+    switch (componentId)
     {
+    case CALO_HIT:
         return this->ReadCaloHit(false);
-    }
-    else if (TRACK == componentId)
-    {
+    case TRACK:
         return this->ReadTrack(false);
-    }
-    else if (EVENT_END == componentId)
-    {
+    case MC_PARTICLE:
+        return this->ReadMCParticle(false);
+    case RELATIONSHIP:
+        return this->ReadRelationship(false);
+    case EVENT_END:
         m_containerId = UNKNOWN_CONTAINER;
         return STATUS_CODE_NOT_FOUND;
+    default:
+        throw StatusCodeException(STATUS_CODE_FAILURE);
     }
-
-    throw StatusCodeException(STATUS_CODE_FAILURE);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -652,6 +650,94 @@ StatusCode FileReader::ReadTrack(bool checkComponentId)
     parameters.m_canFormClusterlessPfo = canFormClusterlessPfo;
     parameters.m_pParentAddress = pParentAddress;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::Track::Create(*m_pPandora, parameters));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadMCParticle(bool checkComponentId)
+{
+    if (EVENT != m_containerId)
+        return STATUS_CODE_FAILURE;
+
+    if (checkComponentId)
+    {
+        ComponentId componentId(UNKNOWN_COMPONENT);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(componentId));
+
+        if (MC_PARTICLE != componentId)
+            return STATUS_CODE_FAILURE;
+    }
+
+    float energy(0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(energy));
+    CartesianVector momentum(0.f, 0.f, 0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(momentum));
+    CartesianVector vertex(0.f, 0.f, 0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(vertex));
+    CartesianVector endpoint(0.f, 0.f, 0.f);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(endpoint));
+    int particleId(-std::numeric_limits<int>::max());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(particleId));
+    void *pParentAddress(NULL);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(pParentAddress));
+
+    PandoraApi::MCParticle::Parameters parameters;
+    parameters.m_energy = energy;
+    parameters.m_momentum = momentum;
+    parameters.m_vertex = vertex;
+    parameters.m_endpoint = endpoint;
+    parameters.m_particleId = particleId;
+    parameters.m_pParentAddress = pParentAddress;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, parameters));
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode FileReader::ReadRelationship(bool checkComponentId)
+{
+    if (EVENT != m_containerId)
+        return STATUS_CODE_FAILURE;
+
+    if (checkComponentId)
+    {
+        ComponentId componentId(UNKNOWN_COMPONENT);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(componentId));
+
+        if (RELATIONSHIP != componentId)
+            return STATUS_CODE_FAILURE;
+    }
+
+    RelationshipId relationshipId(UNKNOWN_RELATIONSHIP);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(relationshipId));
+    void *address1(NULL);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(address1));
+    void *address2(NULL);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(address2));
+
+    switch (relationshipId)
+    {
+    case CALO_HIT_TO_MC:
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetCaloHitToMCParticleRelationship(*m_pPandora, address1, address2));
+        break;
+    case TRACK_TO_MC:
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetTrackToMCParticleRelationship(*m_pPandora, address1, address2));
+        break;
+    case MC_PARENT_DAUGHTER:
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetMCParentDaughterRelationship(*m_pPandora, address1, address2));
+        break;
+    case TRACK_PARENT_DAUGHTER:
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetTrackParentDaughterRelationship(*m_pPandora, address1, address2));
+        break;
+    case TRACK_SIBLING:
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetTrackSiblingRelationship(*m_pPandora, address1, address2));
+        break;
+    default:
+        return STATUS_CODE_FAILURE;
+    }
 
     return STATUS_CODE_SUCCESS;
 }
