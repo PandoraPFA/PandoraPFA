@@ -39,7 +39,11 @@ FileReader::~FileReader()
 
 StatusCode FileReader::ReadGeometry()
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextGeometry());
+    if (GEOMETRY != this->GetNextContainerId())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextGeometry());
+    }
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadGeometryParameters());
 
@@ -62,7 +66,11 @@ StatusCode FileReader::ReadGeometry()
 
 StatusCode FileReader::ReadEvent()
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextEvent());
+    if (EVENT != this->GetNextContainerId())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextEvent());
+    }
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadHeader());
 
     try
@@ -84,13 +92,11 @@ StatusCode FileReader::ReadEvent()
 
 StatusCode FileReader::GoToNextGeometry()
 {
-    ContainerId containerId(this->GetNextContainerId());
-
-    while (GEOMETRY != containerId)
+    do
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextContainer());
-        containerId = this->GetNextContainerId();
     }
+    while (GEOMETRY != this->GetNextContainerId());
 
     return STATUS_CODE_SUCCESS;
 }
@@ -99,13 +105,11 @@ StatusCode FileReader::GoToNextGeometry()
 
 StatusCode FileReader::GoToNextEvent()
 {
-    ContainerId containerId(this->GetNextContainerId());
-
-    while (EVENT != containerId)
+    do
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextContainer());
-        containerId = this->GetNextContainerId();
     }
+    while (EVENT != this->GetNextContainerId());
 
     return STATUS_CODE_SUCCESS;
 }
@@ -120,7 +124,8 @@ StatusCode FileReader::GoToGeometry(const unsigned int geometryNumber)
     if (!m_fileStream.good())
         return STATUS_CODE_FAILURE;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextGeometry());
+    if ((0 == geometryNumber) && (GEOMETRY == this->GetNextContainerId()))
+        return STATUS_CODE_SUCCESS;
 
     while (nGeometriesRead < geometryNumber)
     {
@@ -141,7 +146,8 @@ StatusCode FileReader::GoToEvent(const unsigned int eventNumber)
     if (!m_fileStream.good())
         return STATUS_CODE_FAILURE;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextEvent());
+    if ((0 == eventNumber) && (EVENT == this->GetNextContainerId()))
+        return STATUS_CODE_SUCCESS;
 
     while (nEventsRead < eventNumber)
     {
