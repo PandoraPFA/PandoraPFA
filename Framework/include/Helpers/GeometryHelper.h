@@ -162,6 +162,13 @@ public:
     typedef std::vector<DetectorGap *> DetectorGapList;
 
     /**
+     *  @brief  Whether the geometry helper is initialized
+     * 
+     *  @return boolean
+     */
+    static bool IsInitialized();
+
+    /**
      *  @brief  Get the bfield value for a specified position vector
      * 
      *  @param  positionVector the specified position
@@ -447,6 +454,13 @@ private:
     friend class PandoraApiImpl;
     friend class PandoraSettings;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool GeometryHelper::IsInitialized()
+{
+    return m_isInitialized;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

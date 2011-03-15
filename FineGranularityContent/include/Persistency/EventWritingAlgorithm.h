@@ -44,9 +44,18 @@ private:
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    pandora::FileWriter    *m_pFileWriter;      ///< Address of the file writer
-    std::string             m_fileName;         ///< Name of the output file
-    bool                    m_shouldOverwrite;  ///< Whether to overwrite an existing file with the specified name, or append
+    bool                    m_shouldWriteGeometry;          ///< Whether to write geometry to a specified file
+    std::string             m_geometryFileName;             ///< Name of the output geometry file
+
+    bool                    m_shouldWriteEvents;            ///< Whether to write events to a specified file
+    std::string             m_eventFileName;                ///< Name of the output event file
+    pandora::FileWriter    *m_pEventFileWriter;             ///< Address of the event file writer
+
+    bool                    m_shouldWriteMCRelationships;   ///< Whether to write mc relationship information to the events file
+    bool                    m_shouldWriteTrackRelationships;///< Whether to write track relationship information to the events file
+
+    bool                    m_shouldOverwriteEventFile;     ///< Whether to overwrite existing event file with specified name, or append
+    bool                    m_shouldOverwriteGeometryFile;  ///< Whether to overwrite existing geometry file with specified name, or append
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -289,7 +289,5 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShowDetector", m_showDetector));
 
-    PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector, m_maximumHitEnergy));
-
     return STATUS_CODE_SUCCESS;
 }
