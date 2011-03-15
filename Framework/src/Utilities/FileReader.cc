@@ -118,19 +118,19 @@ StatusCode FileReader::GoToNextEvent()
 
 StatusCode FileReader::GoToGeometry(const unsigned int geometryNumber)
 {
-    unsigned int nGeometriesRead(0);
+    int nGeometriesRead(0);
     m_fileStream.seekg(0, std::ios::beg);
 
     if (!m_fileStream.good())
         return STATUS_CODE_FAILURE;
 
-    if ((0 == geometryNumber) && (GEOMETRY == this->GetNextContainerId()))
-        return STATUS_CODE_SUCCESS;
+    if (GEOMETRY != this->GetNextContainerId())
+        --nGeometriesRead;
 
-    while (nGeometriesRead < geometryNumber)
+    while (nGeometriesRead < static_cast<int>(geometryNumber))
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextGeometry());
-        nGeometriesRead++;
+        ++nGeometriesRead;
     }
 
     return STATUS_CODE_SUCCESS;
@@ -140,19 +140,19 @@ StatusCode FileReader::GoToGeometry(const unsigned int geometryNumber)
 
 StatusCode FileReader::GoToEvent(const unsigned int eventNumber)
 {
-    unsigned int nEventsRead(0);
+    int nEventsRead(0);
     m_fileStream.seekg(0, std::ios::beg);
 
     if (!m_fileStream.good())
         return STATUS_CODE_FAILURE;
 
-    if ((0 == eventNumber) && (EVENT == this->GetNextContainerId()))
-        return STATUS_CODE_SUCCESS;
+    if (EVENT != this->GetNextContainerId())
+        --nEventsRead;
 
-    while (nEventsRead < eventNumber)
+    while (nEventsRead < static_cast<int>(eventNumber))
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GoToNextEvent());
-        nEventsRead++;
+        ++nEventsRead;
     }
 
     return STATUS_CODE_SUCCESS;
