@@ -721,20 +721,15 @@ StatusCode FileReader::ReadRelationship(bool checkComponentId)
     switch (relationshipId)
     {
     case CALO_HIT_TO_MC:
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetCaloHitToMCParticleRelationship(*m_pPandora, address1, address2));
-        break;
+        return PandoraApi::SetCaloHitToMCParticleRelationship(*m_pPandora, address1, address2);
     case TRACK_TO_MC:
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetTrackToMCParticleRelationship(*m_pPandora, address1, address2));
-        break;
+        return PandoraApi::SetTrackToMCParticleRelationship(*m_pPandora, address1, address2);
     case MC_PARENT_DAUGHTER:
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetMCParentDaughterRelationship(*m_pPandora, address1, address2));
-        break;
+        return PandoraApi::SetMCParentDaughterRelationship(*m_pPandora, address1, address2);
     case TRACK_PARENT_DAUGHTER:
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetTrackParentDaughterRelationship(*m_pPandora, address1, address2));
-        break;
+        return PandoraApi::SetTrackParentDaughterRelationship(*m_pPandora, address1, address2);
     case TRACK_SIBLING:
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, PandoraApi::SetTrackSiblingRelationship(*m_pPandora, address1, address2));
-        break;
+        return PandoraApi::SetTrackSiblingRelationship(*m_pPandora, address1, address2);
     default:
         return STATUS_CODE_FAILURE;
     }

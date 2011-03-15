@@ -86,6 +86,55 @@ private:
     StatusCode WriteGeometryParameters();
 
     /**
+     *  @brief  Write a track list to the current position in the file
+     * 
+     *  @param  trackList the track list
+     */
+    StatusCode WriteTrackList(const TrackList &trackList);
+
+    /**
+     *  @brief  Write an ordered calo hit list to the current position in the file
+     * 
+     *  @param  orderedCaloHitList the ordered calo hit list
+     */
+    StatusCode WriteOrderedCaloHitList(const OrderedCaloHitList &orderedCaloHitList);
+
+    /**
+     *  @brief  Write a mc particle list to the current position in the file
+     * 
+     *  @param  mcParticleList the mc particle list
+     */
+    StatusCode WriteMCParticleList(const MCParticleList &mcParticleList);
+
+    /**
+     *  @brief  Write calo hit to mc particle relationships for a specified ordered calo hit list
+     * 
+     *  @param  orderedCaloHitList the ordered calo hit list
+     */
+    StatusCode WriteCaloHitToMCParticleRelationships(const OrderedCaloHitList &orderedCaloHitList);
+
+    /**
+     *  @brief  Write track to mc particle relationships for a specified track list
+     * 
+     *  @param  trackList the track list
+     */
+    StatusCode WriteTrackToMCParticleRelationships(const TrackList &trackList);
+
+    /**
+     *  @brief  Write mc particle relationships for a specified mc particle list
+     * 
+     *  @param  mcParticleList the mc particle list
+     */
+    StatusCode WriteMCParticleRelationships(const MCParticleList &mcParticleList);
+
+    /**
+     *  @brief  Write track relationships for a specified list of tracks
+     * 
+     *  @param  trackList the track list
+     */
+    StatusCode WriteTrackRelationships(const TrackList &trackList);
+
+    /**
      *  @brief  Write a sub detector to the current position in the file
      * 
      *  @param  subDetectorName the sub detector name
@@ -146,55 +195,6 @@ private:
      *  @param  pTrack address of the track
      */
     StatusCode WriteTrackRelationships(const Track *const pTrack);
-
-    /**
-     *  @brief  Write a track list to the current position in the file
-     * 
-     *  @param  trackList the track list
-     */
-    StatusCode WriteTrackList(const TrackList &trackList);
-
-    /**
-     *  @brief  Write an ordered calo hit list to the current position in the file
-     * 
-     *  @param  orderedCaloHitList the ordered calo hit list
-     */
-    StatusCode WriteOrderedCaloHitList(const OrderedCaloHitList &orderedCaloHitList);
-
-    /**
-     *  @brief  Write a mc particle list to the current position in the file
-     * 
-     *  @param  mcParticleList the mc particle list
-     */
-    StatusCode WriteMCParticleList(const MCParticleList &mcParticleList);
-
-    /**
-     *  @brief  Write calo hit to mc particle relationships for a specified ordered calo hit list
-     * 
-     *  @param  orderedCaloHitList the ordered calo hit list
-     */
-    StatusCode WriteCaloHitToMCParticleRelationships(const OrderedCaloHitList &orderedCaloHitList);
-
-    /**
-     *  @brief  Write track to mc particle relationships for a specified track list
-     * 
-     *  @param  trackList the track list
-     */
-    StatusCode WriteTrackToMCParticleRelationships(const TrackList &trackList);
-
-    /**
-     *  @brief  Write mc particle relationships for a specified mc particle list
-     * 
-     *  @param  mcParticleList the mc particle list
-     */
-    StatusCode WriteMCParticleRelationships(const MCParticleList &mcParticleList);
-
-    /**
-     *  @brief  Write track relationships for a specified list of tracks
-     * 
-     *  @param  trackList the track list
-     */
-    StatusCode WriteTrackRelationships(const TrackList &trackList);
 
     /**
      *  @brief  Write a relationship between two objects with specified addresses

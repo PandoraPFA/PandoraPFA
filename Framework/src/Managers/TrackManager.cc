@@ -374,8 +374,15 @@ StatusCode TrackManager::AddParentDaughterAssociations() const
         if ((m_uidToTrackMap.end() == parentIter) || (m_uidToTrackMap.end() == daughterIter))
             continue;
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, parentIter->second->AddDaughter(daughterIter->second));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, daughterIter->second->AddParent(parentIter->second));
+        // ATTN: Very easy to duplicate this information. Now tolerate this without returning error.
+        const StatusCode firstStatusCode(parentIter->second->AddDaughter(daughterIter->second));
+        const StatusCode secondStatusCode(daughterIter->second->AddParent(parentIter->second));
+
+        if (firstStatusCode != secondStatusCode)
+            return STATUS_CODE_FAILURE;
+
+        if ((firstStatusCode != STATUS_CODE_SUCCESS) && (firstStatusCode != STATUS_CODE_ALREADY_PRESENT))
+            return firstStatusCode;
     }
 
     return STATUS_CODE_SUCCESS;
@@ -394,8 +401,15 @@ StatusCode TrackManager::AddSiblingAssociations() const
         if ((m_uidToTrackMap.end() == firstSiblingIter) || (m_uidToTrackMap.end() == secondSiblingIter))
             continue;
 
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, firstSiblingIter->second->AddSibling(secondSiblingIter->second));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, secondSiblingIter->second->AddSibling(firstSiblingIter->second));
+        // ATTN: Very easy to duplicate this information. Now tolerate this without returning error.
+        const StatusCode firstStatusCode(firstSiblingIter->second->AddSibling(secondSiblingIter->second));
+        const StatusCode secondStatusCode(secondSiblingIter->second->AddSibling(firstSiblingIter->second));
+
+        if (firstStatusCode != secondStatusCode)
+            return STATUS_CODE_FAILURE;
+
+        if ((firstStatusCode != STATUS_CODE_SUCCESS) && (firstStatusCode != STATUS_CODE_ALREADY_PRESENT))
+            return firstStatusCode;
     }
 
     return STATUS_CODE_SUCCESS;

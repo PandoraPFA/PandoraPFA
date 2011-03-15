@@ -409,6 +409,11 @@ StatusCode MuonReconstructionAlgorithm::GetPfoComponents(TrackList &pfoTrackList
     for (ParticleFlowObjectList::const_iterator iter = pPfoList->begin(), iterEnd = pPfoList->end(); iter != iterEnd; ++iter)
     {
         ParticleFlowObject *pPfo = *iter;
+        const int particleId(pPfo->GetParticleId());
+
+        if ((particleId != MU_MINUS) && (particleId != MU_PLUS))
+            continue;
+
         pfoTrackList.insert(pPfo->GetTrackList().begin(), pPfo->GetTrackList().end());
         pfoClusterList.insert(pPfo->GetClusterList().begin(), pPfo->GetClusterList().end());
     }
