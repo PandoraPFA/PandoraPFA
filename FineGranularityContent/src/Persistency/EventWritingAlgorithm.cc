@@ -55,7 +55,8 @@ StatusCode EventWritingAlgorithm::Run()
 {
     if ((NULL != m_pEventFileWriter) && m_shouldWriteEvents)
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventFileWriter->WriteEvent());
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventFileWriter->WriteEvent(m_shouldWriteMCRelationships,
+            m_shouldWriteTrackRelationships));
     }
 
     return STATUS_CODE_SUCCESS;
