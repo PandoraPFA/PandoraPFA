@@ -137,6 +137,62 @@ public:
     };
 
     /**
+     *  @brief  ReclusterChangeLog class
+     */
+    class ReclusterChangeLog
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  initialEnergy
+         */
+        ReclusterChangeLog(const float initialEnergy);
+
+        /**
+         *  @brief  
+         * 
+         *  @param  newEnergy
+         */
+        void SetNewEnergyValue(const float newEnergy);
+
+        /**
+         *  @brief  Get the net energy change
+         * 
+         *  @return The net energy change
+         */
+        float GetNetEnergyChange() const;
+
+        /**
+         *  @brief  Get the sum of the moduli of energy changes
+         * 
+         *  @return The sum of the moduli of energy changes
+         */
+        float GetSumModulusEnergyChanges() const;
+
+        /**
+         *  @brief  Get the sum of the squared energy changes
+         * 
+         *  @return The sum of the squared energy changes
+         */
+        float GetSumSquaredEnergyChanges() const;
+
+        /**
+         *  @brief  Get the number of energy changes
+         * 
+         *  @return The number of energy changes
+         */
+        unsigned int GetNEnergyChanges() const;
+
+    private:
+        float           m_currentEnergy;                ///< The current energy associated with a track
+        float           m_netEnergyChange;              ///< The net change in energy associated with a track during reclustering
+        float           m_sumModulusEnergyChanges;      ///< The sum of the moduli of energy changes
+        float           m_sumSquaredEnergyChanges;      ///< The sum of the squared energy changes
+        unsigned int    m_nEnergyChanges;               ///< The number of changes to the energy associated with a track during reclustering
+    };
+
+    /**
      *  @brief  Evaluate the compatibility of a cluster with its associated tracks. Reclustering can be used to split up a
      *          cluster and produce more favourable track/cluster matches.
      *
@@ -168,12 +224,50 @@ public:
 
 private:
     /**
+     *  @brief  Initialize recluster monitoring
+     * 
+     *  @param  pTrackList the recluster track list
+     */
+    static StatusCode InitializeReclusterMonitoring(const TrackList &trackList);
+
+    /**
+     *  @brief  End recluster monitoring
+     */
+    static StatusCode EndReclusterMonitoring();
+
+    /**
+     *  @brief  Get the recluster monitoring results, recording the changes in the energy associated with a specific track during
+     *          the pandora reclustering phase
+     * 
+     *  @param  pTrackParentAddress address of track in the user framework
+     *  @param  netEnergyChange to receive the net change in energy associated with the track during reclustering
+     *  @param  sumModulusEnergyChanges to receive the sum of the moduli of energy changes during reclustering
+     *  @param  sumSquaredEnergyChanges to receive the sum of the squared energy changes during reclustering
+     */
+    static StatusCode GetReclusterMonitoringResults(const void *pTrackParentAddress, float &netEnergyChange, float &sumModulusEnergyChanges,
+        float &sumSquaredEnergyChanges);
+
+    /**
+     *  @brief  Reset the recluster monitoring containers
+     */
+    static StatusCode ResetReclusterMonitoring();
+
+    /**
      *  @brief  Read the recluster helper settings
      * 
      *  @param  pXmlHandle address of the relevant xml handle
      */
     static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
+    typedef std::map<const void *, ReclusterChangeLog> ReclusterMonitoringMap;
+    typedef std::map<unsigned int, TrackList> ProcessIdToTrackListMap;
+
+    static unsigned int             m_nReclusteringProcesses;           ///< The number of reclustering algorithms currently in use
+    static ReclusterMonitoringMap   m_reclusterMonitoringMap;           ///< The recluster monitoring map
+    static ProcessIdToTrackListMap  m_processIdToTrackListMap;          ///< The reclustering process id to track list map
+
+    friend class PandoraApiImpl;
+    friend class PandoraContentApiImpl;
     friend class PandoraSettings;
 };
 
@@ -280,6 +374,35 @@ inline void ReclusterHelper::ReclusterResult::SetNExcessTrackAssociations(unsign
 {
     if (!(m_nExcessTrackAssociations = nExcessTrackAssociations))
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ReclusterHelper::ReclusterChangeLog::GetNetEnergyChange() const
+{
+    return m_netEnergyChange;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ReclusterHelper::ReclusterChangeLog::GetSumModulusEnergyChanges() const
+{
+    return m_sumModulusEnergyChanges;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ReclusterHelper::ReclusterChangeLog::GetSumSquaredEnergyChanges() const
+{
+    return m_sumSquaredEnergyChanges;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline unsigned int ReclusterHelper::ReclusterChangeLog::GetNEnergyChanges() const
+{
+    return m_nEnergyChanges;
 }
 
 } // namespace pandora

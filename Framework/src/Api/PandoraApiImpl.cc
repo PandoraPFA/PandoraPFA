@@ -14,6 +14,7 @@
 #include "Helpers/CaloHitHelper.h"
 #include "Helpers/GeometryHelper.h"
 #include "Helpers/ParticleIdHelper.h"
+#include "Helpers/ReclusterHelper.h"
 
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
@@ -187,6 +188,14 @@ StatusCode PandoraApiImpl::RegisterSettingsFunction(const std::string &xmlTagNam
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApiImpl::GetReclusterMonitoringResults(const void *pTrackParentAddress, float &netEnergyChange, float &sumModulusEnergyChanges,
+    float &sumSquaredEnergyChanges) const
+{
+    return ReclusterHelper::GetReclusterMonitoringResults(pTrackParentAddress, netEnergyChange, sumModulusEnergyChanges, sumSquaredEnergyChanges);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApiImpl::ResetForNextEvent() const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ResetForNextEvent());
@@ -195,6 +204,7 @@ StatusCode PandoraApiImpl::ResetForNextEvent() const
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->ResetForNextEvent());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetForNextEvent());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ClearCaloHitUsageMaps());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ResetReclusterMonitoring());
 
     return STATUS_CODE_SUCCESS;
 }

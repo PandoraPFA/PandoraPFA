@@ -20,6 +20,12 @@
 namespace pandora
 {
 
+unsigned int ReclusterHelper::m_nReclusteringProcesses = 0;
+ReclusterHelper::ReclusterMonitoringMap ReclusterHelper::m_reclusterMonitoringMap;
+ReclusterHelper::ProcessIdToTrackListMap ReclusterHelper::m_processIdToTrackListMap;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 float ReclusterHelper::GetTrackClusterCompatibility(const Cluster *const pCluster, const TrackList &trackList)
 {
     float trackEnergySum(0.);
@@ -102,6 +108,105 @@ StatusCode ReclusterHelper::ExtractReclusterResults(const ClusterList *const pRe
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode ReclusterHelper::InitializeReclusterMonitoring(const TrackList &trackList)
+{
+    ++m_nReclusteringProcesses;
+
+    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
+    {
+        Track *pTrack = *iter;
+
+        const void *pTrackParentAddress(pTrack->GetParentTrackAddress());
+        ReclusterMonitoringMap::const_iterator mapIter = m_reclusterMonitoringMap.find(pTrackParentAddress);
+
+        if (m_reclusterMonitoringMap.end() == mapIter)
+        {
+            Cluster *pCluster = NULL;
+            const float clusterEnergy((STATUS_CODE_SUCCESS != pTrack->GetAssociatedCluster(pCluster)) ? 0.f : pCluster->GetTrackComparisonEnergy());
+
+            if (!m_reclusterMonitoringMap.insert(ReclusterMonitoringMap::value_type(pTrackParentAddress, ReclusterChangeLog(clusterEnergy))).second)
+                return STATUS_CODE_FAILURE;
+
+            if (!m_processIdToTrackListMap[m_nReclusteringProcesses].insert(pTrack).second)
+                return STATUS_CODE_FAILURE;
+        }
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ReclusterHelper::EndReclusterMonitoring()
+{
+    if (0 == m_nReclusteringProcesses)
+        return STATUS_CODE_NOT_ALLOWED;
+
+    ProcessIdToTrackListMap::iterator processIdIter = m_processIdToTrackListMap.find(m_nReclusteringProcesses);
+
+    if (m_processIdToTrackListMap.end() != processIdIter)
+    {
+        for (TrackList::const_iterator iter = processIdIter->second.begin(), iterEnd = processIdIter->second.end(); iter != iterEnd; ++iter)
+        {
+            Track *pTrack = *iter;
+
+            const void *pTrackParentAddress(pTrack->GetParentTrackAddress());
+            ReclusterMonitoringMap::iterator mapIter = m_reclusterMonitoringMap.find(pTrackParentAddress);
+
+            if (m_reclusterMonitoringMap.end() == mapIter)
+                return STATUS_CODE_FAILURE;
+
+            Cluster *pCluster = NULL;
+            const float clusterEnergy((STATUS_CODE_SUCCESS != pTrack->GetAssociatedCluster(pCluster)) ? 0.f : pCluster->GetTrackComparisonEnergy());
+
+            mapIter->second.SetNewEnergyValue(clusterEnergy);
+        }
+        m_processIdToTrackListMap.erase(processIdIter);
+    }
+    --m_nReclusteringProcesses;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ReclusterHelper::GetReclusterMonitoringResults(const void *pTrackParentAddress, float &netEnergyChange, float &sumModulusEnergyChanges,
+    float &sumSquaredEnergyChanges)
+{
+    netEnergyChange = 0.f;
+    sumModulusEnergyChanges = 0.f;
+    sumSquaredEnergyChanges = 0.f;
+
+    ReclusterMonitoringMap::iterator mapIter = m_reclusterMonitoringMap.find(pTrackParentAddress);
+
+    if (m_reclusterMonitoringMap.end() != mapIter)
+    {
+        netEnergyChange = mapIter->second.GetNetEnergyChange();
+        sumModulusEnergyChanges = mapIter->second.GetSumModulusEnergyChanges();
+        sumSquaredEnergyChanges = mapIter->second.GetSumSquaredEnergyChanges();
+    }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ReclusterHelper::ResetReclusterMonitoring()
+{
+    m_reclusterMonitoringMap.clear();
+    m_processIdToTrackListMap.clear();
+
+    if (!m_reclusterMonitoringMap.empty() || !m_processIdToTrackListMap.empty())
+        return STATUS_CODE_FAILURE;
+
+    m_nReclusteringProcesses = 0;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode ReclusterHelper::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
 {
     /*TiXmlElement *pXmlElement(pXmlHandle->FirstChild("ReclusterHelper").Element());
@@ -112,6 +217,34 @@ StatusCode ReclusterHelper::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/
     }*/
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+ReclusterHelper::ReclusterChangeLog::ReclusterChangeLog(const float initialEnergy) :
+    m_currentEnergy(initialEnergy),
+    m_netEnergyChange(0.f),
+    m_sumModulusEnergyChanges(0.f),
+    m_sumSquaredEnergyChanges(0.f),
+    m_nEnergyChanges(0)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void ReclusterHelper::ReclusterChangeLog::SetNewEnergyValue(const float newEnergy)
+{
+    const float energyChange(newEnergy - m_currentEnergy);
+
+    if (std::fabs(energyChange) < std::numeric_limits<float>::epsilon())
+        return;
+
+    m_netEnergyChange += energyChange;
+    m_sumModulusEnergyChanges += std::fabs(energyChange);
+    m_sumSquaredEnergyChanges += (energyChange * energyChange);
+    m_currentEnergy = newEnergy;
+    ++m_nEnergyChanges;
 }
 
 } // namespace pandora

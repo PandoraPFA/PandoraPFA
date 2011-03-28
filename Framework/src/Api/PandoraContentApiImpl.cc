@@ -11,6 +11,7 @@
 #include "Api/PandoraContentApiImpl.h"
 
 #include "Helpers/CaloHitHelper.h"
+#include "Helpers/ReclusterHelper.h"
 
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
@@ -295,7 +296,9 @@ StatusCode PandoraContentApiImpl::InitializeReclustering(const Algorithm &algori
     std::string orderedCaloHitListName;
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->GetCurrentList(pOrderedCaloHitList, orderedCaloHitListName));
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::CreateInitialCaloHitUsageMap(originalClustersListName, pOrderedCaloHitList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::InitializeReclusterMonitoring(inputTrackList));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -317,6 +320,7 @@ StatusCode PandoraContentApiImpl::EndReclustering(const Algorithm &algorithm, co
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetAlgorithmInfo(&algorithm, false));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ApplyCaloHitUsageMap(selectedClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::EndReclusterMonitoring());
 
     return STATUS_CODE_SUCCESS;
 }

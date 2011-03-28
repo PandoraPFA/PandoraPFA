@@ -351,6 +351,19 @@ public:
         pandora::SettingsFunction *pSettingsFunction);
 
     /**
+     *  @brief  Get the recluster monitoring results, recording the changes in the energy associated with a specific track during
+     *          the pandora reclustering phase
+     * 
+     *  @param  pandora the pandora instance to query
+     *  @param  pTrackParentAddress address of track in the user framework
+     *  @param  netEnergyChange to receive the net change in energy associated with the track during reclustering
+     *  @param  sumModulusEnergyChanges to receive the sum of the moduli of energy changes during reclustering
+     *  @param  sumSquaredEnergyChanges to receive the sum of the squared energy changes during reclustering
+     */
+    static pandora::StatusCode GetReclusterMonitoringResults(const pandora::Pandora &pandora, const void *pTrackParentAddress,
+        float &netEnergyChange, float &sumModulusEnergyChanges, float &sumSquaredEnergyChanges);
+
+    /**
      *  @brief  Reset pandora to process another event
      * 
      *  @param  pandora the pandora instance to reset

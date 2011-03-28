@@ -222,6 +222,10 @@ StatusCode TrackDrivenAssociationAlg::Run()
                 clusterVector[*iter] = NULL;
         }
 
+        // Recreate track-cluster associations for chosen recluster candidates
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::TemporarilyReplaceCurrentClusterList(*this, bestReclusterListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
+
         // Choose the best recluster candidates, which may still be the originals
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::EndReclustering(*this, bestReclusterListName));
     }

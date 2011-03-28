@@ -158,6 +158,18 @@ public:
     StatusCode RegisterSettingsFunction(const std::string &xmlTagName, SettingsFunction *pSettingsFunction) const;
 
     /**
+     *  @brief  Get the recluster monitoring results, recording the changes in the energy associated with a specific track during
+     *          the pandora reclustering phase
+     * 
+     *  @param  pTrackParentAddress address of track in the user framework
+     *  @param  netEnergyChange to receive the net change in energy associated with the track during reclustering
+     *  @param  sumModulusEnergyChanges to receive the sum of the moduli of energy changes during reclustering
+     *  @param  sumSquaredEnergyChanges to receive the sum of the squared energy changes during reclustering
+     */
+    StatusCode GetReclusterMonitoringResults(const void *pTrackParentAddress, float &netEnergyChange, float &sumModulusEnergyChanges,
+        float &sumSquaredEnergyChanges) const;
+
+    /**
      *  @brief  Reset pandora to process another event
      */
     StatusCode ResetForNextEvent() const;

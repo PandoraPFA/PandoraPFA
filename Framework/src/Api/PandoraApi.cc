@@ -140,6 +140,14 @@ pandora::StatusCode PandoraApi::RegisterSettingsFunction(const pandora::Pandora 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+pandora::StatusCode PandoraApi::GetReclusterMonitoringResults(const pandora::Pandora &pandora, const void *pTrackParentAddress,
+    float &netEnergyChange, float &sumModulusEnergyChanges, float &sumSquaredEnergyChanges)
+{
+    return pandora.GetPandoraApiImpl()->GetReclusterMonitoringResults(pTrackParentAddress, netEnergyChange, sumModulusEnergyChanges, sumSquaredEnergyChanges);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraApi::Reset(const pandora::Pandora &pandora)
 {
     return pandora.GetPandoraApiImpl()->ResetForNextEvent();
