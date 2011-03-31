@@ -22,7 +22,14 @@ namespace pandora
 class MCParticleHelper
 {
 public:
-
+    /**
+     *  @brief  Find the mc particle making the largest electromagnetic energy contribution to a specified cluster
+     * 
+     *  @param  pCluster address of the cluster to examine
+     * 
+     *  @return address of the main mc particle
+     */
+    static const MCParticle *const GetMainMCParticle(const pandora::Cluster *const pCluster);
 };
 
 } // namespace pandora

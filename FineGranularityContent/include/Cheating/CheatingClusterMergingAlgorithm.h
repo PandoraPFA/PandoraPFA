@@ -29,17 +29,7 @@ private:
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    /**
-     *  @brief  Find the mc particle making the largest electromagnetic energy contribution to a specified cluster
-     * 
-     *  @param  pCluster address of the cluster to examine
-     * 
-     *  @return address of the main mc particle
-     */
-    const pandora::MCParticle *GetMainMCParticle(const pandora::Cluster *const pCluster) const;
-
     pandora::StringVector   m_clusterListNames;             ///< use the given cluster lists to search for daughter clusters to merge
-    bool                    m_debug;                        ///< turn on additional debugging output
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

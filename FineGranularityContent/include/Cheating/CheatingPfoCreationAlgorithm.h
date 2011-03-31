@@ -58,8 +58,8 @@ private:
      *  @param  particleId
      *  @param  charge
      */
-    void ComputeFromCalorimeter(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
-        int &particleId, int &charge) const;
+    static void ComputeFromCalorimeter(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge);
 
     /**
      *  @brief  ComputeFromMC
@@ -71,8 +71,8 @@ private:
      *  @param  particleId
      *  @param  charge
      */
-    void ComputeFromMC(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
-        int &particleId, int &charge) const;
+    static void ComputeFromMC(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge);
 
     /**
      *  @brief  ComputeFromTracks
@@ -84,8 +84,8 @@ private:
      *  @param  particleId
      *  @param  charge
      */
-    void ComputeFromTracks(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
-        int &particleId, int &charge) const;
+    static void ComputeFromTracks(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge);
 
     /**
      *  @brief  ComputeFromCalorimeterAndTracks
@@ -97,8 +97,8 @@ private:
      *  @param  particleId
      *  @param  charge
      */
-    void ComputeFromCalorimeterAndTracks(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
-        int &particleId, int &charge) const;
+    static void ComputeFromCalorimeterAndTracks(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
+        int &particleId, int &charge);
 
     /**
      *  @brief  ComputeEnergyWeightedClusterPosition
@@ -106,15 +106,13 @@ private:
      *  @param  pCluster
      *  @param  energyWeightedClusterPosition
      */
-    void ComputeEnergyWeightedClusterPosition(pandora::Cluster *pCluster, pandora::CartesianVector &energyWeightedClusterPosition) const;
+    static void ComputeEnergyWeightedClusterPosition(pandora::Cluster *pCluster, pandora::CartesianVector &energyWeightedClusterPosition);
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_inputClusterListName;         ///< if a clusterlistname is given, take the clusters from there instead of running a clustering algorithm
     std::string     m_outputClusterListName;        ///< The name under which to save the new cheated cluster list
 
-    std::string     m_energyFrom;                   ///< tells which energy is taken
-
-    bool            m_debug;                        ///< turn on debugging statements
+    std::string     m_pfoParameterDetermination;    ///< Determines how to calculate pfo parameters
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

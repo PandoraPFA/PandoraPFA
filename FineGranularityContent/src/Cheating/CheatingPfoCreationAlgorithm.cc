@@ -14,7 +14,6 @@ using namespace pandora;
 
 StatusCode CheatingPfoCreationAlgorithm::Run()
 {
-    // Run initial clustering algorithm
     const ClusterList *pClusterList = NULL;
 
     if (!m_clusteringAlgorithmName.empty())
@@ -30,65 +29,53 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
     }
 
-    float energySum(0.f);
-    CartesianVector momentumSum(0.f, 0.f, 0.f);
+    if (NULL == pClusterList)
+        return STATUS_CODE_NOT_INITIALIZED;
 
-    for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster)
+    // Configure computation of pfo parameters
+    void (*pPfoParametersFunction)(Cluster *pCluster, float &energy, CartesianVector &momentum, float &mass, int &particleId,
+        int &charge) = &CheatingPfoCreationAlgorithm::ComputeFromMC;
+
+    if (m_pfoParameterDetermination == "Calorimeter")
     {
-        CartesianVector momentum(0.f, 0.f, 0.f);
-        float mass = 0.f;
-        int charge = 0;
-        float energy = 0.f;
-        int particleId = PI_PLUS;
-
-        if (m_energyFrom == "MC")
-        {
-            this->ComputeFromMC((*itCluster), energy, momentum, mass, particleId, charge);
-        }
-        else if (m_energyFrom == "Calorimeter")
-        {
-            this->ComputeFromCalorimeter((*itCluster), energy, momentum, mass, particleId, charge);
-        }
-        else if (m_energyFrom == "Tracks")
-        {
-            this->ComputeFromTracks((*itCluster), energy, momentum, mass, particleId, charge);
-        }
-        else if (m_energyFrom == "CalorimeterAndTracks")
-        {
-            this->ComputeFromCalorimeterAndTracks((*itCluster), energy, momentum, mass, particleId, charge);
-        }
-        else
-        {
-            return STATUS_CODE_INVALID_PARAMETER;
-        }
-
-        PandoraContentApi::ParticleFlowObjectParameters particleFlowObjectParameters;
-
-        // Insert cluster into pfo
-        particleFlowObjectParameters.m_clusterList.insert((*itCluster));
-
-        // Insert tracks into pfo
-        const TrackList &associatedTrackList((*itCluster)->GetAssociatedTrackList());
-        particleFlowObjectParameters.m_trackList.insert(associatedTrackList.begin(), associatedTrackList.end());
-
-        // Set energy, charge, mass, momentum, particleId
-        particleFlowObjectParameters.m_energy = energy;
-        particleFlowObjectParameters.m_charge = charge;
-        particleFlowObjectParameters.m_mass = mass;
-        particleFlowObjectParameters.m_momentum = momentum;
-        particleFlowObjectParameters.m_particleId = particleId;
-
-        energySum += energy;
-        momentumSum = momentumSum + momentum;
-
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, particleFlowObjectParameters));
+        pPfoParametersFunction = &CheatingPfoCreationAlgorithm::ComputeFromCalorimeter;
+    }
+    else if (m_pfoParameterDetermination == "Tracks")
+    {
+        pPfoParametersFunction = &CheatingPfoCreationAlgorithm::ComputeFromTracks;
+    }
+    else if (m_pfoParameterDetermination == "CalorimeterAndTracks")
+    {
+        pPfoParametersFunction = &CheatingPfoCreationAlgorithm::ComputeFromCalorimeterAndTracks;
     }
 
-    const float pT(std::sqrt(momentumSum.GetX() * momentumSum.GetX() + momentumSum.GetY() * momentumSum.GetY()));
-
-    if (m_debug)
+    // For each cluster, use specified function to cheat determination of pfo parameters
+    for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster)
     {
-        std::cout << "energySum " << energySum << ", pT " << pT << std::endl;
+        try
+        {
+            CartesianVector momentum(0.f, 0.f, 0.f);
+            float mass = 0.f;
+            int charge = 0;
+            float energy = 0.f;
+            int particleId = PI_PLUS;
+            pPfoParametersFunction((*itCluster), energy, momentum, mass, particleId, charge);
+
+            PandoraContentApi::ParticleFlowObjectParameters particleFlowObjectParameters;
+            const TrackList &associatedTrackList((*itCluster)->GetAssociatedTrackList());
+            particleFlowObjectParameters.m_trackList.insert(associatedTrackList.begin(), associatedTrackList.end());
+            particleFlowObjectParameters.m_clusterList.insert(*itCluster);
+            particleFlowObjectParameters.m_energy = energy;
+            particleFlowObjectParameters.m_charge = charge;
+            particleFlowObjectParameters.m_mass = mass;
+            particleFlowObjectParameters.m_momentum = momentum;
+            particleFlowObjectParameters.m_particleId = particleId;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, particleFlowObjectParameters));
+        }
+        catch (StatusCodeException &statusCodeException)
+        {
+            std::cout << "CheatingPfoCreationAlgorithm: Failed to cheat construction of a particle flow object" << std::endl;
+        }
     }
 
     return STATUS_CODE_SUCCESS;
@@ -97,39 +84,24 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter(Cluster *pCluster, float &energy, CartesianVector &momentum, float &mass,
-    int &particleId, int &charge) const
+    int &particleId, int &charge)
 {
-    const TrackList &trackList(pCluster->GetAssociatedTrackList());
-
-    if (trackList.empty())
+    if (pCluster->IsFixedPhoton() && pCluster->GetAssociatedTrackList().empty())
     {
-        if (pCluster->IsFixedPhoton())
-        {
-            energy = pCluster->GetElectromagneticEnergy();
-            momentum = pCluster->GetFitToAllHitsResult().GetDirection();
-            momentum = momentum * energy;
-            particleId = PHOTON;
-            mass = PdgTable::GetParticleMass(PHOTON);
-            charge = PdgTable::GetParticleCharge(PHOTON);
-        }
-        else
-        {
-            energy = pCluster->GetHadronicEnergy();
-            particleId = NEUTRON;
-            mass = PdgTable::GetParticleMass(NEUTRON);
-            charge = PdgTable::GetParticleCharge(NEUTRON);
+        energy = pCluster->GetElectromagneticEnergy();
+        particleId = PHOTON;
+        mass = PdgTable::GetParticleMass(PHOTON);
+        charge = PdgTable::GetParticleCharge(PHOTON);
+        momentum = pCluster->GetFitToAllHitsResult().GetDirection() * energy;
+        return;
+    }
 
-            CartesianVector energyWeightedClusterPosition(0.f, 0.f, 0.f);
-            this->ComputeEnergyWeightedClusterPosition(pCluster, energyWeightedClusterPosition);
-
-            const CartesianVector clusterMomentum(energyWeightedClusterPosition * pCluster->GetHadronicEnergy());
-            const float totalGravity(energyWeightedClusterPosition.GetMagnitude());
-
-            if (0.f == totalGravity)
-                throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-            momentum = clusterMomentum * (1. / totalGravity);
-        }
+    if (pCluster->GetAssociatedTrackList().empty())
+    {
+        energy = pCluster->GetHadronicEnergy();
+        particleId = NEUTRON;
+        mass = PdgTable::GetParticleMass(NEUTRON);
+        charge = PdgTable::GetParticleCharge(NEUTRON);
     }
     else
     {
@@ -137,111 +109,77 @@ void CheatingPfoCreationAlgorithm::ComputeFromCalorimeter(Cluster *pCluster, flo
         particleId = PI_PLUS;
         mass = PdgTable::GetParticleMass(PI_PLUS);
         charge = PdgTable::GetParticleCharge(PI_PLUS);
-
-        CartesianVector energyWeightedClusterPosition(0.f, 0.f, 0.f);
-        this->ComputeEnergyWeightedClusterPosition(pCluster, energyWeightedClusterPosition);
-
-        const CartesianVector clusterMomentum(energyWeightedClusterPosition * pCluster->GetHadronicEnergy());
-        const float totalGravity(energyWeightedClusterPosition.GetMagnitude());
-
-        if (0.f == totalGravity)
-            throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-        momentum = clusterMomentum * (1. / totalGravity);
     }
 
-    if (m_debug)
-    {
-        std::cout << "energy from calo: " << energy << std::endl;
-    }
+    CartesianVector energyWeightedClusterPosition(0.f, 0.f, 0.f);
+    CheatingPfoCreationAlgorithm::ComputeEnergyWeightedClusterPosition(pCluster, energyWeightedClusterPosition);
+
+    const CartesianVector clusterMomentum(energyWeightedClusterPosition * pCluster->GetHadronicEnergy());
+    const float totalGravity(energyWeightedClusterPosition.GetMagnitude());
+
+    if (0.f == totalGravity)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    momentum = clusterMomentum * (1. / totalGravity);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingPfoCreationAlgorithm::ComputeFromMC(Cluster *pCluster, float &energy, CartesianVector &/*momentum*/, float &/*mass*/,
-    int &particleId, int &/*charge*/) const
+void CheatingPfoCreationAlgorithm::ComputeFromMC(Cluster *pCluster, float &energy, CartesianVector &momentum, float &mass,
+    int &particleId, int &charge)
 {
-    // Match CaloHitVectors to their MCParticles
-    typedef std::map< const MCParticle*, float > MCParticleToEnergyMap;
-    MCParticleToEnergyMap energyPerMCParticle;
-    MCParticleToEnergyMap::iterator itEnergyPerMCParticle;
+    const MCParticle *const pMainMCParticle(MCParticleHelper::GetMainMCParticle(pCluster));
 
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    if (NULL == pMainMCParticle)
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
 
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
-    {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            const MCParticle *pMCParticle = NULL; 
-            (*hitIter)->GetMCParticle(pMCParticle);
-
-            // Some CalorimeterHits don't have a MCParticle (e.g. noise)
-            if (NULL == pMCParticle)
-                continue;
-
-            const float hitEnergy((*hitIter)->GetInputEnergy());
-
-            itEnergyPerMCParticle = energyPerMCParticle.find(pMCParticle);
-
-            if (energyPerMCParticle.end() == itEnergyPerMCParticle)
-            {
-                energyPerMCParticle.insert(std::make_pair(pMCParticle, hitEnergy));
-            }
-            else
-            {
-                itEnergyPerMCParticle->second += hitEnergy;
-            }
-        }
-    }
-
-    MCParticleToEnergyMap::const_iterator it = std::max_element( energyPerMCParticle.begin(), energyPerMCParticle.end(),
-         pandora::Select2nd<MCParticleToEnergyMap::value_type, std::greater<float> >() );
-
-    const MCParticle *pMCParticle = it->first;
-    energy = pMCParticle->GetEnergy();
-    particleId = pMCParticle->GetParticleId();
+    energy = pMainMCParticle->GetEnergy();
+    particleId = pMainMCParticle->GetParticleId();
+    mass = PdgTable::GetParticleMass(particleId);
+    charge = PdgTable::GetParticleCharge(particleId);
+    momentum = pMainMCParticle->GetMomentum();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void CheatingPfoCreationAlgorithm::ComputeFromTracks(Cluster *pCluster, float &energy, CartesianVector &momentum, float &mass,
-    int &particleId, int &charge) const
+    int &particleId, int &charge)
 {
+    energy = 0.f;
+    momentum = CartesianVector(0.f, 0.f, 0.f);
+    mass = 0.f;
+    particleId = PI_PLUS;
+    charge = 0;
+
     const TrackList &trackList(pCluster->GetAssociatedTrackList());
 
     for (TrackList::const_iterator itTrack = trackList.begin(), itTrackEnd = trackList.end(); itTrack != itTrackEnd; ++itTrack)
     {
-        mass += (*itTrack)->GetMass();
         energy += (*itTrack)->GetEnergyAtDca();
-        particleId = PI_PLUS;
-        charge += (*itTrack)->GetCharge();
         momentum += (*itTrack)->GetMomentumAtDca();
-    }
-
-    if (m_debug)
-    {
-        std::cout << "energy from tracks " << energy << std::endl;
+        mass += (*itTrack)->GetMass();
+        charge += (*itTrack)->GetCharge();
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 void CheatingPfoCreationAlgorithm::ComputeFromCalorimeterAndTracks(Cluster *pCluster, float &energy, CartesianVector &momentum, float &mass,
-    int &particleId, int &charge) const
+    int &particleId, int &charge)
 {
     if (pCluster->GetAssociatedTrackList().empty())
     {
-        this->ComputeFromCalorimeter(pCluster, energy, momentum, mass, particleId, charge);
+        CheatingPfoCreationAlgorithm::ComputeFromCalorimeter(pCluster, energy, momentum, mass, particleId, charge);
     }
     else
     {
-        this->ComputeFromTracks(pCluster, energy, momentum, mass, particleId, charge);
+        CheatingPfoCreationAlgorithm::ComputeFromTracks(pCluster, energy, momentum, mass, particleId, charge);
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void CheatingPfoCreationAlgorithm::ComputeEnergyWeightedClusterPosition(Cluster *pCluster, CartesianVector &energyWeightedClusterPosition) const
+void CheatingPfoCreationAlgorithm::ComputeEnergyWeightedClusterPosition(Cluster *pCluster, CartesianVector &energyWeightedClusterPosition)
 {
     energyWeightedClusterPosition.SetValues(0.f, 0.f, 0.f);
     float energySum(0.f);
@@ -252,9 +190,8 @@ void CheatingPfoCreationAlgorithm::ComputeEnergyWeightedClusterPosition(Cluster 
     {
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            const float hitEnergy = (*hitIter)->GetElectromagneticEnergy();
+            const float hitEnergy = (*hitIter)->GetHadronicEnergy();
             energySum += hitEnergy;
-
             energyWeightedClusterPosition += (*hitIter)->GetPositionVector() * hitEnergy;
         }
     }
@@ -275,12 +212,8 @@ StatusCode CheatingPfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "InputClusterListName", m_inputClusterListName));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
-        "EnergyFrom", m_energyFrom));
-
-    m_debug   = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "Debug", m_debug));
+        "PfoParameterDetermination", m_pfoParameterDetermination));
 
     return STATUS_CODE_SUCCESS;
 }

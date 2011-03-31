@@ -31,16 +31,7 @@ private:
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    /**
-     *  @brief  FragmentRemoval
-     * 
-     *  @param  pCluster
-     *  @param  removedEnergy
-     */
-    pandora::StatusCode FragmentRemoval(pandora::Cluster *pCluster, float &removedEnergy) const;
-
     pandora::StringVector   m_clusterListNames;             ///< names of the clusterlists of which fragments should be removed
-    bool                    m_debug;                        ///< turn on additional debugging output
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
