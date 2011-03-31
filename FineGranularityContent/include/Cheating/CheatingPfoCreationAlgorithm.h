@@ -49,14 +49,6 @@ private:
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
-     *  @brief  ComputeEnergyWeightedClusterPosition
-     * 
-     *  @param  pCluster
-     *  @param  energyWeightedClusterPosition
-     */
-    void ComputeEnergyWeightedClusterPosition(pandora::Cluster *pCluster, pandora::CartesianVector &energyWeightedClusterPosition) const;
-
-    /**
      *  @brief  ComputeFromCalorimeter
      * 
      *  @param  pCluster
@@ -107,6 +99,14 @@ private:
      */
     void ComputeFromCalorimeterAndTracks(pandora::Cluster *pCluster, float &energy, pandora::CartesianVector &momentum, float &mass,
         int &particleId, int &charge) const;
+
+    /**
+     *  @brief  ComputeEnergyWeightedClusterPosition
+     * 
+     *  @param  pCluster
+     *  @param  energyWeightedClusterPosition
+     */
+    void ComputeEnergyWeightedClusterPosition(pandora::Cluster *pCluster, pandora::CartesianVector &energyWeightedClusterPosition) const;
 
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_inputClusterListName;         ///< if a clusterlistname is given, take the clusters from there instead of running a clustering algorithm

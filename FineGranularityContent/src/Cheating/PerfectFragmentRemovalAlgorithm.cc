@@ -16,24 +16,19 @@ StatusCode PerfectFragmentRemovalAlgorithm::Run()
 {
     float removedEnergy(0.f);
 
-    for (StringVector::const_iterator itClusterName = m_clusterListNames.begin(), itClusterNameEnd = m_clusterListNames.end();
-        itClusterName != itClusterNameEnd; ++itClusterName)
+    for (StringVector::const_iterator itClusterListName = m_clusterListNames.begin(), itClusterListNameEnd = m_clusterListNames.end();
+        itClusterListName != itClusterListNameEnd; ++itClusterListName)
     {
-        const std::string &clusterName(*itClusterName);
-
         const ClusterList* pClusterList = NULL;
 
-        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, clusterName, pClusterList))
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetClusterList(*this, *itClusterListName, pClusterList))
             continue;
 
         for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd;
             ++itCluster )
         {
-            Cluster* pCluster = (*itCluster);
-
             float removedCaloHitEnergy;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemoval(pCluster, removedCaloHitEnergy));
-
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemoval((*itCluster), removedCaloHitEnergy));
             removedEnergy += removedCaloHitEnergy;
         }
     }
@@ -50,21 +45,18 @@ StatusCode PerfectFragmentRemovalAlgorithm::Run()
 
 StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval(Cluster *pCluster, float &removedCaloHitEnergy) const
 {
-    const OrderedCaloHitList &pOrderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    OrderedCaloHitList orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(pCluster->GetIsolatedCaloHitList()));
 
     // Match calohitvectors and energy to their MCParticles
     typedef std::map< const MCParticle*, std::pair<float, CaloHitVector*> > CaloHitsPerMCParticle;
     CaloHitsPerMCParticle hitsPerMCParticle;
-    CaloHitsPerMCParticle::iterator itHitsPerMCParticle;
 
-    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList.begin(), itLyrEnd = pOrderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
+    for (OrderedCaloHitList::const_iterator itLyr = orderedCaloHitList.begin(), itLyrEnd = orderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
     {
-        CaloHitVector *pCurrentHits = NULL;
-
-        for(CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
+        for (CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit* pCaloHit = *hitIter;
-            float energy(0.f);
 
             const MCParticle *pMCParticle = NULL; 
             pCaloHit->GetMCParticle(pMCParticle);
@@ -73,37 +65,27 @@ StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval(Cluster *pCluster, f
             if (NULL == pMCParticle)
                 continue;
 
-            // Add hit to calohitvector
-            itHitsPerMCParticle = hitsPerMCParticle.find(pMCParticle);
+            CaloHitsPerMCParticle::iterator itHitsPerMCParticle(hitsPerMCParticle.find(pMCParticle));
 
-            if (itHitsPerMCParticle == hitsPerMCParticle.end())
+            if (hitsPerMCParticle.end() == itHitsPerMCParticle)
             {
-                // If there is no calohitvector for the MCParticle yet, create one
-                pCurrentHits = new CaloHitVector();
-                hitsPerMCParticle.insert(std::make_pair(pMCParticle, std::make_pair(0.f, pCurrentHits)));
+                CaloHitVector *pCurrentHits = new CaloHitVector();
+                pCurrentHits->push_back(pCaloHit);
+                hitsPerMCParticle.insert(std::make_pair(pMCParticle, std::make_pair(pCaloHit->GetElectromagneticEnergy(), pCurrentHits)));
             }
             else
             {
-                // Take the CaloHitVector corresponding to the MCParticle
-                pCurrentHits = itHitsPerMCParticle->second.second; 
-
-                // Get the sum of energy of the CaloHits collected so far
-                energy = itHitsPerMCParticle->second.first;
+                itHitsPerMCParticle->second.first += pCaloHit->GetElectromagneticEnergy();
+                itHitsPerMCParticle->second.second->push_back(pCaloHit);
             }
-
-            // Add the calohit
-            pCurrentHits->push_back(pCaloHit);
-            energy += pCaloHit->GetElectromagneticEnergy();
-            itHitsPerMCParticle->second.first = energy;
         }
     }
 
     // Select the mc particle which contributed most of the calohit-energy to the cluster
-    CaloHitsPerMCParticle::const_iterator itHitsPerMCParticleMostEnergy = hitsPerMCParticle.begin();
+    CaloHitsPerMCParticle::const_iterator itHitsPerMCParticleMostEnergy(hitsPerMCParticle.begin());
 
     CaloHitsPerMCParticle::const_iterator itHits = hitsPerMCParticle.begin();
     CaloHitsPerMCParticle::const_iterator itHitsEnd = hitsPerMCParticle.end();
-
     ++itHits;
 
     float removedEnergy = 0.f;
@@ -142,7 +124,7 @@ StatusCode PerfectFragmentRemovalAlgorithm::FragmentRemoval(Cluster *pCluster, f
         {
             CaloHit* pCaloHit = (*itCaloHit);
             removedEnergy += pCaloHit->GetElectromagneticEnergy();
-            PANDORA_RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCaloHitFromCluster(*this, pCluster, pCaloHit));
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCaloHitFromCluster(*this, pCluster, pCaloHit));
         }
     }
 

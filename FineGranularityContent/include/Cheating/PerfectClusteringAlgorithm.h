@@ -26,7 +26,7 @@ public:
     };
 
 protected:
-    virtual bool SelectMCParticlesForClustering(const pandora::MCParticle *pMcParticle) const;
+    virtual bool SelectMCParticlesForClustering(const pandora::MCParticle *const pMCParticle) const;
 
 private:
     pandora::StatusCode Run();

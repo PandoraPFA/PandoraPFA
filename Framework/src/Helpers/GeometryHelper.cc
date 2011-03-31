@@ -360,7 +360,17 @@ StatusCode GeometryHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 GeometryHelper::SubDetectorParameters::SubDetectorParameters() :
-    m_isInitialized(false)
+    m_isInitialized(false),
+    m_innerRCoordinate(0.f),
+    m_innerZCoordinate(0.f),
+    m_innerPhiCoordinate(0.f),
+    m_innerSymmetryOrder(0),
+    m_outerRCoordinate(0.f),
+    m_outerZCoordinate(0.f),
+    m_outerPhiCoordinate(0.f),
+    m_outerSymmetryOrder(0),
+    m_isMirroredInZ(false),
+    m_nLayers(0)
 {
 }
 

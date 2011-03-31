@@ -15,6 +15,7 @@
 #include "Helpers/EnergyCorrectionsHelper.h"
 #include "Helpers/FragmentRemovalHelper.h"
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/MCParticleHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 #include "Helpers/ReclusterHelper.h"
 #include "Helpers/XmlHelper.h"

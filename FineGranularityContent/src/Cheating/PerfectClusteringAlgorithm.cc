@@ -35,17 +35,13 @@ StatusCode PerfectClusteringAlgorithm::Run()
     }
 
     // Match CaloHitLists to their MCParticles
-    std::map< const MCParticle*, CaloHitList* > hitsPerMCParticle;
-    std::map< const MCParticle*, CaloHitList* >::iterator itHitsPerMCParticle;
-
-    int selected = 0, notSelected = 0;
+    typedef std::map< const MCParticle*, CaloHitList* > MCParticleToCaloHitListMap;
+    MCParticleToCaloHitListMap hitsPerMCParticle;
+    int selected(0), notSelected(0);
 
     for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; ++itLyr)
     {
-        CaloHitList *pCaloHitList= itLyr->second;
-        CaloHitList *pCurrentHits = NULL;
-
-        for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
+        for (CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit* pCaloHit = *hitIter;
 
@@ -77,7 +73,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
             }
 
             // Apply calo hit selection
-            if (!SelectMCParticlesForClustering(pMCParticle))
+            if (!this->SelectMCParticlesForClustering(pMCParticle))
             {
                 if (m_debug)
                 {
@@ -96,21 +92,18 @@ StatusCode PerfectClusteringAlgorithm::Run()
             }
 
             // Add hit to calohitlist
-            itHitsPerMCParticle = hitsPerMCParticle.find(pMCParticle);
+            MCParticleToCaloHitListMap::iterator itHitsPerMCParticle(hitsPerMCParticle.find(pMCParticle));
 
-            if (itHitsPerMCParticle == hitsPerMCParticle.end())
+            if (hitsPerMCParticle.end() == itHitsPerMCParticle)
             {
-                // If there is no calohitlist for the MCParticle yet, create one
-                pCurrentHits = new CaloHitList();
+                CaloHitList *pCurrentHits = new CaloHitList();
+                pCurrentHits->insert(pCaloHit);
                 hitsPerMCParticle.insert(std::make_pair(pMCParticle, pCurrentHits));
             }
             else
             {
-                // Take the calohitlist corresponding to the MCParticle
-                pCurrentHits = itHitsPerMCParticle->second;
+                itHitsPerMCParticle->second->insert(pCaloHit);
             }
-
-            pCurrentHits->insert(pCaloHit);
         }
     }
 
@@ -121,35 +114,35 @@ StatusCode PerfectClusteringAlgorithm::Run()
     }
 
     // Create the clusters
-    ClusterList clusterList;
-    Cluster *pCluster = NULL;
-
-    typedef std::map< const MCParticle*, CaloHitList* > MCParticleToCaloHitListMap;
-
     for (MCParticleToCaloHitListMap::const_iterator itCHList = hitsPerMCParticle.begin(), itCHListEnd = hitsPerMCParticle.end(); 
          itCHList != itCHListEnd; ++itCHList )
     {
         const MCParticle *pMCParticle = itCHList->first;
-
-        // Hits without MCParticle are not clustered
-        if(NULL == pMCParticle)
-            continue;
-
         CaloHitList *pCaloHitList = itCHList->second;
 
         if (!pCaloHitList->empty())
         {
+            Cluster *pCluster = NULL;
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, pCaloHitList, pCluster));
 
-            // Set photon flag for photon clusters
-            if (pMCParticle->GetParticleId() == PHOTON)
+            switch (pMCParticle->GetParticleId())
+            {
+            case PHOTON:
                 pCluster->SetIsFixedPhotonFlag(true);
-
-            if (!clusterList.insert(pCluster).second)
-                return STATUS_CODE_FAILURE;
+                break;
+            case E_PLUS:
+            case E_MINUS:
+                pCluster->SetIsFixedElectronFlag(true);
+                break;
+            case MU_PLUS:
+            case MU_MINUS:
+                pCluster->SetIsFixedMuonFlag(true);
+                break;
+            default:
+                break;
+            }
         }
 
-        // Delete the created CaloHitLists
         delete pCaloHitList;
     }
 
@@ -158,7 +151,7 @@ StatusCode PerfectClusteringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool PerfectClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle* pMCParticle) const
+bool PerfectClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle *const pMCParticle) const
 {
     if (m_particleIdList.empty())
         return true;

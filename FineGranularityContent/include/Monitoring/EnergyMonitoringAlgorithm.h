@@ -189,10 +189,10 @@ public:
         float               m_neutralCalorimetric;          ///< Neutral cluster calorimetric energy
         float               m_photonCalorimetric;           ///< Photon cluster calorimetric energy
 
-        int        m_chargedCalorimetricClusters;  ///< Number of charged calorimetric clusters
-        int        m_chargedTracksNumber;          ///< Number of charged cluster tracks
-        int        m_neutralCalorimetricClusters;  ///< Number of neutral clusters
-        int        m_photonCalorimetricClusters;   ///< Number of photon clusters
+        int                 m_chargedCalorimetricClusters;  ///< Number of charged calorimetric clusters
+        int                 m_chargedTracksNumber;          ///< Number of charged cluster tracks
+        int                 m_neutralCalorimetricClusters;  ///< Number of neutral clusters
+        int                 m_photonCalorimetricClusters;   ///< Number of photon clusters
     };
 
     /**

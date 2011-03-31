@@ -18,42 +18,41 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
     const ClusterList *pCurrentClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pCurrentClusterList, currentClusterListName));
 
-    // Collect mc particles of the clusters in the current list. The mcparticle which provides the most energy to the cluster is taken
+    // Merge cluster fragments within the current list that originate from same main mc particle
+    typedef std::map<const pandora::MCParticle*, pandora::Cluster*> MCParticleToClusterMap;
     MCParticleToClusterMap mcParticleToClusterMap;
 
-    for (ClusterList::const_iterator itCluster = pCurrentClusterList->begin(), itClusterEnd = pCurrentClusterList->end(); itCluster != itClusterEnd;)
+    for (ClusterList::const_iterator itCluster = pCurrentClusterList->begin(); itCluster != pCurrentClusterList->end();)
     {
         Cluster *pCluster = *itCluster;
         ++itCluster;
 
-        const MCParticle *pSelectedMCParticle = GetMainMCParticle(pCluster);
+        const MCParticle *pSelectedMCParticle = this->GetMainMCParticle(pCluster);
 
-        if (!pSelectedMCParticle)
+        if (NULL == pSelectedMCParticle)
             continue;
 
         MCParticleToClusterMap::iterator itMCParticle = mcParticleToClusterMap.find(pSelectedMCParticle);
 
-        if(itMCParticle == mcParticleToClusterMap.end())
+        if (itMCParticle == mcParticleToClusterMap.end())
         {
             mcParticleToClusterMap.insert(std::make_pair(pSelectedMCParticle,pCluster));
         }
         else
         {
             Cluster *pBaseCluster = itMCParticle->second;
-
-            // Merge clusters within the current list if their main MCParticles are the same
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBaseCluster, pCluster));
 
             if (m_debug)
                 std::cout << "CheatingClusterMerging: Clusters within current cluster list '" << currentClusterListName << "' have been merged" << std::endl;
-
-            // Don't have to add the cluster, since the base cluster is already in the map
         }
     }
 
-    for (StringVector::iterator itClusterListName = m_clusterListNames.begin(), itClusterListNameEnd = m_clusterListNames.end(); itClusterListName != itClusterListNameEnd; ++itClusterListName )
+    // Merge cluster fragments from named lists that originate from same main mc particle as a cluster in the current list
+    for (StringVector::iterator itClusterListName = m_clusterListNames.begin(), itClusterListNameEnd = m_clusterListNames.end();
+        itClusterListName != itClusterListNameEnd; ++itClusterListName)
     {
-        std::string clusterListName = (*itClusterListName);
+        std::string clusterListName(*itClusterListName);
         const ClusterList *pClusterList = NULL;
 
         if (m_debug)
@@ -66,20 +65,20 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
 
             continue;
         }
-        
-        for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd;)
+
+        for (ClusterList::const_iterator itCluster = pClusterList->begin(); itCluster != pClusterList->end();)
         {
             Cluster *pCluster = *itCluster;
             ++itCluster;
 
-            const MCParticle* pSelectedMCParticle = GetMainMCParticle(pCluster);
+            const MCParticle *pSelectedMCParticle = this->GetMainMCParticle(pCluster);
 
-            if (!pSelectedMCParticle)
+            if (NULL == pSelectedMCParticle)
                 continue;
 
             MCParticleToClusterMap::iterator itMCParticle = mcParticleToClusterMap.find(pSelectedMCParticle);
 
-            // If the main mcparticle of the cluster is not present in the list, don't touch the cluster
+            // If no cluster in the current list has the same main mc particle, skip this cluster.
             if (itMCParticle != mcParticleToClusterMap.end())
             {
                 if (m_debug)
@@ -95,12 +94,15 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
                     return STATUS_CODE_NOT_ALLOWED;
                 }
 
-                // Merge clusters of other list to the cluster in the current list if their main MCParticles are the same
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBaseCluster, pCluster, 
                     currentClusterListName, clusterListName));
 
                 if (m_debug)
                     std::cout << "CheatingClusterMerging: Merged clusters from cluster list '" << clusterListName << "' into current cluster list '" << currentClusterListName << "'" << std::endl;
+            }
+            else if (m_debug)
+            {
+                std::cout << "CheatingClusterMerging: No cluster with given main mc particle found in the current list" << std::endl;
             }
         }
     }
@@ -110,47 +112,47 @@ StatusCode CheatingClusterMergingAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-const MCParticle* CheatingClusterMergingAlgorithm::GetMainMCParticle(const Cluster *const pCluster) const
+const MCParticle *CheatingClusterMergingAlgorithm::GetMainMCParticle(const Cluster *const pCluster) const
 {
-    MCParticleToFloatMap mcParticleToFloatMap;
+    typedef std::map<const pandora::MCParticle*, float> MCParticleToEnergyMap;
+    MCParticleToEnergyMap mcParticleToEnergyMap;
 
-    const OrderedCaloHitList& orderedCaloHitList = pCluster->GetOrderedCaloHitList();
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (OrderedCaloHitList::const_iterator itLyr = orderedCaloHitList.begin(), itLyrEnd = orderedCaloHitList.end(); itLyr != itLyrEnd; ++itLyr)
     {
-        CaloHitList *pCurrentHits = itLyr->second;
-
-        for (CaloHitList::const_iterator hitIter = pCurrentHits->begin(), hitIterEnd = pCurrentHits->end(); hitIter != hitIterEnd; ++hitIter)
+        for (CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
 
             const MCParticle* pMCParticle = NULL;
             pCaloHit->GetMCParticle(pMCParticle);
 
-            const float energy(pCaloHit->GetElectromagneticEnergy());
-
-            if (!pMCParticle)
+            if (NULL == pMCParticle)
                 continue;
 
-            MCParticleToFloatMap::iterator itMCParticleToFloat = mcParticleToFloatMap.find(pMCParticle);
+            const float hitEnergy(pCaloHit->GetElectromagneticEnergy());
 
-            if (itMCParticleToFloat == mcParticleToFloatMap.end())
+            MCParticleToEnergyMap::iterator itMCParticleToEnergy = mcParticleToEnergyMap.find(pMCParticle);
+
+            if (itMCParticleToEnergy == mcParticleToEnergyMap.end())
             {
-                mcParticleToFloatMap.insert(std::make_pair(pMCParticle,energy));
+                mcParticleToEnergyMap.insert(std::make_pair(pMCParticle, hitEnergy));
                 continue;
             }
 
-            itMCParticleToFloat->second += energy;
+            itMCParticleToEnergy->second += hitEnergy;
         }
     }
 
     const MCParticle *pSelectedMCParticle = NULL;
     float energyOfSelectedMCParticle = 0;
 
-    for (MCParticleToFloatMap::const_iterator itMCParticle = mcParticleToFloatMap.begin(), itMCParticleEnd = mcParticleToFloatMap.end(); itMCParticle != itMCParticleEnd; ++itMCParticle)
+    for (MCParticleToEnergyMap::const_iterator itMCParticle = mcParticleToEnergyMap.begin(), itMCParticleEnd = mcParticleToEnergyMap.end();
+        itMCParticle != itMCParticleEnd; ++itMCParticle)
     {
-        const MCParticle* pCurrentMCParticle = itMCParticle->first;
-        float currentEnergy = itMCParticle->second;
+        const MCParticle *const pCurrentMCParticle = itMCParticle->first;
+        const float currentEnergy = itMCParticle->second;
 
         if (currentEnergy > energyOfSelectedMCParticle)
         {

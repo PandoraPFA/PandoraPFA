@@ -181,14 +181,14 @@ private:
      * 
      *  @param  pPfo
      */
-    pandora::StatusCode DumpChargedPfo(const pandora::ParticleFlowObject *pPfo);
+    pandora::StatusCode DumpChargedPfo(const pandora::ParticleFlowObject *const pPfo);
 
     /**
      *  @brief  DumpNeutralPfo
      * 
      *  @param  pPfo
      */
-    pandora::StatusCode DumpNeutralPfo(const pandora::ParticleFlowObject *pPfo);
+    pandora::StatusCode DumpNeutralPfo(const pandora::ParticleFlowObject *const pPfo);
 
     /**
      *  @brief  DumpNeutralOrPhotonPfo
@@ -196,14 +196,14 @@ private:
      *  @param  pPfo
      *  @param  isPhotonPfo
      */
-    pandora::StatusCode DumpNeutralOrPhotonPfo(const pandora::ParticleFlowObject *pPfo, bool isPhotonPfo);
+    pandora::StatusCode DumpNeutralOrPhotonPfo(const pandora::ParticleFlowObject *const pPfo, bool isPhotonPfo);
 
     /**
      *  @brief  DumpPhotonPfo
      * 
      *  @param  pPfo
      */
-    pandora::StatusCode DumpPhotonPfo(const pandora::ParticleFlowObject *pPfo);
+    pandora::StatusCode DumpPhotonPfo(const pandora::ParticleFlowObject *const pPfo);
 
     /**
      *  @brief  ClusterEnergyFractions
@@ -214,7 +214,7 @@ private:
      *  @param  fneutral
      *  @param  pBestMatchedMcPfo
      */
-    void ClusterEnergyFractions(const pandora::Cluster *pCluster, float &fCharged, float &fPhoton, float &fneutral,
+    void ClusterEnergyFractions(const pandora::Cluster *const pCluster, float &fCharged, float &fPhoton, float &fneutral,
         const pandora::MCParticle *&pBestMatchedMcPfo) const;
 
     /**
@@ -224,7 +224,7 @@ private:
      * 
      *  @return the cluster time
      */
-    float ClusterTime(const pandora::Cluster *pCluster) const;
+    float ClusterTime(const pandora::Cluster *const pCluster) const;
 
     typedef std::set<const pandora::MCParticle*> MCParticleList;
     typedef std::vector<pandora::ParticleFlowObject*> ParticleFlowObjectVector;

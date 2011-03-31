@@ -12,7 +12,7 @@
 
 using namespace pandora;
 
-bool PerfectPhotonClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle *pMCParticle) const
+bool PerfectPhotonClusteringAlgorithm::SelectMCParticlesForClustering(const MCParticle *const pMCParticle) const
 {
     if (pMCParticle->GetParticleId() == PHOTON)
         return true;

@@ -45,11 +45,12 @@ PhotonIDLikelihoodCalculator* PhotonIDLikelihoodCalculator::Instance()
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-ECalPhotonClusteringAlgorithm::ECalPhotonClusteringAlgorithm()
-    : m_nECalLayers(0),
-      m_producePrintoutStatements(0),
-      m_preserveClusters(false),
-      m_produceConfigurationFiles("")
+ECalPhotonClusteringAlgorithm::ECalPhotonClusteringAlgorithm() :
+    m_nECalLayers(0),
+    m_producePrintoutStatements(0),
+    m_preserveClusters(false),
+    m_produceConfigurationFiles(""),
+    pTrackList(NULL)
 {
     if (m_producePrintoutStatements > 0)
         std::cout << "constructor" << std::endl;
@@ -1900,15 +1901,18 @@ void Axis::SetDimensions( const std::vector<float>& binBorders )
         ++idx;
     }
 
+    k = 0;
     regularBins = false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Axis::Axis()
-    : numberBins(0),
-      minValue(0),
-      maxValue(0)
+Axis::Axis() :
+    numberBins(0),
+    minValue(0),
+    maxValue(0),
+    k(0),
+    regularBins(false)
 {
 }
 

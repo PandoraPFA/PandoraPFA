@@ -38,11 +38,7 @@ private:
      */
     const pandora::MCParticle *GetMainMCParticle(const pandora::Cluster *const pCluster) const;
 
-    typedef std::map<const pandora::MCParticle*, pandora::Cluster*> MCParticleToClusterMap;
-    typedef std::map<const pandora::MCParticle*, float> MCParticleToFloatMap;
-
-    pandora::StringVector   m_clusterListNames;             ///< use the given cluster lists to search for clusters to merge
-
+    pandora::StringVector   m_clusterListNames;             ///< use the given cluster lists to search for daughter clusters to merge
     bool                    m_debug;                        ///< turn on additional debugging output
 };
 

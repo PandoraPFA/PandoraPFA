@@ -132,8 +132,10 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
     m_badPhotonEnergy = 0.f;
     m_badNeutralEnergy = 0.f;
 
-    std::cout << std::fixed;
-    std::cout << std::setprecision(precision);
+    // Alter formatting options, caching original parameters
+    (void) std::cout.setf(std::ios::fixed, std::ios::floatfield);
+    const int originalPrecision(std::cout.precision(precision));
+    const int originalWidth(std::cout.width());
 
     const ParticleFlowObjectList *pPfoList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
@@ -307,12 +309,17 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
         FORMATTED_OUTPUT_BADENERGY(m_badTrackEnergy, m_badPhotonEnergy, m_badNeutralEnergy, badEnergy);
     }
 
+    // Restore formatting options
+    (void) std::cout.unsetf(std::ios::fixed);
+    (void) std::cout.precision(originalPrecision);
+    (void) std::cout.width(originalWidth);
+
     return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject* pPfo)
+StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject *const pPfo)
 {
     const TrackList &trackList(pPfo->GetTrackList());
     const int pfoPid(pPfo->GetParticleId());
@@ -339,7 +346,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
 
         if (pTrack->HasAssociatedCluster())
         {
-            pTrack->GetAssociatedCluster(pCluster);
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pTrack->GetAssociatedCluster(pCluster));
             clusterEnergy += pCluster->GetTrackComparisonEnergy();
             clusterTime = this->ClusterTime(pCluster);
         }
@@ -479,7 +486,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject*
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlowObject *pPfo, bool isPhotonPfo)
+StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlowObject *const pPfo, bool isPhotonPfo)
 {
     float fCharged(0.f);
     float fPhoton(0.f);
@@ -508,7 +515,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
 
             if ((fPhoton + fNeutral) > m_goodFractionCut)
             {
-                m_goodPhotonEnergy+=clusterEnergy;
+                m_goodPhotonEnergy += clusterEnergy;
 
                 if (fPhoton > fNeutral)
                     m_goodIdedPhotonEnergy += clusterEnergy;
@@ -578,15 +585,12 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
                 printedHeader = true;
             }
 
-            if (pCluster != NULL)
-            {
-                const float showerProfileStart(pCluster->GetShowerProfileStart());
-                const float showerProfileDiscrepancy(pCluster->GetShowerProfileDiscrepancy());
+            const float showerProfileStart(pCluster->GetShowerProfileStart());
+            const float showerProfileDiscrepancy(pCluster->GetShowerProfileDiscrepancy());
 
-                FORMATTED_OUTPUT_NEUTRAL(clusterEnergy, clusterTime, fCharged, fPhoton, fNeutral, pCluster->GetInnerPseudoLayer(), pCluster->GetOuterPseudoLayer(),
-                    ((showerProfileStart == std::numeric_limits<float>::max()) ? -99 : showerProfileStart),
-                    ((showerProfileDiscrepancy == std::numeric_limits<float>::max()) ? -99 : showerProfileDiscrepancy));
-            }
+            FORMATTED_OUTPUT_NEUTRAL(clusterEnergy, clusterTime, fCharged, fPhoton, fNeutral, pCluster->GetInnerPseudoLayer(), pCluster->GetOuterPseudoLayer(),
+                ((showerProfileStart == std::numeric_limits<float>::max()) ? -99 : showerProfileStart),
+                ((showerProfileDiscrepancy == std::numeric_limits<float>::max()) ? -99 : showerProfileDiscrepancy));
 
             if (badTrackMatch)
             {
@@ -639,7 +643,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpNeutralOrPhotonPfo(const ParticleFlo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster, float &fCharged, float &fPhoton, float &fNeutral,
+void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster *const pCluster, float &fCharged, float &fPhoton, float &fNeutral,
     const MCParticle *&pBestMatchedMcPfo) const
 {
     pBestMatchedMcPfo = NULL;
@@ -733,7 +737,7 @@ void DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(const Cluster* pCluster
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float DumpPfosMonitoringAlgorithm::ClusterTime(const Cluster* pCluster) const
+float DumpPfosMonitoringAlgorithm::ClusterTime(const Cluster *const pCluster) const
 {
     float sumTimeEnergy(0.f);
     float sumEnergy(0.f);
