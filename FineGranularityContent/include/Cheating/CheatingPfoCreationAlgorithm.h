@@ -12,23 +12,6 @@
 
 #include "Objects/CartesianVector.h"
 
-namespace pandora 
-{
-
-template < typename Pair, typename Op >
-class Select2nd : public std::binary_function<Pair, Pair, typename Pair::second_type>
-{
- public:
-    bool operator()(Pair& arg0, Pair& arg1) const
-    { 
-        return Op()( arg0.second, arg1.second ); 
-    }
-};
-
-} // namespace pandora
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 /**
  *  @brief CheatingPfoCreationAlgorithm class
  */
@@ -108,10 +91,7 @@ private:
      */
     static void ComputeEnergyWeightedClusterPosition(pandora::Cluster *pCluster, pandora::CartesianVector &energyWeightedClusterPosition);
 
-    std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
-    std::string     m_inputClusterListName;         ///< if a clusterlistname is given, take the clusters from there instead of running a clustering algorithm
-    std::string     m_outputClusterListName;        ///< The name under which to save the new cheated cluster list
-
+    std::string     m_inputClusterListName;         ///< The input cluster list name; if not specified, use current list
     std::string     m_pfoParameterDetermination;    ///< Determines how to calculate pfo parameters
 };
 

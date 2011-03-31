@@ -16,15 +16,11 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
 {
     const ClusterList *pClusterList = NULL;
 
-    if (!m_clusteringAlgorithmName.empty())
-    {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_clusteringAlgorithmName, pClusterList));
-    }
-    else if (!m_inputClusterListName.empty())
+    if (!m_inputClusterListName.empty())
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetClusterList(*this, m_inputClusterListName, pClusterList));
     }
-    else if (m_clusteringAlgorithmName.empty() && m_inputClusterListName.empty())
+    else
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
     }
@@ -206,9 +202,6 @@ void CheatingPfoCreationAlgorithm::ComputeEnergyWeightedClusterPosition(Cluster 
 
 StatusCode CheatingPfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle,
-        m_clusteringAlgorithmName));
-
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "InputClusterListName", m_inputClusterListName));
 

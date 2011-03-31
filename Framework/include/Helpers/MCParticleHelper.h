@@ -30,6 +30,16 @@ public:
      *  @return address of the main mc particle
      */
     static const MCParticle *const GetMainMCParticle(const pandora::Cluster *const pCluster);
+
+private:
+    /**
+     *  @brief  Read the cluster helper settings
+     * 
+     *  @param  pXmlHandle address of the relevant xml handle
+     */
+    static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
+
+    friend class PandoraSettings;
 };
 
 } // namespace pandora

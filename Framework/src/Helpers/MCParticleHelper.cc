@@ -68,4 +68,18 @@ const MCParticle *const MCParticleHelper::GetMainMCParticle(const Cluster *const
     return pMainMCParticle;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode MCParticleHelper::ReadSettings(const TiXmlHandle *const /*pXmlHandle*/)
+{
+    /*TiXmlElement *pXmlElement(pXmlHandle->FirstChild("MCParticleHelper").Element());
+
+    if (NULL != pXmlElement)
+    {
+        const TiXmlHandle xmlHandle(pXmlElement);
+    }*/
+
+    return STATUS_CODE_SUCCESS;
+}
+
 } // namespace pandora

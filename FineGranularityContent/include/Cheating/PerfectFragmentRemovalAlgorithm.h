@@ -31,7 +31,7 @@ private:
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    pandora::StringVector   m_clusterListNames;             ///< names of the clusterlists of which fragments should be removed
+    std::string     m_inputClusterListName;         ///< The input cluster list name; if not specified, use current list
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

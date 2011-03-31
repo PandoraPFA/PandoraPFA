@@ -11,6 +11,7 @@
 #include "Helpers/EnergyCorrectionsHelper.h"
 #include "Helpers/FragmentRemovalHelper.h"
 #include "Helpers/GeometryHelper.h"
+#include "Helpers/MCParticleHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 #include "Helpers/ReclusterHelper.h"
 #include "Helpers/XmlHelper.h"
@@ -47,6 +48,7 @@ StatusCode PandoraSettings::Initialize(const TiXmlHandle *const pXmlHandle)
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, EnergyCorrectionsHelper::ReadSettings(pXmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, FragmentRemovalHelper::ReadSettings(pXmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, GeometryHelper::ReadSettings(pXmlHandle));
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, MCParticleHelper::ReadSettings(pXmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ParticleIdHelper::ReadSettings(pXmlHandle));
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ReadSettings(pXmlHandle));
 

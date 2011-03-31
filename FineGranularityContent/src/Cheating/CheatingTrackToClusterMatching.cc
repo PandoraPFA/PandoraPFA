@@ -21,6 +21,9 @@ StatusCode CheatingTrackToClusterMatching::Run()
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
+    // Clear any existing track - cluster associations
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RemoveCurrentTrackClusterAssociations(*this));
+
     // Construct a map from mc particle to tracks
     typedef std::map<const MCParticle*, TrackList*> TracksPerMCParticle;
     TracksPerMCParticle tracksPerMCParticle;
