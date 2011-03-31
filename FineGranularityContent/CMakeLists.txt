@@ -10,10 +10,13 @@ AUX_SOURCE_DIRECTORY( ./src/Cheating FineGranularityContent_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Clustering FineGranularityContent_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/FragmentRemoval FineGranularityContent_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Monitoring FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( ./src/ParticleId FineGranularityContent_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Persistency FineGranularityContent_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/PfoConstruction FineGranularityContent_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Reclustering FineGranularityContent_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/TopologicalAssociation FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( ./src/TrackClusterAssociation FineGranularityContent_SRCS )
+AUX_SOURCE_DIRECTORY( ./src/Utility FineGranularityContent_SRCS )
 
 # require proper C++
 ADD_DEFINITIONS( "-Wall -ansi -pedantic" )

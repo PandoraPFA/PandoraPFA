@@ -8,56 +8,45 @@
 #ifndef FINE_GRANULARITY_CONTENT_H
 #define FINE_GRANULARITY_CONTENT_H 1
 
-#include "EventPreparationAlgorithm.h"
-#include "FinalParticleIdAlgorithm.h"
-#include "FragmentRemovalAlgorithm.h"
-#include "MuonReconstructionAlgorithm.h"
-#include "PhotonRecoveryAlgorithm.h"
-#include "PrimaryClusteringAlgorithm.h"
-#include "ReclusteringAlgorithm.h"
-#include "TopologicalAssociationAlgorithm.h"
-
-#include "Cheating/PerfectClusteringAlgorithm.h"
-#include "Cheating/PerfectPhotonClusteringAlgorithm.h"
-#include "Cheating/PerfectNeutralHadronClusteringAlgorithm.h"
-#include "Cheating/CheatingTrackToClusterMatching.h"
 #include "Cheating/CheatingClusterMergingAlgorithm.h"
 #include "Cheating/CheatingPfoCreationAlgorithm.h"
+#include "Cheating/CheatingTrackToClusterMatching.h"
+#include "Cheating/PerfectClusteringAlgorithm.h"
 #include "Cheating/PerfectFragmentRemovalAlgorithm.h"
 
-#include "Clustering/ClusteringAlgorithm.h"
-#include "Clustering/ECalPhotonClusteringAlgorithm.h"
+#include "Clustering/ClusteringParentAlgorithm.h"
+#include "Clustering/ConeClusteringAlgorithm.h"
 #include "Clustering/ForcedClusteringAlgorithm.h"
-#include "Clustering/InwardClusteringAlgorithm.h"
+#include "Clustering/InwardConeClusteringAlgorithm.h"
 #include "Clustering/LineClusteringAlgorithm.h"
 
+#include "FragmentRemoval/FragmentRemovalParentAlgorithm.h"
 #include "FragmentRemoval/MainFragmentRemovalAlgorithm.h"
 #include "FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
 #include "FragmentRemoval/PhotonFragmentRemovalAlgorithm.h"
 
 #include "Monitoring/CaloHitMonitoringAlgorithm.h"
+#include "Monitoring/DumpPfosMonitoringAlgorithm.h"
 #include "Monitoring/EfficiencyMonitoringAlgorithm.h"
 #include "Monitoring/EnergyMonitoringAlgorithm.h"
 #include "Monitoring/MCParticlesMonitoringAlgorithm.h"
 #include "Monitoring/VisualMonitoringAlgorithm.h"
-#include "Monitoring/DumpPfosMonitoringAlgorithm.h"
+
+#include "ParticleId/FinalParticleIdAlgorithm.h"
+#include "ParticleId/MuonReconstructionAlgorithm.h"
+#include "ParticleId/PhotonRecoveryAlgorithm.h"
 
 #include "Persistency/EventReadingAlgorithm.h"
 #include "Persistency/EventWritingAlgorithm.h"
 
 #include "PfoConstruction/CLICPfoSelectionAlgorithm.h"
-#include "PfoConstruction/ClusterPreparationAlgorithm.h"
-#include "PfoConstruction/LoopingTrackAssociationAlgorithm.h"
+#include "PfoConstruction/KinkPfoCreationAlgorithm.h"
 #include "PfoConstruction/PfoCreationAlgorithm.h"
 #include "PfoConstruction/V0PfoCreationAlgorithm.h"
-#include "PfoConstruction/KinkPfoCreationAlgorithm.h"
-#include "PfoConstruction/TrackPreparationAlgorithm.h"
-#include "PfoConstruction/TrackRecoveryAlgorithm.h"
-#include "PfoConstruction/TrackRecoveryHelixAlgorithm.h"
-#include "PfoConstruction/TrackRecoveryInteractionsAlgorithm.h"
 
 #include "Reclustering/ExitingTrackAlg.h"
 #include "Reclustering/ForceSplitTrackAssociationsAlg.h"
+#include "Reclustering/ReclusteringParentAlgorithm.h"
 #include "Reclustering/ResolveTrackAssociationsAlg.h"
 #include "Reclustering/SplitMergedClustersAlg.h"
 #include "Reclustering/SplitTrackAssociationsAlg.h"
@@ -79,7 +68,17 @@
 #include "TopologicalAssociation/ShowerMipMerging3Algorithm.h"
 #include "TopologicalAssociation/ShowerMipMerging4Algorithm.h"
 #include "TopologicalAssociation/SoftClusterMergingAlgorithm.h"
-#include "TopologicalAssociation/TrackClusterAssociationAlgorithm.h"
+#include "TopologicalAssociation/TopologicalAssociationParentAlgorithm.h"
+
+#include "TrackClusterAssociation/LoopingTrackAssociationAlgorithm.h"
+#include "TrackClusterAssociation/TrackClusterAssociationAlgorithm.h"
+#include "TrackClusterAssociation/TrackRecoveryAlgorithm.h"
+#include "TrackClusterAssociation/TrackRecoveryHelixAlgorithm.h"
+#include "TrackClusterAssociation/TrackRecoveryInteractionsAlgorithm.h"
+
+#include "Utility/ClusterPreparationAlgorithm.h"
+#include "Utility/EventPreparationAlgorithm.h"
+#include "Utility/TrackPreparationAlgorithm.h"
 
 #include "FineGranularityEnergyCorrections.h"
 #include "FineGranularityParticleId.h"
@@ -94,49 +93,38 @@ class FineGranularityContent
 {
 public:
     #define FINE_GRANULARITY_ALGORITHM_LIST(d)                                                                                  \
-        d("EventPreparation",                       EventPreparationAlgorithm::Factory)                                         \
-        d("FinalParticleId",                        FinalParticleIdAlgorithm::Factory)                                          \
-        d("FragmentRemoval",                        FragmentRemovalAlgorithm::Factory)                                          \
-        d("MuonReconstruction",                     MuonReconstructionAlgorithm::Factory)                                       \
-        d("PhotonRecovery",                         PhotonRecoveryAlgorithm::Factory)                                           \
-        d("PrimaryClustering",                      PrimaryClusteringAlgorithm::Factory)                                        \
-        d("Reclustering",                           ReclusteringAlgorithm::Factory)                                             \
-        d("TopologicalAssociation",                 TopologicalAssociationAlgorithm::Factory)                                   \
-        d("PerfectClustering",                      PerfectClusteringAlgorithm::Factory)                                        \
-        d("PerfectPhotonClustering",                PerfectPhotonClusteringAlgorithm::Factory)                                  \
-        d("PerfectNeutralHadronClustering",         PerfectNeutralHadronClusteringAlgorithm::Factory)                           \
-        d("CheatingTrackToClusterMatching",         CheatingTrackToClusterMatching::Factory)                                    \
         d("CheatingClusterMerging",                 CheatingClusterMergingAlgorithm::Factory)                                   \
         d("CheatingPfoCreation",                    CheatingPfoCreationAlgorithm::Factory)                                      \
+        d("CheatingTrackToClusterMatching",         CheatingTrackToClusterMatching::Factory)                                    \
+        d("PerfectClustering",                      PerfectClusteringAlgorithm::Factory)                                        \
         d("PerfectFragmentRemoval",                 PerfectFragmentRemovalAlgorithm::Factory)                                   \
-        d("Clustering",                             ClusteringAlgorithm::Factory)                                               \
-        d("ECalPhotonClustering",                   ECalPhotonClusteringAlgorithm::Factory)                                     \
+        d("ClusteringParent",                       ClusteringParentAlgorithm::Factory)                                         \
+        d("ConeClustering",                         ConeClusteringAlgorithm::Factory)                                           \
         d("ForcedClustering",                       ForcedClusteringAlgorithm::Factory)                                         \
-        d("InwardClustering",                       InwardClusteringAlgorithm::Factory)                                         \
+        d("InwardConeClustering",                   InwardConeClusteringAlgorithm::Factory)                                     \
         d("LineClustering",                         LineClusteringAlgorithm::Factory)                                           \
+        d("FragmentRemovalParent",                  FragmentRemovalParentAlgorithm::Factory)                                    \
         d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                                      \
         d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                                   \
         d("PhotonFragmentRemoval",                  PhotonFragmentRemovalAlgorithm::Factory)                                    \
         d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                                        \
+        d("DumpPfosMonitoring",                     DumpPfosMonitoringAlgorithm::Factory)                                       \
         d("EfficiencyMonitoring",                   EfficiencyMonitoringAlgorithm::Factory)                                     \
         d("EnergyMonitoring",                       EnergyMonitoringAlgorithm::Factory)                                         \
-        d("VisualMonitoring",                       VisualMonitoringAlgorithm::Factory)                                         \
         d("MCParticlesMonitoring",                  MCParticlesMonitoringAlgorithm::Factory)                                    \
-        d("DumpPfosMonitoring",                     DumpPfosMonitoringAlgorithm::Factory)                                       \
-        d("CLICPfoSelection",                       CLICPfoSelectionAlgorithm::Factory)                                         \
+        d("VisualMonitoring",                       VisualMonitoringAlgorithm::Factory)                                         \
+        d("FinalParticleId",                        FinalParticleIdAlgorithm::Factory)                                          \
+        d("MuonReconstruction",                     MuonReconstructionAlgorithm::Factory)                                       \
+        d("PhotonRecovery",                         PhotonRecoveryAlgorithm::Factory)                                           \
         d("EventReading",                           EventReadingAlgorithm::Factory)                                             \
         d("EventWriting",                           EventWritingAlgorithm::Factory)                                             \
-        d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                                       \
-        d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                                  \
+        d("CLICPfoSelection",                       CLICPfoSelectionAlgorithm::Factory)                                         \
+        d("KinkPfoCreation",                        KinkPfoCreationAlgorithm::Factory)                                          \
         d("PfoCreation",                            PfoCreationAlgorithm::Factory)                                              \
         d("V0PfoCreation",                          V0PfoCreationAlgorithm::Factory)                                            \
-        d("KinkPfoCreation",                        KinkPfoCreationAlgorithm::Factory)                                          \
-        d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)                                         \
-        d("TrackRecovery",                          TrackRecoveryAlgorithm::Factory)                                            \
-        d("TrackRecoveryHelix",                     TrackRecoveryHelixAlgorithm::Factory)                                       \
-        d("TrackRecoveryInteractions",              TrackRecoveryInteractionsAlgorithm::Factory)                                \
         d("ExitingTrack",                           ExitingTrackAlg::Factory)                                                   \
         d("ForceSplitTrackAssociations",            ForceSplitTrackAssociationsAlg::Factory)                                    \
+        d("ReclusteringParent",                     ReclusteringParentAlgorithm::Factory)                                       \
         d("ResolveTrackAssociations",               ResolveTrackAssociationsAlg::Factory)                                       \
         d("SplitMergedClusters",                    SplitMergedClustersAlg::Factory)                                            \
         d("SplitTrackAssociations",                 SplitTrackAssociationsAlg::Factory)                                         \
@@ -157,7 +145,15 @@ public:
         d("ShowerMipMerging3",                      ShowerMipMerging3Algorithm::Factory)                                        \
         d("ShowerMipMerging4",                      ShowerMipMerging4Algorithm::Factory)                                        \
         d("SoftClusterMerging",                     SoftClusterMergingAlgorithm::Factory)                                       \
-        d("TrackClusterAssociation",                TrackClusterAssociationAlgorithm::Factory)
+        d("TopologicalAssociationParent",           TopologicalAssociationParentAlgorithm::Factory)                             \
+        d("LoopingTrackAssociation",                LoopingTrackAssociationAlgorithm::Factory)                                  \
+        d("TrackRecovery",                          TrackRecoveryAlgorithm::Factory)                                            \
+        d("TrackRecoveryHelix",                     TrackRecoveryHelixAlgorithm::Factory)                                       \
+        d("TrackRecoveryInteractions",              TrackRecoveryInteractionsAlgorithm::Factory)                                \
+        d("TrackClusterAssociation",                TrackClusterAssociationAlgorithm::Factory)                                  \
+        d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                                       \
+        d("EventPreparation",                       EventPreparationAlgorithm::Factory)                                         \
+        d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)
 
     #define FINE_GRANULARITY_ENERGY_CORRECTION_LIST(d)                                                                          \
         d("CleanClusters",          pandora::HADRONIC,          &FineGranularityEnergyCorrections::CleanCluster)                \

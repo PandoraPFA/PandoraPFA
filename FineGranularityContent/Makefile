@@ -24,10 +24,13 @@ SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Cheating/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Clustering/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/FragmentRemoval/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Monitoring/*.cc)
+SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/ParticleId/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Persistency/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/PfoConstruction/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Reclustering/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/TopologicalAssociation/*.cc)
+SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/TrackClusterAssociation/*.cc)
+SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Utility/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)
 
