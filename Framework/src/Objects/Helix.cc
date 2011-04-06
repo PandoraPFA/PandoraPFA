@@ -20,6 +20,8 @@ const float Helix::HALF_PI = static_cast<float>(0.5 * std::acos(-1.0));
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 Helix::Helix(const float phi0, const float d0, const float z0, const float omega, const float tanLambda, const float bField) :
+    m_referencePoint(0.f, 0.f, 0.f),
+    m_momentum(0.f, 0.f, 0.f),
     m_phi0(phi0),
     m_d0(d0),
     m_z0(z0),
@@ -393,7 +395,7 @@ StatusCode Helix::GetDistanceToHelix(const Helix *const pHelix, CartesianVector 
     const CartesianVector &referencePoint1(m_referencePoint);
     const CartesianVector &referencePoint2(pHelix->GetReferencePoint());
 
-    CartesianVector position1, position2;
+    CartesianVector position1(0.f, 0.f, 0.f), position2(0.f, 0.f, 0.f);
 
     if (singlePoint)
     {

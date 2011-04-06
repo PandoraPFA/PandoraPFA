@@ -69,7 +69,7 @@ float FragmentRemovalHelper::GetFractionOfCloseHits(const Cluster *const pCluste
 
 float FragmentRemovalHelper::GetFractionOfHitsInCone(const Cluster *const pClusterI, Cluster *const pClusterJ, const float coneCosineHalfAngle)
 {
-    CartesianVector coneApex, coneDirection;
+    CartesianVector coneApex(0.f, 0.f, 0.f), coneDirection(0.f, 0.f, 0.f);
     const TrackList &associatedTrackList(pClusterJ->GetAssociatedTrackList());
 
     if (associatedTrackList.empty())
@@ -164,7 +164,7 @@ PseudoLayer FragmentRemovalHelper::GetNLayersCrossed(const Helix *const pHelix, 
     if (std::fabs(deltaZ) < 0.001f)
         return 0;
 
-    CartesianVector intersectionPoint;
+    CartesianVector intersectionPoint(0.f, 0.f, 0.f);
     const CartesianVector &referencePoint(pHelix->GetReferencePoint());
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, != , pHelix->GetPointInZ(zStart, referencePoint, intersectionPoint));
 
@@ -229,7 +229,7 @@ StatusCode FragmentRemovalHelper::GetClusterHelixDistance(const Cluster *const p
 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            CartesianVector distanceVector;
+            CartesianVector distanceVector(0.f, 0.f, 0.f);
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint((*hitIter)->GetPositionVector(), distanceVector));
 
             const float distance(distanceVector.GetZ());

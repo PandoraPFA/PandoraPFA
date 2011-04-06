@@ -29,6 +29,7 @@ Cluster::Cluster(CaloHit *pCaloHit) :
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
     m_initialDirection(pCaloHit->GetExpectedDirection()),
+    m_isDirectionUpToDate(true),
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
@@ -49,6 +50,8 @@ Cluster::Cluster(CaloHitList *pCaloHitList) :
     m_isFixedMuon(false),
     m_isMipTrack(false),
     m_pTrackSeed(NULL),
+    m_initialDirection(0.f, 0.f, 0.f),
+    m_isDirectionUpToDate(false),
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
@@ -76,6 +79,7 @@ Cluster::Cluster(Track *pTrack) :
     m_isMipTrack(true),
     m_pTrackSeed(pTrack),
     m_initialDirection(pTrack->GetTrackStateAtCalorimeter().GetMomentum().GetUnitVector()),
+    m_isDirectionUpToDate(true),
     m_isFitUpToDate(false),
     m_isAvailable(true)
 {
@@ -362,20 +366,21 @@ void Cluster::CalculateFitToAllHitsResult() const
 
 void Cluster::CalculateInitialDirection() const
 {
-    if (!m_orderedCaloHitList.empty())
+    if (m_orderedCaloHitList.empty())
     {
-        CartesianVector initialDirection(0.f, 0.f, 0.f);
-        CaloHitList *pCaloHitList(m_orderedCaloHitList.begin()->second);
-
-        for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
-            initialDirection += (*iter)->GetExpectedDirection();
-
-        m_initialDirection = initialDirection.GetUnitVector();
+        m_initialDirection.SetValues(0.f, 0.f, 0.f);
+        m_isDirectionUpToDate = false;
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
     }
-    else
-    {
-        m_initialDirection.Reset();
-    }
+    
+    CartesianVector initialDirection(0.f, 0.f, 0.f);
+    CaloHitList *pCaloHitList(m_orderedCaloHitList.begin()->second);
+
+    for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
+        initialDirection += (*iter)->GetExpectedDirection();
+
+    m_initialDirection = initialDirection.GetUnitVector();
+    m_isDirectionUpToDate = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

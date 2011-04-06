@@ -18,18 +18,18 @@ float CartesianVector::GetCosOpeningAngle(const CartesianVector &rhs) const
 {
     const float magnitudesSquared(this->GetMagnitudeSquared() * rhs.GetMagnitudeSquared());
 
-    if (magnitudesSquared <= 0)
+    if (magnitudesSquared < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
     float cosTheta = this->GetDotProduct(rhs) / std::sqrt(magnitudesSquared);
 
-    if (cosTheta > 1.)
+    if (cosTheta > 1.f)
     {
-        cosTheta = 1.;
+        cosTheta = 1.f;
     }
-    else if (cosTheta < -1.)
+    else if (cosTheta < -1.f)
     {
-        cosTheta = -1.;
+        cosTheta = -1.f;
     }
 
     return cosTheta;
@@ -39,9 +39,6 @@ float CartesianVector::GetCosOpeningAngle(const CartesianVector &rhs) const
 
 void CartesianVector::GetSphericalCoordinates(float &radius, float &phi, float &theta) const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     const float magnitude(this->GetMagnitude());
 
     if (std::fabs(magnitude) < std::numeric_limits<float>::epsilon())
@@ -56,9 +53,6 @@ void CartesianVector::GetSphericalCoordinates(float &radius, float &phi, float &
 
 void CartesianVector::GetCylindricalCoordinates(float &radius, float &phi, float &z) const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     const float magnitude(this->GetMagnitude());
 
     if (std::fabs(magnitude) < std::numeric_limits<float>::epsilon())
@@ -73,9 +67,6 @@ void CartesianVector::GetCylindricalCoordinates(float &radius, float &phi, float
 
 CartesianVector CartesianVector::GetUnitVector() const
 {
-    if (!m_isInitialized)
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
     const float magnitude(this->GetMagnitude());
 
     if (std::fabs(magnitude) < std::numeric_limits<float>::epsilon())
@@ -89,17 +80,10 @@ CartesianVector CartesianVector::GetUnitVector() const
 
 std::ostream &operator<<(std::ostream & stream, const CartesianVector& cartesianVector)
 {
-    if (!cartesianVector.IsInitialized())
-    {
-        stream  << "Not initialized.";
-    }
-    else
-    {
-        stream  << "  x: " << cartesianVector.GetX()
-                << "  y: " << cartesianVector.GetY()
-                << "  z: " << cartesianVector.GetZ()
-                << " length: " << cartesianVector.GetMagnitude();
-    }
+    stream  << "  x: " << cartesianVector.GetX()
+            << "  y: " << cartesianVector.GetY()
+            << "  z: " << cartesianVector.GetZ()
+            << " length: " << cartesianVector.GetMagnitude();
 
     return stream;
 }

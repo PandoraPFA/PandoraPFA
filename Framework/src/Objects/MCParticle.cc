@@ -30,6 +30,9 @@ MCParticle::MCParticle(const PandoraApi::MCParticleParameters &mcParticleParamet
 MCParticle::MCParticle(const Uid uid) :
     m_uid(uid),
     m_energy(0.f),
+    m_momentum(0.f, 0.f, 0.f),
+    m_vertex(0.f, 0.f, 0.f),
+    m_endpoint(0.f, 0.f, 0.f),
     m_innerRadius(0.f),
     m_outerRadius(0.f),
     m_particleId(0),

@@ -570,29 +570,14 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, con
     if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
         return STATUS_CODE_NOT_FOUND;
 
-    float minDistance(std::numeric_limits<float>::max());
-
-    if (STATUS_CODE_SUCCESS != ClusterHelper::GetTrackClusterDistance(pTrack->GetTrackStateAtCalorimeter(), pCluster, maxSearchLayer,
-        parallelDistanceCut, minDistance))
-    {
-        return STATUS_CODE_NOT_FOUND;
-    }
-
-    trackClusterDistance = minDistance;
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, const Cluster *const pCluster, const PseudoLayer maxSearchLayer,
-    const float parallelDistanceCut, float &trackClusterDistance)
-{
-    if ((0 == pCluster->GetNCaloHits()) || (pCluster->GetInnerPseudoLayer() > maxSearchLayer))
-        return STATUS_CODE_NOT_FOUND;
-
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+    const TrackState &trackState(pTrack->GetTrackStateAtCalorimeter());
     const CartesianVector &trackPosition(trackState.GetPosition());
+
+    if (trackPosition.GetCosOpeningAngle(pCluster->GetCentroid(pCluster->GetInnerPseudoLayer())) < m_minTrackClusterCosAngle)
+        return STATUS_CODE_NOT_FOUND;
+
     const CartesianVector trackDirection(trackState.GetMomentum().GetUnitVector());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     bool distanceFound(false);
     float minDistanceSquared(std::numeric_limits<float>::max());
@@ -605,9 +590,8 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const TrackState &trackState, 
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             const CartesianVector positionDifference((*hitIter)->GetPositionVector() - trackPosition);
-            const float parallelDistance(trackDirection.GetDotProduct(positionDifference));
 
-            if (std::fabs(parallelDistance) > parallelDistanceCut)
+            if (std::fabs(trackDirection.GetDotProduct(positionDifference)) > parallelDistanceCut)
                 continue;
 
             const float perpendicularDistanceSquared((trackDirection.GetCrossProduct(positionDifference)).GetMagnitudeSquared());
@@ -857,7 +841,7 @@ ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :
     m_cellSize(pCaloHit->GetCellLengthScale()),
     m_pseudoLayer(pCaloHit->GetPseudoLayer())
 {
-    if (!m_position.IsInitialized() || (!m_cellNormalVector.IsInitialized()) || (0.f == m_cellSize))
+    if (m_cellSize < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 
@@ -870,13 +854,14 @@ ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position,
     m_cellSize(cellSize),
     m_pseudoLayer(pseudoLayer)
 {
-    if (!m_position.IsInitialized() || (!m_cellNormalVector.IsInitialized()) || (0.f == m_cellSize))
+    if (m_cellSize < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+float ClusterHelper::m_minTrackClusterCosAngle = 0.5f;
 float ClusterHelper::m_showerStartMipFraction = 0.8f;
 unsigned int ClusterHelper::m_showerStartNonMipLayers = 2;
 unsigned int ClusterHelper::m_leavingNOuterLayersToExamine = 4;
@@ -893,6 +878,9 @@ StatusCode ClusterHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
     if (NULL != pXmlElement)
     {
         const TiXmlHandle xmlHandle(pXmlElement);
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "MinTrackClusterCosAngle", m_minTrackClusterCosAngle));
 
         PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
             "ShowerStartMipFraction", m_showerStartMipFraction));

@@ -295,18 +295,24 @@ StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pClus
 {
     static const PseudoLayer firstLayer(GeometryHelper::GetPseudoLayerAtIp());
 
-    // Cone approach measurement to track projections
+    // Use position of track projection at calorimeter. Proceed only if projection is in reasonable proximity to calo hit
     if (pCluster->IsTrackSeeded() && ((searchLayer == 0) || (searchLayer < firstLayer)))
     {
-        return this->GetConeApproachDistanceToHit(pCaloHit, pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter().GetPosition(),
-            pCluster->GetInitialDirection(), genericDistance);
+        const CartesianVector &seedPosition(pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter().GetPosition());
+
+        if (pCaloHit->GetPositionVector().GetCosOpeningAngle(seedPosition) < m_minHitTrackCosAngle)
+            return STATUS_CODE_UNCHANGED;
+
+        return this->GetConeApproachDistanceToHit(pCaloHit, seedPosition, pCluster->GetInitialDirection(), genericDistance);
     }
 
+    // Check that cluster is occupied in the searchlayer and that it is in reasonable proximity to calo hit
     OrderedCaloHitList::const_iterator clusterHitListIter = pCluster->GetOrderedCaloHitList().find(searchLayer);
     if (pCluster->GetOrderedCaloHitList().end() == clusterHitListIter)
         return STATUS_CODE_UNCHANGED;
 
-    const CaloHitList *pClusterCaloHitList = clusterHitListIter->second;
+    if (pCaloHit->GetPositionVector().GetCosOpeningAngle(pCluster->GetCentroid(searchLayer)) < m_minHitClusterCosAngle)
+        return STATUS_CODE_UNCHANGED;
 
     const bool useTrackSeed(m_shouldUseTrackSeed && pCluster->IsTrackSeeded());
     const bool followInitialDirection(m_shouldFollowInitialDirection && pCluster->IsTrackSeeded() && (searchLayer > m_trackSeedCutOffLayer));
@@ -315,6 +321,8 @@ StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pClus
     // Cone approach measurements
     if (!useTrackSeed || (searchLayer > m_trackSeedCutOffLayer))
     {
+        const CaloHitList *pClusterCaloHitList = clusterHitListIter->second;
+
         if (searchLayer == pCaloHit->GetPseudoLayer())
         {
             return this->GetDistanceToHitInSameLayer(pCaloHit, pClusterCaloHitList, genericDistance);
@@ -576,10 +584,6 @@ StatusCode ConeClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ClusterSeedStrategy", m_clusterSeedStrategy));
 
-    m_trackSeedMaxCosTheta = 0.7f;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "TrackSeedMaxCosTheta", m_trackSeedMaxCosTheta));
-
     // High level clustering parameters
     CustomHitOrder::m_hitSortingStrategy = 0;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -608,6 +612,14 @@ StatusCode ConeClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_genericDistanceCut = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GenericDistanceCut", m_genericDistanceCut));
+
+    m_minHitTrackCosAngle = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitTrackCosAngle", m_minHitTrackCosAngle));
+
+    m_minHitClusterCosAngle = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitClusterCosAngle", m_minHitClusterCosAngle));
 
     m_shouldUseTrackSeed = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

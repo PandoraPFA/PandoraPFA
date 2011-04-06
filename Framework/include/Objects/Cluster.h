@@ -562,6 +562,8 @@ private:
     InputPseudoLayer            m_outerPseudoLayer;             ///< The outermost pseudo layer in the cluster
 
     mutable CartesianVector     m_initialDirection;             ///< The initial direction of the cluster
+    mutable bool                m_isDirectionUpToDate;          ///< Whether the initial direction of the cluster is up to date
+
     mutable ClusterFitResult    m_currentFitResult;             ///< The current fit result, usually set by clustering algorithm, as cluster grows
 
     mutable ClusterFitResult    m_fitToAllHitsResult;           ///< The result of a linear fit to all calo hits in the cluster
@@ -768,7 +770,7 @@ inline PseudoLayer Cluster::GetOuterPseudoLayer() const
 
 inline const CartesianVector &Cluster::GetInitialDirection() const
 {
-    if (!m_initialDirection.IsInitialized())
+    if (!m_isDirectionUpToDate)
         this->CalculateInitialDirection();
 
     return m_initialDirection;
@@ -975,6 +977,8 @@ inline Cluster::~Cluster()
 inline void Cluster::ResetOutdatedProperties()
 {
     m_isFitUpToDate = false;
+    m_isDirectionUpToDate = false;
+    m_initialDirection.SetValues(0.f, 0.f, 0.f);
     m_fitToAllHitsResult.Reset();
     m_showerStartLayer.Reset();
     m_isPhotonFast.Reset();
@@ -983,7 +987,6 @@ inline void Cluster::ResetOutdatedProperties()
     m_correctedElectromagneticEnergy.Reset();
     m_correctedHadronicEnergy.Reset();
     m_trackComparisonEnergy.Reset();
-    m_initialDirection.Reset();
     m_innerLayerHitType.Reset();
     m_innerLayerRadiationLengths.Reset();
     m_innerLayerInteractionLengths.Reset();

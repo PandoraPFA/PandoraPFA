@@ -49,7 +49,7 @@ StatusCode ForcedClusteringAlgorithm::Run()
 
             if (CaloHitHelper::IsCaloHitAvailable(pCaloHit) && (m_shouldClusterIsolatedHits || !pCaloHit->IsIsolated()))
             {
-                CartesianVector helixSeparation;
+                CartesianVector helixSeparation(0.f, 0.f, 0.f);
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint(pCaloHit->GetPositionVector(), helixSeparation));
 
                 trackDistanceInfoVector.push_back(TrackDistanceInfo(pCaloHit, pCluster, trackEnergy, helixSeparation.GetMagnitude()));

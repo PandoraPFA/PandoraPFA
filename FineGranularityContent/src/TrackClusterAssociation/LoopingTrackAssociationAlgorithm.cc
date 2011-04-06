@@ -113,7 +113,7 @@ StatusCode LoopingTrackAssociationAlgorithm::Run()
             const float deltaR(std::min(std::fabs(innerLayerDeltaR), std::fabs(meanDeltaR))); // ATTN: Changed order of min and fabs here
 
             // Calculate projected helix direction at endcap
-            CartesianVector helixDirection;
+            CartesianVector helixDirection(0.f, 0.f, 0.f);
 
             if (0.f != innerLayerDeltaY)
             {

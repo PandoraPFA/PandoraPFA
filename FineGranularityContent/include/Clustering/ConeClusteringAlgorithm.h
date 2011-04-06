@@ -193,7 +193,6 @@ private:
     static const float FLOAT_MAX;
 
     unsigned int    m_clusterSeedStrategy;          ///< Flag determining if and how clusters should be seeded with tracks
-    float           m_trackSeedMaxCosTheta;         ///< Cut off for seeding clusters with tracks (unless all tracks requested)
 
     bool            m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm
     bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
@@ -203,6 +202,9 @@ private:
 
     unsigned int    m_clusterFormationStrategy;     ///< Flag determining when to add "best" calo hit found to clusters
     float           m_genericDistanceCut;           ///< Generic distance cut to apply throughout algorithm
+
+    float           m_minHitTrackCosAngle;          ///< Min cos(angle) between calo hit position and track projection
+    float           m_minHitClusterCosAngle;        ///< Min cos(angle) between calo hit position and cluster searchlayer centroid
 
     bool            m_shouldUseTrackSeed;           ///< Whether to use track seed information in clustering
     unsigned int    m_trackSeedCutOffLayer;         ///< Pseudo layer beyond which track seed is no longer considered

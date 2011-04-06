@@ -253,8 +253,12 @@ StatusCode InwardConeClusteringAlgorithm::UpdateClusterProperties(ClusterVector 
 StatusCode InwardConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
     float &genericDistance) const
 {
+    // Check that cluster is occupied in the searchlayer and that it is in reasonable proximity to calo hit
     OrderedCaloHitList::const_iterator clusterHitListIter = pCluster->GetOrderedCaloHitList().find(searchLayer);
     if (pCluster->GetOrderedCaloHitList().end() == clusterHitListIter)
+        return STATUS_CODE_UNCHANGED;
+
+    if (pCaloHit->GetPositionVector().GetCosOpeningAngle(pCluster->GetCentroid(searchLayer)) < m_minHitClusterCosAngle)
         return STATUS_CODE_UNCHANGED;
 
     const CaloHitList *pClusterCaloHitList = clusterHitListIter->second;
@@ -455,6 +459,10 @@ StatusCode InwardConeClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     m_genericDistanceCut = 1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "GenericDistanceCut", m_genericDistanceCut));
+
+    m_minHitClusterCosAngle = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinHitClusterCosAngle", m_minHitClusterCosAngle));
 
     // Same layer distance parameters
     m_sameLayerPadWidthsFine = 2.8f;

@@ -224,7 +224,7 @@ inline StatusCode FileReader::ReadVariable(CartesianVector &t)
 template<>
 inline StatusCode FileReader::ReadVariable(TrackState &t)
 {
-    CartesianVector position, momentum;
+    CartesianVector position(0.f, 0.f, 0.f), momentum(0.f, 0.f, 0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(position));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(momentum));
     t = TrackState(position, momentum);

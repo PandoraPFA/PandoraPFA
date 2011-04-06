@@ -170,6 +170,8 @@ private:
     unsigned int    m_clusterFormationStrategy;     ///< Flag determining when to add "best" calo hit found to clusters
     float           m_genericDistanceCut;           ///< Generic distance cut to apply throughout algorithm
 
+    float           m_minHitClusterCosAngle;        ///< Min cos(angle) between calo hit position and cluster searchlayer centroid
+
     float           m_sameLayerPadWidthsFine;       ///< Fine adjacent pad widths used to calculate generic distance to same layer hit
     float           m_sameLayerPadWidthsCoarse;     ///< Coarse adjacent pad widths used to calculate generic distance to same layer hit
 

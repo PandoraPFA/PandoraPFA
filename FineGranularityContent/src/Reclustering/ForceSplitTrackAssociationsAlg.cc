@@ -77,7 +77,7 @@ StatusCode ForceSplitTrackAssociationsAlg::Run()
                 {
                     const Helix *const pHelix(mapIter->first->GetHelixFitAtCalorimeter());
 
-                    CartesianVector helixSeparation;
+                    CartesianVector helixSeparation(0.f, 0.f, 0.f);
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint(hitPosition, helixSeparation));
 
                     const float distanceToTrack(helixSeparation.GetMagnitude());

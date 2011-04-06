@@ -103,7 +103,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             const Helix *const pHelix(pTrack->GetHelixFitAtCalorimeter());
 
             // Compare cluster and helix directions
-            CartesianVector muonEntryPoint;
+            CartesianVector muonEntryPoint(0.f, 0.f, 0.f);
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetMuonEntryPoint(pHelix, isPositiveZ, muonEntryPoint));
 
             bool isInBarrel(false);
@@ -121,7 +121,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
             const Helix externalHelix(muonEntryPoint, pHelix->GetExtrapolatedMomentum(muonEntryPoint),
                 (externalBField < 0.f) ? -pHelix->GetCharge() : pHelix->GetCharge(), std::fabs(externalBField));
 
-            CartesianVector correctedMuonEntryPoint;
+            CartesianVector correctedMuonEntryPoint(0.f, 0.f, 0.f);
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetMuonEntryPoint(&externalHelix, isPositiveZ, correctedMuonEntryPoint));
 
             const CartesianVector helixDirection(externalHelix.GetExtrapolatedMomentum(correctedMuonEntryPoint).GetUnitVector());
@@ -131,7 +131,7 @@ StatusCode MuonReconstructionAlgorithm::AssociateMuonTracks(const ClusterList *c
                 continue;
 
             // Calculate separation of helix and cluster inner centroid
-            CartesianVector helixSeparation;
+            CartesianVector helixSeparation(0.f, 0.f, 0.f);
             PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, externalHelix.GetDistanceToPoint(clusterInnerCentroid, helixSeparation));
 
             const float distanceToTrack(helixSeparation.GetZ());
@@ -178,7 +178,7 @@ StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHe
         {
             const float phi(twopi_n * static_cast<float>(i) + muonBarrelInnerPhi);
 
-            CartesianVector barrelEntryPoint;
+            CartesianVector barrelEntryPoint(0.f, 0.f, 0.f);
             float genericTime(std::numeric_limits<float>::max());
 
             const StatusCode statusCode(pHelix->GetPointInXY(muonBarrelInnerR * std::cos(phi), muonBarrelInnerR * std::sin(phi),
@@ -193,7 +193,7 @@ StatusCode MuonReconstructionAlgorithm::GetMuonEntryPoint(const Helix *const pHe
     }
     else
     {
-        CartesianVector barrelEntryPoint;
+        CartesianVector barrelEntryPoint(0.f, 0.f, 0.f);
         float genericTime(std::numeric_limits<float>::max());
 
         const StatusCode statusCode(pHelix->GetPointOnCircle(muonBarrelInnerR, referencePoint, barrelEntryPoint, genericTime));
@@ -251,7 +251,7 @@ StatusCode MuonReconstructionAlgorithm::AddCaloHits(const ClusterList *const pMu
 
                 if (ENDCAP == pCaloHit->GetDetectorRegion())
                 {
-                    CartesianVector intersectionPoint;
+                    CartesianVector intersectionPoint(0.f, 0.f, 0.f);
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetPointInZ(caloHitPosition.GetZ(), pHelix->GetReferencePoint(), intersectionPoint));
 
                     const float helixR(std::sqrt(intersectionPoint.GetX() * intersectionPoint.GetX() + intersectionPoint.GetY() * intersectionPoint.GetY()));
@@ -263,7 +263,7 @@ StatusCode MuonReconstructionAlgorithm::AddCaloHits(const ClusterList *const pMu
                         continue;
                 }
 
-                CartesianVector helixSeparation;
+                CartesianVector helixSeparation(0.f, 0.f, 0.f);
                 PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pHelix->GetDistanceToPoint(caloHitPosition, helixSeparation));
 
                 const float cellLengthScale(pCaloHit->GetCellLengthScale());

@@ -325,19 +325,6 @@ public:
         const float parallelDistanceCut, float &trackClusterDistance);
 
     /**
-     *  @brief  Get the distance of closest approach between a specified track state and the hits within a cluster.
-     *          Note that only a specified number of layers are examined.
-     * 
-     *  @param  trackState the specified track state (position and momentum vectors)
-     *  @param  pCluster address of the cluster
-     *  @param  maxSearchLayer the maximum pseudolayer to examine
-     *  @param  parallelDistanceCut maximum allowed projection of track-cluster separation along track direction
-     *  @param  trackClusterDistance to receive the track cluster distance
-     */
-    static StatusCode GetTrackClusterDistance(const TrackState &trackState, const Cluster *const pCluster, const PseudoLayer maxSearchLayer,
-        const float parallelDistanceCut, float &trackClusterDistance);
-
-    /**
      *  @brief  Whether a cluster can be merged with another. Uses simple suggested criteria, including cluster photon id flag
      *          and supplied cuts on cluster mip fraction and all hits fit rms.
      * 
@@ -425,13 +412,14 @@ private:
      */
     static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
 
-    static float           m_showerStartMipFraction;               ///< Max layer mip-fraction to declare layer as shower-like
-    static unsigned int    m_showerStartNonMipLayers;              ///< Number of successive shower-like layers to identify shower start
+    static float        m_minTrackClusterCosAngle;              ///< Track/cluster dist: min cos(angle) between track and cluster inner centroid
+    static float        m_showerStartMipFraction;               ///< Max layer mip-fraction to declare layer as shower-like
+    static unsigned int m_showerStartNonMipLayers;              ///< Number of successive shower-like layers to identify shower start
 
-    static unsigned int    m_leavingNOuterLayersToExamine;         ///< Number of outer layers to examine to identify leaving cluster
-    static unsigned int    m_leavingMipLikeNOccupiedLayers;        ///< Number of occupied outer layers for a mip-like leaving cluster
-    static unsigned int    m_leavingShowerLikeNOccupiedLayers;     ///< Number of occupied outer layers for a shower-like leaving cluster
-    static float           m_leavingShowerLikeEnergyInOuterLayers; ///< Energy deposited in outer layers by a shower-like leaving cluster
+    static unsigned int m_leavingNOuterLayersToExamine;         ///< Number of outer layers to examine to identify leaving cluster
+    static unsigned int m_leavingMipLikeNOccupiedLayers;        ///< Number of occupied outer layers for a mip-like leaving cluster
+    static unsigned int m_leavingShowerLikeNOccupiedLayers;     ///< Number of occupied outer layers for a shower-like leaving cluster
+    static float        m_leavingShowerLikeEnergyInOuterLayers; ///< Energy deposited in outer layers by a shower-like leaving cluster
 
     friend class PandoraSettings;
 };
@@ -469,7 +457,9 @@ inline PseudoLayer ClusterHelper::ClusterFitPoint::GetPseudoLayer() const
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline ClusterHelper::ClusterFitResult::ClusterFitResult() :
-    m_isFitSuccessful(false)
+    m_isFitSuccessful(false),
+    m_direction(0.f, 0.f, 0.f),
+    m_intercept(0.f, 0.f, 0.f)
 {
 }
 
@@ -580,8 +570,8 @@ inline void ClusterHelper::ClusterFitResult::SetRadialDirectionCosine(const floa
 inline void ClusterHelper::ClusterFitResult::Reset()
 {
     m_isFitSuccessful = false;
-    m_direction.Reset();
-    m_intercept.Reset();
+    m_direction.SetValues(0.f, 0.f, 0.f);
+    m_intercept.SetValues(0.f, 0.f, 0.f);
     m_chi2.Reset();
     m_rms.Reset();
     m_dirCosR.Reset();
