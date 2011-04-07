@@ -159,8 +159,6 @@ private:
      */
     pandora::StatusCode RemoveEmptyClusters(pandora::ClusterVector &clusterVector) const;
 
-    static const float FLOAT_MAX;
-
     bool            m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm
     bool            m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
 
@@ -175,7 +173,7 @@ private:
     float           m_sameLayerPadWidthsFine;       ///< Fine adjacent pad widths used to calculate generic distance to same layer hit
     float           m_sameLayerPadWidthsCoarse;     ///< Coarse adjacent pad widths used to calculate generic distance to same layer hit
 
-    float           m_coneApproachMaxSeparation;    ///< Maximum separation between calo hit and specified cluster position
+    float           m_coneApproachMaxSeparation2;   ///< Maximum separation between calo hit and specified cluster position (squared)
     float           m_tanConeAngleFine;             ///< Fine tan cone angle used to calculate cone approach distance
     float           m_tanConeAngleCoarse;           ///< Coarse tan cone angle used to calculate cone approach distance
     float           m_additionalPadWidthsFine;      ///< Fine adjacent pad widths used to calculate cone approach distance

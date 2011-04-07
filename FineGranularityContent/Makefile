@@ -12,8 +12,8 @@ ifdef MONITORING
     INCLUDES += -I$(PANDORAMONITORING_DIR)/include
 endif
 
-CC = gcc
-CFLAGS = -c -Wall -g -w -fPIC
+CC = g++
+CFLAGS = -c -Wall -g -w -fPIC -O2
 CFLAGS += $(INCLUDES)
 ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32

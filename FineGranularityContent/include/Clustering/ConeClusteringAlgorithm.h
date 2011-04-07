@@ -125,7 +125,7 @@ private:
      *  @param  genericDistance to receive the generic distance
      */
     pandora::StatusCode GetGenericDistanceToHit(pandora::Cluster *const pCluster, pandora::CaloHit *const pCaloHit,
-        pandora::PseudoLayer searchLayer, float &genericDistance) const;
+        const pandora::PseudoLayer searchLayer, float &genericDistance) const;
 
     /**
      *  @brief  Get the generic distance between a calo hit and a cluster in the same pseudo layer
@@ -190,8 +190,6 @@ private:
      */
     pandora::StatusCode RemoveEmptyClusters(pandora::ClusterVector &clusterVector) const;
 
-    static const float FLOAT_MAX;
-
     unsigned int    m_clusterSeedStrategy;          ///< Flag determining if and how clusters should be seeded with tracks
 
     bool            m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm
@@ -213,7 +211,7 @@ private:
     float           m_sameLayerPadWidthsFine;       ///< Fine adjacent pad widths used to calculate generic distance to same layer hit
     float           m_sameLayerPadWidthsCoarse;     ///< Coarse adjacent pad widths used to calculate generic distance to same layer hit
 
-    float           m_coneApproachMaxSeparation;    ///< Maximum separation between calo hit and specified cluster position
+    float           m_coneApproachMaxSeparation2;   ///< Maximum separation between calo hit and specified cluster position (squared)
     float           m_tanConeAngleFine;             ///< Fine tan cone angle used to calculate cone approach distance
     float           m_tanConeAngleCoarse;           ///< Coarse tan cone angle used to calculate cone approach distance
     float           m_additionalPadWidthsFine;      ///< Fine adjacent pad widths used to calculate cone approach distance
@@ -222,7 +220,7 @@ private:
     float           m_minClusterDirProjection;      ///< Min projection of cluster-hit separation in cluster dir to calculate cone distance
 
     float           m_trackPathWidth;               ///< Track path width, used to determine whether hits are associated with seed track
-    float           m_maxTrackSeedSeparation;       ///< Maximum distance between a calo hit and track seed
+    float           m_maxTrackSeedSeparation2;      ///< Maximum distance between a calo hit and track seed (squared)
 
     unsigned int    m_maxLayersToTrackSeed;         ///< Max number of layers to the track seed for trackSeedDistance to be calculated
     unsigned int    m_maxLayersToTrackLikeHit;      ///< Max number of layers to a "track-like" hit for trackSeedDistance to be calculated

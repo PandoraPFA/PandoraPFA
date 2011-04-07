@@ -13,7 +13,6 @@
 using namespace pandora;
 
 unsigned int CustomHitOrder::m_hitSortingStrategy = 0;
-const float ConeClusteringAlgorithm::FLOAT_MAX = std::numeric_limits<float>::max();
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -119,7 +118,7 @@ StatusCode ConeClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoL
                 clusterIter != clusterIterEnd; ++clusterIter)
             {
                 Cluster *pCluster = *clusterIter;
-                float genericDistance(FLOAT_MAX);
+                float genericDistance(std::numeric_limits<float>::max());
                 const float clusterEnergy(pCluster->GetHadronicEnergy());
 
                 PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetGenericDistanceToHit(pCluster,
@@ -188,7 +187,7 @@ StatusCode ConeClusteringAlgorithm::FindHitsInSameLayer(PseudoLayer pseudoLayer,
                     clusterIter != clusterIterEnd; ++clusterIter)
                 {
                     Cluster *pCluster = *clusterIter;
-                    float genericDistance(FLOAT_MAX);
+                    float genericDistance(std::numeric_limits<float>::max());
                     const float clusterEnergy(pCluster->GetHadronicEnergy());
 
                     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetGenericDistanceToHit(pCluster,
@@ -290,13 +289,13 @@ StatusCode ConeClusteringAlgorithm::UpdateClusterProperties(ClusterVector &clust
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
+StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, const PseudoLayer searchLayer,
     float &genericDistance) const
 {
     static const PseudoLayer firstLayer(GeometryHelper::GetPseudoLayerAtIp());
 
     // Use position of track projection at calorimeter. Proceed only if projection is reasonably compatible with calo hit
-    if (pCluster->IsTrackSeeded() && ((searchLayer == 0) || (searchLayer < firstLayer)))
+    if (((searchLayer == 0) || (searchLayer < firstLayer)) && pCluster->IsTrackSeeded())
     {
         const TrackState &trackState(pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter());
         const CartesianVector trackDirection(trackState.GetMomentum().GetUnitVector());
@@ -307,7 +306,7 @@ StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pClus
         return this->GetConeApproachDistanceToHit(pCaloHit, trackState.GetPosition(), trackDirection, genericDistance);
     }
 
-    // Check that cluster is occupied in the searchlayer and that it is reasonably compatible with calo hit
+    // Check that cluster is occupied in the searchlayer and is reasonably compatible with calo hit
     OrderedCaloHitList::const_iterator clusterHitListIter = pCluster->GetOrderedCaloHitList().find(searchLayer);
 
     if (pCluster->GetOrderedCaloHitList().end() == clusterHitListIter)
@@ -320,9 +319,12 @@ StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pClus
         return STATUS_CODE_UNCHANGED;
 
     // Cone approach measurements
+    float initialDirectionDistance(std::numeric_limits<float>::max());
+    float currentDirectionDistance(std::numeric_limits<float>::max());
+    float trackSeedDistance(std::numeric_limits<float>::max());
+
     const bool useTrackSeed(m_shouldUseTrackSeed && pCluster->IsTrackSeeded());
     const bool followInitialDirection(m_shouldFollowInitialDirection && pCluster->IsTrackSeeded() && (searchLayer > m_trackSeedCutOffLayer));
-    float initialDirectionDistance(FLOAT_MAX), currentDirectionDistance(FLOAT_MAX), trackSeedDistance(FLOAT_MAX);
 
     if (!useTrackSeed || (searchLayer > m_trackSeedCutOffLayer))
     {
@@ -387,7 +389,7 @@ StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pClus
     {
         genericDistance = smallestDistance;
 
-        if (FLOAT_MAX != genericDistance)
+        if (std::numeric_limits<float>::max() != genericDistance)
             return STATUS_CODE_SUCCESS;
     }
 
@@ -403,24 +405,25 @@ StatusCode ConeClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const p
         (m_sameLayerPadWidthsFine * pCaloHit->GetCellLengthScale()) :
         (m_sameLayerPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
 
-    if (0 == dCut)
+    if (0.f == dCut)
         return STATUS_CODE_FAILURE;
 
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
 
     bool hitFound(false);
-    float smallestDistance(FLOAT_MAX);
+    float smallestDistanceSquared(std::numeric_limits<float>::max());
+    const float rDCutSquared(1.f / (dCut * dCut));
 
     for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         CaloHit *pHitInCluster = *iter;
         const CartesianVector &hitInClusterPosition(pHitInCluster->GetPositionVector());
-        const float separation((hitPosition - hitInClusterPosition).GetMagnitude());
-        const float hitDistance(separation / dCut);
+        const float separationSquared((hitPosition - hitInClusterPosition).GetMagnitudeSquared());
+        const float hitDistanceSquared(separationSquared * rDCutSquared);
 
-        if (hitDistance < smallestDistance)
+        if (hitDistanceSquared < smallestDistanceSquared)
         {
-            smallestDistance = hitDistance;
+            smallestDistanceSquared = hitDistanceSquared;
             hitFound = true;
         }
     }
@@ -428,7 +431,7 @@ StatusCode ConeClusteringAlgorithm::GetDistanceToHitInSameLayer(CaloHit *const p
     if (!hitFound)
         return STATUS_CODE_UNCHANGED;
 
-    distance = smallestDistance;
+    distance = std::sqrt(smallestDistanceSquared);
     return STATUS_CODE_SUCCESS;
 }
 
@@ -438,12 +441,12 @@ StatusCode ConeClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const 
     const CartesianVector &clusterDirection, float &distance) const
 {
     bool hitFound(false);
-    float smallestDistance(FLOAT_MAX);
+    float smallestDistance(std::numeric_limits<float>::max());
 
     for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
         CaloHit *pHitInCluster = *iter;
-        float hitDistance(FLOAT_MAX);
+        float hitDistance(std::numeric_limits<float>::max());
 
         PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetConeApproachDistanceToHit(pCaloHit,
             pHitInCluster->GetPositionVector(), clusterDirection, hitDistance));
@@ -470,21 +473,22 @@ StatusCode ConeClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *const 
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
     const CartesianVector positionDifference(hitPosition - clusterPosition);
 
-    if (positionDifference.GetMagnitude() > m_coneApproachMaxSeparation)
+    if (positionDifference.GetMagnitudeSquared() > m_coneApproachMaxSeparation2)
         return STATUS_CODE_UNCHANGED;
 
-    const float dPerp (clusterDirection.GetCrossProduct(positionDifference).GetMagnitude());
     const float dAlong(clusterDirection.GetDotProduct(positionDifference));
-
-    const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
-        (std::fabs(dAlong) * m_tanConeAngleFine) + (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
-        (std::fabs(dAlong) * m_tanConeAngleCoarse) + (m_additionalPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
-
-    if (0 == dCut)
-        return STATUS_CODE_FAILURE;
 
     if ((dAlong < m_maxClusterDirProjection) && (dAlong > m_minClusterDirProjection))
     {
+        const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
+            (std::fabs(dAlong) * m_tanConeAngleFine) + (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
+            (std::fabs(dAlong) * m_tanConeAngleCoarse) + (m_additionalPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
+
+        if (0.f == dCut)
+            return STATUS_CODE_FAILURE;
+
+        const float dPerp (clusterDirection.GetCrossProduct(positionDifference).GetMagnitude());
+
         distance = dPerp / dCut;
         return STATUS_CODE_SUCCESS;
     }
@@ -513,7 +517,7 @@ StatusCode ConeClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pClust
 
         for (CaloHitList::const_iterator iter = listIter->second->begin(), iterEnd = listIter->second->end(); iter != iterEnd; ++iter)
         {
-            float tempDistance(FLOAT_MAX);
+            float tempDistance(std::numeric_limits<float>::max());
             PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, this->GetDistanceToTrackSeed(pCluster, *iter,
                 tempDistance));
 
@@ -529,26 +533,24 @@ StatusCode ConeClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pClust
 
 StatusCode ConeClusteringAlgorithm::GetDistanceToTrackSeed(Cluster *const pCluster, CaloHit *const pCaloHit, float &distance) const
 {
-    if (0 == m_maxTrackSeedSeparation)
-        return STATUS_CODE_FAILURE;
-
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
-
     const CartesianVector &trackSeedPosition(pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter().GetPosition());
-    const CartesianVector positionDifference(hitPosition - trackSeedPosition);
-    const float separation(positionDifference.GetMagnitude());
 
-    if (separation < m_maxTrackSeedSeparation)
+    const CartesianVector positionDifference(hitPosition - trackSeedPosition);
+    const float separationSquared(positionDifference.GetMagnitudeSquared());
+
+    if (separationSquared < m_maxTrackSeedSeparation2)
     {
-        const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
-        const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeedSeparation)));
+        const float flexibility(1.f + (m_trackPathWidth * std::sqrt(separationSquared / m_maxTrackSeedSeparation2)));
 
         const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
             flexibility * (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
             flexibility * (m_additionalPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
 
-        if (0 == dCut)
+        if (0.f == dCut)
             return STATUS_CODE_FAILURE;
+
+        const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
 
         distance = dPerp / dCut;
         return STATUS_CODE_SUCCESS;
@@ -648,9 +650,11 @@ StatusCode ConeClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "SameLayerPadWidthsCoarse", m_sameLayerPadWidthsCoarse));
 
     // Cone approach distance parameters
-    m_coneApproachMaxSeparation = 1000.f;
+    float coneApproachMaxSeparation = 1000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ConeApproachMaxSeparation", m_coneApproachMaxSeparation));
+        "ConeApproachMaxSeparation", coneApproachMaxSeparation));
+
+    m_coneApproachMaxSeparation2 = coneApproachMaxSeparation * coneApproachMaxSeparation;
 
     m_tanConeAngleFine = 0.3f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -681,9 +685,14 @@ StatusCode ConeClusteringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackPathWidth", m_trackPathWidth));
 
-    m_maxTrackSeedSeparation = 250.f;
+    float maxTrackSeedSeparation = 250.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxTrackSeedSeparation", m_maxTrackSeedSeparation));
+        "MaxTrackSeedSeparation", maxTrackSeedSeparation));
+
+    m_maxTrackSeedSeparation2 = maxTrackSeedSeparation * maxTrackSeedSeparation;
+
+    if (m_shouldUseTrackSeed && (0.f == m_maxTrackSeedSeparation2))
+        return STATUS_CODE_INVALID_PARAMETER;
 
     m_maxLayersToTrackSeed = 3;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
