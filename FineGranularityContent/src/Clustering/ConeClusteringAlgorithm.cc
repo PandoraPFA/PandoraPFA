@@ -295,30 +295,35 @@ StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pClus
 {
     static const PseudoLayer firstLayer(GeometryHelper::GetPseudoLayerAtIp());
 
-    // Use position of track projection at calorimeter. Proceed only if projection is in reasonable proximity to calo hit
+    // Use position of track projection at calorimeter. Proceed only if projection is reasonably compatible with calo hit
     if (pCluster->IsTrackSeeded() && ((searchLayer == 0) || (searchLayer < firstLayer)))
     {
-        const CartesianVector &seedPosition(pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter().GetPosition());
+        const TrackState &trackState(pCluster->GetTrackSeed()->GetTrackStateAtCalorimeter());
+        const CartesianVector trackDirection(trackState.GetMomentum().GetUnitVector());
 
-        if (pCaloHit->GetPositionVector().GetCosOpeningAngle(seedPosition) < m_minHitTrackCosAngle)
+        if (pCaloHit->GetExpectedDirection().GetCosOpeningAngle(trackDirection) < m_minHitTrackCosAngle)
             return STATUS_CODE_UNCHANGED;
 
-        return this->GetConeApproachDistanceToHit(pCaloHit, seedPosition, pCluster->GetInitialDirection(), genericDistance);
+        return this->GetConeApproachDistanceToHit(pCaloHit, trackState.GetPosition(), trackDirection, genericDistance);
     }
 
-    // Check that cluster is occupied in the searchlayer and that it is in reasonable proximity to calo hit
+    // Check that cluster is occupied in the searchlayer and that it is reasonably compatible with calo hit
     OrderedCaloHitList::const_iterator clusterHitListIter = pCluster->GetOrderedCaloHitList().find(searchLayer);
+
     if (pCluster->GetOrderedCaloHitList().end() == clusterHitListIter)
         return STATUS_CODE_UNCHANGED;
 
-    if (pCaloHit->GetPositionVector().GetCosOpeningAngle(pCluster->GetCentroid(searchLayer)) < m_minHitClusterCosAngle)
+    const ClusterHelper::ClusterFitResult &clusterFitResult(pCluster->GetCurrentFitResult());
+    const CartesianVector &clusterDirection(clusterFitResult.IsFitSuccessful() ?  clusterFitResult.GetDirection() : pCluster->GetInitialDirection());
+
+    if (pCaloHit->GetExpectedDirection().GetCosOpeningAngle(clusterDirection) < m_minHitClusterCosAngle)
         return STATUS_CODE_UNCHANGED;
 
+    // Cone approach measurements
     const bool useTrackSeed(m_shouldUseTrackSeed && pCluster->IsTrackSeeded());
     const bool followInitialDirection(m_shouldFollowInitialDirection && pCluster->IsTrackSeeded() && (searchLayer > m_trackSeedCutOffLayer));
     float initialDirectionDistance(FLOAT_MAX), currentDirectionDistance(FLOAT_MAX), trackSeedDistance(FLOAT_MAX);
 
-    // Cone approach measurements
     if (!useTrackSeed || (searchLayer > m_trackSeedCutOffLayer))
     {
         const CaloHitList *pClusterCaloHitList = clusterHitListIter->second;
@@ -343,10 +348,10 @@ StatusCode ConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pClus
         }
 
         // Measurement using current cluster direction
-        if (pCluster->GetCurrentFitResult().IsFitSuccessful())
+        if (clusterFitResult.IsFitSuccessful())
         {
-            StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList,
-                pCluster->GetCurrentFitResult().GetDirection(), currentDirectionDistance);
+            StatusCode statusCode = this->GetConeApproachDistanceToHit(pCaloHit, pClusterCaloHitList, clusterFitResult.GetDirection(),
+                currentDirectionDistance);
 
             if (STATUS_CODE_SUCCESS == statusCode)
             {

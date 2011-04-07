@@ -572,15 +572,14 @@ StatusCode ClusterHelper::GetTrackClusterDistance(const Track *const pTrack, con
 
     const TrackState &trackState(pTrack->GetTrackStateAtCalorimeter());
     const CartesianVector &trackPosition(trackState.GetPosition());
-
-    if (trackPosition.GetCosOpeningAngle(pCluster->GetCentroid(pCluster->GetInnerPseudoLayer())) < m_minTrackClusterCosAngle)
-        return STATUS_CODE_NOT_FOUND;
-
     const CartesianVector trackDirection(trackState.GetMomentum().GetUnitVector());
-    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    if (trackDirection.GetCosOpeningAngle(pCluster->GetInitialDirection()) < m_minTrackClusterCosAngle)
+        return STATUS_CODE_NOT_FOUND;
 
     bool distanceFound(false);
     float minDistanceSquared(std::numeric_limits<float>::max());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
     for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {

@@ -253,12 +253,16 @@ StatusCode InwardConeClusteringAlgorithm::UpdateClusterProperties(ClusterVector 
 StatusCode InwardConeClusteringAlgorithm::GetGenericDistanceToHit(Cluster *const pCluster, CaloHit *const pCaloHit, PseudoLayer searchLayer,
     float &genericDistance) const
 {
-    // Check that cluster is occupied in the searchlayer and that it is in reasonable proximity to calo hit
+    // Check that cluster is occupied in the searchlayer and that it is reasonably compatible with calo hit
     OrderedCaloHitList::const_iterator clusterHitListIter = pCluster->GetOrderedCaloHitList().find(searchLayer);
+
     if (pCluster->GetOrderedCaloHitList().end() == clusterHitListIter)
         return STATUS_CODE_UNCHANGED;
 
-    if (pCaloHit->GetPositionVector().GetCosOpeningAngle(pCluster->GetCentroid(searchLayer)) < m_minHitClusterCosAngle)
+    const ClusterHelper::ClusterFitResult &clusterFitResult(pCluster->GetCurrentFitResult());
+    const CartesianVector &clusterDirection(clusterFitResult.IsFitSuccessful() ?  clusterFitResult.GetDirection() : pCluster->GetInitialDirection());
+
+    if (pCaloHit->GetExpectedDirection().GetCosOpeningAngle(clusterDirection) < m_minHitClusterCosAngle)
         return STATUS_CODE_UNCHANGED;
 
     const CaloHitList *pClusterCaloHitList = clusterHitListIter->second;
