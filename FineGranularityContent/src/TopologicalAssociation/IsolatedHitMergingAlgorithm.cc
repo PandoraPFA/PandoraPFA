@@ -131,32 +131,32 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
 float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluster, const CaloHit *const pCaloHit) const
 {
+    // Apply simple preselection using cosine of opening angle between the hit and cluster directions
+    if (pCaloHit->GetExpectedDirection().GetCosOpeningAngle(pCluster->GetInitialDirection()) < m_minCosOpeningAngle)
+        return std::numeric_limits<float>::max();
+
     float minDistanceSquared(std::numeric_limits<float>::max());
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
 
-    // Apply simple preselection using cosine of opening angle between the hit and cluster directions
-    const float cosOpeningAngle(pCaloHit->GetExpectedDirection().GetCosOpeningAngle(pCluster->GetInitialDirection()));
-
-    if (cosOpeningAngle >= m_minCosOpeningAngle)
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
-        const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
-
-        for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
-            for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-            {
-                const CartesianVector positionDifference(hitPosition - (*hitIter)->GetPositionVector());
-                const float distanceSquared(positionDifference.GetMagnitudeSquared());
+            const CartesianVector positionDifference(hitPosition - (*hitIter)->GetPositionVector());
+            const float distanceSquared(positionDifference.GetMagnitudeSquared());
 
-                if (distanceSquared < minDistanceSquared)
-                {
-                    minDistanceSquared = distanceSquared;
-                }
+            if (distanceSquared < minDistanceSquared)
+            {
+                minDistanceSquared = distanceSquared;
             }
         }
     }
 
-    return std::sqrt(minDistanceSquared);
+    if (minDistanceSquared < std::numeric_limits<float>::max())
+        return std::sqrt(minDistanceSquared);
+
+    return std::numeric_limits<float>::max();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
