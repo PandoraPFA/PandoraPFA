@@ -195,8 +195,8 @@ private:
     static NestedUsageMapNames      m_nestedUsageMapNames;              ///< List of usage maps names, ordered by recluster process
     static NameToCaloHitUsageMap    m_nameToCaloHitUsageMap;            ///< The name to calo hit availability map
 
-    static float                    m_caloHitMaxSeparation;             ///< Max separation to consider associations between hits, units mm
-    static float                    m_isolationCaloHitMaxSeparation;    ///< Max separation considered when identifying isolated hits, units mm
+    static float                    m_caloHitMaxSeparation2;            ///< Max separation to consider associations between hits, units mm (used squared)
+    static float                    m_isolationCaloHitMaxSeparation2;   ///< Max separation considered when identifying isolated hits, units mm (used squared)
 
     static float                    m_densityWeightContribution;        ///< The basic density weight contribution
     static unsigned int             m_densityWeightPower;               ///< The density weighting power
@@ -207,8 +207,8 @@ private:
     static float                    m_isolationDensityWeightCutCoarse;  ///< Coarse granularity isolation density weight cut
 
     static unsigned int             m_isolationNLayers;                 ///< Number of adjacent layers to use in isolation calculation
-    static float                    m_isolationCutDistanceFine;         ///< Fine granularity isolation cut distance, units mm
-    static float                    m_isolationCutDistanceCoarse;       ///< Coarse granularity isolation cut distance, units mm
+    static float                    m_isolationCutDistanceFine2;        ///< Fine granularity isolation cut distance, units mm (used squared)
+    static float                    m_isolationCutDistanceCoarse2;      ///< Coarse granularity isolation cut distance, units mm (used squared)
     static unsigned int             m_isolationMaxNearbyHits;           ///< Max number of "nearby" hits for a hit to be considered isolated
 
     static float                    m_mipLikeMipCut;                    ///< Mip equivalent energy cut for hit to be flagged as possible mip
