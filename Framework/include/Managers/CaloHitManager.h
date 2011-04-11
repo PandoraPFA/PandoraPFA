@@ -66,14 +66,6 @@ private:
     StatusCode CalculateCaloHitProperties() const;
 
     /**
-     *  @brief  Calculate calo hit properties for a specified ordered calo hit list. The properties include density weights,
-     *          isolation flags, possible mip flags and surrounding energy
-     * 
-     *  @param  listName the specified ordered calo hit list name
-     */
-    StatusCode CalculateCaloHitProperties(const std::string &listName) const;
-
-    /**
      *  @brief  Get the current ordered calo hit list name
      * 
      *  @param  orderedCaloHitListName to receive the current ordered calo hit list name

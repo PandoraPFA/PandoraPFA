@@ -468,13 +468,13 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
     const PseudoLayer isolationMinLayer((pseudoLayer < m_isolationNLayers) ? 0 : pseudoLayer - m_isolationNLayers);
 
     // Initialize variables
-    float densityWeight = 0;
-    unsigned int isolationNearbyHits = 0;
     bool isIsolated = true;
+    unsigned int isolationNearbyHits = 0;
+    float densityWeight(0.f), surroundingEnergy(0.f);
 
     // Loop over adjacent pseudolayers
-    for(PseudoLayer iPseudoLayer = std::min(densityWeightMinLayer, isolationMinLayer);
-        iPseudoLayer <= std::max(densityWeightMaxLayer, isolationMaxLayer); ++iPseudoLayer)
+    for (PseudoLayer iPseudoLayer = std::min(densityWeightMinLayer, isolationMinLayer),
+        iPseudoLayerMax = std::max(densityWeightMaxLayer, isolationMaxLayer); iPseudoLayer <= iPseudoLayerMax; ++iPseudoLayer)
     {
         OrderedCaloHitList::const_iterator adjacentPseudoLayerIter = pOrderedCaloHitList->find(iPseudoLayer);
 
@@ -483,21 +483,26 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
 
         CaloHitList *pCaloHitList = adjacentPseudoLayerIter->second;
 
-        // Density weight
-        if ((densityWeightMinLayer <= iPseudoLayer) && (densityWeightMaxLayer >= iPseudoLayer))
-            densityWeight += CaloHitHelper::GetDensityWeightContribution(pCaloHit, pCaloHitList);
-
         // IsIsolated flag
-        if (!m_shouldUseSimpleIsolationScheme && isIsolated && (isolationMinLayer <= iPseudoLayer) && (isolationMaxLayer >= iPseudoLayer))
+        if (isIsolated && (isolationMinLayer <= iPseudoLayer) && (isolationMaxLayer >= iPseudoLayer))
         {
             isolationNearbyHits += CaloHitHelper::IsolationCountNearbyHits(pCaloHit, pCaloHitList);
             isIsolated = isolationNearbyHits < m_isolationMaxNearbyHits;
         }
 
+        // Density weight
+        if (m_shouldCalculateDensityWeight && (densityWeightMinLayer <= iPseudoLayer) && (densityWeightMaxLayer >= iPseudoLayer))
+        {
+            densityWeight += CaloHitHelper::GetDensityWeightContribution(pCaloHit, pCaloHitList);
+        }
+
         // Surrounding energy and possible mip flag
         if (pseudoLayer == iPseudoLayer)
         {
-            pCaloHit->AddSurroundingEnergy(CaloHitHelper::GetSurroundingEnergyContribution(pCaloHit, pCaloHitList));
+            if (m_shouldCalculateSurroundingEnergy)
+            {
+                surroundingEnergy += CaloHitHelper::GetSurroundingEnergyContribution(pCaloHit, pCaloHitList);
+            }
 
             if (MUON == pCaloHit->GetHitType())
             {
@@ -522,41 +527,29 @@ void CaloHitHelper::CalculateCaloHitProperties(CaloHit *const pCaloHit, const Or
         }
     }
 
-    if (!m_shouldUseSimpleIsolationScheme && isIsolated)
+    if (isIsolated)
         pCaloHit->SetIsolatedFlag(true);
 
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetDensityWeight(densityWeight));
-}
+    if (m_shouldCalculateDensityWeight)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetDensityWeight(densityWeight));
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void CaloHitHelper::ApplySimpleIsolationScheme(const CaloHitVector &caloHitVector)
-{
-    for (CaloHitVector::const_iterator iter = caloHitVector.begin(), iterEnd = caloHitVector.end(); iter != iterEnd; ++iter)
-    {
-        CaloHit *pCaloHit = *iter;
-        const float isolationDensityWeightCut((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
-            m_isolationDensityWeightCutFine : m_isolationDensityWeightCutCoarse);
-
-        if (pCaloHit->GetDensityWeight() < isolationDensityWeightCut)
-            pCaloHit->SetIsolatedFlag(true);
-    }
+    if (m_shouldCalculateSurroundingEnergy)
+        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetSurroundingEnergy(surroundingEnergy));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 float CaloHitHelper::m_caloHitMaxSeparation2 = 10000.f;
 float CaloHitHelper::m_isolationCaloHitMaxSeparation2 = 1000000.f;
-float CaloHitHelper::m_densityWeightContribution = 100.f;
-unsigned int CaloHitHelper::m_densityWeightPower = 2;
-unsigned int CaloHitHelper::m_densityWeightNLayers = 2;
-bool CaloHitHelper::m_shouldUseSimpleIsolationScheme = false;
-float CaloHitHelper::m_isolationDensityWeightCutFine = 0.1f;
-float CaloHitHelper::m_isolationDensityWeightCutCoarse = 0.1f;
 unsigned int CaloHitHelper::m_isolationNLayers = 2;
 float CaloHitHelper::m_isolationCutDistanceFine2 = 625.f;
 float CaloHitHelper::m_isolationCutDistanceCoarse2 = 40000.f;
 unsigned int CaloHitHelper::m_isolationMaxNearbyHits = 2;
+bool CaloHitHelper::m_shouldCalculateDensityWeight = true;
+float CaloHitHelper::m_densityWeightContribution = 100.f;
+unsigned int CaloHitHelper::m_densityWeightPower = 2;
+unsigned int CaloHitHelper::m_densityWeightNLayers = 2;
+bool CaloHitHelper::m_shouldCalculateSurroundingEnergy = true;
 float CaloHitHelper::m_mipLikeMipCut = 5.f;
 unsigned int CaloHitHelper::m_mipNCellsForNearbyHit = 2;
 unsigned int CaloHitHelper::m_mipMaxNearbyHits = 1;
@@ -582,24 +575,6 @@ StatusCode CaloHitHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
         m_isolationCaloHitMaxSeparation2 = isolationCaloHitMaxSeparation * isolationCaloHitMaxSeparation;
 
         PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-            "DensityWeightContribution", m_densityWeightContribution));
-
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-            "DensityWeightPower", m_densityWeightPower));
-
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-            "DensityWeightNLayers", m_densityWeightNLayers));
-
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-            "ShouldUseSimpleIsolationScheme", m_shouldUseSimpleIsolationScheme));
-
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-            "IsolationDensityWeightCutFine", m_isolationDensityWeightCutFine));
-
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-            "IsolationDensityWeightCutCoarse", m_isolationDensityWeightCutCoarse));
-
-        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
             "IsolationNLayers", m_isolationNLayers));
 
         float isolationCutDistanceFine(std::sqrt(m_isolationCutDistanceFine2));
@@ -614,6 +589,24 @@ StatusCode CaloHitHelper::ReadSettings(const TiXmlHandle *const pXmlHandle)
 
         PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
             "IsolationMaxNearbyHits", m_isolationMaxNearbyHits));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "ShouldCalculateDensityWeight", m_shouldCalculateDensityWeight));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "DensityWeightContribution", m_densityWeightContribution));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "DensityWeightPower", m_densityWeightPower));
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "DensityWeightNLayers", m_densityWeightNLayers));
+
+        if (!m_shouldCalculateDensityWeight)
+            m_densityWeightNLayers = 0;
+
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "ShouldCalculateSurroundingEnergy", m_shouldCalculateSurroundingEnergy));
 
         PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
             "MipLikeMipCut", m_mipLikeMipCut));

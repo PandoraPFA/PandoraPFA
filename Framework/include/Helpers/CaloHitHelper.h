@@ -85,13 +85,6 @@ public:
     static unsigned int IsolationCountNearbyHits(const CaloHit *const pCaloHit, const CaloHitList *const pCaloHitList);
 
     /**
-     *  @brief  Whether calo hit helper has been configured to use the simple (density weight cut) isolation scheme
-     * 
-     *  @return boolean
-     */
-    static bool ShouldUseSimpleIsolationScheme();
-
-    /**
      *  @brief  Count number of "nearby" hits using the mip identification scheme
      * 
      *  @param  pCaloHit the calo hit
@@ -171,13 +164,6 @@ private:
     static void CalculateCaloHitProperties(CaloHit *const pCaloHit, const OrderedCaloHitList *const pOrderedCaloHitList);
 
     /**
-     *  @brief  Identify isolated hits by applying a simple density weight cut to all hits in a calo hit vector
-     *
-     *  @param  caloHitVector the calo hit vector
-     */
-    static void ApplySimpleIsolationScheme(const CaloHitVector &caloHitVector);
-
-    /**
      *  @brief  Read the calo hit helper settings
      * 
      *  @param  pXmlHandle address of the relevant xml handle
@@ -198,18 +184,17 @@ private:
     static float                    m_caloHitMaxSeparation2;            ///< Max separation to consider associations between hits, units mm (used squared)
     static float                    m_isolationCaloHitMaxSeparation2;   ///< Max separation considered when identifying isolated hits, units mm (used squared)
 
-    static float                    m_densityWeightContribution;        ///< The basic density weight contribution
-    static unsigned int             m_densityWeightPower;               ///< The density weighting power
-    static unsigned int             m_densityWeightNLayers;             ///< Number of adjacent layers to use in density weight calculation
-
-    static bool                     m_shouldUseSimpleIsolationScheme;   ///< Whether to use the simple (density weight cut) isolation scheme
-    static float                    m_isolationDensityWeightCutFine;    ///< Fine granularity isolation density weight cut
-    static float                    m_isolationDensityWeightCutCoarse;  ///< Coarse granularity isolation density weight cut
-
     static unsigned int             m_isolationNLayers;                 ///< Number of adjacent layers to use in isolation calculation
     static float                    m_isolationCutDistanceFine2;        ///< Fine granularity isolation cut distance, units mm (used squared)
     static float                    m_isolationCutDistanceCoarse2;      ///< Coarse granularity isolation cut distance, units mm (used squared)
     static unsigned int             m_isolationMaxNearbyHits;           ///< Max number of "nearby" hits for a hit to be considered isolated
+
+    static bool                     m_shouldCalculateDensityWeight;     ///< Whether to calculate calo hit density weight values
+    static float                    m_densityWeightContribution;        ///< The basic density weight contribution
+    static unsigned int             m_densityWeightPower;               ///< The density weighting power
+    static unsigned int             m_densityWeightNLayers;             ///< Number of adjacent layers to use in density weight calculation
+
+    static bool                     m_shouldCalculateSurroundingEnergy; ///< Whether to calculate calo hit surrounding energy values
 
     static float                    m_mipLikeMipCut;                    ///< Mip equivalent energy cut for hit to be flagged as possible mip
     static unsigned int             m_mipNCellsForNearbyHit;            ///< Separation (in calo cells) for hits to be declared "nearby"
@@ -220,13 +205,6 @@ private:
     friend class PandoraContentApiImpl;
     friend class PandoraSettings;
 };
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool CaloHitHelper::ShouldUseSimpleIsolationScheme()
-{
-    return m_shouldUseSimpleIsolationScheme;
-}
 
 } // namespace pandora
 

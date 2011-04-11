@@ -137,23 +137,9 @@ StatusCode CaloHitManager::OrderInputCaloHits()
 
 StatusCode CaloHitManager::CalculateCaloHitProperties() const
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CalculateCaloHitProperties(INPUT_LIST_NAME));
-
-    static const bool useSimpleIsolationScheme(CaloHitHelper::ShouldUseSimpleIsolationScheme());
-
-    if (useSimpleIsolationScheme)
-        CaloHitHelper::ApplySimpleIsolationScheme(m_inputCaloHitVector);
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode CaloHitManager::CalculateCaloHitProperties(const std::string &listName) const
-{
     try
     {
-        NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(listName);
+        NameToOrderedCaloHitListMap::const_iterator iter = m_nameToOrderedCaloHitListMap.find(INPUT_LIST_NAME);
 
         if (m_nameToOrderedCaloHitListMap.end() == iter)
             return STATUS_CODE_NOT_INITIALIZED;
@@ -170,7 +156,7 @@ StatusCode CaloHitManager::CalculateCaloHitProperties(const std::string &listNam
     }
     catch (StatusCodeException &statusCodeException)
     {
-        std::cout << "Failed to calculate calo hit properties for list " << listName << ", " << statusCodeException.ToString() << std::endl;
+        std::cout << "CaloHitManager: Failed to calculate calo hit properties, " << statusCodeException.ToString() << std::endl;
         return statusCodeException.GetStatusCode();
     }
 

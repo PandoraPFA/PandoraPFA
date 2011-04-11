@@ -254,11 +254,11 @@ private:
     StatusCode SetDensityWeight(float densityWeight);
 
     /**
-     *  @brief  Add contribution to the calo hit surrounding energy measure
+     *  @brief  Set the surrounding energy value
      * 
-     *  @param  surroundingEnergy the surrounding energy contribution
+     *  @param  surroundingEnergy the surrounding energy value
      */
-    void AddSurroundingEnergy(float surroundingEnergy);
+    StatusCode SetSurroundingEnergy(float surroundingEnergy);
 
     /**
      *  @brief  Set the isolated hit flag
@@ -311,7 +311,7 @@ private:
     const bool              m_isInOuterSamplingLayer;   ///< Whether cell is in one of the outermost detector sampling layers
 
     InputFloat              m_densityWeight;            ///< The density weight
-    float                   m_surroundingEnergy;        ///< The surrounding energy, units GeV
+    InputFloat              m_surroundingEnergy;        ///< The surrounding energy, units GeV
 
     bool                    m_isPossibleMip;            ///< Whether the calo hit is a possible mip hit
     bool                    m_isIsolated;               ///< Whether the calo hit is isolated
@@ -506,14 +506,30 @@ inline float CaloHit::GetHadronicEnergy() const
 
 inline float CaloHit::GetSurroundingEnergy() const
 {
-    return m_surroundingEnergy;
+    try
+    {
+        return m_surroundingEnergy.Get();
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "CaloHit::GetSurroundingEnergy " << statusCodeException.ToString() << std::endl;
+        throw statusCodeException;
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline float CaloHit::GetDensityWeight() const
 {
-    return m_densityWeight.Get();
+    try
+    {
+        return m_densityWeight.Get();
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "CaloHit::GetDensityWeight " << statusCodeException.ToString() << std::endl;
+        throw statusCodeException;
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
