@@ -292,7 +292,7 @@ StatusCode NeutralFragmentRemovalAlgorithm::ReadSettings(const TiXmlHandle xmlHa
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "CloseHitDistance2", m_contactParameters.m_closeHitDistance2));
 
-    m_contactParameters.m_minCosOpeningAngle = 0.7071f;
+    m_contactParameters.m_minCosOpeningAngle = 0.5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinCosOpeningAngle", m_contactParameters.m_minCosOpeningAngle));
 

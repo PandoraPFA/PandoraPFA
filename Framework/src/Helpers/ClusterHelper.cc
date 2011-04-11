@@ -875,7 +875,7 @@ ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position,
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-float ClusterHelper::m_minTrackClusterCosAngle = 0.7071f;
+float ClusterHelper::m_minTrackClusterCosAngle = 0.f;
 float ClusterHelper::m_showerStartMipFraction = 0.8f;
 unsigned int ClusterHelper::m_showerStartNonMipLayers = 2;
 unsigned int ClusterHelper::m_leavingNOuterLayersToExamine = 4;
