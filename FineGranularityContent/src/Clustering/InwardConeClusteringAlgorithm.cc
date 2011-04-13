@@ -390,7 +390,8 @@ StatusCode InwardConeClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *
     if (positionDifference.GetMagnitudeSquared() > m_coneApproachMaxSeparation2)
         return STATUS_CODE_UNCHANGED;
 
-    const float dAlong(clusterDirection.GetDotProduct(positionDifference));
+    const CartesianVector clusterInwardDirection(clusterDirection * -1.);
+    const float dAlong(clusterInwardDirection.GetDotProduct(positionDifference));
 
     if ((dAlong < m_maxClusterDirProjection) && (dAlong > m_minClusterDirProjection))
     {
@@ -401,7 +402,7 @@ StatusCode InwardConeClusteringAlgorithm::GetConeApproachDistanceToHit(CaloHit *
         if (0.f == dCut)
             return STATUS_CODE_FAILURE;
 
-        const float dPerp (clusterDirection.GetCrossProduct(positionDifference).GetMagnitude());
+        const float dPerp (clusterInwardDirection.GetCrossProduct(positionDifference).GetMagnitude());
 
         distance = dPerp / dCut;
         return STATUS_CODE_SUCCESS;
