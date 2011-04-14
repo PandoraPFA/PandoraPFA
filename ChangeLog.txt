@@ -1,4 +1,33 @@
 ************************************************************************
+TAG V00-06 FOR ILCSOFT USAGE
+************************************************************************
+Made efficiency improvements to reduce cpu time required for events with overlaid background.
+CartesianVector no longer has a default constructor, allowing IsInitialized flags to be removed.
+Added loose, configurable cuts on cos(angle) between track/hit or cluster/hit directions in GetTrackClusterDistance function and cone-based clustering algorithms.
+Added mc particle helper class to offer re-usable functions relating to extraction of mc information.
+Added first implementation of recluster monitoring, which currently requires that associations between tracks and the chosen clusters be up-to-date at end of reclustering.
+Allowed DensityWeight and SurroundingEnergy calculations to be switched on/off via xml CaloHitHelper config.
+Added FileWriter and FileReader classes to create lightweight pandora binary persistency.
+Parameters for pandora objects, geometry or object relationships can now be written/read to/from pandora binary files.
+Added EventWriting and EventReading algorithms to make writing/reading events and geometry simple. Can skip events, jump-to events, etc.
+Added simple stand-alone pandora test application that can run off pandora binary files.
+Added RepeatEventPreparation api.
+Added Algorithm::GetPandora() functionality.
+Added GeometryHelper::IsInitialized function.
+Added ability to merge new tracks/hits into existing saved lists.
+Allowed TrackManager to tolerate duplicated track parent/daughter and sibling information without returning error.
+Enabled creation of an empty temporary track list, allowing for reclustering without reference to tracks.
+Added extra particle id sanity check to MuonReconstruction algorithm.
+Added first basic implementation of a Hough-transform-based 2D line clustering algorithm.
+Re-implemented cheating/perfect algorithms.
+Tidied and re-organised FineGranularityContent library.
+Improved output of DumpPfosMonitoringAlgorithm, including timing information and more detailed confusion summary averaged over all events
+Corrected name of ReadSettings method in fine granularity shower profile calculator.
+Added forward declarations for all pandora objects to PandoraInternal header.
+Addressed issues raised by Coverity.
+Updated standalone Makefile: changed default compiler to g++ and added -O2 optimization flag.
+
+************************************************************************
 TAG V00-05 FOR ILCSOFT USAGE
 ************************************************************************
 Updated CMake files to use new ILCUTIL package.
