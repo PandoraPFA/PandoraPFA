@@ -27,8 +27,8 @@ StatusCode EventPreparationAlgorithm::Run()
     }
 
     // Save the filtered list and set it to be the current list for subsequent algorithms
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, clusteringTrackList,
-        m_outputTrackListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackList(*this, clusteringTrackList, m_outputTrackListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentTrackList(*this, m_outputTrackListName));
 
     // Split input calo hit list into ecal/hcal and muon calo hits
     const OrderedCaloHitList *pOrderedCaloHitList = NULL;
@@ -52,11 +52,9 @@ StatusCode EventPreparationAlgorithm::Run()
     }
 
     // Save the lists, setting the ecal/hcal list to be the current list for subsequent algorithms
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_INITIALIZED, !=, PandoraContentApi::SaveOrderedCaloHitList(*this,
-        muonOrderedCaloHitList, m_outputMuonCaloHitListName));
-
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(*this,
-        orderedCaloHitList, m_outputCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitList(*this, muonOrderedCaloHitList, m_outputMuonCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitList(*this, orderedCaloHitList, m_outputCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, m_outputCaloHitListName));
 
     return STATUS_CODE_SUCCESS;
 }

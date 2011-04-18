@@ -32,8 +32,8 @@ StatusCode TrackPreparationAlgorithm::Run()
     }
 
     // Set this list of candidate pfo tracks to be the current track list
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, candidateTrackList,
-        m_mergedCandidateListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackList(*this, candidateTrackList, m_mergedCandidateListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentTrackList(*this, m_mergedCandidateListName));
 
     if (m_shouldMakeAssociations)
     {
@@ -54,8 +54,8 @@ StatusCode TrackPreparationAlgorithm::Run()
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreatePfoTrackList(candidateTrackList, pfoTrackList));
 
         // Save the filtered list and set it to be the current list for future algorithms
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, pfoTrackList,
-            m_pfoTrackListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackList(*this, pfoTrackList, m_pfoTrackListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentTrackList(*this, m_pfoTrackListName));
     }
 
     return STATUS_CODE_SUCCESS;

@@ -58,6 +58,11 @@ public:
     StatusCode RunAlgorithm(const std::string &algorithmName) const;
 
     /**
+     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
+     */
+    StatusCode RepeatEventPreparation() const;
+
+    /**
      *  @brief  Get the current cluster list
      * 
      *  @param  pClusterList to receive the address of the current cluster list
@@ -147,6 +152,13 @@ public:
      *  @param  pParticleFlowObjectList to receive the address of the current particle flow object list
      */
     StatusCode GetCurrentPfoList(const ParticleFlowObjectList *&pParticleFlowObjectList) const;
+
+    /**
+     *  @brief  Get the list of mc pfo targets
+     *
+     *  @param  mcParticleList to receive the mc particle list
+     */
+    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
 
     /**
      *  @brief  Initialize cluster fragmentation operations on clusters in the algorithm input list. This allows hits in a list
@@ -404,31 +416,6 @@ public:
     StatusCode ReplaceCurrentClusterList(const Algorithm &algorithm, const std::string &newClusterListName) const;
 
     /**
-     *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm). Note that the old cluster list (current at the time of calling
-     *          this function) will be emptied; the clusters will all be moved to the new named list. Note also that any pointers
-     *          to the current cluster list will need to be refreshed.
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newClusterListName the new cluster list name
-     */
-    StatusCode SaveClusterListAndReplaceCurrent(const Algorithm &algorithm, const std::string &newClusterListName) const;
-
-    /**
-     *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm). If all the clusters are saved, the old cluster list (current
-     *          at the time of calling this function) will be emptied; the clusters will all be moved to the new named list.
-     *          Note also that any pointers to the current cluster list will need to be refreshed.
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newClusterListName the new cluster list name
-     *  @param  pClustersToSave a subset of the current cluster list - only clusters in both this and the current
-     *          cluster lists will be saved
-     */
-    StatusCode SaveClusterListAndReplaceCurrent(const Algorithm &algorithm, const std::string &newClusterListName,
-        const ClusterList &clustersToSave) const;
-
-    /**
      *  @brief  Temporarily replace the current cluster list with another list, which may only be a temporary list. This switch
      *          will persist only for the duration of the algorithm and its daughters; unless otherwise specified, the current list
      *          will revert to the algorithm input list upon algorithm completion.
@@ -456,16 +443,6 @@ public:
     StatusCode ReplaceCurrentOrderedCaloHitList(const Algorithm &algorithm, const std::string &newListName) const;
 
     /**
-     *  @brief  Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
-     *          current list (will persist outside the current algorithm)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new ordered calo hit list name
-     */
-    StatusCode SaveOrderedCaloHitListAndReplaceCurrent(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList,
-        const std::string &newListName) const;
-
-    /**
      *  @brief  Save the current track list under a new name
      * 
      *  @param  algorithm the algorithm calling this function
@@ -481,27 +458,6 @@ public:
      *  @param  newListName the name of the replacement track list
      */
     StatusCode ReplaceCurrentTrackList(const Algorithm &algorithm, const std::string &newListName) const;
-
-    /**
-     *  @brief  Save the current track list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new track list name
-     */
-    StatusCode SaveTrackListAndReplaceCurrent(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const;
-
-    /**
-     *  @brief  Get the list of mc pfo targets
-     *
-     *  @param  mcParticleList to receive the mc particle list
-     */
-    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
-
-    /**
-     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
-     */
-    StatusCode RepeatEventPreparation() const;
 
 private:
     /**

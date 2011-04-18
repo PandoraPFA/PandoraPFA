@@ -370,7 +370,8 @@ StatusCode MuonReconstructionAlgorithm::TidyLists(const std::string &inputTrackL
             outputTrackList.erase(*iter);
     }
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackListAndReplaceCurrent(*this, outputTrackList, m_outputTrackListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveTrackList(*this, outputTrackList, m_outputTrackListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentTrackList(*this, m_outputTrackListName));
 
     // Save the muon-removed calo hit list
     const OrderedCaloHitList *pInputCaloHitList = NULL;
@@ -388,7 +389,8 @@ StatusCode MuonReconstructionAlgorithm::TidyLists(const std::string &inputTrackL
     }
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitList(*this, outputMuonCaloHitList, m_outputMuonCaloHitListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(*this, outputCaloHitList, m_outputCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitList(*this, outputCaloHitList, m_outputCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, m_outputCaloHitListName));
 
     // Save the muon cluster list
     if (!pfoClusterList.empty())

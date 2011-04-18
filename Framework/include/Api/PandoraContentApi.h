@@ -103,6 +103,13 @@ public:
     static pandora::StatusCode RunDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, const std::string &daughterAlgorithmName);
 
     /**
+     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
+     *
+     *  @param  algorithm the algorithm calling this function
+     */
+    static pandora::StatusCode RepeatEventPreparation(const pandora::Algorithm &algorithm);
+
+    /**
      *  @brief  Get the current cluster list
      * 
      *  @param  algorithm the algorithm calling this function
@@ -237,6 +244,14 @@ public:
      *  @param  pParticleFlowObjectList to receive the address of the current particle flow object list
      */
     static pandora::StatusCode GetCurrentPfoList(const pandora::Algorithm &algorithm, const pandora::ParticleFlowObjectList *&pParticleFlowObjectList);
+
+    /**
+     *  @brief  Get the list of mc pfo targets
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  mcParticleList to receive the mc particle list
+     */
+    static pandora::StatusCode GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList);
 
     /**
      *  @brief  Initialize cluster fragmentation operations on clusters in the algorithm input list. This allows hits in a list
@@ -533,31 +548,6 @@ public:
     static pandora::StatusCode ReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName);
 
     /**
-     *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm). Note that the old cluster list (current at the time of calling
-     *          this function) will be emptied; the clusters will all be moved to the new named list. Note also that any pointers
-     *          to the current cluster list will need to be refreshed.
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newClusterListName the new cluster list name
-     */
-    static pandora::StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName);
-
-    /**
-     *  @brief  Save the current cluster list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm). If all the clusters are saved, the old cluster list (current
-     *          at the time of calling this function) will be emptied; the clusters will all be moved to the new named list.
-     *          Note also that any pointers to the current cluster list will need to be refreshed.
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newClusterListName the new cluster list name
-     *  @param  clustersToSave a subset of the current cluster list - only clusters in both this and the current
-     *          cluster list will be saved
-     */
-    static pandora::StatusCode SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-        const pandora::ClusterList &clustersToSave);
-
-    /**
      *  @brief  Temporarily replace the current cluster list with another list, which may only be a temporary list. This switch
      *          will persist only for the duration of the algorithm and its daughters; unless otherwise specified, the current list
      *          will revert to the algorithm input list upon algorithm completion.
@@ -586,16 +576,6 @@ public:
     static pandora::StatusCode ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName);
 
     /**
-     *  @brief  Save the current ordered calo hit list under a new name; use this new list as a permanent replacement for the
-     *          current list (will persist outside the current algorithm)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new ordered calo hit list name
-     */
-    static pandora::StatusCode SaveOrderedCaloHitListAndReplaceCurrent(const pandora::Algorithm &algorithm, 
-        const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName);
-
-    /**
      *  @brief  Save the current track list under a new name
      * 
      *  @param  algorithm the algorithm calling this function
@@ -611,31 +591,6 @@ public:
      *  @param  newListName the name of the replacement track list
      */
     static pandora::StatusCode ReplaceCurrentTrackList(const pandora::Algorithm &algorithm, const std::string &newListName);
-
-    /**
-     *  @brief  Save the current track list under a new name; use this new list as a permanent replacement for the current
-     *          list (will persist outside the current algorithm)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new track list name
-     */
-    static pandora::StatusCode SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
-        const std::string &newListName);
-
-    /**
-     *  @brief  Get the list of mc pfo targets
-     *
-     *  @param  algorithm the algorithm calling this function
-     *  @param  mcParticleList to receive the mc particle list
-     */
-    static pandora::StatusCode GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList);
-
-    /**
-     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
-     *
-     *  @param  algorithm the algorithm calling this function
-     */
-    static pandora::StatusCode RepeatEventPreparation(const pandora::Algorithm &algorithm);
 };
 
 #endif // #ifndef PANDORA_CONTENT_API_H

@@ -53,6 +53,13 @@ pandora::StatusCode PandoraContentApi::RunDaughterAlgorithm(const pandora::Algor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+pandora::StatusCode PandoraContentApi::RepeatEventPreparation(const pandora::Algorithm &algorithm)
+{
+    return algorithm.GetPandoraContentApiImpl()->RepeatEventPreparation();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraContentApi::GetCurrentClusterList(const pandora::Algorithm &algorithm, const pandora::ClusterList *&pClusterList)
 {
     std::string clusterListName;
@@ -171,6 +178,13 @@ pandora::StatusCode PandoraContentApi::DropCurrentTrackList(const pandora::Algor
 pandora::StatusCode PandoraContentApi::GetCurrentPfoList(const pandora::Algorithm &algorithm, const pandora::ParticleFlowObjectList *&pParticleFlowObjectList)
 {
     return algorithm.GetPandoraContentApiImpl()->GetCurrentPfoList(pParticleFlowObjectList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetMCParticleList(mcParticleList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -408,21 +422,6 @@ pandora::StatusCode PandoraContentApi::ReplaceCurrentClusterList(const pandora::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName)
-{
-    return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-pandora::StatusCode PandoraContentApi::SaveClusterListAndReplaceCurrent(const pandora::Algorithm &algorithm, const std::string &newClusterListName,
-    const pandora::ClusterList &clustersToSave)
-{
-    return algorithm.GetPandoraContentApiImpl()->SaveClusterListAndReplaceCurrent(algorithm, newClusterListName, clustersToSave);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 pandora::StatusCode PandoraContentApi::TemporarilyReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName)
 {
     return algorithm.GetPandoraContentApiImpl()->TemporarilyReplaceCurrentClusterList(newClusterListName);
@@ -445,14 +444,6 @@ pandora::StatusCode PandoraContentApi::ReplaceCurrentOrderedCaloHitList(const pa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::SaveOrderedCaloHitListAndReplaceCurrent(const pandora::Algorithm &algorithm,
-    const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
-{
-    return algorithm.GetPandoraContentApiImpl()->SaveOrderedCaloHitListAndReplaceCurrent(algorithm, orderedCaloHitList, newListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 pandora::StatusCode PandoraContentApi::SaveTrackList(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
     const std::string &newListName)
 {
@@ -464,28 +455,6 @@ pandora::StatusCode PandoraContentApi::SaveTrackList(const pandora::Algorithm &a
 pandora::StatusCode PandoraContentApi::ReplaceCurrentTrackList(const pandora::Algorithm &algorithm, const std::string &newListName)
 {
     return algorithm.GetPandoraContentApiImpl()->ReplaceCurrentTrackList(algorithm, newListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-pandora::StatusCode PandoraContentApi::SaveTrackListAndReplaceCurrent(const pandora::Algorithm &algorithm, const pandora::TrackList &trackList,
-    const std::string &newListName)
-{
-    return algorithm.GetPandoraContentApiImpl()->SaveTrackListAndReplaceCurrent(algorithm, trackList, newListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-pandora::StatusCode PandoraContentApi::GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList)
-{
-    return algorithm.GetPandoraContentApiImpl()->GetMCParticleList(mcParticleList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-pandora::StatusCode PandoraContentApi::RepeatEventPreparation(const pandora::Algorithm &algorithm)
-{
-    return algorithm.GetPandoraContentApiImpl()->RepeatEventPreparation();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
