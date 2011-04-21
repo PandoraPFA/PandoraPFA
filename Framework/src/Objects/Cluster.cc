@@ -167,10 +167,10 @@ StatusCode Cluster::RemoveCaloHit(CaloHit *const pCaloHit)
         m_sumZByPseudoLayer.erase(pseudoLayer);
     }
 
-    if (pseudoLayer < m_innerPseudoLayer.Get())
+    if (pseudoLayer <= m_innerPseudoLayer.Get())
         m_innerPseudoLayer = m_orderedCaloHitList.begin()->first;
 
-    if (pseudoLayer > m_outerPseudoLayer.Get())
+    if (pseudoLayer >= m_outerPseudoLayer.Get())
         m_outerPseudoLayer = m_orderedCaloHitList.rbegin()->first;
 
     return STATUS_CODE_SUCCESS;
