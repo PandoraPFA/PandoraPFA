@@ -15,7 +15,7 @@
 namespace pandora
 {
 
-const MCParticle *const MCParticleHelper::GetMainMCParticle(const Cluster *const pCluster)
+const MCParticle *MCParticleHelper::GetMainMCParticle(const Cluster *const pCluster)
 {
     typedef std::map<const pandora::MCParticle*, float> MCParticleToEnergyMap;
     MCParticleToEnergyMap mcParticleToEnergyMap;

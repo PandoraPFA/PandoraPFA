@@ -108,7 +108,7 @@ public:
         d("LineClustering",                         LineClusteringAlgorithm::Factory)                                           \
         d("FragmentRemovalParent",                  FragmentRemovalParentAlgorithm::Factory)                                    \
         d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                                      \
-        d("MergeSplitPhoton",                       MergeSplitPhotonsAlgorithm::Factory)                                        \
+        d("MergeSplitPhotons",                       MergeSplitPhotonsAlgorithm::Factory)                                        \
         d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                                   \
         d("PhotonFragmentRemoval",                  PhotonFragmentRemovalAlgorithm::Factory)                                    \
         d("BeamHaloMuonRemoval",                    BeamHaloMuonRemovalAlgorithm::Factory)                                      \

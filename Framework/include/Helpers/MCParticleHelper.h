@@ -29,7 +29,7 @@ public:
      * 
      *  @return address of the main mc particle
      */
-    static const MCParticle *const GetMainMCParticle(const pandora::Cluster *const pCluster);
+    static const MCParticle *GetMainMCParticle(const pandora::Cluster *const pCluster);
 
 private:
     /**

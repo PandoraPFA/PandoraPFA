@@ -26,6 +26,15 @@ public:
     };
 
 private:
+    /**
+     *  @brief  Get the cluster layer in which the maximum electromagnetic energy has been deposited
+     * 
+     *  @param  pCluster address of the cluster
+     * 
+     *  @return The shower max layer
+     */
+    pandora::PseudoLayer GetShowerMaxLayer(const pandora::Cluster *const pCluster) const;
+
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
