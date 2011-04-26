@@ -26,6 +26,50 @@ class ParticleIdHelper
 {
 public:
     /**
+     *  @brief  ShowerPeak class
+     */
+    class ShowerPeak
+    {
+    public:
+        /**
+         *  @brief  Constructor
+         * 
+         *  @param  peakEnergy the peak energy
+         *  @param  peakRms the peak rms
+         *  @param  peakCaloHitList the peak calo hit list
+         */
+        ShowerPeak(const float peakEnergy, const float peakRms, const CaloHitList &peakCaloHitList);
+
+        /**
+         *  @brief  Get peak energy
+         * 
+         *  @return the peak energy
+         */
+        float GetPeakEnergy() const;
+
+        /**
+         *  @brief  Get peak rms
+         * 
+         *  @return the peak rms
+         */
+        float GetPeakRms() const;
+
+        /**
+         *  @brief  Get peak calo hit list
+         * 
+         *  @return the peak calo hit list
+         */
+        const CaloHitList &GetPeakCaloHitList() const;
+
+    private:
+        float                       m_peakEnergy;                   ///< The peak energy
+        float                       m_peakRms;                      ///< The peak rms
+        CaloHitList                 m_peakCaloHitList;              ///< The peak calo hit list
+    };
+
+    typedef std::vector<ShowerPeak> ShowerPeakList;                 ///< The shower peak list typedef
+
+    /**
      *  @brief  Provide fast identification of whether a cluster is an electromagnetic shower
      * 
      *  @param  pCluster address of the cluster
@@ -106,7 +150,35 @@ public:
      */
     static void CalculateShowerProfile(const Cluster *const pCluster, float &profileStart, float &profileDiscrepancy);
 
+    /**
+     *  @brief  Get the list of peaks identified in the transverse shower profile of a cluster
+     * 
+     *  @param  pCluster the address of the cluster
+     *  @param  maxPseudoLayer the maximum pseudo layer to consider
+     *  @param  showerPeakList to receive the shower peak list
+     */
+    static void GetShowerPeaks(const Cluster *const pCluster, const PseudoLayer maxPseudoLayer, ShowerPeakList &showerPeakList);
+
 private:
+    /**
+     *  @brief  ShowerProfileEntry class
+     */
+    class ShowerProfileEntry
+    {
+    public:
+        /**
+         *  @brief  Default constructor
+         */
+        ShowerProfileEntry();
+
+        bool                        m_isAvailable;                  ///< Whether shower profile entry is available (prevent double counting)
+        float                       m_energy;                       ///< The energy associated with the shower profile entry
+        CaloHitList                 m_caloHitList;                  ///< The list of calo hits associated with the shower profile entry
+    };
+
+    typedef std::vector<ShowerProfileEntry> ShowerProfile;          ///< The shower profile typedef
+    typedef std::vector<ShowerProfile> TwoDShowerProfile;           ///< The two dimensional shower profile typedef
+
     /**
      *  @brief  Set the shower profile calculator
      * 
@@ -136,6 +208,45 @@ private:
     friend class PandoraSettings;
     friend class PluginManager;
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline ParticleIdHelper::ShowerPeak::ShowerPeak(const float peakEnergy, const float peakRms, const CaloHitList &peakCaloHitList) :
+    m_peakEnergy(peakEnergy),
+    m_peakRms(peakRms),
+    m_peakCaloHitList(peakCaloHitList)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ParticleIdHelper::ShowerPeak::GetPeakEnergy() const
+{
+    return m_peakEnergy;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ParticleIdHelper::ShowerPeak::GetPeakRms() const
+{
+    return m_peakRms;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline const CaloHitList &ParticleIdHelper::ShowerPeak::GetPeakCaloHitList() const
+{
+    return m_peakCaloHitList;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline ParticleIdHelper::ShowerProfileEntry::ShowerProfileEntry() :
+    m_isAvailable(true),
+    m_energy(0.f)
+{
+}
 
 } // namespace pandora
 

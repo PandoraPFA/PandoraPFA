@@ -289,26 +289,24 @@ StatusCode MipPhotonSeparationAlgorithm::MakeClusterFragments(const PseudoLayer 
 StatusCode MipPhotonSeparationAlgorithm::GetDistanceToTrack(Cluster *const pCluster, Track *const pTrack, CaloHit *const pCaloHit,
     float &distance) const
 {
-    if (0 == m_maxTrackSeparation)
-        return STATUS_CODE_FAILURE;
-
     const CartesianVector &hitPosition(pCaloHit->GetPositionVector());
-
     const CartesianVector &trackSeedPosition(pTrack->GetTrackStateAtCalorimeter().GetPosition());
-    const CartesianVector positionDifference(hitPosition - trackSeedPosition);
-    const float separation(positionDifference.GetMagnitude());
 
-    if (separation < m_maxTrackSeparation)
+    const CartesianVector positionDifference(hitPosition - trackSeedPosition);
+    const float separationSquared(positionDifference.GetMagnitudeSquared());
+
+    if (separationSquared < m_maxTrackSeparation2)
     {
-        const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
-        const float flexibility(1.f + (m_trackPathWidth * (separation / m_maxTrackSeparation)));
+        const float flexibility(1.f + (m_trackPathWidth * std::sqrt(separationSquared / m_maxTrackSeparation2)));
 
         const float dCut ((GeometryHelper::GetHitTypeGranularity(pCaloHit->GetHitType()) <= FINE) ?
             flexibility * (m_additionalPadWidthsFine * pCaloHit->GetCellLengthScale()) :
             flexibility * (m_additionalPadWidthsCoarse * pCaloHit->GetCellLengthScale()) );
 
-        if (0 == dCut)
+        if (0.f == dCut)
             return STATUS_CODE_FAILURE;
+
+        const float dPerp((pCluster->GetInitialDirection().GetCrossProduct(positionDifference)).GetMagnitude());
 
         distance = dPerp / dCut;
         return STATUS_CODE_SUCCESS;
@@ -378,9 +376,14 @@ StatusCode MipPhotonSeparationAlgorithm::ReadSettings(const TiXmlHandle xmlHandl
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "TrackPathWidth", m_trackPathWidth));
 
-    m_maxTrackSeparation = 1000.f;
+    float maxTrackSeparation = 1000.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxTrackSeparation", m_maxTrackSeparation));
+        "MaxTrackSeparation", maxTrackSeparation));
+
+    m_maxTrackSeparation2 = maxTrackSeparation * maxTrackSeparation;
+
+    if (0.f == m_maxTrackSeparation2)
+        return STATUS_CODE_INVALID_PARAMETER;
 
     m_additionalPadWidthsFine = 2.5f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

@@ -22,8 +22,10 @@
 
 #include "FragmentRemoval/FragmentRemovalParentAlgorithm.h"
 #include "FragmentRemoval/MainFragmentRemovalAlgorithm.h"
+#include "FragmentRemoval/MergeSplitPhotonsAlgorithm.h"
 #include "FragmentRemoval/NeutralFragmentRemovalAlgorithm.h"
 #include "FragmentRemoval/PhotonFragmentRemovalAlgorithm.h"
+#include "FragmentRemoval/BeamHaloMuonRemovalAlgorithm.h"
 
 #include "Monitoring/CaloHitMonitoringAlgorithm.h"
 #include "Monitoring/DumpPfosMonitoringAlgorithm.h"
@@ -34,6 +36,7 @@
 
 #include "ParticleId/FinalParticleIdAlgorithm.h"
 #include "ParticleId/MuonReconstructionAlgorithm.h"
+#include "ParticleId/PhotonReconstructionAlgorithm.h"
 #include "ParticleId/PhotonRecoveryAlgorithm.h"
 
 #include "Persistency/EventReadingAlgorithm.h"
@@ -105,8 +108,10 @@ public:
         d("LineClustering",                         LineClusteringAlgorithm::Factory)                                           \
         d("FragmentRemovalParent",                  FragmentRemovalParentAlgorithm::Factory)                                    \
         d("MainFragmentRemoval",                    MainFragmentRemovalAlgorithm::Factory)                                      \
+        d("MergeSplitPhoton",                       MergeSplitPhotonsAlgorithm::Factory)                                        \
         d("NeutralFragmentRemoval",                 NeutralFragmentRemovalAlgorithm::Factory)                                   \
         d("PhotonFragmentRemoval",                  PhotonFragmentRemovalAlgorithm::Factory)                                    \
+        d("BeamHaloMuonRemoval",                    BeamHaloMuonRemovalAlgorithm::Factory)                                      \
         d("CaloHitMonitoring",                      CaloHitMonitoringAlgorithm::Factory)                                        \
         d("DumpPfosMonitoring",                     DumpPfosMonitoringAlgorithm::Factory)                                       \
         d("EfficiencyMonitoring",                   EfficiencyMonitoringAlgorithm::Factory)                                     \
@@ -115,6 +120,7 @@ public:
         d("VisualMonitoring",                       VisualMonitoringAlgorithm::Factory)                                         \
         d("FinalParticleId",                        FinalParticleIdAlgorithm::Factory)                                          \
         d("MuonReconstruction",                     MuonReconstructionAlgorithm::Factory)                                       \
+        d("PhotonReconstruction",                   PhotonReconstructionAlgorithm::Factory)                                     \
         d("PhotonRecovery",                         PhotonRecoveryAlgorithm::Factory)                                           \
         d("EventReading",                           EventReadingAlgorithm::Factory)                                             \
         d("EventWriting",                           EventWritingAlgorithm::Factory)                                             \
