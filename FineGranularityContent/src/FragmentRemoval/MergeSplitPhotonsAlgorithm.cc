@@ -73,7 +73,7 @@ StatusCode MergeSplitPhotonsAlgorithm::Run()
 
             if ((STATUS_CODE_SUCCESS == statusCode) && (nContactLayers > 2) && (contactFraction > 0.5f))
             {
-                // Initialized fragmentation to compare merged cluster with original
+                // Initialize fragmentation to compare merged cluster with original
                 ClusterList clusterList;
                 clusterList.insert(pParentCluster); clusterList.insert(pDaughterCluster);
 
@@ -96,7 +96,7 @@ StatusCode MergeSplitPhotonsAlgorithm::Run()
                 const float minFragmentEnergy(std::min(pDaughterCluster->GetElectromagneticEnergy(), pParentCluster->GetElectromagneticEnergy()));
                 const float maxFragmentEnergy(std::max(pDaughterCluster->GetElectromagneticEnergy(), pParentCluster->GetElectromagneticEnergy()));
 
-                // Decide whether merged cluster is better than individual fragmentes
+                // Decide whether merged cluster is better than individual fragments
                 bool acceptMerge(false);
 
                 if (minFragmentEnergy < 0.2f)
@@ -139,6 +139,7 @@ StatusCode MergeSplitPhotonsAlgorithm::Run()
                 {
                     *iterI = NULL;
                     *iterJ = NULL;
+                    break;
                 }
             }
         }
