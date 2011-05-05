@@ -126,6 +126,10 @@ StatusCode PhotonReconstructionAlgorithm::Run()
                         usedCluster = true;
                         useOriginalCluster ? pCluster->SetIsFixedPhotonFlag(true) : pPeakCluster->SetIsFixedPhotonFlag(true);
                     }
+                    else
+                    {
+                        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::DeleteCluster(*this, pPeakCluster));
+                    }
 
                     if (useOriginalCluster)
                         break;
