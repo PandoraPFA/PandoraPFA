@@ -14,8 +14,6 @@ using namespace pandora;
 
 StatusCode MergeSplitPhotonsAlgorithm::Run()
 {
-    // TODO consider any need for rechecking track-cluster associations here
-
     const ClusterList *pClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
 
@@ -61,17 +59,16 @@ StatusCode MergeSplitPhotonsAlgorithm::Run()
             if (!isParentPhoton && !isDaughterPhoton)
                 continue;
 
-            if (parentShowerMaxCentroid.GetCosOpeningAngle(daughterShowerMaxCentroid) <= 0.98f)
+            if (parentShowerMaxCentroid.GetCosOpeningAngle(daughterShowerMaxCentroid) <= m_minShowerMaxCosAngle)
                 continue;
 
-            // TODO some kind of cos(theta) cut here???
             unsigned int nContactLayers(0);
             float contactFraction(0.f);
 
-            const StatusCode statusCode(FragmentRemovalHelper::GetClusterContactDetails(pParentCluster, pDaughterCluster, 2.f,
-                nContactLayers, contactFraction));
+            const StatusCode statusCode(FragmentRemovalHelper::GetClusterContactDetails(pParentCluster, pDaughterCluster, 
+                m_contactDistanceThreshold, nContactLayers, contactFraction));
 
-            if ((STATUS_CODE_SUCCESS == statusCode) && (nContactLayers > 2) && (contactFraction > 0.5f))
+            if ((STATUS_CODE_SUCCESS == statusCode) && (nContactLayers >= m_minContactLayers) && (contactFraction > m_minContactFraction))
             {
                 // Initialize fragmentation to compare merged cluster with original
                 ClusterList clusterList;
@@ -90,41 +87,40 @@ StatusCode MergeSplitPhotonsAlgorithm::Run()
 
                 // Look for peaks in cluster transverse shower profile
                 ParticleIdHelper::ShowerPeakList showerPeakList;
-                ParticleIdHelper::GetShowerPeaks(pMergedCluster, 30, showerPeakList);
+                ParticleIdHelper::CalculateTransverseProfile(pMergedCluster, m_transProfileMaxLayer, showerPeakList);
 
                 const float subsidiaryPeakEnergy((showerPeakList.size() > 1) ? showerPeakList[1].GetPeakEnergy() : 0.f);
-                const float minFragmentEnergy(std::min(pDaughterCluster->GetElectromagneticEnergy(), pParentCluster->GetElectromagneticEnergy()));
-                const float maxFragmentEnergy(std::max(pDaughterCluster->GetElectromagneticEnergy(), pParentCluster->GetElectromagneticEnergy()));
+                const float smallFragmentEnergy(std::min(pDaughterCluster->GetElectromagneticEnergy(), pParentCluster->GetElectromagneticEnergy()));
+                const float largeFragmentEnergy(std::max(pDaughterCluster->GetElectromagneticEnergy(), pParentCluster->GetElectromagneticEnergy()));
 
                 // Decide whether merged cluster is better than individual fragments
                 bool acceptMerge(false);
 
-                if (minFragmentEnergy < 0.2f)
+                if (smallFragmentEnergy < m_acceptMaxSmallFragmentEnergy)
                 {
                     acceptMerge = true;
                 }
-                else if (subsidiaryPeakEnergy < 0.5f)
+                else if (subsidiaryPeakEnergy < m_acceptMaxSubsidiaryPeakEnergy)
                 {
-                    if (minFragmentEnergy < 0.05f * maxFragmentEnergy)
+                    if (smallFragmentEnergy < m_acceptFragmentEnergyRatio * largeFragmentEnergy)
                     {
                         acceptMerge = true;
                     }
-                    else if (subsidiaryPeakEnergy < 0.1f * minFragmentEnergy)
+                    else if (subsidiaryPeakEnergy < m_acceptSubsidiaryPeakEnergyRatio * smallFragmentEnergy)
                     {
                         acceptMerge = true;
                     }
                 }
 
                 // If merging hard photons, check for early peaks in transverse profile
-                if (acceptMerge && (minFragmentEnergy > 0.2f))
+                if (acceptMerge && (smallFragmentEnergy > m_acceptMaxSmallFragmentEnergy))
                 {
-                    // Look for peaks in cluster transverse shower profile
                     ParticleIdHelper::ShowerPeakList earlyShowerPeakList;
-                    ParticleIdHelper::GetShowerPeaks(pMergedCluster, 20, earlyShowerPeakList);
+                    ParticleIdHelper::CalculateTransverseProfile(pMergedCluster, m_earlyTransProfileMaxLayer, earlyShowerPeakList);
 
                     const float earlySubsidiaryPeakEnergy((earlyShowerPeakList.size() > 1) ? earlyShowerPeakList[1].GetPeakEnergy() : 0.f);
 
-                    if (earlySubsidiaryPeakEnergy > 0.5f)
+                    if (earlySubsidiaryPeakEnergy > m_acceptMaxSubsidiaryPeakEnergy)
                         acceptMerge = false;
                 }
 
@@ -183,9 +179,47 @@ PseudoLayer MergeSplitPhotonsAlgorithm::GetShowerMaxLayer(const Cluster *const p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode MergeSplitPhotonsAlgorithm::ReadSettings(const TiXmlHandle /*xmlHandle*/)
+StatusCode MergeSplitPhotonsAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    // Read settings from xml file here
+    m_minShowerMaxCosAngle = 0.98f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinShowerMaxCosAngle", m_minShowerMaxCosAngle));
+
+    m_contactDistanceThreshold = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ContactDistanceThreshold", m_contactDistanceThreshold));
+
+    m_minContactLayers = 3;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinContactLayers", m_minContactLayers));
+
+    m_minContactFraction = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinContactFraction", m_minContactFraction));
+
+    m_transProfileMaxLayer = 30;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "TransProfileMaxLayer", m_transProfileMaxLayer));
+
+    m_acceptMaxSmallFragmentEnergy = 0.2f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AcceptMaxSmallFragmentEnergy", m_acceptMaxSmallFragmentEnergy));
+
+    m_acceptMaxSubsidiaryPeakEnergy = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AcceptMaxSubsidiaryPeakEnergy", m_acceptMaxSubsidiaryPeakEnergy));
+
+    m_acceptFragmentEnergyRatio = 0.05f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AcceptFragmentEnergyRatio", m_acceptFragmentEnergyRatio));
+
+    m_acceptSubsidiaryPeakEnergyRatio = 0.1f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AcceptSubsidiaryPeakEnergyRatio", m_acceptSubsidiaryPeakEnergyRatio));
+
+    m_earlyTransProfileMaxLayer = 20;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EarlyTransProfileMaxLayer", m_earlyTransProfileMaxLayer));
 
     return STATUS_CODE_SUCCESS;
 }

@@ -38,7 +38,16 @@ private:
     pandora::StatusCode Run();
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
-    // Member variables here
+    float           m_minShowerMaxCosAngle;                 ///< Max cosine of angle between parent and daughter shower max layer centroids
+    float           m_contactDistanceThreshold;             ///< Distance threshold to declare cluster layers as "in contact"
+    unsigned int    m_minContactLayers;                     ///< Minimum number of parent/daughter layers in contact
+    float           m_minContactFraction;                   ///< Minimum contact fraction between parent/daughter clusters
+    unsigned int    m_transProfileMaxLayer;                 ///< Maximum layer to consider in calculation of shower transverse profiles
+    float           m_acceptMaxSmallFragmentEnergy;         ///< Max value of small fragment cluster energy to accept cluster merge
+    float           m_acceptMaxSubsidiaryPeakEnergy;        ///< Max value of subsidiary peak energy to accept cluster merge
+    float           m_acceptFragmentEnergyRatio;            ///< Max value of small/large fragment energy ratio to accept cluster merge
+    float           m_acceptSubsidiaryPeakEnergyRatio;      ///< Max value of subsidiary peak/small fragment energy ratio to accept cluster merge
+    unsigned int    m_earlyTransProfileMaxLayer;            ///< Maximum layer to consider in calculation of early shower transverse profiles
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -12,12 +12,14 @@
 #include "Pandora/PandoraInternal.h"
 #include "Pandora/StatusCodes.h"
 
-#include "Utilities/ShowerProfileCalculator.h"
-
 class TiXmlHandle;
 
 namespace pandora
 {
+
+class ShowerProfileCalculator;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  ParticleIdHelper class
@@ -62,12 +64,12 @@ public:
         const CaloHitList &GetPeakCaloHitList() const;
 
     private:
-        float                       m_peakEnergy;                   ///< The peak energy
-        float                       m_peakRms;                      ///< The peak rms
-        CaloHitList                 m_peakCaloHitList;              ///< The peak calo hit list
+        float           m_peakEnergy;                   ///< The peak energy
+        float           m_peakRms;                      ///< The peak rms
+        CaloHitList     m_peakCaloHitList;              ///< The peak calo hit list
     };
 
-    typedef std::vector<ShowerPeak> ShowerPeakList;                 ///< The shower peak list typedef
+    typedef std::vector<ShowerPeak> ShowerPeakList;
 
     /**
      *  @brief  Provide fast identification of whether a cluster is an electromagnetic shower
@@ -142,43 +144,24 @@ public:
     static bool IsMuonFull(const Cluster *const pCluster);
 
     /**
-     *  @brief  Calculate shower profile for a cluster and compare it with the expected profile for a photon
+     *  @brief  Calculate longitudinal shower profile for a cluster and compare it with the expected profile for a photon
      * 
      *  @param  pCluster address of the cluster to investigate
-     *  @param  profileStart to receive the shower profile start, in radiation lengths
-     *  @param  profileDiscrepancy to receive the shower profile discrepancy
+     *  @param  profileStart to receive the profile start, in radiation lengths
+     *  @param  profileDiscrepancy to receive the profile discrepancy
      */
-    static void CalculateShowerProfile(const Cluster *const pCluster, float &profileStart, float &profileDiscrepancy);
+    static void CalculateLongitudinalProfile(const Cluster *const pCluster, float &profileStart, float &profileDiscrepancy);
 
     /**
-     *  @brief  Get the list of peaks identified in the transverse shower profile of a cluster
+     *  @brief  Calculate transverse shower profile for a cluster and get the list of peaks identified in the profile
      * 
      *  @param  pCluster the address of the cluster
      *  @param  maxPseudoLayer the maximum pseudo layer to consider
      *  @param  showerPeakList to receive the shower peak list
      */
-    static void GetShowerPeaks(const Cluster *const pCluster, const PseudoLayer maxPseudoLayer, ShowerPeakList &showerPeakList);
+    static void CalculateTransverseProfile(const Cluster *const pCluster, const PseudoLayer maxPseudoLayer, ShowerPeakList &showerPeakList);
 
 private:
-    /**
-     *  @brief  ShowerProfileEntry class
-     */
-    class ShowerProfileEntry
-    {
-    public:
-        /**
-         *  @brief  Default constructor
-         */
-        ShowerProfileEntry();
-
-        bool                        m_isAvailable;                  ///< Whether shower profile entry is available (prevent double counting)
-        float                       m_energy;                       ///< The energy associated with the shower profile entry
-        CaloHitList                 m_caloHitList;                  ///< The list of calo hits associated with the shower profile entry
-    };
-
-    typedef std::vector<ShowerProfileEntry> ShowerProfile;          ///< The shower profile typedef
-    typedef std::vector<ShowerProfile> TwoDShowerProfile;           ///< The two dimensional shower profile typedef
-
     /**
      *  @brief  Set the shower profile calculator
      * 
@@ -237,15 +220,6 @@ inline float ParticleIdHelper::ShowerPeak::GetPeakRms() const
 inline const CaloHitList &ParticleIdHelper::ShowerPeak::GetPeakCaloHitList() const
 {
     return m_peakCaloHitList;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline ParticleIdHelper::ShowerProfileEntry::ShowerProfileEntry() :
-    m_isAvailable(true),
-    m_energy(0.f)
-{
 }
 
 } // namespace pandora

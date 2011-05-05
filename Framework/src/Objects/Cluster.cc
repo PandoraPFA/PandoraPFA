@@ -348,7 +348,7 @@ void Cluster::CalculateShowerStartLayer() const
 void Cluster::CalculateShowerProfile() const
 {
     float showerProfileStart(std::numeric_limits<float>::max()), showerProfileDiscrepancy(std::numeric_limits<float>::max());
-    ParticleIdHelper::CalculateShowerProfile(this, showerProfileStart, showerProfileDiscrepancy);
+    ParticleIdHelper::CalculateLongitudinalProfile(this, showerProfileStart, showerProfileDiscrepancy);
 
     if (!(m_showerProfileStart = showerProfileStart) || !(m_showerProfileDiscrepancy = showerProfileDiscrepancy))
         throw StatusCodeException(STATUS_CODE_FAILURE);

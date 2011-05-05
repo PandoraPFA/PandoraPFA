@@ -14,15 +14,17 @@ using namespace pandora;
 
 StatusCode PhotonReconstructionAlgorithm::Run()
 {
+    // Create list of candidate photon clusters
     const ClusterList *pPhotonClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunClusteringAlgorithm(*this, m_photonClusteringAlgName,
         pPhotonClusterList));
 
-    // TODO explain these lines
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, "PhotonClusters"));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentClusterList(*this, "PhotonClusters"));
+    // Fragmentation can only proceed with reference to a saved cluster list, so save these temporary clusters
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveClusterList(*this, m_outputClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentClusterList(*this, m_outputClusterListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pPhotonClusterList));
 
+    // Sort the clusters, then examine each cluster profile to obtain best-guess photon clusters. Delete non-photon clusters.
     ClusterVector clusterVector(pPhotonClusterList->begin(), pPhotonClusterList->end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
@@ -33,11 +35,11 @@ StatusCode PhotonReconstructionAlgorithm::Run()
 
         bool usedCluster(false);
 
-        if (pCluster->GetElectromagneticEnergy() > 0.2f)
+        if (pCluster->GetElectromagneticEnergy() > m_minClusterEnergy)
         {
             // Look for peaks in cluster transverse shower profile
             ParticleIdHelper::ShowerPeakList showerPeakList;
-            ParticleIdHelper::GetShowerPeaks(pCluster, 30, showerPeakList);
+            ParticleIdHelper::CalculateTransverseProfile(pCluster, m_transProfileMaxLayer, showerPeakList);
 
             if (!showerPeakList.empty())
             {
@@ -56,19 +58,19 @@ StatusCode PhotonReconstructionAlgorithm::Run()
                     const ParticleIdHelper::ShowerPeak &showerPeak(showerPeakList[iPeak]);
                     CaloHitList peakCaloHitList(showerPeak.GetPeakCaloHitList());
 
-                    if (showerPeak.GetPeakEnergy() < 0.2f)
+                    if (showerPeak.GetPeakEnergy() < m_minPeakEnergy)
                         continue;
 
-                    if (showerPeak.GetPeakRms() > 5.f)
+                    if (showerPeak.GetPeakRms() > m_maxPeakRms)
                         continue;
 
-                    if (peakCaloHitList.size() < 5)
+                    if (peakCaloHitList.size() < m_minPeakCaloHits)
                         continue;
 
                     Cluster *pPeakCluster = NULL;
                     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::Cluster::Create(*this, &peakCaloHitList, pPeakCluster));
 
-                    // TODO get pid here, for now cheat photon identification
+                    // TODO get pid here, for now cheat photon identification step
                     bool isPeakPhoton(false);
                     const MCParticle *pPeakMCParticle(MCParticleHelper::GetMainMCParticle(pPeakCluster));
 
@@ -78,10 +80,10 @@ StatusCode PhotonReconstructionAlgorithm::Run()
                     // Decide whether to use cluster from shower peak region
                     bool acceptPhotonCandidate(false);
 
-                    const float showerProfileStart(pPeakCluster->GetShowerProfileStart());
-                    const float showerProfileDiscrepancy(pPeakCluster->GetShowerProfileDiscrepancy());
+                    const float longProfileStart(pPeakCluster->GetShowerProfileStart());
+                    const float longProfileDiscrepancy(pPeakCluster->GetShowerProfileDiscrepancy());
 
-                    if (isPeakPhoton && (showerProfileStart < 10.f) && (showerProfileDiscrepancy < 1.f))
+                    if (isPeakPhoton && (longProfileStart < m_maxLongProfileStart) && (longProfileDiscrepancy < m_maxLongProfileDiscrepancy))
                     {
                         // TODO examine distances to nearby tracks here
                         const bool closeToTrack(false);
@@ -95,19 +97,19 @@ StatusCode PhotonReconstructionAlgorithm::Run()
                                 const float peakEnergyFraction(pPeakCluster->GetElectromagneticEnergy() / pCluster->GetElectromagneticEnergy());
                                 const float peakEnergyDifference(pCluster->GetElectromagneticEnergy() - pPeakCluster->GetElectromagneticEnergy());
 
-                                if ((peakEnergyFraction > 0.95f) || (showerPeakList.size() == 1))
+                                if ((peakEnergyFraction > m_oldClusterEnergyFraction0) || (showerPeakList.size() == m_oldClusterNPeaks))
                                 {
                                     useOriginalCluster = true;
                                 }
-                                else if ((peakEnergyFraction > 0.9f) && (peakEnergyDifference < 2.f))
+                                else if ((peakEnergyFraction > m_oldClusterEnergyFraction1) && (peakEnergyDifference < m_oldClusterEnergyDifference1))
                                 {
                                     useOriginalCluster = true;
                                 }
-                                else if ((peakEnergyFraction > 0.8f) && (peakEnergyDifference < 1.f))
+                                else if ((peakEnergyFraction > m_oldClusterEnergyFraction2) && (peakEnergyDifference < m_oldClusterEnergyDifference2))
                                 {
                                     useOriginalCluster = true;
                                 }
-                                else if ((peakEnergyFraction > 0.5f) && (peakEnergyDifference < 0.5f))
+                                else if ((peakEnergyFraction > m_oldClusterEnergyFraction3) && (peakEnergyDifference < m_oldClusterEnergyDifference3))
                                 {
                                     useOriginalCluster = true;
                                 }
@@ -115,7 +117,7 @@ StatusCode PhotonReconstructionAlgorithm::Run()
                         }
                         else
                         {
-                            // TODO demand higher pid values here
+                            // TODO demand higher pid values in event of close proximity to a track
                         }
                     }
 
@@ -152,6 +154,69 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle,
         "PhotonClusterFormation", m_photonClusteringAlgName));
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
+        "OutputClusterListName", m_outputClusterListName));
+
+    m_minClusterEnergy = 0.2f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinClusterEnergy", m_minClusterEnergy));
+
+    m_transProfileMaxLayer = 30;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "TransProfileMaxLayer", m_transProfileMaxLayer));
+
+    m_minPeakEnergy = 0.2f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinPeakEnergy", m_minPeakEnergy));
+
+    m_maxPeakRms = 5.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxPeakRms", m_maxPeakRms));
+
+    m_minPeakCaloHits = 5;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinPeakCaloHits", m_minPeakCaloHits));
+
+    m_maxLongProfileStart = 10.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxLongProfileStart", m_maxLongProfileStart));
+
+    m_maxLongProfileDiscrepancy = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxLongProfileDiscrepancy", m_maxLongProfileDiscrepancy));
+
+    m_oldClusterEnergyFraction0 = 0.95f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterEnergyFraction0", m_oldClusterEnergyFraction0));
+
+    m_oldClusterNPeaks = 1;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterNPeaks", m_oldClusterNPeaks));
+
+    m_oldClusterEnergyFraction1 = 0.9f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterEnergyFraction1", m_oldClusterEnergyFraction1));
+
+    m_oldClusterEnergyDifference1 = 2.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterEnergyDifference1", m_oldClusterEnergyDifference1));
+
+    m_oldClusterEnergyFraction2 = 0.8f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterEnergyFraction2", m_oldClusterEnergyFraction2));
+
+    m_oldClusterEnergyDifference2 = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterEnergyDifference2", m_oldClusterEnergyDifference2));
+
+    m_oldClusterEnergyFraction3 = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterEnergyFraction3", m_oldClusterEnergyFraction3));
+
+    m_oldClusterEnergyDifference3 = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OldClusterEnergyDifference3", m_oldClusterEnergyDifference3));
 
     return STATUS_CODE_SUCCESS;
 }
