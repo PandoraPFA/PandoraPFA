@@ -33,7 +33,8 @@ private:
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     pandora::IntVector  m_particleIdList;               ///< list of particle ids of MCPFOs to be selected
-    bool                m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the perfect clustering algorithm
+    bool                m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm
+    bool                m_shouldUseIsolatedHits;        ///< Whether to use isolated hits in the clustering algorithm
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

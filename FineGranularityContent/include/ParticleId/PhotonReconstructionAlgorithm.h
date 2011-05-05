@@ -30,7 +30,7 @@ private:
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     std::string     m_photonClusteringAlgName;          ///< The name of the photon clustering algorithm to run
-    std::string     m_outputClusterListName;            ///< The name of the output cluster list 
+    std::string     m_clusterListName;                  ///< The name of the output cluster list 
 
     float           m_minClusterEnergy;                 ///< The minimum energy to consider a cluster
     unsigned int    m_transProfileMaxLayer;             ///< Maximum layer to consider in calculation of shower transverse profiles
