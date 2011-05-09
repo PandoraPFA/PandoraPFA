@@ -10,6 +10,11 @@
 
 #include <map>
 
+class pTiXmlDocument;
+class TiXmlHandle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 namespace pandora
 {
 
@@ -27,6 +32,14 @@ public:
      *  @param  xHigh max binned x value
      */
     Histogram(const unsigned int nBinsX, const float xLow, const float xHigh);
+
+    /**
+     *  @brief  Constructor
+     * 
+     *  @param  pXmlHandle address of the handle for the xml element describing the histogram
+     *  @param  xmlElementName the xml element name for the histogram
+     */
+    Histogram(const TiXmlHandle *const pXmlHandle, const std::string &xmlElementName);
 
     /**
      *  @brief  Copy constructor
@@ -158,14 +171,29 @@ public:
      */
     void Fill(const float valueX, const float weight = 1.f);
 
+    /**
+     *  @brief  Scale contents of all histogram bins by a specified factor
+     * 
+     *  @param  scaleFactor the scale factor
+     */
+    void Scale(const float scaleFactor);
+
+    /**
+     *  @brief  Write the histogram to an xml document
+     * 
+     *  @param  pTiXmlDocument address of the xml document
+     *  @param  xmlElementName the xml element name for the histogram
+     */
+    void WriteToXml(TiXmlDocument *pTiXmlDocument, const std::string &xmlElementName) const;
+
 private:
     typedef std::map<int, float> HistogramMap;
 
     HistogramMap        m_histogramMap;         ///< The histogram map
 
-    const int           m_nBinsX;               ///< The number of x bins
-    const float         m_xLow;                 ///< The min binned x value
-    const float         m_xHigh;                ///< The max binned x value
+    int                 m_nBinsX;               ///< The number of x bins
+    float               m_xLow;                 ///< The min binned x value
+    float               m_xHigh;                ///< The max binned x value
     float               m_xBinWidth;            ///< The x bin width
 };
 

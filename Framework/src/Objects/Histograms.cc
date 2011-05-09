@@ -6,9 +6,13 @@
  *  $Log: $
  */
 
+#include "Helpers/XmlHelper.h"
+
 #include "Objects/Histograms.h"
 
 #include "Pandora/StatusCodes.h"
+
+#include "Xml/tinyxml.h"
 
 #include <cmath>
 #include <limits>
@@ -25,6 +29,48 @@ Histogram::Histogram(const unsigned int nBinsX, const float xLow, const float xH
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     m_xBinWidth = (xHigh - xLow) / static_cast<float>(nBinsX);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+Histogram::Histogram(const TiXmlHandle *const pXmlHandle, const std::string &xmlElementName)
+{
+    TiXmlElement *pXmlElement(pXmlHandle->FirstChild(xmlElementName).Element());
+
+    if (NULL == pXmlElement)
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+
+    const TiXmlHandle xmlHandle(pXmlElement);
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "NBinsX", m_nBinsX));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "XLow", m_xLow));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "XHigh", m_xHigh));
+
+    if ((0 >= m_nBinsX) || (m_xHigh - m_xLow < std::numeric_limits<float>::epsilon()))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    m_xBinWidth = (m_xHigh - m_xLow) / static_cast<float>(m_nBinsX);
+
+    FloatVector orderedBinContents;
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "BinContents", orderedBinContents));
+
+    if (orderedBinContents.size() != m_nBinsX)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    for (int binX = 0; binX < m_nBinsX; ++binX)
+    {
+        const float value(orderedBinContents[binX]);
+
+        if (std::fabs(value) > std::numeric_limits<float>::epsilon())
+            m_histogramMap[binX] = value;
+    }
+
+    float underflow(0.f);
+    if (STATUS_CODE_SUCCESS == XmlHelper::ReadValue(xmlHandle, "Underflow", underflow))
+        m_histogramMap[-1] = underflow;
+
+    float overflow(0.f);
+    if (STATUS_CODE_SUCCESS == XmlHelper::ReadValue(xmlHandle, "Overflow", overflow))
+        m_histogramMap[m_nBinsX] = overflow;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,6 +220,62 @@ void Histogram::Fill(const float valueX, const float weight)
     else
     {
         m_histogramMap[binX] = weight;
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram::Scale(const float scaleFactor)
+{
+    for (HistogramMap::iterator iter = m_histogramMap.begin(), iterEnd = m_histogramMap.end(); iter != iterEnd; ++iter)
+    {
+        iter->second = (iter->second * scaleFactor);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void Histogram::WriteToXml(TiXmlDocument *pTiXmlDocument, const std::string &histogramXmlKey) const
+{
+    TiXmlElement *pHistogramElement = new TiXmlElement(histogramXmlKey);
+    pTiXmlDocument->LinkEndChild(pHistogramElement);
+
+    TiXmlElement *pNBinsXElement = new TiXmlElement("NBinsX");
+    pNBinsXElement->LinkEndChild(new TiXmlText(TypeToString(m_nBinsX)));
+    pHistogramElement->LinkEndChild(pNBinsXElement);
+
+    TiXmlElement *pXLowXElement = new TiXmlElement("XLow");
+    pXLowXElement->LinkEndChild(new TiXmlText(TypeToString(m_xLow)));
+    pHistogramElement->LinkEndChild(pXLowXElement);
+
+    TiXmlElement *pXHighElement = new TiXmlElement("XHigh");
+    pXHighElement->LinkEndChild(new TiXmlText(TypeToString(m_xHigh)));
+    pHistogramElement->LinkEndChild(pXHighElement);
+
+    std::string binContentsString;
+    for (int binX = 0; binX < m_nBinsX; ++binX)
+    {
+        binContentsString += TypeToString(this->GetBinContent(binX)) + " ";
+    }
+
+    TiXmlElement *pBinContentsElement = new TiXmlElement("BinContents");
+    pBinContentsElement->LinkEndChild(new TiXmlText(binContentsString));
+    pHistogramElement->LinkEndChild(pBinContentsElement);
+
+    const float underflow(this->GetBinContent(-1));
+    if (std::fabs(underflow) > std::numeric_limits<float>::epsilon())
+    {
+        TiXmlElement *pUnderflowElement = new TiXmlElement("Underflow");
+        pUnderflowElement->LinkEndChild(new TiXmlText(TypeToString(underflow)));
+        pHistogramElement->LinkEndChild(pUnderflowElement);
+    }
+
+    const float overflow(this->GetBinContent(m_nBinsX));
+    if (std::fabs(overflow) > std::numeric_limits<float>::epsilon())
+    {
+        TiXmlElement *pOverflowElement = new TiXmlElement("Overflow");
+        pOverflowElement->LinkEndChild(new TiXmlText(TypeToString(overflow)));
+        pHistogramElement->LinkEndChild(pOverflowElement);
     }
 }
 
