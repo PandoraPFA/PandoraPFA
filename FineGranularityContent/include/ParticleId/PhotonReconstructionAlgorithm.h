@@ -81,6 +81,7 @@ private:
 
     std::string         m_histogramFile;                    ///< The name of the file containing (or to contain) pdf histograms
     bool                m_shouldMakePdfHistograms;          ///< Whether to create pdf histograms, rather than perform photon reconstruction
+    bool                m_shouldDrawPdfHistograms;          ///< Whether to draw pdf histograms at end of reconstruction (requires monitoring)
 
     pandora::Histogram *m_pSigPeakRms;                      ///< PDF histogram, signal peak rms
     pandora::Histogram *m_pBkgPeakRms;                      ///< PDF histogram, background peak rms

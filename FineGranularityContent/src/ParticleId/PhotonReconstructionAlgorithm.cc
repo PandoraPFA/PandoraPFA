@@ -208,24 +208,24 @@ float PhotonReconstructionAlgorithm::GetPid(const float peakRms, const float lon
     const int minDistanceToTrackBin(std::min(m_pSigMinDistanceToTrack->GetNBinsX() - 1,
         static_cast<int>(minDistanceToTrack / m_pSigMinDistanceToTrack->GetXBinWidth())));
 
-    float pid(0.f);
+    double pid(0.);
 
-    const float yes(m_pSigPeakRms->GetBinContent(peakRmsBin) *
+    const double yes(m_pSigPeakRms->GetBinContent(peakRmsBin) *
         m_pSigLongProfileStart->GetBinContent(longProfileStartBin) *
         m_pSigLongProfileDiscrepancy->GetBinContent(longProfileDiscrepancyBin) *
         m_pSigPeakEnergyFraction->GetBinContent(peakEnergyFractionBin) *
         m_pSigMinDistanceToTrack->GetBinContent(minDistanceToTrackBin));
 
-    const float no(m_pBkgPeakRms->GetBinContent(peakRmsBin) *
+    const double no(m_pBkgPeakRms->GetBinContent(peakRmsBin) *
         m_pBkgLongProfileStart->GetBinContent(longProfileStartBin) *
         m_pBkgLongProfileDiscrepancy->GetBinContent(longProfileDiscrepancyBin) *
         m_pBkgPeakEnergyFraction->GetBinContent(peakEnergyFractionBin) *
         m_pBkgMinDistanceToTrack->GetBinContent(minDistanceToTrackBin));
 
-    if ((yes + no) > std::numeric_limits<float>::epsilon())
+    if ((yes + no) > 0.)
         pid = yes / (yes + no);
 
-    return pid;
+    return static_cast<float>(pid);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -285,16 +285,19 @@ void PhotonReconstructionAlgorithm::TidyHistograms()
         xmlDocument.SaveFile(m_histogramFile);
     }
 
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakRms));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakRms));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileStart));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileStart));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileDiscrepancy));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileDiscrepancy));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakEnergyFraction));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakEnergyFraction));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigMinDistanceToTrack));
-    PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgMinDistanceToTrack));
+    if (m_shouldDrawPdfHistograms)
+    {
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakRms));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakRms));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileStart));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileStart));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileDiscrepancy));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileDiscrepancy));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakEnergyFraction));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakEnergyFraction));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigMinDistanceToTrack));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgMinDistanceToTrack));
+    }
 
     delete m_pSigPeakRms;
     delete m_pBkgPeakRms;
@@ -324,6 +327,10 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     m_shouldMakePdfHistograms = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShouldMakePdfHistograms", m_shouldMakePdfHistograms));
+
+    m_shouldDrawPdfHistograms = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldDrawPdfHistograms", m_shouldDrawPdfHistograms));
 
     if (m_shouldMakePdfHistograms)
     {
