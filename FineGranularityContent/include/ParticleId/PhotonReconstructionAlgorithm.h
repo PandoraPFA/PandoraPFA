@@ -35,38 +35,39 @@ private:
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
-     *  @brief  
+     *  @brief  Get the minimum distance between a cluster and a track in a specified track list
      * 
-     *  @param  
-     *  @param  
+     *  @param  pPeakCluster address of the cluster
+     *  @param  trackVector the specified track list
      * 
-     *  @return 
+     *  @return the minimum track-cluster distance
      */
     float GetMinDistanceToTrack(const pandora::Cluster *const pPeakCluster, const pandora::TrackVector &trackVector) const;
 
     /**
-     *  @brief  
+     *  @brief  Get the particle identification (Pid) value for a given set of parameters. Values near unity are deemed photon-like,
+     *          values near zero are identified as background.
      * 
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
+     *  @param  peakRms the rms of the shower peak
+     *  @param  longProfileStart the longitudinal shower profile start
+     *  @param  longProfileDiscrepancy the longitudinal shower profile discrepancy
+     *  @param  peakEnergyFraction the ratio of shower peak energy to original cluster energy
+     *  @param  minDistanceToTrack the minimum distance to a track
      * 
-     *  @return 
+     *  @return the pid value
      */
     float GetPid(const float peakRms, const float longProfileStart, const float longProfileDiscrepancy, const float peakEnergyFraction,
         const float minDistanceToTrack) const;
 
     /**
-     *  @brief  
+     *  @brief  Fill the probability density functions used in the calculation of Pid values.
      * 
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
-     *  @param  
+     *  @param  pPeakCluster the address of the cluster with the specified properties
+     *  @param  peakRms the rms of the shower peak
+     *  @param  longProfileStart the longitudinal shower profile start
+     *  @param  longProfileDiscrepancy the longitudinal shower profile discrepancy
+     *  @param  peakEnergyFraction the ratio of shower peak energy to original cluster energy
+     *  @param  minDistanceToTrack the minimum distance to a track
      */
     void FillPdfHistograms(const pandora::Cluster *const pPeakCluster, const float peakRms, const float longProfileStart,
         const float longProfileDiscrepancy, const float peakEnergyFraction, const float minDistanceToTrack) const;
@@ -75,6 +76,23 @@ private:
      *  @brief  Tidy histograms, normalizing them writing them to file if the algorithm is in histogram creation mode
      */
     void TidyHistograms();
+
+    /**
+     *  @brief  Get the relevant histogram bin content for a specified parameter value, avoiding overflow bins
+     * 
+     *  @param  pHistogram address of the histogram
+     *  @param  value the parameter value to look-up in the histogram
+     * 
+     *  @return the relevant histogram bin content
+     */
+    float GetHistogramContent(const pandora::Histogram *const pHistogram, const float value) const;
+
+    /**
+     *  @brief  Scale contents of histogram so that its cumulative sum is unity, avoiding overflow bins
+     * 
+     *  @param  pHistogram address of the histogram
+     */
+    void NormalizeHistogram(pandora::Histogram *const pHistogram) const;
 
     std::string         m_photonClusteringAlgName;          ///< The name of the photon clustering algorithm to run
     std::string         m_clusterListName;                  ///< The name of the output cluster list 

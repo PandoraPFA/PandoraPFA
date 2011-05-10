@@ -38,7 +38,10 @@ Histogram::Histogram(const TiXmlHandle *const pXmlHandle, const std::string &xml
     TiXmlElement *pXmlElement(pXmlHandle->FirstChild(xmlElementName).Element());
 
     if (NULL == pXmlElement)
+    {
+        std::cout << "Construct Histogram from xml: cannot find xml element with name " << xmlElementName << std::endl;
         throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+    }
 
     const TiXmlHandle xmlHandle(pXmlElement);
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "NBinsX", m_nBinsX));

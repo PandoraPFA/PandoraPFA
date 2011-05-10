@@ -196,31 +196,19 @@ float PhotonReconstructionAlgorithm::GetMinDistanceToTrack(const Cluster *const 
 float PhotonReconstructionAlgorithm::GetPid(const float peakRms, const float longProfileStart, const float longProfileDiscrepancy,
     const float peakEnergyFraction, const float minDistanceToTrack) const
 {
-    // TODO tidy this and investigate using overflow bin
-    const int peakRmsBin(std::min(m_pSigPeakRms->GetNBinsX() - 1,
-        static_cast<int>(peakRms / m_pSigPeakRms->GetXBinWidth())));
-    const int longProfileStartBin(std::min(m_pSigLongProfileStart->GetNBinsX() - 1,
-        static_cast<int>(longProfileStart / m_pSigLongProfileStart->GetXBinWidth())));
-    const int longProfileDiscrepancyBin(std::min(m_pSigLongProfileDiscrepancy->GetNBinsX() - 1,
-        static_cast<int>(longProfileDiscrepancy / m_pSigLongProfileDiscrepancy->GetXBinWidth())));
-    const int peakEnergyFractionBin(std::min(m_pSigPeakEnergyFraction->GetNBinsX() - 1,
-        static_cast<int>(peakEnergyFraction / m_pSigPeakEnergyFraction->GetXBinWidth())));
-    const int minDistanceToTrackBin(std::min(m_pSigMinDistanceToTrack->GetNBinsX() - 1,
-        static_cast<int>(minDistanceToTrack / m_pSigMinDistanceToTrack->GetXBinWidth())));
-
     double pid(0.);
 
-    const double yes(m_pSigPeakRms->GetBinContent(peakRmsBin) *
-        m_pSigLongProfileStart->GetBinContent(longProfileStartBin) *
-        m_pSigLongProfileDiscrepancy->GetBinContent(longProfileDiscrepancyBin) *
-        m_pSigPeakEnergyFraction->GetBinContent(peakEnergyFractionBin) *
-        m_pSigMinDistanceToTrack->GetBinContent(minDistanceToTrackBin));
+    const double yes(this->GetHistogramContent(m_pSigPeakRms, peakRms) *
+        this->GetHistogramContent(m_pSigLongProfileStart, longProfileStart) *
+        this->GetHistogramContent(m_pSigLongProfileDiscrepancy, longProfileDiscrepancy) *
+        this->GetHistogramContent(m_pSigPeakEnergyFraction, peakEnergyFraction) *
+        this->GetHistogramContent(m_pSigMinDistanceToTrack, minDistanceToTrack));
 
-    const double no(m_pBkgPeakRms->GetBinContent(peakRmsBin) *
-        m_pBkgLongProfileStart->GetBinContent(longProfileStartBin) *
-        m_pBkgLongProfileDiscrepancy->GetBinContent(longProfileDiscrepancyBin) *
-        m_pBkgPeakEnergyFraction->GetBinContent(peakEnergyFractionBin) *
-        m_pBkgMinDistanceToTrack->GetBinContent(minDistanceToTrackBin));
+    const double no(this->GetHistogramContent(m_pBkgPeakRms, peakRms) *
+        this->GetHistogramContent(m_pBkgLongProfileStart, longProfileStart) *
+        this->GetHistogramContent(m_pBkgLongProfileDiscrepancy, longProfileDiscrepancy) *
+        this->GetHistogramContent(m_pBkgPeakEnergyFraction, peakEnergyFraction) *
+        this->GetHistogramContent(m_pBkgMinDistanceToTrack, minDistanceToTrack));
 
     if ((yes + no) > 0.)
         pid = yes / (yes + no);
@@ -259,29 +247,28 @@ void PhotonReconstructionAlgorithm::TidyHistograms()
 {
     if (m_shouldMakePdfHistograms)
     {
-        // TODO protect against divide by zero here
-        m_pSigPeakRms->Scale(1.f / m_pSigPeakRms->GetCumulativeSum());
-        m_pBkgPeakRms->Scale(1.f / m_pBkgPeakRms->GetCumulativeSum());
-        m_pSigLongProfileStart->Scale(1.f / m_pSigLongProfileStart->GetCumulativeSum());
-        m_pBkgLongProfileStart->Scale(1.f / m_pBkgLongProfileStart->GetCumulativeSum());
-        m_pSigLongProfileDiscrepancy->Scale(1.f / m_pSigLongProfileDiscrepancy->GetCumulativeSum());
-        m_pBkgLongProfileDiscrepancy->Scale(1.f / m_pBkgLongProfileDiscrepancy->GetCumulativeSum());
-        m_pSigPeakEnergyFraction->Scale(1.f / m_pSigPeakEnergyFraction->GetCumulativeSum());
-        m_pBkgPeakEnergyFraction->Scale(1.f / m_pBkgPeakEnergyFraction->GetCumulativeSum());
-        m_pSigMinDistanceToTrack->Scale(1.f / m_pSigMinDistanceToTrack->GetCumulativeSum());
-        m_pBkgMinDistanceToTrack->Scale(1.f / m_pBkgMinDistanceToTrack->GetCumulativeSum());
+        this->NormalizeHistogram(m_pSigPeakRms);
+        this->NormalizeHistogram(m_pBkgPeakRms);
+        this->NormalizeHistogram(m_pSigLongProfileStart);
+        this->NormalizeHistogram(m_pBkgLongProfileStart);
+        this->NormalizeHistogram(m_pSigLongProfileDiscrepancy);
+        this->NormalizeHistogram(m_pBkgLongProfileDiscrepancy);
+        this->NormalizeHistogram(m_pSigPeakEnergyFraction);
+        this->NormalizeHistogram(m_pBkgPeakEnergyFraction);
+        this->NormalizeHistogram(m_pSigMinDistanceToTrack);
+        this->NormalizeHistogram(m_pBkgMinDistanceToTrack);
 
         TiXmlDocument xmlDocument;
-        m_pSigPeakRms->WriteToXml(&xmlDocument, "SigPeakRms");
-        m_pBkgPeakRms->WriteToXml(&xmlDocument, "BkgPeakRms");
-        m_pSigLongProfileStart->WriteToXml(&xmlDocument, "SigLongProfileStart");
-        m_pBkgLongProfileStart->WriteToXml(&xmlDocument, "BkgLongProfileStart");
-        m_pSigLongProfileDiscrepancy->WriteToXml(&xmlDocument, "SigLongProfileDiscrepancy");
-        m_pBkgLongProfileDiscrepancy->WriteToXml(&xmlDocument, "BkgLongProfileDiscrepancy");
-        m_pSigPeakEnergyFraction->WriteToXml(&xmlDocument, "SigPeakEnergyFraction");
-        m_pBkgPeakEnergyFraction->WriteToXml(&xmlDocument, "BkgPeakEnergyFraction");
-        m_pSigMinDistanceToTrack->WriteToXml(&xmlDocument, "SigMinDistanceToTrack");
-        m_pBkgMinDistanceToTrack->WriteToXml(&xmlDocument, "BkgMinDistanceToTrack");
+        m_pSigPeakRms->WriteToXml(&xmlDocument, "PhotonSigPeakRms");
+        m_pBkgPeakRms->WriteToXml(&xmlDocument, "PhotonBkgPeakRms");
+        m_pSigLongProfileStart->WriteToXml(&xmlDocument, "PhotonSigLongProfileStart");
+        m_pBkgLongProfileStart->WriteToXml(&xmlDocument, "PhotonBkgLongProfileStart");
+        m_pSigLongProfileDiscrepancy->WriteToXml(&xmlDocument, "PhotonSigLongProfileDiscrepancy");
+        m_pBkgLongProfileDiscrepancy->WriteToXml(&xmlDocument, "PhotonBkgLongProfileDiscrepancy");
+        m_pSigPeakEnergyFraction->WriteToXml(&xmlDocument, "PhotonSigPeakEnergyFraction");
+        m_pBkgPeakEnergyFraction->WriteToXml(&xmlDocument, "PhotonBkgPeakEnergyFraction");
+        m_pSigMinDistanceToTrack->WriteToXml(&xmlDocument, "PhotonSigMinDistanceToTrack");
+        m_pBkgMinDistanceToTrack->WriteToXml(&xmlDocument, "PhotonBkgMinDistanceToTrack");
         xmlDocument.SaveFile(m_histogramFile);
     }
 
@@ -313,6 +300,31 @@ void PhotonReconstructionAlgorithm::TidyHistograms()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+float PhotonReconstructionAlgorithm::GetHistogramContent(const Histogram *const pHistogram, const float value) const
+{
+    const float binWidth(pHistogram->GetXBinWidth());
+
+    if (binWidth < std::numeric_limits<float>::epsilon())
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    const int binNumber(std::max(0, std::min(pHistogram->GetNBinsX() - 1, static_cast<int>(value / binWidth))));
+    return pHistogram->GetBinContent(binNumber);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PhotonReconstructionAlgorithm::NormalizeHistogram(Histogram *const pHistogram) const
+{
+    const float cumulativeSum(pHistogram->GetCumulativeSum());
+
+    if (std::fabs(cumulativeSum) < std::numeric_limits<float>::epsilon())
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    pHistogram->Scale(1.f / cumulativeSum);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle,
@@ -334,16 +346,76 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
 
     if (m_shouldMakePdfHistograms)
     {
-        m_pSigPeakRms = new Histogram(100, 0., 5.);
-        m_pBkgPeakRms = new Histogram(100, 0., 5.);
-        m_pSigLongProfileStart = new Histogram(11, -0.5, 10.5);
-        m_pBkgLongProfileStart = new Histogram(11, -0.5, 10.5);
-        m_pSigLongProfileDiscrepancy = new Histogram(101, 0., 1.01);
-        m_pBkgLongProfileDiscrepancy = new Histogram(101, 0., 1.01);
-        m_pSigPeakEnergyFraction = new Histogram(101, 0., 1.01);
-        m_pBkgPeakEnergyFraction = new Histogram(101, 0., 1.01);
-        m_pSigMinDistanceToTrack = new Histogram(100, 0., 500.);
-        m_pBkgMinDistanceToTrack = new Histogram(100, 0., 500.);
+        int peakRmsNBins = 100;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "PeakRmsNBins", peakRmsNBins));
+
+        float peakRmsLowValue = 0.f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "PeakRmsLowValue", peakRmsLowValue));
+
+        float peakRmsHighValue = 5.f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "PeakRmsHighValue", peakRmsHighValue));
+
+        int longProfileStartNBins = 11;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LongProfileStartNBins", longProfileStartNBins));
+
+        float longProfileStartLowValue = -0.5f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LongProfileStartLowValue", longProfileStartLowValue));
+
+        float longProfileStartHighValue = 10.5f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LongProfileStartHighValue", longProfileStartHighValue));
+
+        int longProfileDiscrepancyNBins = 101;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LongProfileDiscrepancyNBins", longProfileDiscrepancyNBins));
+
+        float longProfileDiscrepancyLowValue = 0.f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LongProfileDiscrepancyLowValue", longProfileDiscrepancyLowValue));
+
+        float longProfileDiscrepancyHighValue = 1.01f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "LongProfileDiscrepancyHighValue", longProfileDiscrepancyHighValue));
+
+        int peakEnergyFractionNBins = 101;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "PeakEnergyFractionNBins", peakEnergyFractionNBins));
+
+        float peakEnergyFractionLowValue = 0.f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "PeakEnergyFractionLowValue", peakEnergyFractionLowValue));
+
+        float peakEnergyFractionHighValue = 1.01f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "PeakEnergyFractionHighValue", peakEnergyFractionHighValue));
+
+        int minDistanceToTrackNBins = 100;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "MinDistanceToTrackNBins", minDistanceToTrackNBins));
+
+        float minDistanceToTrackLowValue = 0.f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "MinDistanceToTrackLowValue", minDistanceToTrackLowValue));
+
+        float minDistanceToTrackHighValue = 500.f;
+        PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+            "MinDistanceToTrackHighValue", minDistanceToTrackHighValue));
+
+        m_pSigPeakRms = new Histogram(peakRmsNBins, peakRmsLowValue, peakRmsHighValue);
+        m_pBkgPeakRms = new Histogram(peakRmsNBins, peakRmsLowValue, peakRmsHighValue);
+        m_pSigLongProfileStart = new Histogram(longProfileStartNBins, longProfileStartLowValue, longProfileStartHighValue);
+        m_pBkgLongProfileStart = new Histogram(longProfileStartNBins, longProfileStartLowValue, longProfileStartHighValue);
+        m_pSigLongProfileDiscrepancy = new Histogram(longProfileDiscrepancyNBins, longProfileDiscrepancyLowValue, longProfileDiscrepancyHighValue);
+        m_pBkgLongProfileDiscrepancy = new Histogram(longProfileDiscrepancyNBins, longProfileDiscrepancyLowValue, longProfileDiscrepancyHighValue);
+        m_pSigPeakEnergyFraction = new Histogram(peakEnergyFractionNBins, peakEnergyFractionLowValue, peakEnergyFractionHighValue);
+        m_pBkgPeakEnergyFraction = new Histogram(peakEnergyFractionNBins, peakEnergyFractionLowValue, peakEnergyFractionHighValue);
+        m_pSigMinDistanceToTrack = new Histogram(minDistanceToTrackNBins, minDistanceToTrackLowValue, minDistanceToTrackHighValue);
+        m_pBkgMinDistanceToTrack = new Histogram(minDistanceToTrackNBins, minDistanceToTrackLowValue, minDistanceToTrackHighValue);
     }
     else
     {
@@ -356,16 +428,16 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
         }
 
         const TiXmlHandle pdfXmlHandle(&pdfXmlDocument);
-        m_pSigPeakRms = new Histogram(&pdfXmlHandle, "SigPeakRms");
-        m_pBkgPeakRms = new Histogram(&pdfXmlHandle, "BkgPeakRms");
-        m_pSigLongProfileStart = new Histogram(&pdfXmlHandle, "SigLongProfileStart");
-        m_pBkgLongProfileStart = new Histogram(&pdfXmlHandle, "BkgLongProfileStart");
-        m_pSigLongProfileDiscrepancy = new Histogram(&pdfXmlHandle, "SigLongProfileDiscrepancy");
-        m_pBkgLongProfileDiscrepancy = new Histogram(&pdfXmlHandle, "BkgLongProfileDiscrepancy");
-        m_pSigPeakEnergyFraction = new Histogram(&pdfXmlHandle, "SigPeakEnergyFraction");
-        m_pBkgPeakEnergyFraction = new Histogram(&pdfXmlHandle, "BkgPeakEnergyFraction");
-        m_pSigMinDistanceToTrack = new Histogram(&pdfXmlHandle, "SigMinDistanceToTrack");
-        m_pBkgMinDistanceToTrack = new Histogram(&pdfXmlHandle, "BkgMinDistanceToTrack");
+        m_pSigPeakRms = new Histogram(&pdfXmlHandle, "PhotonSigPeakRms");
+        m_pBkgPeakRms = new Histogram(&pdfXmlHandle, "PhotonBkgPeakRms");
+        m_pSigLongProfileStart = new Histogram(&pdfXmlHandle, "PhotonSigLongProfileStart");
+        m_pBkgLongProfileStart = new Histogram(&pdfXmlHandle, "PhotonBkgLongProfileStart");
+        m_pSigLongProfileDiscrepancy = new Histogram(&pdfXmlHandle, "PhotonSigLongProfileDiscrepancy");
+        m_pBkgLongProfileDiscrepancy = new Histogram(&pdfXmlHandle, "PhotonBkgLongProfileDiscrepancy");
+        m_pSigPeakEnergyFraction = new Histogram(&pdfXmlHandle, "PhotonSigPeakEnergyFraction");
+        m_pBkgPeakEnergyFraction = new Histogram(&pdfXmlHandle, "PhotonBkgPeakEnergyFraction");
+        m_pSigMinDistanceToTrack = new Histogram(&pdfXmlHandle, "PhotonSigMinDistanceToTrack");
+        m_pBkgMinDistanceToTrack = new Histogram(&pdfXmlHandle, "PhotonBkgMinDistanceToTrack");
     }
 
     m_minClusterEnergy = 0.2f;
