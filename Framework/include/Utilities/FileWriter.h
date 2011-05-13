@@ -206,7 +206,7 @@ private:
     StatusCode WriteRelationship(const RelationshipId relationshipId, const void *address1, const void *address2);
 
     /**
-     *  @brief  Read a variable from the file
+     *  @brief  Write a variable to the file
      */
     template<typename T>
     StatusCode WriteVariable(const T &t);

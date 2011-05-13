@@ -54,7 +54,7 @@ public:
      *  @param  vector to receive the 2d vector of values
      */
     template <typename T>
-    static StatusCode Read2dVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, const std::string &rowName,
+    static StatusCode Read2DVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, const std::string &rowName,
         std::vector< std::vector<T> > &vector);
 
     /**
@@ -180,7 +180,7 @@ inline StatusCode XmlHelper::ReadVectorOfValues(const TiXmlHandle &xmlHandle, co
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline StatusCode XmlHelper::Read2dVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, const std::string &rowName,
+inline StatusCode XmlHelper::Read2DVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, const std::string &rowName,
     std::vector< std::vector<T> > &vector)
 {
     TiXmlElement *pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();

@@ -56,24 +56,16 @@ Histogram::Histogram(const TiXmlHandle *const pXmlHandle, const std::string &xml
     FloatVector orderedBinContents;
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(xmlHandle, "BinContents", orderedBinContents));
 
-    if (orderedBinContents.size() != m_nBinsX)
+    if (orderedBinContents.size() != m_nBinsX + 2)
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-    for (int binX = 0; binX < m_nBinsX; ++binX)
+    for (int binX = -1; binX <= m_nBinsX; ++binX)
     {
-        const float value(orderedBinContents[binX]);
+        const float value(orderedBinContents[binX + 1]);
 
         if (std::fabs(value) > std::numeric_limits<float>::epsilon())
             m_histogramMap[binX] = value;
     }
-
-    float underflow(0.f);
-    if (STATUS_CODE_SUCCESS == XmlHelper::ReadValue(xmlHandle, "Underflow", underflow))
-        m_histogramMap[-1] = underflow;
-
-    float overflow(0.f);
-    if (STATUS_CODE_SUCCESS == XmlHelper::ReadValue(xmlHandle, "Overflow", overflow))
-        m_histogramMap[m_nBinsX] = overflow;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -247,16 +239,16 @@ void Histogram::WriteToXml(TiXmlDocument *pTiXmlDocument, const std::string &his
     pNBinsXElement->LinkEndChild(new TiXmlText(TypeToString(m_nBinsX)));
     pHistogramElement->LinkEndChild(pNBinsXElement);
 
-    TiXmlElement *pXLowXElement = new TiXmlElement("XLow");
-    pXLowXElement->LinkEndChild(new TiXmlText(TypeToString(m_xLow)));
-    pHistogramElement->LinkEndChild(pXLowXElement);
+    TiXmlElement *pXLowElement = new TiXmlElement("XLow");
+    pXLowElement->LinkEndChild(new TiXmlText(TypeToString(m_xLow)));
+    pHistogramElement->LinkEndChild(pXLowElement);
 
     TiXmlElement *pXHighElement = new TiXmlElement("XHigh");
     pXHighElement->LinkEndChild(new TiXmlText(TypeToString(m_xHigh)));
     pHistogramElement->LinkEndChild(pXHighElement);
 
     std::string binContentsString;
-    for (int binX = 0; binX < m_nBinsX; ++binX)
+    for (int binX = -1; binX <= m_nBinsX; ++binX)
     {
         binContentsString += TypeToString(this->GetBinContent(binX)) + " ";
     }
@@ -264,22 +256,6 @@ void Histogram::WriteToXml(TiXmlDocument *pTiXmlDocument, const std::string &his
     TiXmlElement *pBinContentsElement = new TiXmlElement("BinContents");
     pBinContentsElement->LinkEndChild(new TiXmlText(binContentsString));
     pHistogramElement->LinkEndChild(pBinContentsElement);
-
-    const float underflow(this->GetBinContent(-1));
-    if (std::fabs(underflow) > std::numeric_limits<float>::epsilon())
-    {
-        TiXmlElement *pUnderflowElement = new TiXmlElement("Underflow");
-        pUnderflowElement->LinkEndChild(new TiXmlText(TypeToString(underflow)));
-        pHistogramElement->LinkEndChild(pUnderflowElement);
-    }
-
-    const float overflow(this->GetBinContent(m_nBinsX));
-    if (std::fabs(overflow) > std::numeric_limits<float>::epsilon())
-    {
-        TiXmlElement *pOverflowElement = new TiXmlElement("Overflow");
-        pOverflowElement->LinkEndChild(new TiXmlText(TypeToString(overflow)));
-        pHistogramElement->LinkEndChild(pOverflowElement);
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -303,6 +279,63 @@ TwoDHistogram::TwoDHistogram(const unsigned int nBinsX, const float xLow, const 
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
     m_yBinWidth = (yHigh - yLow) / static_cast<float>(nBinsY);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+TwoDHistogram::TwoDHistogram(const TiXmlHandle *const pXmlHandle, const std::string &xmlElementName)
+{
+    TiXmlElement *pXmlElement(pXmlHandle->FirstChild(xmlElementName).Element());
+
+    if (NULL == pXmlElement)
+    {
+        std::cout << "Construct Histogram from xml: cannot find xml element with name " << xmlElementName << std::endl;
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+    }
+
+    const TiXmlHandle xmlHandle(pXmlElement);
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "NBinsX", m_nBinsX));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "XLow", m_xLow));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "XHigh", m_xHigh));
+
+    if ((0 >= m_nBinsX) || (m_xHigh - m_xLow < std::numeric_limits<float>::epsilon()))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    m_xBinWidth = (m_xHigh - m_xLow) / static_cast<float>(m_nBinsX);
+
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "NBinsY", m_nBinsY));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "YLow", m_yLow));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "YHigh", m_yHigh));
+
+    if ((0 >= m_nBinsY) || (m_yHigh - m_yLow < std::numeric_limits<float>::epsilon()))
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    m_yBinWidth = (m_yHigh - m_yLow) / static_cast<float>(m_nBinsY);
+
+    typedef std::vector<FloatVector> HistogramEntryList;
+    HistogramEntryList histogramEntryList;
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::Read2DVectorOfValues(xmlHandle, "BinContents", "Row", histogramEntryList));
+
+    if (histogramEntryList.size() != m_nBinsY + 2)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+    for (int binY = -1; binY <= m_nBinsY; ++binY)
+    {
+        const FloatVector &orderedBinContents(histogramEntryList[binY + 1]);
+
+        if (orderedBinContents.size() != m_nBinsX + 2)
+            throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
+        for (int binX = -1; binX <= m_nBinsX; ++binX)
+        {
+            const float value(orderedBinContents[binX + 1]);
+            if (std::fabs(value) > std::numeric_limits<float>::epsilon())
+            {
+                m_yxHistogramMap[binY][binX] = value;
+                m_xyHistogramMap[binX][binY] = value;
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -577,6 +610,77 @@ void TwoDHistogram::Fill(const float valueX, const float valueY, const float wei
     }
 
     m_yxHistogramMap[binY][binX] = yHistogramMap[binY];
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TwoDHistogram::Scale(const float scaleFactor)
+{
+    for (TwoDHistogramMap::iterator iterX = m_xyHistogramMap.begin(), iterXEnd = m_xyHistogramMap.end(); iterX != iterXEnd; ++iterX)
+    {
+        for (HistogramMap::iterator iterY = iterX->second.begin(), iterYEnd = iterX->second.end(); iterY != iterYEnd; ++iterY)
+        {
+            iterY->second = (iterY->second * scaleFactor);
+        }
+    }
+
+    for (TwoDHistogramMap::iterator iterY = m_yxHistogramMap.begin(), iterYEnd = m_yxHistogramMap.end(); iterY != iterYEnd; ++iterY)
+    {
+        for (HistogramMap::iterator iterX = iterY->second.begin(), iterXEnd = iterY->second.end(); iterX != iterXEnd; ++iterX)
+        {
+            iterX->second = (iterX->second * scaleFactor);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void TwoDHistogram::WriteToXml(TiXmlDocument *pTiXmlDocument, const std::string &histogramXmlKey) const
+{
+    TiXmlElement *pHistogramElement = new TiXmlElement(histogramXmlKey);
+    pTiXmlDocument->LinkEndChild(pHistogramElement);
+
+    TiXmlElement *pNBinsXElement = new TiXmlElement("NBinsX");
+    pNBinsXElement->LinkEndChild(new TiXmlText(TypeToString(m_nBinsX)));
+    pHistogramElement->LinkEndChild(pNBinsXElement);
+
+    TiXmlElement *pXLowElement = new TiXmlElement("XLow");
+    pXLowElement->LinkEndChild(new TiXmlText(TypeToString(m_xLow)));
+    pHistogramElement->LinkEndChild(pXLowElement);
+
+    TiXmlElement *pXHighElement = new TiXmlElement("XHigh");
+    pXHighElement->LinkEndChild(new TiXmlText(TypeToString(m_xHigh)));
+    pHistogramElement->LinkEndChild(pXHighElement);
+
+    TiXmlElement *pNBinsYElement = new TiXmlElement("NBinsY");
+    pNBinsYElement->LinkEndChild(new TiXmlText(TypeToString(m_nBinsY)));
+    pHistogramElement->LinkEndChild(pNBinsYElement);
+
+    TiXmlElement *pYLowElement = new TiXmlElement("YLow");
+    pYLowElement->LinkEndChild(new TiXmlText(TypeToString(m_yLow)));
+    pHistogramElement->LinkEndChild(pYLowElement);
+
+    TiXmlElement *pYHighElement = new TiXmlElement("YHigh");
+    pYHighElement->LinkEndChild(new TiXmlText(TypeToString(m_yHigh)));
+    pHistogramElement->LinkEndChild(pYHighElement);
+
+    TiXmlElement *pBinContentsElement = new TiXmlElement("BinContents");
+
+    for (int binY = -1; binY <= m_nBinsY; ++binY)
+    {
+        std::string binContentsString;
+
+        for (int binX = -1; binX <= m_nBinsX; ++binX)
+        {
+            binContentsString += TypeToString(this->GetBinContent(binX, binY)) + " ";
+        }
+
+        TiXmlElement *pRowElement = new TiXmlElement("Row");
+        pRowElement->LinkEndChild(new TiXmlText(binContentsString));
+        pBinContentsElement->LinkEndChild(pRowElement);
+    }
+
+    pHistogramElement->LinkEndChild(pBinContentsElement);
 }
 
 } // namespace pandora

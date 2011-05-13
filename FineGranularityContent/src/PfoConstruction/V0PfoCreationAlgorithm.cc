@@ -41,34 +41,38 @@ StatusCode V0PfoCreationAlgorithm::Run()
 
         if (std::abs(pTrack1->GetParticleId()) == std::abs(E_MINUS) && std::abs(pTrack2->GetParticleId()) == std::abs(E_MINUS))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetV0Mass(momentumAtStart1, momentumAtStart2,
-                PdgTable::GetParticleMass(E_MINUS), PdgTable::GetParticleMass(E_MINUS), mass));
-
-            pParticleFlowObject->SetParticleId(PHOTON);
+            if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(E_MINUS),
+                PdgTable::GetParticleMass(E_MINUS), mass))
+            {
+                pParticleFlowObject->SetParticleId(PHOTON);
+            }
         }
 
         if (std::abs(pTrack1->GetParticleId()) == std::abs(PI_PLUS) && std::abs(pTrack2->GetParticleId()) == std::abs(PI_PLUS))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetV0Mass(momentumAtStart1, momentumAtStart2,
-                PdgTable::GetParticleMass(PI_MINUS), PdgTable::GetParticleMass(PI_MINUS), mass));
-
-            pParticleFlowObject->SetParticleId(K_SHORT);
+            if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(PI_MINUS),
+                PdgTable::GetParticleMass(PI_MINUS), mass))
+            {
+                pParticleFlowObject->SetParticleId(K_SHORT);
+            }
         }
 
         if (std::abs(pTrack1->GetParticleId()) == std::abs(PROTON) && std::abs(pTrack2->GetParticleId()) == std::abs(PI_MINUS))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetV0Mass(momentumAtStart1, momentumAtStart2,
-                PdgTable::GetParticleMass(PROTON), PdgTable::GetParticleMass(PI_MINUS), mass));
-
-            (pTrack1->GetParticleId() == PROTON) ? pParticleFlowObject->SetParticleId(LAMBDA) : pParticleFlowObject->SetParticleId(LAMBDA_BAR);
+            if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(PROTON),
+                PdgTable::GetParticleMass(PI_MINUS), mass))
+            {
+                (pTrack1->GetParticleId() == PROTON) ? pParticleFlowObject->SetParticleId(LAMBDA) : pParticleFlowObject->SetParticleId(LAMBDA_BAR);
+            }
         }
 
         if (std::abs(pTrack1->GetParticleId()) == std::abs(PI_MINUS) && std::abs(pTrack2->GetParticleId()) == std::abs(PROTON))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetV0Mass(momentumAtStart1, momentumAtStart2,
-                PdgTable::GetParticleMass(PI_MINUS), PdgTable::GetParticleMass(PROTON), mass));
-
-            (pTrack2->GetParticleId() == PROTON) ? pParticleFlowObject->SetParticleId(LAMBDA) : pParticleFlowObject->SetParticleId(LAMBDA_BAR);
+            if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(PI_MINUS),
+                PdgTable::GetParticleMass(PROTON), mass))
+            {
+                (pTrack2->GetParticleId() == PROTON) ? pParticleFlowObject->SetParticleId(LAMBDA) : pParticleFlowObject->SetParticleId(LAMBDA_BAR);
+            }
         }
 
         if (m_mcMonitoring)

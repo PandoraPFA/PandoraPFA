@@ -220,6 +220,14 @@ public:
         const float yHigh);
 
     /**
+     *  @brief  Constructor
+     * 
+     *  @param  pXmlHandle address of the handle for the xml element describing the histogram
+     *  @param  xmlElementName the xml element name for the histogram
+     */
+    TwoDHistogram(const TiXmlHandle *const pXmlHandle, const std::string &xmlElementName);
+
+    /**
      *  @brief  Copy constructor
      * 
      *  @param  rhs the histogram to copy
@@ -429,6 +437,21 @@ public:
      */
     void Fill(const float valueX, const float valueY, const float weight = 1.f);
 
+    /**
+     *  @brief  Scale contents of all histogram bins by a specified factor
+     * 
+     *  @param  scaleFactor the scale factor
+     */
+    void Scale(const float scaleFactor);
+
+    /**
+     *  @brief  Write the histogram to an xml document
+     * 
+     *  @param  pTiXmlDocument address of the xml document
+     *  @param  xmlElementName the xml element name for the histogram
+     */
+    void WriteToXml(TiXmlDocument *pTiXmlDocument, const std::string &xmlElementName) const;
+
 private:
     typedef std::map<int, float> HistogramMap;
     typedef std::map<int, HistogramMap> TwoDHistogramMap;
@@ -436,14 +459,14 @@ private:
     TwoDHistogramMap    m_xyHistogramMap;       ///< The x->y->value 2d histogram map
     TwoDHistogramMap    m_yxHistogramMap;       ///< The y->x->value 2d histogram map
 
-    const int           m_nBinsX;               ///< The number of x bins
-    const float         m_xLow;                 ///< The min binned x value
-    const float         m_xHigh;                ///< The max binned x value
+    int                 m_nBinsX;               ///< The number of x bins
+    float               m_xLow;                 ///< The min binned x value
+    float               m_xHigh;                ///< The max binned x value
     float               m_xBinWidth;            ///< The x bin width
 
-    const int           m_nBinsY;               ///< The number of y bins
-    const float         m_yLow;                 ///< The min binned y value
-    const float         m_yHigh;                ///< The max binned y value
+    int                 m_nBinsY;               ///< The number of y bins
+    float               m_yLow;                 ///< The min binned y value
+    float               m_yHigh;                ///< The max binned y value
     float               m_yBinWidth;            ///< The y bin width
 };
 
