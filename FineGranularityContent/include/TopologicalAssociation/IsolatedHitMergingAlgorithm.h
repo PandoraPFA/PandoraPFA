@@ -39,9 +39,12 @@ private:
      */
     float GetDistanceToHit(const pandora::Cluster *const pCluster, const pandora::CaloHit *const pCaloHit) const;
 
-    unsigned int    m_minHitsInCluster;                 ///< The min number of hits allowed in a cluster - smaller clusters will be split up
-    float           m_maxRecombinationDistance;         ///< The max distance between calo hit and cluster to allow addition of hit
-    float           m_minCosOpeningAngle;               ///< Min cosine of angle between hit and cluster directions to allow addition of hit
+    bool                    m_shouldUseCurrentClusterList;  ///< Whether to use clusters from the current list in the algorithm
+    pandora::StringVector   m_additionalClusterListNames;   ///< Additional cluster lists from which to consider clusters
+
+    unsigned int            m_minHitsInCluster;             ///< Min number of hits allowed in a cluster - smaller clusters will be split up
+    float                   m_maxRecombinationDistance;     ///< Max distance between calo hit and cluster to allow addition of hit
+    float                   m_minCosOpeningAngle;           ///< Min cos(angle) between hit and cluster directions to allow addition of hit
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

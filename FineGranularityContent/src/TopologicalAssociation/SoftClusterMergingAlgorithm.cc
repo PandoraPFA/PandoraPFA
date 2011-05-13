@@ -14,14 +14,43 @@ using namespace pandora;
 
 StatusCode SoftClusterMergingAlgorithm::Run()
 {
-    // Begin by recalculating track-cluster associations
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
+    // Read specified lists of input clusters
+    ClusterListToNameMap clusterListToNameMap;
 
-    const ClusterList *pClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+    ClusterList clusterList;
+
+    if (m_shouldUseCurrentClusterList)
+    {
+        std::string clusterListName;
+        const ClusterList *pClusterList = NULL;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList, clusterListName));
+
+        clusterList.insert(pClusterList->begin(), pClusterList->end());
+        clusterListToNameMap.insert(ClusterListToNameMap::value_type(pClusterList, clusterListName));
+
+        if (m_updateCurrentTrackClusterAssociations)
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::RunDaughterAlgorithm(*this, m_trackClusterAssociationAlgName));
+        }
+    }
+
+    for (StringVector::const_iterator iter = m_additionalClusterListNames.begin(), iterEnd = m_additionalClusterListNames.end(); iter != iterEnd; ++iter)
+    {
+        const ClusterList *pClusterList = NULL;
+
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, *iter, pClusterList))
+        {
+            clusterList.insert(pClusterList->begin(), pClusterList->end());
+            clusterListToNameMap.insert(ClusterListToNameMap::value_type(pClusterList, *iter));
+        }
+        else
+        {
+            std::cout << "SoftClusterMergingAlgorithm: Failed to obtain cluster list " << *iter << std::endl;
+        }
+    }
 
     // Create a vector of input clusters, ordered by inner layer
-    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    ClusterVector clusterVector(clusterList.begin(), clusterList.end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
     // Loop over soft daughter candidate clusters
@@ -32,7 +61,7 @@ StatusCode SoftClusterMergingAlgorithm::Run()
         if (NULL == pDaughterCluster)
             continue;
 
-        if(!this->IsSoftCluster(pDaughterCluster))
+        if (!this->IsSoftCluster(pDaughterCluster))
             continue;
 
         Cluster *pBestParentCluster(NULL);
@@ -79,7 +108,19 @@ StatusCode SoftClusterMergingAlgorithm::Run()
 
         if (this->CanMergeSoftCluster(pDaughterCluster, closestDistance))
         {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+            if (clusterListToNameMap.size() > 1)
+            {
+                std::string parentListName, daughterListName;
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterListName(pBestParentCluster, clusterListToNameMap, parentListName));
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->GetClusterListName(pDaughterCluster, clusterListToNameMap, daughterListName));
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster,
+                    parentListName, daughterListName));
+            }
+            else
+            {
+                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::MergeAndDeleteClusters(*this, pBestParentCluster, pDaughterCluster));
+            }
+
             *iterI = NULL;
         }
     }
@@ -151,9 +192,43 @@ bool SoftClusterMergingAlgorithm::CanMergeSoftCluster(const Cluster *const pDaug
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode SoftClusterMergingAlgorithm::GetClusterListName(Cluster *const pCluster, const ClusterListToNameMap &clusterListToNameMap,
+    std::string &listName) const
+{
+    for (ClusterListToNameMap::const_iterator iter = clusterListToNameMap.begin(), iterEnd = clusterListToNameMap.end(); iter != iterEnd; ++iter)
+    {
+        const ClusterList *const pClusterList = iter->first;
+
+        if (pClusterList->end() != pClusterList->find(pCluster))
+        {
+            listName = iter->second;
+            return STATUS_CODE_SUCCESS;
+        }
+    }
+
+    return STATUS_CODE_NOT_FOUND;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode SoftClusterMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, m_trackClusterAssociationAlgName));
+    m_shouldUseCurrentClusterList = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldUseCurrentClusterList", m_shouldUseCurrentClusterList));
+
+    m_updateCurrentTrackClusterAssociations = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "UpdateCurrentTrackClusterAssociations", m_updateCurrentTrackClusterAssociations));
+
+    if (m_shouldUseCurrentClusterList && m_updateCurrentTrackClusterAssociations)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ProcessFirstAlgorithm(*this, xmlHandle, 
+            m_trackClusterAssociationAlgName));
+    }
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "AdditionalClusterListNames", m_additionalClusterListNames));
 
     m_maxHitsInSoftCluster = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

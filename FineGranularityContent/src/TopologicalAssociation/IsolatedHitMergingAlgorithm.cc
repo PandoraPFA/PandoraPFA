@@ -14,11 +14,33 @@ using namespace pandora;
 
 StatusCode IsolatedHitMergingAlgorithm::Run()
 {
-    const ClusterList *pClusterList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+    // Read specified lists of input clusters
+    ClusterList clusterList;
+
+    if (m_shouldUseCurrentClusterList)
+    {
+        const ClusterList *pClusterList = NULL;
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentClusterList(*this, pClusterList));
+
+        clusterList.insert(pClusterList->begin(), pClusterList->end());
+    }
+
+    for (StringVector::const_iterator iter = m_additionalClusterListNames.begin(), iterEnd = m_additionalClusterListNames.end(); iter != iterEnd; ++iter)
+    {
+        const ClusterList *pClusterList = NULL;
+
+        if (STATUS_CODE_SUCCESS == PandoraContentApi::GetClusterList(*this, *iter, pClusterList))
+        {
+            clusterList.insert(pClusterList->begin(), pClusterList->end());
+        }
+        else
+        {
+            std::cout << "IsolatedHitMergingAlgorithm: Failed to obtain cluster list " << *iter << std::endl;
+        }
+    }
 
     // Create a vector of input clusters, ordered by inner layer
-    ClusterVector clusterVector(pClusterList->begin(), pClusterList->end());
+    ClusterVector clusterVector(clusterList.begin(), clusterList.end());
     std::sort(clusterVector.begin(), clusterVector.end(), Cluster::SortByInnerLayer);
 
 
@@ -157,6 +179,13 @@ float IsolatedHitMergingAlgorithm::GetDistanceToHit(const Cluster *const pCluste
 
 StatusCode IsolatedHitMergingAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    m_shouldUseCurrentClusterList = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldUseCurrentClusterList", m_shouldUseCurrentClusterList));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "AdditionalClusterListNames", m_additionalClusterListNames));
+
     m_minHitsInCluster = 4;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
