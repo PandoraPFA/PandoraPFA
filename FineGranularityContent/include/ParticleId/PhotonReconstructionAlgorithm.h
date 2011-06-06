@@ -48,6 +48,7 @@ private:
      *  @brief  Get the particle identification (Pid) value for a given set of parameters. Values near unity are deemed photon-like,
      *          values near zero are identified as background.
      * 
+     *  @param  pPeakCluster the address of the cluster with the specified properties
      *  @param  peakRms the rms of the shower peak
      *  @param  longProfileStart the longitudinal shower profile start
      *  @param  longProfileDiscrepancy the longitudinal shower profile discrepancy
@@ -56,8 +57,8 @@ private:
      * 
      *  @return the pid value
      */
-    float GetPid(const float peakRms, const float longProfileStart, const float longProfileDiscrepancy, const float peakEnergyFraction,
-        const float minDistanceToTrack) const;
+    float GetPid(const pandora::Cluster *const pPeakCluster, const float peakRms, const float longProfileStart,
+        const float longProfileDiscrepancy, const float peakEnergyFraction, const float minDistanceToTrack) const;
 
     /**
      *  @brief  Fill the probability density functions used in the calculation of Pid values.
@@ -94,40 +95,42 @@ private:
      */
     void NormalizeHistogram(pandora::Histogram *const pHistogram) const;
 
-    std::string         m_photonClusteringAlgName;          ///< The name of the photon clustering algorithm to run
-    std::string         m_clusterListName;                  ///< The name of the output cluster list 
+    std::string             m_photonClusteringAlgName;      ///< The name of the photon clustering algorithm to run
+    std::string             m_clusterListName;              ///< The name of the output cluster list 
 
-    std::string         m_histogramFile;                    ///< The name of the file containing (or to contain) pdf histograms
-    bool                m_shouldMakePdfHistograms;          ///< Whether to create pdf histograms, rather than perform photon reconstruction
-    bool                m_shouldDrawPdfHistograms;          ///< Whether to draw pdf histograms at end of reconstruction (requires monitoring)
+    std::string             m_histogramFile;                ///< The name of the file containing (or to contain) pdf histograms
+    bool                    m_shouldMakePdfHistograms;      ///< Whether to create pdf histograms, rather than perform photon reconstruction
+    bool                    m_shouldDrawPdfHistograms;      ///< Whether to draw pdf histograms at end of reconstruction (requires monitoring)
 
-    pandora::Histogram *m_pSigPeakRms;                      ///< PDF histogram, signal peak rms
-    pandora::Histogram *m_pBkgPeakRms;                      ///< PDF histogram, background peak rms
-    pandora::Histogram *m_pSigLongProfileStart;             ///< PDF histogram, signal peak longitudinal profile start
-    pandora::Histogram *m_pBkgLongProfileStart;             ///< PDF histogram, background peak longitudinal profile start
-    pandora::Histogram *m_pSigLongProfileDiscrepancy;       ///< PDF histogram, signal peak longitudinal profile discrepancy
-    pandora::Histogram *m_pBkgLongProfileDiscrepancy;       ///< PDF histogram, background peak longitudinal profile discrepancy
-    pandora::Histogram *m_pSigPeakEnergyFraction;           ///< PDF histogram, signal peak energy fraction
-    pandora::Histogram *m_pBkgPeakEnergyFraction;           ///< PDF histogram, background peak energy fraction
-    pandora::Histogram *m_pSigMinDistanceToTrack;           ///< PDF histogram, signal peak min distance to track
-    pandora::Histogram *m_pBkgMinDistanceToTrack;           ///< PDF histogram, background peak min distance to track
+    unsigned int            m_nEnergyBins;                  ///< Number of pdf energy bins
 
-    float               m_minClusterEnergy;                 ///< The minimum energy to consider a cluster
-    unsigned int        m_transProfileMaxLayer;             ///< Maximum layer to consider in calculation of shower transverse profiles
-    float               m_minPeakEnergy;                    ///< The minimum energy to consider a transverse profile peak
-    float               m_maxPeakRms;                       ///< The maximum rms value to consider a transverse profile peak
-    unsigned int        m_minPeakCaloHits;                  ///< The minimum number of calo hits associated with a transverse profile peak
-    float               m_maxLongProfileStart;              ///< The maximum longitudinal shower profile start
-    float               m_maxLongProfileDiscrepancy;        ///< The maximum longitudinal shower profile discrepancy
-    float               m_pidCut;                           ///< The pid cut to apply for photon cluster identification
+    pandora::Histogram    **m_pSigPeakRms;                  ///< PDF histogram, signal peak rms
+    pandora::Histogram    **m_pBkgPeakRms;                  ///< PDF histogram, background peak rms
+    pandora::Histogram    **m_pSigLongProfileStart;         ///< PDF histogram, signal peak longitudinal profile start
+    pandora::Histogram    **m_pBkgLongProfileStart;         ///< PDF histogram, background peak longitudinal profile start
+    pandora::Histogram    **m_pSigLongProfileDiscrepancy;   ///< PDF histogram, signal peak longitudinal profile discrepancy
+    pandora::Histogram    **m_pBkgLongProfileDiscrepancy;   ///< PDF histogram, background peak longitudinal profile discrepancy
+    pandora::Histogram    **m_pSigPeakEnergyFraction;       ///< PDF histogram, signal peak energy fraction
+    pandora::Histogram    **m_pBkgPeakEnergyFraction;       ///< PDF histogram, background peak energy fraction
+    pandora::Histogram    **m_pSigMinDistanceToTrack;       ///< PDF histogram, signal peak min distance to track
+    pandora::Histogram    **m_pBkgMinDistanceToTrack;       ///< PDF histogram, background peak min distance to track
 
-    float               m_oldClusterEnergyFraction0;        ///< The cluster energy fraction above which original cluster will be used
-    float               m_oldClusterEnergyFraction1;        ///< Decision to use original cluster: energy fraction 1
-    float               m_oldClusterEnergyDifference1;      ///< Decision to use original cluster: energy difference 1
-    float               m_oldClusterEnergyFraction2;        ///< Decision to use original cluster: energy fraction 2
-    float               m_oldClusterEnergyDifference2;      ///< Decision to use original cluster: energy difference 2
-    float               m_oldClusterEnergyFraction3;        ///< Decision to use original cluster: energy fraction 3
-    float               m_oldClusterEnergyDifference3;      ///< Decision to use original cluster: energy difference 3
+    float                   m_minClusterEnergy;             ///< The minimum energy to consider a cluster
+    unsigned int            m_transProfileMaxLayer;         ///< Maximum layer to consider in calculation of shower transverse profiles
+    float                   m_minPeakEnergy;                ///< The minimum energy to consider a transverse profile peak
+    float                   m_maxPeakRms;                   ///< The maximum rms value to consider a transverse profile peak
+    unsigned int            m_minPeakCaloHits;              ///< The minimum number of calo hits associated with a transverse profile peak
+    float                   m_maxLongProfileStart;          ///< The maximum longitudinal shower profile start
+    float                   m_maxLongProfileDiscrepancy;    ///< The maximum longitudinal shower profile discrepancy
+    float                   m_pidCut;                       ///< The pid cut to apply for photon cluster identification
+
+    float                   m_oldClusterEnergyFraction0;    ///< The cluster energy fraction above which original cluster will be used
+    float                   m_oldClusterEnergyFraction1;    ///< Decision to use original cluster: energy fraction 1
+    float                   m_oldClusterEnergyDifference1;  ///< Decision to use original cluster: energy difference 1
+    float                   m_oldClusterEnergyFraction2;    ///< Decision to use original cluster: energy fraction 2
+    float                   m_oldClusterEnergyDifference2;  ///< Decision to use original cluster: energy difference 2
+    float                   m_oldClusterEnergyFraction3;    ///< Decision to use original cluster: energy fraction 3
+    float                   m_oldClusterEnergyDifference3;  ///< Decision to use original cluster: energy difference 3
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
