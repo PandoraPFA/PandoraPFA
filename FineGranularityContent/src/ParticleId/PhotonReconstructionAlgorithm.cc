@@ -14,7 +14,13 @@ using namespace pandora;
 
 PhotonReconstructionAlgorithm::~PhotonReconstructionAlgorithm()
 {
-    this->TidyHistograms();
+    if (m_shouldMakePdfHistograms)
+        this->NormalizeAndWriteHistograms();
+
+    if (m_shouldDrawPdfHistograms)
+        this->DrawHistograms();
+
+    this->DeleteHistograms();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -93,7 +99,7 @@ StatusCode PhotonReconstructionAlgorithm::Run()
 
                     // Multivariate/pid analysis to identify photon candidate clusters
                     if ((longProfileStart < m_maxLongProfileStart) && (longProfileDiscrepancy < m_maxLongProfileDiscrepancy)
-                        && (minDistanceToTrack > 3.f))
+                        && (minDistanceToTrack > m_maxDistanceToTrack))
                     {
                         if (!m_shouldMakePdfHistograms)
                         {
@@ -177,7 +183,7 @@ float PhotonReconstructionAlgorithm::GetMinDistanceToTrack(const Cluster *const 
         Track *pTrack = *trackIter;
 
         float trackClusterDistance(std::numeric_limits<float>::max());
-        if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(pTrack, pPeakCluster, 9, 100.f, trackClusterDistance))
+        if (STATUS_CODE_SUCCESS == ClusterHelper::GetTrackClusterDistance(pTrack, pPeakCluster, m_maxSearchLayer, m_parallelDistanceCut, trackClusterDistance))
         {
             const float energyDifference(std::fabs(pPeakCluster->GetHadronicEnergy() - pTrack->GetEnergyAtDca()));
 
@@ -197,22 +203,8 @@ float PhotonReconstructionAlgorithm::GetMinDistanceToTrack(const Cluster *const 
 float PhotonReconstructionAlgorithm::GetPid(const Cluster *const pPeakCluster, const float peakRms, const float longProfileStart,
     const float longProfileDiscrepancy, const float peakEnergyFraction, const float minDistanceToTrack) const
 {
-    const float clusterEnergy(pPeakCluster->GetElectromagneticEnergy());
-
-    int energyBin = 0;
-    if (m_nEnergyBins > 1)
-    {
-        if ((clusterEnergy > 0.5f) && (clusterEnergy <= 1.0f)) energyBin = 1;
-        else if ((clusterEnergy >  1.0f) && (clusterEnergy <=  1.5f)) energyBin = 2;
-        else if ((clusterEnergy >  1.5f) && (clusterEnergy <=  2.5f)) energyBin = 3;
-        else if ((clusterEnergy >  2.5f) && (clusterEnergy <=  5.0f)) energyBin = 4;
-        else if ((clusterEnergy >  5.0f) && (clusterEnergy <= 10.0f)) energyBin = 5;
-        else if ((clusterEnergy > 10.0f) && (clusterEnergy <= 20.0f)) energyBin = 6;
-        else if ((clusterEnergy > 20.0f) && (clusterEnergy <= 50.0f)) energyBin = 7;
-        else if (clusterEnergy > 50.0f) energyBin = 8;
-    }
-
     double pid(0.);
+    const unsigned int energyBin(this->GetEnergyBin(pPeakCluster->GetElectromagneticEnergy()));
 
     const double yes(static_cast<double>(this->GetHistogramContent(m_pSigPeakRms[energyBin], peakRms)) *
         static_cast<double>(this->GetHistogramContent(m_pSigLongProfileStart[energyBin], longProfileStart)) *
@@ -237,22 +229,8 @@ float PhotonReconstructionAlgorithm::GetPid(const Cluster *const pPeakCluster, c
 void PhotonReconstructionAlgorithm::FillPdfHistograms(const Cluster *const pPeakCluster, const float peakRms, const float longProfileStart,
     const float longProfileDiscrepancy, const float peakEnergyFraction, const float minDistanceToTrack) const
 {
-    const float clusterEnergy(pPeakCluster->GetElectromagneticEnergy());
-
-    int energyBin = 0;
-    if (m_nEnergyBins > 1)
-    {
-        if ((clusterEnergy > 0.5f) && (clusterEnergy <=  1.0f)) energyBin = 1;
-        else if ((clusterEnergy >  1.0f) && (clusterEnergy <=  1.5f)) energyBin = 2;
-        else if ((clusterEnergy >  1.5f) && (clusterEnergy <=  2.5f)) energyBin = 3;
-        else if ((clusterEnergy >  2.5f) && (clusterEnergy <=  5.0f)) energyBin = 4;
-        else if ((clusterEnergy >  5.0f) && (clusterEnergy <= 10.0f)) energyBin = 5;
-        else if ((clusterEnergy > 10.0f) && (clusterEnergy <= 20.0f)) energyBin = 6;
-        else if ((clusterEnergy > 20.0f) && (clusterEnergy <= 50.0f)) energyBin = 7;
-        else if (clusterEnergy > 50.0f) energyBin = 8;
-    }
-
     const MCParticle *const pMCParticle(MCParticleHelper::GetMainMCParticle(pPeakCluster));
+    const unsigned int energyBin(this->GetEnergyBin(pPeakCluster->GetElectromagneticEnergy()));
 
     if ((NULL != pMCParticle) && (PHOTON == pMCParticle->GetParticleId()))
     {
@@ -274,57 +252,77 @@ void PhotonReconstructionAlgorithm::FillPdfHistograms(const Cluster *const pPeak
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void PhotonReconstructionAlgorithm::TidyHistograms()
+void PhotonReconstructionAlgorithm::NormalizeAndWriteHistograms()
 {
-    if (m_shouldMakePdfHistograms)
-    {
-        TiXmlDocument xmlDocument;
-
-        for (unsigned int energyBin = 0; energyBin < m_nEnergyBins; ++energyBin)
-        {
-            this->NormalizeHistogram(m_pSigPeakRms[energyBin]);
-            this->NormalizeHistogram(m_pBkgPeakRms[energyBin]);
-            this->NormalizeHistogram(m_pSigLongProfileStart[energyBin]);
-            this->NormalizeHistogram(m_pBkgLongProfileStart[energyBin]);
-            this->NormalizeHistogram(m_pSigLongProfileDiscrepancy[energyBin]);
-            this->NormalizeHistogram(m_pBkgLongProfileDiscrepancy[energyBin]);
-            this->NormalizeHistogram(m_pSigPeakEnergyFraction[energyBin]);
-            this->NormalizeHistogram(m_pBkgPeakEnergyFraction[energyBin]);
-            this->NormalizeHistogram(m_pSigMinDistanceToTrack[energyBin]);
-            this->NormalizeHistogram(m_pBkgMinDistanceToTrack[energyBin]);
-
-            m_pSigPeakRms[energyBin]->WriteToXml(&xmlDocument, "PhotonSigPeakRms_" + TypeToString(energyBin));
-            m_pBkgPeakRms[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgPeakRms_" + TypeToString(energyBin));
-            m_pSigLongProfileStart[energyBin]->WriteToXml(&xmlDocument, "PhotonSigLongProfileStart_" + TypeToString(energyBin));
-            m_pBkgLongProfileStart[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgLongProfileStart_" + TypeToString(energyBin));
-            m_pSigLongProfileDiscrepancy[energyBin]->WriteToXml(&xmlDocument, "PhotonSigLongProfileDiscrepancy_" + TypeToString(energyBin));
-            m_pBkgLongProfileDiscrepancy[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgLongProfileDiscrepancy_" + TypeToString(energyBin));
-            m_pSigPeakEnergyFraction[energyBin]->WriteToXml(&xmlDocument, "PhotonSigPeakEnergyFraction_" + TypeToString(energyBin));
-            m_pBkgPeakEnergyFraction[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgPeakEnergyFraction_" + TypeToString(energyBin));
-            m_pSigMinDistanceToTrack[energyBin]->WriteToXml(&xmlDocument, "PhotonSigMinDistanceToTrack_" + TypeToString(energyBin));
-            m_pBkgMinDistanceToTrack[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgMinDistanceToTrack_" + TypeToString(energyBin));
-        }
-
-        xmlDocument.SaveFile(m_histogramFile);
-    }
+    std::string energyBinLowerEdgesString;
 
     for (unsigned int energyBin = 0; energyBin < m_nEnergyBins; ++energyBin)
     {
-        if (m_shouldDrawPdfHistograms)
-        {
-            std::cout << "PDF EnergyBin " << energyBin << std::endl;
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakRms[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakRms[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileStart[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileStart[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileDiscrepancy[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileDiscrepancy[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakEnergyFraction[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakEnergyFraction[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigMinDistanceToTrack[energyBin]));
-            PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgMinDistanceToTrack[energyBin]));
-        }
+        this->NormalizeHistogram(m_pSigPeakRms[energyBin]);
+        this->NormalizeHistogram(m_pBkgPeakRms[energyBin]);
+        this->NormalizeHistogram(m_pSigLongProfileStart[energyBin]);
+        this->NormalizeHistogram(m_pBkgLongProfileStart[energyBin]);
+        this->NormalizeHistogram(m_pSigLongProfileDiscrepancy[energyBin]);
+        this->NormalizeHistogram(m_pBkgLongProfileDiscrepancy[energyBin]);
+        this->NormalizeHistogram(m_pSigPeakEnergyFraction[energyBin]);
+        this->NormalizeHistogram(m_pBkgPeakEnergyFraction[energyBin]);
+        this->NormalizeHistogram(m_pSigMinDistanceToTrack[energyBin]);
+        this->NormalizeHistogram(m_pBkgMinDistanceToTrack[energyBin]);
+        energyBinLowerEdgesString += TypeToString(m_energyBinLowerEdges[energyBin]) + " ";
+    }
 
+    TiXmlDocument xmlDocument;
+    TiXmlElement *pEnergyBinLowerEdgesElement = new TiXmlElement("EnergyBinLowerEdges");
+    pEnergyBinLowerEdgesElement->LinkEndChild(new TiXmlText(energyBinLowerEdgesString));
+    xmlDocument.LinkEndChild(pEnergyBinLowerEdgesElement);
+
+    for (unsigned int energyBin = 0; energyBin < m_nEnergyBins; ++energyBin)
+    {
+        m_pSigPeakRms[energyBin]->WriteToXml(&xmlDocument, "PhotonSigPeakRms_" + TypeToString(energyBin));
+        m_pBkgPeakRms[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgPeakRms_" + TypeToString(energyBin));
+        m_pSigLongProfileStart[energyBin]->WriteToXml(&xmlDocument, "PhotonSigLongProfileStart_" + TypeToString(energyBin));
+        m_pBkgLongProfileStart[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgLongProfileStart_" + TypeToString(energyBin));
+        m_pSigLongProfileDiscrepancy[energyBin]->WriteToXml(&xmlDocument, "PhotonSigLongProfileDiscrepancy_" + TypeToString(energyBin));
+        m_pBkgLongProfileDiscrepancy[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgLongProfileDiscrepancy_" + TypeToString(energyBin));
+        m_pSigPeakEnergyFraction[energyBin]->WriteToXml(&xmlDocument, "PhotonSigPeakEnergyFraction_" + TypeToString(energyBin));
+        m_pBkgPeakEnergyFraction[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgPeakEnergyFraction_" + TypeToString(energyBin));
+        m_pSigMinDistanceToTrack[energyBin]->WriteToXml(&xmlDocument, "PhotonSigMinDistanceToTrack_" + TypeToString(energyBin));
+        m_pBkgMinDistanceToTrack[energyBin]->WriteToXml(&xmlDocument, "PhotonBkgMinDistanceToTrack_" + TypeToString(energyBin));
+    }
+
+    xmlDocument.SaveFile(m_histogramFile);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PhotonReconstructionAlgorithm::DrawHistograms() const
+{
+    for (unsigned int energyBin = 0; energyBin < m_nEnergyBins; ++energyBin)
+    {
+        std::cout << "PDF EnergyBin " << energyBin << std::endl << "PeakRms, Signal, Background " << std::endl;
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakRms[energyBin]));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakRms[energyBin]));
+        std::cout << "LongProfileStart, Signal, Background " << std::endl;
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileStart[energyBin]));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileStart[energyBin]));
+        std::cout << "LongProfileDiscrepancy, Signal, Background " << std::endl;
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigLongProfileDiscrepancy[energyBin]));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgLongProfileDiscrepancy[energyBin]));
+        std::cout << "PeakEnergyFraction, Signal, Background " << std::endl;
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigPeakEnergyFraction[energyBin]));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgPeakEnergyFraction[energyBin]));
+        std::cout << "MinDistanceToTrack, Signal, Background " << std::endl;
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pSigMinDistanceToTrack[energyBin]));
+        PANDORA_MONITORING_API(DrawPandoraHistogram(*m_pBkgMinDistanceToTrack[energyBin]));
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PhotonReconstructionAlgorithm::DeleteHistograms()
+{
+    for (unsigned int energyBin = 0; energyBin < m_nEnergyBins; ++energyBin)
+    {
         delete m_pSigPeakRms[energyBin];
         delete m_pBkgPeakRms[energyBin];
         delete m_pSigLongProfileStart[energyBin];
@@ -351,12 +349,28 @@ void PhotonReconstructionAlgorithm::TidyHistograms()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+unsigned int PhotonReconstructionAlgorithm::GetEnergyBin(const float energy) const
+{
+    FloatVector::const_iterator binEdgesIter = std::upper_bound(m_energyBinLowerEdges.begin(), m_energyBinLowerEdges.end(), energy);
+    const unsigned int edgeElementNumber(std::distance(m_energyBinLowerEdges.begin(), binEdgesIter));
+
+    if (0 == edgeElementNumber)
+        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+
+    return static_cast<unsigned int>(edgeElementNumber - 1);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 float PhotonReconstructionAlgorithm::GetHistogramContent(const Histogram *const pHistogram, const float value) const
 {
     const float binWidth(pHistogram->GetXBinWidth());
 
     if (binWidth < std::numeric_limits<float>::epsilon())
+    {
+        std::cout << "PhotonReconstructionAlgorithm: Cannot extract value from histogram, invalid bin width " << std::endl;
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    }
 
     const int binNumber(std::max(0, std::min(pHistogram->GetNBinsX() - 1, static_cast<int>(value / binWidth))));
     return pHistogram->GetBinContent(binNumber);
@@ -369,7 +383,10 @@ void PhotonReconstructionAlgorithm::NormalizeHistogram(Histogram *const pHistogr
     const float cumulativeSum(pHistogram->GetCumulativeSum());
 
     if (std::fabs(cumulativeSum) < std::numeric_limits<float>::epsilon())
-        return;//throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    {
+        std::cout << "PhotonReconstructionAlgorithm: Cannot normalize empty histogram " << std::endl;
+        return;
+    }
 
     pHistogram->Scale(1.f / cumulativeSum);
 }
@@ -387,22 +404,15 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
         "HistogramFile", m_histogramFile));
 
-    m_nEnergyBins = 9;
-    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+    m_nEnergyBins = 0;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle,
         "NEnergyBins", m_nEnergyBins));
 
-    m_pSigPeakRms = new Histogram*[m_nEnergyBins];
-    m_pBkgPeakRms = new Histogram*[m_nEnergyBins];
-    m_pSigLongProfileStart = new Histogram*[m_nEnergyBins];
-    m_pBkgLongProfileStart = new Histogram*[m_nEnergyBins];
-    m_pSigLongProfileDiscrepancy = new Histogram*[m_nEnergyBins];
-    m_pBkgLongProfileDiscrepancy = new Histogram*[m_nEnergyBins];
-    m_pSigPeakEnergyFraction = new Histogram*[m_nEnergyBins];
-    m_pBkgPeakEnergyFraction = new Histogram*[m_nEnergyBins];
-    m_pSigMinDistanceToTrack = new Histogram*[m_nEnergyBins];
-    m_pBkgMinDistanceToTrack = new Histogram*[m_nEnergyBins];
-
-    // TODO read energy bin edges here
+    if (0 == m_nEnergyBins)
+    {
+        std::cout << "PhotonReconstructionAlgorithm::ReadSettings - Invalid number PDF energy bins specified." << std::endl;
+        return STATUS_CODE_INVALID_PARAMETER;
+    }
 
     m_shouldMakePdfHistograms = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -474,6 +484,29 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
         PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
             "MinDistanceToTrackHighValue", minDistanceToTrackHighValue));
 
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+            "EnergyBinLowerEdges", m_energyBinLowerEdges));
+
+        std::sort(m_energyBinLowerEdges.begin(), m_energyBinLowerEdges.end());
+        FloatVector::const_iterator binEdgesIter = std::unique(m_energyBinLowerEdges.begin(), m_energyBinLowerEdges.end());
+
+        if ((m_energyBinLowerEdges.size() != m_nEnergyBins) || (m_energyBinLowerEdges.end() != binEdgesIter))
+        {
+            std::cout << "PhotonReconstructionAlgorithm::ReadSettings - PDF energy binning issue." << std::endl;
+            return STATUS_CODE_INVALID_PARAMETER;
+        }
+
+        m_pSigPeakRms = new Histogram*[m_nEnergyBins];
+        m_pBkgPeakRms = new Histogram*[m_nEnergyBins];
+        m_pSigLongProfileStart = new Histogram*[m_nEnergyBins];
+        m_pBkgLongProfileStart = new Histogram*[m_nEnergyBins];
+        m_pSigLongProfileDiscrepancy = new Histogram*[m_nEnergyBins];
+        m_pBkgLongProfileDiscrepancy = new Histogram*[m_nEnergyBins];
+        m_pSigPeakEnergyFraction = new Histogram*[m_nEnergyBins];
+        m_pBkgPeakEnergyFraction = new Histogram*[m_nEnergyBins];
+        m_pSigMinDistanceToTrack = new Histogram*[m_nEnergyBins];
+        m_pBkgMinDistanceToTrack = new Histogram*[m_nEnergyBins];
+
         for (unsigned int energyBin = 0; energyBin < m_nEnergyBins; ++energyBin)
         {
             m_pSigPeakRms[energyBin] = new Histogram(peakRmsNBins, peakRmsLowValue, peakRmsHighValue);
@@ -500,6 +533,29 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
 
         const TiXmlHandle pdfXmlHandle(&pdfXmlDocument);
 
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadVectorOfValues(pdfXmlHandle,
+            "EnergyBinLowerEdges", m_energyBinLowerEdges));
+
+        std::sort(m_energyBinLowerEdges.begin(), m_energyBinLowerEdges.end());
+        FloatVector::const_iterator binEdgesIter = std::unique(m_energyBinLowerEdges.begin(), m_energyBinLowerEdges.end());
+
+        if ((m_energyBinLowerEdges.size() != m_nEnergyBins) || (m_energyBinLowerEdges.end() != binEdgesIter))
+        {
+            std::cout << "PhotonReconstructionAlgorithm::ReadSettings - PDF energy binning issue." << std::endl;
+            return STATUS_CODE_INVALID_PARAMETER;
+        }
+
+        m_pSigPeakRms = new Histogram*[m_nEnergyBins];
+        m_pBkgPeakRms = new Histogram*[m_nEnergyBins];
+        m_pSigLongProfileStart = new Histogram*[m_nEnergyBins];
+        m_pBkgLongProfileStart = new Histogram*[m_nEnergyBins];
+        m_pSigLongProfileDiscrepancy = new Histogram*[m_nEnergyBins];
+        m_pBkgLongProfileDiscrepancy = new Histogram*[m_nEnergyBins];
+        m_pSigPeakEnergyFraction = new Histogram*[m_nEnergyBins];
+        m_pBkgPeakEnergyFraction = new Histogram*[m_nEnergyBins];
+        m_pSigMinDistanceToTrack = new Histogram*[m_nEnergyBins];
+        m_pBkgMinDistanceToTrack = new Histogram*[m_nEnergyBins];
+
         for (unsigned int energyBin = 0; energyBin < m_nEnergyBins; ++energyBin)
         {
             m_pSigPeakRms[energyBin] = new Histogram(&pdfXmlHandle, "PhotonSigPeakRms_" + TypeToString(energyBin));
@@ -514,6 +570,10 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
             m_pBkgMinDistanceToTrack[energyBin] = new Histogram(&pdfXmlHandle, "PhotonBkgMinDistanceToTrack_" + TypeToString(energyBin));
         }
     }
+
+    m_pidCut = 0.5f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "PidCut", m_pidCut));
 
     m_minClusterEnergy = 0.2f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
@@ -543,9 +603,17 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MaxLongProfileDiscrepancy", m_maxLongProfileDiscrepancy));
 
-    m_pidCut = 0.5f;
+    m_maxSearchLayer = 9;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "PidCut", m_pidCut));
+        "MaxSearchLayer", m_maxSearchLayer));
+
+    m_parallelDistanceCut = 100.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ParallelDistanceCut", m_parallelDistanceCut));
+
+    m_maxDistanceToTrack = 3.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MaxDistanceToTrack", m_maxDistanceToTrack));
 
     m_oldClusterEnergyFraction0 = 0.95f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

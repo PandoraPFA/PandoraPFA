@@ -74,9 +74,26 @@ private:
         const float longProfileDiscrepancy, const float peakEnergyFraction, const float minDistanceToTrack) const;
 
     /**
-     *  @brief  Tidy histograms, normalizing them writing them to file if the algorithm is in histogram creation mode
+     *  @brief  Normalizing member variable histograms and write them to xml
      */
-    void TidyHistograms();
+    void NormalizeAndWriteHistograms();
+
+    /**
+     *  @brief  Draw member variable histograms if pandora monitoring functionality is enabled
+     */
+    void DrawHistograms() const;
+
+    /**
+     *  @brief  Delete member variable histograms
+     */
+    void DeleteHistograms();
+
+    /**
+     *  @brief  Get the relevant energy bin number for a specified energy value
+     * 
+     *  @param  energy the specified energy value
+     */
+    unsigned int GetEnergyBin(const float energy) const;
 
     /**
      *  @brief  Get the relevant histogram bin content for a specified parameter value, avoiding overflow bins
@@ -103,6 +120,7 @@ private:
     bool                    m_shouldDrawPdfHistograms;      ///< Whether to draw pdf histograms at end of reconstruction (requires monitoring)
 
     unsigned int            m_nEnergyBins;                  ///< Number of pdf energy bins
+    pandora::FloatVector    m_energyBinLowerEdges;          ///< List of lower edges of the pdf energy bins
 
     pandora::Histogram    **m_pSigPeakRms;                  ///< PDF histogram, signal peak rms
     pandora::Histogram    **m_pBkgPeakRms;                  ///< PDF histogram, background peak rms
@@ -115,6 +133,8 @@ private:
     pandora::Histogram    **m_pSigMinDistanceToTrack;       ///< PDF histogram, signal peak min distance to track
     pandora::Histogram    **m_pBkgMinDistanceToTrack;       ///< PDF histogram, background peak min distance to track
 
+    float                   m_pidCut;                       ///< The pid cut to apply for photon cluster identification
+
     float                   m_minClusterEnergy;             ///< The minimum energy to consider a cluster
     unsigned int            m_transProfileMaxLayer;         ///< Maximum layer to consider in calculation of shower transverse profiles
     float                   m_minPeakEnergy;                ///< The minimum energy to consider a transverse profile peak
@@ -122,7 +142,9 @@ private:
     unsigned int            m_minPeakCaloHits;              ///< The minimum number of calo hits associated with a transverse profile peak
     float                   m_maxLongProfileStart;          ///< The maximum longitudinal shower profile start
     float                   m_maxLongProfileDiscrepancy;    ///< The maximum longitudinal shower profile discrepancy
-    float                   m_pidCut;                       ///< The pid cut to apply for photon cluster identification
+    unsigned int            m_maxSearchLayer;               ///< Max pseudo layer to examine when calculating track-cluster distance
+    float                   m_parallelDistanceCut;          ///< Max allowed projection of track-hit separation along track direction
+    float                   m_maxDistanceToTrack;           ///< The maximum value of the distance to the nearest track
 
     float                   m_oldClusterEnergyFraction0;    ///< The cluster energy fraction above which original cluster will be used
     float                   m_oldClusterEnergyFraction1;    ///< Decision to use original cluster: energy fraction 1
