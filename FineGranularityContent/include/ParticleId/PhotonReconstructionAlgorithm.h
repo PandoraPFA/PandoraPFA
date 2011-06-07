@@ -144,7 +144,7 @@ private:
     float                   m_maxLongProfileDiscrepancy;    ///< The maximum longitudinal shower profile discrepancy
     unsigned int            m_maxSearchLayer;               ///< Max pseudo layer to examine when calculating track-cluster distance
     float                   m_parallelDistanceCut;          ///< Max allowed projection of track-hit separation along track direction
-    float                   m_maxDistanceToTrack;           ///< The maximum value of the distance to the nearest track
+    float                   m_minDistanceToTrackCut;        ///< The minimum value of the distance to the nearest track
 
     float                   m_oldClusterEnergyFraction0;    ///< The cluster energy fraction above which original cluster will be used
     float                   m_oldClusterEnergyFraction1;    ///< Decision to use original cluster: energy fraction 1

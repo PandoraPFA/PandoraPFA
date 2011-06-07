@@ -99,7 +99,7 @@ StatusCode PhotonReconstructionAlgorithm::Run()
 
                     // Multivariate/pid analysis to identify photon candidate clusters
                     if ((longProfileStart < m_maxLongProfileStart) && (longProfileDiscrepancy < m_maxLongProfileDiscrepancy)
-                        && (minDistanceToTrack > m_maxDistanceToTrack))
+                        && (minDistanceToTrack > m_minDistanceToTrackCut))
                     {
                         if (!m_shouldMakePdfHistograms)
                         {
@@ -571,7 +571,7 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
         }
     }
 
-    m_pidCut = 0.5f;
+    m_pidCut = 0.4f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "PidCut", m_pidCut));
 
@@ -611,9 +611,9 @@ StatusCode PhotonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHand
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ParallelDistanceCut", m_parallelDistanceCut));
 
-    m_maxDistanceToTrack = 3.f;
+    m_minDistanceToTrackCut = 3.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaxDistanceToTrack", m_maxDistanceToTrack));
+        "MinDistanceToTrackCut", m_minDistanceToTrackCut));
 
     m_oldClusterEnergyFraction0 = 0.95f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
