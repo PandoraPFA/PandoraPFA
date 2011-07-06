@@ -15,11 +15,11 @@
  */
 enum TrackErrorTypes
 {
-    OK,
-    UNKNOWN,
-    SPLIT_TRACK,
-    MISSED_CONVERSION,
-    MISSED_KSHORT
+    TRACK_STATUS_OK,
+    TRACK_STATUS_UNKNOWN,
+    TRACK_STATUS_SPLIT_TRACK,
+    TRACK_STATUS_MISSED_CONVERSION,
+    TRACK_STATUS_MISSED_KSHORT
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

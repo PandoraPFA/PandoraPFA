@@ -20,6 +20,18 @@ class MCParticle;
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
+ *  @brief  The calo cell type enum
+ */
+enum CaloCellType
+{
+    RECTANGULAR,
+    POINTING,
+    UNKNOWN_CELL_TYPE
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
  *  @brief  CaloHit class
  */
 class CaloHit
@@ -173,6 +185,13 @@ public:
     bool IsIsolated() const;
 
     /**
+     *  @brief  Get the calo cell type
+     * 
+     *  @return the calo cell type
+     */
+    CaloCellType GetCaloCellType() const;
+
+    /**
      *  @brief  Get address of the mc particle associated with the calo hit
      * 
      *  @param  pMCParticle to receive the address of the mc particle
@@ -182,7 +201,7 @@ public:
     /**
      *  @brief  Get the address of the parent calo hit in the user framework
      */
-     const void *GetParentCaloHitAddress() const;
+    const void *GetParentCaloHitAddress() const;
 
     /**
      *  @brief  Get the typical length scale of cell, units mm
@@ -273,8 +292,10 @@ protected:
     bool                    m_isIsolated;               ///< Whether the calo hit is isolated
     bool                    m_isAvailable;              ///< Whether the calo hit is available to be added to a cluster
 
-    const MCParticle       *m_pMCParticle;             ///< The associated MC particle
-    const void             *m_pParentAddress;          ///< The address of the parent calo hit in the user framework
+    CaloCellType            m_caloCellType;             ///< The calo cell type
+
+    const MCParticle       *m_pMCParticle;              ///< The associated MC particle
+    const void             *m_pParentAddress;           ///< The address of the parent calo hit in the user framework
 
     friend class CaloHitHelper;
     friend class CaloHitManager;
@@ -530,6 +551,13 @@ inline bool CaloHit::IsPossibleMip() const
 inline bool CaloHit::IsIsolated() const
 {
     return m_isIsolated;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline CaloCellType CaloHit::GetCaloCellType() const
+{
+    return m_caloCellType;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

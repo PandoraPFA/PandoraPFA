@@ -170,7 +170,7 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
             const float dZ(std::fabs(positionDifference.GetZ()));
             const float dPhi(std::sqrt(dX * dX + dY * dY));
 
-            if ((dZ < (1.5f * cellLengthScale)) && (dPhi < (1.5f * cellLengthScale))) // TODO test this
+            if ((dZ < (1.5f * cellLengthScale)) && (dPhi < (1.5f * cellLengthScale)))
                 surroundingEnergyContribution += (*iter)->GetHadronicEnergy();
         }
         else
@@ -244,7 +244,7 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
             const float dZ(std::fabs(positionDifference.GetZ()));
             const float dPhi(std::sqrt(dX * dX + dY * dY));
 
-            if ((dZ < (mipNCellsForNearbyHit * cellLengthScale)) && (dPhi < (mipNCellsForNearbyHit * cellLengthScale))) // TODO test this
+            if ((dZ < (mipNCellsForNearbyHit * cellLengthScale)) && (dPhi < (mipNCellsForNearbyHit * cellLengthScale)))
                 ++nearbyHitsFound;
         }
         else

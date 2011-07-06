@@ -522,7 +522,9 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
             return STATUS_CODE_FAILURE;
     }
 
-    CartesianVector positionVector(0.f, 0.f, 0.f);                            // TODO Different kinds of calo hit
+    CaloCellType caloCellType(UNKNOWN_CELL_TYPE);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(caloCellType));
+    CartesianVector positionVector(0.f, 0.f, 0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(positionVector));
     CartesianVector expectedDirection(0.f, 0.f, 0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(expectedDirection));
@@ -561,27 +563,64 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
     void *pParentAddress(NULL);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(pParentAddress));
 
-    PandoraApi::CaloHit::Parameters parameters;
-    parameters.m_positionVector = positionVector;
-    parameters.m_expectedDirection = expectedDirection;
-    parameters.m_cellNormalVector = cellNormalVector;
-    parameters.m_cellSizeU = cellSizeU;
-    parameters.m_cellSizeV = cellSizeV;
-    parameters.m_cellThickness = cellThickness;
-    parameters.m_nCellRadiationLengths = nCellRadiationLengths;
-    parameters.m_nCellInteractionLengths = nCellInteractionLengths;
-    parameters.m_time = time;
-    parameters.m_inputEnergy = inputEnergy;
-    parameters.m_mipEquivalentEnergy = mipEquivalentEnergy;
-    parameters.m_electromagneticEnergy = electromagneticEnergy;
-    parameters.m_hadronicEnergy = hadronicEnergy;
-    parameters.m_isDigital = isDigital;
-    parameters.m_hitType = hitType;
-    parameters.m_detectorRegion = detectorRegion;
-    parameters.m_layer = layer;
-    parameters.m_isInOuterSamplingLayer = isInOuterSamplingLayer;
-    parameters.m_pParentAddress = pParentAddress;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::CaloHit::Create(*m_pPandora, parameters));
+    PandoraApi::RectangularCaloHit::Parameters rectangularParameters;
+    PandoraApi::PointingCaloHit::Parameters pointingParameters;
+
+    if (RECTANGULAR == caloCellType)
+    {
+        float cellSizeU(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizeU));
+        float cellSizeV(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizeV));
+
+        rectangularParameters.m_cellSizeU = cellSizeU;
+        rectangularParameters.m_cellSizeV = cellSizeV;
+    }
+    else if (POINTING == caloCellType)
+    {
+        float cellSizeEta(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizeEta));
+        float cellSizePhi(0.f);
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizePhi));
+
+        pointingParameters.m_cellSizeEta = cellSizeEta;
+        pointingParameters.m_cellSizePhi = cellSizePhi;
+    }
+    else
+    {
+        return STATUS_CODE_FAILURE;
+    }
+
+    PandoraApi::CaloHitBaseParameters baseParameters((RECTANGULAR == caloCellType) ?
+        static_cast<PandoraApi::CaloHitBaseParameters>(rectangularParameters) :
+        static_cast<PandoraApi::CaloHitBaseParameters>(pointingParameters));
+
+    baseParameters.m_positionVector = positionVector;
+    baseParameters.m_expectedDirection = expectedDirection;
+    baseParameters.m_cellNormalVector = cellNormalVector;
+    baseParameters.m_cellThickness = cellThickness;
+    baseParameters.m_nCellRadiationLengths = nCellRadiationLengths;
+    baseParameters.m_nCellInteractionLengths = nCellInteractionLengths;
+    baseParameters.m_time = time;
+    baseParameters.m_inputEnergy = inputEnergy;
+    baseParameters.m_mipEquivalentEnergy = mipEquivalentEnergy;
+    baseParameters.m_electromagneticEnergy = electromagneticEnergy;
+    baseParameters.m_hadronicEnergy = hadronicEnergy;
+    baseParameters.m_isDigital = isDigital;
+    baseParameters.m_hitType = hitType;
+    baseParameters.m_detectorRegion = detectorRegion;
+    baseParameters.m_layer = layer;
+    baseParameters.m_isInOuterSamplingLayer = isInOuterSamplingLayer;
+    baseParameters.m_pParentAddress = pParentAddress;
+
+    if (RECTANGULAR == caloCellType)
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::RectangularCaloHit::Create(*m_pPandora, rectangularParameters));
+    }
+    else
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::PointingCaloHit::Create(*m_pPandora, pointingParameters));
+    }
 
     return STATUS_CODE_SUCCESS;
 }

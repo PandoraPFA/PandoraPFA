@@ -194,20 +194,20 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
                 switch(pMcParticle->GetParticleId())
                 {
                 case PHOTON :
-                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(it->second, MISSED_CONVERSION));
-                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(pTrack, MISSED_CONVERSION));
+                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(it->second, TRACK_STATUS_MISSED_CONVERSION));
+                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(pTrack, TRACK_STATUS_MISSED_CONVERSION));
                     std::cout << " Track appears twice in list - conversion " << pMcParticle->GetEnergy() << std::endl;
                     break;
 
                 case K_SHORT :
-                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(it->second, MISSED_KSHORT));
-                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(pTrack, MISSED_KSHORT));
+                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(it->second, TRACK_STATUS_MISSED_KSHORT));
+                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(pTrack, TRACK_STATUS_MISSED_KSHORT));
                     std::cout << " Track appears twice in list - ks " << pMcParticle->GetEnergy() << std::endl;
                     break;
 
                 default:
-                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(it->second, SPLIT_TRACK));
-                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(pTrack, SPLIT_TRACK));
+                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(it->second, TRACK_STATUS_SPLIT_TRACK));
+                    m_trackToErrorTypeMap.insert(TrackToErrorTypeMap::value_type(pTrack, TRACK_STATUS_SPLIT_TRACK));
                     std::cout << " Track appears twice in list - split " << pMcParticle->GetEnergy() << std::endl;
                     break;
                 }
@@ -330,7 +330,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject 
     for (TrackList::const_iterator trackIter = trackList.begin(); trackIter != trackList.end(); ++trackIter)
     {
         Track *pTrack = *trackIter;
-        TrackErrorTypes trackStatus = OK;
+        TrackErrorTypes trackStatus = TRACK_STATUS_OK;
 
         TrackToErrorTypeMap::const_iterator it = m_trackToErrorTypeMap.find(pTrack);
 
@@ -384,7 +384,7 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject 
             this->DumpPfosMonitoringAlgorithm::ClusterEnergyFractions(pCluster, fCharged, fPhoton, fNeutral, pBestMcMatch);
 
         // Fix for conversions (where both tracks are ided)
-        if (trackStatus == MISSED_CONVERSION)
+        if (trackStatus == TRACK_STATUS_MISSED_CONVERSION)
         {
             fCharged+= fPhoton;
             fPhoton  = 0;
@@ -460,19 +460,19 @@ StatusCode DumpPfosMonitoringAlgorithm::DumpChargedPfo(const ParticleFlowObject 
                 continue;
             }
 
-            if (trackStatus == SPLIT_TRACK)
+            if (trackStatus == TRACK_STATUS_SPLIT_TRACK)
             {
                 std::cout << " <-- split track" << std::endl;
                 continue;
             }
 
-            if (trackStatus == MISSED_CONVERSION)
+            if (trackStatus == TRACK_STATUS_MISSED_CONVERSION)
             {
                 std::cout << " <-- missed conversion" << std::endl;
                 continue;
             }
 
-            if (trackStatus == MISSED_KSHORT)
+            if (trackStatus == TRACK_STATUS_MISSED_KSHORT)
             {
                 std::cout << " <-- missed kshort" << std::endl;
                 continue;

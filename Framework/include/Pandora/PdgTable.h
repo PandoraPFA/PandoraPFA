@@ -96,7 +96,7 @@ namespace pandora
 enum ParticleType
 {
     PARTICLE_DATA_TABLE(GET_PARTICLE_TYPE_ENTRY)
-    UNKNOWN
+    UNKNOWN_PARTICLE_TYPE
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

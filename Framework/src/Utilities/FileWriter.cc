@@ -404,7 +404,9 @@ StatusCode FileWriter::WriteCaloHit(const CaloHit *const pCaloHit)
     if (EVENT != m_containerId)
         return STATUS_CODE_FAILURE;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(CALO_HIT));                            // TODO Different kinds of calo hit
+    const CaloCellType caloCellType(pCaloHit->GetCaloCellType());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(CALO_HIT));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(caloCellType));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pCaloHit->GetPositionVector()));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pCaloHit->GetExpectedDirection()));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pCaloHit->GetCellNormalVector()));
@@ -422,6 +424,31 @@ StatusCode FileWriter::WriteCaloHit(const CaloHit *const pCaloHit)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pCaloHit->GetLayer()));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pCaloHit->IsInOuterSamplingLayer()));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pCaloHit->GetParentCaloHitAddress()));
+
+    if (RECTANGULAR == caloCellType)
+    {
+        const RectangularCaloHit *pRectangularCaloHit = dynamic_cast<const RectangularCaloHit *>(pCaloHit);
+
+        if (NULL == pRectangularCaloHit)
+            return STATUS_CODE_FAILURE;
+
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pRectangularCaloHit->GetCellSizeU()));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pRectangularCaloHit->GetCellSizeV()));
+    }
+    else if (POINTING == caloCellType)
+    {
+        const PointingCaloHit *pPointingCaloHit = dynamic_cast<const PointingCaloHit *>(pCaloHit);
+
+        if (NULL == pPointingCaloHit)
+            return STATUS_CODE_FAILURE;
+
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pPointingCaloHit->GetCellSizeEta()));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteVariable(pPointingCaloHit->GetCellSizePhi()));
+    }
+    else
+    {
+        return STATUS_CODE_FAILURE;
+    }
 
     return STATUS_CODE_SUCCESS;
 }
