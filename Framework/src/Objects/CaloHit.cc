@@ -34,8 +34,8 @@ CaloHit::CaloHit(const PandoraApi::CaloHitBaseParameters &caloHitParameters) :
     m_isPossibleMip(false),
     m_isIsolated(false),
     m_isAvailable(true),
-    m_pMCParticle(NULL),
     m_caloCellType(UNKNOWN_CELL_TYPE),
+    m_pMCParticle(NULL),
     m_pParentAddress(caloHitParameters.m_pParentAddress.Get())
 {
 }
