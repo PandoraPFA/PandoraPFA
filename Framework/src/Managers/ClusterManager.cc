@@ -40,21 +40,21 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
     try
     {
         if (!m_canMakeNewClusters)
-            return STATUS_CODE_NOT_ALLOWED;
+            throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
 
         NameToClusterListMap::iterator iter = m_nameToClusterListMap.find(m_currentListName);
 
         if (m_nameToClusterListMap.end() == iter)
-            return STATUS_CODE_NOT_INITIALIZED;
+             throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
         pCluster = NULL;
         pCluster = new Cluster(pClusterParameters);
 
         if (NULL == pCluster)
-            return STATUS_CODE_FAILURE;
+             throw StatusCodeException(STATUS_CODE_FAILURE);
 
         if (!iter->second->insert(pCluster).second)
-            return STATUS_CODE_FAILURE;
+             throw StatusCodeException(STATUS_CODE_FAILURE);
 
         return STATUS_CODE_SUCCESS;
     }

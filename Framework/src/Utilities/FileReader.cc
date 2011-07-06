@@ -522,7 +522,7 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
             return STATUS_CODE_FAILURE;
     }
 
-    CartesianVector positionVector(0.f, 0.f, 0.f);
+    CartesianVector positionVector(0.f, 0.f, 0.f);                            // TODO Different kinds of calo hit
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(positionVector));
     CartesianVector expectedDirection(0.f, 0.f, 0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(expectedDirection));
@@ -538,10 +538,6 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nCellRadiationLengths));
     float nCellInteractionLengths(0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nCellInteractionLengths));
-    float nRadiationLengthsFromIp(0.f);
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nRadiationLengthsFromIp));
-    float nInteractionLengthsFromIp(0.f);
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(nInteractionLengthsFromIp));
     float time(0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(time));
     float inputEnergy(0.f);
@@ -574,8 +570,6 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
     parameters.m_cellThickness = cellThickness;
     parameters.m_nCellRadiationLengths = nCellRadiationLengths;
     parameters.m_nCellInteractionLengths = nCellInteractionLengths;
-    parameters.m_nRadiationLengthsFromIp = nRadiationLengthsFromIp;
-    parameters.m_nInteractionLengthsFromIp = nInteractionLengthsFromIp;
     parameters.m_time = time;
     parameters.m_inputEnergy = inputEnergy;
     parameters.m_mipEquivalentEnergy = mipEquivalentEnergy;

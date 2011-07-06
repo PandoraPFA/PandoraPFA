@@ -197,12 +197,12 @@ void FineGranularityShowerProfileCalculator::CalculateTransverseProfile(const Cl
         for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
         {
             CaloHit *pCaloHit = *hitIter;
-            const float cellSizeZ((BARREL == pCaloHit->GetDetectorRegion()) ? pCaloHit->GetCellSizeU() : pCaloHit->GetCellSizeV());
+            const float cellLengthScale(pCaloHit->GetCellLengthScale()); // TODO Check this works
 
-            if (std::fabs(cellSizeZ) < std::numeric_limits<float>::epsilon())
+            if (std::fabs(cellLengthScale) < std::numeric_limits<float>::epsilon())
                 continue;
 
-            const CartesianVector hitCoordinates((pCaloHit->GetPositionVector() - innerLayerCentroid) * (1.f / cellSizeZ));
+            const CartesianVector hitCoordinates((pCaloHit->GetPositionVector() - innerLayerCentroid) * (1.f / cellLengthScale));
             const float uValue(hitCoordinates.GetDotProduct(uAxis));
             const float vValue(hitCoordinates.GetDotProduct(vAxis));
 

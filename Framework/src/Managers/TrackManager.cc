@@ -42,12 +42,12 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
         pTrack = new Track(trackParameters);
 
         if (NULL == pTrack)
-            return STATUS_CODE_FAILURE;
+            throw StatusCodeException(STATUS_CODE_FAILURE);
 
         m_inputTrackVector.push_back(pTrack);
 
         if (!m_uidToTrackMap.insert(UidToTrackMap::value_type(pTrack->GetParentTrackAddress(), pTrack)).second)
-            return STATUS_CODE_FAILURE;
+            throw StatusCodeException(STATUS_CODE_FAILURE);
 
         return STATUS_CODE_SUCCESS;
     }

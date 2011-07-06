@@ -40,9 +40,10 @@ private:
     /**
      *  @brief  Create calo hit
      * 
-     *  @param  caloHitParameters the calo hit parameters
+     *  @param  parameters the calo hit parameters
      */
-    StatusCode CreateCaloHit(const PandoraApi::CaloHitParameters &caloHitParameters);
+    template <typename PARAMETERS>
+    StatusCode CreateCaloHit(const PARAMETERS &parameters);
 
     /**
      *  @brief  Create the null ordered calo hit list

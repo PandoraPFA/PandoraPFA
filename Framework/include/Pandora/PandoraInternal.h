@@ -133,10 +133,6 @@ typedef std::vector<MCParticle *> MCParticleVector;
 typedef std::vector<ParticleFlowObject *> ParticleFlowObjectVector;
 typedef std::set<ParticleFlowObject *> ParticleFlowObjectList;
 
-typedef std::set<CaloHit *, PointerLessThan<CaloHit> > EnergySortedCaloHitList;
-typedef std::set<Track *, PointerLessThan<Track> > MomentumSortedTrackList;
-typedef std::set<ParticleFlowObject *, PointerLessThan<ParticleFlowObject> > EnergySortedParticleFlowObjectList;
-
 typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;
 typedef std::vector<std::string> StringVector;
@@ -144,7 +140,6 @@ typedef std::vector<int> IntVector;
 typedef std::vector<float> FloatVector;
 
 typedef const void * Uid;
-
 typedef std::map<Uid, MCParticle *> UidToMCParticleMap;
 typedef std::map<Track *, Cluster *> TrackToClusterMap;
 

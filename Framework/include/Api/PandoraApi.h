@@ -42,32 +42,17 @@ public:
     };
 
     /**
-     *  @brief  CaloHitParameters class
+     *  @brief  MCParticleParameters class
      */
-    class CaloHitParameters
+    class MCParticleParameters
     {
     public:
-        pandora::InputCartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
-        pandora::InputCartesianVector   m_expectedDirection;        ///< Unit vector in direction of expected hit propagation
-        pandora::InputCartesianVector   m_cellNormalVector;         ///< Unit normal to sampling layer, pointing outwards from the origin
-        pandora::InputFloat             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
-        pandora::InputFloat             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
-        pandora::InputFloat             m_cellThickness;            ///< Thickness of cell, units mm
-        pandora::InputFloat             m_nCellRadiationLengths;    ///< Absorber material in front of cell, units radiation lengths
-        pandora::InputFloat             m_nCellInteractionLengths;  ///< Absorber material in front of cell, units interaction lengths
-        pandora::InputFloat             m_nRadiationLengthsFromIp;  ///< Absorber material between cell and IP, units radiation lengths
-        pandora::InputFloat             m_nInteractionLengthsFromIp;///< Absorber material between cell and IP, units interaction lengths
-        pandora::InputFloat             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
-        pandora::InputFloat             m_inputEnergy;              ///< Corrected energy of calorimeter cell in user framework, units GeV
-        pandora::InputFloat             m_mipEquivalentEnergy;      ///< The calibrated mip equivalent energy, units mip
-        pandora::InputFloat             m_electromagneticEnergy;    ///< The calibrated electromagnetic energy measure, units GeV
-        pandora::InputFloat             m_hadronicEnergy;           ///< The calibrated hadronic energy measure, units GeV
-        pandora::InputBool              m_isDigital;                ///< Whether cell should be treated as digital
-        pandora::InputHitType           m_hitType;                  ///< The type of calorimeter hit
-        pandora::InputDetectorRegion    m_detectorRegion;           ///< Region of the detector in which the calo hit is located
-        pandora::InputUInt              m_layer;                    ///< The subdetector readout layer number
-        pandora::InputBool              m_isInOuterSamplingLayer;   ///< Whether cell is in one of the outermost detector sampling layers
-        pandora::InputAddress           m_pParentAddress;           ///< Address of the parent calo hit in the user framework
+        pandora::InputFloat             m_energy;                   ///< The energy of the MC particle, units GeV
+        pandora::InputCartesianVector   m_momentum;                 ///< The momentum of the MC particle, units GeV
+        pandora::InputCartesianVector   m_vertex;                   ///< The production vertex of the MC particle, units mm
+        pandora::InputCartesianVector   m_endpoint;                 ///< The endpoint of the MC particle, units mm
+        pandora::InputInt               m_particleId;               ///< The MC particle's ID (PDG code)
+        pandora::InputAddress           m_pParentAddress;           ///< Address of the parent MC particle in the user framework
     };
 
     /**
@@ -94,17 +79,48 @@ public:
     };
 
     /**
-     *  @brief  MCParticleParameters class
+     *  @brief  CaloHitBaseParameters class
      */
-    class MCParticleParameters
+    class CaloHitBaseParameters
     {
     public:
-        pandora::InputFloat             m_energy;                   ///< The energy of the MC particle, units GeV
-        pandora::InputCartesianVector   m_momentum;                 ///< The momentum of the MC particle, units GeV
-        pandora::InputCartesianVector   m_vertex;                   ///< The production vertex of the MC particle, units mm
-        pandora::InputCartesianVector   m_endpoint;                 ///< The endpoint of the MC particle, units mm
-        pandora::InputInt               m_particleId;               ///< The MC particle's ID (PDG code)
-        pandora::InputAddress           m_pParentAddress;           ///< Address of the parent MC particle in the user framework
+        pandora::InputCartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
+        pandora::InputCartesianVector   m_expectedDirection;        ///< Unit vector in direction of expected hit propagation
+        pandora::InputCartesianVector   m_cellNormalVector;         ///< Unit normal to sampling layer, pointing outwards from the origin
+        pandora::InputFloat             m_cellThickness;            ///< Thickness of cell, units mm
+        pandora::InputFloat             m_nCellRadiationLengths;    ///< Absorber material in front of cell, units radiation lengths
+        pandora::InputFloat             m_nCellInteractionLengths;  ///< Absorber material in front of cell, units interaction lengths
+        pandora::InputFloat             m_time;                     ///< Time of (earliest) energy deposition in this cell, units ns
+        pandora::InputFloat             m_inputEnergy;              ///< Corrected energy of calorimeter cell in user framework, units GeV
+        pandora::InputFloat             m_mipEquivalentEnergy;      ///< The calibrated mip equivalent energy, units mip
+        pandora::InputFloat             m_electromagneticEnergy;    ///< The calibrated electromagnetic energy measure, units GeV
+        pandora::InputFloat             m_hadronicEnergy;           ///< The calibrated hadronic energy measure, units GeV
+        pandora::InputBool              m_isDigital;                ///< Whether cell should be treated as digital
+        pandora::InputHitType           m_hitType;                  ///< The type of calorimeter hit
+        pandora::InputDetectorRegion    m_detectorRegion;           ///< Region of the detector in which the calo hit is located
+        pandora::InputUInt              m_layer;                    ///< The subdetector readout layer number
+        pandora::InputBool              m_isInOuterSamplingLayer;   ///< Whether cell is in one of the outermost detector sampling layers
+        pandora::InputAddress           m_pParentAddress;           ///< Address of the parent calo hit in the user framework
+    };
+
+    /**
+     *  @brief  RectangularCaloHitParameters class
+     */
+    class RectangularCaloHitParameters : public CaloHitBaseParameters
+    {
+    public:
+        pandora::InputFloat             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
+        pandora::InputFloat             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
+    };
+
+    /**
+     *  @brief  PointingCaloHitParameters class
+     */
+    class PointingCaloHitParameters : public CaloHitBaseParameters
+    {
+    public:
+        pandora::InputFloat             m_cellSizeEta;              ///< Dimension of cell, as measured by change in pseudo rapidity, eta
+        pandora::InputFloat             m_cellSizePhi;              ///< Dimension of cell, as measured by change in azimuthal angle, phi
     };
 
     /**
@@ -193,9 +209,11 @@ public:
     };
 
     // Objects available for construction by pandora
-    typedef ObjectCreationHelper<CaloHitParameters> CaloHit;
-    typedef ObjectCreationHelper<TrackParameters> Track;
     typedef ObjectCreationHelper<MCParticleParameters> MCParticle;
+    typedef ObjectCreationHelper<TrackParameters> Track;
+    typedef ObjectCreationHelper<RectangularCaloHitParameters> CaloHit;
+    typedef ObjectCreationHelper<RectangularCaloHitParameters> RectangularCaloHit;
+    typedef ObjectCreationHelper<PointingCaloHitParameters> PointingCaloHit;
     typedef ObjectCreationHelper<GeometryParameters> Geometry;
     typedef ObjectCreationHelper<BoxGapParameters> BoxGap;
     typedef ObjectCreationHelper<ConcentricGapParameters> ConcentricGap;

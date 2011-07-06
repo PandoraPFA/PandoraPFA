@@ -422,32 +422,6 @@ void Cluster::CalculateLayerHitType(const PseudoLayer pseudoLayer, InputHitType 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void Cluster::CalculateLayerPathLengths(const PseudoLayer pseudoLayer, InputFloat &nRadiationLengths, InputFloat &nInteractionLengths) const
-{
-    OrderedCaloHitList::const_iterator iter = m_orderedCaloHitList.find(pseudoLayer);
-
-    if (m_orderedCaloHitList.end() == iter)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-    const unsigned int nHits(iter->second->size());
-
-    if (0 == nHits)
-        throw StatusCodeException(STATUS_CODE_FAILURE);
-
-    float radiationLengthSum(0.f), interactionLengthSum(0.f);
-
-    for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-    {
-        radiationLengthSum += (*hitIter)->GetNRadiationLengthsFromIp();
-        interactionLengthSum += (*hitIter)->GetNInteractionLengthsFromIp();
-    }
-
-    nRadiationLengths = radiationLengthSum / static_cast<float>(nHits);
-    nInteractionLengths = interactionLengthSum / static_cast<float>(nHits);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode Cluster::ResetProperties()
 {
     if (!m_orderedCaloHitList.empty())

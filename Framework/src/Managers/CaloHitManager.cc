@@ -42,18 +42,45 @@ CaloHitManager::~CaloHitManager()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::CaloHitParameters &caloHitParameters)
+template <typename PARAMETERS>
+StatusCode CaloHitManager::CreateCaloHit(const PARAMETERS &parameters)
+{
+    return STATUS_CODE_FAILURE;
+}
+
+template <>
+StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::RectangularCaloHitParameters &parameters)
 {
     try
     {
         CaloHit *pCaloHit = NULL;
-        pCaloHit = new CaloHit(caloHitParameters);
+        pCaloHit = new RectangularCaloHit(parameters);
 
         if (NULL == pCaloHit)
-            return STATUS_CODE_FAILURE;
+            throw StatusCodeException(STATUS_CODE_FAILURE);
 
         m_inputCaloHitVector.push_back(pCaloHit);
+        return STATUS_CODE_SUCCESS;
+    }
+    catch (StatusCodeException &statusCodeException)
+    {
+        std::cout << "Failed to create calo hit: " << statusCodeException.ToString() << std::endl;
+        return statusCodeException.GetStatusCode();
+    }
+}
 
+template <>
+StatusCode CaloHitManager::CreateCaloHit(const PandoraApi::PointingCaloHitParameters &parameters)
+{
+    try
+    {
+        CaloHit *pCaloHit = NULL;
+        pCaloHit = new PointingCaloHit(parameters);
+
+        if (NULL == pCaloHit)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
+
+        m_inputCaloHitVector.push_back(pCaloHit);
         return STATUS_CODE_SUCCESS;
     }
     catch (StatusCodeException &statusCodeException)

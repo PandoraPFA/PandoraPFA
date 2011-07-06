@@ -14,18 +14,13 @@
 namespace pandora
 {
 
-CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
+CaloHit::CaloHit(const PandoraApi::CaloHitBaseParameters &caloHitParameters) :
     m_positionVector(caloHitParameters.m_positionVector.Get()),
     m_expectedDirection(caloHitParameters.m_expectedDirection.Get().GetUnitVector()),
     m_cellNormalVector(caloHitParameters.m_cellNormalVector.Get().GetUnitVector()),
-    m_cellSizeU(caloHitParameters.m_cellSizeU.Get()),
-    m_cellSizeV(caloHitParameters.m_cellSizeV.Get()),
     m_cellThickness(caloHitParameters.m_cellThickness.Get()),
-    m_cellLengthScale(std::sqrt(m_cellSizeU * m_cellSizeV)),
     m_nCellRadiationLengths(caloHitParameters.m_nCellRadiationLengths.Get()),
     m_nCellInteractionLengths(caloHitParameters.m_nCellInteractionLengths.Get()),
-    m_nRadiationLengthsFromIp(caloHitParameters.m_nRadiationLengthsFromIp.Get()),
-    m_nInteractionLengthsFromIp(caloHitParameters.m_nInteractionLengthsFromIp.Get()),
     m_time(caloHitParameters.m_time.Get()),
     m_inputEnergy(caloHitParameters.m_inputEnergy.Get()),
     m_mipEquivalentEnergy(caloHitParameters.m_mipEquivalentEnergy.Get()),
@@ -41,6 +36,12 @@ CaloHit::CaloHit(const PandoraApi::CaloHitParameters &caloHitParameters) :
     m_isAvailable(true),
     m_pMCParticle(NULL),
     m_pParentAddress(caloHitParameters.m_pParentAddress.Get())
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+CaloHit::~CaloHit()
 {
 }
 
@@ -103,6 +104,28 @@ StatusCode CaloHit::SetMCParticle(MCParticle *const pMCParticle)
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+RectangularCaloHit::RectangularCaloHit(const PandoraApi::RectangularCaloHitParameters &parameters) :
+    CaloHit(parameters),
+    m_cellSizeU(parameters.m_cellSizeU.Get()),
+    m_cellSizeV(parameters.m_cellSizeV.Get()),
+    m_cellLengthScale(std::sqrt(m_cellSizeU * m_cellSizeV))
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &parameters) :
+    CaloHit(parameters),
+    m_cellSizeEta(parameters.m_cellSizeEta.Get()),
+    m_cellSizePhi(parameters.m_cellSizePhi.Get()),
+    m_cellLengthScale(4.f) // TODO
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit)
 {
     stream  << " CaloHit: " << std::endl
@@ -110,19 +133,6 @@ std::ostream &operator<<(std::ostream &stream, const CaloHit &caloHit)
             << " energy   " << caloHit.GetInputEnergy() << std::endl;
 
     return stream;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode SortByEnergy(const CaloHitList &caloHitList, EnergySortedCaloHitList &energySortedCaloHitList)
-{
-    for (CaloHitList::const_iterator iter = caloHitList.begin(), iterEnd = caloHitList.end(); iter != iterEnd; ++iter)
-    {
-        if (!energySortedCaloHitList.insert(*iter).second)
-            return STATUS_CODE_ALREADY_PRESENT;
-    }
-
-    return STATUS_CODE_SUCCESS;
 }
 
 } // namespace pandora

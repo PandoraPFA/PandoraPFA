@@ -22,13 +22,6 @@ class Track
 {
 public:
     /**
-     *  @brief  Operator< now orders by track momentum
-     * 
-     *  @param  rhs track to compare with
-     */
-    bool operator< (const Track &rhs) const;
-
-    /**
      *  @brief  Sort tracks by descending momentum
      * 
      *  @param  pLhs address of first track
@@ -320,27 +313,11 @@ private:
  */
 std::ostream &operator<<(std::ostream &stream, const Track &track);
 
-/**
- *  @brief  Sort a track list by track momentum at the distance of closest approach
- *
- *  @param  trackList the track list to be sorted by momentum
- *  @param  momentumSortedTrackList to receive the momentum sorted track list
- */
-StatusCode SortByMomentum(const TrackList &trackList, MomentumSortedTrackList &momentumSortedTrackList);
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline bool Track::SortByMomentum(const Track *const pLhs, const Track *const pRhs)
 {
     return (pLhs->m_momentumMagnitudeAtDca > pRhs->m_momentumMagnitudeAtDca);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool Track::operator< (const Track &rhs) const
-{
-    return (!(m_momentumMagnitudeAtDca > rhs.m_momentumMagnitudeAtDca) && !(rhs.m_momentumMagnitudeAtDca > m_momentumMagnitudeAtDca) ?
-        (this > &rhs) : (m_momentumMagnitudeAtDca > rhs.m_momentumMagnitudeAtDca));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

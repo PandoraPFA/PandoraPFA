@@ -153,17 +153,4 @@ std::ostream &operator<<(std::ostream &stream, const Track &track)
     return stream;
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode SortByMomentum(const TrackList &trackList, MomentumSortedTrackList &momentumSortedTrackList)
-{
-    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
-    {
-        if (!momentumSortedTrackList.insert(*iter).second)
-            return STATUS_CODE_ALREADY_PRESENT;
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
 } // namespace pandora

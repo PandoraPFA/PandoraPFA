@@ -481,15 +481,6 @@ private:
     void CalculateLayerHitType(const PseudoLayer pseudoLayer, InputHitType &layerHitType) const;
 
     /**
-     *  @brief  Calculate the mean number of radiation and interaction lengths from the ip for a specified layer
-     * 
-     *  @param  pseudoLayer the pseudo layer
-     *  @param  nRadiationLengths to receive the mean number of radiation lengths from the ip
-     *  @param  nInteractionLengths to receive the mean number of interaction lengths from the ip
-     */
-    void CalculateLayerPathLengths(const PseudoLayer pseudoLayer, InputFloat &nRadiationLengths, InputFloat &nInteractionLengths) const;
-
-    /**
      *  @brief  Reset all cluster properties
      */
     StatusCode ResetProperties();
@@ -579,12 +570,7 @@ private:
     mutable InputFloat          m_showerProfileDiscrepancy;     ///< The cluster shower profile discrepancy
 
     mutable InputHitType        m_innerLayerHitType;            ///< The typical inner layer hit type
-    mutable InputFloat          m_innerLayerRadiationLengths;   ///< The mean inner layer number of radiation lengths from the ip
-    mutable InputFloat          m_innerLayerInteractionLengths; ///< The mean inner layer number of interaction lengths from the ip
-
     mutable InputHitType        m_outerLayerHitType;            ///< The typical outer layer hit type
-    mutable InputFloat          m_outerLayerRadiationLengths;   ///< The mean inner layer number of radiation lengths from the ip
-    mutable InputFloat          m_outerLayerInteractionLengths; ///< The mean outer layer number of interaction lengths from the ip
 
     TrackList                   m_associatedTrackList;          ///< The list of tracks associated with the cluster
 
@@ -875,52 +861,12 @@ inline HitType Cluster::GetInnerLayerHitType() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float Cluster::GetInnerLayerRadiationLengths() const
-{
-    if (!m_innerLayerRadiationLengths.IsInitialized())
-        this->CalculateLayerPathLengths(m_innerPseudoLayer.Get(), m_innerLayerRadiationLengths, m_innerLayerInteractionLengths);
-
-    return m_innerLayerRadiationLengths.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float Cluster::GetInnerLayerInteractionLengths() const
-{
-    if (!m_innerLayerInteractionLengths.IsInitialized())
-        this->CalculateLayerPathLengths(m_innerPseudoLayer.Get(), m_innerLayerRadiationLengths, m_innerLayerInteractionLengths);
-
-    return m_innerLayerInteractionLengths.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline HitType Cluster::GetOuterLayerHitType() const
 {
     if (!m_outerLayerHitType.IsInitialized())
         this->CalculateLayerHitType(m_outerPseudoLayer.Get(), m_outerLayerHitType);
 
     return m_outerLayerHitType.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float Cluster::GetOuterLayerRadiationLengths() const
-{
-    if (!m_outerLayerRadiationLengths.IsInitialized())
-        this->CalculateLayerPathLengths(m_outerPseudoLayer.Get(), m_outerLayerRadiationLengths, m_outerLayerInteractionLengths);
-
-    return m_outerLayerRadiationLengths.Get();
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline float Cluster::GetOuterLayerInteractionLengths() const
-{
-    if (!m_outerLayerInteractionLengths.IsInitialized())
-        this->CalculateLayerPathLengths(m_outerPseudoLayer.Get(), m_outerLayerRadiationLengths, m_outerLayerInteractionLengths);
-
-    return m_outerLayerInteractionLengths.Get();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -988,11 +934,7 @@ inline void Cluster::ResetOutdatedProperties()
     m_correctedHadronicEnergy.Reset();
     m_trackComparisonEnergy.Reset();
     m_innerLayerHitType.Reset();
-    m_innerLayerRadiationLengths.Reset();
-    m_innerLayerInteractionLengths.Reset();
     m_outerLayerHitType.Reset();
-    m_outerLayerRadiationLengths.Reset();
-    m_outerLayerInteractionLengths.Reset();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -19,14 +19,6 @@ namespace pandora
 class ParticleFlowObject
 {
 public:
-
-    /**
-     *  @brief  Operator< now order by energy
-     * 
-     *  @param  rhs pfo to compare with
-     */
-    bool operator< (const ParticleFlowObject &rhs) const;
-
     /**
      *  @brief  Sort pfos by descending energy 
      * 
@@ -169,15 +161,6 @@ private:
 
     friend class ParticleFlowObjectManager;
 };
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool ParticleFlowObject::operator< (const ParticleFlowObject &rhs) const
-{
-    return (!(m_energy > rhs.m_energy) && !(rhs.m_energy > m_energy) ?
-        (this > &rhs) : (m_energy > rhs.m_energy));
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

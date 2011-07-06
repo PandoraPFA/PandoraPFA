@@ -161,6 +161,8 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
         if (positionDifference.GetMagnitudeSquared() > m_caloHitMaxSeparation2)
             continue;
 
+        const float cellLengthScale(pCaloHit->GetCellLengthScale());
+
         if (isHitInBarrelRegion)
         {
             const float dX(std::fabs(positionDifference.GetX()));
@@ -168,7 +170,7 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
             const float dZ(std::fabs(positionDifference.GetZ()));
             const float dPhi(std::sqrt(dX * dX + dY * dY));
 
-            if ((dZ < (1.5f * pCaloHit->GetCellSizeU())) && (dPhi < (1.5f * pCaloHit->GetCellSizeV())))
+            if ((dZ < (1.5f * cellLengthScale)) && (dPhi < (1.5f * cellLengthScale))) // TODO test this
                 surroundingEnergyContribution += (*iter)->GetHadronicEnergy();
         }
         else
@@ -176,7 +178,7 @@ float CaloHitHelper::GetSurroundingEnergyContribution(const CaloHit *const pCalo
             const float dX(std::fabs(positionDifference.GetX()));
             const float dY(std::fabs(positionDifference.GetY()));
 
-            if ((dX < (1.5f * pCaloHit->GetCellSizeU())) && (dY < (1.5f * pCaloHit->GetCellSizeV())))
+            if ((dX < (1.5f * cellLengthScale)) && (dY < (1.5f * cellLengthScale)))
                 surroundingEnergyContribution += (*iter)->GetHadronicEnergy();
         }
     }
@@ -233,6 +235,8 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
         if (positionDifference.GetMagnitudeSquared() > m_caloHitMaxSeparation2)
             continue;
 
+        const float cellLengthScale(pCaloHit->GetCellLengthScale());
+
         if (isHitInBarrelRegion)
         {
             const float dX(std::fabs(positionDifference.GetX()));
@@ -240,7 +244,7 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
             const float dZ(std::fabs(positionDifference.GetZ()));
             const float dPhi(std::sqrt(dX * dX + dY * dY));
 
-            if ((dZ < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeU())) && (dPhi < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeV())))
+            if ((dZ < (mipNCellsForNearbyHit * cellLengthScale)) && (dPhi < (mipNCellsForNearbyHit * cellLengthScale))) // TODO test this
                 ++nearbyHitsFound;
         }
         else
@@ -248,7 +252,7 @@ unsigned int CaloHitHelper::MipCountNearbyHits(const CaloHit *const pCaloHit, co
             const float dX(std::fabs(positionDifference.GetX()));
             const float dY(std::fabs(positionDifference.GetY()));
 
-            if ((dX < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeU())) && (dY < (mipNCellsForNearbyHit * pCaloHit->GetCellSizeV())))
+            if ((dX < (mipNCellsForNearbyHit * cellLengthScale)) && (dY < (mipNCellsForNearbyHit * cellLengthScale)))
                 ++nearbyHitsFound;
         }
     }

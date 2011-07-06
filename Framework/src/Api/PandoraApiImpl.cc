@@ -36,39 +36,45 @@ StatusCode PandoraApiImpl::CreateObject(const PARAMETERS &parameters) const
 }
 
 template <>
-StatusCode PandoraApiImpl::CreateObject<PandoraApi::CaloHitParameters>(const PandoraApi::CaloHitParameters &caloHitParameters) const
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::MCParticleParameters>(const PandoraApi::MCParticleParameters &parameters) const
 {
-    return m_pPandora->m_pCaloHitManager->CreateCaloHit(caloHitParameters);
+    return m_pPandora->m_pMCManager->CreateMCParticle(parameters);
 }
 
 template <>
-StatusCode PandoraApiImpl::CreateObject<PandoraApi::TrackParameters>(const PandoraApi::TrackParameters &trackParameters) const
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::TrackParameters>(const PandoraApi::TrackParameters &parameters) const
 {
-    return m_pPandora->m_pTrackManager->CreateTrack(trackParameters);
+    return m_pPandora->m_pTrackManager->CreateTrack(parameters);
 }
 
 template <>
-StatusCode PandoraApiImpl::CreateObject<PandoraApi::MCParticleParameters>(const PandoraApi::MCParticleParameters &mcParticleParameters) const
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::RectangularCaloHitParameters>(const PandoraApi::RectangularCaloHitParameters &parameters) const
 {
-    return m_pPandora->m_pMCManager->CreateMCParticle(mcParticleParameters);
+    return m_pPandora->m_pCaloHitManager->CreateCaloHit(parameters);
 }
 
 template <>
-StatusCode PandoraApiImpl::CreateObject<PandoraApi::GeometryParameters>(const PandoraApi::GeometryParameters &geometryParameters) const
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::PointingCaloHitParameters>(const PandoraApi::PointingCaloHitParameters &parameters) const
 {
-    return GeometryHelper::Initialize(geometryParameters);
+    return m_pPandora->m_pCaloHitManager->CreateCaloHit(parameters);
 }
 
 template <>
-StatusCode PandoraApiImpl::CreateObject<PandoraApi::BoxGapParameters>(const PandoraApi::BoxGapParameters &gapParameters) const
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::GeometryParameters>(const PandoraApi::GeometryParameters &parameters) const
 {
-    return GeometryHelper::CreateBoxGap(gapParameters);
+    return GeometryHelper::Initialize(parameters);
 }
 
 template <>
-StatusCode PandoraApiImpl::CreateObject<PandoraApi::ConcentricGapParameters>(const PandoraApi::ConcentricGapParameters &gapParameters) const
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::BoxGapParameters>(const PandoraApi::BoxGapParameters &parameters) const
 {
-    return GeometryHelper::CreateConcentricGap(gapParameters);
+    return GeometryHelper::CreateBoxGap(parameters);
+}
+
+template <>
+StatusCode PandoraApiImpl::CreateObject<PandoraApi::ConcentricGapParameters>(const PandoraApi::ConcentricGapParameters &parameters) const
+{
+    return GeometryHelper::CreateConcentricGap(parameters);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
