@@ -210,6 +210,13 @@ public:
      */
     virtual float GetCellLengthScale() const = 0;
 
+    /**
+     *  @brief  Get the list of cartesian coordinates for the cell corners
+     * 
+     *  @param  cartesianPointList to receive the cartesian coordinates of the cell corners
+     */
+    virtual void GetCellCorners(CartesianPointList &cartesianPointList) const = 0;
+
 protected:
     /**
      *  @brief  Constructor
@@ -325,6 +332,7 @@ public:
     float GetCellSizeV() const;
 
     float GetCellLengthScale() const;
+    void GetCellCorners(CartesianPointList &cartesianPointList) const;
 
 private:
     /**
@@ -365,6 +373,7 @@ public:
     float GetCellSizePhi() const;
 
     float GetCellLengthScale() const;
+    void GetCellCorners(CartesianPointList &cartesianPointList) const;
 
 private:
     /**

@@ -115,6 +115,34 @@ RectangularCaloHit::RectangularCaloHit(const PandoraApi::RectangularCaloHitParam
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+void RectangularCaloHit::GetCellCorners(CartesianPointList &cartesianPointList) const
+{
+    const CartesianVector &position(this->GetPositionVector());
+
+    CartesianVector normal(this->GetCellNormalVector());
+    CartesianVector dirU((ENDCAP == this->GetDetectorRegion()) ? CartesianVector(0.f, 1.f, 0.f) : CartesianVector(0.f, 0.f, 1.f));
+    CartesianVector dirV(normal.GetCrossProduct(dirU));
+
+    float u2(this->GetCellSizeU() / 2.0);
+    float v2(this->GetCellSizeV() / 2.0);
+    float t2(this->GetCellThickness() / 2.0);
+
+    dirU *= u2;
+    dirV *= v2;
+    normal *= t2;
+
+    cartesianPointList.push_back(CartesianVector(position - dirU - dirV - normal));
+    cartesianPointList.push_back(CartesianVector(position + dirU - dirV - normal));
+    cartesianPointList.push_back(CartesianVector(position + dirU + dirV - normal));
+    cartesianPointList.push_back(CartesianVector(position - dirU + dirV - normal));
+    cartesianPointList.push_back(CartesianVector(position - dirU - dirV + normal));
+    cartesianPointList.push_back(CartesianVector(position + dirU - dirV + normal));
+    cartesianPointList.push_back(CartesianVector(position + dirU + dirV + normal));
+    cartesianPointList.push_back(CartesianVector(position - dirU + dirV + normal));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &parameters) :
@@ -124,6 +152,13 @@ PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &pa
     m_cellLengthScale(4.f) // TODO
 {
     m_caloCellType = POINTING;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PointingCaloHit::GetCellCorners(CartesianPointList &cartesianPointList) const
+{
+    // TODO
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
