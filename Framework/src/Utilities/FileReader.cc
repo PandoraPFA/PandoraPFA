@@ -530,10 +530,6 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(expectedDirection));
     CartesianVector cellNormalVector(0.f, 0.f, 0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellNormalVector));
-    float cellSizeU(0.f);
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizeU));
-    float cellSizeV(0.f);
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizeV));
     float cellThickness(0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellThickness));
     float nCellRadiationLengths(0.f);
@@ -591,27 +587,27 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
         return STATUS_CODE_FAILURE;
     }
 
-    PandoraApi::CaloHitBaseParameters baseParameters((RECTANGULAR == caloCellType) ?
-        static_cast<PandoraApi::CaloHitBaseParameters>(rectangularParameters) :
-        static_cast<PandoraApi::CaloHitBaseParameters>(pointingParameters));
+    PandoraApi::CaloHitBaseParameters *pBaseParameters((RECTANGULAR == caloCellType) ?
+        static_cast<PandoraApi::CaloHitBaseParameters*>(&rectangularParameters) :
+        static_cast<PandoraApi::CaloHitBaseParameters*>(&pointingParameters));
 
-    baseParameters.m_positionVector = positionVector;
-    baseParameters.m_expectedDirection = expectedDirection;
-    baseParameters.m_cellNormalVector = cellNormalVector;
-    baseParameters.m_cellThickness = cellThickness;
-    baseParameters.m_nCellRadiationLengths = nCellRadiationLengths;
-    baseParameters.m_nCellInteractionLengths = nCellInteractionLengths;
-    baseParameters.m_time = time;
-    baseParameters.m_inputEnergy = inputEnergy;
-    baseParameters.m_mipEquivalentEnergy = mipEquivalentEnergy;
-    baseParameters.m_electromagneticEnergy = electromagneticEnergy;
-    baseParameters.m_hadronicEnergy = hadronicEnergy;
-    baseParameters.m_isDigital = isDigital;
-    baseParameters.m_hitType = hitType;
-    baseParameters.m_detectorRegion = detectorRegion;
-    baseParameters.m_layer = layer;
-    baseParameters.m_isInOuterSamplingLayer = isInOuterSamplingLayer;
-    baseParameters.m_pParentAddress = pParentAddress;
+    pBaseParameters->m_positionVector = positionVector;
+    pBaseParameters->m_expectedDirection = expectedDirection;
+    pBaseParameters->m_cellNormalVector = cellNormalVector;
+    pBaseParameters->m_cellThickness = cellThickness;
+    pBaseParameters->m_nCellRadiationLengths = nCellRadiationLengths;
+    pBaseParameters->m_nCellInteractionLengths = nCellInteractionLengths;
+    pBaseParameters->m_time = time;
+    pBaseParameters->m_inputEnergy = inputEnergy;
+    pBaseParameters->m_mipEquivalentEnergy = mipEquivalentEnergy;
+    pBaseParameters->m_electromagneticEnergy = electromagneticEnergy;
+    pBaseParameters->m_hadronicEnergy = hadronicEnergy;
+    pBaseParameters->m_isDigital = isDigital;
+    pBaseParameters->m_hitType = hitType;
+    pBaseParameters->m_detectorRegion = detectorRegion;
+    pBaseParameters->m_layer = layer;
+    pBaseParameters->m_isInOuterSamplingLayer = isInOuterSamplingLayer;
+    pBaseParameters->m_pParentAddress = pParentAddress;
 
     if (RECTANGULAR == caloCellType)
     {
