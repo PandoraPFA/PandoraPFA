@@ -132,6 +132,7 @@ void RectangularCaloHit::GetCellCorners(CartesianPointList &cartesianPointList) 
     cartesianPointList.push_back(CartesianVector(position + dirU - dirV - normal));
     cartesianPointList.push_back(CartesianVector(position + dirU + dirV - normal));
     cartesianPointList.push_back(CartesianVector(position - dirU + dirV - normal));
+
     cartesianPointList.push_back(CartesianVector(position - dirU - dirV + normal));
     cartesianPointList.push_back(CartesianVector(position + dirU - dirV + normal));
     cartesianPointList.push_back(CartesianVector(position + dirU + dirV + normal));
@@ -154,33 +155,50 @@ PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &pa
 
 void PointingCaloHit::GetCellCorners(CartesianPointList &cartesianPointList) const
 {
-    const CartesianVector &position(this->GetPositionVector());
-
     float radius(0.f), phi(0.f), theta(0.f);
-    position.GetSphericalCoordinates(radius, phi, theta);
-
+    this->GetPositionVector().GetSphericalCoordinates(radius, phi, theta);
     const float centralEta(-1. * std::log(std::tan(theta / 2.)));
-    const float etaMin(centralEta - this->GetCellSizeEta() / 2.);
-    const float etaMax(centralEta + this->GetCellSizeEta() / 2.);
 
-    const float thetaMin(2. * std::atan(std::exp(-1. * etaMin)));
-    const float thetaMax(2. * std::atan(std::exp(-1. * etaMax)));
-    const float rMin(radius - this->GetCellThickness() / 2.);
-    const float rMax(radius + this->GetCellThickness() / 2.);
-    const float phiMin(phi - this->GetCellSizePhi() / 2.);
-    const float phiMax(phi + this->GetCellSizePhi() / 2.);
+    const float rMin(radius - this->GetCellThickness() / 2.), rMax(radius + this->GetCellThickness() / 2.);
+    const float phiMin(phi - this->GetCellSizePhi() / 2.), phiMax(phi + this->GetCellSizePhi() / 2.);
+    const float etaMin(centralEta - this->GetCellSizeEta() / 2.), etaMax(centralEta + this->GetCellSizeEta() / 2.);
+    const float thetaMin(2. * std::atan(std::exp(-1. * etaMin))), thetaMax(2. * std::atan(std::exp(-1. * etaMax)));
 
+    const float sinTheta(std::sin(theta)), cosTheta(std::cos(theta));
     const float sinThetaMin(std::sin(thetaMin)), cosThetaMin(std::cos(thetaMin)), sinPhiMin(std::sin(phiMin)), cosPhiMin(std::cos(phiMin));
     const float sinThetaMax(std::sin(thetaMax)), cosThetaMax(std::cos(thetaMax)), sinPhiMax(std::sin(phiMax)), cosPhiMax(std::cos(phiMax));
 
-    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMin * cosPhiMin, rMin * sinThetaMin * sinPhiMin, rMin * cosThetaMin));
-    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMax * cosPhiMin, rMin * sinThetaMax * sinPhiMin, rMin * cosThetaMax));
-    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMax * cosPhiMax, rMin * sinThetaMax * sinPhiMax, rMin * cosThetaMax));
-    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMin * cosPhiMax, rMin * sinThetaMin * sinPhiMax, rMin * cosThetaMin));
-    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMin * cosPhiMin, rMax * sinThetaMin * sinPhiMin, rMax * cosThetaMin));
-    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMax * cosPhiMin, rMax * sinThetaMax * sinPhiMin, rMax * cosThetaMax));
-    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMax * cosPhiMax, rMax * sinThetaMax * sinPhiMax, rMax * cosThetaMax));
-    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMin * cosPhiMax, rMax * sinThetaMin * sinPhiMax, rMax * cosThetaMin));
+    float thetaMinRScale(1.f), thetaMaxRScale(1.f);
+
+    if (ENDCAP == this->GetDetectorRegion())
+    {
+        if (std::fabs(cosThetaMin) > std::numeric_limits<float>::epsilon())
+            thetaMinRScale = std::fabs(cosTheta / cosThetaMin);
+
+        if (std::fabs(cosThetaMax) > std::numeric_limits<float>::epsilon())
+            thetaMaxRScale = std::fabs(cosTheta / cosThetaMax);
+    }
+    else
+    {
+        if (std::fabs(sinThetaMin) > std::numeric_limits<float>::epsilon())
+            thetaMinRScale = std::fabs(sinTheta / sinThetaMin);
+
+        if (std::fabs(sinThetaMax) > std::numeric_limits<float>::epsilon())
+            thetaMaxRScale = std::fabs(sinTheta / sinThetaMax);
+    }
+
+    const float rMinAtThetaMin(thetaMinRScale * rMin), rMinAtThetaMax(thetaMaxRScale * rMin);
+    const float rMaxAtThetaMin(thetaMinRScale * rMax), rMaxAtThetaMax(thetaMaxRScale * rMax);
+
+    cartesianPointList.push_back(CartesianVector(rMinAtThetaMin * sinThetaMin * cosPhiMin, rMinAtThetaMin * sinThetaMin * sinPhiMin, rMinAtThetaMin * cosThetaMin));
+    cartesianPointList.push_back(CartesianVector(rMinAtThetaMax * sinThetaMax * cosPhiMin, rMinAtThetaMax * sinThetaMax * sinPhiMin, rMinAtThetaMax * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMinAtThetaMax * sinThetaMax * cosPhiMax, rMinAtThetaMax * sinThetaMax * sinPhiMax, rMinAtThetaMax * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMinAtThetaMin * sinThetaMin * cosPhiMax, rMinAtThetaMin * sinThetaMin * sinPhiMax, rMinAtThetaMin * cosThetaMin));
+
+    cartesianPointList.push_back(CartesianVector(rMaxAtThetaMin * sinThetaMin * cosPhiMin, rMaxAtThetaMin * sinThetaMin * sinPhiMin, rMaxAtThetaMin * cosThetaMin));
+    cartesianPointList.push_back(CartesianVector(rMaxAtThetaMax * sinThetaMax * cosPhiMin, rMaxAtThetaMax * sinThetaMax * sinPhiMin, rMaxAtThetaMax * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMaxAtThetaMax * sinThetaMax * cosPhiMax, rMaxAtThetaMax * sinThetaMax * sinPhiMax, rMaxAtThetaMax * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMaxAtThetaMin * sinThetaMin * cosPhiMax, rMaxAtThetaMin * sinThetaMin * sinPhiMax, rMaxAtThetaMin * cosThetaMin));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
