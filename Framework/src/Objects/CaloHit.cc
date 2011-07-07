@@ -146,9 +146,23 @@ PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &pa
     CaloHit(parameters),
     m_cellSizeEta(parameters.m_cellSizeEta.Get()),
     m_cellSizePhi(parameters.m_cellSizePhi.Get()),
-    m_cellLengthScale(4.f) // TODO
+    m_cellLengthScale(this->CalculateCellLengthScale())
 {
     m_caloCellType = POINTING;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+float PointingCaloHit::CalculateCellLengthScale() const
+{
+    float radius(0.f), phi(0.f), theta(0.f);
+    this->GetPositionVector().GetSphericalCoordinates(radius, phi, theta);
+    const float centralEta(-1. * std::log(std::tan(theta / 2.)));
+
+    const float etaMin(centralEta - this->GetCellSizeEta() / 2.), etaMax(centralEta + this->GetCellSizeEta() / 2.);
+    const float thetaMin(2. * std::atan(std::exp(-1. * etaMin))), thetaMax(2. * std::atan(std::exp(-1. * etaMax)));
+
+    return std::sqrt(std::fabs(radius * this->GetCellSizePhi() * radius * (thetaMax - thetaMin))); // TODO confirm this definition
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

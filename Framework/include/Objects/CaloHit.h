@@ -383,9 +383,16 @@ private:
      */
     PointingCaloHit(const PandoraApi::PointingCaloHitParameters &parameters);
 
+    /**
+     *  @brief  Calculate the typical length scale of cell, measured at cell mid-point, units mm
+     * 
+     *  @return the typical length scale of cell
+     */
+    float CalculateCellLengthScale() const;
+
     const float             m_cellSizeEta;              ///< Dimension of cell, as measured by change in pseudo rapidity, eta
     const float             m_cellSizePhi;              ///< Dimension of cell, as measured by change in azimuthal angle, phi
-    const float             m_cellLengthScale;          ///< Typical length scale of cell, TODO
+    const float             m_cellLengthScale;          ///< Typical length scale of cell, measured at cell mid-point, units mm
 
     friend class CaloHitManager;
 };
