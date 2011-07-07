@@ -124,13 +124,9 @@ void RectangularCaloHit::GetCellCorners(CartesianPointList &cartesianPointList) 
     CartesianVector dirU((ENDCAP == this->GetDetectorRegion()) ? CartesianVector(0.f, 1.f, 0.f) : CartesianVector(0.f, 0.f, 1.f));
     CartesianVector dirV(normal.GetCrossProduct(dirU));
 
-    float u2(this->GetCellSizeU() / 2.0);
-    float v2(this->GetCellSizeV() / 2.0);
-    float t2(this->GetCellThickness() / 2.0);
-
-    dirU *= u2;
-    dirV *= v2;
-    normal *= t2;
+    dirU *= (this->GetCellSizeU() / 2.);
+    dirV *= (this->GetCellSizeV() / 2.);
+    normal *= (this->GetCellThickness() / 2.);
 
     cartesianPointList.push_back(CartesianVector(position - dirU - dirV - normal));
     cartesianPointList.push_back(CartesianVector(position + dirU - dirV - normal));
@@ -158,7 +154,33 @@ PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &pa
 
 void PointingCaloHit::GetCellCorners(CartesianPointList &cartesianPointList) const
 {
-    // TODO
+    const CartesianVector &position(this->GetPositionVector());
+
+    float radius(0.f), phi(0.f), theta(0.f);
+    position.GetSphericalCoordinates(radius, phi, theta);
+
+    const float centralEta(-1. * std::log(std::tan(theta / 2.)));
+    const float etaMin(centralEta - this->GetCellSizeEta() / 2.);
+    const float etaMax(centralEta + this->GetCellSizeEta() / 2.);
+
+    const float thetaMin(2. * std::atan(std::exp(-1. * etaMin)));
+    const float thetaMax(2. * std::atan(std::exp(-1. * etaMax)));
+    const float rMin(radius - this->GetCellThickness() / 2.);
+    const float rMax(radius + this->GetCellThickness() / 2.);
+    const float phiMin(phi - this->GetCellSizePhi() / 2.);
+    const float phiMax(phi + this->GetCellSizePhi() / 2.);
+
+    const float sinThetaMin(std::sin(thetaMin)), cosThetaMin(std::cos(thetaMin)), sinPhiMin(std::sin(phiMin)), cosPhiMin(std::cos(phiMin));
+    const float sinThetaMax(std::sin(thetaMax)), cosThetaMax(std::cos(thetaMax)), sinPhiMax(std::sin(phiMax)), cosPhiMax(std::cos(phiMax));
+
+    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMin * cosPhiMin, rMin * sinThetaMin * sinPhiMin, rMin * cosThetaMin));
+    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMax * cosPhiMin, rMin * sinThetaMax * sinPhiMin, rMin * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMax * cosPhiMax, rMin * sinThetaMax * sinPhiMax, rMin * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMin * sinThetaMin * cosPhiMax, rMin * sinThetaMin * sinPhiMax, rMin * cosThetaMin));
+    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMin * cosPhiMin, rMax * sinThetaMin * sinPhiMin, rMax * cosThetaMin));
+    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMax * cosPhiMin, rMax * sinThetaMax * sinPhiMin, rMax * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMax * cosPhiMax, rMax * sinThetaMax * sinPhiMax, rMax * cosThetaMax));
+    cartesianPointList.push_back(CartesianVector(rMax * sinThetaMin * cosPhiMax, rMax * sinThetaMin * sinPhiMax, rMax * cosThetaMin));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
