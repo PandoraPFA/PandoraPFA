@@ -84,7 +84,9 @@ private:
     bool                    m_blackBackground;          ///< Whether to use a black background color, rather than white
     bool                    m_showDetector;             ///< Whether to display the detector geometry
     std::string             m_hitColors;                ///< Define the hit coloring scheme (default: pfo, choices: pfo, particleid)
-    float                   m_maximumHitEnergy;         ///< Define the maximum hit energy for transparency. Below that value, cells are drawn transparent, above, they are opaque
+
+    float                   m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
+    float                   m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
 
     pandora::StringVector   m_suppressMCParticles;      ///< List of PDG numbers and energies for MC particles to be suppressed (e.g. " 22:0.1 2112:1.0 ")
     PdgCodeToEnergyMap      m_particleSuppressionMap;   ///< Map from pdg-codes to energy for suppression of particles types below specific energies

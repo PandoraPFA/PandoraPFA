@@ -19,7 +19,7 @@ using namespace pandora;
 
 StatusCode VisualMonitoringAlgorithm::Run()
 {
-    PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector, m_maximumHitEnergy));
+    PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector, m_transparencyThresholdE, m_energyScaleThresholdE));
 
     // Show mc particles
     if (m_showMCParticles)
@@ -124,7 +124,8 @@ void VisualMonitoringAlgorithm::VisualizeOrderedCaloHitList(const std::string &l
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::RemoveUnavailableCaloHits(orderedCaloHitList));
     }
 
-    PANDORA_MONITORING_API(VisualizeCaloHits(&orderedCaloHitList, listName.empty() ? "currentCaloHits" : listName.c_str(), GRAY));
+    PANDORA_MONITORING_API(VisualizeCaloHits(&orderedCaloHitList, listName.empty() ? "currentCaloHits" : listName.c_str(),
+        (m_hitColors.find("energy") != std::string::npos ? AUTOENERGY : GRAY)));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -189,8 +190,12 @@ void VisualMonitoringAlgorithm::VisualizeClusterList(const std::string &listName
         }
     }
 
-    PANDORA_MONITORING_API(VisualizeClusters(pClusterList, listName.empty() ? "currentClusters" : listName.c_str(), (m_hitColors.find("particleid") != std::string::npos) ?
-        AUTOID : (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: (m_hitColors.find("iterate") != std::string::npos ? AUTOITER: AUTO)));
+    PANDORA_MONITORING_API(VisualizeClusters(pClusterList, listName.empty() ? "currentClusters" : listName.c_str(),
+        (m_hitColors.find("particleid") != std::string::npos) ? AUTOID :
+        (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE :
+        (m_hitColors.find("iterate") != std::string::npos ? AUTOITER :
+        (m_hitColors.find("energy") != std::string::npos ? AUTOENERGY :
+        AUTO))));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -205,8 +210,12 @@ void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
         return;
     }
 
-    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos", (m_hitColors.find("particleid") != std::string::npos) ?
-        AUTOID : (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE: (m_hitColors.find("iterate") != std::string::npos ? AUTOITER: AUTO)));
+    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos",
+        (m_hitColors.find("particleid") != std::string::npos) ? AUTOID :
+        (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE :
+        (m_hitColors.find("iterate") != std::string::npos ? AUTOITER :
+        (m_hitColors.find("energy") != std::string::npos ? AUTOENERGY :
+        AUTO))));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -255,9 +264,13 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "DisplayEvent", m_displayEvent));
 
-    m_maximumHitEnergy = -1.f;
+    m_transparencyThresholdE = -1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "MaximumHitEnergy", m_maximumHitEnergy));
+        "TransparencyThresholdE", m_transparencyThresholdE));
+
+    m_energyScaleThresholdE = 1.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "EnergyScaleThresholdE", m_energyScaleThresholdE));
 
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
         "SuppressMCParticles", m_suppressMCParticles));
