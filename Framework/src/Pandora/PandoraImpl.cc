@@ -51,7 +51,7 @@ StatusCode PandoraImpl::PrepareTracks() const
 
 StatusCode PandoraImpl::PrepareCaloHits() const
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->OrderInputCaloHits());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CreateInputCaloHitList());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CalculateCaloHitProperties());
 
     return STATUS_CODE_SUCCESS;

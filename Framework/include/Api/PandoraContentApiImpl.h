@@ -71,13 +71,6 @@ public:
     StatusCode GetCurrentClusterList(const ClusterList *&pClusterList, std::string &clusterListName) const;
 
     /**
-     *  @brief  Get the current cluster list name
-     * 
-     *  @param  clusterListName to receive the current cluster list name
-     */
-    StatusCode GetCurrentClusterListName(std::string &clusterListName) const;
-
-    /**
      *  @brief  Get a named cluster list
      * 
      *  @param  clusterListName the name of the cluster list
@@ -99,13 +92,6 @@ public:
     StatusCode GetCurrentCaloHitList(const CaloHitList *&pCaloHitList, std::string &caloHitListName) const;
 
     /**
-     *  @brief  Get the current calo hit list name
-     * 
-     *  @param  caloHitListName to receive the current calo hit list name
-     */
-    StatusCode GetCurrentCaloHitListName(std::string &caloHitListName) const;
-
-    /**
      *  @brief  Get a named calo hit list
      * 
      *  @param  caloHitListName the name of the calo hit list
@@ -125,13 +111,6 @@ public:
      *  @param  trackListName to receive the current track list name
      */
     StatusCode GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const;
-
-    /**
-     *  @brief  Get the current track list name
-     * 
-     *  @param  trackListName to receive the current track list name
-     */
-    StatusCode GetCurrentTrackListName(std::string &trackListName) const;
 
     /**
      *  @brief  Get a named track list

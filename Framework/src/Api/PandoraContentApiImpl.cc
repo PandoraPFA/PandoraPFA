@@ -166,13 +166,6 @@ StatusCode PandoraContentApiImpl::GetCurrentClusterList(const ClusterList *&pClu
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::GetCurrentClusterListName(std::string &clusterListName) const
-{
-    return m_pPandora->m_pClusterManager->GetCurrentListName(clusterListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode PandoraContentApiImpl::GetClusterList(const std::string &clusterListName, const ClusterList *&pClusterList) const
 {
     return m_pPandora->m_pClusterManager->GetList(clusterListName, pClusterList);
@@ -194,13 +187,6 @@ StatusCode PandoraContentApiImpl::GetCurrentCaloHitList(const CaloHitList *&pCal
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::GetCurrentCaloHitListName(std::string &caloHitListName) const
-{
-    return m_pPandora->m_pCaloHitManager->GetCurrentListName(caloHitListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode PandoraContentApiImpl::GetCaloHitList(const std::string &caloHitListName, const CaloHitList *&pCaloHitList) const
 {
     return m_pPandora->m_pCaloHitManager->GetList(caloHitListName, pCaloHitList);
@@ -218,13 +204,6 @@ StatusCode PandoraContentApiImpl::DropCurrentCaloHitList() const
 StatusCode PandoraContentApiImpl::GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const
 {
     return m_pPandora->m_pTrackManager->GetCurrentList(pTrackList, trackListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode PandoraContentApiImpl::GetCurrentTrackListName(std::string &trackListName) const
-{
-    return m_pPandora->m_pTrackManager->GetCurrentListName(trackListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

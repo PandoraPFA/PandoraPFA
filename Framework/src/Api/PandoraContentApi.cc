@@ -78,7 +78,8 @@ pandora::StatusCode PandoraContentApi::GetCurrentClusterList(const pandora::Algo
 
 pandora::StatusCode PandoraContentApi::GetCurrentClusterListName(const pandora::Algorithm &algorithm, std::string &clusterListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->GetCurrentClusterListName(clusterListName);
+    const pandora::ClusterList *pClusterList(NULL);
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentClusterList(pClusterList, clusterListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,7 +117,8 @@ pandora::StatusCode PandoraContentApi::GetCurrentCaloHitList(const pandora::Algo
 
 pandora::StatusCode PandoraContentApi::GetCurrentCaloHitListName(const pandora::Algorithm &algorithm, std::string &caloHitListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->GetCurrentCaloHitListName(caloHitListName);
+    const pandora::CaloHitList *pCaloHitList(NULL);
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentCaloHitList(pCaloHitList, caloHitListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,7 +156,8 @@ pandora::StatusCode PandoraContentApi::GetCurrentTrackList(const pandora::Algori
 
 pandora::StatusCode PandoraContentApi::GetCurrentTrackListName(const pandora::Algorithm &algorithm, std::string &trackListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->GetCurrentTrackListName(trackListName);
+    const pandora::TrackList *pTrackList(NULL);
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentTrackList(pTrackList, trackListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

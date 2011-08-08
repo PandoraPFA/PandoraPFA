@@ -171,31 +171,6 @@ StatusCode TrackManager::AddTracksToList(const std::string &listName, const Trac
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::RemoveTracksFromList(const std::string &listName, const TrackList &trackList)
-{
-    NameToTrackListMap::iterator listIter = m_nameToTrackListMap.find(listName);
-
-    if (m_nameToTrackListMap.end() == listIter)
-        return STATUS_CODE_NOT_FOUND;
-
-    TrackList *pSavedTrackList = listIter->second;
-
-    if (pSavedTrackList == &trackList)
-        return STATUS_CODE_INVALID_PARAMETER;
-
-    for (TrackList::const_iterator iter = trackList.begin(), iterEnd = trackList.end(); iter != iterEnd; ++iter)
-    {
-        TrackList::iterator savedTrackIter = pSavedTrackList->find(*iter);
-
-        if (pSavedTrackList->end() != savedTrackIter)
-            pSavedTrackList->erase(savedTrackIter);
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode TrackManager::MatchTracksToMCPfoTargets(const UidToMCParticleMap &trackToPfoTargetMap)
 {
     if (trackToPfoTargetMap.empty())

@@ -44,34 +44,9 @@ private:
     StatusCode CreateTrack(const PandoraApi::TrackParameters &trackParameters);
 
     /**
-     *  @brief  Create the null track list
-     */
-    StatusCode CreateNullList();
-
-    /**
-     *  @brief  Delete the null track list
-     */
-    void DeleteNullList();
-
-    /**
      *  @brief  Create the input track list (accessible to algorithms), using tracks created by client application
      */
     StatusCode CreateInputTrackList();
-
-    /**
-     *  @brief  Get the current track list name
-     * 
-     *  @param  trackListName to receive the current track list name
-     */
-    StatusCode GetCurrentListName(std::string &trackListName) const;
-
-    /**
-     *  @brief  Get the algorithm input track list name
-     * 
-     *  @param  pAlgorithm address of the algorithm
-     *  @param  trackListName to receive the algorithm input track list name
-     */
-    StatusCode GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &trackListName) const;
 
     /**
      *  @brief  Get the current track list
@@ -143,14 +118,6 @@ private:
      *  @param  trackList the list of tracks to be added
      */
     StatusCode AddTracksToList(const std::string &listName, const TrackList &trackList);
-
-    /**
-     *  @brief  Remove tracks from a saved track list
-     *
-     *  @param  listName the list to remove the tracks from
-     *  @param  trackList the lsit of tracks to be removed
-     */
-    StatusCode RemoveTracksFromList(const std::string &listName, const TrackList &trackList);
 
     /**
      *  @brief  Match tracks to their correct mc particles for particle flow
@@ -275,32 +242,6 @@ private:
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode TrackManager::GetCurrentListName(std::string &trackListName) const
-{
-    if (m_currentListName.empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    trackListName = m_currentListName;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode TrackManager::GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &trackListName) const
-{
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
-
-    if (m_algorithmInfoMap.end() == iter)
-        return this->GetCurrentListName(trackListName);
-
-    trackListName = iter->second.m_parentListName;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline StatusCode TrackManager::GetCurrentList(const TrackList *&pTrackList, std::string &trackListName) const
 {
     trackListName = m_currentListName;
@@ -331,7 +272,8 @@ inline StatusCode TrackManager::GetAlgorithmInputList(const Algorithm *const pAl
 
 inline StatusCode TrackManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
 {
-    return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
+    const TrackList *pTrackList(NULL);
+    return this->GetAlgorithmInputList(pAlgorithm, pTrackList, m_currentListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

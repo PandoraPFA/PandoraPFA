@@ -8,8 +8,6 @@
 
 #include "Managers/ClusterManager.h"
 
-#include "Objects/Cluster.h"
-
 namespace pandora
 {
 
@@ -21,15 +19,14 @@ ClusterManager::ClusterManager() :
     m_canMakeNewClusters(false),
     m_currentListName(NULL_LIST_NAME)
 {
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ClusterManager::~ClusterManager()
 {
-    (void) this->ResetForNextEvent();
-    this->DeleteNullList();
+    (void) this->EraseAllContent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,45 +64,6 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::CreateNullList()
-{
-    if (!m_nameToClusterListMap.empty() || !m_savedLists.empty())
-        return STATUS_CODE_NOT_ALLOWED;
-
-    m_nameToClusterListMap[NULL_LIST_NAME] = new ClusterList;
-    m_savedLists.insert(NULL_LIST_NAME);
-
-    if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(NULL_LIST_NAME))
-        return STATUS_CODE_FAILURE;
-
-    if (m_savedLists.end() == m_savedLists.find(NULL_LIST_NAME))
-        return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void ClusterManager::DeleteNullList()
-{
-    NameToClusterListMap::iterator iter = m_nameToClusterListMap.find(NULL_LIST_NAME);
-
-    if (m_nameToClusterListMap.end() != iter)
-    {
-        delete iter->second;
-        m_nameToClusterListMap.erase(iter);
-    }
-
-    StringSet::iterator savedListsIter = m_savedLists.find(NULL_LIST_NAME);
-
-    if (m_savedLists.end() != savedListsIter)
-    {
-        m_savedLists.erase(savedListsIter);
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ClusterManager::GetList(const std::string &listName, const ClusterList *&pClusterList) const
 {
     NameToClusterListMap::const_iterator iter = m_nameToClusterListMap.find(listName);
@@ -125,8 +83,6 @@ StatusCode ClusterManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm 
     if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(clusterListName))
         return STATUS_CODE_NOT_FOUND;
 
-    // ATTN: Previously couldn't replace lists unless called from a top-level algorithm: return if (m_algorithmInfoMap.size() > 1)
-    //       Then algorithhm parent list was only replaced for algorithm calling this function.
     if (m_savedLists.end() == m_savedLists.find(clusterListName))
         return STATUS_CODE_NOT_ALLOWED;
 
@@ -252,12 +208,7 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, c
     }
 
     m_savedLists.insert(targetListName);
-
     sourceClusterListIter->second->clear();
-
-    // ATTN: Previously used to delete the emptied cluster list immediately, but algorithm users often tended to try to
-    //       access deleted cluster list via a dangling pointer. Now they simply continue to access an empty list (preferable).
-    // PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -310,40 +261,7 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, c
 
     m_savedLists.insert(targetListName);
 
-    // ATTN: Previously used to delete the emptied cluster list immediately, but algorithm users often tended to try to
-    //       access deleted cluster list via a dangling pointer. Now they simply continue to access an empty list (preferable).
-    // if (sourceClusterListIter->second->empty())
-    //     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RemoveEmptyClusterList(pAlgorithm, sourceListName));
-
     return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
-{
-    return pCluster->AddCaloHit(pCaloHit);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterManager::RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit)
-{
-    return pCluster->RemoveCaloHit(pCaloHit);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterManager::AddIsolatedCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
-{
-    return pCluster->AddIsolatedCaloHit(pCaloHit);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterManager::RemoveIsolatedCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit)
-{
-    return pCluster->RemoveIsolatedCaloHit(pCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -560,6 +478,16 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
 
 StatusCode ClusterManager::ResetForNextEvent()
 {
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->EraseAllContent());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::EraseAllContent()
+{
     m_canMakeNewClusters = false;
 
     for (NameToClusterListMap::iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end();)
@@ -570,17 +498,28 @@ StatusCode ClusterManager::ResetForNextEvent()
             delete (*clusterIter);
         }
 
-        iter->second->clear();
         delete iter->second;
         m_nameToClusterListMap.erase(iter++);
     }
+
+    m_currentListName = NULL_LIST_NAME;
 
     m_nameToClusterListMap.clear();
     m_algorithmInfoMap.clear();
     m_savedLists.clear();
 
-    m_currentListName = NULL_LIST_NAME;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode ClusterManager::CreateInitialLists()
+{
+    if (!m_nameToClusterListMap.empty() || !m_savedLists.empty())
+        return STATUS_CODE_NOT_ALLOWED;
+
+    m_nameToClusterListMap[NULL_LIST_NAME] = new ClusterList;
+    m_savedLists.insert(NULL_LIST_NAME);
 
     return STATUS_CODE_SUCCESS;
 }

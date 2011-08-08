@@ -10,6 +10,8 @@
 
 #include "Api/PandoraContentApi.h"
 
+#include "Objects/Cluster.h"
+
 #include "Pandora/PandoraInternal.h"
 
 namespace pandora
@@ -44,16 +46,6 @@ private:
      */
     template <typename CLUSTER_PARAMETERS>
     StatusCode CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster);
-
-    /**
-     *  @brief  Create the null cluster list
-     */
-    StatusCode CreateNullList();
-
-    /**
-     *  @brief  Delete the null cluster list
-     */
-    void DeleteNullList();
 
     /**
      *  @brief  Get the current cluster list name
@@ -286,6 +278,16 @@ private:
     StatusCode ResetForNextEvent();
 
     /**
+     *  @brief  Erase all cluster manager content
+     */
+    StatusCode EraseAllContent();
+
+    /**
+     *  @brief  Create initial cluster lists
+     */
+    StatusCode CreateInitialLists();
+
+    /**
      *  @brief  Remove an empty cluster list
      * 
      *  @param  pAlgorithm the algorithm manipulating the cluster lists
@@ -406,6 +408,34 @@ inline StatusCode ClusterManager::DropCurrentList()
     m_canMakeNewClusters = false;
     m_currentListName = NULL_LIST_NAME;
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
+{
+    return pCluster->AddCaloHit(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::RemoveCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit)
+{
+    return pCluster->RemoveCaloHit(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::AddIsolatedCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit)
+{
+    return pCluster->AddIsolatedCaloHit(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline StatusCode ClusterManager::RemoveIsolatedCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit)
+{
+    return pCluster->RemoveIsolatedCaloHit(pCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

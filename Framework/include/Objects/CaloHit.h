@@ -321,6 +321,7 @@ protected:
     const void             *m_pParentAddress;           ///< The address of the parent calo hit in the user framework
 
     friend class CaloHitHelper;
+    friend class CaloHitMetadata;
     friend class CaloHitManager;
 };
 
