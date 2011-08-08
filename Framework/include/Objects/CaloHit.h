@@ -185,6 +185,13 @@ public:
     bool IsIsolated() const;
 
     /**
+     *  @brief  Get the calo hit weight, which may not be unity if the hit has been fragmented
+     * 
+     *  @return the calo hit weight
+     */
+    float GetWeight() const;
+
+    /**
      *  @brief  Get the calo cell type
      * 
      *  @return the calo cell type
@@ -224,6 +231,14 @@ protected:
      *  @param  parameters the calo hit parameters
      */
     CaloHit(const PandoraApi::CaloHitBaseParameters &parameters);
+
+    /**
+     *  @brief  Weighted copy constructor
+     * 
+     *  @param  pCaloHit address of the calo hit to copy
+     *  @param  weight the weight to apply to energy depositions
+     */
+    CaloHit(CaloHit *pCaloHit, const float weight);
 
     /**
      *  @brief  Destructor
@@ -298,6 +313,7 @@ protected:
     bool                    m_isPossibleMip;            ///< Whether the calo hit is a possible mip hit
     bool                    m_isIsolated;               ///< Whether the calo hit is isolated
     bool                    m_isAvailable;              ///< Whether the calo hit is available to be added to a cluster
+    float                   m_weight;                   ///< The calo hit weight, which may not be unity if the hit has been fragmented
 
     CaloCellType            m_caloCellType;             ///< The calo cell type
 
@@ -342,6 +358,14 @@ private:
      */
     RectangularCaloHit(const PandoraApi::RectangularCaloHitParameters &parameters);
 
+    /**
+     *  @brief  Weighted copy constructor
+     * 
+     *  @param  pCaloHit address of the calo hit to copy
+     *  @param  weight the weight to apply to energy depositions
+     */
+    RectangularCaloHit(RectangularCaloHit *pCaloHit, const float weight = 1.f);
+
     const float             m_cellSizeU;                ///< Dimension of cell (up in ENDCAP, along beam in BARREL), units mm
     const float             m_cellSizeV;                ///< Dimension of cell (perpendicular to u and thickness), units mm
     const float             m_cellLengthScale;          ///< Typical length scale of cell, std::sqrt(CellSizeU * CellSizeV), units mm
@@ -382,6 +406,14 @@ private:
      *  @param  parameters the calo hit parameters
      */
     PointingCaloHit(const PandoraApi::PointingCaloHitParameters &parameters);
+
+    /**
+     *  @brief  Weighted copy constructor
+     * 
+     *  @param  pCaloHit address of the calo hit to copy
+     *  @param  weight the weight to apply to energy depositions
+     */
+    PointingCaloHit(PointingCaloHit *pCaloHit, const float weight = 1.f);
 
     /**
      *  @brief  Calculate the typical length scale of cell, measured at cell mid-point, units mm
@@ -560,6 +592,13 @@ inline float CaloHit::GetDensityWeight() const
 inline bool CaloHit::IsPossibleMip() const
 {
     return m_isPossibleMip;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float CaloHit::GetWeight() const
+{
+    return m_weight;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

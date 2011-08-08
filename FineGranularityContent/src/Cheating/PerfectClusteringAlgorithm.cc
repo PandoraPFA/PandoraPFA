@@ -14,52 +14,49 @@ using namespace pandora;
 
 StatusCode PerfectClusteringAlgorithm::Run()
 {
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
     // Match CaloHitLists to their MCParticles
     typedef std::map< const MCParticle*, CaloHitList* > MCParticleToCaloHitListMap;
     MCParticleToCaloHitListMap hitsPerMCParticle;
 
-    for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; ++itLyr)
+    for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
     {
-        for (CaloHitList::const_iterator hitIter = itLyr->second->begin(), hitIterEnd = itLyr->second->end(); hitIter != hitIterEnd; ++hitIter)
+        CaloHit* pCaloHit = *hitIter;
+
+        if (!PandoraContentApi::IsCaloHitAvailable(*this, pCaloHit))
+            continue;
+
+        if (m_shouldUseOnlyECalHits && (ECAL != pCaloHit->GetHitType()))
+            continue;
+
+        if (!m_shouldUseIsolatedHits && pCaloHit->IsIsolated())
+            continue;
+
+        const MCParticle *pMCParticle = NULL;
+        pCaloHit->GetMCParticle(pMCParticle);
+
+        // Some CalorimeterHits don't have a MCParticle (e.g. noise)
+        if (NULL == pMCParticle)
+            continue;
+
+        // Apply calo hit selection
+        if (!this->SelectMCParticlesForClustering(pMCParticle))
+            continue;
+
+        // Add hit to calohitlist
+        MCParticleToCaloHitListMap::iterator itHitsPerMCParticle(hitsPerMCParticle.find(pMCParticle));
+
+        if (hitsPerMCParticle.end() == itHitsPerMCParticle)
         {
-            CaloHit* pCaloHit = *hitIter;
-
-            if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
-                continue;
-
-            if (m_shouldUseOnlyECalHits && (ECAL != pCaloHit->GetHitType()))
-                continue;
-
-            if (!m_shouldUseIsolatedHits && pCaloHit->IsIsolated())
-                continue;
-
-            const MCParticle *pMCParticle = NULL;
-            pCaloHit->GetMCParticle(pMCParticle);
-
-            // Some CalorimeterHits don't have a MCParticle (e.g. noise)
-            if (NULL == pMCParticle)
-                continue;
-
-            // Apply calo hit selection
-            if (!this->SelectMCParticlesForClustering(pMCParticle))
-                continue;
-
-            // Add hit to calohitlist
-            MCParticleToCaloHitListMap::iterator itHitsPerMCParticle(hitsPerMCParticle.find(pMCParticle));
-
-            if (hitsPerMCParticle.end() == itHitsPerMCParticle)
-            {
-                CaloHitList *pCurrentHits = new CaloHitList();
-                pCurrentHits->insert(pCaloHit);
-                hitsPerMCParticle.insert(std::make_pair(pMCParticle, pCurrentHits));
-            }
-            else
-            {
-                itHitsPerMCParticle->second->insert(pCaloHit);
-            }
+            CaloHitList *pCurrentHits = new CaloHitList();
+            pCurrentHits->insert(pCaloHit);
+            hitsPerMCParticle.insert(std::make_pair(pMCParticle, pCurrentHits));
+        }
+        else
+        {
+            itHitsPerMCParticle->second->insert(pCaloHit);
         }
     }
 

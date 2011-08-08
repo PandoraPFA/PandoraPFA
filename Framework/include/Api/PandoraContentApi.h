@@ -153,47 +153,47 @@ public:
     static pandora::StatusCode DropCurrentClusterList(const pandora::Algorithm &algorithm);
 
     /**
-     *  @brief  Get the current ordered calo hit list
+     *  @brief  Get the current calo hit list
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  pOrderedCaloHitList to receive the address of the current ordered calo hit list
+     *  @param  pCaloHitList to receive the address of the current calo hit list
      */
-    static pandora::StatusCode GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const pandora::OrderedCaloHitList *&pOrderedCaloHitList);
+    static pandora::StatusCode GetCurrentCaloHitList(const pandora::Algorithm &algorithm, const pandora::CaloHitList *&pCaloHitList);
 
     /**
-     *  @brief  Get the current ordered calo hit list
+     *  @brief  Get the current calo hit list
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  pOrderedCaloHitList to receive the address of the current ordered calo hit list
-     *  @param  orderedCaloHitListName to receive the current ordered calo hit list name
+     *  @param  pCaloHitList to receive the address of the current calo hit list
+     *  @param  caloHitListName to receive the current calo hit list name
      */
-    static pandora::StatusCode GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const pandora::OrderedCaloHitList *&pOrderedCaloHitList,
-        std::string &orderedCaloHitListName);
+    static pandora::StatusCode GetCurrentCaloHitList(const pandora::Algorithm &algorithm, const pandora::CaloHitList *&pCaloHitList,
+        std::string &caloHitListName);
 
     /**
-     *  @brief  Get the current ordered calo hit list name
+     *  @brief  Get the current calo hit list name
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  orderedCaloHitListName to receive the current ordered calo hit list name
+     *  @param  caloHitListName to receive the current calo hit list name
      */
-    static pandora::StatusCode GetCurrentOrderedCaloHitListName(const pandora::Algorithm &algorithm, std::string &orderedCaloHitListName);
+    static pandora::StatusCode GetCurrentCaloHitListName(const pandora::Algorithm &algorithm, std::string &caloHitListName);
 
     /**
-     *  @brief  Get a named ordered calo hit list
+     *  @brief  Get a named calo hit list
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  orderedCaloHitListName the name of the ordered calo hit list
-     *  @param  pOrderedCaloHitList to receive the address of the ordered calo hit list
+     *  @param  caloHitListName the name of the calo hit list
+     *  @param  pCaloHitList to receive the address of the calo hit list
      */
-    static pandora::StatusCode GetOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &orderedCaloHitListName,
-        const pandora::OrderedCaloHitList *&pOrderedCaloHitList);
+    static pandora::StatusCode GetCaloHitList(const pandora::Algorithm &algorithm, const std::string &caloHitListName,
+        const pandora::CaloHitList *&pCaloHitList);
 
     /**
-     *  @brief  Drop the current ordered calo hit list, returning the current list to its default empty/null state
+     *  @brief  Drop the current calo hit list, returning the current list to its default empty/null state
      * 
      *  @param  algorithm the algorithm calling this function
      */
-    static pandora::StatusCode DropCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm);
+    static pandora::StatusCode DropCurrentCaloHitList(const pandora::Algorithm &algorithm);
 
     /**
      *  @brief  Get the current track list
@@ -317,6 +317,26 @@ public:
         const pandora::ClusterList *&pNewClusterList, std::string &newClusterListName);
 
     /**
+     *  @brief  Is calo hit available to add to a cluster
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pCaloHit address of the calo hit
+     * 
+     *  @return boolean
+     */
+    static bool IsCaloHitAvailable(const pandora::Algorithm &algorithm, pandora::CaloHit *pCaloHit);
+
+    /**
+     *  @brief  Are all calo hits in list available to add to a cluster
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  caloHitList the list of calo hits
+     * 
+     *  @return boolean
+     */
+    static bool AreCaloHitsAvailable(const pandora::Algorithm &algorithm, const pandora::CaloHitList &caloHitList);
+
+    /**
      *  @brief  Add a calo hit to a cluster
      *
      *  @param  algorithm the algorithm calling this function
@@ -353,6 +373,29 @@ public:
      *  @param  pCaloHit address of the isolated hit to remove
      */
     static pandora::StatusCode RemoveIsolatedCaloHitFromCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster, pandora::CaloHit *pCaloHit);
+
+    /**
+     *  @brief  Fragment a calo hit into two daughter calo hits, with a specified energy division
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pOriginalCaloHit address of the original calo hit, which will be deleted
+     *  @param  fraction1 the fraction of energy to be assigned to daughter fragment 1
+     *  @param  pDaughterCaloHit1 to receive the address of daughter fragment 1
+     *  @param  pDaughterCaloHit2 to receive the address of daughter fragment 2
+     */
+    static pandora::StatusCode FragmentCaloHit(const pandora::Algorithm &algorithm, pandora::CaloHit *pOriginalCaloHit, const float fraction1,
+        pandora::CaloHit *&pDaughterCaloHit1, pandora::CaloHit *&pDaughterCaloHit2);
+
+    /**
+     *  @brief  Merge two calo hit fragments, originally from the same parent hit, to form a new calo hit
+     *
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pFragmentCaloHit1 address of calo hit fragment 1, which will be deleted
+     *  @param  pFragmentCaloHit2 address of calo hit fragment 2, which will be deleted
+     *  @param  pMergedCaloHit to receive the address of the merged calo hit
+     */
+    static pandora::StatusCode MergeCaloHitFragments(const pandora::Algorithm &algorithm, pandora::CaloHit *pFragmentCaloHit1,
+        pandora::CaloHit *pFragmentCaloHit2, pandora::CaloHit *&pMergedCaloHit);
 
     /**
      *  @brief  Delete a cluster from the current list
@@ -558,22 +601,22 @@ public:
     static pandora::StatusCode TemporarilyReplaceCurrentClusterList(const pandora::Algorithm &algorithm, const std::string &newClusterListName);
 
     /**
-     *  @brief  Save the current ordered calo hit list under a new name
+     *  @brief  Save the current calo hit list under a new name
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new ordered calo hit list name
+     *  @param  newListName the new calo hit list name
      */
-    static pandora::StatusCode SaveOrderedCaloHitList(const pandora::Algorithm &algorithm, const pandora::OrderedCaloHitList &orderedCaloHitList,
+    static pandora::StatusCode SaveCaloHitList(const pandora::Algorithm &algorithm, const pandora::CaloHitList &caloHitList,
         const std::string &newListName);
 
     /**
-     *  @brief  Replace the current ordered calo hit list with a pre-saved list; use this new list as a permanent replacement
+     *  @brief  Replace the current calo hit list with a pre-saved list; use this new list as a permanent replacement
      *          for the current list (will persist outside the current algorithm)
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the name of the replacement ordered calo hit list
+     *  @param  newListName the name of the replacement calo hit list
      */
-    static pandora::StatusCode ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName);
+    static pandora::StatusCode ReplaceCurrentCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName);
 
     /**
      *  @brief  Save the current track list under a new name

@@ -30,35 +30,35 @@ private:
     pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
 
     /**
-     *  @brief  Visualize a specified ordered calo hit list
+     *  @brief  Visualize mc particle list
      * 
      *  @param  listName the list name
      */
     void VisualizeMCParticleList() const;
 
     /**
-     *  @brief  Visualize a specified ordered calo hit list
+     *  @brief  Visualize a specified calo hit list
      * 
      *  @param  listName the list name
      */
-    void VisualizeOrderedCaloHitList(const std::string &listName) const;
+    void VisualizeCaloHitList(const std::string &listName) const;
 
     /**
-     *  @brief  Visualize a specified ordered calo hit list
+     *  @brief  Visualize a specified calo hit list
      * 
      *  @param  listName the list name
      */
     void VisualizeTrackList(const std::string &listName) const;
 
     /**
-     *  @brief  Visualize a specified ordered calo hit list
+     *  @brief  Visualize a specified calo hit list
      * 
      *  @param  listName the list name
      */
     void VisualizeClusterList(const std::string &listName) const;
 
     /**
-     *  @brief  Visualize a specified ordered calo hit list
+     *  @brief  Visualize a specified calo hit list
      * 
      *  @param  listName the list name
      */
@@ -68,14 +68,14 @@ private:
 
     bool                    m_showMCParticles;          ///< Whether to show MC particles
 
-    bool                    m_showCurrentCaloHits;      ///< Whether to show current ordered calohitlist
+    bool                    m_showCurrentCaloHits;      ///< Whether to show current calohitlist
     pandora::StringVector   m_caloHitListNames;         ///< Names of calo hit lists to show
 
-    bool                    m_showCurrentTracks;        ///< Whether to show current ordered calohitlist
-    pandora::StringVector   m_trackListNames;           ///< Names of calo hit lists to show
+    bool                    m_showCurrentTracks;        ///< Whether to show current tracks
+    pandora::StringVector   m_trackListNames;           ///< Names of track lists to show
 
-    bool                    m_showCurrentClusters;      ///< Whether to show current ordered calohitlist
-    pandora::StringVector   m_clusterListNames;         ///< Names of calo hit lists to show
+    bool                    m_showCurrentClusters;      ///< Whether to show current clusters
+    pandora::StringVector   m_clusterListNames;         ///< Names of cluster lists to show
 
     bool                    m_showCurrentPfos;          ///< Whether to show current particle flow object list
     bool                    m_showOnlyAvailable;        ///< Whether to show only available  (i.e. non-clustered) calohits and tracks

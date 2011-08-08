@@ -34,9 +34,42 @@ CaloHit::CaloHit(const PandoraApi::CaloHitBaseParameters &caloHitParameters) :
     m_isPossibleMip(false),
     m_isIsolated(false),
     m_isAvailable(true),
+    m_weight(1.f),
     m_caloCellType(UNKNOWN_CELL_TYPE),
     m_pMCParticle(NULL),
     m_pParentAddress(caloHitParameters.m_pParentAddress.Get())
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+CaloHit::CaloHit(CaloHit *pCaloHit, const float weight) :
+    m_positionVector(pCaloHit->m_positionVector),
+    m_expectedDirection(pCaloHit->m_expectedDirection),
+    m_cellNormalVector(pCaloHit->m_cellNormalVector),
+    m_cellThickness(pCaloHit->m_cellThickness),
+    m_nCellRadiationLengths(pCaloHit->m_nCellRadiationLengths),
+    m_nCellInteractionLengths(pCaloHit->m_nCellInteractionLengths),
+    m_time(pCaloHit->m_time),
+    m_inputEnergy(weight * pCaloHit->m_inputEnergy),
+    m_mipEquivalentEnergy(weight * pCaloHit->m_mipEquivalentEnergy),
+    m_electromagneticEnergy(weight * pCaloHit->m_electromagneticEnergy),
+    m_hadronicEnergy(weight * pCaloHit->m_hadronicEnergy),
+    m_isDigital(pCaloHit->m_isDigital),
+    m_hitType(pCaloHit->m_hitType),
+    m_detectorRegion(pCaloHit->m_detectorRegion),
+    m_layer(pCaloHit->m_layer),
+    m_pseudoLayer(pCaloHit->m_pseudoLayer),
+    m_isInOuterSamplingLayer(pCaloHit->m_isInOuterSamplingLayer),
+    m_densityWeight(pCaloHit->m_densityWeight),
+    m_surroundingEnergy(pCaloHit->m_surroundingEnergy),
+    m_isPossibleMip(pCaloHit->m_isPossibleMip),
+    m_isIsolated(pCaloHit->m_isIsolated),
+    m_isAvailable(pCaloHit->m_isAvailable),
+    m_weight(weight * pCaloHit->m_weight),
+    m_caloCellType(pCaloHit->m_caloCellType),
+    m_pMCParticle(pCaloHit->m_pMCParticle),
+    m_pParentAddress(pCaloHit->m_pParentAddress)
 {
 }
 
@@ -116,6 +149,16 @@ RectangularCaloHit::RectangularCaloHit(const PandoraApi::RectangularCaloHitParam
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+RectangularCaloHit::RectangularCaloHit(RectangularCaloHit *pCaloHit, const float weight) :
+    CaloHit(pCaloHit, weight),
+    m_cellSizeU(pCaloHit->m_cellSizeU),
+    m_cellSizeV(pCaloHit->m_cellSizeV),
+    m_cellLengthScale(pCaloHit->m_cellLengthScale)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void RectangularCaloHit::GetCellCorners(CartesianPointList &cartesianPointList) const
 {
     const CartesianVector &position(this->GetPositionVector());
@@ -153,6 +196,16 @@ PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &pa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+PointingCaloHit::PointingCaloHit(PointingCaloHit *pCaloHit, const float weight) :
+    CaloHit(pCaloHit, weight),
+    m_cellSizeEta(pCaloHit->m_cellSizeEta),
+    m_cellSizePhi(pCaloHit->m_cellSizePhi),
+    m_cellLengthScale(pCaloHit->m_cellLengthScale)
+{
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 float PointingCaloHit::CalculateCellLengthScale() const
 {
     float radius(0.f), phi(0.f), theta(0.f);
@@ -162,7 +215,7 @@ float PointingCaloHit::CalculateCellLengthScale() const
     const float etaMin(centralEta - this->GetCellSizeEta() / 2.), etaMax(centralEta + this->GetCellSizeEta() / 2.);
     const float thetaMin(2. * std::atan(std::exp(-1. * etaMin))), thetaMax(2. * std::atan(std::exp(-1. * etaMax)));
 
-    return std::sqrt(std::fabs(radius * this->GetCellSizePhi() * radius * (thetaMax - thetaMin))); // TODO confirm this definition
+    return std::sqrt(std::fabs(radius * this->GetCellSizePhi() * radius * (thetaMax - thetaMin)));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

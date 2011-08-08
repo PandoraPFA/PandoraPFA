@@ -19,8 +19,8 @@ StatusCode ClusteringParentAlgorithm::Run()
 
     if (!m_inputCaloHitListName.empty())
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitListName(*this, originalCaloHitListName));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, m_inputCaloHitListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitListName(*this, originalCaloHitListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentCaloHitList(*this, m_inputCaloHitListName));
     }
 
     // Run the initial cluster formation algorithm
@@ -43,7 +43,7 @@ StatusCode ClusteringParentAlgorithm::Run()
     // Unless specified, return current calo hit list to that when algorithm started
     if (m_restoreOriginalCaloHitList && !m_inputCaloHitListName.empty())
     {
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, originalCaloHitListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentCaloHitList(*this, originalCaloHitListName));
     }
 
     return STATUS_CODE_SUCCESS;

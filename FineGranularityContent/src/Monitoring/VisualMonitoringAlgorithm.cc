@@ -30,13 +30,13 @@ StatusCode VisualMonitoringAlgorithm::Run()
     // Show current calo hit list
     if (m_showCurrentCaloHits)
     {
-        this->VisualizeOrderedCaloHitList(std::string());
+        this->VisualizeCaloHitList(std::string());
     }
 
     // Show specified lists of calo hits
     for (StringVector::const_iterator iter = m_caloHitListNames.begin(), iterEnd = m_caloHitListNames.end(); iter != iterEnd; ++iter)
     {
-        this->VisualizeOrderedCaloHitList(*iter);
+        this->VisualizeCaloHitList(*iter);
     }
 
     // Show current cluster list
@@ -95,36 +95,46 @@ void VisualMonitoringAlgorithm::VisualizeMCParticleList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void VisualMonitoringAlgorithm::VisualizeOrderedCaloHitList(const std::string &listName) const
+void VisualMonitoringAlgorithm::VisualizeCaloHitList(const std::string &listName) const
 {
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
+    const CaloHitList *pCaloHitList = NULL;
 
     if (listName.empty())
     {
-        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList))
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList))
         {
-            std::cout << "VisualMonitoringAlgorithm: current ordered calo hit list unavailable." << std::endl;
+            std::cout << "VisualMonitoringAlgorithm: current calo hit list unavailable." << std::endl;
             return;
         }
     }
     else
     {
-        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetOrderedCaloHitList(*this, listName, pOrderedCaloHitList))
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCaloHitList(*this, listName, pCaloHitList))
         {
-            std::cout << "VisualMonitoringAlgorithm: ordered calo hit list " << listName << " unavailable." << std::endl;
+            std::cout << "VisualMonitoringAlgorithm: calo hit list " << listName << " unavailable." << std::endl;
             return;
         }
     }
 
-    OrderedCaloHitList orderedCaloHitList(*pOrderedCaloHitList);
+    CaloHitList caloHitList(*pCaloHitList);
 
     // Filter calo hit list
     if (m_showOnlyAvailable)
     {
-        PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::RemoveUnavailableCaloHits(orderedCaloHitList));
+        for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; )
+        {
+            if (!PandoraContentApi::IsCaloHitAvailable(*this, *hitIter))
+            {
+                caloHitList.erase(hitIter++);
+            }
+            else
+            {
+                hitIter++;
+            }
+        }
     }
 
-    PANDORA_MONITORING_API(VisualizeCaloHits(&orderedCaloHitList, listName.empty() ? "currentCaloHits" : listName.c_str(),
+    PANDORA_MONITORING_API(VisualizeCaloHits(&caloHitList, listName.empty() ? "currentCaloHits" : listName.c_str(),
         (m_hitColors.find("energy") != std::string::npos ? AUTOENERGY : GRAY)));
 }
 

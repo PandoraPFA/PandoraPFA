@@ -104,45 +104,42 @@ StatusCode IsolatedHitMergingAlgorithm::Run()
 
 
     // SECOND PART - loop over the remaining available isolated hits, and associate them with other clusters
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
-    for (OrderedCaloHitList::const_iterator iterI = pOrderedCaloHitList->begin(); iterI != pOrderedCaloHitList->end(); ++iterI)
+    for (CaloHitList::const_iterator hitIterI = pCaloHitList->begin(); hitIterI != pCaloHitList->end(); ++hitIterI)
     {
-        for (CaloHitList::const_iterator hitIterI = iterI->second->begin(); hitIterI != iterI->second->end(); ++hitIterI)
-        {
-            CaloHit *pCaloHit = *hitIterI;
+        CaloHit *pCaloHit = *hitIterI;
 
-            if (!pCaloHit->IsIsolated() || !CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+        if (!pCaloHit->IsIsolated() || !PandoraContentApi::IsCaloHitAvailable(*this, pCaloHit))
+            continue;
+
+        Cluster *pBestHostCluster(NULL);
+        float bestHostClusterEnergy(0.);
+        float minDistance(m_maxRecombinationDistance);
+
+        // Find most appropriate cluster for this isolated hit
+        for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
+        {
+            Cluster *pCluster = *iterJ;
+
+            if (NULL == pCluster)
                 continue;
 
-            Cluster *pBestHostCluster(NULL);
-            float bestHostClusterEnergy(0.);
-            float minDistance(m_maxRecombinationDistance);
+            const float distance(this->GetDistanceToHit(pCluster, pCaloHit));
+            const float hostClusterEnergy(pCluster->GetHadronicEnergy());
 
-            // Find most appropriate cluster for this isolated hit
-            for (ClusterVector::const_iterator iterJ = clusterVector.begin(), iterJEnd = clusterVector.end(); iterJ != iterJEnd; ++iterJ)
+            if ((distance < minDistance) || ((distance == minDistance) && (hostClusterEnergy > bestHostClusterEnergy)))
             {
-                Cluster *pCluster = *iterJ;
-
-                if (NULL == pCluster)
-                    continue;
-
-                const float distance(this->GetDistanceToHit(pCluster, pCaloHit));
-                const float hostClusterEnergy(pCluster->GetHadronicEnergy());
-
-                if ((distance < minDistance) || ((distance == minDistance) && (hostClusterEnergy > bestHostClusterEnergy)))
-                {
-                    minDistance = distance;
-                    pBestHostCluster = pCluster;
-                    bestHostClusterEnergy = hostClusterEnergy;
-                }
+                minDistance = distance;
+                pBestHostCluster = pCluster;
+                bestHostClusterEnergy = hostClusterEnergy;
             }
+        }
 
-            if (NULL != pBestHostCluster)
-            {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddIsolatedCaloHitToCluster(*this, pBestHostCluster, pCaloHit));
-            }
+        if (NULL != pBestHostCluster)
+        {
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::AddIsolatedCaloHitToCluster(*this, pBestHostCluster, pCaloHit));
         }
     }
 

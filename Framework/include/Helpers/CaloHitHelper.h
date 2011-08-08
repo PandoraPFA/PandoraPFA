@@ -23,38 +23,6 @@ class CaloHitHelper
 {
 public:
     /**
-     *  @brief  Is calo hit available to add to a cluster
-     * 
-     *  @param  pCaloHit address of the calo hit
-     * 
-     *  @return boolean
-     */
-    static bool IsCaloHitAvailable(CaloHit *const pCaloHit);
-
-    /**
-     *  @brief  Are all calo hits in list available to add to a cluster
-     * 
-     *  @param  caloHitList the list of calo hits
-     * 
-     *  @return boolean
-     */
-    static bool AreCaloHitsAvailable(const CaloHitList &caloHitList);
-
-    /**
-     *  @brief  Remove all calo hits unavailable for clustering from a calo hit list
-     * 
-     *  @param  caloHitList the list of calo hits from which to remove unavailable hits
-     */
-    static void RemoveUnavailableCaloHits(CaloHitList &caloHitList);
-
-    /**
-     *  @brief  Remove all calo hits unavailable for clustering from an ordered calo hit list
-     * 
-     *  @param  orderedCaloHitList the ordered list of calo hits from which to remove unavailable hits
-     */
-    static StatusCode RemoveUnavailableCaloHits(OrderedCaloHitList &orderedCaloHitList);
-
-    /**
      *  @brief  Get contribution to a hit's density weight from a list of other hits
      * 
      *  @param  pCaloHit the calo hit
@@ -96,65 +64,6 @@ public:
 
 private:
     /**
-     *  @brief  Set availability of a calo hit to be added to a cluster
-     * 
-     *  @param  pCaloHit the address of the calo hit
-     *  @param  isAvailable the calo hit availability
-     */
-    static StatusCode SetCaloHitAvailability(CaloHit *const pCaloHit, bool isAvailable);
-
-    /**
-     *  @brief  Set availability of all calo hits in list
-     * 
-     *  @param  caloHitList the list of calo hits
-     *  @param  isAvailable the calo hit availability
-     */
-    static StatusCode SetCaloHitAvailability(CaloHitList &caloHitList, bool isAvailable);
-
-    /**
-     *  @brief  Create a calo hit usage map containing an entry for each calo hit in a cluster list
-     *          specifying whether the calo hit is available to be added to a cluster
-     * 
-     *  @param  usageMapName the usage map name
-     *  @param  clusterList the cluster list
-     */
-    static StatusCode CreateInitialCaloHitUsageMap(const std::string &usageMapName, const ClusterList &clusterList);
-
-    /**
-     *  @brief  Create a calo hit usage map containing an entry for each calo hit in an ordered calo hit list
-     *          specifying whether the calo hit is available to be added to a cluster
-     * 
-     *  @param  usageMapName the usage map name
-     *  @param  pOrderedCaloHitList the address of the ordered calo hit list
-     */
-    static StatusCode CreateInitialCaloHitUsageMap(const std::string &usageMapName, const OrderedCaloHitList *pOrderedCaloHitList);
-
-    /**
-     *  @brief  Create a new calo hit usage map containing the same calo hits as the current usage map
-     *          and with all isAvailable flags set to true
-     * 
-     *  @param  usageMapName the name of the usage map to create
-     */
-    static StatusCode CreateAdditionalCaloHitUsageMap(const std::string &usageMapName);
-
-    /**
-     *  @brief  Apply the details in a calo hit usage map to the calo hits
-     * 
-     *  @param  usageMapName the name of the usage map to apply
-     */
-    static StatusCode ApplyCaloHitUsageMap(const std::string &usageMapName);
-
-    /**
-     *  @brief  Clear the calo hit usage maps
-     */
-    static StatusCode ClearCaloHitUsageMaps();
-
-    /**
-     *  @brief  Clear the calo hit usage maps used by the most recent reclustering process
-     */
-    static StatusCode ClearMostRecentCaloHitUsageMaps();
-
-    /**
      *  @brief  Calculate calo hit properties for a particular calo hit, through comparison with an ordered list of other hits.
      *          Calculates density weights, isolation flags, possible mip flags and surrounding energy
      * 
@@ -169,17 +78,6 @@ private:
      *  @param  pXmlHandle address of the relevant xml handle
      */
     static StatusCode ReadSettings(const TiXmlHandle *const pXmlHandle);
-
-    typedef std::map<CaloHit *, bool> CaloHitUsageMap;
-    typedef std::map<std::string, CaloHitUsageMap *> NameToCaloHitUsageMap;
-    typedef std::vector<CaloHitUsageMap *> UsageMapVector;
-    typedef std::vector<StringVector *> NestedUsageMapNames;
-
-    static unsigned int             m_nReclusteringProcesses;           ///< The number of reclustering algorithms currently in use
-    static CaloHitUsageMap         *m_pCurrentUsageMap;                 ///< Address of the current calo hit usage map
-    static UsageMapVector           m_parentCaloHitUsageMaps;           ///< List of current usage maps for all reclustering algorithms in use
-    static NestedUsageMapNames      m_nestedUsageMapNames;              ///< List of usage maps names, ordered by recluster process
-    static NameToCaloHitUsageMap    m_nameToCaloHitUsageMap;            ///< The name to calo hit availability map
 
     static float                    m_caloHitMaxSeparation2;            ///< Max separation to consider associations between hits, units mm (used squared)
     static float                    m_isolationCaloHitMaxSeparation2;   ///< Max separation considered when identifying isolated hits, units mm (used squared)

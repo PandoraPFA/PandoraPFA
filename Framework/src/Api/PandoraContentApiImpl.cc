@@ -10,7 +10,6 @@
 
 #include "Api/PandoraContentApiImpl.h"
 
-#include "Helpers/CaloHitHelper.h"
 #include "Helpers/ReclusterHelper.h"
 
 #include "Managers/AlgorithmManager.h"
@@ -39,11 +38,11 @@ StatusCode PandoraContentApiImpl::CreateCluster(CLUSTER_PARAMETERS *pClusterPara
 template <>
 StatusCode PandoraContentApiImpl::CreateCluster(CaloHit *pCaloHit, Cluster *&pCluster) const
 {
-    if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+    if (!m_pPandora->m_pCaloHitManager->IsCaloHitAvailable(pCaloHit))
         return STATUS_CODE_NOT_ALLOWED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateCluster(pCaloHit, pCluster));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, false));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(pCaloHit, false));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -51,11 +50,11 @@ StatusCode PandoraContentApiImpl::CreateCluster(CaloHit *pCaloHit, Cluster *&pCl
 template <>
 StatusCode PandoraContentApiImpl::CreateCluster(CaloHitList *pCaloHitList, Cluster *&pCluster) const
 {
-    if (!CaloHitHelper::AreCaloHitsAvailable(*pCaloHitList))
+    if (!m_pPandora->m_pCaloHitManager->AreCaloHitsAvailable(*pCaloHitList))
         return STATUS_CODE_NOT_ALLOWED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateCluster(pCaloHitList, pCluster));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(*pCaloHitList, false));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(*pCaloHitList, false));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -188,29 +187,28 @@ StatusCode PandoraContentApiImpl::DropCurrentClusterList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList,
-    std::string &orderedCaloHitListName) const
+StatusCode PandoraContentApiImpl::GetCurrentCaloHitList(const CaloHitList *&pCaloHitList, std::string &caloHitListName) const
 {
-    return m_pPandora->m_pCaloHitManager->GetCurrentList(pOrderedCaloHitList, orderedCaloHitListName);
+    return m_pPandora->m_pCaloHitManager->GetCurrentList(pCaloHitList, caloHitListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::GetCurrentOrderedCaloHitListName(std::string &orderedCaloHitListName) const
+StatusCode PandoraContentApiImpl::GetCurrentCaloHitListName(std::string &caloHitListName) const
 {
-    return m_pPandora->m_pCaloHitManager->GetCurrentListName(orderedCaloHitListName);
+    return m_pPandora->m_pCaloHitManager->GetCurrentListName(caloHitListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::GetOrderedCaloHitList(const std::string &orderedCaloHitListName, const OrderedCaloHitList *&pOrderedCaloHitList) const
+StatusCode PandoraContentApiImpl::GetCaloHitList(const std::string &caloHitListName, const CaloHitList *&pCaloHitList) const
 {
-    return m_pPandora->m_pCaloHitManager->GetList(orderedCaloHitListName, pOrderedCaloHitList);
+    return m_pPandora->m_pCaloHitManager->GetList(caloHitListName, pCaloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::DropCurrentOrderedCaloHitList() const
+StatusCode PandoraContentApiImpl::DropCurrentCaloHitList() const
 {
     return m_pPandora->m_pCaloHitManager->DropCurrentList();
 }
@@ -262,14 +260,15 @@ StatusCode PandoraContentApiImpl::GetMCParticleList(MCParticleList &mcParticleLi
 StatusCode PandoraContentApiImpl::InitializeFragmentation(const Algorithm &algorithm, const ClusterList &inputClusterList,
     std::string &originalClustersListName, std::string &fragmentClustersListName) const
 {
+    // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MoveClustersToTemporaryListAndSetCurrent(&algorithm, inputClusterListName, originalClustersListName, inputClusterList));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::CreateInitialCaloHitUsageMap(originalClustersListName, inputClusterList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->InitializeReclustering(&algorithm, inputClusterList, originalClustersListName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MakeTemporaryListAndSetCurrent(&algorithm, fragmentClustersListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::CreateAdditionalCaloHitUsageMap(fragmentClustersListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->PrepareForClustering(&algorithm, fragmentClustersListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -279,6 +278,7 @@ StatusCode PandoraContentApiImpl::InitializeFragmentation(const Algorithm &algor
 StatusCode PandoraContentApiImpl::EndFragmentation(const Algorithm &algorithm, const std::string &clusterListToSaveName,
     const std::string &clusterListToDeleteName) const
 {
+    // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveClusters(&algorithm, inputClusterListName, clusterListToSaveName));
@@ -288,7 +288,7 @@ StatusCode PandoraContentApiImpl::EndFragmentation(const Algorithm &algorithm, c
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareReclusterCandidatesForDeletion(*pClustersToBeDeleted));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteTemporaryClusterList(&algorithm, clusterListToDeleteName));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ApplyCaloHitUsageMap(clusterListToSaveName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->EndReclustering(&algorithm, clusterListToSaveName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetCurrentListToAlgorithmInputList(&algorithm));
 
     return STATUS_CODE_SUCCESS;
@@ -299,19 +299,15 @@ StatusCode PandoraContentApiImpl::EndFragmentation(const Algorithm &algorithm, c
 StatusCode PandoraContentApiImpl::InitializeReclustering(const Algorithm &algorithm, const TrackList &inputTrackList,
     const ClusterList &inputClusterList, std::string &originalClustersListName) const
 {
-    std::string temporaryListName;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->CreateTemporaryListAndSetCurrent(&algorithm, inputTrackList, temporaryListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CreateTemporaryListAndSetCurrent(&algorithm, inputClusterList, temporaryListName));
-
+    // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MoveClustersToTemporaryListAndSetCurrent(&algorithm, inputClusterListName, originalClustersListName, inputClusterList));
 
-    std::string orderedCaloHitListName;
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->GetCurrentList(pOrderedCaloHitList, orderedCaloHitListName));
+    std::string temporaryListName;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->CreateTemporaryListAndSetCurrent(&algorithm, inputTrackList, temporaryListName));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::CreateInitialCaloHitUsageMap(originalClustersListName, pOrderedCaloHitList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->InitializeReclustering(&algorithm, inputClusterList, originalClustersListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::InitializeReclusterMonitoring(inputTrackList));
 
     return STATUS_CODE_SUCCESS;
@@ -321,6 +317,7 @@ StatusCode PandoraContentApiImpl::InitializeReclustering(const Algorithm &algori
 
 StatusCode PandoraContentApiImpl::EndReclustering(const Algorithm &algorithm, const std::string &selectedClusterListName) const
 {
+    // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveClusters(&algorithm, inputClusterListName, selectedClusterListName));
@@ -333,7 +330,7 @@ StatusCode PandoraContentApiImpl::EndReclustering(const Algorithm &algorithm, co
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareReclusterCandidatesForDeletion(clustersToBeDeleted));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetAlgorithmInfo(&algorithm, false));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ApplyCaloHitUsageMap(selectedClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->EndReclustering(&algorithm, selectedClusterListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::EndReclusterMonitoring());
 
     return STATUS_CODE_SUCCESS;
@@ -345,9 +342,7 @@ StatusCode PandoraContentApiImpl::RunClusteringAlgorithm(const Algorithm &algori
     const ClusterList *&pNewClusterList, std::string &newClusterListName) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MakeTemporaryListAndSetCurrent(&algorithm, newClusterListName));
-
-    if (0 < CaloHitHelper::m_nReclusteringProcesses)
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::CreateAdditionalCaloHitUsageMap(newClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->PrepareForClustering(&algorithm, newClusterListName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->RunAlgorithm(clusteringAlgorithmName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetCurrentList(pNewClusterList, newClusterListName));
@@ -357,13 +352,27 @@ StatusCode PandoraContentApiImpl::RunClusteringAlgorithm(const Algorithm &algori
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool PandoraContentApiImpl::IsCaloHitAvailable(pandora::CaloHit *pCaloHit) const
+{
+    return m_pPandora->m_pCaloHitManager->IsCaloHitAvailable(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PandoraContentApiImpl::AreCaloHitsAvailable(const pandora::CaloHitList &caloHitList) const
+{
+    return m_pPandora->m_pCaloHitManager->AreCaloHitsAvailable(caloHitList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraContentApiImpl::AddCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const
 {
-    if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+    if (!m_pPandora->m_pCaloHitManager->IsCaloHitAvailable(pCaloHit))
         return STATUS_CODE_NOT_ALLOWED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->AddCaloHitToCluster(pCluster, pCaloHit));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, false));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(pCaloHit, false));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -376,7 +385,7 @@ StatusCode PandoraContentApiImpl::RemoveCaloHitFromCluster(Cluster *pCluster, Ca
         return STATUS_CODE_NOT_ALLOWED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->RemoveCaloHitFromCluster(pCluster, pCaloHit));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, true));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(pCaloHit, true));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -385,11 +394,11 @@ StatusCode PandoraContentApiImpl::RemoveCaloHitFromCluster(Cluster *pCluster, Ca
 
 StatusCode PandoraContentApiImpl::AddIsolatedCaloHitToCluster(Cluster *pCluster, CaloHit *pCaloHit) const
 {
-    if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+    if (!m_pPandora->m_pCaloHitManager->IsCaloHitAvailable(pCaloHit))
         return STATUS_CODE_NOT_ALLOWED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->AddIsolatedCaloHitToCluster(pCluster, pCaloHit));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, false));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(pCaloHit, false));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -399,9 +408,24 @@ StatusCode PandoraContentApiImpl::AddIsolatedCaloHitToCluster(Cluster *pCluster,
 StatusCode PandoraContentApiImpl::RemoveIsolatedCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->RemoveIsolatedCaloHitFromCluster(pCluster, pCaloHit));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(pCaloHit, true));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(pCaloHit, true));
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::FragmentCaloHit(CaloHit *pOriginalCaloHit, const float fraction1, CaloHit *&pDaughterCaloHit1,
+    CaloHit *&pDaughterCaloHit2) const
+{
+    return m_pPandora->m_pCaloHitManager->FragmentCaloHit(pOriginalCaloHit, fraction1, pDaughterCaloHit1, pDaughterCaloHit2);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::MergeCaloHitFragments(CaloHit *pFragmentCaloHit1, CaloHit *pFragmentCaloHit2, CaloHit *&pMergedCaloHit) const
+{
+    return m_pPandora->m_pCaloHitManager->MergeCaloHitFragments(pFragmentCaloHit1, pFragmentCaloHit2, pMergedCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -649,15 +673,14 @@ StatusCode PandoraContentApiImpl::TemporarilyReplaceCurrentClusterList(const std
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::SaveOrderedCaloHitList(const Algorithm &/*algorithm*/, const OrderedCaloHitList &orderedCaloHitList,
-    const std::string &newListName) const
+StatusCode PandoraContentApiImpl::SaveCaloHitList(const Algorithm &/*algorithm*/, const CaloHitList &caloHitList, const std::string &newListName) const
 {
-    return m_pPandora->m_pCaloHitManager->SaveList(orderedCaloHitList, newListName);
+    return m_pPandora->m_pCaloHitManager->SaveList(caloHitList, newListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::ReplaceCurrentOrderedCaloHitList(const Algorithm &algorithm, const std::string &newListName) const
+StatusCode PandoraContentApiImpl::ReplaceCurrentCaloHitList(const Algorithm &algorithm, const std::string &newListName) const
 {
     return m_pPandora->m_pCaloHitManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newListName);
 }
@@ -696,7 +719,7 @@ StatusCode PandoraContentApiImpl::PrepareClusterForDeletion(const Cluster *const
     const CaloHitList &isolatedCaloHitList(pCluster->GetIsolatedCaloHitList());
     caloHitList.insert(isolatedCaloHitList.begin(), isolatedCaloHitList.end());
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitList, true));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(caloHitList, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(pCluster->GetAssociatedTrackList()));
 
     return STATUS_CODE_SUCCESS;
@@ -725,7 +748,7 @@ StatusCode PandoraContentApiImpl::PrepareClustersForDeletion(const ClusterList &
         trackList.insert(associatedTrackList.begin(), associatedTrackList.end());
     }
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::SetCaloHitAvailability(caloHitList, true));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->SetCaloHitAvailability(caloHitList, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveClusterAssociations(trackList));
 
     return STATUS_CODE_SUCCESS;

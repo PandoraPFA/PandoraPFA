@@ -91,32 +91,32 @@ public:
     StatusCode DropCurrentClusterList() const;
 
     /**
-     *  @brief  Get the current ordered calo hit list
+     *  @brief  Get the current calo hit list
      * 
-     *  @param  pOrderedCaloHitList to receive the address of the current ordered calo hit list
-     *  @param  orderedCaloHitListName to receive the current ordered calo hit list name
+     *  @param  pCaloHitList to receive the address of the current calo hit list
+     *  @param  caloHitListName to receive the current calo hit list name
      */
-    StatusCode GetCurrentOrderedCaloHitList(const OrderedCaloHitList *&pOrderedCaloHitList, std::string &orderedCaloHitListName) const;
+    StatusCode GetCurrentCaloHitList(const CaloHitList *&pCaloHitList, std::string &caloHitListName) const;
 
     /**
-     *  @brief  Get the current ordered calo hit list name
+     *  @brief  Get the current calo hit list name
      * 
-     *  @param  orderedCaloHitListName to receive the current ordered calo hit list name
+     *  @param  caloHitListName to receive the current calo hit list name
      */
-    StatusCode GetCurrentOrderedCaloHitListName(std::string &orderedCaloHitListName) const;
+    StatusCode GetCurrentCaloHitListName(std::string &caloHitListName) const;
 
     /**
-     *  @brief  Get a named ordered calo hit list
+     *  @brief  Get a named calo hit list
      * 
-     *  @param  orderedCaloHitListName the name of the ordered calo hit list
-     *  @param  pOrderedCaloHitList to receive the address of the ordered calo hit list
+     *  @param  caloHitListName the name of the calo hit list
+     *  @param  pCaloHitList to receive the address of the calo hit list
      */
-    StatusCode GetOrderedCaloHitList(const std::string &orderedCaloHitListName, const OrderedCaloHitList *&pOrderedCaloHitList) const;
+    StatusCode GetCaloHitList(const std::string &caloHitListName, const CaloHitList *&pCaloHitList) const;
 
     /**
-     *  @brief  Drop the current ordered calo hit list, returning the current list to its default empty/null state
+     *  @brief  Drop the current calo hit list, returning the current list to its default empty/null state
      */
-    StatusCode DropCurrentOrderedCaloHitList() const;
+    StatusCode DropCurrentCaloHitList() const;
 
     /**
      *  @brief  Get the current track list
@@ -215,6 +215,24 @@ public:
         const ClusterList *&pNewClusterList, std::string &newClusterListName) const;
 
     /**
+     *  @brief  Is calo hit available to add to a cluster
+     * 
+     *  @param  pCaloHit address of the calo hit
+     * 
+     *  @return boolean
+     */
+    bool IsCaloHitAvailable(pandora::CaloHit *pCaloHit) const;
+
+    /**
+     *  @brief  Are all calo hits in list available to add to a cluster
+     * 
+     *  @param  caloHitList the list of calo hits
+     * 
+     *  @return boolean
+     */
+    bool AreCaloHitsAvailable(const pandora::CaloHitList &caloHitList) const;
+
+    /**
      *  @brief  Add a calo hit to a cluster
      *
      *  @param  pCluster address of the cluster to modify
@@ -247,6 +265,25 @@ public:
      *  @param  pCaloHit address of the isolated hit to remove
      */
     StatusCode RemoveIsolatedCaloHitFromCluster(Cluster *pCluster, CaloHit *pCaloHit) const;
+
+    /**
+     *  @brief  Fragment a calo hit into two daughter calo hits, with a specified energy division
+     *
+     *  @param  pOriginalCaloHit address of the original calo hit, which will be deleted
+     *  @param  fraction1 the fraction of energy to be assigned to daughter fragment 1
+     *  @param  pDaughterCaloHit1 to receive the address of daughter fragment 1
+     *  @param  pDaughterCaloHit2 to receive the address of daughter fragment 2
+     */
+    StatusCode FragmentCaloHit(CaloHit *pOriginalCaloHit, const float fraction1, CaloHit *&pDaughterCaloHit1, CaloHit *&pDaughterCaloHit2) const;
+
+    /**
+     *  @brief  Merge two calo hit fragments, originally from the same parent hit, to form a new calo hit
+     *
+     *  @param  pFragmentCaloHit1 address of calo hit fragment 1, which will be deleted
+     *  @param  pFragmentCaloHit2 address of calo hit fragment 2, which will be deleted
+     *  @param  pMergedCaloHit to receive the address of the merged calo hit
+     */
+    StatusCode MergeCaloHitFragments(CaloHit *pFragmentCaloHit1, CaloHit *pFragmentCaloHit2, CaloHit *&pMergedCaloHit) const;
 
     /**
      *  @brief  Delete a cluster in the current list
@@ -425,28 +462,27 @@ public:
     StatusCode TemporarilyReplaceCurrentClusterList(const std::string &newClusterListName) const;
 
     /**
-     *  @brief  Save the current ordered calo hit list under a new name
+     *  @brief  Save the current calo hit list under a new name
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new ordered calo hit list name
+     *  @param  newListName the new calo hit list name
      */
-    StatusCode SaveOrderedCaloHitList(const Algorithm &algorithm, const OrderedCaloHitList &orderedCaloHitList,
-        const std::string &newListName) const;
+    StatusCode SaveCaloHitList(const Algorithm &algorithm, const CaloHitList &caloHitList, const std::string &newListName) const;
 
     /**
-     *  @brief  Replace the current ordered calo hit list with a pre-saved list; use this new list as a permanent replacement
+     *  @brief  Replace the current calo hit list with a pre-saved list; use this new list as a permanent replacement
      *          for the current list (will persist outside the current algorithm)
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the name of the replacement ordered calo hit list
+     *  @param  newListName the name of the replacement calo hit list
      */
-    StatusCode ReplaceCurrentOrderedCaloHitList(const Algorithm &algorithm, const std::string &newListName) const;
+    StatusCode ReplaceCurrentCaloHitList(const Algorithm &algorithm, const std::string &newListName) const;
 
     /**
      *  @brief  Save the current track list under a new name
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new ordered calo hit list name
+     *  @param  newListName the new track list name
      */
     StatusCode SaveTrackList(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const;
 

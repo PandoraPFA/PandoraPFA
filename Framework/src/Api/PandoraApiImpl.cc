@@ -11,7 +11,6 @@
 #include "Api/PandoraApi.h"
 #include "Api/PandoraApiImpl.h"
 
-#include "Helpers/CaloHitHelper.h"
 #include "Helpers/GeometryHelper.h"
 #include "Helpers/ParticleIdHelper.h"
 #include "Helpers/ReclusterHelper.h"
@@ -209,7 +208,6 @@ StatusCode PandoraApiImpl::ResetForNextEvent() const
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->ResetForNextEvent());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pParticleFlowObjectManager->ResetForNextEvent());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetForNextEvent());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CaloHitHelper::ClearCaloHitUsageMaps());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ResetReclusterMonitoring());
 
     return STATUS_CODE_SUCCESS;

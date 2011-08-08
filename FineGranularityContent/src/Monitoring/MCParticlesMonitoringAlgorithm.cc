@@ -254,36 +254,29 @@ StatusCode MCParticlesMonitoringAlgorithm::FillListOfUsedMCParticles()
     {
         if (m_haveCaloHits)
         {
-            const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+            const CaloHitList *pCaloHitList = NULL;
+            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
-            for (OrderedCaloHitList::const_iterator itLyr = pOrderedCaloHitList->begin(), itLyrEnd = pOrderedCaloHitList->end(); itLyr != itLyrEnd; ++itLyr)
+            for(CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
             {
-                // int pseudoLayer = itLyr->first;
-                CaloHitList::iterator itCaloHit = itLyr->second->begin();
-                CaloHitList::iterator itCaloHitEnd = itLyr->second->end();
+                CaloHit *pCaloHit = (*hitIter);
 
-                for( ; itCaloHit != itCaloHitEnd; ++itCaloHit)
+                const MCParticle *pMCParticle = NULL;
+                pCaloHit->GetMCParticle(pMCParticle);
+
+                if (pMCParticle == NULL)
+                    continue;
+
+                float energy = pCaloHit->GetElectromagneticEnergy();
+                ConstMCParticleToEnergyMap::iterator mcIter = m_mcParticleToEnergyMap.find(pMCParticle);
+
+                if (mcIter == m_mcParticleToEnergyMap.end())
                 {
-                    CaloHit *pCaloHit = (*itCaloHit);
-
-                    const MCParticle *mc = NULL;
-                    pCaloHit->GetMCParticle(mc);
-
-                    if (mc == NULL)
-                        continue;
-
-                    float energy = pCaloHit->GetElectromagneticEnergy();
-                    ConstMCParticleToEnergyMap::iterator itMc = m_mcParticleToEnergyMap.find(mc);
-
-                    if (itMc == m_mcParticleToEnergyMap.end())
-                    {
-                        m_mcParticleToEnergyMap.insert(std::make_pair(mc, std::make_pair(energy, 0.f)));
-                    }
-                    else
-                    {
-                        itMc->second.first += energy;
-                    }
+                    m_mcParticleToEnergyMap.insert(std::make_pair(pMCParticle, std::make_pair(energy, 0.f)));
+                }
+                else
+                {
+                    mcIter->second.first += energy;
                 }
             }
         }

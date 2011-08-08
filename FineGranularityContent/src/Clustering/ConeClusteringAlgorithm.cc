@@ -18,16 +18,19 @@ unsigned int CustomHitOrder::m_hitSortingStrategy = 0;
 
 StatusCode ConeClusteringAlgorithm::Run()
 {
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
-    if (pOrderedCaloHitList->empty())
+    if (pCaloHitList->empty())
         return STATUS_CODE_SUCCESS;
+
+    OrderedCaloHitList orderedCaloHitList;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*pCaloHitList));
 
     ClusterVector clusterVector;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->SeedClustersWithTracks(clusterVector));
 
-    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
     {
         const PseudoLayer pseudoLayer(iter->first);
         CustomSortedCaloHitList customSortedCaloHitList;
@@ -36,8 +39,9 @@ StatusCode ConeClusteringAlgorithm::Run()
         {
             CaloHit *pCaloHit = *hitIter;
 
-            if (CaloHitHelper::IsCaloHitAvailable(pCaloHit) && (m_shouldUseIsolatedHits || !pCaloHit->IsIsolated()) &&
-               (!m_shouldUseOnlyECalHits || (ECAL == pCaloHit->GetHitType())) )
+            if ((m_shouldUseIsolatedHits || !pCaloHit->IsIsolated()) &&
+                (!m_shouldUseOnlyECalHits || (ECAL == pCaloHit->GetHitType())) &&
+                (PandoraContentApi::IsCaloHitAvailable(*this, pCaloHit)))
             {
                 customSortedCaloHitList.insert(pCaloHit);
             }
@@ -147,7 +151,7 @@ StatusCode ConeClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer pseudoL
         }
 
         // Tidy the energy sorted calo hit list
-        if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+        if (!PandoraContentApi::IsCaloHitAvailable(*this, pCaloHit))
         {
             pCustomSortedCaloHitList->erase(iter++);
         }

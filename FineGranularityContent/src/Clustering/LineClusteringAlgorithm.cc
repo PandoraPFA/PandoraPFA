@@ -88,16 +88,13 @@ StatusCode LineClusteringAlgorithm::Run()
 
 StatusCode LineClusteringAlgorithm::GetListOfAvailableCaloHits(CaloHitList &caloHitList) const
 {
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
-    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
     {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            if (CaloHitHelper::IsCaloHitAvailable(*hitIter) && (m_shouldUseIsolatedHits || !(*hitIter)->IsIsolated()))
-                caloHitList.insert(*hitIter);
-        }
+        if ((m_shouldUseIsolatedHits || !(*hitIter)->IsIsolated()) && PandoraContentApi::IsCaloHitAvailable(*this, *hitIter))
+            caloHitList.insert(*hitIter);
     }
 
     return STATUS_CODE_SUCCESS;

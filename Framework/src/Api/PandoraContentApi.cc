@@ -98,41 +98,40 @@ pandora::StatusCode PandoraContentApi::DropCurrentClusterList(const pandora::Alg
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm,
-    const pandora::OrderedCaloHitList *&pOrderedCaloHitList)
+pandora::StatusCode PandoraContentApi::GetCurrentCaloHitList(const pandora::Algorithm &algorithm, const pandora::CaloHitList *&pCaloHitList)
 {
-    std::string orderedCaloHitListName;
-    return algorithm.GetPandoraContentApiImpl()->GetCurrentOrderedCaloHitList(pOrderedCaloHitList, orderedCaloHitListName);
+    std::string caloHitListName;
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentCaloHitList(pCaloHitList, caloHitListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::GetCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm,
-    const pandora::OrderedCaloHitList *&pOrderedCaloHitList, std::string &orderedCaloHitListName)
+pandora::StatusCode PandoraContentApi::GetCurrentCaloHitList(const pandora::Algorithm &algorithm, const pandora::CaloHitList *&pCaloHitList,
+    std::string &caloHitListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->GetCurrentOrderedCaloHitList(pOrderedCaloHitList, orderedCaloHitListName);
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentCaloHitList(pCaloHitList, caloHitListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::GetCurrentOrderedCaloHitListName(const pandora::Algorithm &algorithm, std::string &orderedCaloHitListName)
+pandora::StatusCode PandoraContentApi::GetCurrentCaloHitListName(const pandora::Algorithm &algorithm, std::string &caloHitListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->GetCurrentOrderedCaloHitListName(orderedCaloHitListName);
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentCaloHitListName(caloHitListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::GetOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &orderedCaloHitListName,
-    const pandora::OrderedCaloHitList *&pOrderedCaloHitList)
+pandora::StatusCode PandoraContentApi::GetCaloHitList(const pandora::Algorithm &algorithm, const std::string &caloHitListName,
+    const pandora::CaloHitList *&pCaloHitList)
 {
-    return algorithm.GetPandoraContentApiImpl()->GetOrderedCaloHitList(orderedCaloHitListName, pOrderedCaloHitList);
+    return algorithm.GetPandoraContentApiImpl()->GetCaloHitList(caloHitListName, pCaloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::DropCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm)
+pandora::StatusCode PandoraContentApi::DropCurrentCaloHitList(const pandora::Algorithm &algorithm)
 {
-    return algorithm.GetPandoraContentApiImpl()->DropCurrentOrderedCaloHitList();
+    return algorithm.GetPandoraContentApiImpl()->DropCurrentCaloHitList();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -238,6 +237,20 @@ pandora::StatusCode PandoraContentApi::RunClusteringAlgorithm(const pandora::Alg
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+bool PandoraContentApi::IsCaloHitAvailable(const pandora::Algorithm &algorithm, pandora::CaloHit *pCaloHit)
+{
+    return algorithm.GetPandoraContentApiImpl()->IsCaloHitAvailable(pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+bool PandoraContentApi::AreCaloHitsAvailable(const pandora::Algorithm &algorithm, const pandora::CaloHitList &caloHitList)
+{
+    return algorithm.GetPandoraContentApiImpl()->AreCaloHitsAvailable(caloHitList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraContentApi::AddCaloHitToCluster(const pandora::Algorithm &algorithm, pandora::Cluster *pCluster,
     pandora::CaloHit *pCaloHit)
 {
@@ -266,6 +279,22 @@ pandora::StatusCode PandoraContentApi::RemoveIsolatedCaloHitFromCluster(const pa
     pandora::CaloHit *pCaloHit)
 {
     return algorithm.GetPandoraContentApiImpl()->RemoveIsolatedCaloHitFromCluster(pCluster, pCaloHit);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::FragmentCaloHit(const pandora::Algorithm &algorithm, pandora::CaloHit *pOriginalCaloHit,
+    const float fraction1, pandora::CaloHit *&pDaughterCaloHit1, pandora::CaloHit *&pDaughterCaloHit2)
+{
+    return algorithm.GetPandoraContentApiImpl()->FragmentCaloHit(pOriginalCaloHit, fraction1, pDaughterCaloHit1, pDaughterCaloHit2);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::MergeCaloHitFragments(const pandora::Algorithm &algorithm, pandora::CaloHit *pFragmentCaloHit1,
+    pandora::CaloHit *pFragmentCaloHit2, pandora::CaloHit *&pMergedCaloHit)
+{
+    return algorithm.GetPandoraContentApiImpl()->MergeCaloHitFragments(pFragmentCaloHit1, pFragmentCaloHit2, pMergedCaloHit);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -429,17 +458,17 @@ pandora::StatusCode PandoraContentApi::TemporarilyReplaceCurrentClusterList(cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::SaveOrderedCaloHitList(const pandora::Algorithm &algorithm,
-    const pandora::OrderedCaloHitList &orderedCaloHitList, const std::string &newListName)
+pandora::StatusCode PandoraContentApi::SaveCaloHitList(const pandora::Algorithm &algorithm, const pandora::CaloHitList &caloHitList,
+    const std::string &newListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->SaveOrderedCaloHitList(algorithm, orderedCaloHitList, newListName);
+    return algorithm.GetPandoraContentApiImpl()->SaveCaloHitList(algorithm, caloHitList, newListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::ReplaceCurrentOrderedCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName)
+pandora::StatusCode PandoraContentApi::ReplaceCurrentCaloHitList(const pandora::Algorithm &algorithm, const std::string &newListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->ReplaceCurrentOrderedCaloHitList(algorithm, newListName);
+    return algorithm.GetPandoraContentApiImpl()->ReplaceCurrentCaloHitList(algorithm, newListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

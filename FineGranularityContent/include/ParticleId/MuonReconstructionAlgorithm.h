@@ -89,7 +89,7 @@ private:
      *  @param  pfoCaloHitList to receive the list of calo hits in pfos
      *  @param  pfoClusterList to receive the list of clusters in pfos
      */
-    pandora::StatusCode GetPfoComponents(pandora::TrackList &pfoTrackList, pandora::OrderedCaloHitList &pfoCaloHitList, pandora::ClusterList &pfoClusterList) const;
+    pandora::StatusCode GetPfoComponents(pandora::TrackList &pfoTrackList, pandora::CaloHitList &pfoCaloHitList, pandora::ClusterList &pfoClusterList) const;
 
     std::string     m_muonCaloHitListName;          ///< The name of the original calo hit list containing muon hits
     std::string     m_muonClusteringAlgName;        ///< The name of the muon clustering algorithm to run

@@ -31,21 +31,17 @@ StatusCode CaloHitMonitoringAlgorithm::Run()
     PANDORA_MONITORING_API(Create1DHistogram(IsIsolatedFlagHistName, IsIsolatedFlagHistName, 2, -0.5, 1.5));
 
     // Loop over current calo hit list and fill histograms
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
-    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end();
-        iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
-        for (CaloHitList::const_iterator caloHitIter = iter->second->begin(), caloHitIterEnd = iter->second->end();
-            caloHitIter != caloHitIterEnd; ++caloHitIter)
-        {
-            PANDORA_MONITORING_API(Fill1DHistogram(PseudoLayerHistName, (*caloHitIter)->GetPseudoLayer()));
-            PANDORA_MONITORING_API(Fill1DHistogram(DensityWeightHistName, (*caloHitIter)->GetDensityWeight()));
-            PANDORA_MONITORING_API(Fill1DHistogram(SurroundingEnergyHistName, (*caloHitIter)->GetSurroundingEnergy()));
-            PANDORA_MONITORING_API(Fill1DHistogram(PossibleMipFlagHistName, (*caloHitIter)->IsPossibleMip()));
-            PANDORA_MONITORING_API(Fill1DHistogram(IsIsolatedFlagHistName, (*caloHitIter)->IsIsolated()));
-        }
+        CaloHit *pCaloHit = *iter;
+        PANDORA_MONITORING_API(Fill1DHistogram(PseudoLayerHistName, pCaloHit->GetPseudoLayer()));
+        PANDORA_MONITORING_API(Fill1DHistogram(DensityWeightHistName, pCaloHit->GetDensityWeight()));
+        PANDORA_MONITORING_API(Fill1DHistogram(SurroundingEnergyHistName, pCaloHit->GetSurroundingEnergy()));
+        PANDORA_MONITORING_API(Fill1DHistogram(PossibleMipFlagHistName, pCaloHit->IsPossibleMip()));
+        PANDORA_MONITORING_API(Fill1DHistogram(IsIsolatedFlagHistName, pCaloHit->IsIsolated()));
     }
 
     // Append histograms to file

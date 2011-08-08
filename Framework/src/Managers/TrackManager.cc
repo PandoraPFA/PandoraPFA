@@ -21,15 +21,14 @@ const std::string TrackManager::INPUT_LIST_NAME = "Input";
 TrackManager::TrackManager() :
     m_currentListName(NULL_LIST_NAME)
 {
-    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 TrackManager::~TrackManager()
 {
-    (void) this->ResetForNextEvent();
-    this->DeleteNullList();
+    (void) this->EraseAllContent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,10 +40,10 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
         Track *pTrack = NULL;
         pTrack = new Track(trackParameters);
 
-        if (NULL == pTrack)
-            throw StatusCodeException(STATUS_CODE_FAILURE);
+        NameToTrackListMap::iterator inputIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
 
-        m_inputTrackVector.push_back(pTrack);
+        if ((NULL == pTrack) || (m_nameToTrackListMap.end() == inputIter) || (!inputIter->second->insert(pTrack).second))
+            throw StatusCodeException(STATUS_CODE_FAILURE);
 
         if (!m_uidToTrackMap.insert(UidToTrackMap::value_type(pTrack->GetParentTrackAddress(), pTrack)).second)
             throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -60,55 +59,13 @@ StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackPar
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode TrackManager::CreateNullList()
-{
-    if (!m_nameToTrackListMap.empty() || !m_savedLists.empty())
-        return STATUS_CODE_NOT_ALLOWED;
-
-    m_nameToTrackListMap[NULL_LIST_NAME] = new TrackList;
-    m_savedLists.insert(NULL_LIST_NAME);
-
-    if (m_nameToTrackListMap.end() == m_nameToTrackListMap.find(NULL_LIST_NAME))
-        return STATUS_CODE_FAILURE;
-
-    if (m_savedLists.end() == m_savedLists.find(NULL_LIST_NAME))
-        return STATUS_CODE_FAILURE;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void TrackManager::DeleteNullList()
-{
-    NameToTrackListMap::iterator iter = m_nameToTrackListMap.find(NULL_LIST_NAME);
-
-    if (m_nameToTrackListMap.end() != iter)
-    {
-        delete iter->second;
-        m_nameToTrackListMap.erase(iter);
-    }
-
-    StringSet::iterator savedListsIter = m_savedLists.find(NULL_LIST_NAME);
-
-    if (m_savedLists.end() != savedListsIter)
-    {
-        m_savedLists.erase(savedListsIter);
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode TrackManager::CreateInputTrackList()
 {
     NameToTrackListMap::iterator existingListIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
 
-    if (m_nameToTrackListMap.end() != existingListIter)
-        m_nameToTrackListMap.erase(existingListIter);
+    if (m_nameToTrackListMap.end() == existingListIter)
+        return STATUS_CODE_FAILURE;
 
-    TrackList trackList(m_inputTrackVector.begin(), m_inputTrackVector.end());
-
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(trackList, INPUT_LIST_NAME));
     m_currentListName = INPUT_LIST_NAME;
 
     return STATUS_CODE_SUCCESS;
@@ -135,8 +92,6 @@ StatusCode TrackManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *c
     if (m_nameToTrackListMap.end() == m_nameToTrackListMap.find(trackListName))
         return STATUS_CODE_NOT_FOUND;
 
-    // ATTN: Previously couldn't replace lists unless called from a top-level algorithm: return if (m_algorithmInfoMap.size() > 1)
-    //       Then algorithhm parent list was only replaced for algorithm calling this function.
     if (m_savedLists.end() == m_savedLists.find(trackListName))
         return STATUS_CODE_NOT_ALLOWED;
 
@@ -246,7 +201,12 @@ StatusCode TrackManager::MatchTracksToMCPfoTargets(const UidToMCParticleMap &tra
     if (trackToPfoTargetMap.empty())
         return STATUS_CODE_SUCCESS;
 
-    for (TrackVector::const_iterator iter = m_inputTrackVector.begin(), iterEnd = m_inputTrackVector.end(); iter != iterEnd; ++iter)
+    NameToTrackListMap::const_iterator inputIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() == inputIter)
+        return STATUS_CODE_FAILURE;
+
+    for (TrackList::const_iterator iter = inputIter->second->begin(), iterEnd = inputIter->second->end(); iter != iterEnd; ++iter)
     {
         UidToMCParticleMap::const_iterator pfoTargetIter = trackToPfoTargetMap.find((*iter)->GetParentTrackAddress());
 
@@ -308,27 +268,55 @@ StatusCode TrackManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm, b
 
 StatusCode TrackManager::ResetForNextEvent()
 {
-    for (TrackVector::iterator iter = m_inputTrackVector.begin(), iterEnd = m_inputTrackVector.end(); iter != iterEnd; ++iter)
-        delete *iter;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->EraseAllContent());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
 
-    m_inputTrackVector.clear();
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::EraseAllContent()
+{
+    NameToTrackListMap::const_iterator inputIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() == inputIter)
+    {
+        std::cout << "TrackManager::EraseAllContent cannot retrieve input track list " << std::endl;
+    }
+    else
+    {
+        for (TrackList::iterator iter = inputIter->second->begin(), iterEnd = inputIter->second->end(); iter != iterEnd; ++iter)
+            delete *iter;
+    }
 
     for (NameToTrackListMap::iterator iter = m_nameToTrackListMap.begin(); iter != m_nameToTrackListMap.end();)
     {
-        iter->second->clear();
         delete iter->second;
         m_nameToTrackListMap.erase(iter++);
     }
 
+    m_currentListName = NULL_LIST_NAME;
     m_nameToTrackListMap.clear();
     m_savedLists.clear();
-
-    m_currentListName = NULL_LIST_NAME;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNullList());
 
     m_uidToTrackMap.clear();
     m_parentDaughterRelationMap.clear();
     m_siblingRelationMap.clear();
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::CreateInitialLists()
+{
+    if (!m_nameToTrackListMap.empty() || !m_savedLists.empty())
+        return STATUS_CODE_NOT_ALLOWED;
+
+    TrackList trackList;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(trackList, NULL_LIST_NAME));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, SaveList(trackList, INPUT_LIST_NAME));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -419,7 +407,12 @@ StatusCode TrackManager::AddSiblingAssociations() const
 
 StatusCode TrackManager::RemoveAllClusterAssociations() const
 {
-    for (TrackVector::const_iterator iter = m_inputTrackVector.begin(), iterEnd = m_inputTrackVector.end(); iter != iterEnd; ++iter)
+    NameToTrackListMap::const_iterator inputIter = m_nameToTrackListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToTrackListMap.end() == inputIter)
+        return STATUS_CODE_FAILURE;
+
+    for (TrackList::const_iterator iter = inputIter->second->begin(), iterEnd = inputIter->second->end(); iter != iterEnd; ++iter)
     {
         (*iter)->m_pAssociatedCluster = NULL;
     }

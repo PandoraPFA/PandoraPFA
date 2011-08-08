@@ -18,15 +18,18 @@ unsigned int InwardConeClusteringAlgorithm::CustomHitOrder::m_hitSortingStrategy
 
 StatusCode InwardConeClusteringAlgorithm::Run()
 {
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
-    if (pOrderedCaloHitList->empty())
+    if (pCaloHitList->empty())
         return STATUS_CODE_SUCCESS;
+
+    OrderedCaloHitList orderedCaloHitList;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*pCaloHitList));
 
     ClusterVector clusterVector;
 
-    for (OrderedCaloHitList::const_reverse_iterator iter = pOrderedCaloHitList->rbegin(), iterEnd = pOrderedCaloHitList->rend(); iter != iterEnd; ++iter)
+    for (OrderedCaloHitList::const_reverse_iterator iter = orderedCaloHitList.rbegin(), iterEnd = orderedCaloHitList.rend(); iter != iterEnd; ++iter)
     {
         const PseudoLayer pseudoLayer(iter->first);
         CustomSortedCaloHitList customSortedCaloHitList;
@@ -35,8 +38,9 @@ StatusCode InwardConeClusteringAlgorithm::Run()
         {
             CaloHit *pCaloHit = *hitIter;
 
-            if (CaloHitHelper::IsCaloHitAvailable(pCaloHit) && (m_shouldUseIsolatedHits || !pCaloHit->IsIsolated()) &&
-               (!m_shouldUseOnlyECalHits || (ECAL == pCaloHit->GetHitType())) )
+            if ((m_shouldUseIsolatedHits || !pCaloHit->IsIsolated()) &&
+                (!m_shouldUseOnlyECalHits || (ECAL == pCaloHit->GetHitType())) &&
+                (PandoraContentApi::IsCaloHitAvailable(*this, pCaloHit)))
             {
                 customSortedCaloHitList.insert(pCaloHit);
             }
@@ -107,7 +111,7 @@ StatusCode InwardConeClusteringAlgorithm::FindHitsInPreviousLayers(PseudoLayer p
         }
 
         // Tidy the energy sorted calo hit list
-        if (!CaloHitHelper::IsCaloHitAvailable(pCaloHit))
+        if (!PandoraContentApi::IsCaloHitAvailable(*this, pCaloHit))
         {
             pCustomSortedCaloHitList->erase(iter++);
         }

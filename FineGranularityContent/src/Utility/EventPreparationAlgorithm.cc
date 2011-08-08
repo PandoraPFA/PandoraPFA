@@ -31,30 +31,29 @@ StatusCode EventPreparationAlgorithm::Run()
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentTrackList(*this, m_outputTrackListName));
 
     // Split input calo hit list into ecal/hcal and muon calo hits
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pCaloHitList));
 
-    OrderedCaloHitList orderedCaloHitList, muonOrderedCaloHitList;
+    CaloHitList caloHitList, muonCaloHitList;
 
-    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator hitIter = pCaloHitList->begin(), hitIterEnd = pCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
     {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        if (MUON == (*hitIter)->GetHitType())
         {
-            if (MUON == (*hitIter)->GetHitType())
-            {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, muonOrderedCaloHitList.Add(*hitIter));
-            }
-            else
-            {
-                PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, orderedCaloHitList.Add(*hitIter));
-            }
+            if (!muonCaloHitList.insert(*hitIter).second)
+                return STATUS_CODE_ALREADY_PRESENT;
+        }
+        else
+        {
+            if (!caloHitList.insert(*hitIter).second)
+                return STATUS_CODE_ALREADY_PRESENT;
         }
     }
 
     // Save the lists, setting the ecal/hcal list to be the current list for subsequent algorithms
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitList(*this, muonOrderedCaloHitList, m_outputMuonCaloHitListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveOrderedCaloHitList(*this, orderedCaloHitList, m_outputCaloHitListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentOrderedCaloHitList(*this, m_outputCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveCaloHitList(*this, muonCaloHitList, m_outputMuonCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SaveCaloHitList(*this, caloHitList, m_outputCaloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentCaloHitList(*this, m_outputCaloHitListName));
 
     return STATUS_CODE_SUCCESS;
 }

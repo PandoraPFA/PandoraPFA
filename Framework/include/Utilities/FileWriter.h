@@ -59,12 +59,12 @@ public:
     /**
      *  @brief  Write the specified event components to the file
      * 
-     *  @param  orderedCaloHitList the ordered list of calo hits to write to the file
+     *  @param  caloHitList the list of calo hits to write to the file
      *  @param  trackList the list of tracks to write to the file
      *  @param  writeMCRelationships whether to write mc relationship information to the file
      *  @param  writeTrackRelationships whether to write track relationship information to the file
      */
-    StatusCode WriteEvent(const OrderedCaloHitList &orderedCaloHitList, const TrackList &trackList, const bool writeMCRelationships = true,
+    StatusCode WriteEvent(const CaloHitList &caloHitList, const TrackList &trackList, const bool writeMCRelationships = true,
         const bool writeTrackRelationships = true);
 
 private:
@@ -93,11 +93,11 @@ private:
     StatusCode WriteTrackList(const TrackList &trackList);
 
     /**
-     *  @brief  Write an ordered calo hit list to the current position in the file
+     *  @brief  Write a calo hit list to the current position in the file
      * 
-     *  @param  orderedCaloHitList the ordered calo hit list
+     *  @param  caloHitList the calo hit list
      */
-    StatusCode WriteOrderedCaloHitList(const OrderedCaloHitList &orderedCaloHitList);
+    StatusCode WriteCaloHitList(const CaloHitList &caloHitList);
 
     /**
      *  @brief  Write a mc particle list to the current position in the file
@@ -107,11 +107,11 @@ private:
     StatusCode WriteMCParticleList(const MCParticleList &mcParticleList);
 
     /**
-     *  @brief  Write calo hit to mc particle relationships for a specified ordered calo hit list
+     *  @brief  Write calo hit to mc particle relationships for a specified calo hit list
      * 
-     *  @param  orderedCaloHitList the ordered calo hit list
+     *  @param  caloHitList the calo hit list
      */
-    StatusCode WriteCaloHitToMCParticleRelationships(const OrderedCaloHitList &orderedCaloHitList);
+    StatusCode WriteCaloHitToMCParticleRelationships(const CaloHitList &caloHitList);
 
     /**
      *  @brief  Write track to mc particle relationships for a specified track list

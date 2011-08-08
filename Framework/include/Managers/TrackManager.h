@@ -54,7 +54,7 @@ private:
     void DeleteNullList();
 
     /**
-     *  @brief  Create the input track list (accessible to algorithms), using contents of the input track vector
+     *  @brief  Create the input track list (accessible to algorithms), using tracks created by client application
      */
     StatusCode CreateInputTrackList();
 
@@ -180,6 +180,16 @@ private:
     StatusCode ResetForNextEvent();
 
     /**
+     *  @brief  Erase all track manager content
+     */
+    StatusCode EraseAllContent();
+
+    /**
+     *  @brief  Create initial track lists
+     */
+    StatusCode CreateInitialLists();
+
+    /**
      *  @brief  Set a track parent-daughter relationship
      * 
      *  @param  parentUid the parent track unique identifier
@@ -243,7 +253,6 @@ private:
     typedef std::map<std::string, TrackList *> NameToTrackListMap;
     typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
 
-    TrackVector                     m_inputTrackVector;                 ///< The input track vector
     NameToTrackListMap              m_nameToTrackListMap;               ///< The name to track list map
     AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map
 

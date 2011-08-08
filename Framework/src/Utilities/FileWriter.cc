@@ -14,7 +14,6 @@
 #include "Objects/CaloHit.h"
 #include "Objects/DetectorGap.h"
 #include "Objects/MCParticle.h"
-#include "Objects/OrderedCaloHitList.h"
 #include "Objects/Track.h"
 
 #include "Utilities/FileWriter.h"
@@ -73,24 +72,24 @@ StatusCode FileWriter::WriteGeometry()
 
 StatusCode FileWriter::WriteEvent(const bool writeMCRelationships, const bool writeTrackRelationships)
 {
-    std::string orderedCaloHitListName;
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->GetPandoraContentApiImpl()->GetCurrentOrderedCaloHitList(pOrderedCaloHitList, orderedCaloHitListName));
+    std::string caloHitListName;
+    const CaloHitList *pCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->GetPandoraContentApiImpl()->GetCurrentCaloHitList(pCaloHitList, caloHitListName));
 
     std::string trackListName;
     const TrackList *pTrackList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->GetPandoraContentApiImpl()->GetCurrentTrackList(pTrackList, trackListName));
 
-    return this->WriteEvent(*pOrderedCaloHitList, *pTrackList, writeMCRelationships, writeTrackRelationships);
+    return this->WriteEvent(*pCaloHitList, *pTrackList, writeMCRelationships, writeTrackRelationships);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileWriter::WriteEvent(const OrderedCaloHitList &orderedCaloHitList, const TrackList &trackList,
-    const bool writeMCRelationships, const bool writeTrackRelationships)
+StatusCode FileWriter::WriteEvent(const CaloHitList &caloHitList, const TrackList &trackList, const bool writeMCRelationships,
+    const bool writeTrackRelationships)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteHeader(EVENT));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteOrderedCaloHitList(orderedCaloHitList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteCaloHitList(caloHitList));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteTrackList(trackList));
 
     if (writeMCRelationships)
@@ -98,7 +97,7 @@ StatusCode FileWriter::WriteEvent(const OrderedCaloHitList &orderedCaloHitList, 
         MCParticleList mcParticleList;
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->GetPandoraContentApiImpl()->GetMCParticleList(mcParticleList));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteMCParticleList(mcParticleList));
-        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteCaloHitToMCParticleRelationships(orderedCaloHitList));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteCaloHitToMCParticleRelationships(caloHitList));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteTrackToMCParticleRelationships(trackList));
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteMCParticleRelationships(mcParticleList));
     }
@@ -232,14 +231,11 @@ StatusCode FileWriter::WriteTrackList(const TrackList &trackList)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileWriter::WriteOrderedCaloHitList(const OrderedCaloHitList &orderedCaloHitList)
+StatusCode FileWriter::WriteCaloHitList(const CaloHitList &caloHitList)
 {
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; ++hitIter)
     {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteCaloHit(*hitIter));
-        }
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteCaloHit(*hitIter));
     }
 
     return STATUS_CODE_SUCCESS;
@@ -259,14 +255,11 @@ StatusCode FileWriter::WriteMCParticleList(const MCParticleList &mcParticleList)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode FileWriter::WriteCaloHitToMCParticleRelationships(const OrderedCaloHitList &orderedCaloHitList)
+StatusCode FileWriter::WriteCaloHitToMCParticleRelationships(const CaloHitList &caloHitList)
 {
-    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; ++hitIter)
     {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteCaloHitToMCParticleRelationship(*hitIter));
-        }
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->WriteCaloHitToMCParticleRelationship(*hitIter));
     }
 
     return STATUS_CODE_SUCCESS;

@@ -17,19 +17,16 @@ using namespace pandora;
 
 StatusCode KMeansClusteringAlgorithm::Run()
 {
-    const OrderedCaloHitList *pOrderedCaloHitList = NULL;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentOrderedCaloHitList(*this, pOrderedCaloHitList));
+    const CaloHitList *pInputCaloHitList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentCaloHitList(*this, pInputCaloHitList));
 
     // Make list of available hits
     CaloHitList caloHitList;
 
-    for (OrderedCaloHitList::const_iterator iter = pOrderedCaloHitList->begin(), iterEnd = pOrderedCaloHitList->end(); iter != iterEnd; ++iter)
+    for (CaloHitList::const_iterator hitIter = pInputCaloHitList->begin(), hitIterEnd = pInputCaloHitList->end(); hitIter != hitIterEnd; ++hitIter)
     {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
-        {
-            if (CaloHitHelper::IsCaloHitAvailable(*hitIter) && (m_shouldUseIsolatedHits || !(*hitIter)->IsIsolated()))
-                caloHitList.insert(*hitIter);
-        }
+        if ((m_shouldUseIsolatedHits || !(*hitIter)->IsIsolated()) && PandoraContentApi::IsCaloHitAvailable(*this, *hitIter))
+            caloHitList.insert(*hitIter);
     }
 
     if (caloHitList.empty())
