@@ -316,7 +316,7 @@ StatusCode CaloHitManager::MergeCaloHitFragments(CaloHit *pFragmentCaloHit1, Cal
 
     CaloHitReplacement caloHitReplacement;
     caloHitReplacement.m_newCaloHits.insert(pMergedCaloHit);
-    caloHitReplacement.m_oldCaloHits.insert(pFragmentCaloHit1); caloHitReplacement.m_newCaloHits.insert(pFragmentCaloHit2);
+    caloHitReplacement.m_oldCaloHits.insert(pFragmentCaloHit1); caloHitReplacement.m_oldCaloHits.insert(pFragmentCaloHit2);
 
     if (m_nReclusteringProcesses > 0)
     {
