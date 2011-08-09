@@ -360,7 +360,8 @@ StatusCode CaloHitManager::PrepareForClustering(const Algorithm *const pAlgorith
     const CaloHitList &caloHitList(m_pCurrentReclusterMetadata->GetCaloHitList());
 
     std::string caloHitListName;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, InputObjectManager<CaloHit*>::CreateTemporaryListAndSetCurrent(pAlgorithm, caloHitList, caloHitListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, InputObjectManager<CaloHit*>::CreateTemporaryListAndSetCurrent(pAlgorithm, caloHitList,
+        caloHitListName));
     CaloHitList *pCaloHitList = m_nameToListMap[caloHitListName];
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCurrentReclusterMetadata->CreateCaloHitMetadata(pCaloHitList, caloHitListName,

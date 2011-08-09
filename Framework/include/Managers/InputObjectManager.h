@@ -10,9 +10,6 @@
 
 #include "Managers/Manager.h"
 
-#include "Pandora/PandoraInternal.h"
-#include "Pandora/StatusCodes.h"
-
 namespace pandora
 {
 

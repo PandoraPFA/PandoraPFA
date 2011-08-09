@@ -111,12 +111,12 @@ protected:
      *  @param  pAlgorithm address of the algorithm altering the lists
      *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
      */
-    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
+    virtual StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
 
     /**
      *  @brief  Reset the manager
      */
-    StatusCode ResetForNextEvent();
+    virtual StatusCode ResetForNextEvent();
 
     /**
      *  @brief  Erase all manager content
