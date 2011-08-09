@@ -15,6 +15,10 @@
 namespace pandora
 {
 
+template<typename T> class InputObjectManager;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  Track class
  */
@@ -303,6 +307,7 @@ private:
 
     friend class PandoraContentApiImpl;
     friend class TrackManager;
+    friend class InputObjectManager<Track*>;
 };
 
 /**

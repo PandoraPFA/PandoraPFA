@@ -41,7 +41,7 @@ StatusCode PandoraImpl::PrepareMCParticles() const
 
 StatusCode PandoraImpl::PrepareTracks() const
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->CreateInputTrackList());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->CreateInputList());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->AssociateTracks());
 
     return STATUS_CODE_SUCCESS;
@@ -51,7 +51,7 @@ StatusCode PandoraImpl::PrepareTracks() const
 
 StatusCode PandoraImpl::PrepareCaloHits() const
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CreateInputCaloHitList());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CreateInputList());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->CalculateCaloHitProperties());
 
     return STATUS_CODE_SUCCESS;

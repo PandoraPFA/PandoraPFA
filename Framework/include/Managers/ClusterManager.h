@@ -10,6 +10,8 @@
 
 #include "Api/PandoraContentApi.h"
 
+#include "Managers/Manager.h"
+
 #include "Objects/Cluster.h"
 
 #include "Pandora/PandoraInternal.h"
@@ -24,7 +26,7 @@ class Algorithm;
 /**
  *    @brief ClusterManager class
  */
-class ClusterManager
+class ClusterManager : public Manager<Cluster*>
 {
 public:
     /**
@@ -48,54 +50,6 @@ private:
     StatusCode CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster);
 
     /**
-     *  @brief  Get the current cluster list name
-     * 
-     *  @param  clusterListName to receive the current cluster list name
-     */
-    StatusCode GetCurrentListName(std::string &clusterListName) const;
-
-    /**
-     *  @brief  Get the algorithm input cluster list name
-     * 
-     *  @param  pAlgorithm address of the algorithm
-     *  @param  clusterListName to receive the algorithm input cluster list name
-     */
-    StatusCode GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &clusterListName) const;
-
-    /**
-     *  @brief  Get the current cluster list
-     * 
-     *  @param  pClusterList to receive the current cluster list
-     *  @param  clusterListName to receive the name of the current cluster list
-     */
-    StatusCode GetCurrentList(const ClusterList *&pClusterList, std::string &clusterListName) const;
-
-    /**
-     *  @brief  Get the algorithm input cluster list
-     * 
-     *  @param  pAlgorithm address of the algorithm
-     *  @param  pClusterList to receive the algorithm input cluster list
-     *  @param  clusterListName to receive the name of the algorithm input cluster list
-     */
-    StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *&pClusterList, std::string &clusterListName) const;
-
-    /**
-     *  @brief  Get a cluster list
-     * 
-     *  @param  listName the name of the list
-     *  @param  pClusterList to receive the cluster list
-     */
-    StatusCode GetList(const std::string &listName, const ClusterList *&pClusterList) const;
-
-    /**
-     *  @brief  Replace the current and algorithm input lists with a pre-existing list
-     *
-     *  @param  pAlgorithm address of the algorithm changing the cluster lists
-     *  @param  clusterListName the name of the new current (and algorithm input) cluster list
-     */
-    StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &clusterListName);
-
-    /**
      *  @brief  Temporarily replace the current cluster list with another list, which may only be a temporary list.
      *          This switch will persist only for the duration of the algorithm and its daughters; unless otherwise
      *          specified, the current list will revert to the algorithm input list upon algorithm completion.
@@ -103,18 +57,6 @@ private:
      *  @param  clusterListName the name of the new current (and algorithm input) cluster list
      */
     StatusCode TemporarilyReplaceCurrentList(const std::string &clusterListName);
-
-    /**
-     *  @brief  Reset the current list to the algorithm input list
-     *
-     *  @param  pAlgorithm address of the algorithm changing the cluster lists
-     */
-    StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
-
-    /**
-     *  @brief  Drop the current list, returning the current list to its default empty/null state
-     */
-    StatusCode DropCurrentList();
 
     /**
      *  @brief  Make a temporary cluster list and set it to be the current cluster list
@@ -250,13 +192,6 @@ private:
         const std::string &deleteListName);
 
     /**
-     *  @brief  Register an algorithm with the cluster manager
-     * 
-     *  @param  pAlgorithm address of the algorithm
-     */
-    StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
-
-    /**
      *  @brief  Get the list of clusters that will be deleted when the algorithm info is reset
      * 
      *  @param  pAlgorithm address of the algorithm
@@ -273,19 +208,9 @@ private:
     StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
 
     /**
-     *  @brief  Reset the cluster manager
-     */
-    StatusCode ResetForNextEvent();
-
-    /**
      *  @brief  Erase all cluster manager content
      */
     StatusCode EraseAllContent();
-
-    /**
-     *  @brief  Create initial cluster lists
-     */
-    StatusCode CreateInitialLists();
 
     /**
      *  @brief  Remove an empty cluster list
@@ -314,101 +239,11 @@ private:
      */
     StatusCode RemoveTrackAssociations(const TrackToClusterMap &trackToClusterList) const;
 
-    /**
-     *  @brief  AlgorithmInfo class
-     */
-    class AlgorithmInfo
-    {
-    public:
-        std::string                 m_parentListName;                   ///< The current cluster list when algorithm was initialized
-        StringSet                   m_temporaryListNames;               ///< The temporary cluster list names
-        unsigned int                m_numberOfListsCreated;             ///< The number of cluster lists created by the algorithm
-    };
-
-    typedef std::map<std::string, ClusterList *> NameToClusterListMap;
-    typedef std::map<const Algorithm *, AlgorithmInfo> AlgorithmInfoMap;
-
-    NameToClusterListMap            m_nameToClusterListMap;             ///< The name to cluster list map
-    AlgorithmInfoMap                m_algorithmInfoMap;                 ///< The algorithm info map
-
     bool                            m_canMakeNewClusters;               ///< Whether the manager is allowed to make new clusters
-    std::string                     m_currentListName;                  ///< The name of the current cluster list
-    StringSet                       m_savedLists;                       ///< The set of saved cluster lists
-    static const std::string        NULL_LIST_NAME;                     ///< The name of the default empty (NULL) cluster list
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
 };
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode ClusterManager::GetCurrentListName(std::string &clusterListName) const
-{
-    if (m_currentListName.empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    clusterListName = m_currentListName;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode ClusterManager::GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &clusterListName) const
-{
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
-
-    if (m_algorithmInfoMap.end() == iter)
-        return this->GetCurrentListName(clusterListName);
-
-    clusterListName = iter->second.m_parentListName;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode ClusterManager::GetCurrentList(const ClusterList *&pClusterList, std::string &clusterListName) const
-{
-    clusterListName = m_currentListName;
-
-    return this->GetList(clusterListName, pClusterList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode ClusterManager::GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ClusterList *&pClusterList,
-    std::string &clusterListName) const
-{
-    AlgorithmInfoMap::const_iterator iter = m_algorithmInfoMap.find(pAlgorithm);
-
-    if (m_algorithmInfoMap.end() != iter)
-    {
-        clusterListName = iter->second.m_parentListName;
-    }
-    else
-    {
-        clusterListName = m_currentListName;
-    }
-
-    return this->GetList(clusterListName, pClusterList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode ClusterManager::ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm)
-{
-    return this->GetAlgorithmInputListName(pAlgorithm, m_currentListName);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline StatusCode ClusterManager::DropCurrentList()
-{
-    m_canMakeNewClusters = false;
-    m_currentListName = NULL_LIST_NAME;
-    return STATUS_CODE_SUCCESS;
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

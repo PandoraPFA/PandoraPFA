@@ -11,13 +11,9 @@
 namespace pandora
 {
 
-const std::string ClusterManager::NULL_LIST_NAME = "NullList";
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 ClusterManager::ClusterManager() :
-    m_canMakeNewClusters(false),
-    m_currentListName(NULL_LIST_NAME)
+    Manager<Cluster*>(),
+    m_canMakeNewClusters(false)
 {
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
 }
@@ -39,9 +35,9 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
         if (!m_canMakeNewClusters)
             throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
 
-        NameToClusterListMap::iterator iter = m_nameToClusterListMap.find(m_currentListName);
+        NameToListMap::iterator iter = m_nameToListMap.find(m_currentListName);
 
-        if (m_nameToClusterListMap.end() == iter)
+        if (m_nameToListMap.end() == iter)
              throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
         pCluster = NULL;
@@ -64,47 +60,9 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::GetList(const std::string &listName, const ClusterList *&pClusterList) const
-{
-    NameToClusterListMap::const_iterator iter = m_nameToClusterListMap.find(listName);
-
-    if (m_nameToClusterListMap.end() == iter)
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    pClusterList = iter->second;
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterManager::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &clusterListName)
-{
-    if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(clusterListName))
-        return STATUS_CODE_NOT_FOUND;
-
-    if (m_savedLists.end() == m_savedLists.find(clusterListName))
-        return STATUS_CODE_NOT_ALLOWED;
-
-    if (m_algorithmInfoMap.end() == m_algorithmInfoMap.find(pAlgorithm))
-        return STATUS_CODE_FAILURE;
-
-    m_canMakeNewClusters = false;
-    m_currentListName = clusterListName;
-
-    for (AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.begin(), iterEnd = m_algorithmInfoMap.end(); iter != iterEnd; ++iter)
-    {
-        iter->second.m_parentListName = clusterListName;
-    }
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ClusterManager::TemporarilyReplaceCurrentList(const std::string &clusterListName)
 {
-    if (m_nameToClusterListMap.end() == m_nameToClusterListMap.find(clusterListName))
+    if (m_nameToListMap.end() == m_nameToListMap.find(clusterListName))
         return STATUS_CODE_NOT_FOUND;
 
     m_canMakeNewClusters = false;
@@ -127,7 +85,7 @@ StatusCode ClusterManager::MakeTemporaryListAndSetCurrent(const Algorithm *const
     if (!iter->second.m_temporaryListNames.insert(temporaryListName).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
-    m_nameToClusterListMap[temporaryListName] = new ClusterList;
+    m_nameToListMap[temporaryListName] = new ClusterList;
     m_currentListName = temporaryListName;
     m_canMakeNewClusters = true;
 
@@ -142,18 +100,18 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
     if (clustersToMove.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    NameToClusterListMap::iterator originalClusterListIter = m_nameToClusterListMap.find(originalListName);
+    NameToListMap::iterator originalClusterListIter = m_nameToListMap.find(originalListName);
 
-    if (m_nameToClusterListMap.end() == originalClusterListIter)
+    if (m_nameToListMap.end() == originalClusterListIter)
         return STATUS_CODE_NOT_FOUND;
 
     if (originalClusterListIter->second->empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MakeTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
-    NameToClusterListMap::iterator temporaryClusterListIter = m_nameToClusterListMap.find(temporaryListName);
+    NameToListMap::iterator temporaryClusterListIter = m_nameToListMap.find(temporaryListName);
 
-    if (m_nameToClusterListMap.end() == temporaryClusterListIter)
+    if (m_nameToListMap.end() == temporaryClusterListIter)
         return STATUS_CODE_FAILURE;
 
     if ((originalClusterListIter->second == &clustersToMove) || (temporaryClusterListIter->second == &clustersToMove))
@@ -181,22 +139,22 @@ StatusCode ClusterManager::MoveClustersToTemporaryListAndSetCurrent(const Algori
 StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, const std::string &targetListName,
     const std::string &sourceListName)
 {
-    NameToClusterListMap::iterator sourceClusterListIter = m_nameToClusterListMap.find(sourceListName);
+    NameToListMap::iterator sourceClusterListIter = m_nameToListMap.find(sourceListName);
 
-    if (m_nameToClusterListMap.end() == sourceClusterListIter)
+    if (m_nameToListMap.end() == sourceClusterListIter)
         return STATUS_CODE_NOT_FOUND;
 
     if (sourceClusterListIter->second->empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    NameToClusterListMap::iterator targetClusterListIter = m_nameToClusterListMap.find(targetListName);
+    NameToListMap::iterator targetClusterListIter = m_nameToListMap.find(targetListName);
 
-    if (m_nameToClusterListMap.end() == targetClusterListIter)
+    if (m_nameToListMap.end() == targetClusterListIter)
     {
-        m_nameToClusterListMap[targetListName] = new ClusterList;
-        targetClusterListIter = m_nameToClusterListMap.find(targetListName);
+        m_nameToListMap[targetListName] = new ClusterList;
+        targetClusterListIter = m_nameToListMap.find(targetListName);
 
-        if (m_nameToClusterListMap.end() == targetClusterListIter)
+        if (m_nameToListMap.end() == targetClusterListIter)
             return STATUS_CODE_FAILURE;
     }
 
@@ -221,22 +179,22 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, c
     if (clustersToSave.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    NameToClusterListMap::iterator sourceClusterListIter = m_nameToClusterListMap.find(sourceListName);
+    NameToListMap::iterator sourceClusterListIter = m_nameToListMap.find(sourceListName);
 
-    if (m_nameToClusterListMap.end() == sourceClusterListIter)
+    if (m_nameToListMap.end() == sourceClusterListIter)
         return STATUS_CODE_NOT_FOUND;
 
     if (sourceClusterListIter->second->empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    NameToClusterListMap::iterator targetClusterListIter = m_nameToClusterListMap.find(targetListName);
+    NameToListMap::iterator targetClusterListIter = m_nameToListMap.find(targetListName);
 
-    if (m_nameToClusterListMap.end() == targetClusterListIter)
+    if (m_nameToListMap.end() == targetClusterListIter)
     {
-        m_nameToClusterListMap[targetListName] = new ClusterList;
-        targetClusterListIter = m_nameToClusterListMap.find(targetListName);
+        m_nameToListMap[targetListName] = new ClusterList;
+        targetClusterListIter = m_nameToListMap.find(targetListName);
 
-        if (m_nameToClusterListMap.end() == targetClusterListIter)
+        if (m_nameToListMap.end() == targetClusterListIter)
             return STATUS_CODE_FAILURE;
     }
 
@@ -268,9 +226,9 @@ StatusCode ClusterManager::SaveClusters(const Algorithm *const /*pAlgorithm*/, c
 
 StatusCode ClusterManager::DeleteCluster(Cluster *pCluster, const std::string &listName)
 {
-    NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(listName);
+    NameToListMap::iterator listIter = m_nameToListMap.find(listName);
 
-    if (m_nameToClusterListMap.end() == listIter)
+    if (m_nameToListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;
 
     ClusterList::iterator deletionIter = listIter->second->find(pCluster);
@@ -288,9 +246,9 @@ StatusCode ClusterManager::DeleteCluster(Cluster *pCluster, const std::string &l
 
 StatusCode ClusterManager::DeleteClusters(const ClusterList &clusterList, const std::string &listName)
 {
-    NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(listName);
+    NameToListMap::iterator listIter = m_nameToListMap.find(listName);
 
-    if (m_nameToClusterListMap.end() == listIter)
+    if (m_nameToListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;
 
     if (listIter->second == &clusterList)
@@ -317,9 +275,9 @@ StatusCode ClusterManager::DeleteClusters(const ClusterList &clusterList, const 
 
 StatusCode ClusterManager::DeleteTemporaryClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName)
 {
-    NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(clusterListName);
+    NameToListMap::iterator clusterListIter = m_nameToListMap.find(clusterListName);
 
-    if (m_nameToClusterListMap.end() == clusterListIter)
+    if (m_nameToListMap.end() == clusterListIter)
         return STATUS_CODE_NOT_FOUND;
 
     if (m_algorithmInfoMap.end() == m_algorithmInfoMap.find(pAlgorithm))
@@ -344,9 +302,9 @@ StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cl
     if (pClusterToEnlarge == pClusterToDelete)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    NameToClusterListMap::iterator listIter = m_nameToClusterListMap.find(m_currentListName);
+    NameToListMap::iterator listIter = m_nameToListMap.find(m_currentListName);
 
-    if (m_nameToClusterListMap.end() == listIter)
+    if (m_nameToListMap.end() == listIter)
         return STATUS_CODE_NOT_INITIALIZED;
 
     ClusterList::iterator clusterToEnlargeIter = listIter->second->find(pClusterToEnlarge);
@@ -371,10 +329,10 @@ StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cl
     if (pClusterToEnlarge == pClusterToDelete)
         return STATUS_CODE_INVALID_PARAMETER;
 
-    NameToClusterListMap::iterator enlargeListIter = m_nameToClusterListMap.find(enlargeListName);
-    NameToClusterListMap::iterator deleteListIter = m_nameToClusterListMap.find(deleteListName);
+    NameToListMap::iterator enlargeListIter = m_nameToListMap.find(enlargeListName);
+    NameToListMap::iterator deleteListIter = m_nameToListMap.find(deleteListName);
 
-    if ((m_nameToClusterListMap.end() == enlargeListIter) || (m_nameToClusterListMap.end() == deleteListIter))
+    if ((m_nameToListMap.end() == enlargeListIter) || (m_nameToListMap.end() == deleteListIter))
         return STATUS_CODE_NOT_INITIALIZED;
 
     ClusterList::iterator clusterToEnlargeIter = enlargeListIter->second->find(pClusterToEnlarge);
@@ -391,24 +349,6 @@ StatusCode ClusterManager::MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cl
     return STATUS_CODE_SUCCESS;
 }
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ClusterManager::RegisterAlgorithm(const Algorithm *const pAlgorithm)
-{
-    if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
-        return STATUS_CODE_ALREADY_PRESENT;
-
-    AlgorithmInfo algorithmInfo;
-    algorithmInfo.m_parentListName = m_currentListName;
-    algorithmInfo.m_numberOfListsCreated = 0;
-
-    if (!m_algorithmInfoMap.insert(AlgorithmInfoMap::value_type(pAlgorithm, algorithmInfo)).second)
-        return STATUS_CODE_ALREADY_PRESENT;
-
-    return STATUS_CODE_SUCCESS;
-}
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ClusterManager::GetClustersToBeDeleted(const Algorithm *const pAlgorithm, ClusterList &clusterList) const
@@ -421,9 +361,9 @@ StatusCode ClusterManager::GetClustersToBeDeleted(const Algorithm *const pAlgori
     for (StringSet::const_iterator listNameIter = algorithmListIter->second.m_temporaryListNames.begin(),
         listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
     {
-        NameToClusterListMap::const_iterator clusterListIter = m_nameToClusterListMap.find(*listNameIter);
+        NameToListMap::const_iterator clusterListIter = m_nameToListMap.find(*listNameIter);
 
-        if (m_nameToClusterListMap.end() == clusterListIter)
+        if (m_nameToListMap.end() == clusterListIter)
             return STATUS_CODE_FAILURE;
 
         for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
@@ -450,9 +390,9 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
     for (StringSet::const_iterator listNameIter = algorithmListIter->second.m_temporaryListNames.begin(),
         listNameIterEnd = algorithmListIter->second.m_temporaryListNames.end(); listNameIter != listNameIterEnd; ++listNameIter)
     {
-        NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(*listNameIter);
+        NameToListMap::iterator clusterListIter = m_nameToListMap.find(*listNameIter);
 
-        if (m_nameToClusterListMap.end() == clusterListIter)
+        if (m_nameToListMap.end() == clusterListIter)
             return STATUS_CODE_FAILURE;
 
         for (ClusterList::iterator clusterIter = clusterListIter->second->begin(), clusterIterEnd = clusterListIter->second->end();
@@ -462,7 +402,7 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
         }
 
         delete clusterListIter->second;
-        m_nameToClusterListMap.erase(clusterListIter);
+        m_nameToListMap.erase(clusterListIter);
     }
 
     algorithmListIter->second.m_temporaryListNames.clear();
@@ -476,21 +416,11 @@ StatusCode ClusterManager::ResetAlgorithmInfo(const Algorithm *const pAlgorithm,
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::ResetForNextEvent()
-{
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->EraseAllContent());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ClusterManager::EraseAllContent()
 {
     m_canMakeNewClusters = false;
 
-    for (NameToClusterListMap::iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end();)
+    for (NameToListMap::iterator iter = m_nameToListMap.begin(); iter != m_nameToListMap.end();)
     {
         for (ClusterList::iterator clusterIter = iter->second->begin(), clusterIterEnd = iter->second->end(); 
             clusterIter != clusterIterEnd; ++clusterIter)
@@ -499,12 +429,12 @@ StatusCode ClusterManager::EraseAllContent()
         }
 
         delete iter->second;
-        m_nameToClusterListMap.erase(iter++);
+        m_nameToListMap.erase(iter++);
     }
 
     m_currentListName = NULL_LIST_NAME;
 
-    m_nameToClusterListMap.clear();
+    m_nameToListMap.clear();
     m_algorithmInfoMap.clear();
     m_savedLists.clear();
 
@@ -513,31 +443,18 @@ StatusCode ClusterManager::EraseAllContent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ClusterManager::CreateInitialLists()
-{
-    if (!m_nameToClusterListMap.empty() || !m_savedLists.empty())
-        return STATUS_CODE_NOT_ALLOWED;
-
-    m_nameToClusterListMap[NULL_LIST_NAME] = new ClusterList;
-    m_savedLists.insert(NULL_LIST_NAME);
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 StatusCode ClusterManager::RemoveEmptyClusterList(const Algorithm *const pAlgorithm, const std::string &clusterListName)
 {
-    NameToClusterListMap::iterator clusterListIter = m_nameToClusterListMap.find(clusterListName);
+    NameToListMap::iterator clusterListIter = m_nameToListMap.find(clusterListName);
 
-    if (m_nameToClusterListMap.end() == clusterListIter)
+    if (m_nameToListMap.end() == clusterListIter)
         return STATUS_CODE_NOT_FOUND;
 
     if (!clusterListIter->second->empty())
         return STATUS_CODE_NOT_ALLOWED;
 
     delete clusterListIter->second;
-    m_nameToClusterListMap.erase(clusterListIter);
+    m_nameToListMap.erase(clusterListIter);
 
     AlgorithmInfoMap::iterator algorithmListIter = m_algorithmInfoMap.find(pAlgorithm);
 
@@ -564,7 +481,7 @@ StatusCode ClusterManager::RemoveEmptyClusterList(const Algorithm *const pAlgori
 
 StatusCode ClusterManager::RemoveAllTrackAssociations() const
 {
-    for (NameToClusterListMap::const_iterator iter = m_nameToClusterListMap.begin(); iter != m_nameToClusterListMap.end(); ++iter)
+    for (NameToListMap::const_iterator iter = m_nameToListMap.begin(); iter != m_nameToListMap.end(); ++iter)
     {
         for (ClusterList::iterator clusterIter = iter->second->begin(), clusterIterEnd = iter->second->end(); 
             clusterIter != clusterIterEnd; ++clusterIter)
@@ -580,9 +497,9 @@ StatusCode ClusterManager::RemoveAllTrackAssociations() const
 
 StatusCode ClusterManager::RemoveCurrentTrackAssociations(TrackList &danglingTracks) const
 {
-    NameToClusterListMap::const_iterator iter = m_nameToClusterListMap.find(m_currentListName);
+    NameToListMap::const_iterator iter = m_nameToListMap.find(m_currentListName);
 
-    if (m_nameToClusterListMap.end() == iter)
+    if (m_nameToListMap.end() == iter)
         return STATUS_CODE_NOT_INITIALIZED;
 
     for (ClusterList::iterator clusterIter = iter->second->begin(), clusterIterEnd = iter->second->end(); clusterIter != clusterIterEnd;
