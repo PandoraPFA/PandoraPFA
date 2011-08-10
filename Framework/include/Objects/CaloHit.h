@@ -323,7 +323,7 @@ protected:
     friend class CaloHitHelper;
     friend class CaloHitMetadata;
     friend class CaloHitManager;
-    friend class InputObjectManager<CaloHit*>;
+    friend class InputObjectManager<CaloHit>;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

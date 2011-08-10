@@ -19,7 +19,7 @@
 namespace pandora
 {
 
-class CaloHit;
+template<typename T> class AlgorithmObjectManager;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -578,6 +578,7 @@ private:
 
     friend class PandoraContentApiImpl;
     friend class ClusterManager;
+    friend class AlgorithmObjectManager<Cluster>;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

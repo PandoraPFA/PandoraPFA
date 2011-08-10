@@ -49,12 +49,12 @@ protected:
         std::string &temporaryListName);
 
     /**
-     *  @brief  Save a list of objects as a new list with a specified name
+     *  @brief  Save a list of objects in a list with a specified name; create new list if required
      * 
+     *  @param  listName the list name
      *  @param  objectList the object list
-     *  @param  newListName the new list name
      */
-    StatusCode SaveList(const ObjectList &objectList, const std::string &newListName);
+    StatusCode SaveList(const std::string &listName, const ObjectList &objectList);
 
     /**
      *  @brief  Add objects to a saved list with a specified name

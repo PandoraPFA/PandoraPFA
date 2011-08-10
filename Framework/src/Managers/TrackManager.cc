@@ -14,7 +14,7 @@ namespace pandora
 {
 
 TrackManager::TrackManager() :
-    InputObjectManager<Track*>()
+    InputObjectManager<Track>()
 {
     PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
 }
@@ -60,7 +60,7 @@ StatusCode TrackManager::EraseAllContent()
     m_parentDaughterRelationMap.clear();
     m_siblingRelationMap.clear();
 
-    return InputObjectManager<Track*>::EraseAllContent();
+    return InputObjectManager<Track>::EraseAllContent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

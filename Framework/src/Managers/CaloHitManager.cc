@@ -21,7 +21,7 @@ namespace pandora
 {
 
 CaloHitManager::CaloHitManager() :
-    InputObjectManager<CaloHit*>(),
+    InputObjectManager<CaloHit>(),
     m_nReclusteringProcesses(0),
     m_pCurrentReclusterMetadata(NULL)
 {
@@ -130,7 +130,7 @@ StatusCode CaloHitManager::CreateTemporaryListAndSetCurrent(const Algorithm *con
         caloHitList.insert(pCluster->GetIsolatedCaloHitList().begin(), pCluster->GetIsolatedCaloHitList().end());
     }
 
-    return InputObjectManager<CaloHit*>::CreateTemporaryListAndSetCurrent(pAlgorithm, caloHitList, temporaryListName);
+    return InputObjectManager<CaloHit>::CreateTemporaryListAndSetCurrent(pAlgorithm, caloHitList, temporaryListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ StatusCode CaloHitManager::EraseAllContent()
     m_pCurrentReclusterMetadata = NULL;
     m_reclusterMetadataList.clear();
 
-    return InputObjectManager<CaloHit*>::EraseAllContent();
+    return InputObjectManager<CaloHit>::EraseAllContent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -360,7 +360,7 @@ StatusCode CaloHitManager::PrepareForClustering(const Algorithm *const pAlgorith
     const CaloHitList &caloHitList(m_pCurrentReclusterMetadata->GetCaloHitList());
 
     std::string caloHitListName;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, InputObjectManager<CaloHit*>::CreateTemporaryListAndSetCurrent(pAlgorithm, caloHitList,
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, InputObjectManager<CaloHit>::CreateTemporaryListAndSetCurrent(pAlgorithm, caloHitList,
         caloHitListName));
     CaloHitList *pCaloHitList = m_nameToListMap[caloHitListName];
 

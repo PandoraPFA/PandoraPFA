@@ -233,8 +233,8 @@ StatusCode Manager<T>::CreateInitialLists()
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template class Manager<CaloHit *>;
-template class Manager<Cluster *>;
-template class Manager<Track *>;
+template class Manager<CaloHit>;
+template class Manager<Cluster>;
+template class Manager<Track>;
 
 } // namespace pandora

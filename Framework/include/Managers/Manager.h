@@ -36,7 +36,7 @@ public:
     virtual ~Manager();
 
 protected:
-    typedef std::set<T> ObjectList;
+    typedef std::set<T*> ObjectList;
 
     /**
      *  @brief  Get a list

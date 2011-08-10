@@ -71,16 +71,16 @@ StatusCode InputObjectManager<T>::CreateTemporaryListAndSetCurrent(const Algorit
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-StatusCode InputObjectManager<T>::SaveList(const ObjectList &objectList, const std::string &newListName)
+StatusCode InputObjectManager<T>::SaveList(const std::string &listName, const ObjectList &objectList)
 {
-    if (Manager<T>::m_nameToListMap.end() != Manager<T>::m_nameToListMap.find(newListName))
-        return this->AddObjectsToList(newListName, objectList);
+    if (Manager<T>::m_nameToListMap.end() != Manager<T>::m_nameToListMap.find(listName))
+        return this->AddObjectsToList(listName, objectList);
 
-    if (!Manager<T>::m_nameToListMap.insert(typename Manager<T>::NameToListMap::value_type(newListName, new ObjectList)).second)
+    if (!Manager<T>::m_nameToListMap.insert(typename Manager<T>::NameToListMap::value_type(listName, new ObjectList)).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
-    *(Manager<T>::m_nameToListMap[newListName]) = objectList;
-    Manager<T>::m_savedLists.insert(newListName);
+    *(Manager<T>::m_nameToListMap[listName]) = objectList;
+    Manager<T>::m_savedLists.insert(listName);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -170,7 +170,7 @@ StatusCode InputObjectManager<T>::CreateInitialLists()
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-template class InputObjectManager<CaloHit *>;
-template class InputObjectManager<Track *>;
+template class InputObjectManager<CaloHit>;
+template class InputObjectManager<Track>;
 
 } // namespace pandora

@@ -20,7 +20,7 @@ namespace pandora
 /**
  *    @brief TrackManager class
  */
-class TrackManager : public InputObjectManager<Track*>
+class TrackManager : public InputObjectManager<Track>
 {
 public:
     /**

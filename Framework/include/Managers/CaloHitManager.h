@@ -20,14 +20,10 @@
 namespace pandora
 {
 
-class Algorithm;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 /**
  *  @brief  CaloHitManager class
  */
-class CaloHitManager : public InputObjectManager<CaloHit*>
+class CaloHitManager : public InputObjectManager<CaloHit>
 {
 public:
     /**

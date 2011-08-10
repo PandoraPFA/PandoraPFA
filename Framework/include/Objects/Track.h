@@ -307,7 +307,7 @@ private:
 
     friend class PandoraContentApiImpl;
     friend class TrackManager;
-    friend class InputObjectManager<Track*>;
+    friend class InputObjectManager<Track>;
 };
 
 /**

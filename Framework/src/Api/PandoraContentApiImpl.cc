@@ -143,8 +143,8 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetAlgorithmInfo(iter->second, true));
 
     ClusterList clustersToBeDeleted;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetClustersToBeDeleted(iter->second, clustersToBeDeleted));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClustersForDeletion(clustersToBeDeleted));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetObjectsToBeDeleted(iter->second, clustersToBeDeleted));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClustersForDeletion(clustersToBeDeleted)); // TODO rename
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetAlgorithmInfo(iter->second, true));
 
     return STATUS_CODE_SUCCESS;
@@ -242,7 +242,7 @@ StatusCode PandoraContentApiImpl::InitializeFragmentation(const Algorithm &algor
     // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MoveClustersToTemporaryListAndSetCurrent(&algorithm, inputClusterListName, originalClustersListName, inputClusterList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MoveObjectsToTemporaryListAndSetCurrent(&algorithm, inputClusterListName, originalClustersListName, inputClusterList));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->InitializeReclustering(&algorithm, inputClusterList, originalClustersListName));
 
@@ -260,12 +260,12 @@ StatusCode PandoraContentApiImpl::EndFragmentation(const Algorithm &algorithm, c
     // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveClusters(&algorithm, inputClusterListName, clusterListToSaveName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveObjects(&algorithm, inputClusterListName, clusterListToSaveName));
 
     const ClusterList *pClustersToBeDeleted = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetList(clusterListToDeleteName, pClustersToBeDeleted));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareReclusterCandidatesForDeletion(*pClustersToBeDeleted));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteTemporaryClusterList(&algorithm, clusterListToDeleteName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteTemporaryObjects(&algorithm, clusterListToDeleteName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->EndReclustering(&algorithm, clusterListToSaveName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetCurrentListToAlgorithmInputList(&algorithm));
@@ -281,7 +281,7 @@ StatusCode PandoraContentApiImpl::InitializeReclustering(const Algorithm &algori
     // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MoveClustersToTemporaryListAndSetCurrent(&algorithm, inputClusterListName, originalClustersListName, inputClusterList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->MoveObjectsToTemporaryListAndSetCurrent(&algorithm, inputClusterListName, originalClustersListName, inputClusterList));
 
     std::string temporaryListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->CreateTemporaryListAndSetCurrent(&algorithm, inputTrackList, temporaryListName));
@@ -299,13 +299,13 @@ StatusCode PandoraContentApiImpl::EndReclustering(const Algorithm &algorithm, co
     // TODO tidy this
     std::string inputClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetAlgorithmInputListName(&algorithm, inputClusterListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveClusters(&algorithm, inputClusterListName, selectedClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveObjects(&algorithm, inputClusterListName, selectedClusterListName));
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ResetAlgorithmInfo(&algorithm, false));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetAlgorithmInfo(&algorithm, false));
 
     ClusterList clustersToBeDeleted;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetClustersToBeDeleted(&algorithm, clustersToBeDeleted));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetObjectsToBeDeleted(&algorithm, clustersToBeDeleted));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareReclusterCandidatesForDeletion(clustersToBeDeleted));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetAlgorithmInfo(&algorithm, false));
 
@@ -412,7 +412,7 @@ StatusCode PandoraContentApiImpl::MergeCaloHitFragments(CaloHit *pFragmentCaloHi
 StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClusterForDeletion(pCluster));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteCluster(pCluster));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteObject(pCluster));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -422,7 +422,7 @@ StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster) const
 StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster, const std::string &clusterListName) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClusterForDeletion(pCluster));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteCluster(pCluster, clusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteObject(pCluster, clusterListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -432,7 +432,7 @@ StatusCode PandoraContentApiImpl::DeleteCluster(Cluster *pCluster, const std::st
 StatusCode PandoraContentApiImpl::DeleteClusters(const ClusterList &clusterList) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClustersForDeletion(clusterList));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteClusters(clusterList));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteObjects(clusterList));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -442,7 +442,7 @@ StatusCode PandoraContentApiImpl::DeleteClusters(const ClusterList &clusterList)
 StatusCode PandoraContentApiImpl::DeleteClusters(const ClusterList &clusterList, const std::string &clusterListName) const
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareClustersForDeletion(clusterList));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteClusters(clusterList, clusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->DeleteObjects(clusterList, clusterListName));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -600,7 +600,7 @@ StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, co
 {
     std::string currentClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetCurrentListName(currentClusterListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveClusters(&algorithm, newClusterListName, currentClusterListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveObjects(&algorithm, newClusterListName, currentClusterListName));
 
     const ClusterList *pNewClusterList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetList(newClusterListName, pNewClusterList));
@@ -615,7 +615,7 @@ StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, co
 {
     std::string currentClusterListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetCurrentListName(currentClusterListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveClusters(&algorithm, newClusterListName, currentClusterListName, clustersToSave));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->SaveObjects(&algorithm, newClusterListName, currentClusterListName, clustersToSave));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -625,7 +625,7 @@ StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, co
 StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName,
     const std::string &newClusterListName) const
 {
-    return m_pPandora->m_pClusterManager->SaveClusters(&algorithm, newClusterListName, oldClusterListName);
+    return m_pPandora->m_pClusterManager->SaveObjects(&algorithm, newClusterListName, oldClusterListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -633,7 +633,7 @@ StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, co
 StatusCode PandoraContentApiImpl::SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName,
     const std::string &newClusterListName, const ClusterList &clustersToSave) const
 {
-    return m_pPandora->m_pClusterManager->SaveClusters(&algorithm, newClusterListName, oldClusterListName, clustersToSave);
+    return m_pPandora->m_pClusterManager->SaveObjects(&algorithm, newClusterListName, oldClusterListName, clustersToSave);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -654,7 +654,7 @@ StatusCode PandoraContentApiImpl::TemporarilyReplaceCurrentClusterList(const std
 
 StatusCode PandoraContentApiImpl::SaveCaloHitList(const Algorithm &/*algorithm*/, const CaloHitList &caloHitList, const std::string &newListName) const
 {
-    return m_pPandora->m_pCaloHitManager->SaveList(caloHitList, newListName);
+    return m_pPandora->m_pCaloHitManager->SaveList(newListName, caloHitList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -668,7 +668,7 @@ StatusCode PandoraContentApiImpl::ReplaceCurrentCaloHitList(const Algorithm &alg
 
 StatusCode PandoraContentApiImpl::SaveTrackList(const Algorithm &/*algorithm*/, const TrackList &trackList, const std::string &newListName) const
 {
-    return m_pPandora->m_pTrackManager->SaveList(trackList, newListName);
+    return m_pPandora->m_pTrackManager->SaveList(newListName, trackList);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
