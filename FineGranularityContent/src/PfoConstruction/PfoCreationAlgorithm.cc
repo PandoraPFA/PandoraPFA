@@ -14,8 +14,18 @@ using namespace pandora;
 
 StatusCode PfoCreationAlgorithm::Run()
 {
+    const PfoList *pPfoList = NULL; std::string pfoListName; // TODO MAKE NEATER
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pfoListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
+
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateTrackBasedPfos());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNeutralPfos());
+
+    if (!pPfoList->empty())
+    {
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::SavePfoList(*this, m_outputPfoListName));
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ReplaceCurrentPfoList(*this, m_outputPfoListName));
+    }
 
     return STATUS_CODE_SUCCESS;
 }
@@ -242,6 +252,10 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
 
 StatusCode PfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
+    m_outputPfoListName = "Output";
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "OutputPfoListName", m_outputPfoListName));
+
     m_minClusterHadronicEnergy = 0.25f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterHadronicEnergy", m_minClusterHadronicEnergy));

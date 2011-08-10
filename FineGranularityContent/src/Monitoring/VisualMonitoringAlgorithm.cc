@@ -212,7 +212,7 @@ void VisualMonitoringAlgorithm::VisualizeClusterList(const std::string &listName
 
 void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
 {
-    const ParticleFlowObjectList *pPfoList = NULL;
+    const PfoList *pPfoList = NULL;
 
     if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
     {

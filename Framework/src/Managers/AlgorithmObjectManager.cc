@@ -9,6 +9,7 @@
 #include "Managers/AlgorithmObjectManager.h"
 
 #include "Objects/Cluster.h"
+#include "Objects/ParticleFlowObject.h"
 
 namespace pandora
 {
@@ -30,7 +31,7 @@ AlgorithmObjectManager<T>::~AlgorithmObjectManager()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-StatusCode AlgorithmObjectManager<T>::MakeTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName)
+StatusCode AlgorithmObjectManager<T>::CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName)
 {
     typename Manager<T>::AlgorithmInfoMap::iterator iter = Manager<T>::m_algorithmInfoMap.find(pAlgorithm);
 
@@ -66,7 +67,7 @@ StatusCode AlgorithmObjectManager<T>::MoveObjectsToTemporaryListAndSetCurrent(co
     if (originalObjectListIter->second->empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, MakeTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CreateTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
     typename Manager<T>::NameToListMap::iterator temporaryObjectListIter = Manager<T>::m_nameToListMap.find(temporaryListName);
 
     if (Manager<T>::m_nameToListMap.end() == temporaryObjectListIter)
@@ -95,8 +96,7 @@ StatusCode AlgorithmObjectManager<T>::MoveObjectsToTemporaryListAndSetCurrent(co
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-StatusCode AlgorithmObjectManager<T>::SaveObjects(const Algorithm *const /*pAlgorithm*/, const std::string &targetListName,
-    const std::string &sourceListName)
+StatusCode AlgorithmObjectManager<T>::SaveObjects(const std::string &targetListName, const std::string &sourceListName)
 {
     typename Manager<T>::NameToListMap::iterator sourceObjectListIter = Manager<T>::m_nameToListMap.find(sourceListName);
 
@@ -133,8 +133,7 @@ StatusCode AlgorithmObjectManager<T>::SaveObjects(const Algorithm *const /*pAlgo
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-StatusCode AlgorithmObjectManager<T>::SaveObjects(const Algorithm *const /*pAlgorithm*/, const std::string &targetListName,
-    const std::string &sourceListName, const ObjectList &objectsToSave)
+StatusCode AlgorithmObjectManager<T>::SaveObjects(const std::string &targetListName, const std::string &sourceListName, const ObjectList &objectsToSave)
 {
     if (objectsToSave.empty())
         return STATUS_CODE_NOT_INITIALIZED;
@@ -359,8 +358,18 @@ StatusCode AlgorithmObjectManager<T>::EraseAllContent()
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+StatusCode AlgorithmObjectManager<T>::DropCurrentList()
+{
+    m_canMakeNewObjects = false;
+    return Manager<T>::DropCurrentList();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template class AlgorithmObjectManager<Cluster>;
+template class AlgorithmObjectManager<ParticleFlowObject>;
 
 } // namespace pandora

@@ -91,6 +91,7 @@ private:
      */
     static void ComputeEnergyWeightedClusterPosition(pandora::Cluster *pCluster, pandora::CartesianVector &energyWeightedClusterPosition);
 
+    std::string     m_outputPfoListName;            ///< The output pfo list name
     std::string     m_inputClusterListName;         ///< The input cluster list name; if not specified, use current list
     std::string     m_pfoParameterDetermination;    ///< Determines how to calculate pfo parameters
 };

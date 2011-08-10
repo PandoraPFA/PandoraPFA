@@ -80,9 +80,10 @@ pandora::StatusCode PandoraApi::SetTrackToMCParticleRelationship(const pandora::
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraApi::GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList)
+pandora::StatusCode PandoraApi::GetCurrentPfoList(const pandora::Pandora &pandora, const pandora::PfoList *&pfoList)
 {
-    return pandora.GetPandoraApiImpl()->GetParticleFlowObjects(particleFlowObjectList);
+    std::string pfoListName;
+    return pandora.GetPandoraApiImpl()->GetCurrentPfoList(pfoList, pfoListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

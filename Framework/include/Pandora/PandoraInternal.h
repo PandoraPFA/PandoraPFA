@@ -130,8 +130,8 @@ typedef std::vector<CaloHit *> CaloHitVector;
 typedef std::vector<Track *> TrackVector;
 typedef std::vector<Cluster *> ClusterVector;
 typedef std::vector<MCParticle *> MCParticleVector;
-typedef std::vector<ParticleFlowObject *> ParticleFlowObjectVector;
-typedef std::set<ParticleFlowObject *> ParticleFlowObjectList;
+typedef std::vector<ParticleFlowObject *> PfoVector;
+typedef std::set<ParticleFlowObject *> PfoList;
 
 typedef unsigned int PseudoLayer;
 typedef std::set<std::string> StringSet;

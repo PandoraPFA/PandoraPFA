@@ -132,15 +132,6 @@ StatusCode Manager<T>::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *con
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
-StatusCode Manager<T>::DropCurrentList()
-{
-    m_currentListName = NULL_LIST_NAME;
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template<typename T>
 StatusCode Manager<T>::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))
@@ -231,10 +222,20 @@ StatusCode Manager<T>::CreateInitialLists()
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+StatusCode Manager<T>::DropCurrentList()
+{
+    m_currentListName = NULL_LIST_NAME;
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template class Manager<CaloHit>;
 template class Manager<Cluster>;
+template class Manager<ParticleFlowObject>;
 template class Manager<Track>;
 
 } // namespace pandora

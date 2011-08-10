@@ -45,13 +45,16 @@ StatusCode CaloHitManager::CreateCaloHit(const PARAMETERS &parameters)
         CaloHit *pCaloHit = NULL;
         pCaloHit = this->HitInstantiation(parameters);
 
-        NameToListMap::iterator inputIter = m_nameToListMap.find(INPUT_LIST_NAME);
-
-        if ((NULL == pCaloHit) || (m_nameToListMap.end() == inputIter) || (!inputIter->second->insert(pCaloHit).second))
+        if (NULL == pCaloHit)
             throw StatusCodeException(STATUS_CODE_FAILURE);
 
         const PseudoLayer pseudoLayer = GeometryHelper::GetPseudoLayer(pCaloHit->GetPositionVector());
         PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pCaloHit->SetPseudoLayer(pseudoLayer));
+
+        NameToListMap::iterator inputIter = m_nameToListMap.find(INPUT_LIST_NAME);
+
+        if ((m_nameToListMap.end() == inputIter) || !inputIter->second->insert(pCaloHit).second)
+            throw StatusCodeException(STATUS_CODE_FAILURE);
 
         return STATUS_CODE_SUCCESS;
     }

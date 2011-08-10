@@ -13,6 +13,10 @@
 namespace pandora
 {
 
+template<typename T> class AlgorithmObjectManager;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  ParticleFlowObject class
  */
@@ -160,6 +164,7 @@ private:
     ClusterList             m_clusterList;              ///< The cluster list
 
     friend class ParticleFlowObjectManager;
+    friend class AlgorithmObjectManager<ParticleFlowObject>;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

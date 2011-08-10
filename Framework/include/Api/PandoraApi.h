@@ -296,12 +296,12 @@ public:
         const void *pMCParticleParentAddress, const float mcParticleWeight = 1);
 
     /**
-     *  @brief  Get the particle flow objects
+     *  @brief  Get the current pfo list
      * 
      *  @param  pandora the pandora instance to get the objects from
-     *  @param  pfoVector container to receive the particle flow objects
+     *  @param  pPfoList to receive the address of the particle flow objects
      */
-    static pandora::StatusCode GetParticleFlowObjects(const pandora::Pandora &pandora, pandora::ParticleFlowObjectList &particleFlowObjectList);
+    static pandora::StatusCode GetCurrentPfoList(const pandora::Pandora &pandora, const pandora::PfoList *&pPfoList);
 
     /**
      *  @brief  Set the bfield calculator used by pandora

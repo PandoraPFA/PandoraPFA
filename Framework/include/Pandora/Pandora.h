@@ -79,7 +79,7 @@ private:
     CaloHitManager              *m_pCaloHitManager;             ///< The hit manager
     ClusterManager              *m_pClusterManager;             ///< The cluster manager
     MCManager                   *m_pMCManager;                  ///< The MC manager
-    ParticleFlowObjectManager   *m_pParticleFlowObjectManager;  ///< The particle flow object manager
+    ParticleFlowObjectManager   *m_pPfoManager;                 ///< The particle flow object manager
     PluginManager               *m_pPluginManager;              ///< The pandora plugin manager
     TrackManager                *m_pTrackManager;               ///< The track manager
 

@@ -14,13 +14,13 @@ using namespace pandora;
 
 StatusCode KinkPfoCreationAlgorithm::Run()
 {
-    const ParticleFlowObjectList *pPfoList = NULL;
+    const PfoList *pPfoList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
 
 // Under Development:
-//    ParticleFlowObjectList lambdaPfos, kShortPfos;
+//    PfoList lambdaPfos, kShortPfos;
 //
-//    for (ParticleFlowObjectList::const_iterator iter = pPfoList->begin(), iterEnd = pPfoList->end(); iter != iterEnd; ++iter)
+//    for (PfoList::const_iterator iter = pPfoList->begin(), iterEnd = pPfoList->end(); iter != iterEnd; ++iter)
 //    {
 //        ParticleFlowObject *pPfo = *iter;
 //
@@ -31,7 +31,7 @@ StatusCode KinkPfoCreationAlgorithm::Run()
 //            lambdaPfos.insert(pPfo);
 //    }
 
-    for (ParticleFlowObjectList::const_iterator iter = pPfoList->begin(); iter != pPfoList->end(); ++iter)
+    for (PfoList::const_iterator iter = pPfoList->begin(); iter != pPfoList->end(); ++iter)
     {
         ParticleFlowObject *pPfo = *iter;
         const TrackList pfoTrackList(pPfo->GetTrackList());
@@ -113,7 +113,7 @@ StatusCode KinkPfoCreationAlgorithm::Run()
             ClusterList neutralPfoCandidateClusterList;
             PfosOrderedByDistanceMap neutralPfosByDistance, photonPfosByDistance, chargedPfosByDistance;
 
-            for (ParticleFlowObjectList::const_iterator neutralIter = pPfoList->begin(), neutralIterEnd = pPfoList->end(); neutralIter != neutralIterEnd;)
+            for (PfoList::const_iterator neutralIter = pPfoList->begin(), neutralIterEnd = pPfoList->end(); neutralIter != neutralIterEnd;)
             {
                 ParticleFlowObject *pNeutralPfo = *neutralIter;
                 ++neutralIter;
@@ -216,7 +216,7 @@ StatusCode KinkPfoCreationAlgorithm::Run()
 //            {
 //                const float targetEnergy(pParentTrack->GetEnergyAtDca() - pDaughterTrack->GetEnergyAtDca());
 //
-//                for (ParticleFlowObjectList::const_iterator lIter = lambdaPfos.begin(), lIterEnd = lambdaPfos.end(); lIter != lIterEnd; ++lIter)
+//                for (PfoList::const_iterator lIter = lambdaPfos.begin(), lIterEnd = lambdaPfos.end(); lIter != lIterEnd; ++lIter)
 //                {
 //                    ParticleFlowObject *lambdaPfo = (*lIter);
 //                    const CartesianVector lambdaMomentum(lambdaPfo->GetMomentum());
@@ -238,7 +238,7 @@ StatusCode KinkPfoCreationAlgorithm::Run()
                 const float targetEnergy(pParentTrack->GetEnergyAtDca() - pDaughterTrack->GetEnergyAtDca());
 
                 float clusterEnergy(0.);
-                ParticleFlowObjectList pfosToRemove;
+                PfoList pfosToRemove;
                 float chi2Current(std::numeric_limits<float>::max());
 
                 for (PfosOrderedByDistanceMap::const_iterator cIter = neutralPfosByDistance.begin(), cIterEnd = neutralPfosByDistance.end();
@@ -328,7 +328,7 @@ StatusCode KinkPfoCreationAlgorithm::Run()
 //
 //            TrackList v0s;
 //
-//            for (ParticleFlowObjectList::const_iterator iterV0 = pPfoList->begin(), iterV0End = pPfoList->end(); iterV0 != iterV0End; ++iterV0)
+//            for (PfoList::const_iterator iterV0 = pPfoList->begin(), iterV0End = pPfoList->end(); iterV0 != iterV0End; ++iterV0)
 //            {
 //                ParticleFlowObject *pPfoV0 = *iterV0;
 //                const TrackList &trackListV0(pPfoV0->GetTrackList());
@@ -443,11 +443,11 @@ StatusCode KinkPfoCreationAlgorithm::SetPfoParametersFromParentTrack(ParticleFlo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode KinkPfoCreationAlgorithm::MergeClustersFromPfoListToPfo(ParticleFlowObjectList &pfosToMerge, ParticleFlowObject *pPfo) const
+StatusCode KinkPfoCreationAlgorithm::MergeClustersFromPfoListToPfo(PfoList &pfosToMerge, ParticleFlowObject *pPfo) const
 {
     ClusterList clustersToAdd;
 
-    for (ParticleFlowObjectList::const_iterator iter = pfosToMerge.begin(), iterEnd = pfosToMerge.end(); iter != iterEnd;)
+    for (PfoList::const_iterator iter = pfosToMerge.begin(), iterEnd = pfosToMerge.end(); iter != iterEnd;)
     {
         ParticleFlowObject *pPfoToMerge = *iter;
         iter++;

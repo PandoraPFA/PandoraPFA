@@ -8,33 +8,45 @@
 
 #include "Managers/ParticleFlowObjectManager.h"
 
-#include "Objects/CaloHit.h"
-#include "Objects/Cluster.h"
 #include "Objects/ParticleFlowObject.h"
-#include "Objects/Track.h"
 
 namespace pandora
 {
 
-ParticleFlowObjectManager::~ParticleFlowObjectManager()
+ParticleFlowObjectManager::ParticleFlowObjectManager() :
+    AlgorithmObjectManager<ParticleFlowObject>()
 {
-    (void) this->ResetForNextEvent();
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateInitialLists());
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+ParticleFlowObjectManager::~ParticleFlowObjectManager()
+{
+    (void) this->EraseAllContent();
+}
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 StatusCode ParticleFlowObjectManager::CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters)
 {
     try
     {
-        ParticleFlowObject *pParticleFlowObject = NULL;
-        pParticleFlowObject = new ParticleFlowObject(particleFlowObjectParameters);
+        if (!m_canMakeNewObjects)
+            throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
 
-        if (NULL == pParticleFlowObject)
-            return STATUS_CODE_FAILURE;
+        NameToListMap::iterator iter = m_nameToListMap.find(m_currentListName);
 
-        if (!m_particleFlowObjectList.insert(pParticleFlowObject).second)
-            return STATUS_CODE_FAILURE;
+        if (m_nameToListMap.end() == iter)
+             throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+        ParticleFlowObject *pPfo = NULL;
+        pPfo = new ParticleFlowObject(particleFlowObjectParameters);
+
+        if (NULL == pPfo)
+             throw StatusCodeException(STATUS_CODE_FAILURE);
+
+        if (!iter->second->insert(pPfo).second)
+             throw StatusCodeException(STATUS_CODE_FAILURE);
 
         return STATUS_CODE_SUCCESS;
     }
@@ -47,32 +59,9 @@ StatusCode ParticleFlowObjectManager::CreateParticleFlowObject(const PandoraCont
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ParticleFlowObjectManager::GetParticleFlowObjects(ParticleFlowObjectList &particleFlowObjectList) const
+StatusCode ParticleFlowObjectManager::AddClusterToPfo(ParticleFlowObject *pPfo, Cluster *pCluster) const
 {
-    particleFlowObjectList = m_particleFlowObjectList;
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ParticleFlowObjectManager::GetCurrentList(const ParticleFlowObjectList *&pParticleFlowObjectList) const
-{
-    pParticleFlowObjectList = &m_particleFlowObjectList;
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ParticleFlowObjectManager::AddClusterToPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster) const
-{
-    ParticleFlowObjectList::const_iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
-
-    if (m_particleFlowObjectList.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    ClusterList &clusterList = (*iter)->m_clusterList;
-
-    if (!clusterList.insert(pCluster).second)
+    if (!pPfo->m_clusterList.insert(pCluster).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
@@ -80,16 +69,9 @@ StatusCode ParticleFlowObjectManager::AddClusterToPfo(ParticleFlowObject *pParti
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ParticleFlowObjectManager::AddTrackToPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack) const
+StatusCode ParticleFlowObjectManager::AddTrackToPfo(ParticleFlowObject *pPfo, Track *pTrack) const
 {
-    ParticleFlowObjectList::const_iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
-
-    if (m_particleFlowObjectList.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    TrackList &trackList = (*iter)->m_trackList;
-
-    if (!trackList.insert(pTrack).second)
+    if (!pPfo->m_trackList.insert(pTrack).second)
         return STATUS_CODE_ALREADY_PRESENT;
 
     return STATUS_CODE_SUCCESS;
@@ -97,14 +79,9 @@ StatusCode ParticleFlowObjectManager::AddTrackToPfo(ParticleFlowObject *pParticl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ParticleFlowObjectManager::RemoveClusterFromPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster)
+StatusCode ParticleFlowObjectManager::RemoveClusterFromPfo(ParticleFlowObject *pPfo, Cluster *pCluster)
 {
-    ParticleFlowObjectList::iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
-
-    if (m_particleFlowObjectList.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    ClusterList &clusterList = (*iter)->m_clusterList;
+    ClusterList &clusterList = pPfo->m_clusterList;
     ClusterList::iterator clusterIter = clusterList.find(pCluster);
 
     if (clusterList.end() == clusterIter)
@@ -117,50 +94,15 @@ StatusCode ParticleFlowObjectManager::RemoveClusterFromPfo(ParticleFlowObject *p
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode ParticleFlowObjectManager::RemoveTrackFromPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack)
+StatusCode ParticleFlowObjectManager::RemoveTrackFromPfo(ParticleFlowObject *pPfo, Track *pTrack)
 {
-    ParticleFlowObjectList::iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
-
-    if (m_particleFlowObjectList.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    TrackList &trackList = (*iter)->m_trackList;
+    TrackList &trackList = pPfo->m_trackList;
     TrackList::iterator trackIter = trackList.find(pTrack);
 
     if (trackList.end() == trackIter)
         return STATUS_CODE_NOT_FOUND;
 
     trackList.erase(trackIter);
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ParticleFlowObjectManager::DeletePfo(ParticleFlowObject *pParticleFlowObject)
-{
-    ParticleFlowObjectList::iterator iter = m_particleFlowObjectList.find(pParticleFlowObject);
-
-    if (m_particleFlowObjectList.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    delete pParticleFlowObject;
-    m_particleFlowObjectList.erase(iter);
-
-    return STATUS_CODE_SUCCESS;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-StatusCode ParticleFlowObjectManager::ResetForNextEvent()
-{
-    for (ParticleFlowObjectList::iterator iter = m_particleFlowObjectList.begin(), iterEnd = m_particleFlowObjectList.end(); iter != iterEnd; ++iter)
-        delete *iter;
-
-    m_particleFlowObjectList.clear();
-
-    if (!m_particleFlowObjectList.empty())
-        return STATUS_CODE_FAILURE;
 
     return STATUS_CODE_SUCCESS;
 }

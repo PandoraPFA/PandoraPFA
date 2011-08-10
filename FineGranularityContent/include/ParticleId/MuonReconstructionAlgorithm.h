@@ -115,6 +115,7 @@ private:
     float           m_maxGenericDistance;           ///< Max generic distance to add ecal/hcal hit to muon
     float           m_isolatedMaxGenericDistance;   ///< Max generic distance to add ecal/hcal hit to isolated muon
 
+    std::string     m_outputMuonPfoListName;        ///< The name of the output muon pfo list
     std::string     m_outputMuonClusterListName;    ///< The name of the output muon cluster list
     std::string     m_outputTrackListName;          ///< The name of the output muon-removed track list
     std::string     m_outputCaloHitListName;        ///< The name of the output muon-removed calo hit list

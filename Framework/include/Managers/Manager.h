@@ -94,11 +94,6 @@ protected:
     StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &listName);
 
     /**
-     *  @brief  Drop the current list, returning the current list to its default empty/null state
-     */
-    StatusCode DropCurrentList();
-
-    /**
      *  @brief  Register an algorithm with the manager
      * 
      *  @param  pAlgorithm address of the algorithm
@@ -127,6 +122,11 @@ protected:
      *  @brief  Create initial lists
      */
     virtual StatusCode CreateInitialLists();
+
+    /**
+     *  @brief  Drop the current list, returning the current list to its default empty/null state
+     */
+    virtual StatusCode DropCurrentList();
 
     /**
      *  @brief  AlgorithmInfo class

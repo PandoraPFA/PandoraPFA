@@ -39,7 +39,7 @@ protected:
      *  @param  pAlgorithm address of the algorithm requesting a temporary list
      *  @param  temporaryListName to receive the name of the temporary list
      */
-    StatusCode MakeTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName);
+    StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName);
 
     /**
      *  @brief  Move objects to a new temporary object list and set it to be the current object list
@@ -52,30 +52,26 @@ protected:
      *          - an empty object list will be rejected
      */
     StatusCode MoveObjectsToTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const std::string &originalListName,
-        std::string &temporaryListName, const ObjectList &objectsToMove);   // THIS COULD JUST CALL MAKE TEMP LIST, THEN MOVE CLUSTERS TO LIST
-                                                                            // SAVE CLUSTERS COULD CALL MAKE NEW LIST, MOVE TO LIST, INSERT INTO LIST OF SAVED LISTS
+        std::string &temporaryListName, const ObjectList &objectsToMove);
 
     /**
      *  @brief  Save a list of objects
      * 
-     *  @param  pAlgorithm the algorithm associated with the temporary objects
      *  @param  targetListName the name of the target object list, which will be created if it doesn't currently exist
      *  @param  sourceListName the name of the (typically temporary) object list to save
      */
-    StatusCode SaveObjects(const Algorithm *const pAlgorithm, const std::string &targetListName, const std::string &sourceListName);
+    StatusCode SaveObjects(const std::string &targetListName, const std::string &sourceListName);
 
     /**
      *  @brief  Save a list of objects
      * 
-     *  @param  pAlgorithm the algorithm associated with the temporary objects
      *  @param  targetListName the name of the target object list, which will be created if it doesn't currently exist
      *  @param  sourceListName the name of the (typically temporary) object list containing objects to save
      *  @param  objectToSave only object in both this and the temporary list will be stored
      *          - other object will remain in the temporary list and will be deleted when the parent algorithm exits
      *          - an empty object list will be rejected
      */
-    StatusCode SaveObjects(const Algorithm *const pAlgorithm, const std::string &targetListName, const std::string &sourceListName,
-        const ObjectList &objectsToSave); // LOOK AT MERGING TWO SAVEOBJECTS FUNCTIONS?
+    StatusCode SaveObjects(const std::string &targetListName, const std::string &sourceListName, const ObjectList &objectsToSave);
 
     /**
      *  @brief  Temporarily replace the current list with another list, which may only be a temporary list.
@@ -84,7 +80,7 @@ protected:
      * 
      *  @param  listName the name of the new current (and algorithm input) list
      */
-    StatusCode TemporarilyReplaceCurrentList(const std::string &listName); // THIS ISN'T A GREAT FUNCTION; ITS USE SHOULD BE MINIMISED
+    StatusCode TemporarilyReplaceCurrentList(const std::string &listName);
 
     /**
      *  @brief  Delete an object from the current list
@@ -122,7 +118,7 @@ protected:
      *  @param  pAlgorithm address of the algorithm calling this function
      *  @param  temporaryListName the name of the temporary list
      */
-    StatusCode DeleteTemporaryObjects(const Algorithm *const pAlgorithm, const std::string &temporaryListName); // RENAMED
+    StatusCode DeleteTemporaryObjects(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
 
     /**
      *  @brief  Get the list of objects that will be deleted when the algorithm info is reset
@@ -138,12 +134,17 @@ protected:
      *  @param  pAlgorithm the algorithm associated with the temporary objects
      *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
      */
-    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished); // HAS ADDITIONAL STEP OF DELETING CLUSTERS
+    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
 
     /**
      *  @brief  Erase all manager content
      */
     virtual StatusCode EraseAllContent();
+
+    /**
+     *  @brief  Drop the current list, returning the current list to its default empty/null state
+     */
+    virtual StatusCode DropCurrentList();
 
     bool        m_canMakeNewObjects;            ///< Whether the manager is allowed to make new objects when requested by algorithms
 };

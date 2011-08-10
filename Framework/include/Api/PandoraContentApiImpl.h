@@ -25,6 +25,8 @@ class Pandora;
 class PandoraContentApiImpl
 {
 public:
+    /* Object-creation functions */
+
     /**
      *  @brief  Create a cluster
      *
@@ -40,6 +42,14 @@ public:
      *  @param  particleFlowObjectParameters the particle flow object parameters
      */
     StatusCode CreateParticleFlowObject(const PandoraContentApi::ParticleFlowObjectParameters &particleFlowObjectParameters) const;
+
+
+    /* High-level steering functions */
+
+    /**
+     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
+     */
+    StatusCode RepeatEventPreparation() const;
 
     /**
      *  @brief  Create an algorithm instance, via one of the algorithm factories registered with pandora.
@@ -58,30 +68,18 @@ public:
     StatusCode RunAlgorithm(const std::string &algorithmName) const;
 
     /**
-     *  @brief  Repeat the event preparation stages, which are used to calculate properties of input objects for later use in algorithms
-     */
-    StatusCode RepeatEventPreparation() const;
-
-    /**
-     *  @brief  Get the current cluster list
+     *  @brief  Run a clustering algorithm (an algorithm that will create new cluster objects)
      * 
-     *  @param  pClusterList to receive the address of the current cluster list
-     *  @param  clusterListName to receive the current cluster list name
+     *  @param  algorithm the algorithm calling this function
+     *  @param  clusteringAlgorithmName the name of the clustering algorithm to run
+     *  @param  pNewClusterList the address of the new cluster list populated
+     *  @param  newClusterListName the name of the new cluster list populated
      */
-    StatusCode GetCurrentClusterList(const ClusterList *&pClusterList, std::string &clusterListName) const;
+     StatusCode RunClusteringAlgorithm(const Algorithm &algorithm, const std::string &clusteringAlgorithmName,
+        const ClusterList *&pNewClusterList, std::string &newClusterListName) const;
 
-    /**
-     *  @brief  Get a named cluster list
-     * 
-     *  @param  clusterListName the name of the cluster list
-     *  @param  pClusterList to receive the address of the cluster list
-     */
-    StatusCode GetClusterList(const std::string &clusterListName, const ClusterList *&pClusterList) const;
 
-    /**
-     *  @brief  Drop the current cluster list, returning the current list to its default empty/null state
-     */
-    StatusCode DropCurrentClusterList() const;
+    /* CaloHit-related functions */
 
     /**
      *  @brief  Get the current calo hit list
@@ -92,6 +90,13 @@ public:
     StatusCode GetCurrentCaloHitList(const CaloHitList *&pCaloHitList, std::string &caloHitListName) const;
 
     /**
+     *  @brief  Get the current calo hit list name
+     * 
+     *  @param  caloHitListName to receive the current calo hit list name
+     */
+    StatusCode GetCurrentCaloHitListName(std::string &caloHitListName) const;
+
+    /**
      *  @brief  Get a named calo hit list
      * 
      *  @param  caloHitListName the name of the calo hit list
@@ -100,98 +105,25 @@ public:
     StatusCode GetCaloHitList(const std::string &caloHitListName, const CaloHitList *&pCaloHitList) const;
 
     /**
+     *  @brief  Save the current calo hit list under a new name
+     * 
+     *  @param  newListName the new calo hit list name
+     */
+    StatusCode SaveCaloHitList(const CaloHitList &caloHitList, const std::string &newListName) const;
+
+    /**
+     *  @brief  Replace the current calo hit list with a pre-saved list; use this new list as a permanent replacement
+     *          for the current list (will persist outside the current algorithm)
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  newListName the name of the replacement calo hit list
+     */
+    StatusCode ReplaceCurrentCaloHitList(const Algorithm &algorithm, const std::string &newListName) const;
+
+    /**
      *  @brief  Drop the current calo hit list, returning the current list to its default empty/null state
      */
     StatusCode DropCurrentCaloHitList() const;
-
-    /**
-     *  @brief  Get the current track list
-     * 
-     *  @param  pTrackList to receive the address of the current track list
-     *  @param  trackListName to receive the current track list name
-     */
-    StatusCode GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const;
-
-    /**
-     *  @brief  Get a named track list
-     * 
-     *  @param  trackListName the name of the track list
-     *  @param  pTrackList to receive the address of the track list
-     */
-    StatusCode GetTrackList(const std::string &trackListName, const TrackList *&pTrackList) const;
-
-    /**
-     *  @brief  Drop the current track list, returning the current list to its default empty/null state
-     */
-    StatusCode DropCurrentTrackList() const;
-
-    /**
-     *  @brief  Get the current particle flow object list
-     * 
-     *  @param  pParticleFlowObjectList to receive the address of the current particle flow object list
-     */
-    StatusCode GetCurrentPfoList(const ParticleFlowObjectList *&pParticleFlowObjectList) const;
-
-    /**
-     *  @brief  Get the list of mc pfo targets
-     *
-     *  @param  mcParticleList to receive the mc particle list
-     */
-    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
-
-    /**
-     *  @brief  Initialize cluster fragmentation operations on clusters in the algorithm input list. This allows hits in a list
-     *          of clusters (a subset of the algorithm input list) to be redistributed.
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  inputClusterList the input cluster list
-     *  @param  originalClustersListName to receive the name of the list in which the original clusters are stored
-     *  @param  fragmentClustersListName to receive the name of the list in which the fragment clusters are stored
-     */
-    StatusCode InitializeFragmentation(const Algorithm &algorithm, const ClusterList &inputClusterList,
-        std::string &originalClustersListName, std::string &fragmentClustersListName) const;
-
-    /**
-     *  @brief  End cluster fragmentation operations on clusters in the algorithm input list
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  clusterListToSaveName the name of the list containing the clusters chosen to be saved (original or fragments)
-     *  @param  clusterListToDeleteName the name of the list containing the clusters chosen to be deleted (original or fragments)
-     */
-    StatusCode EndFragmentation(const Algorithm &algorithm, const std::string &clusterListToSaveName,
-        const std::string &clusterListToDeleteName) const;
-
-    /**
-     *  @brief  Initialize reclustering operations on clusters in the algorithm input list. This allows hits in a list
-     *          of clusters (a subset of the algorithm input list) to be redistributed.
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  inputTrackList the input track list
-     *  @param  inputClusterList the input cluster list
-     *  @param  originalClustersListName to receive the name of the list in which the original clusters are stored
-     */
-    StatusCode InitializeReclustering(const Algorithm &algorithm, const TrackList &inputTrackList, const ClusterList &inputClusterList,
-        std::string &originalClustersListName) const;
-
-    /**
-     *  @brief  End reclustering operations on clusters in the algorithm input list
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  pandora the pandora instance performing reclustering
-     *  @param  selectedClusterListName the name of the list containing the chosen recluster candidates (or the original candidates)
-     */
-    StatusCode EndReclustering(const Algorithm &algorithm, const std::string &selectedClusterListName) const;
-
-    /**
-     *  @brief  Run a clustering algorithm (an algorithm that will create new cluster objects)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  clusteringAlgorithmName the name of the clustering algorithm to run
-     *  @param  pNewClusterList the address of the new cluster list populated
-     *  @param  newClusterListName the name of the new cluster list populated
-     */
-     StatusCode RunClusteringAlgorithm(const Algorithm &algorithm, const std::string &clusteringAlgorithmName,
-        const ClusterList *&pNewClusterList, std::string &newClusterListName) const;
 
     /**
      *  @brief  Is calo hit available to add to a cluster
@@ -264,6 +196,172 @@ public:
      */
     StatusCode MergeCaloHitFragments(CaloHit *pFragmentCaloHit1, CaloHit *pFragmentCaloHit2, CaloHit *&pMergedCaloHit) const;
 
+
+    /* Track-related functions */
+
+    /**
+     *  @brief  Get the current track list
+     * 
+     *  @param  pTrackList to receive the address of the current track list
+     *  @param  trackListName to receive the current track list name
+     */
+    StatusCode GetCurrentTrackList(const TrackList *&pTrackList, std::string &trackListName) const;
+
+    /**
+     *  @brief  Get the current track list name
+     * 
+     *  @param  trackListName to receive the current track list name
+     */
+    StatusCode GetCurrentTrackListName(std::string &trackListName) const;
+
+    /**
+     *  @brief  Get a named track list
+     * 
+     *  @param  trackListName the name of the track list
+     *  @param  pTrackList to receive the address of the track list
+     */
+    StatusCode GetTrackList(const std::string &trackListName, const TrackList *&pTrackList) const;
+
+    /**
+     *  @brief  Save the current track list under a new name
+     * 
+     *  @param  newListName the new track list name
+     */
+    StatusCode SaveTrackList(const TrackList &trackList, const std::string &newListName) const;
+
+    /**
+     *  @brief  Replace the current track list with a pre-saved list; use this new list as a permanent replacement
+     *          for the current list (will persist outside the current algorithm)
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  newListName the name of the replacement track list
+     */
+    StatusCode ReplaceCurrentTrackList(const Algorithm &algorithm, const std::string &newListName) const;
+
+    /**
+     *  @brief  Drop the current track list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentTrackList() const;
+
+    /**
+     *  @brief  Add an association between a track and a cluster
+     * 
+     *  @param  pTrack address of the track
+     *  @param  pCluster address of the cluster
+     */
+    StatusCode AddTrackClusterAssociation(Track *const pTrack, Cluster *const pCluster) const;
+
+    /**
+     *  @brief  Remove an association between a track and a cluster
+     * 
+     *  @param  pTrack address of the track
+     *  @param  pCluster address of the cluster
+     */
+    StatusCode RemoveTrackClusterAssociation(Track *const pTrack, Cluster *const pCluster) const;
+
+    /**
+     *  @brief  Remove all track-cluster associations from objects in the current track and cluster lists
+     */
+    StatusCode RemoveCurrentTrackClusterAssociations() const;
+
+    /**
+     *  @brief  Remove all associations between tracks and clusters
+     */
+    StatusCode RemoveAllTrackClusterAssociations() const;
+
+
+    /* Cluster-related functions */
+
+    /**
+     *  @brief  Get the current cluster list
+     * 
+     *  @param  pClusterList to receive the address of the current cluster list
+     *  @param  clusterListName to receive the current cluster list name
+     */
+    StatusCode GetCurrentClusterList(const ClusterList *&pClusterList, std::string &clusterListName) const;
+
+    /**
+     *  @brief  Get the current cluster list name
+     * 
+     *  @param  clusterListName to receive the current cluster list name
+     */
+    StatusCode GetCurrentClusterListName(std::string &clusterListName) const;
+
+    /**
+     *  @brief  Get a named cluster list
+     * 
+     *  @param  clusterListName the name of the cluster list
+     *  @param  pClusterList to receive the address of the cluster list
+     */
+    StatusCode GetClusterList(const std::string &clusterListName, const ClusterList *&pClusterList) const;
+
+    /**
+     *  @brief  Make a temporary cluster list and set it to be the current list, enabling cluster creation
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  temporaryListName to receive the temporary list name
+     */
+    StatusCode CreateTemporaryClusterListAndSetCurrent(const Algorithm &algorithm, std::string &temporaryListName) const;
+
+    /**
+     *  @brief  Save the current cluster list in a list with the specified new name. Note that this will empty the current
+     *          cluster list; the clusters will all be moved to the new named list.
+     * 
+     *  @param  newClusterListName the new cluster list name
+     */
+    StatusCode SaveClusterList(const std::string &newClusterListName) const;
+
+    /**
+     *  @brief  Save elements of the current cluster list in a list with the specified new name. If all the clusters in the
+     *          current list are saved, this will empty the current list; the clusters will all be moved to the new named list.
+     * 
+     *  @param  newClusterListName the new cluster list name
+     *  @param  clustersToSave a subset of the current cluster list - only clusters in both this and the current list will be saved
+     */
+    StatusCode SaveClusterList(const std::string &newClusterListName, const ClusterList &clustersToSave) const;
+
+    /**
+     *  @brief  Save a named cluster list in a list with the specified new name. Note that this will empty the old cluster list;
+     *          the clusters will all be moved to the new named list.
+     * 
+     *  @param  oldClusterListName the old cluster list name
+     *  @param  newClusterListName the new cluster list name
+     */
+    StatusCode SaveClusterList(const std::string &oldClusterListName,  const std::string &newClusterListName) const;
+
+    /**
+     *  @brief  Save elements of a named cluster list in a list with the specified new name. If all the clusters in the old
+     *          list are saved, this will empty the old cluster list; the clusters will all be moved to the new named list.
+     * 
+     *  @param  oldClusterListName the old cluster list name
+     *  @param  newClusterListName the new cluster list name
+     *  @param  clustersToSave a subset of the old cluster list - only clusters in both this and the old cluster list will be saved
+     */
+    StatusCode SaveClusterList(const std::string &oldClusterListName, const std::string &newClusterListName, const ClusterList &clustersToSave) const;
+
+    /**
+     *  @brief  Replace the current cluster list with a pre-saved list; use this new list as a permanent replacement
+     *          for the current list (will persist outside the current algorithm)
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  newClusterListName the name of the replacement cluster list
+     */
+    StatusCode ReplaceCurrentClusterList(const Algorithm &algorithm, const std::string &newClusterListName) const;
+
+    /**
+     *  @brief  Temporarily replace the current cluster list with another list, which may only be a temporary list. This switch
+     *          will persist only for the duration of the algorithm and its daughters; unless otherwise specified, the current list
+     *          will revert to the algorithm input list upon algorithm completion.
+     * 
+     *  @param  newClusterListName the name of the replacement cluster list
+     */
+    StatusCode TemporarilyReplaceCurrentClusterList(const std::string &newClusterListName) const;
+
+    /**
+     *  @brief  Drop the current cluster list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentClusterList() const;
+
     /**
      *  @brief  Delete a cluster in the current list
      * 
@@ -313,166 +411,218 @@ public:
     StatusCode MergeAndDeleteClusters(Cluster *pClusterToEnlarge, Cluster *pClusterToDelete, const std::string &enlargeListName,
         const std::string &deleteListName) const;
 
+
+    /* Pfo-related functions */
+
+    /**
+     *  @brief  Get the current pfo list
+     * 
+     *  @param  pPfoList to receive the address of the current pfo list
+     *  @param  pfoListName to receive the current pfo list name
+     */
+    StatusCode GetCurrentPfoList(const PfoList *&pPfoList, std::string &pfoListName) const;
+
+    /**
+     *  @brief  Get the current pfo list name
+     * 
+     *  @param  pfoListName to receive the current pfo list name
+     */
+    StatusCode GetCurrentPfoListName(std::string &pfoListName) const;
+
+    /**
+     *  @brief  Get a named pfo list
+     * 
+     *  @param  pfoListName the name of the pfo list
+     *  @param  pPfoList to receive the address of the pfo list
+     */
+    StatusCode GetPfoList(const std::string &pfoListName, const PfoList *&pPfoList) const;
+
+    /**
+     *  @brief  Make a temporary pfo list and set it to be the current list, enabling pfo creation
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  temporaryListName to receive the temporary list name
+     */
+    StatusCode CreateTemporaryPfoListAndSetCurrent(const Algorithm &algorithm, std::string &temporaryListName) const;
+    /**
+     *  @brief  Save the current pfo list in a list with the specified new name. Note that this will empty the current
+     *          pfo list; the pfos will all be moved to the new named list.
+     * 
+     *  @param  newPfoListName the new pfo list name
+     */
+    StatusCode SavePfoList(const std::string &newPfoListName) const;
+
+    /**
+     *  @brief  Save elements of the current pfo list in a list with the specified new name. If all the pfos in the
+     *          current list are saved, this will empty the current list; the pfos will all be moved to the new named list.
+     * 
+     *  @param  newPfoListName the new pfo list name
+     *  @param  pfosToSave a subset of the current pfo list - only pfos in both this and the current list will be saved
+     */
+    StatusCode SavePfoList(const std::string &newPfoListName, const PfoList &pfosToSave) const;
+
+    /**
+     *  @brief  Save a named pfo list in a list with the specified new name. Note that this will empty the old pfo list;
+     *          the pfos will all be moved to the new named list.
+     * 
+     *  @param  oldPfoListName the old pfo list name
+     *  @param  newPfoListName the new pfo list name
+     */
+    StatusCode SavePfoList(const std::string &oldPfoListName,  const std::string &newPfoListName) const;
+
+    /**
+     *  @brief  Save elements of a named pfo list in a list with the specified new name. If all the pfos in the old
+     *          list are saved, this will empty the old pfo list; the pfos will all be moved to the new named list.
+     * 
+     *  @param  oldPfoListName the old pfo list name
+     *  @param  newPfoListName the new pfo list name
+     *  @param  pfosToSave a subset of the old pfo list - only pfos in both this and the old pfo list will be saved
+     */
+    StatusCode SavePfoList(const std::string &oldPfoListName, const std::string &newPfoListName, const PfoList &pfosToSave) const;
+
+    /**
+     *  @brief  Replace the current pfo list with a pre-saved list; use this new list as a permanent replacement
+     *          for the current list (will persist outside the current algorithm)
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  newPfoListName the name of the replacement pfo list
+     */
+    StatusCode ReplaceCurrentPfoList(const Algorithm &algorithm, const std::string &newPfoListName) const;
+
+    /**
+     *  @brief  Temporarily replace the current pfo list with another list, which may only be a temporary list. This switch
+     *          will persist only for the duration of the algorithm and its daughters; unless otherwise specified, the current list
+     *          will revert to the algorithm input list upon algorithm completion.
+     * 
+     *  @param  newPfoListName the name of the replacement pfo list
+     */
+    StatusCode TemporarilyReplaceCurrentPfoList(const std::string &newPfoListName) const;
+
+    /**
+     *  @brief  Drop the current pfo list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentPfoList() const;
+
+    /**
+     *  @brief  Delete a pfo in the current list
+     * 
+     *  @param  pPfo address of the pfo to delete
+     */
+    StatusCode DeletePfo(ParticleFlowObject *pPfo) const;
+
+    /**
+     *  @brief  Delete a pfo from a specified list
+     * 
+     *  @param  pPfo address of the pfo to delete
+     *  @param  pfoListName name of the list containing the pfo
+     */
+    StatusCode DeletePfo(ParticleFlowObject *pPfo, const std::string &pfoListName) const;
+
+    /**
+     *  @brief  Delete a list of pfos from the current list
+     * 
+     *  @param  pfoList the list of pfos to delete
+     */
+    StatusCode DeletePfos(const PfoList &pfoList) const;
+
+    /**
+     *  @brief  Delete a list of pfos from a specified list
+     * 
+     *  @param  pfoList the list of pfos to delete
+     *  @param  pfoListName name of the list containing the pfos
+     */
+     StatusCode DeletePfos(const PfoList &pfoList, const std::string &pfoListName) const;
+
     /**
      *  @brief  Add a cluster to a particle flow object
      *
-     *  @param  pParticleFlowObject address of the particle flow object to modify
-     *  @param  pCluster address of the cluster to add
+     *  @param  pPfo address of the particle flow object to modify
+     *  @param  pPfo address of the cluster to add
      */
-    StatusCode AddClusterToPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster) const;
+    StatusCode AddClusterToPfo(ParticleFlowObject *pPfo, Cluster *pCluster) const;
 
     /**
      *  @brief  Add a track to a particle flow object
      *
-     *  @param  pParticleFlowObject address of the particle flow object to modify
+     *  @param  pPfo address of the particle flow object to modify
      *  @param  pTrack address of the track to add
      */
-    StatusCode AddTrackToPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack) const;
+    StatusCode AddTrackToPfo(ParticleFlowObject *pPfo, Track *pTrack) const;
 
     /**
      *  @brief  Remove a cluster from a particle flow object. Note this function will not remove the final object (track or cluster)
      *          from a particle flow object, and will instead return status code "not allowed" as a prompt to delete the cluster
      *
      *  @param  algorithm the algorithm calling this function
-     *  @param  pParticleFlowObject address of the particle flow object to modify
+     *  @param  pPfo address of the particle flow object to modify
      *  @param  pCluster address of the cluster to remove
      */
-    StatusCode RemoveClusterFromPfo(ParticleFlowObject *pParticleFlowObject, Cluster *pCluster) const;
+    StatusCode RemoveClusterFromPfo(ParticleFlowObject *pPfo, Cluster *pCluster) const;
 
     /**
      *  @brief  Remove a track from a particle flow object. Note this function will not remove the final object (track or cluster)
      *          from a particle flow object, and will instead return status code "not allowed" as a prompt to delete the cluster
      *
-     *  @param  pParticleFlowObject address of the particle flow object to modify
+     *  @param  pPfo address of the particle flow object to modify
      *  @param  pTrack address of the track to remove
      */
-    StatusCode RemoveTrackFromPfo(ParticleFlowObject *pParticleFlowObject, Track *pTrack) const;
+    StatusCode RemoveTrackFromPfo(ParticleFlowObject *pPfo, Track *pTrack) const;
+
+
+    /* MCParticle-related functions */
 
     /**
-     *  @brief  Delete a particle flow object from the current list
-     * 
-     *  @param  pParticleFlowObject address of the particle flow object to delete
+     *  @brief  Get the list of mc pfo targets
+     *
+     *  @param  mcParticleList to receive the mc particle list
      */
-    StatusCode DeletePfo(ParticleFlowObject *pParticleFlowObject) const;
+    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
+
+
+    /* Reclustering functions */
 
     /**
-     *  @brief  Add an association between a track and a cluster
-     * 
-     *  @param  pTrack address of the track
-     *  @param  pCluster address of the cluster
-     */
-    StatusCode AddTrackClusterAssociation(Track *const pTrack, Cluster *const pCluster) const;
-
-    /**
-     *  @brief  Remove an association between a track and a cluster
-     * 
-     *  @param  pTrack address of the track
-     *  @param  pCluster address of the cluster
-     */
-    StatusCode RemoveTrackClusterAssociation(Track *const pTrack, Cluster *const pCluster) const;
-
-    /**
-     *  @brief  Remove all track-cluster associations from objects in the current track and cluster lists
-     */
-    StatusCode RemoveCurrentTrackClusterAssociations() const;
-
-    /**
-     *  @brief  Remove all associations between tracks and clusters
-     */
-    StatusCode RemoveAllTrackClusterAssociations() const;
-
-    /**
-     *  @brief  Save the current cluster list in a list with the specified new name. Note that this will empty the current
-     *          cluster list; the clusters will all be moved to the new named list.
+     *  @brief  Initialize cluster fragmentation operations on clusters in the algorithm input list. This allows hits in a list
+     *          of clusters (a subset of the algorithm input list) to be redistributed.
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newClusterListName the new cluster list name
+     *  @param  inputClusterList the input cluster list
+     *  @param  originalClustersListName to receive the name of the list in which the original clusters are stored
+     *  @param  fragmentClustersListName to receive the name of the list in which the fragment clusters are stored
      */
-    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &newClusterListName) const;
+    StatusCode InitializeFragmentation(const Algorithm &algorithm, const ClusterList &inputClusterList,
+        std::string &originalClustersListName, std::string &fragmentClustersListName) const;
 
     /**
-     *  @brief  Save elements of the current cluster list in a list with the specified new name. If all the clusters in the
-     *          current list are saved, this will empty the current list; the clusters will all be moved to the new named list.
+     *  @brief  End cluster fragmentation operations on clusters in the algorithm input list
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  newClusterListName the new cluster list name
-     *  @param  clustersToSave a subset of the current cluster list - only clusters in both this and the current list will be saved
+     *  @param  clusterListToSaveName the name of the list containing the clusters chosen to be saved (original or fragments)
+     *  @param  clusterListToDeleteName the name of the list containing the clusters chosen to be deleted (original or fragments)
      */
-    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &newClusterListName, const ClusterList &clustersToSave) const;
+    StatusCode EndFragmentation(const Algorithm &algorithm, const std::string &clusterListToSaveName,
+        const std::string &clusterListToDeleteName) const;
 
     /**
-     *  @brief  Save a named cluster list in a list with the specified new name. Note that this will empty the old cluster list;
-     *          the clusters will all be moved to the new named list.
+     *  @brief  Initialize reclustering operations on clusters in the algorithm input list. This allows hits in a list
+     *          of clusters (a subset of the algorithm input list) to be redistributed.
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  oldClusterListName the old cluster list name
-     *  @param  newClusterListName the new cluster list name
+     *  @param  inputTrackList the input track list
+     *  @param  inputClusterList the input cluster list
+     *  @param  originalClustersListName to receive the name of the list in which the original clusters are stored
      */
-    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName,  const std::string &newClusterListName) const;
+    StatusCode InitializeReclustering(const Algorithm &algorithm, const TrackList &inputTrackList, const ClusterList &inputClusterList,
+        std::string &originalClustersListName) const;
 
     /**
-     *  @brief  Save elements of a named cluster list in a list with the specified new name. If all the clusters in the old
-     *          list are saved, this will empty the old cluster list; the clusters will all be moved to the new named list.
+     *  @brief  End reclustering operations on clusters in the algorithm input list
      * 
      *  @param  algorithm the algorithm calling this function
-     *  @param  oldClusterListName the old cluster list name
-     *  @param  newClusterListName the new cluster list name
-     *  @param  clustersToSave a subset of the old cluster list - only clusters in both this and the old cluster list will be saved
+     *  @param  pandora the pandora instance performing reclustering
+     *  @param  selectedClusterListName the name of the list containing the chosen recluster candidates (or the original candidates)
      */
-    StatusCode SaveClusterList(const Algorithm &algorithm, const std::string &oldClusterListName, const std::string &newClusterListName,
-        const ClusterList &clustersToSave) const;
-
-    /**
-     *  @brief  Replace the current cluster list with a pre-saved list; use this new list as a permanent replacement
-     *          for the current list (will persist outside the current algorithm)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newClusterListName the name of the replacement cluster list
-     */
-    StatusCode ReplaceCurrentClusterList(const Algorithm &algorithm, const std::string &newClusterListName) const;
-
-    /**
-     *  @brief  Temporarily replace the current cluster list with another list, which may only be a temporary list. This switch
-     *          will persist only for the duration of the algorithm and its daughters; unless otherwise specified, the current list
-     *          will revert to the algorithm input list upon algorithm completion.
-     * 
-     *  @param  newClusterListName the name of the replacement cluster list
-     */
-    StatusCode TemporarilyReplaceCurrentClusterList(const std::string &newClusterListName) const;
-
-    /**
-     *  @brief  Save the current calo hit list under a new name
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new calo hit list name
-     */
-    StatusCode SaveCaloHitList(const Algorithm &algorithm, const CaloHitList &caloHitList, const std::string &newListName) const;
-
-    /**
-     *  @brief  Replace the current calo hit list with a pre-saved list; use this new list as a permanent replacement
-     *          for the current list (will persist outside the current algorithm)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the name of the replacement calo hit list
-     */
-    StatusCode ReplaceCurrentCaloHitList(const Algorithm &algorithm, const std::string &newListName) const;
-
-    /**
-     *  @brief  Save the current track list under a new name
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the new track list name
-     */
-    StatusCode SaveTrackList(const Algorithm &algorithm, const TrackList &trackList, const std::string &newListName) const;
-
-    /**
-     *  @brief  Replace the current track list with a pre-saved list; use this new list as a permanent replacement
-     *          for the current list (will persist outside the current algorithm)
-     * 
-     *  @param  algorithm the algorithm calling this function
-     *  @param  newListName the name of the replacement track list
-     */
-    StatusCode ReplaceCurrentTrackList(const Algorithm &algorithm, const std::string &newListName) const;
+    StatusCode EndReclustering(const Algorithm &algorithm, const std::string &selectedClusterListName) const;
 
 private:
     /**
@@ -487,21 +637,35 @@ private:
      * 
      *  @param  pCluster address of the cluster to prepare for deletion
      */
-    StatusCode PrepareClusterForDeletion(const Cluster *const pCluster) const;
+    StatusCode PrepareForDeletion(const Cluster *const pCluster) const;
 
     /**
      *  @brief  Prepare a list of clusters for deletion, flagging constituent calo hits as available and removing track associations
      * 
      *  @param  clusterList the list of clusters to prepare for deletion
      */
-    StatusCode PrepareClustersForDeletion(const ClusterList &clusterList) const;
+    StatusCode PrepareForDeletion(const ClusterList &clusterList) const;
+
+    /**
+     *  @brief  Prepare a pfo for deletion, flagging constituents as available
+     * 
+     *  @param  pPfo address of the pfo to prepare for deletion
+     */
+    StatusCode PrepareForDeletion(const ParticleFlowObject *const pPfo) const;
+
+    /**
+     *  @brief  Prepare a list of pfos for deletion, flagging constituents as available
+     * 
+     *  @param  pfoList the list of pfos to prepare for deletion
+     */
+    StatusCode PrepareForDeletion(const PfoList &pfoList) const;
 
     /**
      *  @brief  Prepare a list of clusters (formed as recluster candidates) for deletion, removing any track associations.
      * 
      *  @param  clusterList the list of clusters to prepare for deletion
      */
-    StatusCode PrepareReclusterCandidatesForDeletion(const ClusterList &clusterList) const;
+    StatusCode PrepareForReclusteringDeletion(const ClusterList &clusterList) const;
 
     Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
 

@@ -42,10 +42,10 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
     mcPosition.GetSphericalCoordinates(radius, phi, theta);
 
     // Extract the most energetic pfo
-    const ParticleFlowObjectList *pPfoList= NULL;
+    const PfoList *pPfoList= NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
 
-    ParticleFlowObjectVector pfoVector(pPfoList->begin(), pPfoList->end());
+    PfoVector pfoVector(pPfoList->begin(), pPfoList->end());
     std::sort(pfoVector.begin(), pfoVector.end(), ParticleFlowObject::SortByEnergy);
     const ParticleFlowObject *const pMostEnergeticPfo((!pfoVector.empty()) ? *(pfoVector.begin()) : NULL);
 

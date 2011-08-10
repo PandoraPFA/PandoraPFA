@@ -14,10 +14,10 @@ using namespace pandora;
 
 StatusCode CLICPfoSelectionAlgorithm::Run()
 {
-    const ParticleFlowObjectList *pPfoList = NULL;
+    const PfoList *pPfoList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
 
-    for (ParticleFlowObjectList::const_iterator iter = pPfoList->begin(); iter != pPfoList->end();)
+    for (PfoList::const_iterator iter = pPfoList->begin(); iter != pPfoList->end();)
     {
         ParticleFlowObject *pPfo = *iter;
         iter++;

@@ -96,11 +96,12 @@ public:
         const float mcParticleWeight) const;
 
     /**
-     *  @brief  Get the particle flow objects
+     *  @brief  Get the current pfo list
      * 
-     *   @param  particleFlowObjectList container to receive the particle flow objects
+     *  @param  pPfoList to receive the address of the current pfo list
+     *  @param  pfoListName to receive the current pfo list name
      */
-    StatusCode GetParticleFlowObjects(ParticleFlowObjectList &particleFlowObjectList) const;
+    StatusCode GetCurrentPfoList(const PfoList *&pPfoList, std::string &pfoListName) const;
 
     /**
      *  @brief  Set the bfield calculator used by pandora

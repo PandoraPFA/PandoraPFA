@@ -14,14 +14,14 @@ using namespace pandora;
 
 StatusCode V0PfoCreationAlgorithm::Run()
 {
-    const ParticleFlowObjectList *pPfoList = NULL;
+    const PfoList *pPfoList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
 
-    for (ParticleFlowObjectList::const_iterator iter = pPfoList->begin(), iterEnd = pPfoList->end(); iter != iterEnd; ++iter)
+    for (PfoList::const_iterator iter = pPfoList->begin(), iterEnd = pPfoList->end(); iter != iterEnd; ++iter)
     {
-        ParticleFlowObject *pParticleFlowObject = *iter;
+        ParticleFlowObject *pPfo = *iter;
 
-        const TrackList &trackList(pParticleFlowObject->GetTrackList());
+        const TrackList &trackList(pPfo->GetTrackList());
 
         if (trackList.size() != 2)
             continue;
@@ -44,7 +44,7 @@ StatusCode V0PfoCreationAlgorithm::Run()
             if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(E_MINUS),
                 PdgTable::GetParticleMass(E_MINUS), mass))
             {
-                pParticleFlowObject->SetParticleId(PHOTON);
+                pPfo->SetParticleId(PHOTON);
             }
         }
 
@@ -53,7 +53,7 @@ StatusCode V0PfoCreationAlgorithm::Run()
             if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(PI_MINUS),
                 PdgTable::GetParticleMass(PI_MINUS), mass))
             {
-                pParticleFlowObject->SetParticleId(K_SHORT);
+                pPfo->SetParticleId(K_SHORT);
             }
         }
 
@@ -62,7 +62,7 @@ StatusCode V0PfoCreationAlgorithm::Run()
             if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(PROTON),
                 PdgTable::GetParticleMass(PI_MINUS), mass))
             {
-                (pTrack1->GetParticleId() == PROTON) ? pParticleFlowObject->SetParticleId(LAMBDA) : pParticleFlowObject->SetParticleId(LAMBDA_BAR);
+                (pTrack1->GetParticleId() == PROTON) ? pPfo->SetParticleId(LAMBDA) : pPfo->SetParticleId(LAMBDA_BAR);
             }
         }
 
@@ -71,7 +71,7 @@ StatusCode V0PfoCreationAlgorithm::Run()
             if (STATUS_CODE_SUCCESS == this->GetV0Mass(momentumAtStart1, momentumAtStart2, PdgTable::GetParticleMass(PI_MINUS),
                 PdgTable::GetParticleMass(PROTON), mass))
             {
-                (pTrack2->GetParticleId() == PROTON) ? pParticleFlowObject->SetParticleId(LAMBDA) : pParticleFlowObject->SetParticleId(LAMBDA_BAR);
+                (pTrack2->GetParticleId() == PROTON) ? pPfo->SetParticleId(LAMBDA) : pPfo->SetParticleId(LAMBDA_BAR);
             }
         }
 
@@ -132,7 +132,7 @@ StatusCode V0PfoCreationAlgorithm::Run()
             if (pMCParent1 != pMCParent2)
                 goodV0 = false;
 
-            if (pMCParent1->GetParticleId() != pParticleFlowObject->GetParticleId())
+            if (pMCParent1->GetParticleId() != pPfo->GetParticleId())
                 goodV0 = false;
 
             // Fast electron id
@@ -157,12 +157,12 @@ StatusCode V0PfoCreationAlgorithm::Run()
             // Print debug information
             if (goodV0)
             {
-                std::cout << " Good V0 : " << pParticleFlowObject->GetParticleId() << " " << pTrack1->GetEnergyAtDca() << " "
+                std::cout << " Good V0 : " << pPfo->GetParticleId() << " " << pTrack1->GetEnergyAtDca() << " "
                           << pTrack2->GetEnergyAtDca() << " eID " << isElectron1 << " " << isElectron2 << " Mass = " << mass << std::endl;
             }
             else
             {
-                std::cout << " Bad  V0 : " << pParticleFlowObject->GetParticleId() << " " << pTrack1->GetEnergyAtDca() << " "
+                std::cout << " Bad  V0 : " << pPfo->GetParticleId() << " " << pTrack1->GetEnergyAtDca() << " "
                           << pTrack2->GetEnergyAtDca() << " eID " << isElectron1 << " " << isElectron2 << " Mass = " << mass << std::endl;
             }
 

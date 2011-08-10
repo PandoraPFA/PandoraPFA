@@ -67,7 +67,7 @@ private:
      *  @param  pfosToMerge the list of Pfos to merge with pfo
      *  @param  pPfo address of particle flow object accepting the clusters
      */
-    pandora::StatusCode MergeClustersFromPfoListToPfo(pandora::ParticleFlowObjectList &pfosToMerge, pandora::ParticleFlowObject *pPfo) const;
+    pandora::StatusCode MergeClustersFromPfoListToPfo(pandora::PfoList &pfosToMerge, pandora::ParticleFlowObject *pPfo) const;
 
     /**
      *  @brief  Disply MC information for candidate kink

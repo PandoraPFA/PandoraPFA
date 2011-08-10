@@ -137,17 +137,17 @@ StatusCode DumpPfosMonitoringAlgorithm::Run()
     const int originalPrecision(std::cout.precision(precision));
     const int originalWidth(std::cout.width());
 
-    const ParticleFlowObjectList *pPfoList = NULL;
+    const PfoList *pPfoList = NULL;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
 
-    ParticleFlowObjectList chargedPfos;
-    ParticleFlowObjectList photonPfos;
-    ParticleFlowObjectList neutralHadronPfos;
+    PfoList chargedPfos;
+    PfoList photonPfos;
+    PfoList neutralHadronPfos;
 
     float totalPfoEnergy(0.f);
 
     // First loop over pfos to make collections and save track mc pfo list
-    for (ParticleFlowObjectList::const_iterator pfoIter = pPfoList->begin(); pfoIter != pPfoList->end(); ++pfoIter)
+    for (PfoList::const_iterator pfoIter = pPfoList->begin(); pfoIter != pPfoList->end(); ++pfoIter)
     {
         ParticleFlowObject *pPfo = *pfoIter;
         totalPfoEnergy += pPfo->GetEnergy();

@@ -86,6 +86,7 @@ private:
      */
     pandora::StatusCode CreateNeutralPfos() const;
 
+    std::string     m_outputPfoListName;                    ///< The output pfo list name
     float           m_minClusterHadronicEnergy;             ///< Min hadronic energy for neutral (non-photon) clusters to be added to pfos
     unsigned int    m_minHitsInCluster;                     ///< Min number of calo hits for neutral cluster to be added to pfos
 };

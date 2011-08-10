@@ -33,7 +33,7 @@ Pandora::Pandora() :
     m_pCaloHitManager(NULL),
     m_pClusterManager(NULL),
     m_pMCManager(NULL),
-    m_pParticleFlowObjectManager(NULL),
+    m_pPfoManager(NULL),
     m_pPluginManager(NULL),
     m_pTrackManager(NULL),
     m_pPandoraApiImpl(NULL),
@@ -46,7 +46,7 @@ Pandora::Pandora() :
         m_pCaloHitManager = new CaloHitManager;
         m_pClusterManager = new ClusterManager;
         m_pMCManager = new MCManager;
-        m_pParticleFlowObjectManager = new ParticleFlowObjectManager;
+        m_pPfoManager = new ParticleFlowObjectManager;
         m_pPluginManager = new PluginManager;
         m_pTrackManager = new TrackManager;
         m_pPandoraApiImpl = new PandoraApiImpl(this);
@@ -75,7 +75,7 @@ Pandora::~Pandora()
     delete m_pCaloHitManager;
     delete m_pClusterManager;
     delete m_pMCManager;
-    delete m_pParticleFlowObjectManager;
+    delete m_pPfoManager;
     delete m_pPluginManager;
     delete m_pTrackManager;
     delete m_pPandoraApiImpl;
