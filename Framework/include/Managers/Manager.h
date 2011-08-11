@@ -44,7 +44,7 @@ protected:
      *  @param  listName the name of the list
      *  @param  pObjectList to receive the list
      */
-    StatusCode GetList(const std::string &listName, const ObjectList *&pObjectList) const;
+    virtual StatusCode GetList(const std::string &listName, const ObjectList *&pObjectList) const;
 
     /**
      *  @brief  Get the current list
@@ -52,14 +52,14 @@ protected:
      *  @param  pObjectList to receive the current list
      *  @param  listName to receive the name of the current list
      */
-    StatusCode GetCurrentList(const ObjectList *&pObjectList, std::string &listName) const;
+    virtual StatusCode GetCurrentList(const ObjectList *&pObjectList, std::string &listName) const;
 
     /**
      *  @brief  Get the current list name
      * 
      *  @param  listName to receive the current list name
      */
-    StatusCode GetCurrentListName(std::string &listName) const;
+    virtual StatusCode GetCurrentListName(std::string &listName) const;
 
     /**
      *  @brief  Get the algorithm input list
@@ -68,7 +68,7 @@ protected:
      *  @param  pObjectList to receive the algorithm input list
      *  @param  listName to receive the name of the algorithm input list
      */
-    StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ObjectList *&pObjectList, std::string &listName) const;
+    virtual StatusCode GetAlgorithmInputList(const Algorithm *const pAlgorithm, const ObjectList *&pObjectList, std::string &listName) const;
 
     /**
      *  @brief  Get the algorithm track list name
@@ -76,14 +76,14 @@ protected:
      *  @param  pAlgorithm address of the algorithm
      *  @param  listName to receive the algorithm input list name
      */
-    StatusCode GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &listName) const;
+    virtual StatusCode GetAlgorithmInputListName(const Algorithm *const pAlgorithm, std::string &listName) const;
 
     /**
      *  @brief  Reset the current list to the algorithm input list
      *
      *  @param  pAlgorithm address of the algorithm changing the current track list
      */
-    StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+    virtual StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
 
     /**
      *  @brief  Replace the current and algorithm input lists with a pre-existing list
@@ -91,14 +91,14 @@ protected:
      *  @param  pAlgorithm address of the algorithm changing the current list
      *  @param  listName the name of the new current (and algorithm input) list
      */
-    StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &listName);
+    virtual StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &listName);
 
     /**
      *  @brief  Register an algorithm with the manager
      * 
      *  @param  pAlgorithm address of the algorithm
      */
-    StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
+    virtual StatusCode RegisterAlgorithm(const Algorithm *const pAlgorithm);
 
     /**
      *  @brief  Remove temporary lists and reset the current list to that when algorithm was initialized

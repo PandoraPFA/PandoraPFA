@@ -597,7 +597,7 @@ public:
         const pandora::PfoList *&pPfoList);
 
     /**
-     *  @brief  Make a temporary pfo list and set it to be the current list, enabling pfo creation
+     *  @brief  Create a temporary pfo list and set it to be the current list, enabling pfo creation
      * 
      *  @param  algorithm the algorithm calling this function
      *  @param  temporaryListName to receive the temporary list name

@@ -36,7 +36,7 @@ protected:
     /**
      *  @brief  Create the input list (accessible to algorithms), using objects created by client application
      */
-    StatusCode CreateInputList();
+    virtual StatusCode CreateInputList();
 
     /**
      *  @brief  Change the current list to a specified temporary list
@@ -45,7 +45,7 @@ protected:
      *  @param  objectList the specified temporary list
      *  @param  temporaryListName to receive the name of the temporary list
      */
-    StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const ObjectList &objectList,
+    virtual StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const ObjectList &objectList,
         std::string &temporaryListName);
 
     /**
@@ -54,7 +54,7 @@ protected:
      *  @param  listName the list name
      *  @param  objectList the object list
      */
-    StatusCode SaveList(const std::string &listName, const ObjectList &objectList);
+    virtual StatusCode SaveList(const std::string &listName, const ObjectList &objectList);
 
     /**
      *  @brief  Add objects to a saved list with a specified name
@@ -62,7 +62,7 @@ protected:
      *  @param  listName the list to add the objects to
      *  @param  objectList the list of objects to be added
      */
-    StatusCode AddObjectsToList(const std::string &listName, const ObjectList &objectList);
+    virtual StatusCode AddObjectsToList(const std::string &listName, const ObjectList &objectList);
 
     /**
      * @brief Remove objects from a saved list
@@ -70,7 +70,7 @@ protected:
      * @param listName the list to remove the objects from
      * @param objectList the list of objects to be removed
      */
-    StatusCode RemoveObjectsFromList(const std::string &listName, const ObjectList &objectList);
+    virtual StatusCode RemoveObjectsFromList(const std::string &listName, const ObjectList &objectList);
 
     /**
      *  @brief  Erase all manager content

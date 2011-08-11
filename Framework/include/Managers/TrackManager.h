@@ -103,6 +103,15 @@ private:
      */
     StatusCode RemoveClusterAssociations(const TrackList &trackList) const;
 
+    /**
+     *  @brief  Initialize reclustering operations, preparing lists and metadata accordingly
+     * 
+     *  @param  pAlgorithm address of the algorithm controlling reclustering
+     *  @param  clusterList the input cluster list
+     *  @param  originalReclusterListName the list name/key for the original recluster candidates
+     */
+    StatusCode InitializeReclustering(const Algorithm *const pAlgorithm, const TrackList &trackList, const std::string &originalReclusterListName);
+
     typedef std::map<Uid, Track *> UidToTrackMap;
     typedef std::multimap<Uid, Uid> TrackRelationMap;
 

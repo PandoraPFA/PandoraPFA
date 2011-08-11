@@ -220,4 +220,12 @@ StatusCode TrackManager::RemoveClusterAssociations(const TrackList &trackList) c
     return STATUS_CODE_SUCCESS;
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode TrackManager::InitializeReclustering(const Algorithm *const pAlgorithm, const TrackList &trackList, const std::string &originalReclusterListName)
+{
+    std::string temporaryListName;
+    return this->CreateTemporaryListAndSetCurrent(pAlgorithm, trackList, temporaryListName);
+}
+
 } // namespace pandora

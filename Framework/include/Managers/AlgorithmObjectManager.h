@@ -28,7 +28,7 @@ public:
     /**
      *  @brief  Destructor
      */
-     ~AlgorithmObjectManager();
+    virtual ~AlgorithmObjectManager();
 
 protected:
     typedef typename Manager<T>::ObjectList ObjectList;
@@ -39,7 +39,7 @@ protected:
      *  @param  pAlgorithm address of the algorithm requesting a temporary list
      *  @param  temporaryListName to receive the name of the temporary list
      */
-    StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName);
+    virtual StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName);
 
     /**
      *  @brief  Move objects to a new temporary object list and set it to be the current object list
@@ -51,7 +51,7 @@ protected:
      *          - other object in the current list will remain in original list
      *          - an empty object list will be rejected
      */
-    StatusCode MoveObjectsToTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const std::string &originalListName,
+    virtual StatusCode MoveObjectsToTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const std::string &originalListName,
         std::string &temporaryListName, const ObjectList &objectsToMove);
 
     /**
@@ -60,7 +60,7 @@ protected:
      *  @param  targetListName the name of the target object list, which will be created if it doesn't currently exist
      *  @param  sourceListName the name of the (typically temporary) object list to save
      */
-    StatusCode SaveObjects(const std::string &targetListName, const std::string &sourceListName);
+    virtual StatusCode SaveObjects(const std::string &targetListName, const std::string &sourceListName);
 
     /**
      *  @brief  Save a list of objects
@@ -71,7 +71,7 @@ protected:
      *          - other object will remain in the temporary list and will be deleted when the parent algorithm exits
      *          - an empty object list will be rejected
      */
-    StatusCode SaveObjects(const std::string &targetListName, const std::string &sourceListName, const ObjectList &objectsToSave);
+    virtual StatusCode SaveObjects(const std::string &targetListName, const std::string &sourceListName, const ObjectList &objectsToSave);
 
     /**
      *  @brief  Temporarily replace the current list with another list, which may only be a temporary list.
@@ -80,14 +80,14 @@ protected:
      * 
      *  @param  listName the name of the new current (and algorithm input) list
      */
-    StatusCode TemporarilyReplaceCurrentList(const std::string &listName);
+    virtual StatusCode TemporarilyReplaceCurrentList(const std::string &listName);
 
     /**
      *  @brief  Delete an object from the current list
      * 
      *  @param  pCluster address of the object to delete
      */
-    StatusCode DeleteObject(T *pT);
+    virtual StatusCode DeleteObject(T *pT);
 
     /**
      *  @brief  Delete an object from a specified list
@@ -95,14 +95,14 @@ protected:
      *  @param  pCluster address of the object to delete
      *  @param  listName the name of the list containing the object
      */
-    StatusCode DeleteObject(T *pT, const std::string &listName);
+    virtual StatusCode DeleteObject(T *pT, const std::string &listName);
 
     /**
      *  @brief  Delete a list of objects from the current list
      * 
      *  @param  objectList the list of objects to delete
      */
-    StatusCode DeleteObjects(const ObjectList &objectList);
+    virtual StatusCode DeleteObjects(const ObjectList &objectList);
 
     /**
      *  @brief  Delete a list of objects from a specified list
@@ -110,7 +110,7 @@ protected:
      *  @param  objectList the list of objects to delete
      *  @param  listName the name of the list containing the objects
      */
-    StatusCode DeleteObjects(const ObjectList &objectList, const std::string &listName);
+    virtual StatusCode DeleteObjects(const ObjectList &objectList, const std::string &listName);
 
     /**
      *  @brief  Delete the contents of a temporary list
@@ -118,7 +118,7 @@ protected:
      *  @param  pAlgorithm address of the algorithm calling this function
      *  @param  temporaryListName the name of the temporary list
      */
-    StatusCode DeleteTemporaryObjects(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
+    virtual StatusCode DeleteTemporaryObjects(const Algorithm *const pAlgorithm, const std::string &temporaryListName);
 
     /**
      *  @brief  Get the list of objects that will be deleted when the algorithm info is reset
@@ -126,7 +126,22 @@ protected:
      *  @param  pAlgorithm address of the algorithm
      *  @param  objectList to receive the list of objects that will be deleted when the algorithm info is reset
      */
-    StatusCode GetObjectsToBeDeleted(const Algorithm *const pAlgorithm, ObjectList &objectList) const;
+    virtual StatusCode GetResetDeletionObjects(const Algorithm *const pAlgorithm, ObjectList &objectList) const;
+
+    /**
+     *  @brief  Reset the current list to the algorithm input list
+     *
+     *  @param  pAlgorithm address of the algorithm changing the current track list
+     */
+    virtual StatusCode ResetCurrentListToAlgorithmInputList(const Algorithm *const pAlgorithm);
+
+    /**
+     *  @brief  Replace the current and algorithm input lists with a pre-existing list
+     *
+     *  @param  pAlgorithm address of the algorithm changing the current list
+     *  @param  listName the name of the new current (and algorithm input) list
+     */
+    virtual StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &listName);
 
     /**
      *  @brief  Remove temporary lists and reset the current cluster list to that when algorithm was initialized
@@ -134,7 +149,7 @@ protected:
      *  @param  pAlgorithm the algorithm associated with the temporary objects
      *  @param  isAlgorithmFinished whether the algorithm has completely finished and the algorithm info should be entirely removed
      */
-    StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
+    virtual StatusCode ResetAlgorithmInfo(const Algorithm *const pAlgorithm, bool isAlgorithmFinished);
 
     /**
      *  @brief  Erase all manager content
