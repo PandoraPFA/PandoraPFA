@@ -45,6 +45,7 @@
 #include "PfoConstruction/CLICPfoSelectionAlgorithm.h"
 #include "PfoConstruction/KinkPfoCreationAlgorithm.h"
 #include "PfoConstruction/PfoCreationAlgorithm.h"
+#include "PfoConstruction/PfoCreationParentAlgorithm.h"
 #include "PfoConstruction/V0PfoCreationAlgorithm.h"
 
 #include "Reclustering/ExitingTrackAlg.h"
@@ -81,6 +82,7 @@
 
 #include "Utility/ClusterPreparationAlgorithm.h"
 #include "Utility/EventPreparationAlgorithm.h"
+#include "Utility/PfoPreparationAlgorithm.h"
 #include "Utility/TrackPreparationAlgorithm.h"
 
 #include "FineGranularityEnergyCorrections.h"
@@ -127,6 +129,7 @@ public:
         d("CLICPfoSelection",                       CLICPfoSelectionAlgorithm::Factory)                                         \
         d("KinkPfoCreation",                        KinkPfoCreationAlgorithm::Factory)                                          \
         d("PfoCreation",                            PfoCreationAlgorithm::Factory)                                              \
+        d("PfoCreationParent",                      PfoCreationParentAlgorithm::Factory)                                        \
         d("V0PfoCreation",                          V0PfoCreationAlgorithm::Factory)                                            \
         d("ExitingTrack",                           ExitingTrackAlg::Factory)                                                   \
         d("ForceSplitTrackAssociations",            ForceSplitTrackAssociationsAlg::Factory)                                    \
@@ -159,6 +162,7 @@ public:
         d("TrackClusterAssociation",                TrackClusterAssociationAlgorithm::Factory)                                  \
         d("ClusterPreparation",                     ClusterPreparationAlgorithm::Factory)                                       \
         d("EventPreparation",                       EventPreparationAlgorithm::Factory)                                         \
+        d("PfoPreparation",                         PfoPreparationAlgorithm::Factory)                                           \
         d("TrackPreparation",                       TrackPreparationAlgorithm::Factory)
 
     #define FINE_GRANULARITY_ENERGY_CORRECTION_LIST(d)                                                                          \

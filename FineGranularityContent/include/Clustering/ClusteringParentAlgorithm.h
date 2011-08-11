@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/FineGranularityContent/include/Clustering/ClusteringParentAlgorithm.h
  * 
- *  @brief  Header file for the primary clustering algorithm class.
+ *  @brief  Header file for the clustering parent algorithm class.
  * 
  *  $Log: $
  */
@@ -32,7 +32,7 @@ private:
     std::string     m_clusteringAlgorithmName;      ///< The name of the clustering algorithm to run
     std::string     m_associationAlgorithmName;     ///< The name of the topological association algorithm to run
 
-    std::string     m_inputCaloHitListName;         ///< The name of the input ordered calo hit list, containing the hits to be clustered
+    std::string     m_inputCaloHitListName;         ///< The name of the input calo hit list, containing the hits to be clustered
     bool            m_restoreOriginalCaloHitList;   ///< Whether to restore the original calo hit list as the "current" list upon completion
 
     std::string     m_clusterListName;              ///< The name under which to save the new cluster list

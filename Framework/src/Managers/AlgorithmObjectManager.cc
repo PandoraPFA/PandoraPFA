@@ -136,6 +136,7 @@ StatusCode AlgorithmObjectManager<T>::MoveObjectsBetweenLists(const std::string 
         }
     }
 
+    m_canMakeNewObjects = false;
     return STATUS_CODE_SUCCESS;
 }
 

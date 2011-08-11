@@ -1,7 +1,7 @@
 /**
  *  @file   PandoraPFANew/FineGranularityContent/src/Clustering/ClusteringParentAlgorithm.cc
  * 
- *  @brief  Implementation of the primary clustering algorithm class.
+ *  @brief  Implementation of the clustering parent algorithm class.
  * 
  *  $Log: $
  */
@@ -60,7 +60,7 @@ StatusCode ClusteringParentAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ProcessAlgorithm(*this, xmlHandle,
         "ClusterAssociation", m_associationAlgorithmName));
 
-    // Input parameters: name of input ordered calo hit list and whether it should persist as the current list after algorithm has finished
+    // Input parameters: name of input calo hit list and whether it should persist as the current list after algorithm has finished
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "InputCaloHitListName", m_inputCaloHitListName));
 
