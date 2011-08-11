@@ -94,6 +94,14 @@ protected:
     virtual StatusCode ReplaceCurrentAndAlgorithmInputLists(const Algorithm *const pAlgorithm, const std::string &listName);
 
     /**
+     *  @brief  Create a temporary list associated with a particular algorithm
+     *
+     *  @param  pAlgorithm address of the algorithm
+     *  @param  temporaryListName to receive the name of the temporary list
+     */
+    virtual StatusCode CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName);
+
+    /**
      *  @brief  Register an algorithm with the manager
      * 
      *  @param  pAlgorithm address of the algorithm

@@ -299,9 +299,11 @@ public:
      *  @brief  Make a temporary cluster list and set it to be the current list, enabling cluster creation
      * 
      *  @param  algorithm the algorithm calling this function
+     *  @param  pClusterList to receive the address of the temporary cluster list
      *  @param  temporaryListName to receive the temporary list name
      */
-    StatusCode CreateTemporaryClusterListAndSetCurrent(const Algorithm &algorithm, std::string &temporaryListName) const;
+    StatusCode CreateTemporaryClusterListAndSetCurrent(const Algorithm &algorithm, const ClusterList *&pClusterList,
+        std::string &temporaryListName) const;
 
     /**
      *  @brief  Save the current cluster list in a list with the specified new name. Note that this will empty the current
@@ -441,9 +443,12 @@ public:
      *  @brief  Make a temporary pfo list and set it to be the current list, enabling pfo creation
      * 
      *  @param  algorithm the algorithm calling this function
+     *  @param  pPfoList to receive the address of the temporary pfo list
      *  @param  temporaryListName to receive the temporary list name
      */
-    StatusCode CreateTemporaryPfoListAndSetCurrent(const Algorithm &algorithm, std::string &temporaryListName) const;
+    StatusCode CreateTemporaryPfoListAndSetCurrent(const Algorithm &algorithm, const PfoList *&pPfoList,
+        std::string &temporaryListName) const;
+
     /**
      *  @brief  Save the current pfo list in a list with the specified new name. Note that this will empty the current
      *          pfo list; the pfos will all be moved to the new named list.

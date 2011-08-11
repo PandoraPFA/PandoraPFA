@@ -132,6 +132,27 @@ StatusCode Manager<T>::ReplaceCurrentAndAlgorithmInputLists(const Algorithm *con
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template<typename T>
+StatusCode Manager<T>::CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName)
+{
+    typename AlgorithmInfoMap::iterator iter = m_algorithmInfoMap.find(pAlgorithm);
+
+    if (m_algorithmInfoMap.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+    temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_numberOfListsCreated++);
+
+    if (!iter->second.m_temporaryListNames.insert(temporaryListName).second)
+        return STATUS_CODE_ALREADY_PRESENT;
+
+    m_nameToListMap[temporaryListName] = new ObjectList;
+    m_currentListName = temporaryListName;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
 StatusCode Manager<T>::RegisterAlgorithm(const Algorithm *const pAlgorithm)
 {
     if (m_algorithmInfoMap.end() != m_algorithmInfoMap.find(pAlgorithm))

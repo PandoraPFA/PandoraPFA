@@ -310,9 +310,8 @@ StatusCode MuonReconstructionAlgorithm::AddCaloHits(const ClusterList *const pMu
 
 StatusCode MuonReconstructionAlgorithm::CreateMuonPfos(const ClusterList *const pMuonClusterList) const
 {
-    const PfoList *pPfoList = NULL; std::string pfoListName; // TODO MAKE NEATER
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pfoListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
+    const PfoList *pPfoList = NULL; std::string pfoListName;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pPfoList, pfoListName));
 
     for (ClusterList::const_iterator iter = pMuonClusterList->begin(), iterEnd = pMuonClusterList->end(); iter != iterEnd; ++iter)
     {
@@ -536,7 +535,7 @@ StatusCode MuonReconstructionAlgorithm::ReadSettings(const TiXmlHandle xmlHandle
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "OutputMuonClusterListName", m_outputMuonClusterListName));
 
-    m_outputMuonPfoListName = "Output";
+    m_outputMuonPfoListName = "PrimaryPfoList";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "OutputMuonPfoListName", m_outputMuonPfoListName));
 

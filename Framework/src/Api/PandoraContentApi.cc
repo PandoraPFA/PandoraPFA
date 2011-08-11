@@ -306,9 +306,10 @@ pandora::StatusCode PandoraContentApi::GetClusterList(const pandora::Algorithm &
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::CreateTemporaryClusterListAndSetCurrent(const pandora::Algorithm &algorithm, std::string &temporaryListName)
+pandora::StatusCode PandoraContentApi::CreateTemporaryClusterListAndSetCurrent(const pandora::Algorithm &algorithm,
+    const pandora::ClusterList *&pClusterList, std::string &temporaryListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->CreateTemporaryClusterListAndSetCurrent(algorithm, temporaryListName);
+    return algorithm.GetPandoraContentApiImpl()->CreateTemporaryClusterListAndSetCurrent(algorithm, pClusterList, temporaryListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -441,9 +442,10 @@ pandora::StatusCode PandoraContentApi::GetPfoList(const pandora::Algorithm &algo
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(const pandora::Algorithm &algorithm, std::string &temporaryListName)
+pandora::StatusCode PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(const pandora::Algorithm &algorithm,
+    const pandora::PfoList *&pPfoList, std::string &temporaryListName)
 {
-    return algorithm.GetPandoraContentApiImpl()->CreateTemporaryPfoListAndSetCurrent(algorithm, temporaryListName);
+    return algorithm.GetPandoraContentApiImpl()->CreateTemporaryPfoListAndSetCurrent(algorithm, pPfoList, temporaryListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -47,7 +47,7 @@ protected:
      *  @param  pAlgorithm address of the algorithm requesting a temporary list
      *  @param  originalListName the list in which the object currently exist
      *  @param  temporaryListName to receive the name of the temporary list
-     *  @param  objectsToMove only object in both this and the current list will be moved
+     *  @param  objectsToMove only objects in both this and the current list will be moved
      *          - other object in the current list will remain in original list
      *          - an empty object list will be rejected
      */
@@ -67,11 +67,21 @@ protected:
      * 
      *  @param  targetListName the name of the target object list, which will be created if it doesn't currently exist
      *  @param  sourceListName the name of the (typically temporary) object list containing objects to save
-     *  @param  objectToSave only object in both this and the temporary list will be stored
+     *  @param  objectToSave only objects in both this and the temporary list will be stored
      *          - other object will remain in the temporary list and will be deleted when the parent algorithm exits
      *          - an empty object list will be rejected
      */
     virtual StatusCode SaveObjects(const std::string &targetListName, const std::string &sourceListName, const ObjectList &objectsToSave);
+
+    /**
+     *  @brief  Move (a subset of) objects between two lists
+     * 
+     *  @param  targetListName the name of the target object list, which will be created if it doesn't currently exist
+     *  @param  sourceListName the name of the object list containing objects to save
+     *  @param  pObjectSubset if specified, only objects in both this and the source list will be moved
+     */
+    virtual StatusCode MoveObjectsBetweenLists(const std::string &targetListName, const std::string &sourceListName,
+        const ObjectList *pObjectSubset = NULL);
 
     /**
      *  @brief  Temporarily replace the current list with another list, which may only be a temporary list.

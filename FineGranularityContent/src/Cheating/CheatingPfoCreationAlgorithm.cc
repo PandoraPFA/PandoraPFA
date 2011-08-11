@@ -45,9 +45,8 @@ StatusCode CheatingPfoCreationAlgorithm::Run()
         pPfoParametersFunction = &CheatingPfoCreationAlgorithm::ComputeFromCalorimeterAndTracks;
     }
 
-    const PfoList *pPfoList = NULL; std::string pfoListName; // TODO MAKE NEATER
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pfoListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
+    const PfoList *pPfoList = NULL; std::string pfoListName;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pPfoList, pfoListName));
 
     // For each cluster, use specified function to cheat determination of pfo parameters
     for (ClusterList::const_iterator itCluster = pClusterList->begin(), itClusterEnd = pClusterList->end(); itCluster != itClusterEnd; ++itCluster)
@@ -212,7 +211,7 @@ void CheatingPfoCreationAlgorithm::ComputeEnergyWeightedClusterPosition(Cluster 
 
 StatusCode CheatingPfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_outputPfoListName = "CheatingPfoOutput";
+    m_outputPfoListName = "CheatingPfoList";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "OutputPfoListName", m_outputPfoListName));
 

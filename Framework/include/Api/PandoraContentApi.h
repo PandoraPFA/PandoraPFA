@@ -425,9 +425,11 @@ public:
      *  @brief  Create a temporary cluster list and set it to be the current list, enabling cluster creation
      * 
      *  @param  algorithm the algorithm calling this function
+     *  @param  pClusterList to receive the address of the temporary cluster list
      *  @param  temporaryListName to receive the temporary list name
      */
-    static pandora::StatusCode CreateTemporaryClusterListAndSetCurrent(const pandora::Algorithm &algorithm, std::string &temporaryListName);
+    static pandora::StatusCode CreateTemporaryClusterListAndSetCurrent(const pandora::Algorithm &algorithm,
+        const pandora::ClusterList *&pClusterList, std::string &temporaryListName);
 
     /**
      *  @brief  Save the current cluster list in a list with the specified new name. Note that this will empty the current
@@ -600,9 +602,11 @@ public:
      *  @brief  Create a temporary pfo list and set it to be the current list, enabling pfo creation
      * 
      *  @param  algorithm the algorithm calling this function
+     *  @param  pPfoList to receive the address of the temporary pfo list
      *  @param  temporaryListName to receive the temporary list name
      */
-    static pandora::StatusCode CreateTemporaryPfoListAndSetCurrent(const pandora::Algorithm &algorithm, std::string &temporaryListName);
+    static pandora::StatusCode CreateTemporaryPfoListAndSetCurrent(const pandora::Algorithm &algorithm,
+        const pandora::PfoList *&pPfoList, std::string &temporaryListName);
 
     /**
      *  @brief  Save the current pfo list in a list with the specified new name. Note that this will empty the current

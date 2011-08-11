@@ -404,9 +404,13 @@ StatusCode PandoraContentApiImpl::GetClusterList(const std::string &clusterListN
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::CreateTemporaryClusterListAndSetCurrent(const Algorithm &algorithm, std::string &temporaryListName) const
+StatusCode PandoraContentApiImpl::CreateTemporaryClusterListAndSetCurrent(const Algorithm &algorithm, const ClusterList *&pClusterList,
+    std::string &temporaryListName) const
 {
-    return m_pPandora->m_pClusterManager->CreateTemporaryListAndSetCurrent(&algorithm, temporaryListName);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->CreateTemporaryListAndSetCurrent(&algorithm, temporaryListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->GetCurrentList(pClusterList, temporaryListName));
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -561,9 +565,13 @@ StatusCode PandoraContentApiImpl::GetPfoList(const std::string &pfoListName, con
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::CreateTemporaryPfoListAndSetCurrent(const Algorithm &algorithm, std::string &temporaryListName) const
+StatusCode PandoraContentApiImpl::CreateTemporaryPfoListAndSetCurrent(const Algorithm &algorithm, const PfoList *&pPfoList,
+    std::string &temporaryListName) const
 {
-    return m_pPandora->m_pPfoManager->CreateTemporaryListAndSetCurrent(&algorithm, temporaryListName);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pPfoManager->CreateTemporaryListAndSetCurrent(&algorithm, temporaryListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pPfoManager->GetCurrentList(pPfoList, temporaryListName));
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

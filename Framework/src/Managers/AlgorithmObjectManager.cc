@@ -33,21 +33,8 @@ AlgorithmObjectManager<T>::~AlgorithmObjectManager()
 template<typename T>
 StatusCode AlgorithmObjectManager<T>::CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, std::string &temporaryListName)
 {
-    typename Manager<T>::AlgorithmInfoMap::iterator iter = Manager<T>::m_algorithmInfoMap.find(pAlgorithm);
-
-    if (Manager<T>::m_algorithmInfoMap.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_numberOfListsCreated++);
-
-    if (!iter->second.m_temporaryListNames.insert(temporaryListName).second)
-        return STATUS_CODE_ALREADY_PRESENT;
-
-    Manager<T>::m_nameToListMap[temporaryListName] = new ObjectList;
-    Manager<T>::m_currentListName = temporaryListName;
     m_canMakeNewObjects = true;
-
-    return STATUS_CODE_SUCCESS;
+    return Manager<T>::CreateTemporaryListAndSetCurrent(pAlgorithm, temporaryListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,36 +46,8 @@ StatusCode AlgorithmObjectManager<T>::MoveObjectsToTemporaryListAndSetCurrent(co
     if (objectsToMove.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    typename Manager<T>::NameToListMap::iterator originalObjectListIter = Manager<T>::m_nameToListMap.find(originalListName);
-
-    if (Manager<T>::m_nameToListMap.end() == originalObjectListIter)
-        return STATUS_CODE_NOT_FOUND;
-
-    if (originalObjectListIter->second->empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, CreateTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
-    typename Manager<T>::NameToListMap::iterator temporaryObjectListIter = Manager<T>::m_nameToListMap.find(temporaryListName);
-
-    if (Manager<T>::m_nameToListMap.end() == temporaryObjectListIter)
-        return STATUS_CODE_FAILURE;
-
-    if ((originalObjectListIter->second == &objectsToMove) || (temporaryObjectListIter->second == &objectsToMove))
-        return STATUS_CODE_INVALID_PARAMETER;
-
-    for (typename ObjectList::const_iterator objectIter = objectsToMove.begin(), objectIterEnd = objectsToMove.end();
-        objectIter != objectIterEnd; ++objectIter)
-    {
-        typename ObjectList::iterator originalObjectIter = originalObjectListIter->second->find(*objectIter);
-
-        if (originalObjectListIter->second->end() == originalObjectIter)
-            return STATUS_CODE_NOT_FOUND;
-
-        if (!temporaryObjectListIter->second->insert(*originalObjectIter).second)
-            return STATUS_CODE_ALREADY_PRESENT;
-
-        originalObjectListIter->second->erase(originalObjectIter);
-    }
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->MoveObjectsBetweenLists(temporaryListName, originalListName, &objectsToMove));
 
     return STATUS_CODE_SUCCESS;
 }
@@ -98,36 +57,15 @@ StatusCode AlgorithmObjectManager<T>::MoveObjectsToTemporaryListAndSetCurrent(co
 template<typename T>
 StatusCode AlgorithmObjectManager<T>::SaveObjects(const std::string &targetListName, const std::string &sourceListName)
 {
-    typename Manager<T>::NameToListMap::iterator sourceObjectListIter = Manager<T>::m_nameToListMap.find(sourceListName);
-
-    if (Manager<T>::m_nameToListMap.end() == sourceObjectListIter)
-        return STATUS_CODE_NOT_FOUND;
-
-    if (sourceObjectListIter->second->empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
     typename Manager<T>::NameToListMap::iterator targetObjectListIter = Manager<T>::m_nameToListMap.find(targetListName);
 
     if (Manager<T>::m_nameToListMap.end() == targetObjectListIter)
     {
         Manager<T>::m_nameToListMap[targetListName] = new ObjectList;
-        targetObjectListIter = Manager<T>::m_nameToListMap.find(targetListName);
-
-        if (Manager<T>::m_nameToListMap.end() == targetObjectListIter)
-            return STATUS_CODE_FAILURE;
+        Manager<T>::m_savedLists.insert(targetListName);
     }
 
-    for (typename ObjectList::iterator objectIter = sourceObjectListIter->second->begin(), objectIterEnd = sourceObjectListIter->second->end();
-        objectIter != objectIterEnd; ++objectIter)
-    {
-        if (!targetObjectListIter->second->insert(*objectIter).second)
-            return STATUS_CODE_ALREADY_PRESENT;
-    }
-
-    Manager<T>::m_savedLists.insert(targetListName);
-    sourceObjectListIter->second->clear();
-
-    return STATUS_CODE_SUCCESS;
+    return this->MoveObjectsBetweenLists(targetListName, sourceListName);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -138,45 +76,65 @@ StatusCode AlgorithmObjectManager<T>::SaveObjects(const std::string &targetListN
     if (objectsToSave.empty())
         return STATUS_CODE_NOT_INITIALIZED;
 
-    typename Manager<T>::NameToListMap::iterator sourceObjectListIter = Manager<T>::m_nameToListMap.find(sourceListName);
-
-    if (Manager<T>::m_nameToListMap.end() == sourceObjectListIter)
-        return STATUS_CODE_NOT_FOUND;
-
-    if (sourceObjectListIter->second->empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
     typename Manager<T>::NameToListMap::iterator targetObjectListIter = Manager<T>::m_nameToListMap.find(targetListName);
 
     if (Manager<T>::m_nameToListMap.end() == targetObjectListIter)
     {
         Manager<T>::m_nameToListMap[targetListName] = new ObjectList;
-        targetObjectListIter = Manager<T>::m_nameToListMap.find(targetListName);
-
-        if (Manager<T>::m_nameToListMap.end() == targetObjectListIter)
-            return STATUS_CODE_FAILURE;
+        Manager<T>::m_savedLists.insert(targetListName);
     }
 
-    if ((sourceObjectListIter->second == &objectsToSave) || (targetObjectListIter->second == &objectsToSave))
-        return STATUS_CODE_INVALID_PARAMETER;
+    return this->MoveObjectsBetweenLists(targetListName, sourceListName, &objectsToSave);
+}
 
-    for (typename ObjectList::const_iterator objectIter = objectsToSave.begin(); objectIter != objectsToSave.end();)
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template<typename T>
+StatusCode AlgorithmObjectManager<T>::MoveObjectsBetweenLists(const std::string &targetListName, const std::string &sourceListName,
+    const ObjectList *pObjectSubset)
+{
+    typename Manager<T>::NameToListMap::iterator sourceListIter = Manager<T>::m_nameToListMap.find(sourceListName);
+
+    if (Manager<T>::m_nameToListMap.end() == sourceListIter)
+        return STATUS_CODE_NOT_FOUND;
+
+    if (sourceListIter->second->empty())
+        return STATUS_CODE_NOT_INITIALIZED;
+
+    typename Manager<T>::NameToListMap::iterator targetListIter = Manager<T>::m_nameToListMap.find(targetListName);
+
+    if (Manager<T>::m_nameToListMap.end() == targetListIter)
+        return STATUS_CODE_FAILURE;
+
+    if (NULL == pObjectSubset)
     {
-        T *pT = *objectIter;
-        ++objectIter;
+        for (typename ObjectList::iterator iter = sourceListIter->second->begin(), iterEnd = sourceListIter->second->end();
+            iter != iterEnd; ++iter)
+        {
+            if (!targetListIter->second->insert(*iter).second)
+                return STATUS_CODE_ALREADY_PRESENT;
+        }
 
-        typename ObjectList::iterator sourceObjectIter = sourceObjectListIter->second->find(pT);
-
-        if (sourceObjectListIter->second->end() == sourceObjectIter)
-            return STATUS_CODE_NOT_FOUND;
-
-        if (!targetObjectListIter->second->insert(*sourceObjectIter).second)
-            return STATUS_CODE_ALREADY_PRESENT;
-
-        sourceObjectListIter->second->erase(sourceObjectIter);
+        sourceListIter->second->clear();
     }
+    else
+    {
+        if ((sourceListIter->second == pObjectSubset) || (targetListIter->second == pObjectSubset))
+            return STATUS_CODE_INVALID_PARAMETER;
 
-    Manager<T>::m_savedLists.insert(targetListName);
+        for (typename ObjectList::const_iterator iter = pObjectSubset->begin(), iterEnd = pObjectSubset->end(); iter != iterEnd; ++iter)
+        {
+            typename ObjectList::iterator objectIter = sourceListIter->second->find(*iter);
+
+            if (sourceListIter->second->end() == objectIter)
+                return STATUS_CODE_NOT_FOUND;
+
+            if (!targetListIter->second->insert(*objectIter).second)
+                return STATUS_CODE_ALREADY_PRESENT;
+
+            sourceListIter->second->erase(objectIter);
+        }
+    }
 
     return STATUS_CODE_SUCCESS;
 }

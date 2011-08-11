@@ -52,18 +52,8 @@ template<typename T>
 StatusCode InputObjectManager<T>::CreateTemporaryListAndSetCurrent(const Algorithm *const pAlgorithm, const ObjectList &objectList,
     std::string &temporaryListName)
 {
-    typename Manager<T>::AlgorithmInfoMap::iterator iter = Manager<T>::m_algorithmInfoMap.find(pAlgorithm);
-
-    if (Manager<T>::m_algorithmInfoMap.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-    temporaryListName = TypeToString(pAlgorithm) + "_" + TypeToString(iter->second.m_numberOfListsCreated++);
-
-    if (!iter->second.m_temporaryListNames.insert(temporaryListName).second)
-        return STATUS_CODE_ALREADY_PRESENT;
-
-    Manager<T>::m_nameToListMap[temporaryListName] = new ObjectList(objectList);
-    Manager<T>::m_currentListName = temporaryListName;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Manager<T>::CreateTemporaryListAndSetCurrent(pAlgorithm, temporaryListName));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->AddObjectsToList(temporaryListName, objectList));
 
     return STATUS_CODE_SUCCESS;
 }

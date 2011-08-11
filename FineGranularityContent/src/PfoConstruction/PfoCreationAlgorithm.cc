@@ -14,10 +14,8 @@ using namespace pandora;
 
 StatusCode PfoCreationAlgorithm::Run()
 {
-    const PfoList *pPfoList = NULL; std::string pfoListName; // TODO MAKE NEATER
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pfoListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentPfoList(*this, pPfoList));
-
+    const PfoList *pPfoList = NULL; std::string pfoListName;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pPfoList, pfoListName));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateTrackBasedPfos());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNeutralPfos());
 
@@ -252,7 +250,7 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
 
 StatusCode PfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_outputPfoListName = "Output";
+    m_outputPfoListName = "PrimaryPfoList";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "OutputPfoListName", m_outputPfoListName));
 
