@@ -66,7 +66,13 @@ StatusCode VisualMonitoringAlgorithm::Run()
     // Show current particle flow objects
     if (m_showCurrentPfos)
     {
-        this->VisualizeParticleFlowList();
+        this->VisualizeParticleFlowList(std::string());
+    }
+
+    // Show specified lists of pfo
+    for (StringVector::const_iterator iter = m_pfoListNames.begin(), iterEnd = m_pfoListNames.end(); iter != iterEnd; ++iter)
+    {
+        this->VisualizeParticleFlowList(*iter);
     }
 
     // Finally, display the event and pause application
@@ -210,17 +216,28 @@ void VisualMonitoringAlgorithm::VisualizeClusterList(const std::string &listName
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void VisualMonitoringAlgorithm::VisualizeParticleFlowList() const
+void VisualMonitoringAlgorithm::VisualizeParticleFlowList(const std::string &listName) const
 {
     const PfoList *pPfoList = NULL;
 
-    if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
+    if (listName.empty())
     {
-        std::cout << "VisualMonitoringAlgorithm: current pfo list unavailable." << std::endl;
-        return;
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentPfoList(*this, pPfoList))
+        {
+            std::cout << "VisualMonitoringAlgorithm: current pfo list unavailable." << std::endl;
+            return;
+        }
+    }
+    else
+    {
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetPfoList(*this, listName, pPfoList))
+        {
+            std::cout << "VisualMonitoringAlgorithm: pfo list " << listName << " unavailable." << std::endl;
+            return;
+        }
     }
 
-    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, "currentPfos",
+    PANDORA_MONITORING_API(VisualizeParticleFlowObjects(pPfoList, listName.empty() ? "currentPfos" : listName.c_str(),
         (m_hitColors.find("particleid") != std::string::npos) ? AUTOID :
         (m_hitColors.find("particletype") != std::string::npos) ? AUTOTYPE :
         (m_hitColors.find("iterate") != std::string::npos ? AUTOITER :
@@ -260,6 +277,9 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_showCurrentPfos = true;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ShowCurrentPfos", m_showCurrentPfos));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "PfoListNames", m_pfoListNames));
 
     m_hitColors = "pfo";
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

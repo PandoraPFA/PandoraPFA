@@ -62,7 +62,7 @@ private:
      * 
      *  @param  listName the list name
      */
-    void VisualizeParticleFlowList() const;
+    void VisualizeParticleFlowList(const std::string &listName) const;
 
     typedef std::map<int, float> PdgCodeToEnergyMap;
 
@@ -78,6 +78,8 @@ private:
     pandora::StringVector   m_clusterListNames;         ///< Names of cluster lists to show
 
     bool                    m_showCurrentPfos;          ///< Whether to show current particle flow object list
+    pandora::StringVector   m_pfoListNames;             ///< Names of pfo lists to show
+
     bool                    m_showOnlyAvailable;        ///< Whether to show only available  (i.e. non-clustered) calohits and tracks
     bool                    m_displayEvent;             ///< Whether to display the event
 
