@@ -210,9 +210,6 @@ StatusCode MCManager::CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTarget
 
 StatusCode MCManager::GetMCParticleList(MCParticleList &mcParticleList) const
 {
-    if (m_uidToMCParticleMap.empty())
-        return STATUS_CODE_NOT_INITIALIZED;
-
     for(UidToMCParticleMap::const_iterator iter = m_uidToMCParticleMap.begin(), iterEnd = m_uidToMCParticleMap.end(); iter != iterEnd; ++iter)
     {
         mcParticleList.insert(iter->second);
