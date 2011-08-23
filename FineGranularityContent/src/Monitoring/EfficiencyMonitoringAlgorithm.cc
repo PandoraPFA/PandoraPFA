@@ -37,6 +37,12 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
     const float mcEnergy(pMCParticle->GetEnergy());
     const int mcPDGCode(pMCParticle->GetParticleId());
 
+    if (mcEnergy < m_mcThresholdEnergy)
+    {
+        std::cout << "EfficiencyMonitoring - MC particle energy below threshold " << mcEnergy << "( < " << m_mcThresholdEnergy << ")" <<std::endl;
+        return STATUS_CODE_SUCCESS;
+    }
+
     float radius(0.f), phi(0.f), theta(0.f);
     const CartesianVector &mcPosition(pMCParticle->GetEndpoint());
     mcPosition.GetSphericalCoordinates(radius, phi, theta);
@@ -88,6 +94,10 @@ StatusCode EfficiencyMonitoringAlgorithm::Run()
 StatusCode EfficiencyMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::ReadValue(xmlHandle, "MonitoringFileName", m_monitoringFileName));
+
+    m_mcThresholdEnergy = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MCThresholdEnergy", m_mcThresholdEnergy));
 
     return STATUS_CODE_SUCCESS;
 }

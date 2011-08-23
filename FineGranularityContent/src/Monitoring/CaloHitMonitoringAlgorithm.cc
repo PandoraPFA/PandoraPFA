@@ -36,12 +36,11 @@ StatusCode CaloHitMonitoringAlgorithm::Run()
 
     for (CaloHitList::const_iterator iter = pCaloHitList->begin(), iterEnd = pCaloHitList->end(); iter != iterEnd; ++iter)
     {
-        CaloHit *pCaloHit = *iter;
-        PANDORA_MONITORING_API(Fill1DHistogram(PseudoLayerHistName, pCaloHit->GetPseudoLayer()));
-        PANDORA_MONITORING_API(Fill1DHistogram(DensityWeightHistName, pCaloHit->GetDensityWeight()));
-        PANDORA_MONITORING_API(Fill1DHistogram(SurroundingEnergyHistName, pCaloHit->GetSurroundingEnergy()));
-        PANDORA_MONITORING_API(Fill1DHistogram(PossibleMipFlagHistName, pCaloHit->IsPossibleMip()));
-        PANDORA_MONITORING_API(Fill1DHistogram(IsIsolatedFlagHistName, pCaloHit->IsIsolated()));
+        PANDORA_MONITORING_API(Fill1DHistogram(PseudoLayerHistName, (*iter)->GetPseudoLayer()));
+        PANDORA_MONITORING_API(Fill1DHistogram(DensityWeightHistName, (*iter)->GetDensityWeight()));
+        PANDORA_MONITORING_API(Fill1DHistogram(SurroundingEnergyHistName, (*iter)->GetSurroundingEnergy()));
+        PANDORA_MONITORING_API(Fill1DHistogram(PossibleMipFlagHistName, (*iter)->IsPossibleMip()));
+        PANDORA_MONITORING_API(Fill1DHistogram(IsIsolatedFlagHistName, (*iter)->IsIsolated()));
     }
 
     // Append histograms to file
