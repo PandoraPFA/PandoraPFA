@@ -1,18 +1,13 @@
-#Path to project directory
-PROJECT_DIR = YOUR_PATH_HERE
+DEFINES  = -DMONITORING=1
+DEFINES += -DROOT_EVE=1
 
-#Path to project dependency
-PANDORAPFANEW_DIR = YOUR_PATH_HERE
-
-DEFINES = -DROOT_EVE=1
-
-PROJECT_INCLUDE_DIR = $(PROJECT_DIR)/include/
-PROJECT_SOURCE_DIR  = $(PROJECT_DIR)/src/
-PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib/
+PROJECT_INCLUDE_DIR = ./include
+PROJECT_SOURCE_DIR  = ./src
+PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib
 
 INCLUDES  = -I$(PROJECT_INCLUDE_DIR)
+INCLUDES += -I$(PROJECT_DIR)/Framework/include
 INCLUDES += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
-INCLUDES += -I$(PANDORAPFANEW_DIR)/Framework/include/
 
 CC = g++
 CFLAGS = -c -Wall -g -w -fPIC -O2
@@ -21,11 +16,11 @@ ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
 endif
 
-SOURCES = $(wildcard $(PROJECT_SOURCE_DIR)*.cc)
+SOURCES = $(wildcard $(PROJECT_SOURCE_DIR)/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)
 
-LIBS = $(shell $(ROOTSYS)/bin/root-config --glibs) -lEve
+LIBS = -L$(PROJECT_LIBRARY_DIR) -lPandoraFramework $(shell $(ROOTSYS)/bin/root-config --glibs) -lEve
 ifdef BUILD_32BIT_COMPATIBLE
     LIBS += -m32
 endif
@@ -45,5 +40,5 @@ $(LIBRARY): $(OBJECTS)
 	$(CC) $(CFLAGS) $(DEFINES) $< -o $@
 
 clean:
-	rm -f ../src/*.o
+	rm -f $(OBJECTS)
 	rm -f $(LIBRARY)

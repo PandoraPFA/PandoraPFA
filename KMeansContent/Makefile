@@ -9,7 +9,7 @@ PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib
 INCLUDES  = -I$(PROJECT_INCLUDE_DIR)
 INCLUDES += -I$(PROJECT_DIR)/Framework/include
 ifdef MONITORING
-    INCLUDES += -I$(PANDORAMONITORING_DIR)/include
+    INCLUDES += -I$(PROJECT_DIR)/Monitoring/include
 endif
 
 CC = g++
@@ -26,7 +26,7 @@ OBJECTS = $(SOURCES:.cc=.o)
 LIBS = -L$(PROJECT_LIBRARY_DIR) -lPandoraFramework
 
 ifdef MONITORING
-    LIBS += -L$(PANDORAMONITORING_DIR)/lib -lPandoraMonitoring
+    LIBS += -lPandoraMonitoring
 endif
 
 ifdef BUILD_32BIT_COMPATIBLE

@@ -1,15 +1,8 @@
-ifdef MONITORING
-    DEFINES = -DMONITORING=1
-endif
-
 PROJECT_INCLUDE_DIR = ./include
 PROJECT_SOURCE_DIR  = ./src
 PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib
 
 INCLUDES = -I$(PROJECT_INCLUDE_DIR)
-ifdef MONITORING
-    INCLUDES += -I$(PANDORAMONITORING_DIR)/include
-endif
 
 CC = g++
 CFLAGS = -c -Wall -g -w -fPIC -O2
@@ -30,10 +23,6 @@ SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Xml/*.cc)
 OBJECTS = $(SOURCES:.cc=.o)
 
 LIBS =
-
-ifdef MONITORING
-    LIBS += -L$(PANDORAMONITORING_DIR)/lib -lPandoraMonitoring
-endif
 
 ifdef BUILD_32BIT_COMPATIBLE
     LIBS += -m32
