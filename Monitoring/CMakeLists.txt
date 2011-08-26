@@ -10,27 +10,25 @@ LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 
 ### LIBRARY #################################################################
 
-# definitions to pass to the compiler
-ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
-ADD_DEFINITIONS( "-Wno-long-long" )
-
-# Add additional linker flag for Apple to defer linking against ROOT until PandoraPFANew build.
-IF( APPLE ) 
-    SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup" )
-    # Add Unix compiler definition.  Already happens automatically on Linux.
-    IF( UNIX )
-        ADD_DEFINITIONS(-D__unix__)
-    ENDIF()
-ENDIF()
-
-
-# include directories
 INCLUDE_DIRECTORIES( ./include )
-INCLUDE_DIRECTORIES( "../Framework/include" )
-#INSTALL_DIRECTORY( ./include DESTINATION . FILES_MATCHING PATTERN "*.h" )
+INCLUDE_DIRECTORIES( ../Framework/include )
+
+AUX_SOURCE_DIRECTORY( ./src/ Monitoring_SRCS )
+
+# require proper C++
+ADD_DEFINITIONS( "-Wall -ansi -pedantic" )
+
+# need long long for int64 for now
+ADD_DEFINITIONS( "-Wno-long-long -Wno-sign-compare -fno-strict-aliasing" )
+
 
 # add library
-AUX_SOURCE_DIRECTORY( ./src library_sources )
-ADD_SHARED_LIBRARY( PandoraMonitoring ${library_sources} )
+ADD_SHARED_LIBRARY( PandoraMonitoring ${Monitoring_SRCS} )
+TARGET_LINK_LIBRARIES( PandoraMonitoring PandoraFramework )
+
+# install library
 INSTALL_SHARED_LIBRARY( PandoraMonitoring DESTINATION lib )
+
+# install header files
+INSTALL_DIRECTORY( ./include DESTINATION . )
 

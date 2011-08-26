@@ -48,15 +48,13 @@ ENDIF()
 
 ### LIBRARY AND TOOLS #######################################################
 
-
+ADD_SUBDIRECTORY( ./Framework )
 IF( PANDORA_MONITORING )
     ADD_SUBDIRECTORY( ./Monitoring )
     ADD_DEFINITIONS( -DMONITORING )
     INCLUDE_DIRECTORIES( ./Monitoring/include )
     LINK_LIBRARIES( PandoraMonitoring )
 ENDIF()
-
-ADD_SUBDIRECTORY( ./Framework )
 ADD_SUBDIRECTORY( ./FineGranularityContent )
 ADD_SUBDIRECTORY( ./KMeansContent )
 
