@@ -23,16 +23,9 @@ FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES REQUIRED )
 # load default settings from ILCSOFT_CMAKE_MODULES
 INCLUDE( ilcsoft_default_settings )
 
-FIND_PACKAGE( PandoraMonitoring QUIET )
 
-IF( PandoraMonitoring_FOUND )
-    ADD_DEFINITIONS( -DMONITORING )
-    INCLUDE_DIRECTORIES( "${PandoraMonitoring_INCLUDE_DIRS}" )
-    LINK_LIBRARIES( "${PandoraMonitoring_LIBRARIES}" )
-ELSE()
-    MESSAGE( STATUS "PandoraMonitoring not found -- please set PandoraMonitoring_DIR to activate PandoraMonitoring" )
-ENDIF()
-
+OPTION( PANDORA_MONITORING "Build Monitoring library (requires ROOT)" OFF )
+MESSAGE( STATUS "PANDORA_MONITORING: ${PANDORA_MONITORING}" )
 
 
 ### DOCUMENTATION ###########################################################
@@ -56,9 +49,16 @@ ENDIF()
 ### LIBRARY AND TOOLS #######################################################
 
 
-ADD_SUBDIRECTORY( Framework )
-ADD_SUBDIRECTORY( FineGranularityContent )
-ADD_SUBDIRECTORY( KMeansContent )
+IF( PANDORA_MONITORING )
+    ADD_SUBDIRECTORY( ./Monitoring )
+    ADD_DEFINITIONS( -DMONITORING )
+    INCLUDE_DIRECTORIES( ./Monitoring/include )
+    LINK_LIBRARIES( PandoraMonitoring )
+ENDIF()
+
+ADD_SUBDIRECTORY( ./Framework )
+ADD_SUBDIRECTORY( ./FineGranularityContent )
+ADD_SUBDIRECTORY( ./KMeansContent )
 
 
 # display some variables and write them to cache
@@ -66,3 +66,4 @@ DISPLAY_STD_VARIABLES()
 
 # generate and install following configuration files
 GENERATE_PACKAGE_CONFIGURATION_FILES( ${PROJECT_NAME}Config.cmake ${PROJECT_NAME}ConfigVersion.cmake ${PROJECT_NAME}LibDeps.cmake )
+

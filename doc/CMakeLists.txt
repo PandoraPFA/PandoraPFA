@@ -9,6 +9,10 @@ SET( DOC_BIN_DIR "${PROJECT_BINARY_DIR}/docbuild" )
 
 SET( DOX_INPUT ../Framework/ ../FineGranularityContent ../KMeansContent ) 
 
+IF( PANDORA_MONITORING )
+    LIST( APPEND DOX_INPUT ../Monitoring )
+ENDIF()
+
 # custom command to build documentation
 ADD_CUSTOM_COMMAND(
     OUTPUT  "${DOC_BIN_DIR}/html/index.html" #"${DOC_BIN_DIR}/latex/index.tex"
