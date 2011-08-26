@@ -1,52 +1,15 @@
 README
 ======
 
-Summary:
---------
-Download, compilation and installation instructions of PandoraMonitoring for PandoraPFANew.
-
-
-Installation of PandoraMonitoring
-==============================================================
-
-Requirements:
--------------
-For the default installation of PandoraMonitoring using cmake the following software is needed:
-- ROOT (>=5.26, built with ROOT TEve included)
-- LCIO 
-- CMakeModules (if cmake is used for compilation)
-- PandoraPFANew
-
-Getting PandoraMonitoring:
---------------------------
-- checkout PandoraMonitoring-source from:
-svn co https://svnsrv.desy.de/public/PandoraPFANew/PandoraMonitoring/trunk PandoraMonitoring
-
-Installing PandoraMonitoring:
---------------------------
-cd PandoraMonitoring
-mkdir build
-cd build
-cmake -C ILCSoft.cmake ..
-make install
-
-(where ILCSoft.cmake contains locations of required packages PandoraPFANew, ROOT and CMakeModules)
-
-
-Installation of PandoraMonitoring without CMake
-==============================================================
-
-If cmake is not available, please edit the supplied "Makefile" to specify details of the project directory 
-and paths to the project dependencies. The package is then built with the command "make". A commandline 
-switch "BUILD_32BIT_COMPATIBLE=1" can be used.
-
-
 Recompilation of PandoraPFANew with PandoraMonitoring support:
 ==============================================================
 
-- tell PandoraPFANew the path to the monitoring directory
-cmake -C ILCSoft.cmake -DPandoraMonitoring_DIR=/<path_to_monitoring_directory> ..
+If using cmake
+cmake -DPANDORA_MONITORING=1 OTHER_OPTIONS ..
 make install
+
+If using standalone makefile
+make MONITORING=1 OTHER_OPTIONS
 
 
 Usage of PandoraMonitoring:
@@ -59,37 +22,36 @@ pandora-settings snippet into the PandoraSettings file at the location where the
 reconstruction should be visualized. 
 
     <algorithm type = "VisualMonitoring" description = "display all">
-        <!--  draw specific named cluster lists -->
-        <ClusterListNames>PrimaryClusterList PhotonClusterList</ClusterListNames> 
+        <ShowMCParticles>false</ShowMCParticles>
+        <SuppressMCParticles></SuppressMCParticles>
 
-        <!--  Use ROOT TEve for visualization -->
-        <UseROOTEve>true</UseROOTEve>
-
-        <!--  draw Monte Carlo particles -->
-        <ShowMCParticles>true</ShowMCParticles> 
-
-        <!--  draw the current PFOs -->
-        <ShowCurrentPfos>true</ShowCurrentPfos>
-
-        <!--  draw the current cluster-list   -->
-        <ShowCurrentClusters>true</ShowCurrentClusters>
-
-        <!--  draw the current track-list   -->
-        <ShowCurrentTracks>false</ShowCurrentTracks>
-        
-        <!--  when drawing the current calo-hit-list, draw only calohits which are not clustered yet   -->
-        <ShowOnlyAvailable>true</ShowOnlyAvailable>
-
-        <!--  draw the current calohit-list   -->
         <ShowCurrentCaloHits>false</ShowCurrentCaloHits>
+        <CaloHitListNames></CaloHitListNames>
 
-        <!--  (re)draw the display   -->
-        <Show>true</Show>
+        <ShowCurrentTracks>false</ShowCurrentTracks>
+        <TrackListNames></TrackListNames>
+
+        <ShowCurrentClusters>true</ShowCurrentClusters>
+        <ClusterListNames></ClusterListNames>
+
+        <ShowCurrentPfos>true</ShowCurrentPfos>
+        <PfoListNames></PfoListNames>
+
+        <HitColors>pfo</HitColors>
+        <ShowOnlyAvailable>false</ShowOnlyAvailable>
+
+        <DisplayEvent>true</DisplayEvent>
+
+        <TransparencyThresholdE>-1.</TransparencyThresholdE>
+        <EnergyScaleThresholdE>1.</EnergyScaleThresholdE>
+
+        <BlackBackground>false</BlackBackground>
+        <ShowDetector>true</ShowDetector>
     </algorithm>
 
 The visualisation can be called at several places in the pandora settings file. The objects will 
-be given to PandoraMonitoring and displayed when "Show" is set to true. Each time the 
-visualisation algorithm is called with "Show" set to true a new event display will be created. 
+be given to PandoraMonitoring and displayed when "DisplayEvent" is set to true. Each time the 
+visualisation algorithm is called with "DisplayEvent" set to true a new event display will be created. 
 
 
 In the algorithm code:
@@ -106,6 +68,6 @@ selected (look into PandoraMonitoringAPI.h for the full list of available colors
 variables define if the arrow indicating the linear fit of the calo hits shall be drawn and if the 
 tracks associated to the clusters are drawn. 
 
-With "ViewEvent()" the event display is redrawn. 
+With "DisplayEvent()" the event display is redrawn. 
 
 The full list of available visualisation commands can be inspected in PandoraMonitoringApi.h.
