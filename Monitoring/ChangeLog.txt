@@ -1,4 +1,13 @@
 ************************************************************************
+TAG V00-06 FOR ILCSOFT USAGE
+************************************************************************
+Moved PandoraMonitoring to PandoraPFANew repository.
+Updated to reflect recent changes to pandora APIs, including typedef changes and use of CaloHitLists, rather than OrderedCaloHitLists.
+Added ability to deal with pandora rectangular and pointing calo hits, via virtual function CaloHit::GetCellCorners.
+Added hit colour scheme that uses continuous palette to reflect energy of hits.
+Removed unused options to draw fit to clusters and pfos.
+
+************************************************************************
 TAG V00-05 FOR ILCSOFT USAGE
 ************************************************************************
 Added ability to draw pandora histograms.

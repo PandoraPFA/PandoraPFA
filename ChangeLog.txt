@@ -1,4 +1,38 @@
 ************************************************************************
+TAG V00-07 FOR ILCSOFT USAGE
+************************************************************************
+Moved PandoraMonitoring to PandoraPFANew repository and updated CMake and standalone makefiles accordingly.
+Addressed warnings produced when compiling without monitoring.
+Restructured pandora manager classes, separating common functionality into Manager base class.
+Separated common functionality of CaloHit and Track managers into InputObjectManager class.
+Separated common functionality of Cluster and Pfo managers into AlgorithmObjectManager class.
+Exposed CreateTemporaryListAndSetCurrent APIs to enable Cluster or Pfo creation without need for nested algorithms.
+Made GetPfoList API available to client applications.
+Added new PfoPreparation and PfoCreationParent algorithms.
+Updated VisualMonitoring algorithm to deal with multiple pfo lists.
+Modified CaloHit manager to allow for division/fragmentation and re-merging of CaloHits, including during reclustering operations.
+CaloHit availability monitoring updated and moved from CaloHit helper to CaloHit manager.
+CaloHit manager now saves CaloHitLists, rather than OrderedCaloHitLists; APIs now work with CaloHitLists, resulting in algorithm changes.
+Added new types of CaloHit: Rectangular CaloHit (existing type) and new Pointing CaloHit, with dimensions specified in delta(eta) and delta(phi).
+Implemented GetCellCorners and GetCellLengthScale functions for Rectangular and Pointing CaloHits.
+Updated file reader/writer classes following changes to CaloHits and interfaces.
+Added new PhotonReconstruction algorithm, for clustering and identification of photons before standard pandora reconstruction.
+Added implementation of multivariate/pid analysis for photon identification, supporting separate PDFs for bins of reconstructed cluster energy.
+Added ability to read/write pandora histograms from xml.
+Added new interface for use when calculating transverse shower profile. Function can return list of identified shower peaks.
+Renamed functions for calculation of longitudinal and transverse shower profiles. Calculations are accessible via ParticleIdHelper.
+Updated isolated hit merging algorithm and soft cluster merging algorithm to handle (neutral) clusters from multiple specified cluster lists.
+Added new algorithms: MergeSplitPhotons and BeamHaloMuonRemoval.
+Replaced efficiency monitoring algorithm (no longer maintained) with simple algorithm for evaluating efficiency of particle id for single particle samples.
+Added ECAL-only option to PerfectClustering algorithm.
+Changed behaviour of V0PfoCreation algorithm in case where predicted mass squared is negative.
+Added option to visual monitoring algorithm allowing use of new hit colour scheme, which uses continuous palette to reflect energy of hits.
+Altered behaviour of MCManager::GetMCParticleList function, returning success for case where no mc particles have been created.
+Removed unnecessary const qualifier from pointer returned by value in MCParticleHelper.
+Corrected update of inner and outer pseudolayers when calo hit is removed from a cluster.
+Removed possibility of deleting a cluster that is currently part of a pfo.
+
+************************************************************************
 TAG V00-06 FOR ILCSOFT USAGE
 ************************************************************************
 Made efficiency improvements to reduce cpu time required for events with overlaid background.
