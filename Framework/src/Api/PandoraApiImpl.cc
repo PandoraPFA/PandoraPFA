@@ -143,6 +143,13 @@ StatusCode PandoraApiImpl::GetCurrentPfoList(const PfoList *&pPfoList, std::stri
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApiImpl::GetPfoList(const std::string &pfoListName, const PfoList *&pPfoList) const
+{
+    return m_pPandora->m_pPfoManager->GetList(pfoListName, pPfoList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApiImpl::SetBFieldCalculator(BFieldCalculator *pBFieldCalculator) const
 {
     return GeometryHelper::SetBFieldCalculator(pBFieldCalculator);

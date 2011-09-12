@@ -88,6 +88,13 @@ pandora::StatusCode PandoraApi::GetCurrentPfoList(const pandora::Pandora &pandor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+pandora::StatusCode PandoraApi::GetPfoList(const pandora::Pandora &pandora, const std::string &pfoListName, const pandora::PfoList *&pPfoList)
+{
+    return pandora.GetPandoraApiImpl()->GetPfoList(pfoListName, pPfoList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraApi::SetBFieldCalculator(const pandora::Pandora &pandora, pandora::BFieldCalculator *pBFieldCalculator)
 {
     return pandora.GetPandoraApiImpl()->SetBFieldCalculator(pBFieldCalculator);

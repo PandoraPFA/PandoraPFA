@@ -304,6 +304,15 @@ public:
     static pandora::StatusCode GetCurrentPfoList(const pandora::Pandora &pandora, const pandora::PfoList *&pPfoList);
 
     /**
+     *  @brief  Get a named pfo list
+     * 
+     *  @param  pandora the pandora instance to get the objects from
+     *  @param  pfoListName the name of the pfo list
+     *  @param  pPfoList to receive the address of the pfo list
+     */
+    static pandora::StatusCode GetPfoList(const pandora::Pandora &pandora, const std::string &pfoListName, const pandora::PfoList *&pPfoList);
+
+    /**
      *  @brief  Set the bfield calculator used by pandora
      * 
      *  @param  pandora the pandora instance to register the bfield calculator with

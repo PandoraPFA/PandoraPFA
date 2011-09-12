@@ -104,6 +104,14 @@ public:
     StatusCode GetCurrentPfoList(const PfoList *&pPfoList, std::string &pfoListName) const;
 
     /**
+     *  @brief  Get a named pfo list
+     * 
+     *  @param  pfoListName the name of the pfo list
+     *  @param  pPfoList to receive the address of the pfo list
+     */
+    StatusCode GetPfoList(const std::string &pfoListName, const PfoList *&pPfoList) const;
+
+    /**
      *  @brief  Set the bfield calculator used by pandora
      * 
      *  @param  pBFieldCalculator address of the bfield calculator
