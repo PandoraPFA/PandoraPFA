@@ -177,17 +177,19 @@ StatusCode ClusterHelper::FitLayerCentroids(const Cluster *const pCluster, const
             if (endLayer < pseudoLayer)
                 break;
 
-            float cellLengthScaleSum(0.f);
+            float cellLengthScaleSum(0.f), cellEnergySum(0.f);
             CartesianVector cellNormalVectorSum(0.f, 0.f, 0.f);
 
             for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
             {
                 cellLengthScaleSum += (*hitIter)->GetCellLengthScale();
                 cellNormalVectorSum += (*hitIter)->GetCellNormalVector();
+                cellEnergySum += (*hitIter)->GetInputEnergy();
             }
 
             clusterFitPointList.push_back(ClusterFitPoint(pCluster->GetCentroid(pseudoLayer), cellNormalVectorSum.GetUnitVector(),
-                cellLengthScaleSum / static_cast<float>(iter->second->size()), pseudoLayer));
+                cellLengthScaleSum / static_cast<float>(iter->second->size()), cellEnergySum / static_cast<float>(iter->second->size()),
+                pseudoLayer));
         }
 
         return FitPoints(clusterFitPointList, clusterFitResult);
@@ -238,7 +240,7 @@ StatusCode ClusterHelper::PerformLinearFit(const ClusterFitPointList &clusterFit
     const CartesianVector &centralDirection, ClusterFitResult &clusterFitResult)
 {
     // Extract the data
-    double sumP(0.), sumQ(0.), sumR(0.);
+    double sumP(0.), sumQ(0.), sumR(0.), sumWeights(0.);
     double sumPR(0.), sumQR(0.), sumRR(0.);
 
     static const CartesianVector chosenAxis(0.f, 0.f, 1.f);
@@ -251,6 +253,7 @@ StatusCode ClusterHelper::PerformLinearFit(const ClusterFitPointList &clusterFit
     for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
         const CartesianVector position(iter->GetPosition() - centralPosition);
+        const double weight(iter->GetEnergy());
 
         const double p( (cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * position.GetX() +
             (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * position.GetY() +
@@ -262,21 +265,21 @@ StatusCode ClusterHelper::PerformLinearFit(const ClusterFitPointList &clusterFit
             (rotationAxis.GetZ() * rotationAxis.GetY() * (1. - cosTheta) + rotationAxis.GetX() * sinTheta) * position.GetY() +
             (cosTheta + rotationAxis.GetZ() * rotationAxis.GetZ() * (1. - cosTheta)) * position.GetZ() );
 
-        sumP += p; sumQ += q; sumR += r;
-        sumPR += p * r; sumQR += q * r; sumRR += r * r;
+        sumP += p * weight; sumQ += q * weight; sumR += r * weight;
+        sumPR += p * r * weight; sumQR += q * r * weight; sumRR += r * r * weight;
+        sumWeights += weight;
     }
 
     // Perform the fit
-    const double nPoints(static_cast<double>(clusterFitPointList.size()));
-    const double denominatorR(sumR * sumR - nPoints * sumRR);
+    const double denominatorR(sumR * sumR - sumWeights * sumRR);
 
     if (0. == denominatorR)
         return STATUS_CODE_FAILURE;
 
-    const double aP((sumR * sumP - nPoints * sumPR) / denominatorR);
-    const double bP((sumP - aP * sumR) / nPoints);
-    const double aQ((sumR * sumQ - nPoints * sumQR) / denominatorR);
-    const double bQ((sumQ - aQ * sumR) / nPoints);
+    const double aP((sumR * sumP - sumWeights * sumPR) / denominatorR);
+    const double bP((sumP - aP * sumR) / sumWeights);
+    const double aQ((sumR * sumQ - sumWeights * sumQR) / denominatorR);
+    const double bQ((sumQ - aQ * sumR) / sumWeights);
 
     // Extract direction and intercept
     const double magnitude(std::sqrt(1. + aP * aP + aQ * aQ));
@@ -343,6 +346,7 @@ StatusCode ClusterHelper::PerformLinearFit(const ClusterFitPointList &clusterFit
         sumA += a; sumL += l; sumAL += a * l; sumLL += l * l;
     }
 
+    const double nPoints(static_cast<double>(clusterFitPointList.size()));
     const double denominatorL(sumL * sumL - nPoints * sumLL);
 
     if (0. != denominatorL)
@@ -853,6 +857,7 @@ ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :
     m_position(pCaloHit->GetPositionVector()),
     m_cellNormalVector(pCaloHit->GetCellNormalVector()),
     m_cellSize(pCaloHit->GetCellLengthScale()),
+    m_energy(pCaloHit->GetInputEnergy()),
     m_pseudoLayer(pCaloHit->GetPseudoLayer())
 {
     if (m_cellSize < std::numeric_limits<float>::epsilon())
@@ -862,10 +867,11 @@ ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CaloHit *const pCaloHit) :
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 ClusterHelper::ClusterFitPoint::ClusterFitPoint(const CartesianVector &position, const CartesianVector &cellNormalVector, const float cellSize,
-        const PseudoLayer pseudoLayer) :
+        const float energy, const PseudoLayer pseudoLayer) :
     m_position(position),
     m_cellNormalVector(cellNormalVector.GetUnitVector()),
     m_cellSize(cellSize),
+    m_energy(energy),
     m_pseudoLayer(pseudoLayer)
 {
     if (m_cellSize < std::numeric_limits<float>::epsilon())

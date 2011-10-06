@@ -41,10 +41,11 @@ public:
          *  @param  position the position vector of the fit point
          *  @param  cellNormalVector the unit normal vector to the cell in which the point was recorded
          *  @param  cellSize the size of the cell in which the point was recorded
+         *  @param  energy the energy deposited in the cell in which the point was recorded
          *  @param  pseudoLayer the pseudolayer in which the point was recorded
          */
         ClusterFitPoint(const CartesianVector &position, const CartesianVector &cellNormalVector, const float cellSize,
-            const PseudoLayer pseudoLayer);
+            const float energy, const PseudoLayer pseudoLayer);
 
         /**
          *  @brief  Get the position vector of the fit point
@@ -68,6 +69,13 @@ public:
         float GetCellSize() const;
 
         /**
+         *  @brief  Get the energy deposited in the cell in which the point was recorded
+         * 
+         *  @return energy deposited in the cell in which the point was recorded
+         */
+        float GetEnergy() const;
+
+        /**
          *  @brief  Get the pseudolayer in which the point was recorded
          * 
          *  @return the pseudolayer in which the point was recorded
@@ -76,8 +84,9 @@ public:
 
     private:
         CartesianVector         m_position;              ///< The position vector of the fit point
-        CartesianVector         m_cellNormalVector;      ///< The  unit normal vector to the cell in which the point was recorded
+        CartesianVector         m_cellNormalVector;      ///< The unit normal vector to the cell in which the point was recorded
         float                   m_cellSize;              ///< The size of the cell in which the point was recorded
+        float                   m_energy;                ///< The energy deposited in the cell in which the point was recorded
         PseudoLayer             m_pseudoLayer;           ///< The pseudolayer in which the point was recorded
     };
 
@@ -444,6 +453,13 @@ inline const CartesianVector &ClusterHelper::ClusterFitPoint::GetCellNormalVecto
 inline float ClusterHelper::ClusterFitPoint::GetCellSize() const
 {
     return m_cellSize;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline float ClusterHelper::ClusterFitPoint::GetEnergy() const
+{
+    return m_energy;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
