@@ -61,28 +61,11 @@ public:
     const CaloHitList &GetIsolatedCaloHitList() const;
 
     /**
-     *  @brief  Get calo hits in specified pseudo layer
-     * 
-     *  @param  pseudoLayer the pseudo layer
-     *  @param  pCaloHitList to receive the address of the relevant calo hit list
-     */
-    StatusCode GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const;
-
-    /**
      *  @brief  Get the number of calo hits in the cluster
      * 
      *  @return The number of calo hits
      */
     unsigned int GetNCaloHits() const;
-
-    /**
-     *  @brief  Get the number of calo hits in a specified pseudo layer
-     * 
-     *  @param  pseudoLayer the pseudo layer
-     * 
-     *  @return The number of calo hits in the specified pseudo layer
-     */
-    unsigned int GetNCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer) const;
 
     /**
      *  @brief  Get the number of isolated calo hits in the cluster
@@ -206,22 +189,13 @@ public:
     bool ContainsHitType(const HitType hitType) const;
 
     /**
-     *  @brief  Whether the cluster contains a calo hit of a type other than the specified hit type
-     * 
-     *  @param  hitType the hit type
-     * 
-     *  @return boolean
-     */
-    bool ContainsAlternativeHitType(const HitType hitType) const;
-
-    /**
-     *  @brief  Get the centroid for the cluster at a particular pseudo layer
+     *  @brief  Get unweighted centroid for cluster at a particular pseudo layer, calculated using cached values of hit coordinate sums
      * 
      *  @param  pseudoLayer the pseudo layer of interest
      * 
-     *  @return The centroid, returned by value
+     *  @return The unweighted centroid, returned by value
      */
-    const CartesianVector GetCentroid(PseudoLayer pseudoLayer) const;
+    const CartesianVector GetCentroid(const PseudoLayer pseudoLayer) const;
 
     /**
      *  @brief  Get the initial direction of the cluster
@@ -303,39 +277,11 @@ public:
     HitType GetInnerLayerHitType() const;
 
     /**
-     *  @brief  Get the mean inner layer number of radiation lengths from the ip
-     * 
-     *  @return The mean inner layer number of radiation lengths from the ip
-     */
-    float GetInnerLayerRadiationLengths() const;
-
-    /**
-     *  @brief  Get the mean inner layer number of interaction lengths from the ip
-     * 
-     *  @return The mean inner layer number of interaction lengths from the ip
-     */
-    float GetInnerLayerInteractionLengths() const;
-
-    /**
      *  @brief  Get the typical outer layer hit type
      * 
      *  @return The typical outer layer hit type
      */
     HitType GetOuterLayerHitType() const;
-
-    /**
-     *  @brief  Get the mean outer layer number of radiation lengths from the ip
-     * 
-     *  @return The mean outer layer number of radiation lengths from the ip
-     */
-    float GetOuterLayerRadiationLengths() const;
-
-    /**
-     *  @brief  Get the mean outer layer number of interaction lengths from the ip
-     * 
-     *  @return The mean outer layer number of interaction lengths from the ip
-     */
-    float GetOuterLayerInteractionLengths() const;
 
     /**
      *  @brief  Get the list of tracks associated with the cluster
@@ -621,23 +567,9 @@ inline const CaloHitList &Cluster::GetIsolatedCaloHitList() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline StatusCode Cluster::GetCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer, CaloHitList *&pCaloHitList) const
-{
-    return m_orderedCaloHitList.GetCaloHitsInPseudoLayer(pseudoLayer, pCaloHitList);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline unsigned int Cluster::GetNCaloHits() const
 {
     return m_nCaloHits;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline unsigned int Cluster::GetNCaloHitsInPseudoLayer(const PseudoLayer pseudoLayer) const
-{
-    return m_orderedCaloHitList.GetNCaloHitsInPseudoLayer(pseudoLayer);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

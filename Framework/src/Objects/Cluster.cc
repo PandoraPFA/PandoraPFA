@@ -254,28 +254,7 @@ bool Cluster::ContainsHitType(const HitType hitType) const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-bool Cluster::ContainsAlternativeHitType(const HitType hitType) const
-{
-    if (0 == this->GetNCaloHits())
-        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
-
-    for (OrderedCaloHitList::const_reverse_iterator iter = m_orderedCaloHitList.rbegin(), iterEnd = m_orderedCaloHitList.rend();
-        iter != iterEnd; ++iter)
-    {
-        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd;
-            ++hitIter)
-        {
-            if (hitType != (*hitIter)->GetHitType())
-                return true;
-        }
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-const CartesianVector Cluster::GetCentroid(PseudoLayer pseudoLayer) const
+const CartesianVector Cluster::GetCentroid(const PseudoLayer pseudoLayer) const
 {
     OrderedCaloHitList::const_iterator iter = m_orderedCaloHitList.find(pseudoLayer);
 

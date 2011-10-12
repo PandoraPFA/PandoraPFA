@@ -61,7 +61,7 @@ StatusCode MuonClusterAssociationAlgorithm::Run()
             const float muonInnerX(muonInnerCentroid.GetX()), muonInnerY(muonInnerCentroid.GetY());
             const float innerRadius(std::sqrt(muonInnerX * muonInnerX + muonInnerY * muonInnerY));
 
-            const unsigned int nHitsInInnerLayer(pMuonCluster->GetNCaloHitsInPseudoLayer(muonClusterInnerLayer));
+            const unsigned int nHitsInInnerLayer(pMuonCluster->GetOrderedCaloHitList().GetNCaloHitsInPseudoLayer(muonClusterInnerLayer));
 
             if ((innerRadius > m_coilCorrectionMinInnerRadius) && (nHitsInInnerLayer >= m_coilCorrectionMinInnerLayerHits))
                 energyLostInCoil += m_coilEnergyLossCorrection;

@@ -86,9 +86,22 @@ private:
      */
     pandora::StatusCode CreateNeutralPfos() const;
 
+    /**
+     *  @brief  Get the energy-weighted centroid for a specified cluster, calculated over a particular pseudo layer range
+     * 
+     *  @param  pCluster address of the cluster to consider
+     *  @param  pseudoLayer the inner pseudo layer of interest
+     *  @param  pseudoLayer the outer pseudo layer of interest
+     * 
+     *  @return The energy-weighted centroid, returned by value
+     */
+    const pandora::CartesianVector GetEnergyWeightedCentroid(const pandora::Cluster *const pCluster, const pandora::PseudoLayer innerPseudoLayer,
+        const pandora::PseudoLayer outerPseudoLayer) const;
+
     std::string     m_outputPfoListName;                    ///< The output pfo list name
     float           m_minClusterHadronicEnergy;             ///< Min hadronic energy for neutral (non-photon) clusters to be added to pfos
     unsigned int    m_minHitsInCluster;                     ///< Min number of calo hits for neutral cluster to be added to pfos
+    unsigned int    m_neutralPfoPositionAlgorithm;          ///< Identifies the algorithm used to calculate neutral pfo position vector
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

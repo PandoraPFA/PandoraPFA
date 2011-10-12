@@ -234,16 +234,61 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         pfoParameters.m_energy = clusterEnergy;
         pfoParameters.m_clusterList.insert(pCluster);
 
-        const CartesianVector positionWeight(pCluster->GetCentroid(pCluster->GetInnerPseudoLayer()).GetUnitVector());
+        // Position calculation: 0) unweighted inner centroid, 1) energy-weighted inner centroid, 2+) energy-weighted centroid for all layers
+        CartesianVector positionUnitVector(0.f, 0.f, 0.f);
+        const PseudoLayer clusterInnerLayer(pCluster->GetInnerPseudoLayer());
 
-        pfoParameters.m_momentum = CartesianVector(clusterEnergy * positionWeight.GetX(),
-            clusterEnergy * positionWeight.GetY(),
-            clusterEnergy * positionWeight.GetZ());
+        switch (m_neutralPfoPositionAlgorithm)
+        {
+        case 0:
+            positionUnitVector = pCluster->GetCentroid(clusterInnerLayer).GetUnitVector();
+            break;
+        case 1:
+            positionUnitVector = this->GetEnergyWeightedCentroid(pCluster, clusterInnerLayer, clusterInnerLayer).GetUnitVector();
+            break;
+        default:
+            positionUnitVector = this->GetEnergyWeightedCentroid(pCluster, clusterInnerLayer, pCluster->GetOuterPseudoLayer()).GetUnitVector();
+        }
+
+        pfoParameters.m_momentum = CartesianVector(clusterEnergy * positionUnitVector.GetX(),
+            clusterEnergy * positionUnitVector.GetY(),
+            clusterEnergy * positionUnitVector.GetZ());
 
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::ParticleFlowObject::Create(*this, pfoParameters));
     }
 
     return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+const CartesianVector PfoCreationAlgorithm::GetEnergyWeightedCentroid(const Cluster *const pCluster, const PseudoLayer innerPseudoLayer,
+    const PseudoLayer outerPseudoLayer) const
+{
+    float energySum(0.f);
+    CartesianVector energyPositionSum(0.f, 0.f, 0.f);
+    const OrderedCaloHitList &orderedCaloHitList(pCluster->GetOrderedCaloHitList());
+
+    for (OrderedCaloHitList::const_iterator iter = orderedCaloHitList.begin(), iterEnd = orderedCaloHitList.end(); iter != iterEnd; ++iter)
+    {
+        if (iter->first > outerPseudoLayer)
+            break;
+
+        if (iter->first < innerPseudoLayer)
+            continue;
+
+        for (CaloHitList::const_iterator hitIter = iter->second->begin(), hitIterEnd = iter->second->end(); hitIter != hitIterEnd; ++hitIter)
+        {
+            const float electromagneticEnergy((*hitIter)->GetElectromagneticEnergy());
+            energySum += electromagneticEnergy;
+            energyPositionSum += ((*hitIter)->GetPositionVector() * electromagneticEnergy);
+        }
+    }
+
+    if (energySum < std::numeric_limits<float>::epsilon())
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+
+    return (energyPositionSum * (1.f / energySum));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -261,6 +306,10 @@ StatusCode PfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     m_minHitsInCluster = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
+
+    m_neutralPfoPositionAlgorithm = 2;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "NeutralPfoPositionAlgorithm", m_neutralPfoPositionAlgorithm));
 
     return STATUS_CODE_SUCCESS;
 }
