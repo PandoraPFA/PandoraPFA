@@ -101,7 +101,7 @@ private:
     std::string     m_outputPfoListName;                    ///< The output pfo list name
     float           m_minClusterHadronicEnergy;             ///< Min hadronic energy for neutral (non-photon) clusters to be added to pfos
     unsigned int    m_minHitsInCluster;                     ///< Min number of calo hits for neutral cluster to be added to pfos
-    unsigned int    m_neutralPfoPositionAlgorithm;          ///< Identifies the algorithm used to calculate neutral pfo position vector
+    unsigned int    m_photonPositionAlgorithm;              ///< Identifies the algorithm used to calculate photon pfo position vectors
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

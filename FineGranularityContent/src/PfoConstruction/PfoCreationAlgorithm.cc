@@ -234,19 +234,20 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
         pfoParameters.m_energy = clusterEnergy;
         pfoParameters.m_clusterList.insert(pCluster);
 
-        // Position calculation: 0) unweighted inner centroid, 1) energy-weighted inner centroid, 2+) energy-weighted centroid for all layers
+        // Photon position: 0) unweighted inner centroid, 1) energy-weighted inner centroid, 2+) energy-weighted centroid for all layers
         CartesianVector positionUnitVector(0.f, 0.f, 0.f);
         const PseudoLayer clusterInnerLayer(pCluster->GetInnerPseudoLayer());
 
-        switch (m_neutralPfoPositionAlgorithm)
+        if (!isPhoton || (0 == m_photonPositionAlgorithm))
         {
-        case 0:
             positionUnitVector = pCluster->GetCentroid(clusterInnerLayer).GetUnitVector();
-            break;
-        case 1:
+        }
+        else if (1 == m_photonPositionAlgorithm)
+        {
             positionUnitVector = this->GetEnergyWeightedCentroid(pCluster, clusterInnerLayer, clusterInnerLayer).GetUnitVector();
-            break;
-        default:
+        }
+        else
+        {
             positionUnitVector = this->GetEnergyWeightedCentroid(pCluster, clusterInnerLayer, pCluster->GetOuterPseudoLayer()).GetUnitVector();
         }
 
@@ -307,9 +308,9 @@ StatusCode PfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
 
-    m_neutralPfoPositionAlgorithm = 2;
+    m_photonPositionAlgorithm = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "NeutralPfoPositionAlgorithm", m_neutralPfoPositionAlgorithm));
+        "PhotonPositionAlgorithm", m_photonPositionAlgorithm));
 
     return STATUS_CODE_SUCCESS;
 }
