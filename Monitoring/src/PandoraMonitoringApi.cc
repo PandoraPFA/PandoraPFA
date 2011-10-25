@@ -212,6 +212,20 @@ void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::PfoList *
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::Pause()
+{
+    PandoraMonitoring::GetInstance()->Pause();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void PandoraMonitoringApi::Create()
+{
+    (void) PandoraMonitoring::GetInstance();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::Delete()
 {
     PandoraMonitoring::GetInstance()->DeleteInstance();

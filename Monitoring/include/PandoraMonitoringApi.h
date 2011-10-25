@@ -309,7 +309,17 @@ public:
         bool showAssociatedTracks = true);
 
     /**
-     *  @brief  Delete monitoring instance
+     *  @brief  Pause thread until user enters 'return'
+     */
+    static void Pause();
+
+    /**
+     *  @brief  Create monitoring instance, with its associated ROOT TApplication
+     */
+    static void Create();
+
+    /**
+     *  @brief  Delete monitoring instance, terminating its associated ROOT TApplication
      */
     static void Delete();
 };

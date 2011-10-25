@@ -256,7 +256,7 @@ public:
         bool showAssociatedTracks, int pfoId = 0);
 
     /**
-     *  @brief  Pause until user enters 'return'
+     *  @brief  Pause thread until user enters 'return'
      */
     void Pause() const;
 
