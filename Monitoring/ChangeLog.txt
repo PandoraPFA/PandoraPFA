@@ -1,3 +1,5 @@
+Added Pause and Create APIs, allowing for easy creation of Monitoring TApplication and allowing access to reusable pause functionality.
+
 ************************************************************************
 TAG V00-06 FOR ILCSOFT USAGE
 ************************************************************************

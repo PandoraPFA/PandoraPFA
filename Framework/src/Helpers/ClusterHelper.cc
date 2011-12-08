@@ -253,7 +253,7 @@ StatusCode ClusterHelper::PerformLinearFit(const ClusterFitPointList &clusterFit
     for (ClusterFitPointList::const_iterator iter = clusterFitPointList.begin(), iterEnd = clusterFitPointList.end(); iter != iterEnd; ++iter)
     {
         const CartesianVector position(iter->GetPosition() - centralPosition);
-        const double weight(iter->GetEnergy());
+        const double weight(1.);
 
         const double p( (cosTheta + rotationAxis.GetX() * rotationAxis.GetX() * (1. - cosTheta)) * position.GetX() +
             (rotationAxis.GetX() * rotationAxis.GetY() * (1. - cosTheta) - rotationAxis.GetZ() * sinTheta) * position.GetY() +

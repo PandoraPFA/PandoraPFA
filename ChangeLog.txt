@@ -1,3 +1,6 @@
+Added new photon pfo momentum calculations; by default uses cluster energy-weighted centroid in calculation.
+Tidied Cluster class, removing a few unused functions.
+
 ************************************************************************
 TAG V00-07 FOR ILCSOFT USAGE
 ************************************************************************
