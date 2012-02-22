@@ -29,7 +29,6 @@ template<typename T> class AlgorithmObjectManager;
 class Cluster
 {
 public:
-
     /**
      *  @brief  Sort clusters by descending hadronic energy
      * 
@@ -37,6 +36,14 @@ public:
      *  @param  pRhs address of second cluster
      */
     static bool SortByHadronicEnergy(const Cluster *const pLhs, const Cluster *const pRhs);
+
+    /**
+     *  @brief  Sort clusters by descending electromagnetic energy
+     * 
+     *  @param  pLhs address of first cluster
+     *  @param  pRhs address of second cluster
+     */
+    static bool SortByElectromagneticEnergy(const Cluster *const pLhs, const Cluster *const pRhs);
 
     /**
      *  @brief  Sort clusters by ascending inner layer, and by hadronic energy within a layer
@@ -532,6 +539,13 @@ private:
 inline bool Cluster::SortByHadronicEnergy(const Cluster *const pLhs, const Cluster *const pRhs)
 {
     return (pLhs->GetHadronicEnergy() > pRhs->GetHadronicEnergy());
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool Cluster::SortByElectromagneticEnergy(const Cluster *const pLhs, const Cluster *const pRhs)
+{
+    return (pLhs->GetElectromagneticEnergy() > pRhs->GetElectromagneticEnergy());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

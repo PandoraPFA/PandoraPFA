@@ -125,18 +125,19 @@ void VisualMonitoringAlgorithm::VisualizeCaloHitList(const std::string &listName
     CaloHitList caloHitList(*pCaloHitList);
 
     // Filter calo hit list
-    if (m_showOnlyAvailable)
+    for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; )
     {
-        for (CaloHitList::const_iterator hitIter = caloHitList.begin(), hitIterEnd = caloHitList.end(); hitIter != hitIterEnd; )
+        if (((*hitIter)->GetElectromagneticEnergy() < m_thresholdEnergy))
         {
-            if (!PandoraContentApi::IsCaloHitAvailable(*this, *hitIter))
-            {
-                caloHitList.erase(hitIter++);
-            }
-            else
-            {
-                hitIter++;
-            }
+            caloHitList.erase(hitIter++);
+        }
+        else if (m_showOnlyAvailable && !PandoraContentApi::IsCaloHitAvailable(*this, *hitIter))
+        {
+            caloHitList.erase(hitIter++);
+        }
+        else
+        {
+            hitIter++;
         }
     }
 
@@ -285,6 +286,10 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "HitColors", m_hitColors));
     std::transform(m_hitColors.begin(), m_hitColors.end(), m_hitColors.begin(), ::tolower);
+
+    m_thresholdEnergy = 0.01f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ThresholdEnergy", m_thresholdEnergy));
 
     m_showOnlyAvailable = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

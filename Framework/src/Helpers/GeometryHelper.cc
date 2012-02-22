@@ -423,7 +423,7 @@ void GeometryHelper::SubDetectorParameters::Initialize(const std::string &subDet
         if (STATUS_CODE_NOT_INITIALIZED != statusCodeException.GetStatusCode())
             throw statusCodeException;
 
-        std::cout << "GeometryHelper: " << subDetectorName << " not specified." << std::endl;
+        //std::cout << "GeometryHelper: " << subDetectorName << " not specified." << std::endl;
         m_isInitialized = false;
     }
 }

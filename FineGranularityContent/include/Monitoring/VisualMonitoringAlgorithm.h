@@ -87,6 +87,7 @@ private:
     bool                    m_showDetector;             ///< Whether to display the detector geometry
     std::string             m_hitColors;                ///< Define the hit coloring scheme (default: pfo, choices: pfo, particleid)
 
+    float                   m_thresholdEnergy;          ///< Cell energy threshold for display (em scale)
     float                   m_transparencyThresholdE;   ///< Cell energy for which transparency is saturated (0%, fully opaque)
     float                   m_energyScaleThresholdE;    ///< Cell energy for which color is at top end of continous color palette
 
