@@ -287,7 +287,7 @@ StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
         "HitColors", m_hitColors));
     std::transform(m_hitColors.begin(), m_hitColors.end(), m_hitColors.begin(), ::tolower);
 
-    m_thresholdEnergy = 0.01f;
+    m_thresholdEnergy = -1.f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "ThresholdEnergy", m_thresholdEnergy));
 

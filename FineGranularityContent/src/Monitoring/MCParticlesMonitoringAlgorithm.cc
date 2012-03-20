@@ -69,12 +69,6 @@ StatusCode MCParticlesMonitoringAlgorithm::Run()
 
 void MCParticlesMonitoringAlgorithm::MonitorMCParticleList(const MCParticleList& mcParticleList)
 {
-    if (m_print)
-    {
-        std::cout << "MCParticle monitoring written into tree : " << m_treeName << std::endl;
-    }
-
-    // alle MCParticles ausselektieren die in der parent-list eines anderen particles drinnen sind. TODO!!
     m_energy->clear();
     m_momentumX->clear();
     m_momentumY->clear();
@@ -126,9 +120,9 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList(const MCParticleList&
     {
         for (SortIndex::iterator itIdx = sortIndex.begin(), itIdxEnd = sortIndex.end(); itIdx != itIdxEnd; ++itIdx)
         {
-            int idx = itIdx->second;
+            const int idx(itIdx->second);
 
-            assert(fabs(itIdx->first - m_energy->at(idx)) < 0.1);
+            assert(std::fabs(itIdx->first - m_energy->at(idx)) < 0.1);
 
             m_energy->push_back     ( m_energy->at(idx)      );
             m_momentumX->push_back  ( m_momentumX->at(idx)   );
@@ -163,14 +157,16 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList(const MCParticleList&
     {
         int idx = 0;
 
+        std::sort(mcParticleVector.begin(), mcParticleVector.end(), MCParticle::SortByEnergy);
+
         for (MCParticleVector::iterator itMc = mcParticleVector.begin(), itMcEnd = mcParticleVector.end(); itMc != itMcEnd; ++itMc)
         {
             const MCParticle *pMcParticle = (*itMc);
 
-            float caloHitEnergy = m_caloHitEnergy->at(idx);
-            float trackEnergy = m_trackEnergy->at(idx);
+            float caloHitEnergy(m_caloHitEnergy->at(idx));
+            float trackEnergy(m_trackEnergy->at(idx));
 
-            PrintMCParticle(pMcParticle,caloHitEnergy, trackEnergy, std::cout);
+            PrintMCParticle(pMcParticle, caloHitEnergy, trackEnergy, std::cout);
             std::cout << std::endl;
             ++idx;
         }
@@ -206,44 +202,39 @@ void MCParticlesMonitoringAlgorithm::MonitorMCParticleList(const MCParticleList&
 
 void MCParticlesMonitoringAlgorithm::PrintMCParticle(const MCParticle *pMCParticle, float &caloHitEnergy, float &trackEnergy, std::ostream &o)
 {
-//    static const char* whiteongreen = "\033[1;42m";  // white on green background
-//    static const char* reset  = "\033[0m";           // reset
-
     if (m_indent)
     {
         int printDepth = (int)(pMCParticle->GetOuterRadius() / 100); // this can be changed if the printout doesn't look good
         o << std::setw (printDepth) << " ";
     }
 
-//  -- indication of ROOT particles is nonsensical for the used set of MCPFO selection rules.
-//     if( pMCParticle->IsRootParticle() )
-//     {
-//         o << whiteongreen << "/ROOT/" << reset;
-//     }
-
     const CartesianVector &momentum = pMCParticle->GetMomentum();
-//    o << "[" << MCParticle << "]"
+    const CartesianVector &endPoint = pMCParticle->GetEndpoint();
 
-    o << std::setprecision(2);
-    o << std::fixed;
-    o << " E=" << pMCParticle->GetEnergy()
+    float radius(0.f), phi(0.f), theta(0.f);
+    endPoint.GetSphericalCoordinates(radius, phi, theta);
+    const float eta(-1. * std::log(std::tan(theta / 2.)));
+
+    o << std::fixed << std::setprecision(2)
+      << "PID=" << pMCParticle->GetParticleId()
+      << " E=" << pMCParticle->GetEnergy()
+      << std::fixed << std::setprecision(4)
+      << " ETA=" << eta
+      << " PHI=" << phi
+      << std::fixed << std::setprecision(1)
+      << " r_i=" << pMCParticle->GetInnerRadius()
+      << " r_o=" << pMCParticle->GetOuterRadius()
       << std::scientific
       << " px=" << momentum.GetX()
       << " py=" << momentum.GetY()
       << " pz=" << momentum.GetZ()
-      << " pid=" << pMCParticle->GetParticleId()
-      << std::fixed << std::setprecision(1)
-      << " r_i=" << pMCParticle->GetInnerRadius()
-      << " r_o=" << pMCParticle->GetOuterRadius();
+      << std::fixed << std::setprecision(4);
 
     if(m_haveCaloHits)
         o << " ECalo=" << caloHitEnergy;
 
     if(m_haveTracks)
         o << " ETrack=" << trackEnergy;
-
-//      << " uid=" << pMCParticle->GetUid();
-//    o << " dghtrs: " << pMCParticle->GetDaughterList().size();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -457,7 +448,7 @@ StatusCode MCParticlesMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHan
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "Print", m_print));
 
-    m_indent = true;
+    m_indent = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "Indent", m_indent));
 

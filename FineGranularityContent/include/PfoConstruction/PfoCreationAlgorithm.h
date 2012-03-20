@@ -99,8 +99,12 @@ private:
         const pandora::PseudoLayer outerPseudoLayer) const;
 
     std::string     m_outputPfoListName;                    ///< The output pfo list name
+    bool            m_shouldCreateTrackBasedPfos;           ///< Whether to create track-based (charged) pfos
+    bool            m_shouldCreateNeutralPfos;              ///< Whether to create neutral pfos
     float           m_minClusterHadronicEnergy;             ///< Min hadronic energy for neutral (non-photon) clusters to be added to pfos
+    float           m_minClusterElectromagneticEnergy;      ///< Min electromagnetic energy for neutral (photon) clusters to be added to pfos
     unsigned int    m_minHitsInCluster;                     ///< Min number of calo hits for neutral cluster to be added to pfos
+    bool            m_allowSingleLayerClusters;             ///< Whether to allow neutral clusters spanning only a single pseudolayer
     unsigned int    m_photonPositionAlgorithm;              ///< Identifies the algorithm used to calculate photon pfo position vectors
 };
 

@@ -16,8 +16,12 @@ StatusCode PfoCreationAlgorithm::Run()
 {
     const PfoList *pPfoList = NULL; std::string pfoListName;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::CreateTemporaryPfoListAndSetCurrent(*this, pPfoList, pfoListName));
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateTrackBasedPfos());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNeutralPfos());
+
+    if (m_shouldCreateTrackBasedPfos)
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateTrackBasedPfos());
+
+    if (m_shouldCreateNeutralPfos)
+        PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->CreateNeutralPfos());
 
     if (!pPfoList->empty())
     {
@@ -222,7 +226,12 @@ StatusCode PfoCreationAlgorithm::CreateNeutralPfos() const
             if (clusterEnergy < m_minClusterHadronicEnergy)
                 continue;
 
-            if (pCluster->GetInnerPseudoLayer() == pCluster->GetOuterPseudoLayer())
+            if (!m_allowSingleLayerClusters && (pCluster->GetInnerPseudoLayer() == pCluster->GetOuterPseudoLayer()))
+                continue;
+        }
+        else
+        {
+            if (clusterEnergy < m_minClusterElectromagneticEnergy)
                 continue;
         }
 
@@ -300,13 +309,29 @@ StatusCode PfoCreationAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "OutputPfoListName", m_outputPfoListName));
 
+    m_shouldCreateTrackBasedPfos = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldCreateTrackBasedPfos", m_shouldCreateTrackBasedPfos));
+
+    m_shouldCreateNeutralPfos = true;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "ShouldCreateNeutralPfos", m_shouldCreateNeutralPfos));
+
     m_minClusterHadronicEnergy = 0.25f;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinClusterHadronicEnergy", m_minClusterHadronicEnergy));
 
+    m_minClusterElectromagneticEnergy = 0.f;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "MinClusterElectromagneticEnergy", m_minClusterElectromagneticEnergy));
+
     m_minHitsInCluster = 5;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
         "MinHitsInCluster", m_minHitsInCluster));
+
+    m_allowSingleLayerClusters = false;
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
+        "AllowSingleLayerClusters", m_allowSingleLayerClusters));
 
     m_photonPositionAlgorithm = 2;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
