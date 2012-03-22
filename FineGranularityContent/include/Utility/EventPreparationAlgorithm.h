@@ -27,7 +27,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     std::string     m_outputTrackListName;          ///< The output track list name
     std::string     m_outputMuonCaloHitListName;    ///< The output muon calo hit list name

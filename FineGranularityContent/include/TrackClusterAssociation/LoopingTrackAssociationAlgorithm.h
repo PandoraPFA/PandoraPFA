@@ -27,7 +27,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get mean distance of hits in first m_nClusterDeltaRLayers layers of cluster from centre of specified helix

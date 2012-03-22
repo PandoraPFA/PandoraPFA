@@ -26,7 +26,7 @@ public:
     };
 
 private:
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     pandora::StatusCode PerformFragmentation(pandora::Cluster *const pOriginalCluster, pandora::Track *const pTrack,
         pandora::PseudoLayer showerStartLayer, pandora::PseudoLayer showerEndLayer) const;

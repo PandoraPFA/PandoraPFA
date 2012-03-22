@@ -56,6 +56,8 @@ distribution.
 	#define TIXML_EXPLICIT
 #endif
 
+namespace pandora // Added namespace
+{
 
 /*
    TiXmlString is an emulation of a subset of the std::string template.
@@ -314,6 +316,8 @@ public :
 	}
 
 } ;
+
+} // Added namespace pandora
 
 #endif	// TIXML_STRING_INCLUDED
 #endif	// TIXML_USE_STL

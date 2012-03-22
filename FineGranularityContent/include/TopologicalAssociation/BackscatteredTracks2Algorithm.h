@@ -27,7 +27,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     float           m_canMergeMinMipFraction;           ///< The min mip fraction for clusters (flagged as photons) to be merged
     float           m_canMergeMaxRms;                   ///< The max all hit fit rms for clusters (flagged as photons) to be merged

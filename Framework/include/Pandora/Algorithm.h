@@ -13,12 +13,11 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/StatusCodes.h"
 
-class TiXmlHandle;
-
 namespace pandora
 {
 
 class PandoraContentApiImpl;
+class TiXmlHandle;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

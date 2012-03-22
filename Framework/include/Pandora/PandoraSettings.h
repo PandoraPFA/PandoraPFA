@@ -10,10 +10,12 @@
 
 #include "Pandora/StatusCodes.h"
 
-class TiXmlHandle;
-
 namespace pandora
 {
+
+class TiXmlHandle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  PandoraSettings class

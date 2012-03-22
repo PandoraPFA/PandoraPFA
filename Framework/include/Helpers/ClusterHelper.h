@@ -11,10 +11,12 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
 
-class TiXmlHandle;
-
 namespace pandora
 {
+
+class TiXmlHandle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  ClusterHelper class

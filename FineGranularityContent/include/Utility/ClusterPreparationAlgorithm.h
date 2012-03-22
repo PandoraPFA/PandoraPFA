@@ -27,7 +27,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     pandora::StringVector   m_candidateListNames;           ///< The list of cluster list names to use
     std::string             m_mergedCandidateListName;      ///< The name of the merged candidate list name

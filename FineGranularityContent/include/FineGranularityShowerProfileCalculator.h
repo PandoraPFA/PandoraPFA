@@ -16,7 +16,7 @@
 class FineGranularityShowerProfileCalculator : public pandora::ShowerProfileCalculator
 {
 public:
-    void ReadSettings(const TiXmlHandle *const pXmlHandle);
+    void ReadSettings(const pandora::TiXmlHandle *const pXmlHandle);
     void CalculateLongitudinalProfile(const pandora::Cluster *const pCluster, float &profileStart, float &profileDiscrepancy) const;
     void CalculateTransverseProfile(const pandora::Cluster *const pCluster, const pandora::PseudoLayer maxPseudoLayer, pandora::ParticleIdHelper::ShowerPeakList &showerPeakList) const;
 

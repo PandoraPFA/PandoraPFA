@@ -13,10 +13,12 @@
 #include "Pandora/PandoraInternal.h"
 #include "Pandora/StatusCodes.h"
 
-class TiXmlHandle;
-
 namespace pandora
 {
+
+class TiXmlHandle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  FragmentRemovalHelper class

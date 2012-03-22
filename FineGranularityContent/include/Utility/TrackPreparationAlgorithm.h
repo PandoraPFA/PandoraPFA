@@ -27,7 +27,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Create list of parent tracks to be used in construction of charged pfos

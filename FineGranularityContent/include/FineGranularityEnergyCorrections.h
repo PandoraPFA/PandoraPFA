@@ -51,7 +51,7 @@ public:
      * 
      *  @param  xmlHandle the relevant xml handle
      */
-    static pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    static pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
 private:
     /**

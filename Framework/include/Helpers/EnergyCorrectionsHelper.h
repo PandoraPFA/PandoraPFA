@@ -12,10 +12,12 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/StatusCodes.h"
 
-class TiXmlHandle;
-
 namespace pandora
 {
+
+class TiXmlHandle;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  *  @brief  EnergyCorrectionsHelper class

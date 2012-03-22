@@ -70,7 +70,7 @@ private:
     typedef std::map<pandora::Track *, AssociationInfoSet> TrackAssociationInfoMap;
 
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get a map specifying cluster association information for every possible matching cluster

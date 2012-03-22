@@ -36,7 +36,7 @@ private:
     pandora::PseudoLayer GetShowerMaxLayer(const pandora::Cluster *const pCluster) const;
 
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     float           m_minShowerMaxCosAngle;                 ///< Max cosine of angle between parent and daughter shower max layer centroids
     float           m_contactDistanceThreshold;             ///< Distance threshold to declare cluster layers as "in contact"

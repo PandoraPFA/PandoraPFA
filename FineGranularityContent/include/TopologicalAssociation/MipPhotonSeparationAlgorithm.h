@@ -27,7 +27,7 @@ public:
 
 protected:
     virtual pandora::StatusCode Run();
-    virtual pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    virtual pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Whether to attempt to fragment a cluster into a mip-like part and a photon-like part

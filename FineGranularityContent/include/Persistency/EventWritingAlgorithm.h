@@ -42,7 +42,7 @@ public:
 private:
     pandora::StatusCode Initialize();
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     bool                    m_shouldWriteGeometry;          ///< Whether to write geometry to a specified file
     std::string             m_geometryFileName;             ///< Name of the output geometry file

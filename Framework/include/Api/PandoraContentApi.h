@@ -12,10 +12,7 @@
 #include "Pandora/PandoraInputTypes.h"
 #include "Pandora/PandoraInternal.h"
 
-class TiXmlElement;
-class TiXmlHandle;
-
-namespace pandora { class Algorithm; }
+namespace pandora { class Algorithm; class TiXmlElement; class TiXmlHandle;}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -103,7 +100,7 @@ public:
      *  @param  pXmlElement address of the xml element describing the daughter algorithm type and settings
      *  @param  daughterAlgorithmName to receive the name of the daughter algorithm instance
      */
-    static pandora::StatusCode CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
+    static pandora::StatusCode CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, pandora::TiXmlElement *const pXmlElement,
         std::string &daughterAlgorithmName);
 
     /**

@@ -82,7 +82,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     std::string             m_trackClusterAssociationAlgName;       ///< The name of the track-cluster association algorithm to run
 

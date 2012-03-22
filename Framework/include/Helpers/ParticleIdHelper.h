@@ -12,12 +12,11 @@
 #include "Pandora/PandoraInternal.h"
 #include "Pandora/StatusCodes.h"
 
-class TiXmlHandle;
-
 namespace pandora
 {
 
 class ShowerProfileCalculator;
+class TiXmlHandle;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

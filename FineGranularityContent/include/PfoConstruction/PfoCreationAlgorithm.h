@@ -31,7 +31,7 @@ private:
     typedef PandoraContentApi::ParticleFlowObject::Parameters PfoParameters;
 
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Create particle flow objects starting from tracks in the main tracker. The pfos will account for associated

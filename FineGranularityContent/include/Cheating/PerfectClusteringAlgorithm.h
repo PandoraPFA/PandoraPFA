@@ -30,7 +30,7 @@ protected:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     pandora::IntVector  m_particleIdList;               ///< list of particle ids of MCPFOs to be selected
     bool                m_shouldUseOnlyECalHits;        ///< Whether to only use ecal hits in the clustering algorithm

@@ -42,7 +42,7 @@ public:
 private:
     pandora::StatusCode Initialize();
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     bool                    m_shouldReadGeometry;           ///< Whether to read geometry from a specified file
     std::string             m_geometryFileName;             ///< Name of the file containing geometry information

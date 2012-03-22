@@ -61,7 +61,7 @@ private:
     };
 
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     /**
      *  @brief  Get the list of calo hits that are available for clustering (a subset of the current calo hit list)

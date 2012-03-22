@@ -45,7 +45,7 @@ pandora::StatusCode PandoraContentApi::RepeatEventPreparation(const pandora::Alg
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, TiXmlElement *const pXmlElement,
+pandora::StatusCode PandoraContentApi::CreateDaughterAlgorithm(const pandora::Algorithm &parentAlgorithm, pandora::TiXmlElement *const pXmlElement,
     std::string &daughterAlgorithmName)
 {
     return parentAlgorithm.GetPandoraContentApiImpl()->CreateDaughterAlgorithm(pXmlElement, daughterAlgorithmName);

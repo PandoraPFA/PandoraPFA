@@ -32,7 +32,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     std::string     m_monitoringFileName;       ///< The name of the file in which to save the monitoring tree
     float           m_mcThresholdEnergy;        ///< MC particle threshold energy, units GeV

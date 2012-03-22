@@ -83,6 +83,9 @@ distribution.
 	#endif
 #endif	
 
+namespace pandora // Added namespace
+{
+
 class TiXmlDocument;
 class TiXmlElement;
 class TiXmlComment;
@@ -1798,5 +1801,6 @@ private:
 #pragma warning( pop )
 #endif
 
-#endif
+} // Added namespace pandora
 
+#endif

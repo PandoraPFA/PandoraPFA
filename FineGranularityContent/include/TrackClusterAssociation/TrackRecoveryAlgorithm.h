@@ -27,7 +27,7 @@ public:
 
 private:
     pandora::StatusCode Run();
-    pandora::StatusCode ReadSettings(const TiXmlHandle xmlHandle);
+    pandora::StatusCode ReadSettings(const pandora::TiXmlHandle xmlHandle);
 
     float           m_maxTrackZStart;                   ///< Max track start z coordinate for track without parent to be considered
     float           m_maxAbsoluteTrackClusterChi;       ///< Max absolute value of track-cluster consistency chi for non-leaving cluster

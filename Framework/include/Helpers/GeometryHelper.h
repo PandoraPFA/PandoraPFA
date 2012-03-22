@@ -10,14 +10,13 @@
 
 #include "Api/PandoraApi.h"
 
-class TiXmlHandle;
-
 namespace pandora
 {
 
 class DetectorGap;
 class BFieldCalculator;
 class PseudoLayerCalculator;
+class TiXmlHandle;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

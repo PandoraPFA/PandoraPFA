@@ -31,6 +31,9 @@ distribution.
 
 #include "Xml/tinyxml.h" // Altered path
 
+namespace pandora // Added namespace
+{
+
 FILE* TiXmlFOpen( const char* filename, const char* mode );
 
 bool TiXmlBase::condenseWhiteSpace = true;
@@ -1837,3 +1840,4 @@ bool TiXmlPrinter::Visit( const TiXmlUnknown& unknown )
 	return true;
 }
 
+} // Added namespace pandora

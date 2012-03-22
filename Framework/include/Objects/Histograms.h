@@ -10,13 +10,13 @@
 
 #include <map>
 
-class pTiXmlDocument;
+namespace pandora
+{
+
+class TiXmlDocument;
 class TiXmlHandle;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
-
-namespace pandora
-{
 
 /**
  *  @brief  Histogram class
