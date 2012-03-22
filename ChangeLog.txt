@@ -1,3 +1,16 @@
+************************************************************************
+TAG V00-09 FOR Maximum Entropy Studies
+************************************************************************
+Move xml parser into pandora namespace - prevents clashes with other packages using different versions of same parser.
+Add new parameters to PfoCreation algorithm, improving flexibility.
+Add new print-out details to MCParticlesMonitoring algorithm.
+Add Cluster::SortByElectromagneticEnergy function.
+Add cell threshold option to visual monitoring algorithm.
+Remove print-out of uninitialized subdetectors (only relevant to ILC/CLIC-like detectors, and exception will be thrown if unitialized details are requested anyway).
+
+************************************************************************
+TAG V00-08 FOR ILCSOFT USAGE
+************************************************************************
 Added new photon pfo momentum calculations; by default uses cluster energy-weighted centroid in calculation.
 Tidied Cluster class, removing a few unused functions.
 
