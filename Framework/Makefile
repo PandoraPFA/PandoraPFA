@@ -39,7 +39,7 @@ all: $(SOURCES) $(OBJECTS)
 $(LIBRARY): $(OBJECTS)
 	$(CC) $(LDFLAGS) -fPIC $(OBJECTS) -o $@
 
-.cc.o:
+%.o:%.cc
 	$(CC) $(CFLAGS) $(DEFINES) $< -o $@
 
 clean:
