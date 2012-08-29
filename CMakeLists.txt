@@ -56,7 +56,6 @@ IF( PANDORA_MONITORING )
     LINK_LIBRARIES( PandoraMonitoring )
 ENDIF()
 ADD_SUBDIRECTORY( ./FineGranularityContent )
-ADD_SUBDIRECTORY( ./KMeansContent )
 
 
 # display some variables and write them to cache

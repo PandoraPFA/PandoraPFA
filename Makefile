@@ -17,10 +17,8 @@ ifdef MONITORING
 	(cd $(PROJECT_DIR)/Monitoring; make $(ARGUMENTS))
 endif
 	(cd $(PROJECT_DIR)/FineGranularityContent; make $(ARGUMENTS))
-	(cd $(PROJECT_DIR)/KMeansContent; make $(ARGUMENTS))
 
 clean:
 	(cd $(PROJECT_DIR)/Framework; make clean $(ARGUMENTS))
 	(cd $(PROJECT_DIR)/Monitoring; make clean $(ARGUMENTS))
 	(cd $(PROJECT_DIR)/FineGranularityContent; make clean $(ARGUMENTS))
-	(cd $(PROJECT_DIR)/KMeansContent; make clean $(ARGUMENTS))
