@@ -522,8 +522,8 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
             return STATUS_CODE_FAILURE;
     }
 
-    CaloCellType caloCellType(UNKNOWN_CELL_TYPE);
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(caloCellType));
+    CellGeometry cellGeometry(UNKNOWN_CELL_GEOMETRY);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellGeometry));
     CartesianVector positionVector(0.f, 0.f, 0.f);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(positionVector));
     CartesianVector expectedDirection(0.f, 0.f, 0.f);
@@ -562,7 +562,7 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
     PandoraApi::RectangularCaloHit::Parameters rectangularParameters;
     PandoraApi::PointingCaloHit::Parameters pointingParameters;
 
-    if (RECTANGULAR == caloCellType)
+    if (RECTANGULAR == cellGeometry)
     {
         float cellSizeU(0.f);
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizeU));
@@ -572,7 +572,7 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
         rectangularParameters.m_cellSizeU = cellSizeU;
         rectangularParameters.m_cellSizeV = cellSizeV;
     }
-    else if (POINTING == caloCellType)
+    else if (POINTING == cellGeometry)
     {
         float cellSizeEta(0.f);
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(cellSizeEta));
@@ -587,7 +587,7 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
         return STATUS_CODE_FAILURE;
     }
 
-    PandoraApi::CaloHitBaseParameters *pBaseParameters((RECTANGULAR == caloCellType) ?
+    PandoraApi::CaloHitBaseParameters *pBaseParameters((RECTANGULAR == cellGeometry) ?
         static_cast<PandoraApi::CaloHitBaseParameters*>(&rectangularParameters) :
         static_cast<PandoraApi::CaloHitBaseParameters*>(&pointingParameters));
 
@@ -609,7 +609,7 @@ StatusCode FileReader::ReadCaloHit(bool checkComponentId)
     pBaseParameters->m_isInOuterSamplingLayer = isInOuterSamplingLayer;
     pBaseParameters->m_pParentAddress = pParentAddress;
 
-    if (RECTANGULAR == caloCellType)
+    if (RECTANGULAR == cellGeometry)
     {
         PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::RectangularCaloHit::Create(*m_pPandora, rectangularParameters));
     }

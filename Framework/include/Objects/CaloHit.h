@@ -22,11 +22,11 @@ template<typename T> class InputObjectManager;
 /**
  *  @brief  The calo cell type enum
  */
-enum CaloCellType
+enum CellGeometry
 {
     RECTANGULAR,
     POINTING,
-    UNKNOWN_CELL_TYPE
+    UNKNOWN_CELL_GEOMETRY
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -192,11 +192,11 @@ public:
     float GetWeight() const;
 
     /**
-     *  @brief  Get the calo cell type
+     *  @brief  Get the cell geometry
      * 
-     *  @return the calo cell type
+     *  @return the cell geometry
      */
-    CaloCellType GetCaloCellType() const;
+    CellGeometry GetCellGeometry() const;
 
     /**
      *  @brief  Get address of the mc particle associated with the calo hit
@@ -315,7 +315,7 @@ protected:
     bool                    m_isAvailable;              ///< Whether the calo hit is available to be added to a cluster
     float                   m_weight;                   ///< The calo hit weight, which may not be unity if the hit has been fragmented
 
-    CaloCellType            m_caloCellType;             ///< The calo cell type
+    CellGeometry            m_cellGeometry;             ///< The cell geometry
 
     const MCParticle       *m_pMCParticle;              ///< The associated MC particle
     const void             *m_pParentAddress;           ///< The address of the parent calo hit in the user framework
@@ -612,9 +612,9 @@ inline bool CaloHit::IsIsolated() const
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline CaloCellType CaloHit::GetCaloCellType() const
+inline CellGeometry CaloHit::GetCellGeometry() const
 {
-    return m_caloCellType;
+    return m_cellGeometry;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

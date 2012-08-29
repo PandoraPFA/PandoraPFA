@@ -215,13 +215,13 @@ StatusCode CaloHitManager::FragmentCaloHit(CaloHit *pOriginalCaloHit, const floa
     if (!this->CanFragmentCaloHit(pOriginalCaloHit, fraction1))
         return STATUS_CODE_NOT_ALLOWED;
 
-    if (RECTANGULAR == pOriginalCaloHit->GetCaloCellType())
+    if (RECTANGULAR == pOriginalCaloHit->GetCellGeometry())
     {
         RectangularCaloHit *pOriginalRectangularCaloHit = dynamic_cast<RectangularCaloHit *>(pOriginalCaloHit);
         pDaughterCaloHit1 = new RectangularCaloHit(pOriginalRectangularCaloHit, fraction1);
         pDaughterCaloHit2 = new RectangularCaloHit(pOriginalRectangularCaloHit, 1.f - fraction1);
     }
-    else if (POINTING == pOriginalCaloHit->GetCaloCellType())
+    else if (POINTING == pOriginalCaloHit->GetCellGeometry())
     {
         PointingCaloHit *pOriginalPointingCaloHit = dynamic_cast<PointingCaloHit *>(pOriginalCaloHit);
         pDaughterCaloHit1 = new PointingCaloHit(pOriginalPointingCaloHit, fraction1);
@@ -258,12 +258,12 @@ StatusCode CaloHitManager::MergeCaloHitFragments(CaloHit *pFragmentCaloHit1, Cal
 
     const float newWeight((pFragmentCaloHit1->GetWeight() + pFragmentCaloHit2->GetWeight()) / pFragmentCaloHit1->GetWeight());
 
-    if ((RECTANGULAR == pFragmentCaloHit1->GetCaloCellType()) && (RECTANGULAR == pFragmentCaloHit2->GetCaloCellType()))
+    if ((RECTANGULAR == pFragmentCaloHit1->GetCellGeometry()) && (RECTANGULAR == pFragmentCaloHit2->GetCellGeometry()))
     {
         RectangularCaloHit *pOriginalRectangularCaloHit = dynamic_cast<RectangularCaloHit *>(pFragmentCaloHit1);
         pMergedCaloHit = new RectangularCaloHit(pOriginalRectangularCaloHit, newWeight);
     }
-    else if ((POINTING == pFragmentCaloHit1->GetCaloCellType()) && (POINTING == pFragmentCaloHit2->GetCaloCellType()))
+    else if ((POINTING == pFragmentCaloHit1->GetCellGeometry()) && (POINTING == pFragmentCaloHit2->GetCellGeometry()))
     {
         PointingCaloHit *pOriginalPointingCaloHit = dynamic_cast<PointingCaloHit *>(pFragmentCaloHit1);
         pMergedCaloHit = new PointingCaloHit(pOriginalPointingCaloHit, newWeight);

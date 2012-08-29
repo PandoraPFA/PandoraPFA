@@ -35,7 +35,7 @@ CaloHit::CaloHit(const PandoraApi::CaloHitBaseParameters &caloHitParameters) :
     m_isIsolated(false),
     m_isAvailable(true),
     m_weight(1.f),
-    m_caloCellType(UNKNOWN_CELL_TYPE),
+    m_cellGeometry(UNKNOWN_CELL_GEOMETRY),
     m_pMCParticle(NULL),
     m_pParentAddress(caloHitParameters.m_pParentAddress.Get())
 {
@@ -67,7 +67,7 @@ CaloHit::CaloHit(CaloHit *pCaloHit, const float weight) :
     m_isIsolated(pCaloHit->m_isIsolated),
     m_isAvailable(pCaloHit->m_isAvailable),
     m_weight(weight * pCaloHit->m_weight),
-    m_caloCellType(pCaloHit->m_caloCellType),
+    m_cellGeometry(pCaloHit->m_cellGeometry),
     m_pMCParticle(pCaloHit->m_pMCParticle),
     m_pParentAddress(pCaloHit->m_pParentAddress)
 {
@@ -144,7 +144,7 @@ RectangularCaloHit::RectangularCaloHit(const PandoraApi::RectangularCaloHitParam
     m_cellSizeV(parameters.m_cellSizeV.Get()),
     m_cellLengthScale(std::sqrt(m_cellSizeU * m_cellSizeV))
 {
-     m_caloCellType = RECTANGULAR;
+     m_cellGeometry = RECTANGULAR;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ PointingCaloHit::PointingCaloHit(const PandoraApi::PointingCaloHitParameters &pa
     m_cellSizePhi(parameters.m_cellSizePhi.Get()),
     m_cellLengthScale(this->CalculateCellLengthScale())
 {
-    m_caloCellType = POINTING;
+    m_cellGeometry = POINTING;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
