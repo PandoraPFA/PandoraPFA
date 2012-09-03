@@ -7,7 +7,7 @@
 SET( DOC_SRC_DIR "${PROJECT_SOURCE_DIR}/doc" )
 SET( DOC_BIN_DIR "${PROJECT_BINARY_DIR}/docbuild" )
 
-SET( DOX_INPUT ../Framework/ ../FineGranularityContent ../KMeansContent ) 
+SET( DOX_INPUT ../Framework/ ../FineGranularityContent ) 
 
 IF( PANDORA_MONITORING )
     LIST( APPEND DOX_INPUT ../Monitoring )
