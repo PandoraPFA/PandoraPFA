@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Framework/include/Utilities/FileReader.h
+ *  @file   PandoraPFANew/Framework/include/Persistency/FileReader.h
  * 
  *  @brief  Header file for the file reader class.
  * 

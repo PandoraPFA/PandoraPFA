@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/FineGranularityContent/src/Persistency/EventReadingAlgorithm.cc
+ *  @file   PandoraPFANew/Framework/src/Persistency/EventReadingAlgorithm.cc
  * 
  *  @brief  Implementation of the event reading algorithm class.
  * 
@@ -9,8 +9,7 @@
 #include "Pandora/AlgorithmHeaders.h"
 
 #include "Persistency/EventReadingAlgorithm.h"
-
-#include "Utilities/FileReader.h"
+#include "Persistency/FileReader.h"
 
 using namespace pandora;
 

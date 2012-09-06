@@ -8,6 +8,9 @@
 
 #include "Pandora/Algorithm.h"
 
+#include "Persistency/EventReadingAlgorithm.h"
+#include "Persistency/EventWritingAlgorithm.h"
+
 #include "Managers/AlgorithmManager.h"
 
 #include "Xml/tinyxml.h"
@@ -18,6 +21,8 @@ namespace pandora
 AlgorithmManager::AlgorithmManager(Pandora *pPandora) :
     m_pPandora(pPandora)
 {
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("EventReading", new EventReadingAlgorithm::Factory));
+    PANDORA_THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, RegisterAlgorithmFactory("EventWriting", new EventWritingAlgorithm::Factory));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Framework/src/Utilities/FileWriter.cc
+ *  @file   PandoraPFANew/Framework/src/Persistency/FileWriter.cc
  * 
  *  @brief  Implementation of the file writer class.
  * 
@@ -16,7 +16,7 @@
 #include "Objects/MCParticle.h"
 #include "Objects/Track.h"
 
-#include "Utilities/FileWriter.h"
+#include "Persistency/FileWriter.h"
 
 namespace pandora
 {

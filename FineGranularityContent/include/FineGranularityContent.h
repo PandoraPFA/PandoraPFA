@@ -39,9 +39,6 @@
 #include "ParticleId/PhotonReconstructionAlgorithm.h"
 #include "ParticleId/PhotonRecoveryAlgorithm.h"
 
-#include "Persistency/EventReadingAlgorithm.h"
-#include "Persistency/EventWritingAlgorithm.h"
-
 #include "PfoConstruction/CLICPfoSelectionAlgorithm.h"
 #include "PfoConstruction/KinkPfoCreationAlgorithm.h"
 #include "PfoConstruction/PfoCreationAlgorithm.h"
@@ -124,8 +121,6 @@ public:
         d("MuonReconstruction",                     MuonReconstructionAlgorithm::Factory)                                       \
         d("PhotonReconstruction",                   PhotonReconstructionAlgorithm::Factory)                                     \
         d("PhotonRecovery",                         PhotonRecoveryAlgorithm::Factory)                                           \
-        d("EventReading",                           EventReadingAlgorithm::Factory)                                             \
-        d("EventWriting",                           EventWritingAlgorithm::Factory)                                             \
         d("CLICPfoSelection",                       CLICPfoSelectionAlgorithm::Factory)                                         \
         d("KinkPfoCreation",                        KinkPfoCreationAlgorithm::Factory)                                          \
         d("PfoCreation",                            PfoCreationAlgorithm::Factory)                                              \

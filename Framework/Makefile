@@ -17,7 +17,7 @@ SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Helpers/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Managers/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Objects/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Pandora/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Utilities/*.cc)
+SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Persistency/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Xml/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)

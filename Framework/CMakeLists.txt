@@ -10,7 +10,7 @@ AUX_SOURCE_DIRECTORY( ./src/Helpers Framework_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Managers Framework_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Objects Framework_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Pandora Framework_SRCS )
-AUX_SOURCE_DIRECTORY( ./src/Utilities Framework_SRCS )
+AUX_SOURCE_DIRECTORY( ./src/Persistency Framework_SRCS )
 AUX_SOURCE_DIRECTORY( ./src/Xml Framework_SRCS )
 
 # require proper C++

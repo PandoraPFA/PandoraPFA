@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Framework/src/Utilities/FileReader.cc
+ *  @file   PandoraPFANew/Framework/src/Persistency/FileReader.cc
  * 
  *  @brief  Implementation of the file reader class.
  * 
@@ -11,7 +11,7 @@
 #include "Objects/CaloHit.h"
 #include "Objects/Track.h"
 
-#include "Utilities/FileReader.h"
+#include "Persistency/FileReader.h"
 
 namespace pandora
 {

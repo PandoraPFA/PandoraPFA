@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/Framework/include/Utilities/FileWriter.h
+ *  @file   PandoraPFANew/Framework/include/Persistency/FileWriter.h
  * 
  *  @brief  Header file for the file writer class.
  * 

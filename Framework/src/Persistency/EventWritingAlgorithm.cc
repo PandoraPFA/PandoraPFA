@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/FineGranularityContent/src/Persistency/EventWritingAlgorithm.cc
+ *  @file   PandoraPFANew/Framework/src/Persistency/EventWritingAlgorithm.cc
  * 
  *  @brief  Implementation of the event writing algorithm class.
  * 
@@ -9,8 +9,7 @@
 #include "Pandora/AlgorithmHeaders.h"
 
 #include "Persistency/EventWritingAlgorithm.h"
-
-#include "Utilities/FileWriter.h"
+#include "Persistency/FileWriter.h"
 
 using namespace pandora;
 

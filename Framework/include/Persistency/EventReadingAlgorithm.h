@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/FineGranularityContent/include/Persistency/EventReadingAlgorithm.h
+ *  @file   PandoraPFANew/Framework/include/Persistency/EventReadingAlgorithm.h
  * 
  *  @brief  Header file for the event reading algorithm class.
  * 

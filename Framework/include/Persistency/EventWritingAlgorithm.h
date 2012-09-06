@@ -1,5 +1,5 @@
 /**
- *  @file   PandoraPFANew/FineGranularityContent/include/Persistency/EventWritingAlgorithm.h
+ *  @file   PandoraPFANew/Framework/include/Persistency/EventWritingAlgorithm.h
  * 
  *  @brief  Header file for the event writing algorithm class.
  * 
