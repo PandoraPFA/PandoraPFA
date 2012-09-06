@@ -32,6 +32,9 @@ enum HitType
     ECAL,
     HCAL,
     MUON,
+    VIEW_U,
+    VIEW_V,
+    VIEW_W,
     CUSTOM
 };
 

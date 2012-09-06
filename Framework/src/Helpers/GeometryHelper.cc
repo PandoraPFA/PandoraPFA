@@ -53,6 +53,19 @@ bool GeometryHelper::IsInDetectorGapRegion(const CartesianVector &position)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+Granularity GeometryHelper::GetHitTypeGranularity(const HitType hitType)
+{
+    HitTypeToGranularityMap::const_iterator iter = m_hitTypeToGranularityMap.find(hitType);
+
+    if (m_hitTypeToGranularityMap.end() != iter)
+        return iter->second;
+
+    std::cout << "GeometryHelper: specified hitType must be registered with a specific granularity. See PandoraApi.h " << std::endl;
+    throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 float GeometryHelper::GetMaximumRadius(const unsigned int symmetryOrder, const float phi0, const float x, const float y)
 {
     static const float twoPi = static_cast<float>(2. * std::acos(-1.));
@@ -271,7 +284,10 @@ GeometryHelper::HitTypeToGranularityMap GeometryHelper::GetDefaultHitTypeToGranu
     if (!hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(INNER_DETECTOR, FINE)).second ||
         !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(ECAL, FINE)).second ||
         !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(HCAL, COARSE)).second ||
-        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(MUON, VERY_COARSE)).second )
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(MUON, VERY_COARSE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(VIEW_U, FINE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(VIEW_V, FINE)).second ||
+        !hitTypeToGranularityMap.insert(HitTypeToGranularityMap::value_type(VIEW_W, FINE)).second )
     {
         throw StatusCodeException(STATUS_CODE_FAILURE);
     }
@@ -285,10 +301,15 @@ StatusCode GeometryHelper::SetHitTypeGranularity(const HitType hitType, const Gr
 {
     HitTypeToGranularityMap::iterator iter = m_hitTypeToGranularityMap.find(hitType);
 
-    if (m_hitTypeToGranularityMap.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
+    if (m_hitTypeToGranularityMap.end() != iter)
+    {
+        iter->second = granularity;
+    }
+    else
+    {
+        m_hitTypeToGranularityMap[hitType] = granularity;
+    }
 
-    iter->second = granularity;
     return STATUS_CODE_SUCCESS;
 }
 

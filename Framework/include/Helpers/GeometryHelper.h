@@ -578,18 +578,6 @@ inline const GeometryHelper::DetectorGapList &GeometryHelper::GetDetectorGapList
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline Granularity GeometryHelper::GetHitTypeGranularity(const HitType hitType)
-{
-    HitTypeToGranularityMap::const_iterator iter = m_hitTypeToGranularityMap.find(hitType);
-
-    if (m_hitTypeToGranularityMap.end() != iter)
-        return iter->second;
-
-    throw StatusCodeException(STATUS_CODE_NOT_FOUND);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 inline float GeometryHelper::GetGapTolerance()
 {
     return m_gapTolerance;
