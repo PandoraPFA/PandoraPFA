@@ -9,6 +9,7 @@
 #define PANDORA_MAIN_H 1
 
 #include "Pandora/PandoraInternal.h"
+#include "Pandora/PandoraInputTypes.h"
 #include "Pandora/StatusCodes.h"
 
 namespace pandora
@@ -67,6 +68,18 @@ private:
      *  @brief  Process event, calling event prepare event function, then running the algorithms
      */
     StatusCode ProcessEvent();
+
+    /**
+     *  @brief  Reset event, calling manager reset functions and any registered reset functions
+     */
+    StatusCode ResetEvent();
+
+    /**
+     *  @brief  Register a reset function, called whenever client application resets pandora to process another event
+     * 
+     *  @param  pResetFunction pointer to the reset function
+     */
+    StatusCode RegisterResetFunction(ResetFunction *pResetFunction);
 
     /**
      *  @brief  Read pandora settings

@@ -116,8 +116,8 @@ private:
      */
     StatusCode RemoveTrackAssociations(const TrackToClusterMap &trackToClusterList) const;
 
-    friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
+    friend class PandoraImpl;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

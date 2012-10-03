@@ -111,6 +111,20 @@ StatusCode Pandora::ProcessEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode Pandora::ResetEvent()
+{
+    return m_pPandoraImpl->ResetEvent();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode Pandora::RegisterResetFunction(ResetFunction *pResetFunction)
+{
+    return m_pPandoraImpl->RegisterResetFunction(pResetFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode Pandora::ReadSettings(const std::string &xmlFileName)
 {
     try

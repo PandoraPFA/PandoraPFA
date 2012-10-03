@@ -179,8 +179,12 @@ typedef std::vector<CaloHitAddressList> ClusterAddressList;
 typedef void (EnergyCorrectionFunction)(const Cluster *const, float &);
 typedef bool (ParticleIdFunction)(const Cluster *const);
 typedef pandora::StatusCode (SettingsFunction)(const TiXmlHandle xmlHandle);
+typedef void (ResetFunction)();
 
 typedef std::vector<EnergyCorrectionFunction *> EnergyCorrectionFunctionVector;
+typedef std::vector<ParticleIdFunction *> ParticleIdFunctionVector;
+typedef std::vector<SettingsFunction *> SettingsFunctionVector;
+typedef std::vector<ResetFunction *> ResetFunctionVector;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------

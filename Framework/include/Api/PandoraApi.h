@@ -378,6 +378,14 @@ public:
         pandora::SettingsFunction *pSettingsFunction);
 
     /**
+     *  @brief  Register a reset function which will be called whenever the client application resets pandora to process another event
+     * 
+     *  @param  pandora the pandora instance with which to register the reset function
+     *  @param  pResetFunction pointer to the reset function
+     */
+    static pandora::StatusCode RegisterResetFunction(const pandora::Pandora &pandora, pandora::ResetFunction *pResetFunction);
+
+    /**
      *  @brief  Get the recluster monitoring results, recording the changes in the energy associated with a specific track during
      *          the pandora reclustering phase
      * 

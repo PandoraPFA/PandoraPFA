@@ -8,9 +8,13 @@
 
 #include "Api/PandoraContentApiImpl.h"
 
+#include "Helpers/ReclusterHelper.h"
+
 #include "Managers/AlgorithmManager.h"
 #include "Managers/CaloHitManager.h"
+#include "Managers/ClusterManager.h"
 #include "Managers/MCManager.h"
+#include "Managers/ParticleFlowObjectManager.h"
 #include "Managers/PluginManager.h"
 #include "Managers/TrackManager.h"
 
@@ -76,6 +80,35 @@ StatusCode PandoraImpl::InitializePlugins(const TiXmlHandle *const pXmlHandle) c
 StatusCode PandoraImpl::RunAlgorithm(const std::string &algorithmName) const
 {
     return m_pPandora->m_pPandoraContentApiImpl->RunAlgorithm(algorithmName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraImpl::RegisterResetFunction(ResetFunction *pResetFunction)
+{
+    m_resetFunctionVector.push_back(pResetFunction);
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraImpl::ResetEvent() const
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ResetForNextEvent());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetForNextEvent());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->ResetForNextEvent());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pPfoManager->ResetForNextEvent());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetForNextEvent());
+
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ResetReclusterMonitoring());
+
+    for (ResetFunctionVector::const_iterator iter = m_resetFunctionVector.begin(), iterEnd = m_resetFunctionVector.end(); iter != iterEnd; ++iter)
+    {
+        (*iter)();
+    }
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

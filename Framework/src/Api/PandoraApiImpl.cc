@@ -200,6 +200,13 @@ StatusCode PandoraApiImpl::RegisterSettingsFunction(const std::string &xmlTagNam
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode PandoraApiImpl::RegisterResetFunction(ResetFunction *pResetFunction) const
+{
+    return m_pPandora->RegisterResetFunction(pResetFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode PandoraApiImpl::GetReclusterMonitoringResults(const void *pTrackParentAddress, float &netEnergyChange, float &sumModulusEnergyChanges,
     float &sumSquaredEnergyChanges) const
 {
@@ -208,16 +215,9 @@ StatusCode PandoraApiImpl::GetReclusterMonitoringResults(const void *pTrackParen
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraApiImpl::ResetForNextEvent() const
+StatusCode PandoraApiImpl::ResetEvent() const
 {
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ResetForNextEvent());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetForNextEvent());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->ResetForNextEvent());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pPfoManager->ResetForNextEvent());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetForNextEvent());
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ReclusterHelper::ResetReclusterMonitoring());
-
-    return STATUS_CODE_SUCCESS;
+    return m_pPandora->ResetEvent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

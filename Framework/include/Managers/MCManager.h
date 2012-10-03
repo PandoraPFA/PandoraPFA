@@ -166,9 +166,9 @@ private:
     UidRelationMap          m_caloHitToMCParticleMap;   ///< The calo hit to mc particle relation map
     UidRelationMap          m_trackToMCParticleMap;     ///< The track to mc particle relation map
 
-    friend class PandoraImpl;
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
+    friend class PandoraImpl;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------

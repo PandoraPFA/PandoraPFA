@@ -140,6 +140,13 @@ pandora::StatusCode PandoraApi::RegisterParticleIdFunction(const pandora::Pandor
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+pandora::StatusCode PandoraApi::RegisterResetFunction(const pandora::Pandora &pandora, pandora::ResetFunction *pResetFunction)
+{
+    return pandora.GetPandoraApiImpl()->RegisterResetFunction(pResetFunction);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 pandora::StatusCode PandoraApi::RegisterSettingsFunction(const pandora::Pandora &pandora, const std::string &xmlTagName,
     pandora::SettingsFunction *pSettingsFunction)
 {
@@ -158,7 +165,7 @@ pandora::StatusCode PandoraApi::GetReclusterMonitoringResults(const pandora::Pan
 
 pandora::StatusCode PandoraApi::Reset(const pandora::Pandora &pandora)
 {
-    return pandora.GetPandoraApiImpl()->ResetForNextEvent();
+    return pandora.GetPandoraApiImpl()->ResetEvent();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

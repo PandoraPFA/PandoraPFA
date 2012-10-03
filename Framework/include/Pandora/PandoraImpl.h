@@ -55,7 +55,18 @@ private:
      */
     StatusCode RunAlgorithm(const std::string &algorithmName) const;
 
-private:
+    /**
+     *  @brief  Register a reset function, called whenever client application resets pandora to process another event
+     * 
+     *  @param  pResetFunction pointer to the reset function
+     */
+    StatusCode RegisterResetFunction(ResetFunction *pResetFunction);
+
+    /**
+     *  @brief  Reset event, calling manager reset functions and any registered reset functions
+     */
+    StatusCode ResetEvent() const;
+
     /**
      *  @brief  Constructor
      * 
@@ -63,7 +74,8 @@ private:
      */
     PandoraImpl(Pandora *pPandora);
 
-    Pandora    *m_pPandora;    ///< The pandora object to provide an interface to
+    Pandora                *m_pPandora;             ///< The pandora object to provide an interface to
+    ResetFunctionVector     m_resetFunctionVector;  ///< The reset function vector
 
     friend class Pandora;
 };

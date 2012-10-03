@@ -268,6 +268,7 @@ private:
     static ReclusterMonitoringMap   m_reclusterMonitoringMap;           ///< The recluster monitoring map
     static ProcessIdToTrackListMap  m_processIdToTrackListMap;          ///< The reclustering process id to track list map
 
+    friend class PandoraImpl;
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
     friend class PandoraSettings;

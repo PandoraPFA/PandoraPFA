@@ -167,6 +167,13 @@ public:
     StatusCode RegisterSettingsFunction(const std::string &xmlTagName, SettingsFunction *pSettingsFunction) const;
 
     /**
+     *  @brief  Register a reset function which will be called whenever the client application resets pandora to process another event
+     * 
+     *  @param  pResetFunction pointer to the reset function
+     */
+    StatusCode RegisterResetFunction(ResetFunction *pResetFunction) const;
+
+    /**
      *  @brief  Get the recluster monitoring results, recording the changes in the energy associated with a specific track during
      *          the pandora reclustering phase
      * 
@@ -181,7 +188,7 @@ public:
     /**
      *  @brief  Reset pandora to process another event
      */
-    StatusCode ResetForNextEvent() const;
+    StatusCode ResetEvent() const;
 
 private:
     /**

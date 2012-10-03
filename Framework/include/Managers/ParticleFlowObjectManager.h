@@ -78,6 +78,7 @@ private:
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
+    friend class PandoraImpl;
 };
 
 } // namespace pandora
