@@ -212,6 +212,14 @@ void PandoraMonitoringApi::VisualizeParticleFlowObjects(const pandora::PfoList *
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoringApi::AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, Color color,
+    const unsigned int markerSize)
+{
+    PandoraMonitoring::GetInstance()->AddMarkerToVisualization(pMarkerPoint, name, color, markerSize);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoringApi::Pause()
 {
     PandoraMonitoring::GetInstance()->Pause();

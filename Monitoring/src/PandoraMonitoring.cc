@@ -1482,6 +1482,34 @@ TEveElement *PandoraMonitoring::VisualizeClusters(const ClusterList *const pClus
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+void PandoraMonitoring::AddMarkerToVisualization(const CartesianVector *const pMarkerPoint, std::string name, Color color,
+    const unsigned int markerSize)
+{
+    InitializeEve();
+
+    const std::string markerTitle(name.empty() ? "Marker" : name);
+    TEvePointSet *pTEvePointSet = new TEvePointSet(markerTitle.c_str(), 1);
+    pTEvePointSet->SetOwnIds(kTRUE);
+
+    pTEvePointSet->SetPoint(0, pMarkerPoint->GetX() * m_scalingFactor,
+        pMarkerPoint->GetY() * m_scalingFactor,
+        pMarkerPoint->GetZ() * m_scalingFactor);
+
+    if (color >= AUTO)
+    {
+        color = ORANGE;
+    }
+
+    pTEvePointSet->SetMarkerColor(GetROOTColor(color));
+    pTEvePointSet->SetMarkerSize(markerSize);
+    pTEvePointSet->SetMarkerStyle(20);
+
+    gEve->AddElement(pTEvePointSet);
+    gEve->Redraw3D();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 void PandoraMonitoring::MakeCaloHitCell(const CaloHit *const pCaloHit, float corners[24])
 {
     CartesianPointList cartesianPointList;

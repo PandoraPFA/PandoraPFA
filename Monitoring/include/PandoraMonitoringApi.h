@@ -286,6 +286,17 @@ public:
     static void VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, Color color);
 
     /**
+     *  @brief Add Clusters to the Eve event-display
+     * 
+     *  @param pClusterList list of clusters to be added to the event display
+     *  @param name of the cluster list
+     *  @param color The color the cluster elements are drawn with
+     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     */
+    static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
+        bool showAssociatedTracks = true);
+
+    /**
      *  @brief Add Particle flow objects to the Eve event-display
      * 
      *  @param pPfoList list of particle flow objects to be added to the event display
@@ -298,15 +309,15 @@ public:
         bool showAssociatedTracks = true);
 
     /**
-     *  @brief Add Clusters to the Eve event-display
+     *  @brief Add marker to visualization
      * 
-     *  @param pClusterList list of clusters to be added to the event display
-     *  @param name of the cluster list
-     *  @param color The color the cluster elements are drawn with
+     *  @param pMarkerPoint address of the marker point
+     *  @param name of the marker
+     *  @param color the marker color
      *  @param showAssociatedTracks draw the tracks associated to the cluster
-     */  
-    static void VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, Color color,
-        bool showAssociatedTracks = true);
+     */
+    static void AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, Color color,
+        const unsigned int markerSize);
 
     /**
      *  @brief  Pause thread until user enters 'return'

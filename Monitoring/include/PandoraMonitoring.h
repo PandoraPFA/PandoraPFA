@@ -230,18 +230,6 @@ public:
     TEveElement *VisualizeCaloHits(const pandora::CaloHitList *const pCaloHitList, std::string name, TEveElement* parent, Color color, int pfoId = 0);
 
     /**
-     *  @brief Add Particle flow objects to the Eve event-display
-     * 
-     *  @param pPfoList list of particle flow objects to be added to the event display
-     *  @param name of the pfo list
-     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
-     *  @param color The color the cluster elements are drawn with
-     *  @param showAssociatedTracks draw the tracks associated to the cluster
-     */
-    TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name, TEveElement* parent,
-        Color color, bool showAssociatedTracks);
-
-    /**
      *  @brief Add Clusters to the Eve event-display
      * 
      *  @param pClusterList list of clusters to be added to the event display
@@ -254,6 +242,29 @@ public:
      */
     TEveElement *VisualizeClusters(const pandora::ClusterList *const pClusterList, std::string name, TEveElement* parent, Color color,
         bool showAssociatedTracks, int pfoId = 0);
+
+    /**
+     *  @brief Add Particle flow objects to the Eve event-display
+     * 
+     *  @param pPfoList list of particle flow objects to be added to the event display
+     *  @param name of the pfo list
+     *  @param parent pointer to the parent TEveElement. If NULL, the cluster will be parent element
+     *  @param color The color the cluster elements are drawn with
+     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     */
+    TEveElement *VisualizeParticleFlowObjects(const pandora::PfoList *const pPfoList, std::string name, TEveElement* parent,
+        Color color, bool showAssociatedTracks);
+
+    /**
+     *  @brief Add marker to visualization
+     * 
+     *  @param pMarkerPoint address of the marker point
+     *  @param name of the marker
+     *  @param color the marker color
+     *  @param showAssociatedTracks draw the tracks associated to the cluster
+     */
+    void AddMarkerToVisualization(const pandora::CartesianVector *const pMarkerPoint, std::string name, Color color,
+        const unsigned int markerSize);
 
     /**
      *  @brief  Pause thread until user enters 'return'
