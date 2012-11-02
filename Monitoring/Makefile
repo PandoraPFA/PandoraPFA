@@ -11,7 +11,6 @@ INCLUDES += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
 
 CC = g++
 CFLAGS = -c -Wall -g -w -fPIC -O2
-CFLAGS += $(INCLUDES)
 ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
 endif
@@ -19,6 +18,7 @@ endif
 SOURCES = $(wildcard $(PROJECT_SOURCE_DIR)/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)
+DEPENDS = $(OBJECTS:.o=.d)
 
 LIBS = -L$(PROJECT_LIBRARY_DIR) -lPandoraFramework $(shell $(ROOTSYS)/bin/root-config --glibs) -lEve
 ifdef BUILD_32BIT_COMPATIBLE
@@ -36,9 +36,12 @@ all: $(SOURCES) $(OBJECTS)
 $(LIBRARY): $(OBJECTS)
 	$(CC) $(LDFLAGS) -fPIC $(OBJECTS) -o $@
 
+-include $(DEPENDS)
+
 %.o:%.cc
-	$(CC) $(CFLAGS) $(DEFINES) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -MP -MMD -MT $*.o -MT $*.d -MF $*.d -o $*.o $*.cc
 
 clean:
 	rm -f $(OBJECTS)
+	rm -f $(DEPENDS)
 	rm -f $(LIBRARY)

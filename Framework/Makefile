@@ -6,7 +6,6 @@ INCLUDES = -I$(PROJECT_INCLUDE_DIR)
 
 CC = g++
 CFLAGS = -c -Wall -g -w -fPIC -O2
-CFLAGS += $(INCLUDES)
 ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
 endif
@@ -21,6 +20,7 @@ SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Persistency/*.cc)
 SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Xml/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)
+DEPENDS = $(OBJECTS:.o=.d)
 
 LIBS =
 
@@ -39,9 +39,12 @@ all: $(SOURCES) $(OBJECTS)
 $(LIBRARY): $(OBJECTS)
 	$(CC) $(LDFLAGS) -fPIC $(OBJECTS) -o $@
 
+-include $(DEPENDS)
+
 %.o:%.cc
-	$(CC) $(CFLAGS) $(DEFINES) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -MP -MMD -MT $*.o -MT $*.d -MF $*.d -o $*.o $*.cc
 
 clean:
 	rm -f $(OBJECTS)
+	rm -f $(DEPENDS)
 	rm -f $(LIBRARY)
