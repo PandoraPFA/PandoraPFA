@@ -55,19 +55,18 @@ MCParticlesMonitoringAlgorithm::~MCParticlesMonitoringAlgorithm()
 
 StatusCode MCParticlesMonitoringAlgorithm::Run()
 {
-    MCParticleList mcParticleList;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetMCParticleList(*this, mcParticleList));
+    const MCParticleList *pMCParticleList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentMCParticleList(*this, pMCParticleList));
 
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, FillListOfUsedMCParticles());
-
-    MonitorMCParticleList(mcParticleList);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->FillListOfUsedMCParticles());
+    this->MonitorMCParticleList(*pMCParticleList);
 
     return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void MCParticlesMonitoringAlgorithm::MonitorMCParticleList(const MCParticleList& mcParticleList)
+void MCParticlesMonitoringAlgorithm::MonitorMCParticleList(const MCParticleList &mcParticleList)
 {
     m_energy->clear();
     m_momentumX->clear();

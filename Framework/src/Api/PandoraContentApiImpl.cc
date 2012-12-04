@@ -120,6 +120,7 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->RegisterAlgorithm(iter->second));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->RegisterAlgorithm(iter->second));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->RegisterAlgorithm(iter->second));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pPfoManager->RegisterAlgorithm(iter->second));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RegisterAlgorithm(iter->second));
 
@@ -151,6 +152,7 @@ StatusCode PandoraContentApiImpl::RunAlgorithm(const std::string &algorithmName)
 
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->ResetAlgorithmInfo(iter->second, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pClusterManager->ResetAlgorithmInfo(iter->second, true));
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->ResetAlgorithmInfo(iter->second, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pPfoManager->ResetAlgorithmInfo(iter->second, true));
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->ResetAlgorithmInfo(iter->second, true));
 
@@ -729,9 +731,62 @@ StatusCode PandoraContentApiImpl::RemoveTrackFromPfo(ParticleFlowObject *pPfo, T
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-StatusCode PandoraContentApiImpl::GetMCParticleList(MCParticleList &mcParticleList) const
+StatusCode PandoraContentApiImpl::GetCurrentMCParticleList(const MCParticleList *&pMCParticleList, std::string &mcParticleListName) const
 {
-    return m_pPandora->m_pMCManager->GetMCParticleList(mcParticleList);
+    return m_pPandora->m_pMCManager->GetCurrentList(pMCParticleList, mcParticleListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::GetCurrentMCParticleListName(std::string &mcParticleListName) const
+{
+    return m_pPandora->m_pMCManager->GetCurrentListName(mcParticleListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::GetMCParticleList(const std::string &mcParticleListName, const MCParticleList *&pMCParticleList) const
+{
+    return m_pPandora->m_pMCManager->GetList(mcParticleListName, pMCParticleList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::SaveMCParticleList(const MCParticleList &mcParticleList, const std::string &newListName) const
+{
+    return m_pPandora->m_pMCManager->SaveList(newListName, mcParticleList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::ReplaceCurrentMCParticleList(const Algorithm &algorithm, const std::string &newListName) const
+{
+    return m_pPandora->m_pMCManager->ReplaceCurrentAndAlgorithmInputLists(&algorithm, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::DropCurrentMCParticleList() const
+{
+    return m_pPandora->m_pMCManager->DropCurrentList();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::RepeatMCParticlePreparation() const
+{
+    return m_pPandora->PrepareMCParticles();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode PandoraContentApiImpl::RemoveAllMCParticleRelationships() const
+{
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pMCManager->RemoveAllMCParticleRelationships());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pCaloHitManager->RemoveAllMCParticleRelationships());
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pPandora->m_pTrackManager->RemoveAllMCParticleRelationships());
+
+    return STATUS_CODE_SUCCESS;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

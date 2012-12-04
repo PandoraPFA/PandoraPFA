@@ -41,6 +41,24 @@ enum HitType
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
+ *  @brief  MC particle type enum
+ */
+enum MCParticleType
+{
+    MC_STANDARD,
+    MC_VERTEX,
+    MC_VIEW_U,
+    MC_VIEW_V,
+    MC_VIEW_W,
+    MC_VERTEX_U,
+    MC_VERTEX_V,
+    MC_VERTEX_W,
+    MC_CUSTOM
+};
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
  *  @brief  Granularity enum
  */
 enum Granularity
@@ -166,6 +184,7 @@ typedef PandoraInputType<float> InputFloat;
 typedef PandoraInputType<void *> InputAddress;
 typedef PandoraInputType<bool> InputBool;
 typedef PandoraInputType<HitType> InputHitType;
+typedef PandoraInputType<MCParticleType> InputMCParticleType;
 typedef PandoraInputType<DetectorRegion> InputDetectorRegion;
 typedef PandoraInputType<unsigned int> InputPseudoLayer;
 

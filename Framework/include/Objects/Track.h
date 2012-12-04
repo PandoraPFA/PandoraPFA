@@ -230,6 +230,11 @@ private:
     StatusCode SetMCParticle(MCParticle *const pMCParticle);
 
     /**
+     *  @brief  Remove the mc particle associated with the track
+     */
+    StatusCode RemoveMCParticle();
+
+    /**
      *  @brief  Set the cluster associated with the track
      * 
      *  @param  pCluster the address of the associated cluster

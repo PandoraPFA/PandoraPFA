@@ -757,12 +757,79 @@ public:
     /* MCParticle-related functions */
 
     /**
-     *  @brief  Get the list of mc pfo targets
+     *  @brief  Get the current mc particle list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pMCParticleList to receive the address of the current mc particle list
+     */
+    static pandora::StatusCode GetCurrentMCParticleList(const pandora::Algorithm &algorithm, const pandora::MCParticleList *&pMCParticleList);
+
+    /**
+     *  @brief  Get the current mc particle list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  pMCParticleList to receive the address of the current mc particle list
+     *  @param  mcParticleListName to receive the current mc particle list name
+     */
+    static pandora::StatusCode GetCurrentMCParticleList(const pandora::Algorithm &algorithm, const pandora::MCParticleList *&pMCParticleList,
+        std::string &mcParticleListName);
+
+    /**
+     *  @brief  Get the current mc particle list name
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  mcParticleListName to receive the current mc particle list name
+     */
+    static pandora::StatusCode GetCurrentMCParticleListName(const pandora::Algorithm &algorithm, std::string &mcParticleListName);
+
+    /**
+     *  @brief  Get a named mc particle list
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  mc particleListName the name of the mc particle list
+     *  @param  pMCParticleList to receive the address of the mc particle list
+     */
+    static pandora::StatusCode GetMCParticleList(const pandora::Algorithm &algorithm, const std::string &mcParticleListName,
+        const pandora::MCParticleList *&pMCParticleList);
+
+    /**
+     *  @brief  Save the current mc particle list under a new name
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  newListName the new mc particle list name
+     */
+    static pandora::StatusCode SaveMCParticleList(const pandora::Algorithm &algorithm, const pandora::MCParticleList &mcParticleList,
+        const std::string &newListName);
+
+    /**
+     *  @brief  Replace the current mc particle list with a pre-saved list; use this new list as a permanent replacement
+     *          for the current list (will persist outside the current algorithm)
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  newListName the name of the replacement mc particle list
+     */
+    static pandora::StatusCode ReplaceCurrentMCParticleList(const pandora::Algorithm &algorithm, const std::string &newListName);
+
+    /**
+     *  @brief  Drop the current mc particle list, returning the current list to its default empty/null state
+     * 
+     *  @param  algorithm the algorithm calling this function
+     */
+    static pandora::StatusCode DropCurrentMCParticleList(const pandora::Algorithm &algorithm);
+
+    /**
+     *  @brief  Repeat the mc particle preparation, performing pfo target identification and forming relationships with tracks/calo hits
      *
      *  @param  algorithm the algorithm calling this function
-     *  @param  mcParticleList to receive the mc particle list
      */
-    static pandora::StatusCode GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList);
+    static pandora::StatusCode RepeatMCParticlePreparation(const pandora::Algorithm &algorithm);
+
+    /**
+     *  @brief  Remove all mc particle relationships previously registered with the mc manager and linked to tracks/calo hits
+     *
+     *  @param  algorithm the algorithm calling this function
+     */
+    static pandora::StatusCode RemoveAllMCParticleRelationships(const pandora::Algorithm &algorithm);
 
 
     /* Reclustering functions */

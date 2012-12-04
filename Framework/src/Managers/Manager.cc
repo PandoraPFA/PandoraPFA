@@ -256,6 +256,7 @@ StatusCode Manager<T>::DropCurrentList()
 
 template class Manager<CaloHit>;
 template class Manager<Cluster>;
+template class Manager<MCParticle>;
 template class Manager<ParticleFlowObject>;
 template class Manager<Track>;
 

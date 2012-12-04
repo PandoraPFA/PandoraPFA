@@ -175,6 +175,21 @@ StatusCode CaloHitManager::MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap 
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode CaloHitManager::RemoveAllMCParticleRelationships()
+{
+    NameToListMap::const_iterator inputIter = m_nameToListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToListMap.end() == inputIter)
+        return STATUS_CODE_FAILURE;
+
+    for (CaloHitList::const_iterator iter = inputIter->second->begin(), iterEnd = inputIter->second->end(); iter != iterEnd; ++iter)
+        (*iter)->RemoveMCParticle();
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 bool CaloHitManager::AreCaloHitsAvailable(const CaloHitList &caloHitList) const
 {
     if (0 == m_nReclusteringProcesses)

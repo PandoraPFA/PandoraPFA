@@ -52,6 +52,7 @@ public:
         pandora::InputCartesianVector   m_vertex;                   ///< The production vertex of the MC particle, units mm
         pandora::InputCartesianVector   m_endpoint;                 ///< The endpoint of the MC particle, units mm
         pandora::InputInt               m_particleId;               ///< The MC particle's ID (PDG code)
+        pandora::InputMCParticleType    m_mcParticleType;           ///< The type of mc particle, e.g. vertex, 2D-projection, etc.
         pandora::InputAddress           m_pParentAddress;           ///< Address of the parent MC particle in the user framework
     };
 

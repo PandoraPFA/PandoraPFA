@@ -88,6 +88,21 @@ StatusCode TrackManager::MatchTracksToMCPfoTargets(const UidToMCParticleMap &tra
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode TrackManager::RemoveAllMCParticleRelationships()
+{
+    NameToListMap::const_iterator inputIter = m_nameToListMap.find(INPUT_LIST_NAME);
+
+    if (m_nameToListMap.end() == inputIter)
+        return STATUS_CODE_FAILURE;
+
+    for (TrackList::const_iterator iter = inputIter->second->begin(), iterEnd = inputIter->second->end(); iter != iterEnd; ++iter)
+        (*iter)->RemoveMCParticle();
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode TrackManager::SetTrackParentDaughterRelationship(const Uid parentUid, const Uid daughterUid)
 {
     m_parentDaughterRelationMap.insert(TrackRelationMap::value_type(parentUid, daughterUid));

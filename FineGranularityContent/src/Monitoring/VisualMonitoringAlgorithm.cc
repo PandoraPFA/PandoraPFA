@@ -21,10 +21,16 @@ StatusCode VisualMonitoringAlgorithm::Run()
 {
     PANDORA_MONITORING_API(SetEveDisplayParameters(m_blackBackground, m_showDetector, m_transparencyThresholdE, m_energyScaleThresholdE));
 
-    // Show mc particles
-    if (m_showMCParticles)
+    // Show current mc particles
+    if (m_showCurrentMCParticles)
     {
-        this->VisualizeMCParticleList();
+        this->VisualizeMCParticleList(std::string());
+    }
+
+    // Show specified lists of mc particles
+    for (StringVector::const_iterator iter = m_mcParticleListNames.begin(), iterEnd = m_mcParticleListNames.end(); iter != iterEnd; ++iter)
+    {
+        this->VisualizeMCParticleList(*iter);
     }
 
     // Show current calo hit list
@@ -86,17 +92,29 @@ StatusCode VisualMonitoringAlgorithm::Run()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void VisualMonitoringAlgorithm::VisualizeMCParticleList() const
+void VisualMonitoringAlgorithm::VisualizeMCParticleList(const std::string &listName) const
 {
-    MCParticleList mcParticleList;
+    const MCParticleList *pMCParticleList = NULL;
 
-    if (STATUS_CODE_SUCCESS != PandoraContentApi::GetMCParticleList(*this, mcParticleList))
+    if (listName.empty())
     {
-        std::cout << "VisualMonitoringAlgorithm: mc particle list unavailable." << std::endl;
-        return;
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetCurrentMCParticleList(*this, pMCParticleList))
+        {
+            std::cout << "VisualMonitoringAlgorithm: mc particle list unavailable." << std::endl;
+            return;
+        }
+    }
+    else
+    {
+        if (STATUS_CODE_SUCCESS != PandoraContentApi::GetMCParticleList(*this, listName, pMCParticleList))
+        {
+            std::cout << "VisualMonitoringAlgorithm: mc particle list unavailable." << std::endl;
+            return;
+        }
     }
 
-    PANDORA_MONITORING_API(VisualizeMCParticles(&mcParticleList, "currentMCParticles", AUTO, &m_particleSuppressionMap));
+    PANDORA_MONITORING_API(VisualizeMCParticles(pMCParticleList, listName.empty() ? "currentMCParticles" : listName.c_str(),
+        AUTO, &m_particleSuppressionMap));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -250,9 +268,12 @@ void VisualMonitoringAlgorithm::VisualizeParticleFlowList(const std::string &lis
 
 StatusCode VisualMonitoringAlgorithm::ReadSettings(const TiXmlHandle xmlHandle)
 {
-    m_showMCParticles = false;
+    m_showCurrentMCParticles = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,
-        "ShowMCParticles", m_showMCParticles));
+        "ShowCurrentMCParticles", m_showCurrentMCParticles));
+
+    PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadVectorOfValues(xmlHandle,
+        "MCParticleListNames", m_mcParticleListNames));
 
     m_showCurrentCaloHits = false;
     PANDORA_RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::ReadValue(xmlHandle,

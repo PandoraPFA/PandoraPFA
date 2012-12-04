@@ -9,6 +9,7 @@
 #include "Managers/InputObjectManager.h"
 
 #include "Objects/CaloHit.h"
+#include "Objects/MCParticle.h"
 #include "Objects/Track.h"
 
 namespace pandora
@@ -161,6 +162,7 @@ StatusCode InputObjectManager<T>::CreateInitialLists()
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 template class InputObjectManager<CaloHit>;
+template class InputObjectManager<MCParticle>;
 template class InputObjectManager<Track>;
 
 } // namespace pandora

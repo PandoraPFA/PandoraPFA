@@ -96,6 +96,13 @@ StatusCode Pandora::PrepareEvent()
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode Pandora::PrepareMCParticles()
+{
+    return m_pPandoraImpl->PrepareMCParticles();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode Pandora::ProcessEvent()
 {
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->PrepareEvent());

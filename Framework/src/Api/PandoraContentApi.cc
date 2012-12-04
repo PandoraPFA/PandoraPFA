@@ -564,9 +564,69 @@ pandora::StatusCode PandoraContentApi::RemoveTrackFromPfo(const pandora::Algorit
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-pandora::StatusCode PandoraContentApi::GetMCParticleList(const pandora::Algorithm &algorithm, pandora::MCParticleList &mcParticleList)
+pandora::StatusCode PandoraContentApi::GetCurrentMCParticleList(const pandora::Algorithm &algorithm, const pandora::MCParticleList *&pMCParticleList)
 {
-    return algorithm.GetPandoraContentApiImpl()->GetMCParticleList(mcParticleList);
+    std::string mcParticleListName;
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentMCParticleList(pMCParticleList, mcParticleListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::GetCurrentMCParticleList(const pandora::Algorithm &algorithm, const pandora::MCParticleList *&pMCParticleList,
+    std::string &mcParticleListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentMCParticleList(pMCParticleList, mcParticleListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::GetCurrentMCParticleListName(const pandora::Algorithm &algorithm, std::string &mcParticleListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetCurrentMCParticleListName(mcParticleListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::GetMCParticleList(const pandora::Algorithm &algorithm, const std::string &mcParticleListName,
+    const pandora::MCParticleList *&pMCParticleList)
+{
+    return algorithm.GetPandoraContentApiImpl()->GetMCParticleList(mcParticleListName, pMCParticleList);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::SaveMCParticleList(const pandora::Algorithm &algorithm, const pandora::MCParticleList &mcParticleList,
+    const std::string &newListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->SaveMCParticleList(mcParticleList, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::ReplaceCurrentMCParticleList(const pandora::Algorithm &algorithm, const std::string &newListName)
+{
+    return algorithm.GetPandoraContentApiImpl()->ReplaceCurrentMCParticleList(algorithm, newListName);
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::DropCurrentMCParticleList(const pandora::Algorithm &algorithm)
+{
+    return algorithm.GetPandoraContentApiImpl()->DropCurrentMCParticleList();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::RepeatMCParticlePreparation(const pandora::Algorithm &algorithm)
+{
+    return algorithm.GetPandoraContentApiImpl()->RepeatMCParticlePreparation();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+pandora::StatusCode PandoraContentApi::RemoveAllMCParticleRelationships(const pandora::Algorithm &algorithm)
+{
+    return algorithm.GetPandoraContentApiImpl()->RemoveAllMCParticleRelationships();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

@@ -65,6 +65,12 @@ private:
     StatusCode PrepareEvent();
 
     /**
+     *  @brief  Prepare mc particles: select mc pfo targets, match tracks and calo hits to the correct mc
+     *          particles for particle flow
+     */
+    StatusCode PrepareMCParticles();
+
+    /**
      *  @brief  Process event, calling event prepare event function, then running the algorithms
      */
     StatusCode ProcessEvent();

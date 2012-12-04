@@ -103,6 +103,15 @@ StatusCode Track::RemoveAssociatedCluster(Cluster *const pCluster)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+StatusCode Track::RemoveMCParticle()
+{
+    m_pMCParticle = NULL;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 StatusCode Track::AddParent(Track *const pTrack)
 {
     if (NULL == pTrack)

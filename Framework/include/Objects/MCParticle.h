@@ -15,6 +15,10 @@
 namespace pandora
 {
 
+template<typename T> class InputObjectManager;
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 /**
  *  @brief  MCParticle class
  */
@@ -29,13 +33,6 @@ public:
      *  @param  pRhs address of second MCParticle
      */
     static bool SortByEnergy(const MCParticle *const pLhs, const MCParticle *const pRhs);
-
-    /**
-     *  @brief  Whether the mc particle properties have been initialized
-     * 
-     *  @return boolean
-     */
-    bool IsInitialized() const;
 
     /**
      *  @brief  Whether the mc particle is a root particle
@@ -101,6 +98,13 @@ public:
     int GetParticleId() const;
 
     /**
+     *  @brief  Get the type of the mc particle, e.g. vertex, 2D-projection, etc.
+     *
+     *  @return the type of the mc particle
+     */
+    MCParticleType GetMCParticleType() const;
+
+    /**
      *  @brief  Whether the pfo target been set
      *
      *  @return boolean
@@ -144,23 +148,9 @@ private:
     MCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters);
 
     /**
-     *  @brief  Constructor
-     * 
-     *  @param  uid the unique identifier of the mc particle
-     */
-    MCParticle(const Uid uid);
-
-    /**
      *  @brief  Destructor
      */
     ~MCParticle();
-
-    /**
-     *  @brief  Set mc particle properties
-     * 
-     *  @param  mcParticleParameters the mc particle parametersle id
-     */
-    void SetProperties(const PandoraApi::MCParticleParameters &mcParticleParameters);
 
     /**
      *  @brief  Add daughter particle
@@ -198,6 +188,11 @@ private:
     StatusCode SetPfoTarget(MCParticle *pMCParticle);
 
     /**
+     *  @brief  Remove pfo target particle
+     */
+    StatusCode RemovePfoTarget();
+
+    /**
      *  @brief  Set pfo target for a mc tree
      * 
      *  @param  mcParticle particle in the mc tree
@@ -206,24 +201,24 @@ private:
      */
     StatusCode SetPfoTargetInTree(MCParticle *pMCParticle, bool onlyDaughters = false);
 
-    Uid                     m_uid;                      ///< Unique identifier for the mc particle
+    const Uid               m_uid;                      ///< Unique identifier for the mc particle
 
-    float                   m_energy;                   ///< The energy of the mc particle, units GeV
-    CartesianVector         m_momentum;                 ///< The momentum of the mc particle, units GeV
-    CartesianVector         m_vertex;                   ///< The production vertex of the mc particle, units mm
-    CartesianVector         m_endpoint;                 ///< The endpoint of the mc particle, units mm
+    const float             m_energy;                   ///< The energy of the mc particle, units GeV
+    const CartesianVector   m_momentum;                 ///< The momentum of the mc particle, units GeV
+    const CartesianVector   m_vertex;                   ///< The production vertex of the mc particle, units mm
+    const CartesianVector   m_endpoint;                 ///< The endpoint of the mc particle, units mm
 
-    float                   m_innerRadius;              ///< Inner radius of the particle's path, units mm
-    float                   m_outerRadius;              ///< Outer radius of the particle's path, units mm
-    int                     m_particleId;               ///< The PDG code of the mc particle
+    const float             m_innerRadius;              ///< Inner radius of the particle's path, units mm
+    const float             m_outerRadius;              ///< Outer radius of the particle's path, units mm
+    const int               m_particleId;               ///< The PDG code of the mc particle
+    const MCParticleType    m_mcParticleType;           ///< The type of the mc particle, e.g. vertex, 2D-projection, etc.
 
     MCParticle             *m_pPfoTarget;               ///< The address of the pfo target
     MCParticleList          m_daughterList;             ///< The list of mc daughter particles
     MCParticleList          m_parentList;               ///< The list of mc parent particles
 
-    bool                    m_isInitialized;            ///< Whether the particle information has been initialized
-
     friend class MCManager;
+    friend class InputObjectManager<MCParticle>;
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -231,13 +226,6 @@ private:
 inline bool MCParticle::SortByEnergy(const MCParticle *const pLhs, const MCParticle *const pRhs)
 {
     return (pLhs->GetEnergy() > pRhs->GetEnergy());
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline bool MCParticle::IsInitialized() const
-{
-    return m_isInitialized;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -342,6 +330,15 @@ inline StatusCode MCParticle::SetPfoTarget(MCParticle *pMCParticle)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
+inline StatusCode MCParticle::RemovePfoTarget()
+{
+    m_pPfoTarget = NULL;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
 inline float MCParticle::GetEnergy() const
 {
     return m_energy;
@@ -387,6 +384,13 @@ inline float MCParticle::GetOuterRadius() const
 inline int MCParticle::GetParticleId() const
 {
     return m_particleId;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+inline MCParticleType MCParticle::GetMCParticleType() const
+{
+    return m_mcParticleType;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

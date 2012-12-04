@@ -20,46 +20,16 @@ MCParticle::MCParticle(const PandoraApi::MCParticleParameters &mcParticleParamet
     m_innerRadius(mcParticleParameters.m_vertex.Get().GetMagnitude()),
     m_outerRadius(mcParticleParameters.m_endpoint.Get().GetMagnitude()),
     m_particleId(mcParticleParameters.m_particleId.Get()),
-    m_pPfoTarget(NULL),
-    m_isInitialized(true)
+    m_mcParticleType(mcParticleParameters.m_mcParticleType.Get()),
+    m_pPfoTarget(NULL)
 {
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-MCParticle::MCParticle(const Uid uid) :
-    m_uid(uid),
-    m_energy(0.f),
-    m_momentum(0.f, 0.f, 0.f),
-    m_vertex(0.f, 0.f, 0.f),
-    m_endpoint(0.f, 0.f, 0.f),
-    m_innerRadius(0.f),
-    m_outerRadius(0.f),
-    m_particleId(0),
-    m_pPfoTarget(NULL),
-    m_isInitialized(false)
-{
-}
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 MCParticle::~MCParticle()
 {
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-void MCParticle::SetProperties(const PandoraApi::MCParticleParameters &mcParticleParameters)
-{
-    m_energy = mcParticleParameters.m_energy.Get();
-    m_momentum = mcParticleParameters.m_momentum.Get();
-    m_vertex = mcParticleParameters.m_vertex.Get();
-    m_endpoint = mcParticleParameters.m_endpoint.Get();
-    m_innerRadius = mcParticleParameters.m_vertex.Get().GetMagnitude();
-    m_outerRadius = mcParticleParameters.m_endpoint.Get().GetMagnitude();
-    m_particleId = mcParticleParameters.m_particleId.Get();
-
-    m_isInitialized = true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

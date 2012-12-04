@@ -715,6 +715,8 @@ StatusCode FileReader::ReadMCParticle(bool checkComponentId)
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(endpoint));
     int particleId(-std::numeric_limits<int>::max());
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(particleId));
+    MCParticleType mcParticleType(MC_STANDARD);
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(mcParticleType));
     void *pParentAddress(NULL);
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->ReadVariable(pParentAddress));
 
@@ -724,6 +726,7 @@ StatusCode FileReader::ReadMCParticle(bool checkComponentId)
     parameters.m_vertex = vertex;
     parameters.m_endpoint = endpoint;
     parameters.m_particleId = particleId;
+    parameters.m_mcParticleType = mcParticleType;
     parameters.m_pParentAddress = pParentAddress;
     PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraApi::MCParticle::Create(*m_pPandora, parameters));
 

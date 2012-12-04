@@ -287,6 +287,11 @@ protected:
      */
     StatusCode SetMCParticle(MCParticle *const pMCParticle);
 
+    /**
+     *  @brief  Remove the mc particle associated with the calo hit
+     */
+    StatusCode RemoveMCParticle();
+
     const CartesianVector   m_positionVector;           ///< Position vector of center of calorimeter cell, units mm
     const CartesianVector   m_expectedDirection;        ///< Unit vector in direction of expected hit propagation
     const CartesianVector   m_cellNormalVector;         ///< Unit normal to the sampling layer, pointing outwards from the origin

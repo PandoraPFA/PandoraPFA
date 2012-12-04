@@ -54,6 +54,11 @@ private:
     StatusCode MatchTracksToMCPfoTargets(const UidToMCParticleMap &trackToPfoTargetMap);
 
     /**
+     *  @brief  Remove all mc particle associations that have been registered with tracks
+     */
+    StatusCode RemoveAllMCParticleRelationships();
+
+    /**
      *  @brief  Set a track parent-daughter relationship
      * 
      *  @param  parentUid the parent track unique identifier

@@ -136,6 +136,15 @@ StatusCode CaloHit::SetMCParticle(MCParticle *const pMCParticle)
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+StatusCode CaloHit::RemoveMCParticle()
+{
+    m_pMCParticle = NULL;
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 RectangularCaloHit::RectangularCaloHit(const PandoraApi::RectangularCaloHitParameters &parameters) :

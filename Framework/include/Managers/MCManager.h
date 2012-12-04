@@ -10,47 +10,30 @@
 
 #include "Api/PandoraApi.h"
 
+#include "Managers/InputObjectManager.h"
+
 #include "Pandora/PandoraInternal.h"
 
 namespace pandora
 {
 
-class MCParticle;
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 /**
  *    @brief MCManager class
  */
-class MCManager
+class MCManager : public InputObjectManager<MCParticle>
 {
 public:
+    /**
+     *  @brief  Default constructor
+     */
+    MCManager();
+
     /**
      *  @brief  Destructor
      */
     ~MCManager();
 
 private:
-    /**
-     *  @brief  UidAndWeight class
-     */
-    class UidAndWeight
-    {
-    public:
-        /**
-         *  @brief  UidAndWeight class
-         * 
-         *  @param  uid the unique identifier
-         *  @param  weight the weight
-         */
-        UidAndWeight(const Uid uid, const float weight);
-
-        Uid                 m_uid;                      ///< The unique identifier
-        float               m_weight;                   ///< The weight
-    };
-
-    typedef std::map<Uid, UidAndWeight> UidRelationMap;
-
     /**
      *  @brief  Create a mc particle
      * 
@@ -59,12 +42,9 @@ private:
     StatusCode CreateMCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters);
 
     /**
-     *  @brief  Retrieve a mc particle, creating an empty mc particle if it does not already exist
-     * 
-     *  @param  mcParticleUid the unique identifier of the mc particle
-     *  @param  pMCParticle to receive the address of the mc particle
+     *  @brief  Erase all mc manager content
      */
-    StatusCode RetrieveExistingOrCreateEmptyMCParticle(const Uid mcParticleUid, MCParticle *&pMCParticle);
+    StatusCode EraseAllContent();
 
     /**
      *  @brief  Set mc particle relationship
@@ -93,15 +73,9 @@ private:
     StatusCode SetTrackToMCParticleRelationship(const Uid trackUid, const Uid mcParticleUid, const float mcParticleWeight);
 
     /**
-     *  @brief  Set an object (e.g. calo hit or track) to mc particle relationship
-     * 
-     *  @param  uid the unique identifier of the object
-     *  @param  mcParticleUid the mc particle unique identifier
-     *  @param  mcParticleWeight weighting to assign to the mc particle
-     *  @param  uidRelationMap the uid relation map to populate
+     *  @brief  Identify pfo targets
      */
-    StatusCode SetUidToMCParticleRelationship(const Uid objectUid, const Uid mcParticleUid, const float mcParticleWeight,
-        UidRelationMap &uidRelationMap);
+    StatusCode IdentifyPfoTargets();
 
     /**
      *  @brief  Select pfo targets
@@ -130,41 +104,52 @@ private:
      */
     StatusCode CreateTrackToPfoTargetMap(UidToMCParticleMap &trackToPfoTargetMap) const;
 
-   /**
-     *  @brief  Create a map relating an object (calo hit or track) uid to mc pfo target
-     * 
-     *  @param  caloHitToPfoTargetMap to receive the calo hit uid to mc pfo target map
-     *  @param  uidRelationMap the uid relation map containing the information
+    /**
+     *  @brief  Apply mc particle associations (parent-daughter) that have been registered with the mc manager
      */
-    StatusCode CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTargetMap, const UidRelationMap &uidRelationMap) const;
+    StatusCode AddMCParticleRelationships() const;
 
     /**
-     *  @brief  Get the list of mc pfo targets
-     *
-     *  @param  mcParticleList to receive the mc particle list
+     *  @brief  Remove all mc particle associations that have been registered with the mc manager
      */
-    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
-
-    /**
-     *  @brief  Delete non pfo targets
-     */
-    StatusCode DeleteNonPfoTargets();
+    StatusCode RemoveAllMCParticleRelationships();
 
     /**
      *  @brief  Remove all parent/daughter particle links from a mc particle and from its (previously) linked particles
      * 
      *  @param  pMCParticle address of the mc particle
      */
-    StatusCode RemoveMCParticleRelationships(MCParticle *const pMCParticle);
+    StatusCode RemoveMCParticleRelationships(MCParticle *const pMCParticle) const;
+
+    typedef std::pair<Uid, float> UidAndWeight;
+    typedef std::map<Uid, UidAndWeight> ObjectRelationMap;
+    typedef std::multimap<Uid, Uid> MCParticleRelationMap;
 
     /**
-     *  @brief  Reset the mc manager
+     *  @brief  Set an object (e.g. calo hit or track) to mc particle relationship
+     * 
+     *  @param  uid the unique identifier of the object
+     *  @param  mcParticleUid the mc particle unique identifier
+     *  @param  mcParticleWeight weighting to assign to the mc particle
+     *  @param  objectRelationMap the uid relation map to populate
      */
-    StatusCode ResetForNextEvent();
+    StatusCode SetUidToMCParticleRelationship(const Uid objectUid, const Uid mcParticleUid, const float mcParticleWeight,
+        ObjectRelationMap &objectRelationMap) const;
 
-    UidToMCParticleMap      m_uidToMCParticleMap;       ///< The uid to mc particle map
-    UidRelationMap          m_caloHitToMCParticleMap;   ///< The calo hit to mc particle relation map
-    UidRelationMap          m_trackToMCParticleMap;     ///< The track to mc particle relation map
+   /**
+     *  @brief  Create a map relating an object (calo hit or track) uid to mc pfo target
+     * 
+     *  @param  caloHitToPfoTargetMap to receive the calo hit uid to mc pfo target map
+     *  @param  objectRelationMap the object relation map containing the information
+     */
+    StatusCode CreateUidToPfoTargetMap(UidToMCParticleMap &uidToPfoTargetMap, const ObjectRelationMap &objectRelationMap) const;
+
+    UidToMCParticleMap              m_uidToMCParticleMap;               ///< The uid to mc particle map
+    MCParticleRelationMap           m_parentDaughterRelationMap;        ///< The mc particle parent-daughter relation map
+    ObjectRelationMap               m_caloHitToMCParticleMap;           ///< The calo hit to mc particle relation map
+    ObjectRelationMap               m_trackToMCParticleMap;             ///< The track to mc particle relation map
+
+    static const std::string        SELECTED_LIST_NAME;                 ///< The name of the input list
 
     friend class PandoraApiImpl;
     friend class PandoraContentApiImpl;
@@ -197,15 +182,6 @@ inline StatusCode MCManager::CreateCaloHitToPfoTargetMap(UidToMCParticleMap &cal
 inline StatusCode MCManager::CreateTrackToPfoTargetMap(UidToMCParticleMap &trackToPfoTargetMap) const
 {
     return this->CreateUidToPfoTargetMap(trackToPfoTargetMap, m_trackToMCParticleMap);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-inline MCManager::UidAndWeight::UidAndWeight(const Uid uid, const float weight) :
-    m_uid(uid),
-    m_weight(weight)
-{
 }
 
 } // namespace pandora

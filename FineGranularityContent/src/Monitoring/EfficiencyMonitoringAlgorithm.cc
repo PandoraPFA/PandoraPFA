@@ -22,16 +22,16 @@ EfficiencyMonitoringAlgorithm::~EfficiencyMonitoringAlgorithm()
 StatusCode EfficiencyMonitoringAlgorithm::Run()
 {
     // Extract the mc particle - this algorithm is intended to work only with single particle samples
-    MCParticleList mcParticleList;
-    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetMCParticleList(*this, mcParticleList));
+    const MCParticleList *pMCParticleList = NULL;
+    PANDORA_RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, PandoraContentApi::GetCurrentMCParticleList(*this, pMCParticleList));
 
-    if (1 != mcParticleList.size())
+    if (1 != pMCParticleList->size())
     {
-        std::cout << "EfficiencyMonitoring - Algorithm works only with single particle samples, nParticles " << mcParticleList.size() << std::endl;
+        std::cout << "EfficiencyMonitoring - Algorithm works only with single particle samples, nParticles " << pMCParticleList->size() << std::endl;
         return STATUS_CODE_SUCCESS;
     }
 
-    const MCParticle *const pMCParticle(*(mcParticleList.begin()));
+    const MCParticle *const pMCParticle(*(pMCParticleList->begin()));
 
     // Extract the mc particle properties
     const float mcEnergy(pMCParticle->GetEnergy());

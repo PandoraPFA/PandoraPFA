@@ -577,11 +577,58 @@ public:
     /* MCParticle-related functions */
 
     /**
-     *  @brief  Get the list of mc pfo targets
-     *
-     *  @param  mcParticleList to receive the mc particle list
+     *  @brief  Get the current mc particle list
+     * 
+     *  @param  pMCParticleList to receive the address of the current mc particle list
+     *  @param  mcParticleListName to receive the current mc particle list name
      */
-    StatusCode GetMCParticleList(MCParticleList &mcParticleList) const;
+    StatusCode GetCurrentMCParticleList(const MCParticleList *&pMCParticleList, std::string &mcParticleListName) const;
+
+    /**
+     *  @brief  Get the current mc particle list name
+     * 
+     *  @param  mcParticleListName to receive the current mc particle list name
+     */
+    StatusCode GetCurrentMCParticleListName(std::string &mcParticleListName) const;
+
+    /**
+     *  @brief  Get a named mc particle list
+     * 
+     *  @param  mcParticleListName the name of the mc particle list
+     *  @param  pMCParticleList to receive the address of the mc particle list
+     */
+    StatusCode GetMCParticleList(const std::string &mcParticleListName, const MCParticleList *&pMCParticleList) const;
+
+    /**
+     *  @brief  Save the current mc particle list under a new name
+     * 
+     *  @param  newListName the new mc particle list name
+     */
+    StatusCode SaveMCParticleList(const MCParticleList &mcParticleList, const std::string &newListName) const;
+
+    /**
+     *  @brief  Replace the current mc particle list with a pre-saved list; use this new list as a permanent replacement
+     *          for the current list (will persist outside the current algorithm)
+     * 
+     *  @param  algorithm the algorithm calling this function
+     *  @param  newListName the name of the replacement mc particle list
+     */
+    StatusCode ReplaceCurrentMCParticleList(const Algorithm &algorithm, const std::string &newListName) const;
+
+    /**
+     *  @brief  Drop the current mc particle list, returning the current list to its default empty/null state
+     */
+    StatusCode DropCurrentMCParticleList() const;
+
+    /**
+     *  @brief  Repeat the mc particle preparation, performing pfo target identification and forming relationships with tracks/calo hits
+     */
+    StatusCode RepeatMCParticlePreparation() const;
+
+    /**
+     *  @brief  Remove all mc particle relationships previously registered with the mc manager and linked to tracks/calo hits
+     */
+    StatusCode RemoveAllMCParticleRelationships() const;
 
 
     /* Reclustering functions */

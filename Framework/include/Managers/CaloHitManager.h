@@ -83,6 +83,11 @@ private:
     StatusCode MatchCaloHitsToMCPfoTargets(const UidToMCParticleMap &caloHitToPfoTargetMap);
 
     /**
+     *  @brief  Remove all mc particle associations that have been registered with calo hits
+     */
+    StatusCode RemoveAllMCParticleRelationships();
+
+    /**
      *  @brief  Is calo hit available to add to a cluster
      * 
      *  @param  pCaloHit address of the calo hit

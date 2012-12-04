@@ -34,7 +34,7 @@ private:
      * 
      *  @param  listName the list name
      */
-    void VisualizeMCParticleList() const;
+    void VisualizeMCParticleList(const std::string &listName) const;
 
     /**
      *  @brief  Visualize a specified calo hit list
@@ -66,7 +66,8 @@ private:
 
     typedef std::map<int, float> PdgCodeToEnergyMap;
 
-    bool                    m_showMCParticles;          ///< Whether to show MC particles
+    bool                    m_showCurrentMCParticles;   ///< Whether to show current mc particles
+    pandora::StringVector   m_mcParticleListNames;      ///< Names of mc particles lists to show
 
     bool                    m_showCurrentCaloHits;      ///< Whether to show current calohitlist
     pandora::StringVector   m_caloHitListNames;         ///< Names of calo hit lists to show

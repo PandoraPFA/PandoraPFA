@@ -1072,9 +1072,6 @@ TEveElement *PandoraMonitoring::VisualizeMCParticles(const MCParticleList *const
     { 
         MCParticle *pPandoraMCParticle = (*mcParticleIter);
 
-        if (!pPandoraMCParticle->IsInitialized())
-            continue;
-
         // Get mc particle position and momentum
         const CartesianVector &momentum(pPandoraMCParticle->GetMomentum());
         const float energy(pPandoraMCParticle->GetEnergy());
