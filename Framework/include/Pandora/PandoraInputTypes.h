@@ -349,7 +349,7 @@ inline bool PandoraInputType<HitType>::IsValid(const HitType &t) const
 }
 
 template <>
-inline bool PandoraInputType<HitType>::IsValid(const MCParticleType &t) const
+inline bool PandoraInputType<MCParticleType>::IsValid(const MCParticleType &t) const
 {
     return !(IS_NAN(static_cast<unsigned int>(t)) || IS_INF(static_cast<unsigned int>(t)));
 }
