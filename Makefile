@@ -1,5 +1,5 @@
 #Path to pandora directory
-PANDORA_DIR = YOUR_PATH_HERE
+PANDORA_DIR = /usera/marshall/ilcsoft/test/PandoraPFANew
 
 #Paths to project dependencies, note monitoring is optional
 ARGUMENTS = PANDORA_DIR=$(PANDORA_DIR)

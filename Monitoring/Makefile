@@ -1,11 +1,7 @@
-PROJECT_DIR = $(PANDORA_DIR)
-
 DEFINES  = -DMONITORING=1
 DEFINES += -DROOT_EVE=1
 
-PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib
-
-INCLUDES  = -I$(PROJECT_DIR)/include
+INCLUDES  = -I$(PANDORA_DIR)/Monitoring/include
 INCLUDES += -I$(PANDORA_DIR)/Framework/include
 INCLUDES += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
 
@@ -15,7 +11,7 @@ ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
 endif
 
-SOURCES = $(wildcard $(PROJECT_DIR)/src/*.cc)
+SOURCES = $(wildcard $(PANDORA_DIR)/Monitoring/src/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)
 DEPENDS = $(OBJECTS:.o=.d)
@@ -28,7 +24,7 @@ endif
 LDFLAGS  = $(shell $(ROOTSYS)/bin/root-config --auxcflags)
 LDFLAGS += $(LIBS) -Wl,-rpath
 
-LIBRARY = $(PROJECT_DIR)/lib/libPandoraMonitoring.so
+LIBRARY = $(PANDORA_DIR)/lib/libPandoraMonitoring.so
 
 all: $(SOURCES) $(OBJECTS)
 	$(CC) $(OBJECTS) $(LIBS) -shared -o $(LIBRARY)
