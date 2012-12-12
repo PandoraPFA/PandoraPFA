@@ -16,9 +16,19 @@ all:
 ifdef MONITORING
 	(cd $(PROJECT_DIR)/Monitoring; make $(ARGUMENTS))
 endif
+if test -d $(PROJECT_DIR)/FineGranularityContent
 	(cd $(PROJECT_DIR)/FineGranularityContent; make $(ARGUMENTS))
+endif
+if test -d $(PROJECT_DIR)/LArContent
+	(cd $(PROJECT_DIR)/LArContent; make $(ARGUMENTS))
+endif
 
 clean:
 	(cd $(PROJECT_DIR)/Framework; make clean $(ARGUMENTS))
 	(cd $(PROJECT_DIR)/Monitoring; make clean $(ARGUMENTS))
+if test -d $(PROJECT_DIR)/FineGranularityContent
 	(cd $(PROJECT_DIR)/FineGranularityContent; make clean $(ARGUMENTS))
+endif
+if test -d $(PROJECT_DIR)/LArContent
+	(cd $(PROJECT_DIR)/LArContent; make clean $(ARGUMENTS))
+endif

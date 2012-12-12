@@ -30,24 +30,29 @@ TrackManager::~TrackManager()
 
 StatusCode TrackManager::CreateTrack(const PandoraApi::TrackParameters &trackParameters)
 {
+    Track *pTrack = NULL;
+
     try
     {
-        Track *pTrack = NULL;
         pTrack = new Track(trackParameters);
 
         NameToListMap::iterator inputIter = m_nameToListMap.find(INPUT_LIST_NAME);
 
-        if ((NULL == pTrack) || (m_nameToListMap.end() == inputIter) || (!inputIter->second->insert(pTrack).second))
+        if ((NULL == pTrack) || (m_nameToListMap.end() == inputIter) || (inputIter->second->end() != inputIter->second->find(pTrack)))
             throw StatusCodeException(STATUS_CODE_FAILURE);
 
-        if (!m_uidToTrackMap.insert(UidToTrackMap::value_type(pTrack->GetParentTrackAddress(), pTrack)).second)
-            throw StatusCodeException(STATUS_CODE_FAILURE);
+        if (m_uidToTrackMap.end() != m_uidToTrackMap.find(pTrack->GetParentTrackAddress()))
+            throw StatusCodeException(STATUS_CODE_ALREADY_PRESENT);
+
+        (void) inputIter->second->insert(pTrack);
+        (void) m_uidToTrackMap.insert(UidToTrackMap::value_type(pTrack->GetParentTrackAddress(), pTrack));
 
         return STATUS_CODE_SUCCESS;
     }
     catch (StatusCodeException &statusCodeException)
     {
         std::cout << "Failed to create track: " << statusCodeException.ToString() << std::endl;
+        delete pTrack;
         return statusCodeException.GetStatusCode();
     }
 }

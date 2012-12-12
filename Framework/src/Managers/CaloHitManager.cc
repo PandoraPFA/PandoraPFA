@@ -40,9 +40,10 @@ CaloHitManager::~CaloHitManager()
 template <typename PARAMETERS>
 StatusCode CaloHitManager::CreateCaloHit(const PARAMETERS &parameters)
 {
+    CaloHit *pCaloHit = NULL;
+
     try
     {
-        CaloHit *pCaloHit = NULL;
         pCaloHit = this->HitInstantiation(parameters);
 
         if (NULL == pCaloHit)
@@ -61,6 +62,7 @@ StatusCode CaloHitManager::CreateCaloHit(const PARAMETERS &parameters)
     catch (StatusCodeException &statusCodeException)
     {
         std::cout << "Failed to create calo hit: " << statusCodeException.ToString() << std::endl;
+        delete pCaloHit;
         return statusCodeException.GetStatusCode();
     }
 }

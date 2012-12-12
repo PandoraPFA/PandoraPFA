@@ -29,6 +29,8 @@ ClusterManager::~ClusterManager()
 template <typename CLUSTER_PARAMETERS>
 StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters, Cluster *&pCluster)
 {
+    pCluster = NULL;
+
     try
     {
         if (!m_canMakeNewObjects)
@@ -39,7 +41,6 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
         if (m_nameToListMap.end() == iter)
              throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-        pCluster = NULL;
         pCluster = new Cluster(pClusterParameters);
 
         if (NULL == pCluster)
@@ -53,6 +54,7 @@ StatusCode ClusterManager::CreateCluster(CLUSTER_PARAMETERS *pClusterParameters,
     catch (StatusCodeException &statusCodeException)
     {
         std::cout << "Failed to create cluster: " << statusCodeException.ToString() << std::endl;
+        delete pCluster;
         return statusCodeException.GetStatusCode();
     }
 }

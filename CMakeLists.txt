@@ -55,7 +55,12 @@ IF( PANDORA_MONITORING )
     INCLUDE_DIRECTORIES( ./Monitoring/include )
     LINK_LIBRARIES( PandoraMonitoring )
 ENDIF()
-ADD_SUBDIRECTORY( ./FineGranularityContent )
+IF( EXISTS "./FineGranularityContent" AND IS_DIRECTORY "./FineGranularityContent" )
+    ADD_SUBDIRECTORY( ./FineGranularityContent )
+ENDIF()
+IF( EXISTS "./LArContent" AND IS_DIRECTORY "./LArContent" )
+    ADD_SUBDIRECTORY( ./LArContent )
+ENDIF()
 
 
 # display some variables and write them to cache

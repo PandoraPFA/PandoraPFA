@@ -36,24 +36,29 @@ MCManager::~MCManager()
 
 StatusCode MCManager::CreateMCParticle(const PandoraApi::MCParticleParameters &mcParticleParameters)
 {
+    MCParticle *pMCParticle = NULL;
+
     try
     {
-        MCParticle *pMCParticle = NULL;
         pMCParticle = new MCParticle(mcParticleParameters);
 
         NameToListMap::iterator inputIter = m_nameToListMap.find(INPUT_LIST_NAME);
 
-        if ((NULL == pMCParticle) || (m_nameToListMap.end() == inputIter) || (!inputIter->second->insert(pMCParticle).second))
+        if ((NULL == pMCParticle) || (m_nameToListMap.end() == inputIter) || (inputIter->second->end() != inputIter->second->find(pMCParticle)))
             throw StatusCodeException(STATUS_CODE_FAILURE);
 
-        if (!m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(pMCParticle->GetUid(), pMCParticle)).second)
-            throw StatusCodeException(STATUS_CODE_FAILURE);
+        if (m_uidToMCParticleMap.end() != m_uidToMCParticleMap.find(pMCParticle->GetUid()))
+            throw StatusCodeException(STATUS_CODE_ALREADY_PRESENT);
+
+        (void) inputIter->second->insert(pMCParticle);
+        (void) m_uidToMCParticleMap.insert(UidToMCParticleMap::value_type(pMCParticle->GetUid(), pMCParticle));
 
         return STATUS_CODE_SUCCESS;
     }
     catch (StatusCodeException &statusCodeException)
     {
         std::cout << "Failed to create mc particle: " << statusCodeException.ToString() << std::endl;
+        delete pMCParticle;
         return statusCodeException.GetStatusCode();
     }
 }
