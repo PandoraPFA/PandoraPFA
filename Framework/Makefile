@@ -1,8 +1,6 @@
-PROJECT_INCLUDE_DIR = ./include
-PROJECT_SOURCE_DIR  = ./src
-PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib
+PROJECT_DIR = $(PANDORA_DIR)
 
-INCLUDES = -I$(PROJECT_INCLUDE_DIR)
+INCLUDES = -I$(PROJECT_DIR)/include
 
 CC = g++
 CFLAGS = -c -Wall -g -w -fPIC -O2
@@ -10,14 +8,14 @@ ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
 endif
 
-SOURCES  = $(wildcard $(PROJECT_SOURCE_DIR)/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Api/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Helpers/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Managers/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Objects/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Pandora/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Persistency/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Xml/*.cc)
+SOURCES  = $(wildcard $(PROJECT_DIR)/src/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Api/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Helpers/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Managers/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Objects/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Pandora/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Persistency/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Xml/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)
 DEPENDS = $(OBJECTS:.o=.d)
@@ -30,7 +28,7 @@ endif
 
 LDFLAGS = $(LIBS) -Wl,-rpath
 
-LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraFramework.so
+LIBRARY = $(PROJECT_DIR)/lib/libPandoraFramework.so
 
 all: $(SOURCES) $(OBJECTS)
 	@echo $(PROJECT_SOURCE_DIR)

@@ -1,15 +1,15 @@
+ifndef PROJECT_DIR
+    PROJECT_DIR = $(PANDORA_DIR)
+endif
+
 ifdef MONITORING
     DEFINES = -DMONITORING=1
 endif
 
-PROJECT_INCLUDE_DIR = ./include
-PROJECT_SOURCE_DIR  = ./src
-PROJECT_LIBRARY_DIR = $(PROJECT_DIR)/lib
-
-INCLUDES  = -I$(PROJECT_INCLUDE_DIR)
-INCLUDES += -I$(PROJECT_DIR)/Framework/include
+INCLUDES  = -I$(PROJECT_DIR)/include
+INCLUDES += -I$(PANDORA_DIR)/Framework/include
 ifdef MONITORING
-    INCLUDES += -I$(PROJECT_DIR)/Monitoring/include
+    INCLUDES += -I$(PANDORA_DIR)/Monitoring/include
 endif
 
 CC = g++
@@ -18,23 +18,23 @@ ifdef BUILD_32BIT_COMPATIBLE
     CFLAGS += -m32
 endif
 
-SOURCES  = $(wildcard $(PROJECT_SOURCE_DIR)/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Cheating/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Clustering/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/FragmentRemoval/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Monitoring/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/ParticleId/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Persistency/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/PfoConstruction/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Reclustering/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/TopologicalAssociation/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/TrackClusterAssociation/*.cc)
-SOURCES += $(wildcard $(PROJECT_SOURCE_DIR)/Utility/*.cc)
+SOURCES  = $(wildcard $(PROJECT_DIR)/src/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Cheating/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Clustering/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/FragmentRemoval/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Monitoring/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/ParticleId/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Persistency/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/PfoConstruction/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Reclustering/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/TopologicalAssociation/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/TrackClusterAssociation/*.cc)
+SOURCES += $(wildcard $(PROJECT_DIR)/src/Utility/*.cc)
 
 OBJECTS = $(SOURCES:.cc=.o)
 DEPENDS = $(OBJECTS:.o=.d)
 
-LIBS = -L$(PROJECT_LIBRARY_DIR) -lPandoraFramework
+LIBS = -L$(PANDORA_DIR)/lib -lPandoraFramework
 
 ifdef MONITORING
     LIBS += -lPandoraMonitoring
@@ -46,7 +46,7 @@ endif
 
 LDFLAGS = $(LIBS) -Wl,-rpath
 
-LIBRARY = $(PROJECT_LIBRARY_DIR)/libPandoraFineGranularityContent.so
+LIBRARY = $(PROJECT_DIR)/lib/libPandoraFineGranularityContent.so
 
 all: $(SOURCES) $(OBJECTS)
 	$(CC) $(OBJECTS) $(LIBS) -shared -o $(LIBRARY)
