@@ -1,4 +1,16 @@
 ************************************************************************
+TAG V00-10 FOR Liquid Argon TPC reconstruction usage
+************************************************************************
+Redesign of MC Manager, enabling creation of multiple MC particle lists.
+Add MCParticleType API parameter.
+Improve manner in which pandora content is reset between events, adding ability to register reset functions.
+Move core EventWriting and EventReading algorithms into Framework library.
+Add HitTypes VIEW_U, VIEW_V, VIEW_W, registered with FINE granularity.
+Allow visualization of marker at a specified position.
+Move FineGranularityContent library to separate repository.
+Makefile updates.
+
+************************************************************************
 TAG V00-09 FOR Maximum Entropy Studies
 ************************************************************************
 Move xml parser into pandora namespace - prevents clashes with other packages using different versions of same parser.

@@ -1,5 +1,7 @@
 #Path to pandora directory
-PANDORA_DIR = YOUR_PATH_HERE
+ifndef PANDORA_DIR
+    PANDORA_DIR = YOUR_PATH_HERE
+endif
 
 #Paths to project dependencies, note monitoring is optional
 ARGUMENTS = PANDORA_DIR=$(PANDORA_DIR)
