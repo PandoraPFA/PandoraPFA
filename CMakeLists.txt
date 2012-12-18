@@ -1,12 +1,12 @@
 ########################################################
-# cmake file for building PandoraPFA
+# cmake file for building PandoraPFANew
 # @author Jan Engels, DESY
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2 FATAL_ERROR)
 ########################################################
 
 
 # project name
-PROJECT( PandoraPFA )
+PROJECT( PandoraPFANew )
 
 
 ### PACKAGE VERSIONS ########################################################
@@ -14,8 +14,8 @@ SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )
 SET( ${PROJECT_NAME}_VERSION_MINOR 11 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
-# versions of PandoraPFA subpackages
-# don't forget to update when releasing PandoraPFA
+# versions of PandoraPFANew subpackages
+# don't forget to update when releasing PandoraPFANew
 # e.g. SET( PandoraSDK_version "tags/v00-01" )
 SET( PandoraSDK_version "trunk" )
 SET( Monitoring_version "trunk" )
