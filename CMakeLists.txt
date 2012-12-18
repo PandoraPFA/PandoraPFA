@@ -80,12 +80,12 @@ IF( PANDORA_MONITORING )
         CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
     )
 
-    ExternalProject_Add( MarlinPandora
-        DEPENDS PandoraSDK Monitoring FineGranularityContent
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
-        CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
-        LIST_SEPARATOR % # needed for CMAKE_PREFIX_PATH
-    )
+#    ExternalProject_Add( MarlinPandora
+#        DEPENDS PandoraSDK Monitoring FineGranularityContent
+#        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
+#        CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
+#        LIST_SEPARATOR % # needed for CMAKE_PREFIX_PATH
+#    )
 ELSE()
     ExternalProject_Add( FineGranularityContent
         DEPENDS PandoraSDK
@@ -93,12 +93,12 @@ ELSE()
         CMAKE_ARGS ${common_cmake_args}
     )
 
-    ExternalProject_Add( MarlinPandora
-        DEPENDS PandoraSDK FineGranularityContent
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
-        CMAKE_ARGS ${common_cmake_args}
-        LIST_SEPARATOR % # needed for CMAKE_PREFIX_PATH
-    )
+#    ExternalProject_Add( MarlinPandora
+#        DEPENDS PandoraSDK FineGranularityContent
+#        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
+#        CMAKE_ARGS ${common_cmake_args}
+#        LIST_SEPARATOR % # needed for CMAKE_PREFIX_PATH
+#    )
 ENDIF()
 
 #ExternalProject_Add( Settings
