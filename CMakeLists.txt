@@ -38,20 +38,27 @@ MESSAGE( STATUS "PANDORA_MONITORING: ${PANDORA_MONITORING}" )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 
 # ----- download settings ----------------------------------------------------
-#set( desy_svn_repository "https://svnsrv.desy.de/svn" )    # use grid certificate (pkcs12)
-#set( desy_svn_repository "https://svnsrv.desy.de/desy" )    # use desy account (kerberos)
-set( desy_svn_repository "https://svnsrv.desy.de/public" ) # public (no authentication)
+#SET( desy_svn_repository "https://svnsrv.desy.de/svn" )    # use grid certificate (pkcs12)
+#SET( desy_svn_repository "https://svnsrv.desy.de/desy" )   # use desy account (kerberos)
+SET( desy_svn_repository "https://svnsrv.desy.de/public" )  # public (no authentication)
 # ----------------------------------------------------------------------------
 
+# in order to pass CMAKE_PREFIX_PATH over the command line to all packages
+# we need to separate list elements in this variable with '%' instead of the
+# standard cmake list separator ';' (is there another way to fix this??)
+# The list separator needs also to be redefined in the ExternalProject_Add
+# calls by setting the variable LIST_SEPARATOR
+FOREACH( _path ${CMAKE_PREFIX_PATH} )
+    SET( CMAKE_PREFIX_PATH_FIXED ${CMAKE_PREFIX_PATH_FIXED}%${_path} )
+ENDFOREACH()
 
 # ----- cmake arguments common to ALL cmake packages -------------------------
-set( common_cmake_args
-    "-DILCSOFT_CMAKE_MODULES_ROOT=${ILCSOFT_CMAKE_MODULES_ROOT}"
-    "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
-    "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}"
-    "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-    "-DINSTALL_DOC=${INSTALL_DOC}"
-    "-DBUILD_TESTING=ON"
+SET( common_cmake_args
+     "-DILCSOFT_CMAKE_MODULES_ROOT=${ILCSOFT_CMAKE_MODULES_ROOT}"
+     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_FIXED}"
+     "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}"
+     "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+     "-DINSTALL_DOC=${INSTALL_DOC}"
 )
 # ----------------------------------------------------------------------------
 
@@ -77,6 +84,7 @@ IF( PANDORA_MONITORING )
         DEPENDS PandoraSDK Monitoring FineGranularityContent
         SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
         CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
+        LIST_SEPARATOR % # needed for CMAKE_PREFIX_PATH
     )
 ELSE()
     ExternalProject_Add( FineGranularityContent
@@ -89,6 +97,7 @@ ELSE()
         DEPENDS PandoraSDK FineGranularityContent
         SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
         CMAKE_ARGS ${common_cmake_args}
+        LIST_SEPARATOR % # needed for CMAKE_PREFIX_PATH
     )
 ENDIF()
 
