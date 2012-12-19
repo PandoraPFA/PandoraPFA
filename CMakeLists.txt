@@ -18,7 +18,7 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # don't forget to update when releasing PandoraPFANew
 # e.g. SET( PandoraSDK_version "tags/v00-01" )
 SET( PandoraSDK_version "trunk" )
-SET( Monitoring_version "trunk" )
+SET( PandoraMonitoring_version "trunk" )
 SET( FineGranularityContent_version "trunk" )
 #SET( MarlinPandora_version "trunk" )
 #SET( Settings_version "trunk" )
@@ -32,7 +32,7 @@ FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES REQUIRED )
 INCLUDE( ilcsoft_default_settings )
 INCLUDE( ExternalProject )
 
-OPTION( PANDORA_MONITORING "Build Monitoring library (requires ROOT)" OFF )
+OPTION( PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" OFF )
 MESSAGE( STATUS "PANDORA_MONITORING: ${PANDORA_MONITORING}" )
 
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
@@ -71,22 +71,22 @@ ExternalProject_Add( PandoraSDK
 )
 
 IF( PANDORA_MONITORING )
-    ExternalProject_Add( Monitoring
+    ExternalProject_Add( PandoraMonitoring
         DEPENDS PandoraSDK
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/Monitoring/${Monitoring_version}"
+        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/PandoraMonitoring/${PandoraMonitoring_version}"
         CMAKE_ARGS ${common_cmake_args}
         LIST_SEPARATOR %
     )
 
     ExternalProject_Add( FineGranularityContent
-        DEPENDS PandoraSDK Monitoring
+        DEPENDS PandoraSDK PandoraMonitoring
         SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/FineGranularityContent/${FineGranularityContent_version}"
         CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
         LIST_SEPARATOR %
     )
 
 #    ExternalProject_Add( MarlinPandora
-#        DEPENDS PandoraSDK Monitoring FineGranularityContent
+#        DEPENDS PandoraSDK PandoraMonitoring FineGranularityContent
 #        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
 #        CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
 #        LIST_SEPARATOR %

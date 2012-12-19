@@ -22,7 +22,7 @@ endif
 all:
 	(cd $(PANDORA_DIR)/PandoraSDK; make $(ARGUMENTS))
 ifdef MONITORING
-	(cd $(PANDORA_DIR)/Monitoring; make $(ARGUMENTS))
+	(cd $(PANDORA_DIR)/PandoraMonitoring; make $(ARGUMENTS))
 endif
 	-if test -d $(PANDORA_DIR)/FineGranularityContent; then (cd $(PANDORA_DIR)/FineGranularityContent; make $(ARGUMENTS)); fi
 	-if test -d $(PANDORA_DIR)/LArContent; then (cd $(PANDORA_DIR)/LArContent; make $(ARGUMENTS)); fi
@@ -30,13 +30,13 @@ endif
 install:
 	(cd $(PANDORA_DIR)/PandoraSDK; make install $(ARGUMENTS))
 ifdef MONITORING
-	(cd $(PANDORA_DIR)/Monitoring; make install $(ARGUMENTS))
+	(cd $(PANDORA_DIR)/PandoraMonitoring; make install $(ARGUMENTS))
 endif
 	-if test -d $(PANDORA_DIR)/FineGranularityContent; then (cd $(PANDORA_DIR)/FineGranularityContent; make install $(ARGUMENTS)); fi
 	-if test -d $(PANDORA_DIR)/LArContent; then (cd $(PANDORA_DIR)/LArContent; make install $(ARGUMENTS)); fi
 
 clean:
 	(cd $(PANDORA_DIR)/PandoraSDK; make clean $(ARGUMENTS))
-	-if test -d $(PANDORA_DIR)/Monitoring; then (cd $(PANDORA_DIR)/Monitoring; make clean $(ARGUMENTS)); fi
+	-if test -d $(PANDORA_DIR)/PandoraMonitoring; then (cd $(PANDORA_DIR)/PandoraMonitoring; make clean $(ARGUMENTS)); fi
 	-if test -d $(PANDORA_DIR)/FineGranularityContent; then (cd $(PANDORA_DIR)/FineGranularityContent; make clean $(ARGUMENTS)); fi
 	-if test -d $(PANDORA_DIR)/LArContent; then (cd $(PANDORA_DIR)/LArContent; make clean $(ARGUMENTS)); fi
