@@ -106,5 +106,7 @@ ENDIF()
 #    CMAKE_ARGS ${common_cmake_args}
 #)
 
+INSTALL( FILES "ChangeLog.txt" DESTINATION "doc" )
+
 # display some variables and write them to cache
 DISPLAY_STD_VARIABLES()
