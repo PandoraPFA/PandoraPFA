@@ -1,4 +1,20 @@
 ************************************************************************
+TAG V00-11 FOLLOWING REPOSITORY RESTRUCTURING
+************************************************************************
+PandoraPFANew is now a "metadata" package containing only Makefiles for downloading and building relevant Pandora libraries.
+
+GENERAL INFO:
+Pandora consists of the PandoraSDK (Software Development Kit), which comprises a single library and header files with flexible APIs.
+There is also an optional PandoraMonitoring library, which contains event display and tree/histogram-writing functionality.
+The PandoraMonitoring library depends on the PandoraSDK and ROOT.
+Pandora algorithms will necessarily depend upon the PandoraSDK (and also PandoraMonitoring, if desired).
+The algorithms can be built as part of a Pandora client application, such as MarlinPandora, or the standalone TestPandora binary.
+Algorithms declared to be suitably generic may be designed for use by multiple client applications.
+Such re-usable algorithms are best bundled together into a Pandora "content" library.
+Algorithms are always registered via the client application, using the PandoraAPIs, but the client app can link against as many content libraries as required.
+
+
+************************************************************************
 TAG V00-10 FOR Liquid Argon TPC reconstruction usage
 ************************************************************************
 Redesign of MC Manager, enabling creation of multiple MC particle lists.
@@ -18,7 +34,7 @@ Add new parameters to PfoCreation algorithm, improving flexibility.
 Add new print-out details to MCParticlesMonitoring algorithm.
 Add Cluster::SortByElectromagneticEnergy function.
 Add cell threshold option to visual monitoring algorithm.
-Remove print-out of uninitialized subdetectors (only relevant to ILC/CLIC-like detectors, and exception will be thrown if unitialized details are requested anyway).
+Remove print-out of uninitialized subdetectors (only relevant to ILC/CLIC-like detectors, and exception will be thrown if uninitialized details are requested anyway).
 
 ************************************************************************
 TAG V00-08 FOR ILCSOFT USAGE
