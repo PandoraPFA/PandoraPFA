@@ -1,4 +1,9 @@
 ************************************************************************
+TAG V00-12 FOR ILCSOFT USAGE
+************************************************************************
+Updated daughter package versions.
+
+************************************************************************
 TAG V00-11 FOLLOWING REPOSITORY RESTRUCTURING
 ************************************************************************
 PandoraPFANew is now a "metadata" package containing only Makefiles for downloading and building relevant Pandora libraries.
