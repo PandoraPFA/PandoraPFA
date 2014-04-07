@@ -11,17 +11,17 @@ PROJECT( PandoraPFANew )
 
 ### PACKAGE VERSIONS ########################################################
 SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 14 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 15 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # versions of PandoraPFANew subpackages
 # don't forget to update when releasing PandoraPFANew
 # e.g. SET( PandoraSDK_version "tags/v00-01" )
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( FineGranularityContent_version "trunk" )
-#SET( MarlinPandora_version "trunk" )
-#SET( Settings_version "trunk" )
+SET( PandoraSDK_version "tags/v00-15" )
+SET( PandoraMonitoring_version "tags/v00-15" )
+SET( FineGranularityContent_version "tags/v00-15" )
+#SET( MarlinPandora_version "tags/v00-13" )
+#SET( Settings_version "tags/v00-06" )
 
 
 ### DEPENDENCIES ############################################################
