@@ -17,10 +17,10 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # versions of PandoraPFANew subpackages
 # don't forget to update when releasing PandoraPFANew
 # e.g. SET( PandoraSDK_version "tags/v00-01" )
-SET( PandoraSDK_version "tags/v00-16" )
-SET( PandoraMonitoring_version "tags/v00-16" )
-SET( FineGranularityContent_version "tags/v00-16" )
-#SET( MarlinPandora_version "tags/v00-14" )
+SET( PandoraSDK_version "trunk" )
+SET( PandoraMonitoring_version "trunk" )
+SET( FineGranularityContent_version "trunk" )
+#SET( MarlinPandora_version "trunk" )
 
 
 ### DEPENDENCIES ############################################################
