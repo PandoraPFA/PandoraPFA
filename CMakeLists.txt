@@ -11,17 +11,16 @@ PROJECT( PandoraPFANew )
 
 ### PACKAGE VERSIONS ########################################################
 SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 15 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 16 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # versions of PandoraPFANew subpackages
 # don't forget to update when releasing PandoraPFANew
 # e.g. SET( PandoraSDK_version "tags/v00-01" )
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( FineGranularityContent_version "trunk" )
-#SET( MarlinPandora_version "trunk" )
-#SET( Settings_version "trunk" )
+SET( PandoraSDK_version "tags/v00-16" )
+SET( PandoraMonitoring_version "tags/v00-16" )
+SET( FineGranularityContent_version "tags/v00-16" )
+#SET( MarlinPandora_version "tags/v00-14" )
 
 
 ### DEPENDENCIES ############################################################
@@ -106,12 +105,6 @@ ELSE()
 #        LIST_SEPARATOR %
 #    )
 ENDIF()
-
-#ExternalProject_Add( Settings
-#    SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/Settings/${Settings_version}"
-#    CMAKE_ARGS ${common_cmake_args}
-#    LIST_SEPARATOR %
-#)
 
 INSTALL( FILES "ChangeLog.txt" DESTINATION "doc" )
 
