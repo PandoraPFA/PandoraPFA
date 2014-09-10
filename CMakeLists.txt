@@ -11,7 +11,7 @@ PROJECT( PandoraPFANew )
 
 ### PACKAGE VERSIONS ########################################################
 SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 16 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 17 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # versions of PandoraPFANew subpackages
@@ -19,7 +19,7 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # e.g. SET( PandoraSDK_version "tags/v00-01" )
 SET( PandoraSDK_version "trunk" )
 SET( PandoraMonitoring_version "trunk" )
-SET( FineGranularityContent_version "trunk" )
+SET( LCContent_version "trunk" )
 #SET( MarlinPandora_version "trunk" )
 
 
@@ -77,29 +77,29 @@ IF( PANDORA_MONITORING )
         LIST_SEPARATOR %
     )
 
-    ExternalProject_Add( FineGranularityContent
+    ExternalProject_Add( LCContent
         DEPENDS PandoraSDK PandoraMonitoring
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/FineGranularityContent/${FineGranularityContent_version}"
+        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
         CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
         LIST_SEPARATOR %
     )
 
 #    ExternalProject_Add( MarlinPandora
-#        DEPENDS PandoraSDK PandoraMonitoring FineGranularityContent
+#        DEPENDS PandoraSDK PandoraMonitoring LCContent
 #        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
 #        CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
 #        LIST_SEPARATOR %
 #    )
 ELSE()
-    ExternalProject_Add( FineGranularityContent
+    ExternalProject_Add( LCContent
         DEPENDS PandoraSDK
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/FineGranularityContent/${FineGranularityContent_version}"
+        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
         CMAKE_ARGS ${common_cmake_args}
         LIST_SEPARATOR %
     )
 
 #    ExternalProject_Add( MarlinPandora
-#        DEPENDS PandoraSDK FineGranularityContent
+#        DEPENDS PandoraSDK LCContent
 #        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
 #        CMAKE_ARGS ${common_cmake_args}
 #        LIST_SEPARATOR %
