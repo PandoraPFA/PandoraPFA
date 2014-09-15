@@ -16,11 +16,11 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # versions of PandoraPFANew subpackages
 # don't forget to update when releasing PandoraPFANew
-# e.g. SET( PandoraSDK_version "tags/v00-01" )
+# e.g. SET( PandoraSDK_version "tags/vAB-CD" )
 SET( PandoraSDK_version "trunk" )
 SET( PandoraMonitoring_version "trunk" )
 SET( LCContent_version "trunk" )
-#SET( MarlinPandora_version "trunk" )
+SET( LArContent_version "trunk" )
 
 
 ### DEPENDENCIES ############################################################
@@ -33,6 +33,12 @@ INCLUDE( ExternalProject )
 
 OPTION( PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" OFF )
 MESSAGE( STATUS "PANDORA_MONITORING: ${PANDORA_MONITORING}" )
+
+OPTION( PANDORA_LC_CONTENT "Build Pandora LC content library" ON )
+MESSAGE( STATUS "PANDORA_LC_CONTENT: ${PANDORA_LC_CONTENT}" )
+
+OPTION( PANDORA_LAR_CONTENT "Build Pandora LAr content library" OFF )
+MESSAGE( STATUS "PANDORA_LAR_CONTENT: ${PANDORA_LAR_CONTENT}" )
 
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 
@@ -77,33 +83,41 @@ IF( PANDORA_MONITORING )
         LIST_SEPARATOR %
     )
 
-    ExternalProject_Add( LCContent
-        DEPENDS PandoraSDK PandoraMonitoring
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
-        CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
-        LIST_SEPARATOR %
-    )
+    IF ( PANDORA_LC_CONTENT )
+        ExternalProject_Add( LCContent
+            DEPENDS PandoraSDK PandoraMonitoring
+            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
+            CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
+            LIST_SEPARATOR %
+        )
+    ENDIF()
 
-#    ExternalProject_Add( MarlinPandora
-#        DEPENDS PandoraSDK PandoraMonitoring LCContent
-#        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
-#        CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
-#        LIST_SEPARATOR %
-#    )
+    IF ( PANDORA_LAR_CONTENT )
+        ExternalProject_Add( LArContent
+            DEPENDS PandoraSDK PandoraMonitoring
+            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LArContent/${LArContent_version}"
+            CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
+            LIST_SEPARATOR %
+        )
+    ENDIF()
 ELSE()
-    ExternalProject_Add( LCContent
-        DEPENDS PandoraSDK
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
-        CMAKE_ARGS ${common_cmake_args}
-        LIST_SEPARATOR %
-    )
+    IF ( PANDORA_LC_CONTENT )
+        ExternalProject_Add( LCContent
+            DEPENDS PandoraSDK
+            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
+            CMAKE_ARGS ${common_cmake_args}
+            LIST_SEPARATOR %
+        )
+    ENDIF()
 
-#    ExternalProject_Add( MarlinPandora
-#        DEPENDS PandoraSDK LCContent
-#        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/MarlinPandora/${MarlinPandora_version}"
-#        CMAKE_ARGS ${common_cmake_args}
-#        LIST_SEPARATOR %
-#    )
+    IF ( PANDORA_LAR_CONTENT )
+        ExternalProject_Add( LArContent
+            DEPENDS PandoraSDK
+            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LArContent/${LArContent_version}"
+            CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=1
+            LIST_SEPARATOR %
+        )
+    ENDIF()
 ENDIF()
 
 INSTALL( FILES "ChangeLog.txt" DESTINATION "doc" )
