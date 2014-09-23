@@ -17,10 +17,10 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # versions of PandoraPFANew subpackages
 # don't forget to update when releasing PandoraPFANew
 # e.g. SET( PandoraSDK_version "tags/vAB-CD" )
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( LCContent_version "trunk" )
-SET( LArContent_version "trunk" )
+SET( PandoraSDK_version "v00-17" )
+SET( PandoraMonitoring_version "v00-17" )
+SET( LCContent_version "v00-17" )
+SET( LArContent_version "v00-06" )
 
 
 ### DEPENDENCIES ############################################################

@@ -1,33 +1,41 @@
-************************************************************************
-TAG V00-16
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-17
+--------------------------------------------------------------------------------------------------------------------------------------------
 Updated daughter package versions.
 
-************************************************************************
-TAG V00-15
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-16
+--------------------------------------------------------------------------------------------------------------------------------------------
 Updated daughter package versions.
 
-************************************************************************
-TAG V00-14
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-15
+--------------------------------------------------------------------------------------------------------------------------------------------
 Updated daughter package versions.
 
-************************************************************************
-TAG V00-13 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-14
+--------------------------------------------------------------------------------------------------------------------------------------------
 Updated daughter package versions.
 
-************************************************************************
-TAG V00-12 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-13
+--------------------------------------------------------------------------------------------------------------------------------------------
 Updated daughter package versions.
 
-************************************************************************
-TAG V00-11 FOLLOWING REPOSITORY RESTRUCTURING
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-12
+--------------------------------------------------------------------------------------------------------------------------------------------
+Updated daughter package versions.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-11
+--------------------------------------------------------------------------------------------------------------------------------------------
+RESTRUCTURING
 PandoraPFANew is now a "metadata" package containing only Makefiles for downloading and building relevant Pandora libraries.
 
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
 GENERAL INFO:
 Pandora consists of the PandoraSDK (Software Development Kit), which comprises a single library and header files with flexible APIs.
 There is also an optional PandoraMonitoring library, which contains event display and tree/histogram-writing functionality.
@@ -37,11 +45,13 @@ The algorithms can be built as part of a Pandora client application, such as Mar
 Algorithms declared to be suitably generic may be designed for use by multiple client applications.
 Such re-usable algorithms are best bundled together into a Pandora "content" library.
 Algorithms are always registered via the client application, using the PandoraAPIs, but the client app can link against as many content libraries as required.
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 
-************************************************************************
-TAG V00-10 FOR Liquid Argon TPC reconstruction usage
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-10
+--------------------------------------------------------------------------------------------------------------------------------------------
 Redesign of MC Manager, enabling creation of multiple MC particle lists.
 Add MCParticleType API parameter.
 Improve manner in which pandora content is reset between events, adding ability to register reset functions.
@@ -51,9 +61,9 @@ Allow visualization of marker at a specified position.
 Move FineGranularityContent library to separate repository.
 Makefile updates.
 
-************************************************************************
-TAG V00-09 FOR Maximum Entropy Studies
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-09
+--------------------------------------------------------------------------------------------------------------------------------------------
 Move xml parser into pandora namespace - prevents clashes with other packages using different versions of same parser.
 Add new parameters to PfoCreation algorithm, improving flexibility.
 Add new print-out details to MCParticlesMonitoring algorithm.
@@ -61,15 +71,15 @@ Add Cluster::SortByElectromagneticEnergy function.
 Add cell threshold option to visual monitoring algorithm.
 Remove print-out of uninitialized subdetectors (only relevant to ILC/CLIC-like detectors, and exception will be thrown if uninitialized details are requested anyway).
 
-************************************************************************
-TAG V00-08 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-08
+--------------------------------------------------------------------------------------------------------------------------------------------
 Added new photon pfo momentum calculations; by default uses cluster energy-weighted centroid in calculation.
 Tidied Cluster class, removing a few unused functions.
 
-************************************************************************
-TAG V00-07 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-07
+--------------------------------------------------------------------------------------------------------------------------------------------
 Moved PandoraMonitoring to PandoraPFANew repository and updated CMake and standalone makefiles accordingly.
 Addressed warnings produced when compiling without monitoring.
 Restructured pandora manager classes, separating common functionality into Manager base class.
@@ -101,9 +111,9 @@ Removed unnecessary const qualifier from pointer returned by value in MCParticle
 Corrected update of inner and outer pseudolayers when calo hit is removed from a cluster.
 Removed possibility of deleting a cluster that is currently part of a pfo.
 
-************************************************************************
-TAG V00-06 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-06
+--------------------------------------------------------------------------------------------------------------------------------------------
 Made efficiency improvements to reduce cpu time required for events with overlaid background.
 CartesianVector no longer has a default constructor, allowing IsInitialized flags to be removed.
 Added loose, configurable cuts on cos(angle) between track/hit or cluster/hit directions in GetTrackClusterDistance function and cone-based clustering algorithms.
@@ -130,9 +140,9 @@ Added forward declarations for all pandora objects to PandoraInternal header.
 Addressed issues raised by Coverity.
 Updated standalone Makefile: changed default compiler to g++ and added -O2 optimization flag.
 
-************************************************************************
-TAG V00-05 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-05
+--------------------------------------------------------------------------------------------------------------------------------------------
 Updated CMake files to use new ILCUTIL package.
 Added CLICPfoSelection algorithm.
 Added one and two dimensional histogram classes.
@@ -169,9 +179,9 @@ New api parameter: IsMirroredInZ subdetector parameter.
 Renamed api parameter: "track state at ecal" parameters to "track state at calorimeter".
 Addressed CppCheck (static analysis package) warnings.
 
-************************************************************************
-TAG V00-04 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-04
+--------------------------------------------------------------------------------------------------------------------------------------------
 Introduced new api parameters to help remove geometry dependence from pandora algorithms.
 New api parameter: expected calo hit direction (removes assumption that expected hit propagation direction is radial).
 New api parameter: number of radition lengths between calo hit position and the ip.
@@ -187,9 +197,9 @@ Removed geometry usage from most pandora algorithms.
 Removed GeometryHelper IsOutsideECal function.
 Improve OrderedCaloHitList memory management.
 
-************************************************************************
-CREATE CLIC_CDR BRANCH
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_4
+--------------------------------------------------------------------------------------------------------------------------------------------
 Added muon reconstruction algorithm, which complete muon particle flow object construction before the standard pandora reconstruction.
 Improved PrimaryClustering algorithm to account for possible deletion of clusters during topological association algorithms.
 Improved cluster and track preparation algorithms to deal with content already used in particle flow objects.
@@ -211,18 +221,18 @@ Client application must now specify pseudolayer calculator and bfield calculator
 Removed TrackSelection algorithm and replaced with EventPreparation algorithm.
 Provided a gnu makefile.
 
-************************************************************************
-TAG V00-03 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-03
+--------------------------------------------------------------------------------------------------------------------------------------------
 Tidied GeometryHelper class, separating PseudoLayerCalculator and DetectorGap classes.
 Improved pseudo layer calculation; now uses binary search and has improved treatment for barrel/endcap overlap regions.
 Added ability to create and use custom pseudo layer calculator class.
 Added efficiency monitoring algorithm to assess particle identification purity and completeness.
 Set BUILD_32BIT_COMPATIBLE to OFF by default.
 
-************************************************************************
-LCD_WG2_VALIDATION_3 TAG
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_3
+--------------------------------------------------------------------------------------------------------------------------------------------
 Added protection against input NaN and INF values.
 Corrected ClusterHelper::GetFitResultsClosestApproach to deal with (nearly-)parallel fit-results.
 Overhaul of cluster contact classes used in all fragment removal algorithms.
@@ -247,9 +257,9 @@ New DumpPfosMonitoringAlgorithm examines reconstructed PFOs and displays/analyse
 Upgrade xml parser from tiny xml v2.5.3 to v2.6.1
 XmlHelper::TokenizeString is now public.
 
-************************************************************************
-LCD_WG2_VALIDATION_2 TAG
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION_2
+--------------------------------------------------------------------------------------------------------------------------------------------
 New approach to forced clustering, ordering calo hits by distance to track helix projection.
 Improvements to ForcedClustering algorithm, so that it can deal with multiple tracks.
 Use ForcedClustering algorithm in ExitingTrack, ResolveTrackAssociations and SplitTrackAssociations algorithms.
@@ -262,9 +272,9 @@ Final particle id algorithm now deals with split/prong tracks.
 Added new algorithm to create PFOs from reconstructed V0s.
 Added new algorithm to create PFOs from reconstructed kinks.
 
-************************************************************************
-LCD_WG2_VALIDATION TAG
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG LCD_WG2_VALIDATION
+--------------------------------------------------------------------------------------------------------------------------------------------
 CaloHitParameters now require nInteractionLengthsFromIp to be specified.
 TrackParameters now require specification of track charge, rather than simple charge sign.
 Add GetTrackComparisonEnergy functionality to clusters. Returns corrected HAD energy (or EM energy if cluster is identified as EM shower).
@@ -276,14 +286,14 @@ Added visualization of particle flow objects to VisualMonitoringAlgorithm.
 ParticleType helper functions moved to PdgTable helper class.
 Reorganized header files and all helper class settings.
 
-************************************************************************
-TAG V00-02 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-02
+--------------------------------------------------------------------------------------------------------------------------------------------
 Separated shared electromagnetic shower id code from fast electron and photon id.
 Added Read2dVectorOfValues xml helper function.
 Added PdgTable header file, containing masses, widths and charges for relevant particle types.
 Use particle types enum throughout algorithms.
 
-************************************************************************
-TAG V00-01 FOR ILCSOFT USAGE
-************************************************************************
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v00-01
+--------------------------------------------------------------------------------------------------------------------------------------------
