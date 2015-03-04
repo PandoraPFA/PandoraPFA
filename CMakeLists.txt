@@ -75,11 +75,14 @@ SET( common_cmake_args
      "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_FIXED}"
      "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH_FIXED}"
      "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-     "-DPANDORA_CMAKE_MODULES_ROOT=${PANDORA_CMAKE_MODULES_ROOT}"
-     "-DINSTALL_DOC=${INSTALL_DOC}"
-)
+     "-DINSTALL_DOC=${INSTALL_DOC}" )
+
+IF( PANDORA_CMAKE_MODULES_ROOT )
+    SET( common_cmake_args ${common_cmake_args} "-DPANDORA_CMAKE_MODULES_ROOT=${PANDORA_CMAKE_MODULES_ROOT}" )
+ENDIF()
 
 
+### EXTERNAL PROJECTS #######################################################
 ExternalProject_Add( PandoraSDK
     SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/PandoraSDK/${PandoraSDK_version}"
     CMAKE_ARGS ${common_cmake_args}
