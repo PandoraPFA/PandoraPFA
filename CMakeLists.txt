@@ -17,7 +17,7 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 00 )
 
 ### EXTERNAL PROJECT VERSIONS ###############################################
 # e.g. SET( PandoraSDK_version "tags/vAB-CD" )
-SET( PandoraSDK_version "tags/PandoraSDK_v01-00-00" )
+SET( PandoraSDK_version "tags/v01-00-00" )
 SET( PandoraMonitoring_version "tags/v01-00-00" )
 SET( LCContent_version "tags/v01-00-00" )
 SET( LArContent_version "tags/v01-00-00" )
