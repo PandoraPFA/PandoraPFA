@@ -17,10 +17,10 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 00 )
 
 ### EXTERNAL PROJECT VERSIONS ###############################################
 # e.g. SET( PandoraSDK_version "tags/vAB-CD" )
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( LCContent_version "trunk" )
-SET( LArContent_version "trunk" )
+SET( PandoraSDK_version "tags/v01-00-00" )
+SET( PandoraMonitoring_version "tags/v01-00-00" )
+SET( LCContent_version "tags/v01-00-00" )
+SET( LArContent_version "tags/v01-00-00" )
 
 OPTION( PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" OFF )
 OPTION( PANDORA_LC_CONTENT "Build Pandora LC content library" OFF )
