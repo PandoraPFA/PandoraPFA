@@ -74,10 +74,17 @@ FOREACH( _path ${CMAKE_MODULE_PATH} )
 ENDFOREACH()
 
 SET( common_cmake_args
-     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_FIXED}"
      "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH_FIXED}"
      "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
      "-DINSTALL_DOC=${INSTALL_DOC}" )
+
+IF( CMAKE_PREFIX_PATH_FIXED )
+    SET( common_cmake_args ${common_cmake_args} "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_FIXED}" )
+ENDIF()
+
+IF( CMAKE_CXX_FLAGS )
+    SET( common_cmake_args ${common_cmake_args} "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}" )
+ENDIF()
 
 IF( PANDORA_CMAKE_MODULES_ROOT )
     SET( common_cmake_args ${common_cmake_args} "-DPANDORA_CMAKE_MODULES_ROOT=${PANDORA_CMAKE_MODULES_ROOT}" )
@@ -86,6 +93,8 @@ ENDIF()
 IF( PANDORA_MONITORING )
     SET( cmake_monitoring_args "-DPANDORA_MONITORING=ON" )
 ENDIF()
+
+MESSAGE( STATUS "Arguments provided to external projects: ${common_cmake_args}" )
 
 
 ### EXTERNAL PROJECTS #######################################################
