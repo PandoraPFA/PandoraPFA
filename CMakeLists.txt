@@ -11,17 +11,25 @@ PROJECT( PandoraPFANew )
 
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 01 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 00 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 01 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 00 )
 
 
 ### EXTERNAL PROJECT VERSIONS ###############################################
-# e.g. SET( PandoraSDK_version "tags/vAB-CD" )
+SET( svn_repository_root "https://svnsrv.desy.de/public/PandoraPFANew" )  # public (no authentication)
+
+SET( PandoraSDK_repository "PandoraSDK" )
+SET( PandoraMonitoring_repository "PandoraMonitoring" )
+SET( LCContent_repository "LCContent" )
+SET( LArContent_repository "LArContent" )
+
 SET( PandoraSDK_version "trunk" )
 SET( PandoraMonitoring_version "trunk" )
 SET( LCContent_version "trunk" )
 SET( LArContent_version "trunk" )
 
+
+### EXTERNAL PROJECT SELECTION ##############################################
 OPTION( PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" OFF )
 OPTION( PANDORA_LC_CONTENT "Build Pandora LC content library" OFF )
 OPTION( PANDORA_LAR_CONTENT "Build Pandora LAr content library" OFF )
@@ -52,12 +60,6 @@ IF ( PANDORA_MONITORING AND ROOT_DIR )
 ENDIF()
 
 
-### DOWNLOAD SETTINGS #######################################################
-#SET( desy_svn_repository "https://svnsrv.desy.de/svn" )    # use grid certificate (pkcs12)
-#SET( desy_svn_repository "https://svnsrv.desy.de/desy" )   # use desy account (kerberos)
-SET( desy_svn_repository "https://svnsrv.desy.de/public" )  # public (no authentication)
-
-
 ### PASS ARGUMENTS TO EXTERNAL PROJECTS #####################################
 # In order to pass semicolon-separated lists over the command line to all packages,
 # we need to separate list elements with '%' instead of the standard cmake list separator ';'
@@ -81,57 +83,47 @@ IF( PANDORA_CMAKE_MODULES_ROOT )
     SET( common_cmake_args ${common_cmake_args} "-DPANDORA_CMAKE_MODULES_ROOT=${PANDORA_CMAKE_MODULES_ROOT}" )
 ENDIF()
 
+IF( PANDORA_MONITORING )
+    SET( cmake_monitoring_args "-DPANDORA_MONITORING=ON" )
+ENDIF()
+
 
 ### EXTERNAL PROJECTS #######################################################
 ExternalProject_Add( PandoraSDK
-    SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/PandoraSDK/${PandoraSDK_version}"
+    SVN_REPOSITORY "${svn_repository_root}/${PandoraSDK_repository}/${PandoraSDK_version}"
     CMAKE_ARGS ${common_cmake_args}
+    PREFIX PandoraSDK-${PandoraSDK_version}
     LIST_SEPARATOR %
 )
 
 IF( PANDORA_MONITORING )
     ExternalProject_Add( PandoraMonitoring
         DEPENDS PandoraSDK
-        SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/PandoraMonitoring/${PandoraMonitoring_version}"
+        SVN_REPOSITORY "${svn_repository_root}/${PandoraMonitoring_repository}/${PandoraMonitoring_version}"
         CMAKE_ARGS ${common_cmake_args}
+        PREFIX PandoraMonitoring-${PandoraMonitoring_version}
         LIST_SEPARATOR %
     )
+ENDIF()
 
-    IF ( PANDORA_LC_CONTENT )
-        ExternalProject_Add( LCContent
-            DEPENDS PandoraSDK PandoraMonitoring
-            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
-            CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=ON
-            LIST_SEPARATOR %
-        )
-    ENDIF()
+IF ( PANDORA_LC_CONTENT )
+    ExternalProject_Add( LCContent
+        DEPENDS PandoraSDK PandoraMonitoring
+        SVN_REPOSITORY "${svn_repository_root}/${LCContent_repository}/${LCContent_version}"
+        CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
+        PREFIX LCContent-${LCContent_version}
+        LIST_SEPARATOR %
+    )
+ENDIF()
 
-    IF ( PANDORA_LAR_CONTENT )
-        ExternalProject_Add( LArContent
-            DEPENDS PandoraSDK PandoraMonitoring
-            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LArContent/${LArContent_version}"
-            CMAKE_ARGS ${common_cmake_args} -DPANDORA_MONITORING=ON
-            LIST_SEPARATOR %
-        )
-    ENDIF()
-ELSE()
-    IF ( PANDORA_LC_CONTENT )
-        ExternalProject_Add( LCContent
-            DEPENDS PandoraSDK
-            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LCContent/${LCContent_version}"
-            CMAKE_ARGS ${common_cmake_args}
-            LIST_SEPARATOR %
-        )
-    ENDIF()
-
-    IF ( PANDORA_LAR_CONTENT )
-        ExternalProject_Add( LArContent
-            DEPENDS PandoraSDK
-            SVN_REPOSITORY "${desy_svn_repository}/PandoraPFANew/LArContent/${LArContent_version}"
-            CMAKE_ARGS ${common_cmake_args}
-            LIST_SEPARATOR %
-        )
-    ENDIF()
+IF ( PANDORA_LAR_CONTENT )
+    ExternalProject_Add( LArContent
+        DEPENDS PandoraSDK PandoraMonitoring
+        SVN_REPOSITORY "${svn_repository_root}/${LArContent_repository}/${LArContent_version}"
+        CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
+        PREFIX LArContent-${LArContent_version}
+        LIST_SEPARATOR %
+    )
 ENDIF()
 
 INSTALL( FILES "ChangeLog.txt" DESTINATION "doc" )
