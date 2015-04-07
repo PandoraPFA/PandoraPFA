@@ -18,10 +18,10 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 00 )
 ### EXTERNAL PROJECT VERSIONS ###############################################
 SET( svn_repository_root "https://svnsrv.desy.de/public/PandoraPFANew" )  # public (no authentication)
 
-SET( PandoraSDK_repository "PandoraSDK" )
-SET( PandoraMonitoring_repository "PandoraMonitoring" )
-SET( LCContent_repository "LCContent" )
-SET( LArContent_repository "LArContent" )
+SET( PandoraSDK_repository "PandoraSDK/tags" )
+SET( PandoraMonitoring_repository "PandoraMonitoring/tags" )
+SET( LCContent_repository "LCContent/tags" )
+SET( LArContent_repository "LArContent/tags" )
 
 SET( PandoraSDK_version "v01-00-01" )
 SET( PandoraMonitoring_version "v01-00-01" )
