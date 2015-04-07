@@ -23,10 +23,10 @@ SET( PandoraMonitoring_repository "PandoraMonitoring" )
 SET( LCContent_repository "LCContent" )
 SET( LArContent_repository "LArContent" )
 
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( LCContent_version "trunk" )
-SET( LArContent_version "trunk" )
+SET( PandoraSDK_version "v01-00-01" )
+SET( PandoraMonitoring_version "v01-00-01" )
+SET( LCContent_version "v01-00-01" )
+SET( LArContent_version "v01-01-00" )
 
 
 ### EXTERNAL PROJECT SELECTION ##############################################
