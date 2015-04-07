@@ -94,8 +94,6 @@ IF( PANDORA_MONITORING )
     SET( cmake_monitoring_args "-DPANDORA_MONITORING=ON" )
 ENDIF()
 
-MESSAGE( STATUS "Arguments provided to external projects: ${common_cmake_args}" )
-
 
 ### EXTERNAL PROJECTS #######################################################
 ExternalProject_Add( PandoraSDK
