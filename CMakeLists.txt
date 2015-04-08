@@ -12,21 +12,21 @@ PROJECT( PandoraPFANew )
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 01 )
 SET( ${PROJECT_NAME}_VERSION_MINOR 01 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 00 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 01 )
 
 
 ### EXTERNAL PROJECT VERSIONS ###############################################
 SET( svn_repository_root "https://svnsrv.desy.de/public/PandoraPFANew" )  # public (no authentication)
 
-SET( PandoraSDK_repository "PandoraSDK" )
-SET( PandoraMonitoring_repository "PandoraMonitoring" )
-SET( LCContent_repository "LCContent" )
-SET( LArContent_repository "LArContent" )
+SET( PandoraSDK_repository "PandoraSDK/tags" )
+SET( PandoraMonitoring_repository "PandoraMonitoring/tags" )
+SET( LCContent_repository "LCContent/tags" )
+SET( LArContent_repository "LArContent/tags" )
 
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( LCContent_version "trunk" )
-SET( LArContent_version "trunk" )
+SET( PandoraSDK_version "v01-00-01" )
+SET( PandoraMonitoring_version "v01-00-01" )
+SET( LCContent_version "v01-00-01" )
+SET( LArContent_version "v01-01-00" )
 
 
 ### EXTERNAL PROJECT SELECTION ##############################################
@@ -76,6 +76,7 @@ ENDFOREACH()
 SET( common_cmake_args
      "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH_FIXED}"
      "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
      "-DINSTALL_DOC=${INSTALL_DOC}" )
 
 IF( CMAKE_PREFIX_PATH_FIXED )
@@ -101,6 +102,7 @@ ExternalProject_Add( PandoraSDK
     CMAKE_ARGS ${common_cmake_args}
     PREFIX PandoraSDK-${PandoraSDK_version}
     LIST_SEPARATOR %
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/PandoraSDK-${PandoraSDK_version}
 )
 
 IF( PANDORA_MONITORING )
@@ -110,6 +112,7 @@ IF( PANDORA_MONITORING )
         CMAKE_ARGS ${common_cmake_args}
         PREFIX PandoraMonitoring-${PandoraMonitoring_version}
         LIST_SEPARATOR %
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/PandoraMonitoring-${PandoraMonitoring_version}
     )
 ENDIF()
 
@@ -120,6 +123,7 @@ IF ( PANDORA_LC_CONTENT )
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LCContent-${LCContent_version}
         LIST_SEPARATOR %
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LCContent-${LCContent_version}
     )
 ENDIF()
 
@@ -130,6 +134,7 @@ IF ( PANDORA_LAR_CONTENT )
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LArContent-${LArContent_version}
         LIST_SEPARATOR %
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LArContent-${LArContent_version}
     )
 ENDIF()
 
