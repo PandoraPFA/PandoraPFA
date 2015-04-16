@@ -11,22 +11,22 @@ PROJECT( PandoraPFANew )
 
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 01 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 01 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 01 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 02 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 00 )
 
 
 ### EXTERNAL PROJECT VERSIONS ###############################################
 SET( svn_repository_root "https://svnsrv.desy.de/public/PandoraPFANew" )  # public (no authentication)
 
-SET( PandoraSDK_repository "PandoraSDK" )
-SET( PandoraMonitoring_repository "PandoraMonitoring" )
-SET( LCContent_repository "LCContent" )
-SET( LArContent_repository "LArContent" )
+SET( PandoraSDK_repository "PandoraSDK/tags" )
+SET( PandoraMonitoring_repository "PandoraMonitoring/tags" )
+SET( LCContent_repository "LCContent/tags" )
+SET( LArContent_repository "LArContent/tags" )
 
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( LCContent_version "trunk" )
-SET( LArContent_version "trunk" )
+SET( PandoraSDK_version "v01-00-01" )
+SET( PandoraMonitoring_version "v01-00-01" )
+SET( LCContent_version "v01-01-00" )
+SET( LArContent_version "v01-01-00" )
 
 
 ### EXTERNAL PROJECT SELECTION ##############################################
