@@ -93,6 +93,7 @@ ENDIF()
 
 IF( PANDORA_MONITORING )
     SET( cmake_monitoring_args "-DPANDORA_MONITORING=ON" )
+    SET( content_library_monitoring "PandoraMonitoring" )
 ENDIF()
 
 
@@ -118,7 +119,7 @@ ENDIF()
 
 IF ( PANDORA_LC_CONTENT )
     ExternalProject_Add( LCContent
-        DEPENDS PandoraSDK PandoraMonitoring
+        DEPENDS PandoraSDK ${content_library_monitoring}
         SVN_REPOSITORY "${svn_repository_root}/${LCContent_repository}/${LCContent_version}"
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LCContent-${LCContent_version}
@@ -129,7 +130,7 @@ ENDIF()
 
 IF ( PANDORA_LAR_CONTENT )
     ExternalProject_Add( LArContent
-        DEPENDS PandoraSDK PandoraMonitoring
+        DEPENDS PandoraSDK ${content_library_monitoring}
         SVN_REPOSITORY "${svn_repository_root}/${LArContent_repository}/${LArContent_version}"
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LArContent-${LArContent_version}
