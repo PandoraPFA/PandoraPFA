@@ -12,21 +12,14 @@ PROJECT( PandoraPFANew )
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 02 )
 SET( ${PROJECT_NAME}_VERSION_MINOR 02 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 00 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 01 )
 
 
 ### EXTERNAL PROJECT VERSIONS ###############################################
-SET( svn_repository_root "https://svnsrv.desy.de/public/PandoraPFANew" )  # public (no authentication)
-
-SET( PandoraSDK_repository "PandoraSDK" )
-SET( PandoraMonitoring_repository "PandoraMonitoring" )
-SET( LCContent_repository "LCContent" )
-SET( LArContent_repository "LArContent" )
-
-SET( PandoraSDK_version "trunk" )
-SET( PandoraMonitoring_version "trunk" )
-SET( LCContent_version "trunk" )
-SET( LArContent_version "trunk" )
+SET( PandoraSDK_version "master" )
+SET( PandoraMonitoring_version "master" )
+SET( LCContent_version "master" )
+SET( LArContent_version "master" )
 
 
 ### EXTERNAL PROJECT SELECTION ##############################################
@@ -99,7 +92,8 @@ ENDIF()
 
 ### EXTERNAL PROJECTS #######################################################
 ExternalProject_Add( PandoraSDK
-    SVN_REPOSITORY "${svn_repository_root}/${PandoraSDK_repository}/${PandoraSDK_version}"
+    GIT_REPOSITORY "https://github.com/johnmarshall80/PandoraSDK.git"
+    GIT_TAG ${PandoraSDK_version}
     CMAKE_ARGS ${common_cmake_args}
     PREFIX PandoraSDK-${PandoraSDK_version}
     LIST_SEPARATOR %
@@ -109,7 +103,8 @@ ExternalProject_Add( PandoraSDK
 IF( PANDORA_MONITORING )
     ExternalProject_Add( PandoraMonitoring
         DEPENDS PandoraSDK
-        SVN_REPOSITORY "${svn_repository_root}/${PandoraMonitoring_repository}/${PandoraMonitoring_version}"
+        GIT_REPOSITORY "https://github.com/johnmarshall80/PandoraMonitoring.git"
+        GIT_TAG ${PandoraMonitoring_version}
         CMAKE_ARGS ${common_cmake_args}
         PREFIX PandoraMonitoring-${PandoraMonitoring_version}
         LIST_SEPARATOR %
@@ -120,7 +115,8 @@ ENDIF()
 IF ( PANDORA_LC_CONTENT )
     ExternalProject_Add( LCContent
         DEPENDS PandoraSDK ${content_library_monitoring}
-        SVN_REPOSITORY "${svn_repository_root}/${LCContent_repository}/${LCContent_version}"
+        GIT_REPOSITORY "https://github.com/johnmarshall80/LCContent.git"
+        GIT_TAG ${LCContent_version}
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LCContent-${LCContent_version}
         LIST_SEPARATOR %
@@ -131,7 +127,8 @@ ENDIF()
 IF ( PANDORA_LAR_CONTENT )
     ExternalProject_Add( LArContent
         DEPENDS PandoraSDK ${content_library_monitoring}
-        SVN_REPOSITORY "${svn_repository_root}/${LArContent_repository}/${LArContent_version}"
+        GIT_REPOSITORY "https://github.com/johnmarshall80/LArContent.git"
+        GIT_TAG ${LArContent_version}
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LArContent-${LArContent_version}
         LIST_SEPARATOR %
