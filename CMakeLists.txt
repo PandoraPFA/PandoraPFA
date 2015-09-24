@@ -16,10 +16,10 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 01 )
 
 
 ### EXTERNAL PROJECT VERSIONS ###############################################
-SET( PandoraSDK_version "master" )
-SET( PandoraMonitoring_version "master" )
-SET( LCContent_version "master" )
-SET( LArContent_version "master" )
+SET( PandoraSDK_version "v02-00-01" )
+SET( PandoraMonitoring_version "v02-00-00" )
+SET( LCContent_version "v02-00-02" )
+SET( LArContent_version "v02-02-01" )
 
 
 ### EXTERNAL PROJECT SELECTION ##############################################
@@ -92,7 +92,7 @@ ENDIF()
 
 ### EXTERNAL PROJECTS #######################################################
 ExternalProject_Add( PandoraSDK
-    GIT_REPOSITORY "https://github.com/johnmarshall80/PandoraSDK.git"
+    GIT_REPOSITORY "https://github.com/PandoraPFA/PandoraSDK.git"
     GIT_TAG ${PandoraSDK_version}
     CMAKE_ARGS ${common_cmake_args}
     PREFIX PandoraSDK-${PandoraSDK_version}
@@ -103,7 +103,7 @@ ExternalProject_Add( PandoraSDK
 IF( PANDORA_MONITORING )
     ExternalProject_Add( PandoraMonitoring
         DEPENDS PandoraSDK
-        GIT_REPOSITORY "https://github.com/johnmarshall80/PandoraMonitoring.git"
+        GIT_REPOSITORY "https://github.com/PandoraPFA/PandoraMonitoring.git"
         GIT_TAG ${PandoraMonitoring_version}
         CMAKE_ARGS ${common_cmake_args}
         PREFIX PandoraMonitoring-${PandoraMonitoring_version}
@@ -115,7 +115,7 @@ ENDIF()
 IF ( PANDORA_LC_CONTENT )
     ExternalProject_Add( LCContent
         DEPENDS PandoraSDK ${content_library_monitoring}
-        GIT_REPOSITORY "https://github.com/johnmarshall80/LCContent.git"
+        GIT_REPOSITORY "https://github.com/PandoraPFA/LCContent.git"
         GIT_TAG ${LCContent_version}
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LCContent-${LCContent_version}
@@ -127,7 +127,7 @@ ENDIF()
 IF ( PANDORA_LAR_CONTENT )
     ExternalProject_Add( LArContent
         DEPENDS PandoraSDK ${content_library_monitoring}
-        GIT_REPOSITORY "https://github.com/johnmarshall80/LArContent.git"
+        GIT_REPOSITORY "https://github.com/PandoraPFA/LArContent.git"
         GIT_TAG ${LArContent_version}
         CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
         PREFIX LArContent-${LArContent_version}
