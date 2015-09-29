@@ -1,7 +1,7 @@
+# Jan Engels, DESY
 
-# helper macro to display standard cmake variables and force write to cache
-# otherwise outdated values may appear in ccmake gui
-MACRO( DISPLAY_STD_VARIABLES )
+# helper macro to display standard cmake variables and force write to cache, otherwise outdated values may appear in ccmake gui
+MACRO( PANDORA_DISPLAY_STD_VARIABLES )
     MESSAGE( STATUS )
     MESSAGE( STATUS "-------------------------------------------------------------------------------" )
     MESSAGE( STATUS "Change values with: cmake -D<Variable>=<Value>" )
@@ -50,5 +50,5 @@ MACRO( DISPLAY_STD_VARIABLES )
     MESSAGE( STATUS "-------------------------------------------------------------------------------" )
     MESSAGE( STATUS )
 
-ENDMACRO( DISPLAY_STD_VARIABLES )
+ENDMACRO( PANDORA_DISPLAY_STD_VARIABLES )
 

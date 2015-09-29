@@ -1,7 +1,9 @@
-#GET_FILENAME_COMPONENT( _current_dir ${CMAKE_CURRENT_LIST_FILE} PATH )
+# Jan Engels, DESY
 
 # helper macro for generating project configuration file
-MACRO( GENERATE_PACKAGE_CONFIGURATION_FILES )
+MACRO( PANDORA_GENERATE_PACKAGE_CONFIGURATION_FILES )
+
+    FIND_PATH ( PANDORA_CMAKE_MODULES_PATH "MacroCheckPackageVersion.cmake" ${CMAKE_MODULE_PATH} )
 
     FOREACH( arg ${ARGN} )
         IF( ${arg} MATCHES "Config.cmake" )
@@ -10,12 +12,6 @@ MACRO( GENERATE_PACKAGE_CONFIGURATION_FILES )
                                 "${PROJECT_BINARY_DIR}/${arg}" @ONLY
                 )
                 INSTALL( FILES "${PROJECT_BINARY_DIR}/${arg}" DESTINATION . )
-                #IF( EXISTS "${_current_dir}/MacroCheckPackageLibs.cmake" )
-                #    INSTALL( FILES "${_current_dir}/MacroCheckPackageLibs.cmake" DESTINATION cmake )
-                #ENDIF()
-                #IF( EXISTS "${_current_dir}/MacroExportPackageDeps.cmake" )
-                #    INSTALL( FILES "${_current_dir}/MacroExportPackageDeps.cmake" DESTINATION cmake )
-                #ENDIF()
             ENDIF()
         ENDIF()
 
@@ -27,9 +23,6 @@ MACRO( GENERATE_PACKAGE_CONFIGURATION_FILES )
                                 "${PROJECT_BINARY_DIR}/${arg}" @ONLY
                 )
                 INSTALL( FILES "${PROJECT_BINARY_DIR}/${arg}" DESTINATION . )
-                #IF( EXISTS "${_current_dir}/MacroCheckPackageVersion.cmake" )
-                #    INSTALL( FILES "${_current_dir}/MacroCheckPackageVersion.cmake" DESTINATION cmake )
-                #ENDIF()
             ENDIF( EXISTS "${PROJECT_SOURCE_DIR}/cmake/${arg}.in" )
         ENDIF()
 
@@ -40,5 +33,5 @@ MACRO( GENERATE_PACKAGE_CONFIGURATION_FILES )
 
     ENDFOREACH()
 
-ENDMACRO( GENERATE_PACKAGE_CONFIGURATION_FILES )
+ENDMACRO( PANDORA_GENERATE_PACKAGE_CONFIGURATION_FILES )
 
