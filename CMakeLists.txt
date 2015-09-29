@@ -1,142 +1,156 @@
-########################################################
-# cmake file for building PandoraPFANew
-# @author Jan Engels, DESY
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2 FATAL_ERROR)
-########################################################
+# cmake file for building PandoraPFA
+#-------------------------------------------------------------------------------------------------------------------------------------------
+cmake_minimum_required(VERSION 2.8.2 FATAL_ERROR)
 
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "PandoraPFA requires an out-of-source build.")
+endif()
 
-# project name
-PROJECT( PandoraPFANew )
+project(PandoraPFA)
 
+set(${PROJECT_NAME}_VERSION_MAJOR 02)
+set(${PROJECT_NAME}_VERSION_MINOR 03)
+set(${PROJECT_NAME}_VERSION_PATCH 00)
+set(${PROJECT_NAME}_VERSION "${PandoraSDK_VERSION_MAJOR}.${PandoraSDK_VERSION_MINOR}.${PandoraSDK_VERSION_PATCH}")
 
-# project version
-SET( ${PROJECT_NAME}_VERSION_MAJOR 02 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 02 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 01 )
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# Dependencies
+find_path(pandora_cmake_path "PandoraCMakeSettings.cmake" "${CMAKE_CURRENT_LIST_DIR}/cmakemodules")
+if (pandora_cmake_path)
+    list(APPEND CMAKE_MODULE_PATH ${pandora_cmake_path})
+endif()
+include(PandoraCMakeSettings)
 
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# External project versions
+set(git_repository_root "https://github.com/johnmarshall80")
 
-### EXTERNAL PROJECT VERSIONS ###############################################
-SET( PandoraSDK_version "v02-00-01" )
-SET( PandoraMonitoring_version "v02-00-00" )
-SET( LCContent_version "v02-00-02" )
-SET( LArContent_version "v02-02-01" )
+set(PandoraSDK_repository "PandoraSDK.git")
+set(PandoraMonitoring_repository "PandoraMonitoring.git")
+set(LCContent_repository "LCContent.git")
+set(LArContent_repository "LArContent.git")
+set(ExampleContent_repository "ExampleContent.git")
 
+set(PandoraSDK_version "master")
+set(PandoraMonitoring_version "master")
+set(LArContent_version "master")
+set(LCContent_version "master")
+set(ExampleContent_version "master")
 
-### EXTERNAL PROJECT SELECTION ##############################################
-OPTION( PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" OFF )
-OPTION( PANDORA_LC_CONTENT "Build Pandora LC content library" OFF )
-OPTION( PANDORA_LAR_CONTENT "Build Pandora LAr content library" OFF )
-OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# External project selection
+include(CMakeDependentOption)
+option(PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" OFF)
+option(INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF)
+cmake_dependent_option(LAR_PANDORA_CONTENT "Build LAr Pandora content library" ON "PANDORA_LAR_CONTENT OR LAR_PANDORA_CONTENT" OFF)
+cmake_dependent_option(LC_PANDORA_CONTENT "Build LC Pandora content library" ON "PANDORA_LC_CONTENT OR LC_PANDORA_CONTENT" OFF)
+cmake_dependent_option(EXAMPLE_PANDORA_CONTENT "Build Example Pandora content library" ON "PANDORA_EXAMPLE_CONTENT OR EXAMPLE_PANDORA_CONTENT" OFF)
 
-MESSAGE( STATUS "PANDORA_MONITORING: ${PANDORA_MONITORING}" )
-MESSAGE( STATUS "PANDORA_LC_CONTENT: ${PANDORA_LC_CONTENT}" )
-MESSAGE( STATUS "PANDORA_LAR_CONTENT: ${PANDORA_LAR_CONTENT}" )
-MESSAGE( STATUS "INSTALL_DOC: ${INSTALL_DOC}" )
+message(STATUS "PANDORA_SDK: ON")
+message(STATUS "PANDORA_MONITORING: ${PANDORA_MONITORING}")
+message(STATUS "LAR_PANDORA_CONTENT: ${LAR_PANDORA_CONTENT}")
+message(STATUS "LC_PANDORA_CONTENT: ${LC_PANDORA_CONTENT}")
+message(STATUS "EXAMPLE_PANDORA_CONTENT: ${EXAMPLE_PANDORA_CONTENT}")
+message(STATUS "INSTALL_DOC: ${INSTALL_DOC}")
 
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# Pass arguments to external projects
+if(CMAKE_CXX_FLAGS)
+    list(APPEND COMMON_CMAKE_ARGS "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
+endif()
 
-### DEPENDENCIES ############################################################
-INCLUDE( ExternalProject )
+if(NOT LAR_CONTENT_LIBRARY_NAME STREQUAL "LArPandoraContent")
+    set(LAR_CONTENT_LIBRARY_NAME "LArContent")
+endif()
 
-FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES QUIET )
+if(NOT LC_CONTENT_LIBRARY_NAME STREQUAL "LCPandoraContent")
+    set(LC_CONTENT_LIBRARY_NAME "LCContent")
+endif()
 
-IF( ILCUTIL_FOUND )
-    INCLUDE( ilcsoft_default_settings )
-ELSEIF( PANDORA_CMAKE_MODULES_ROOT )
-    LIST( APPEND CMAKE_MODULE_PATH "${PANDORA_CMAKE_MODULES_ROOT}" )
-    INCLUDE( Default_settings )
-ELSE()
-    MESSAGE( FATAL_ERROR "Required path PANDORA_CMAKE_MODULES_ROOT not specified." )
-ENDIF()
+if(NOT EXAMPLE_CONTENT_LIBRARY_NAME STREQUAL "ExamplePandoraContent")
+    set(EXAMPLE_CONTENT_LIBRARY_NAME "ExampleContent")
+endif()
 
-IF ( PANDORA_MONITORING AND ROOT_DIR )
-    LIST( APPEND CMAKE_MODULE_PATH "${ROOT_DIR}" )
-ENDIF()
+if(PANDORA_MONITORING)
+    set(MONITORING_DEPENDENCY "PandoraMonitoring")
+    set(MONITORING_CMAKE_ARGS "-DPANDORA_MONITORING=ON")
+    list(APPEND CMAKE_MODULE_PATH ${ROOT_DIR})
+endif()
 
+# In order to pass semicolon-separated lists to all packages, need to separate elements with '%' instead of standard separator ';'
+foreach(_path ${CMAKE_MODULE_PATH})
+    set(CMAKE_MODULE_PATH_FIXED ${CMAKE_MODULE_PATH_FIXED}%${_path})
+endforeach()
 
-### PASS ARGUMENTS TO EXTERNAL PROJECTS #####################################
-# In order to pass semicolon-separated lists over the command line to all packages,
-# we need to separate list elements with '%' instead of the standard cmake list separator ';'
-# The list separator needs also to be redefined in the ExternalProject_Add calls by setting
-# the variable LIST_SEPARATOR
-FOREACH( _path ${CMAKE_PREFIX_PATH} )
-    SET( CMAKE_PREFIX_PATH_FIXED ${CMAKE_PREFIX_PATH_FIXED}%${_path} )
-ENDFOREACH()
+list(APPEND COMMON_CMAKE_ARGS
+    "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH_FIXED}"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+    "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+    "-DINSTALL_DOC=${INSTALL_DOC}")
 
-FOREACH( _path ${CMAKE_MODULE_PATH} )
-    SET( CMAKE_MODULE_PATH_FIXED ${CMAKE_MODULE_PATH_FIXED}%${_path} )
-ENDFOREACH()
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# External projects
+include(ExternalProject)
 
-SET( common_cmake_args
-     "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH_FIXED}"
-     "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-     "-DINSTALL_DOC=${INSTALL_DOC}" )
-
-IF( CMAKE_PREFIX_PATH_FIXED )
-    SET( common_cmake_args ${common_cmake_args} "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_FIXED}" )
-ENDIF()
-
-IF( CMAKE_CXX_FLAGS )
-    SET( common_cmake_args ${common_cmake_args} "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}" )
-ENDIF()
-
-IF( PANDORA_CMAKE_MODULES_ROOT )
-    SET( common_cmake_args ${common_cmake_args} "-DPANDORA_CMAKE_MODULES_ROOT=${PANDORA_CMAKE_MODULES_ROOT}" )
-ENDIF()
-
-IF( PANDORA_MONITORING )
-    SET( cmake_monitoring_args "-DPANDORA_MONITORING=ON" )
-    SET( content_library_monitoring "PandoraMonitoring" )
-ENDIF()
-
-
-### EXTERNAL PROJECTS #######################################################
-ExternalProject_Add( PandoraSDK
-    GIT_REPOSITORY "https://github.com/PandoraPFA/PandoraSDK.git"
+ExternalProject_Add(PandoraSDK
+    GIT_REPOSITORY "${git_repository_root}/${PandoraSDK_repository}"
     GIT_TAG ${PandoraSDK_version}
-    CMAKE_ARGS ${common_cmake_args}
+    CMAKE_ARGS ${COMMON_CMAKE_ARGS}
     PREFIX PandoraSDK-${PandoraSDK_version}
     LIST_SEPARATOR %
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/PandoraSDK-${PandoraSDK_version}
 )
 
-IF( PANDORA_MONITORING )
-    ExternalProject_Add( PandoraMonitoring
+if(PANDORA_MONITORING)
+    ExternalProject_Add(PandoraMonitoring
         DEPENDS PandoraSDK
-        GIT_REPOSITORY "https://github.com/PandoraPFA/PandoraMonitoring.git"
+        GIT_REPOSITORY "${git_repository_root}/${PandoraMonitoring_repository}"
         GIT_TAG ${PandoraMonitoring_version}
-        CMAKE_ARGS ${common_cmake_args}
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
         PREFIX PandoraMonitoring-${PandoraMonitoring_version}
         LIST_SEPARATOR %
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/PandoraMonitoring-${PandoraMonitoring_version}
     )
-ENDIF()
+endif()
 
-IF ( PANDORA_LC_CONTENT )
-    ExternalProject_Add( LCContent
-        DEPENDS PandoraSDK ${content_library_monitoring}
-        GIT_REPOSITORY "https://github.com/PandoraPFA/LCContent.git"
-        GIT_TAG ${LCContent_version}
-        CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
-        PREFIX LCContent-${LCContent_version}
-        LIST_SEPARATOR %
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LCContent-${LCContent_version}
-    )
-ENDIF()
-
-IF ( PANDORA_LAR_CONTENT )
-    ExternalProject_Add( LArContent
-        DEPENDS PandoraSDK ${content_library_monitoring}
-        GIT_REPOSITORY "https://github.com/PandoraPFA/LArContent.git"
+if(LAR_PANDORA_CONTENT)
+    ExternalProject_Add(${LAR_CONTENT_LIBRARY_NAME}
+        DEPENDS PandoraSDK ${MONITORING_DEPENDENCY}
+        GIT_REPOSITORY "${git_repository_root}/${LArContent_repository}"
         GIT_TAG ${LArContent_version}
-        CMAKE_ARGS ${common_cmake_args} ${cmake_monitoring_args}
-        PREFIX LArContent-${LArContent_version}
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DLAR_CONTENT_LIBRARY_NAME=${LAR_CONTENT_LIBRARY_NAME}
+        PREFIX ${LAR_CONTENT_LIBRARY_NAME}-${LArContent_version}
         LIST_SEPARATOR %
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LArContent-${LArContent_version}
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${LAR_CONTENT_LIBRARY_NAME}-${LArContent_version}
     )
-ENDIF()
+endif()
 
-INSTALL( FILES "ChangeLog.txt" DESTINATION "doc" )
+if(LC_PANDORA_CONTENT)
+    ExternalProject_Add(${LC_CONTENT_LIBRARY_NAME}
+        DEPENDS PandoraSDK ${MONITORING_DEPENDENCY}
+        GIT_REPOSITORY "${git_repository_root}/${LCContent_repository}"
+        GIT_TAG ${LCContent_version}
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DLC_CONTENT_LIBRARY_NAME=${LC_CONTENT_LIBRARY_NAME}
+        PREFIX ${LC_CONTENT_LIBRARY_NAME}-${LCContent_version}
+        LIST_SEPARATOR %
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${LC_CONTENT_LIBRARY_NAME}-${LCContent_version}
+    )
+endif()
 
+if(EXAMPLE_PANDORA_CONTENT)
+    ExternalProject_Add(${EXAMPLE_CONTENT_LIBRARY_NAME}
+        DEPENDS PandoraSDK ${MONITORING_DEPENDENCY}
+        GIT_REPOSITORY "${git_repository_root}/${ExampleContent_repository}"
+        GIT_TAG ${ExampleContent_version}
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DEXAMPLE_CONTENT_LIBRARY_NAME=${EXAMPLE_CONTENT_LIBRARY_NAME}
+        PREFIX ${EXAMPLE_CONTENT_LIBRARY_NAME}-${ExampleContent_version}
+        LIST_SEPARATOR %
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${EXAMPLE_CONTENT_LIBRARY_NAME}-${ExampleContent_version}
+    )
+endif()
+
+#-------------------------------------------------------------------------------------------------------------------------------------------
 # display some variables and write them to cache
-DISPLAY_STD_VARIABLES()
+PANDORA_DISPLAY_STD_VARIABLES()
+
+install(FILES "ChangeLog.txt" DESTINATION "doc")

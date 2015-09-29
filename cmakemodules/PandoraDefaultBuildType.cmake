@@ -1,6 +1,6 @@
+# Jan Engels, DESY
 
-# set default cmake build type to RelWithDebInfo
-# possible options are: None Debug Release RelWithDebInfo MinSizeRel
+# set default cmake build type to RelWithDebInfo possible options are: None Debug Release RelWithDebInfo MinSizeRel
 IF( NOT CMAKE_BUILD_TYPE )
     SET( CMAKE_BUILD_TYPE "RelWithDebInfo" )
 ENDIF()
