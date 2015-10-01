@@ -10,7 +10,7 @@ project(PandoraPFA)
 
 set(${PROJECT_NAME}_VERSION_MAJOR 02)
 set(${PROJECT_NAME}_VERSION_MINOR 03)
-set(${PROJECT_NAME}_VERSION_PATCH 00)
+set(${PROJECT_NAME}_VERSION_PATCH 01)
 set(${PROJECT_NAME}_VERSION "${PandoraSDK_VERSION_MAJOR}.${PandoraSDK_VERSION_MINOR}.${PandoraSDK_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -31,11 +31,11 @@ set(LCContent_repository "LCContent.git")
 set(LArContent_repository "LArContent.git")
 set(ExampleContent_repository "ExampleContent.git")
 
-set(PandoraSDK_version "master")
-set(PandoraMonitoring_version "master")
-set(LArContent_version "master")
-set(LCContent_version "master")
-set(ExampleContent_version "master")
+set(PandoraSDK_version "v02-01-00")
+set(PandoraMonitoring_version "v02-01-00")
+set(LArContent_version "v02-03-00")
+set(LCContent_version "v02-01-01")
+set(ExampleContent_version "v02-01-01")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # External project selection
