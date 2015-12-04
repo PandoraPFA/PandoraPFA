@@ -10,7 +10,7 @@ project(PandoraPFA)
 
 set(${PROJECT_NAME}_VERSION_MAJOR 02)
 set(${PROJECT_NAME}_VERSION_MINOR 03)
-set(${PROJECT_NAME}_VERSION_PATCH 00)
+set(${PROJECT_NAME}_VERSION_PATCH 02)
 set(${PROJECT_NAME}_VERSION "${PandoraSDK_VERSION_MAJOR}.${PandoraSDK_VERSION_MINOR}.${PandoraSDK_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,6 +57,14 @@ message(STATUS "INSTALL_DOC: ${INSTALL_DOC}")
 # Pass arguments to external projects
 if(CMAKE_CXX_FLAGS)
     list(APPEND COMMON_CMAKE_ARGS "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
+endif()
+
+if(CMAKE_C_COMPILER)
+    list(APPEND COMMON_CMAKE_ARGS "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+endif()
+
+if(CMAKE_CXX_COMPILER)
+    list(APPEND COMMON_CMAKE_ARGS "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 endif()
 
 if(NOT LAR_CONTENT_LIBRARY_NAME STREQUAL "LArPandoraContent")
