@@ -31,11 +31,11 @@ set(LCContent_repository "LCContent.git")
 set(LArContent_repository "LArContent.git")
 set(ExampleContent_repository "ExampleContent.git")
 
-set(PandoraSDK_version "master")
-set(PandoraMonitoring_version "master")
-set(LArContent_version "master")
-set(LCContent_version "master")
-set(ExampleContent_version "master")
+set(PandoraSDK_version "origin/master")
+set(PandoraMonitoring_version "origin/master")
+set(LArContent_version "origin/master")
+set(LCContent_version "origin/master")
+set(ExampleContent_version "origin/master")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # External project selection
@@ -103,7 +103,6 @@ include(ExternalProject)
 ExternalProject_Add(PandoraSDK
     GIT_REPOSITORY ${git_repository_root}/${PandoraSDK_repository}
     GIT_TAG ${PandoraSDK_version}
-    UPDATE_COMMAND git pull origin ${PandoraSDK_version}
     CMAKE_ARGS ${COMMON_CMAKE_ARGS}
     PREFIX PandoraSDK-${PandoraSDK_version}
     LIST_SEPARATOR %
@@ -115,7 +114,6 @@ if(PANDORA_MONITORING)
         DEPENDS PandoraSDK
         GIT_REPOSITORY ${git_repository_root}/${PandoraMonitoring_repository}
         GIT_TAG ${PandoraMonitoring_version}
-        UPDATE_COMMAND git pull origin ${PandoraMonitoring_version}
         CMAKE_ARGS ${COMMON_CMAKE_ARGS}
         PREFIX PandoraMonitoring-${PandoraMonitoring_version}
         LIST_SEPARATOR %
@@ -128,7 +126,6 @@ if(LAR_PANDORA_CONTENT)
         DEPENDS PandoraSDK ${MONITORING_DEPENDENCY}
         GIT_REPOSITORY ${git_repository_root}/${LArContent_repository}
         GIT_TAG ${LArContent_version}
-        UPDATE_COMMAND git pull origin ${LArContent_version}
         CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DLAR_CONTENT_LIBRARY_NAME=${LAR_CONTENT_LIBRARY_NAME}
         PREFIX ${LAR_CONTENT_LIBRARY_NAME}-${LArContent_version}
         LIST_SEPARATOR %
@@ -141,7 +138,6 @@ if(LC_PANDORA_CONTENT)
         DEPENDS PandoraSDK ${MONITORING_DEPENDENCY}
         GIT_REPOSITORY ${git_repository_root}/${LCContent_repository}
         GIT_TAG ${LCContent_version}
-        UPDATE_COMMAND git pull origin ${LCContent_version}
         CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DLC_CONTENT_LIBRARY_NAME=${LC_CONTENT_LIBRARY_NAME}
         PREFIX ${LC_CONTENT_LIBRARY_NAME}-${LCContent_version}
         LIST_SEPARATOR %
@@ -154,7 +150,6 @@ if(EXAMPLE_PANDORA_CONTENT)
         DEPENDS PandoraSDK ${MONITORING_DEPENDENCY}
         GIT_REPOSITORY ${git_repository_root}/${ExampleContent_repository}
         GIT_TAG ${ExampleContent_version}
-        UPDATE_COMMAND git pull origin ${ExampleContent_version}
         CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DEXAMPLE_CONTENT_LIBRARY_NAME=${EXAMPLE_CONTENT_LIBRARY_NAME}
         PREFIX ${EXAMPLE_CONTENT_LIBRARY_NAME}-${ExampleContent_version}
         LIST_SEPARATOR %
