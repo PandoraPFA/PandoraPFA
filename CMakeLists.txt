@@ -31,11 +31,11 @@ set(LCContent_repository "LCContent.git")
 set(LArContent_repository "LArContent.git")
 set(ExampleContent_repository "ExampleContent.git")
 
-set(PandoraSDK_version "origin/master")
-set(PandoraMonitoring_version "origin/master")
-set(LArContent_version "origin/master")
-set(LCContent_version "origin/master")
-set(ExampleContent_version "origin/master")
+set(PandoraSDK_version "v02-03-00")
+set(PandoraMonitoring_version "v02-03-00")
+set(LArContent_version "v02-06-00")
+set(LCContent_version "v02-03-00")
+set(ExampleContent_version "v02-01-02")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # External project selection
