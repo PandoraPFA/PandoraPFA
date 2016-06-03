@@ -1,4 +1,22 @@
 --------------------------------------------------------------------------------------------------------------------------------------------
+TAG v02-08-01
+--------------------------------------------------------------------------------------------------------------------------------------------
+PandoraSDK: v02-03-00
+PandoraMonitoring: v02-03-00
+LArContent: v02-07-02
+LCContent: v02-03-00
+ExampleContent: v02-01-02
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v02-08-01
+--------------------------------------------------------------------------------------------------------------------------------------------
+PandoraSDK: v02-03-00
+PandoraMonitoring: v02-03-00
+LArContent: v02-07-01
+LCContent: v02-03-00
+ExampleContent: v02-01-02
+
+--------------------------------------------------------------------------------------------------------------------------------------------
 TAG v02-08-00
 --------------------------------------------------------------------------------------------------------------------------------------------
 PandoraSDK: v02-03-00
@@ -44,6 +62,20 @@ LCContent: v02-01-00
 ExampleContent: v02-01-00
 
 --------------------------------------------------------------------------------------------------------------------------------------------
+TAG v02-03-02
+--------------------------------------------------------------------------------------------------------------------------------------------
+Append some common CMAKE arguments.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v02-03-01
+--------------------------------------------------------------------------------------------------------------------------------------------
+PandoraSDK: v02-01-00
+PandoraMonitoring: v02-01-00
+LArContent: v02-03-00
+LCContent: v02-01-01
+ExampleContent: v02-01-01
+
+--------------------------------------------------------------------------------------------------------------------------------------------
 TAG v02-03-00
 --------------------------------------------------------------------------------------------------------------------------------------------
 PandoraSDK: v02-01-00
@@ -51,6 +83,14 @@ PandoraMonitoring: v02-01-00
 LArContent: v02-03-00
 LCContent: v02-01-00
 ExampleContent: v02-01-00
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v02-02-01
+--------------------------------------------------------------------------------------------------------------------------------------------
+PandoraSDK: v02-00-01
+PandoraMonitoring: v02-00-00
+LArContent: v02-02-01
+LCContent: v02-00-02
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 TAG v02-02-00
@@ -84,6 +124,11 @@ PandoraSDK: v01-00-01
 PandoraMonitoring: v01-00-01
 LArContent: v01-01-00
 LCContent: v01-01-00
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+TAG v01-01-01
+--------------------------------------------------------------------------------------------------------------------------------------------
+Set source directory and build type.
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 TAG v01-01-00
@@ -162,7 +207,7 @@ Pandora consists of the PandoraSDK (Software Development Kit), which comprises a
 There is also an optional PandoraMonitoring library, which contains event display and tree/histogram-writing functionality.
 The PandoraMonitoring library depends on the PandoraSDK and ROOT.
 Pandora algorithms will necessarily depend upon the PandoraSDK (and also PandoraMonitoring, if desired).
-The algorithms can be built as part of a Pandora client application, such as MarlinPandora, or the standalone TestPandora binary.
+The algorithms can be built as part of a Pandora client application, such as MarlinPandora, or a standalone test application.
 Algorithms declared to be suitably generic may be designed for use by multiple client applications.
 Such re-usable algorithms are best bundled together into a Pandora "content" library.
 Algorithms are always registered via the client application, using the PandoraAPIs, but the client app can link against as many content libraries as required.
