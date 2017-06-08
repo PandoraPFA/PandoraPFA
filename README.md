@@ -48,11 +48,11 @@ environment variables or provide the additional CMake arguments:
 ## Recommended library/application versions
 Use 'git tag' to check the list of available tags.
 Current recommended versions are as defined below:
-````
-export PANDORA_PFA_VERSION=v03-03-00
+```
+export PANDORA_PFA_VERSION=v03-04-00
 export PANDORA_SDK_VERSION=v03-00-01
 export PANDORA_MONITORING_VERSION=v03-01-00
-export PANDORA_LAR_CONTENT_VERSION=v03_06_00
+export PANDORA_LAR_CONTENT_VERSION=v03_07_00
 export PANDORA_LC_CONTENT_VERSION=v03-00-03
 export PANDORA_EXAMPLE_CONTENT_VERSION=v03-00-00
 export PANDORA_LAR_RECO_VERSION=v03-06-00
@@ -60,6 +60,7 @@ export PANDORA_LC_RECO_VERSION=v03-00-02
 
 export MY_TEST_AREA=/path/to/your/test/area
 ```
+
 ## 1. Using CMake and the PandoraPFA metadata package
 ```
 cd $MY_TEST_AREA
