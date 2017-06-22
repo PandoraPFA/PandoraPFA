@@ -121,12 +121,22 @@ cmake -DCMAKE_MODULE_PATH="$MY_TEST_AREA/PandoraPFA/cmakemodules;$ROOTSYS/etc/cm
 make -j4 install
 
 cd $MY_TEST_AREA
+wget http://bitbucket.org/eigen/eigen/get/3.3.3.tar.gz
+tar -xf 3.3.3.tar.gz
+mv eigen-eigen-67e894c6cd8f Eigen3
+cd Eigen3
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=$MY_TEST_AREA/Eigen3/ ..
+make -j4 install
+
+cd $MY_TEST_AREA
 git clone https://github.com/PandoraPFA/LArContent.git
 cd LArContent
 git checkout $PANDORA_LAR_CONTENT_VERSION
 mkdir build
 cd build
-cmake -DCMAKE_MODULE_PATH="$MY_TEST_AREA/PandoraPFA/cmakemodules;$ROOTSYS/etc/cmake" -DPANDORA_MONITORING=ON -DPandoraSDK_DIR=$MY_TEST_AREA/PandoraSDK -DPandoraMonitoring_DIR=$MY_TEST_AREA/PandoraMonitoring ..
+cmake -DCMAKE_MODULE_PATH="$MY_TEST_AREA/PandoraPFA/cmakemodules;$ROOTSYS/etc/cmake" -DPANDORA_MONITORING=ON -DPandoraSDK_DIR=$MY_TEST_AREA/PandoraSDK -DPandoraMonitoring_DIR=$MY_TEST_AREA/PandoraMonitoring -DEigen3_DIR=$MY_TEST_AREA/Eigen3/share/eigen3/cmake/ ..
 make -j4 install
 
 cd $MY_TEST_AREA
@@ -156,6 +166,11 @@ cd $MY_TEST_AREA/PandoraPFA
 git clone https://github.com/PandoraPFA/PandoraMonitoring.git PandoraMonitoring
 cd PandoraMonitoring
 git checkout $PANDORA_MONITORING_VERSION
+
+cd $MY_TEST_AREA/PandoraPFA
+wget http://bitbucket.org/eigen/eigen/get/3.3.3.tar.gz
+tar -xf 3.3.3.tar.gz
+mv eigen-eigen-67e894c6cd8f Eigen3
 
 cd $MY_TEST_AREA/PandoraPFA
 git clone https://github.com/PandoraPFA/LArContent.git LArContent
@@ -200,11 +215,16 @@ make -j4 MONITORING=1 PROJECT_DIR=$MY_TEST_AREA/PandoraMonitoring PANDORA_DIR=$M
 make install MONITORING=1 PROJECT_DIR=$MY_TEST_AREA/PandoraMonitoring PANDORA_DIR=$MY_TEST_AREA LIB_TARGET=$MY_TEST_AREA/lib
 
 cd $MY_TEST_AREA
+wget http://bitbucket.org/eigen/eigen/get/3.3.3.tar.gz
+tar -xf 3.3.3.tar.gz
+mv eigen-eigen-67e894c6cd8f Eigen3
+
+cd $MY_TEST_AREA
 git clone https://github.com/PandoraPFA/LArContent.git
 cd LArContent
 git checkout $PANDORA_LAR_CONTENT_VERSION
 mkdir lib
-make -j4 MONITORING=1 PROJECT_DIR=$MY_TEST_AREA/LArContent PANDORA_DIR=$MY_TEST_AREA
+make -j4 MONITORING=1 PROJECT_DIR=$MY_TEST_AREA/LArContent PANDORA_DIR=$MY_TEST_AREA EIGEN_INC=$MY_TEST_AREA/Eigen3/
 make install MONITORING=1 PROJECT_DIR=$MY_TEST_AREA/LArContent PANDORA_DIR=$MY_TEST_AREA LIB_TARGET=$MY_TEST_AREA/lib
 
 cd $MY_TEST_AREA
@@ -213,8 +233,6 @@ cd LArReco
 git checkout $PANDORA_LAR_RECO_VERSION
 mkdir bin
 make -j4 MONITORING=1 PROJECT_DIR=$MY_TEST_AREA/LArReco PANDORA_DIR=$MY_TEST_AREA
-
-export LD_LIBRARY_PATH=$MY_TEST_AREA/lib:$LD_LIBRARY_PATH
 
 $MY_TEST_AREA/LArReco/bin/PandoraInterface -h # as for example 1.
 ```
