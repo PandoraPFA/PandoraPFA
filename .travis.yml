@@ -1,0 +1,23 @@
+language: cpp
+
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
+env:
+  matrix:
+    - COMPILER=g++
+    - COMPILER=clang
+
+before_install:
+  - docker run -itd --name pandora -v `pwd`:/pandora/package -e "COMPILER=$COMPILER" pandorapfa/pandorapfa:latest /bin/bash
+
+script:
+  - docker exec -it pandora /bin/bash -c "cd /pandora/package && source /pandora/build_pandora_pfa.sh"
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always

@@ -1,4 +1,7 @@
-# Pandora build instructions / suggestions
+# PandoraPFA
+[![Build Status](https://travis-ci.org/PandoraPFA/PandoraPFA.svg?branch=master)](https://travis-ci.org/PandoraPFA/PandoraPFA)
+
+## Pandora build instructions / suggestions
 
 As with any multi-library application, there are a number of
 different ways in which one can choose to structure and build
@@ -23,7 +26,7 @@ or, most likely, use of a different client application required).
 If it is at all unclear how to adapt these instructions to your
 circumstances, please get in touch: marshall AT hep.phy.cam.ac.uk
 
-## Build notes
+### Build notes
 1. These instructions have been tested with:
 -Scientific Linux CERN SLC release 6.7, gcc 4.9.3, ROOT 5.34.32
 -Scientific Linux CERN SLC release 6.7, gcc 4.9.3, ROOT 6.06.04
@@ -45,7 +48,7 @@ is to pick-up alternative compilers, either specify CC and CXX
 environment variables or provide the additional CMake arguments:
 -DCMAKE_C_COMPILER=/your/cc/path and -DCMAKE_CXX_COMPILER=/your/c++/path
 
-## Recommended library/application versions
+### Recommended library/application versions
 Use 'git tag' to check the list of available tags.
 Current recommended versions are as defined below:
 ```
@@ -61,7 +64,7 @@ export PANDORA_LC_RECO_VERSION=v03-00-02
 export MY_TEST_AREA=/path/to/your/test/area
 ```
 
-## 1. Using CMake and the PandoraPFA metadata package
+### 1. Using CMake and the PandoraPFA metadata package
 ```
 cd $MY_TEST_AREA
 git clone https://github.com/PandoraPFA/PandoraPFA.git
@@ -95,7 +98,7 @@ e.g. the EventReading algorithm, configured in the specified
 PandoraSettings file. This will need to provide a fully-qualified
 path to the valid input .pndr or .xml file.
 
-## 2. Using CMake for each individual package
+### 2. Using CMake for each individual package
 ```
 cd $MY_TEST_AREA
 git clone https://github.com/PandoraPFA/PandoraPFA.git # still need this for the CMake modules
@@ -150,7 +153,7 @@ make -j4 install
 
 $MY_TEST_AREA/LArReco/bin/PandoraInterface -h # as for example 1.
 ```
-## 3. Using simple Makefiles and the PandoraPFA metadata package
+### 3. Using simple Makefiles and the PandoraPFA metadata package
 ```
 cd $MY_TEST_AREA
 git clone https://github.com/PandoraPFA/PandoraPFA.git
@@ -193,7 +196,7 @@ export LD_LIBRARY_PATH=$MY_TEST_AREA/PandoraPFA/lib:$LD_LIBRARY_PATH
 
 $MY_TEST_AREA/LArReco/bin/PandoraInterface -h # as for example 1.
 ```
-## 4. Using simple Makefiles for each individual package
+### 4. Using simple Makefiles for each individual package
 ```
 cd $MY_TEST_AREA
 mkdir lib
