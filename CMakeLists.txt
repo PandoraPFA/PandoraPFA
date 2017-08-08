@@ -33,7 +33,7 @@ set(ExampleContent_repository "ExampleContent.git")
 
 set(PandoraSDK_version "v03-00-02")
 set(PandoraMonitoring_version "v03-01-01")
-set(LArContent_version "v03_07_02")
+set(LArContent_version "v03_07_03")
 set(LCContent_version "v03-00-04")
 set(ExampleContent_version "v03-00-01")
 set(Eigen3_version "3.3.3")
