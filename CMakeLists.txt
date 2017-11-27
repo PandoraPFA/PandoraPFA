@@ -31,11 +31,11 @@ set(LCContent_repository "LCContent.git")
 set(LArContent_repository "LArContent.git")
 set(ExampleContent_repository "ExampleContent.git")
 
-set(PandoraSDK_version "origin/master")
-set(PandoraMonitoring_version "origin/master")
-set(LArContent_version "origin/master")
-set(LCContent_version "origin/master")
-set(ExampleContent_version "origin/master")
+set(PandoraSDK_version "v03-02-00")
+set(PandoraMonitoring_version "v03-04-00")
+set(LArContent_version "v03_09_00")
+set(LCContent_version "v03-01-01")
+set(ExampleContent_version "v03-00-02")
 set(Eigen3_version "3.3.3")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
