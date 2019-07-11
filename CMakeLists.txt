@@ -31,12 +31,11 @@ set(LCContent_repository "LCContent.git")
 set(LArContent_repository "LArContent.git")
 set(ExampleContent_repository "ExampleContent.git")
 
-set(PandoraSDK_version "origin/master")
+set(PandoraSDK_version "origin/feature/fallthrough")
 set(PandoraMonitoring_version "origin/master")
-set(LArContent_version "origin/master")
+set(LArContent_version "origin/feature/tf")
 set(LCContent_version "origin/master")
 set(ExampleContent_version "origin/master")
-set(Eigen3_version "3.3.3")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # External project selection
@@ -123,18 +122,11 @@ if(PANDORA_MONITORING)
 endif()
 
 if(LAR_PANDORA_CONTENT)
-    ExternalProject_Add(Eigen3
-        URL "http://bitbucket.org/eigen/eigen/get/${Eigen3_version}.tar.gz"
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/Eigen3-${Eigen3_version}
-        LIST_SEPARATOR %
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Eigen3-${Eigen3_version}
-    )
-
     ExternalProject_Add(${LAR_CONTENT_LIBRARY_NAME}
-        DEPENDS PandoraSDK ${MONITORING_DEPENDENCY} Eigen3
+        DEPENDS PandoraSDK ${MONITORING_DEPENDENCY}
         GIT_REPOSITORY ${git_repository_root}/${LArContent_repository}
         GIT_TAG ${LArContent_version}
-        CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DLAR_CONTENT_LIBRARY_NAME=${LAR_CONTENT_LIBRARY_NAME} -DEigen3_DIR=${CMAKE_CURRENT_SOURCE_DIR}/Eigen3-${Eigen3_version}/share/eigen3/cmake/
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${MONITORING_CMAKE_ARGS} -DLAR_CONTENT_LIBRARY_NAME=${LAR_CONTENT_LIBRARY_NAME}
         PREFIX ${LAR_CONTENT_LIBRARY_NAME}-${LArContent_version}
         LIST_SEPARATOR %
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${LAR_CONTENT_LIBRARY_NAME}-${LArContent_version}
