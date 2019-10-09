@@ -14,6 +14,12 @@ set(${PROJECT_NAME}_VERSION_PATCH 02)
 set(${PROJECT_NAME}_VERSION "${PandoraSDK_VERSION_MAJOR}.${PandoraSDK_VERSION_MINOR}.${PandoraSDK_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
+# Default C++ standard
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+endif()
+
+#-------------------------------------------------------------------------------------------------------------------------------------------
 # Dependencies
 find_path(pandora_cmake_path "PandoraCMakeSettings.cmake" "${CMAKE_CURRENT_LIST_DIR}/cmakemodules")
 if (pandora_cmake_path)
@@ -66,6 +72,10 @@ endif()
 
 if(CMAKE_CXX_COMPILER)
     list(APPEND COMMON_CMAKE_ARGS "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+endif()
+
+if(CMAKE_CXX_STANDARD)
+    list(APPEND COMMON_CMAKE_ARGS "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
 endif()
 
 if(NOT LAR_CONTENT_LIBRARY_NAME STREQUAL "LArPandoraContent")
