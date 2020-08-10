@@ -165,6 +165,8 @@ if(EXAMPLE_PANDORA_CONTENT)
     )
 endif()
 
+install(DIRECTORY "cmakemodules/" DESTINATION "cmakemodules")
+
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # display some variables and write them to cache
 PANDORA_DISPLAY_STD_VARIABLES()
