@@ -10,7 +10,7 @@ project(PandoraPFA)
 
 set(${PROJECT_NAME}_VERSION_MAJOR 03)
 set(${PROJECT_NAME}_VERSION_MINOR 15)
-set(${PROJECT_NAME}_VERSION_PATCH 00)
+set(${PROJECT_NAME}_VERSION_PATCH 01)
 set(${PROJECT_NAME}_VERSION "${PandoraSDK_VERSION_MAJOR}.${PandoraSDK_VERSION_MINOR}.${PandoraSDK_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -31,11 +31,11 @@ set(LCContent_repository "LCContent.git")
 set(LArContent_repository "LArContent.git")
 set(ExampleContent_repository "ExampleContent.git")
 
-set(PandoraSDK_version "origin/master")
-set(PandoraMonitoring_version "origin/master")
-set(LArContent_version "origin/master")
-set(LCContent_version "origin/master")
-set(ExampleContent_version "origin/master")
+set(PandoraSDK_version "v03-04-01")
+set(PandoraMonitoring_version "v03-05-00")
+set(LArContent_version "v03-19-03")
+set(LCContent_version "v03-01-05")
+set(ExampleContent_version "v03-01-00")
 set(Eigen3_version "3.3.5")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
