@@ -124,7 +124,7 @@ endif()
 
 if(LAR_PANDORA_CONTENT)
     ExternalProject_Add(Eigen3
-        URL "http://bitbucket.org/eigen/eigen/get/${Eigen3_version}.tar.gz"
+        URL "https://gitlab.com/libeigen/eigen/-/archive/${Eigen3_version}/eigen-${Eigen3_version}.tar.gz"
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/Eigen3-${Eigen3_version}
         LIST_SEPARATOR %
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Eigen3-${Eigen3_version}
