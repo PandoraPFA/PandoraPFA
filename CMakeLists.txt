@@ -10,7 +10,7 @@ project(PandoraPFA)
 
 set(${PROJECT_NAME}_VERSION_MAJOR 03)
 set(${PROJECT_NAME}_VERSION_MINOR 19)
-set(${PROJECT_NAME}_VERSION_PATCH 05)
+set(${PROJECT_NAME}_VERSION_PATCH 06)
 set(${PROJECT_NAME}_VERSION "${PandoraSDK_VERSION_MAJOR}.${PandoraSDK_VERSION_MINOR}.${PandoraSDK_VERSION_PATCH}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
