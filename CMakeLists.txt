@@ -21,6 +21,13 @@ if (pandora_cmake_path)
 endif()
 include(PandoraCMakeSettings)
 
+# Set up C++ Standard
+# ``-DCMAKE_CXX_STANDARD=<standard>`` when invoking CMake
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
+
+# Prevent CMake falls back to the latest standard the compiler does support
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # External project versions
 set(git_repository_root "https://github.com/PandoraPFA")
@@ -95,6 +102,7 @@ list(APPEND COMMON_CMAKE_ARGS
     "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH_FIXED}"
     "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+    "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}"
     "-DINSTALL_DOC=${INSTALL_DOC}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
