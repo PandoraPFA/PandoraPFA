@@ -30,7 +30,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # External project versions
-set(git_repository_root "https://github.com/PandoraPFA")
+set(git_repository_root "https://github.com/AndyChappell")
 
 set(PandoraSDK_repository "PandoraSDK.git")
 set(PandoraMonitoring_repository "PandoraMonitoring.git")
@@ -38,9 +38,9 @@ set(LCContent_repository "LCContent.git")
 set(LArContent_repository "LArContent.git")
 set(ExampleContent_repository "ExampleContent.git")
 
-set(PandoraSDK_version "origin/master")
-set(PandoraMonitoring_version "origin/master")
-set(LArContent_version "origin/master")
+set(PandoraSDK_version "feature/modern_build")
+set(PandoraMonitoring_version "feature/modern_build")
+set(LArContent_version "feature/modern_build")
 set(LCContent_version "origin/master")
 set(ExampleContent_version "origin/master")
 set(Eigen3_version "3.4.0")
