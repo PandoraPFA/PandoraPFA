@@ -1,98 +1,104 @@
-cmake_minimum_required(VERSION 3.14)
+# Modern CMakeLists.txt for the PandoraPFA super-build
+#-------------------------------------------------------------------------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-# Ensure out-of-source build
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+project(PandoraPFA LANGUAGES CXX)
+
+# Enforce out-of-source builds.
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "PandoraPFA requires an out-of-source build.")
 endif()
 
-# Project definition
-project(PandoraPFA VERSION 04.19.05 LANGUAGES CXX)
+# --- Staging Area for Installation ---
+# All sub-projects will be installed into this single directory inside the build folder.
+# This allows them to find each other easily using find_package.
+set(STAGING_INSTALL_DIR "${CMAKE_BINARY_DIR}/install")
+message(STATUS "All dependencies will be built and installed into: ${STAGING_INSTALL_DIR}")
 
-#---------------------------------------------------------------------
-# Options
-option(PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" OFF)
-option(INSTALL_DOC "Build documentation" OFF)
-option(BUILD_ONLY_SDK_AND_MONITORING "Build only PandoraSDK and PandoraMonitoring" OFF)
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# External project versions and repository locations
+set(GIT_REPOSITORY_ROOT "https://github.com/AndyChappell")
+
+set(PANDORA_SDK_VERSION "feature/modern_build")
+set(PANDORA_MONITORING_VERSION "feature/modern_build")
+set(LAR_CONTENT_VERSION "feature/modern_build")
+set(EIGEN3_VERSION "3.4.0")
+
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# Options to select which content libraries to build
+include(CMakeDependentOption)
+option(PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" ON)
 option(LAR_PANDORA_CONTENT "Build LAr Pandora content library" ON)
-option(LC_PANDORA_CONTENT "Build LC Pandora content library" ON)
-option(EXAMPLE_PANDORA_CONTENT "Build Example Pandora content library" ON)
 
-#---------------------------------------------------------------------
-# FetchContent setup
-include(FetchContent)
+message(STATUS "Build Configuration:")
+message(STATUS "  - PandoraSDK: ON")
+message(STATUS "  - PandoraMonitoring: ${PANDORA_MONITORING}")
+message(STATUS "  - LArContent: ${LAR_PANDORA_CONTENT}")
 
-# PandoraSDK
-FetchContent_Declare(
-    PandoraSDK
-    GIT_REPOSITORY https://github.com/PandoraPFA/PandoraSDK.git
-    GIT_TAG origin/master
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# Common CMake arguments to pass to all external projects
+# We enforce the same install prefix, build type, and C++ standard for consistency.
+list(APPEND COMMON_CMAKE_ARGS
+    "-DCMAKE_INSTALL_PREFIX=${STAGING_INSTALL_DIR}"
+    "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+    "-DCMAKE_CXX_STANDARD=17"
+    # Pass the CMAKE_PREFIX_PATH so sub-projects can find dependencies (like ROOT)
+    # that the user has specified for the super-build.
+    "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
 )
-FetchContent_MakeAvailable(PandoraSDK)
 
-# PandoraMonitoring (optional)
+#-------------------------------------------------------------------------------------------------------------------------------------------
+# External Projects Definition
+include(ExternalProject)
+
+# --- PandoraSDK (Core dependency) ---
+ExternalProject_Add(PandoraSDK
+    GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/PandoraSDK.git
+    GIT_TAG           ${PANDORA_SDK_VERSION}
+    CMAKE_ARGS        ${COMMON_CMAKE_ARGS}
+    UPDATE_COMMAND    "" # Avoid re-pulling on every configure
+)
+
+# --- PandoraMonitoring (Optional) ---
 if(PANDORA_MONITORING)
-    FetchContent_Declare(
-        PandoraMonitoring
-        GIT_REPOSITORY https://github.com/PandoraPFA/PandoraMonitoring.git
-        GIT_TAG origin/master
+    ExternalProject_Add(PandoraMonitoring
+        DEPENDS           PandoraSDK
+        GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/PandoraMonitoring.git
+        GIT_TAG           ${PANDORA_MONITORING_VERSION}
+        CMAKE_ARGS        ${COMMON_CMAKE_ARGS}
+        UPDATE_COMMAND    ""
     )
-    FetchContent_MakeAvailable(PandoraMonitoring)
 endif()
 
-# Eigen3 (required for LArContent)
+# --- LArContent (Optional) ---
 if(LAR_PANDORA_CONTENT)
-    FetchContent_Declare(
-        Eigen3
-        URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+    # Eigen3 is a dependency for LArContent. We build it first.
+    ExternalProject_Add(Eigen3
+        URL               "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.gz"
+        URL_HASH          SHA256=8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72
+        CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${STAGING_INSTALL_DIR}
+        UPDATE_COMMAND    ""
     )
-    FetchContent_MakeAvailable(Eigen3)
 
-    # LArContent
-    FetchContent_Declare(
-        LArContent
-        GIT_REPOSITORY https://github.com/PandoraPFA/LArContent.git
-        GIT_TAG origin/master
-    )
-    set(LArContent_DEPENDS PandoraSDK)
+    # Determine the dependencies for LArContent
+    set(LAR_CONTENT_DEPS PandoraSDK Eigen3)
     if(PANDORA_MONITORING)
-        list(APPEND LArContent_DEPENDS PandoraMonitoring)
+        list(APPEND LAR_CONTENT_DEPS PandoraMonitoring)
     endif()
-    list(APPEND LArContent_DEPENDS Eigen3)
-    FetchContent_MakeAvailable(LArContent)
+
+    ExternalProject_Add(LArContent
+        DEPENDS           ${LAR_CONTENT_DEPS}
+        GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/LArContent.git
+        GIT_TAG           ${LAR_CONTENT_VERSION}
+        CMAKE_ARGS        ${COMMON_CMAKE_ARGS} -DPANDORA_MONITORING=${PANDORA_MONITORING}
+        UPDATE_COMMAND    ""
+    )
 endif()
 
-# LCContent
-if(LC_PANDORA_CONTENT)
-    FetchContent_Declare(
-        LCContent
-        GIT_REPOSITORY https://github.com/PandoraPFA/LCContent.git
-        GIT_TAG origin/master
-    )
-    set(LCContent_DEPENDS PandoraSDK)
-    if(PANDORA_MONITORING)
-        list(APPEND LCContent_DEPENDS PandoraMonitoring)
-    endif()
-    FetchContent_MakeAvailable(LCContent)
-endif()
-
-# ExampleContent
-if(EXAMPLE_PANDORA_CONTENT)
-    FetchContent_Declare(
-        ExampleContent
-        GIT_REPOSITORY https://github.com/PandoraPFA/ExampleContent.git
-        GIT_TAG origin/master
-    )
-    set(ExampleContent_DEPENDS PandoraSDK)
-    if(PANDORA_MONITORING)
-        list(APPEND ExampleContent_DEPENDS PandoraMonitoring)
-    endif()
-    FetchContent_MakeAvailable(ExampleContent)
-endif()
-
-# Install cmakemodules and changelog
-install(DIRECTORY cmakemodules/ DESTINATION cmakemodules)
-install(FILES ChangeLog.txt DESTINATION doc)
-
-# Display variables
-PANDORA_DISPLAY_STD_VARIABLES()
-
+# --- Final Installation ---
+# This step allows a user to run "cmake --install ." on the super-build
+# to copy the artifacts from the staging area to a final desired location.
+install(DIRECTORY "${STAGING_INSTALL_DIR}/"
+    DESTINATION "."
+    USE_SOURCE_PERMISSIONS
+)
