@@ -9,10 +9,14 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "PandoraPFA requires an out-of-source build.")
 endif()
 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install path for PandoraPFA" FORCE)
+endif()
+
 # --- Staging Area for Installation ---
-# All sub-projects will be installed into this single directory inside the build folder.
+# All sub-projects will be installed into this single directory, matching the install prefix above.
 # This allows them to find each other easily using find_package.
-set(STAGING_INSTALL_DIR "${CMAKE_BINARY_DIR}/install")
+set(STAGING_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 message(STATUS "All dependencies will be built and installed into: ${STAGING_INSTALL_DIR}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,10 +99,3 @@ if(LAR_PANDORA_CONTENT)
     )
 endif()
 
-# --- Final Installation ---
-# This step allows a user to run "cmake --install ." on the super-build
-# to copy the artifacts from the staging area to a final desired location.
-install(DIRECTORY "${STAGING_INSTALL_DIR}/"
-    DESTINATION "."
-    USE_SOURCE_PERMISSIONS
-)
