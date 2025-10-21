@@ -33,6 +33,7 @@ set(EIGEN3_VERSION "3.4.0")
 include(CMakeDependentOption)
 option(PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" ON)
 option(LAR_PANDORA_CONTENT "Build LAr Pandora content library" ON)
+option(PANDORA_LIBTORCH "Enable LibTorch support in LArContent library" OFF)
 
 message(STATUS "Build Configuration:")
 message(STATUS "  - PandoraSDK: ON")
@@ -94,7 +95,7 @@ if(LAR_PANDORA_CONTENT)
         DEPENDS           ${LAR_CONTENT_DEPS}
         GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/LArContent.git
         GIT_TAG           ${LAR_CONTENT_VERSION}
-        CMAKE_ARGS        ${COMMON_CMAKE_ARGS} -DPANDORA_MONITORING=${PANDORA_MONITORING}
+        CMAKE_ARGS        ${COMMON_CMAKE_ARGS} -DPANDORA_MONITORING=${PANDORA_MONITORING} -DPANDORA_LIBTORCH=${PANDORA_LIBTORCH}
         UPDATE_COMMAND    ""
     )
 endif()
