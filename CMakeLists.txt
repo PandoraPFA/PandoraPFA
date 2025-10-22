@@ -73,6 +73,8 @@ if(PANDORA_MONITORING)
         CMAKE_ARGS        ${COMMON_CMAKE_ARGS}
         UPDATE_COMMAND    ""
     )
+
+    ExternalProject_Add_StepDependencies(PandoraMonitoring configure PandoraSDK)
 endif()
 
 # --- LArContent (Optional) ---
