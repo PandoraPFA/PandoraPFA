@@ -71,6 +71,7 @@ if(PANDORA_MONITORING)
         GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/PandoraMonitoring.git
         GIT_TAG           ${PANDORA_MONITORING_VERSION}
         CMAKE_ARGS        ${COMMON_CMAKE_ARGS}
+                          -DCMAKE_PREFIX_PATH=${STAGING_INSTALL_DIR};${CMAKE_PREFIX_PATH}
         UPDATE_COMMAND    ""
     )
 
