@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project(PandoraPFA LANGUAGES CXX)
+project(PandoraPFA VERSION 04.18.00 LANGUAGES CXX)
 
 # Enforce out-of-source builds.
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -32,13 +32,13 @@ set(EIGEN3_VERSION "3.4.0")
 # Options to select which content libraries to build
 include(CMakeDependentOption)
 option(PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" ON)
-option(LAR_PANDORA_CONTENT "Build LAr Pandora content library" ON)
+option(PANDORA_CONTENT "Build Pandora content library" ON)
 option(PANDORA_LIBTORCH "Enable LibTorch support in LArContent library" OFF)
 
 message(STATUS "Build Configuration:")
 message(STATUS "  - PandoraSDK: ON")
 message(STATUS "  - PandoraMonitoring: ${PANDORA_MONITORING}")
-message(STATUS "  - LArContent: ${LAR_PANDORA_CONTENT}")
+message(STATUS "  - LArContent: ${PANDORA_CONTENT}")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # Common CMake arguments to pass to all external projects
@@ -79,7 +79,7 @@ if(PANDORA_MONITORING)
 endif()
 
 # --- LArContent (Optional) ---
-if(LAR_PANDORA_CONTENT)
+if(PANDORA_CONTENT)
     # Eigen3 is a dependency for LArContent. We build it first.
     ExternalProject_Add(Eigen3
         URL               "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.gz"
