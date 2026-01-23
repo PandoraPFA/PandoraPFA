@@ -11,7 +11,7 @@ MACRO( PANDORA_GENERATE_PACKAGE_CONFIGURATION_FILES )
                 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/${arg}.in"
                                 "${PROJECT_BINARY_DIR}/${arg}" @ONLY
                 )
-                INSTALL( FILES "${PROJECT_BINARY_DIR}/${arg}" DESTINATION . )
+                INSTALL( FILES "${PROJECT_BINARY_DIR}/${arg}" DESTINATION lib/cmake/${PROJECT_NAME} )
             ENDIF()
         ENDIF()
 
@@ -22,7 +22,7 @@ MACRO( PANDORA_GENERATE_PACKAGE_CONFIGURATION_FILES )
                 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/${arg}.in"
                                 "${PROJECT_BINARY_DIR}/${arg}" @ONLY
                 )
-                INSTALL( FILES "${PROJECT_BINARY_DIR}/${arg}" DESTINATION . )
+                INSTALL( FILES "${PROJECT_BINARY_DIR}/${arg}" DESTINATION lib/cmake/${PROJECT_NAME} )
             ENDIF( EXISTS "${PROJECT_SOURCE_DIR}/cmake/${arg}.in" )
         ENDIF()
 
