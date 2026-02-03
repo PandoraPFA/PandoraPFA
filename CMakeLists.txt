@@ -32,7 +32,7 @@ set(EIGEN3_VERSION "3.4.0")
 # Options to select which content libraries to build
 include(CMakeDependentOption)
 option(PANDORA_MONITORING "Build PandoraMonitoring library (requires ROOT)" ON)
-option(PANDORA_CONTENT "Build Pandora content library" ON)
+option(PANDORA_CONTENT "Build Pandora content library" OFF)
 option(PANDORA_LIBTORCH "Enable LibTorch support in LArContent library" OFF)
 
 message(STATUS "Build Configuration:")
@@ -44,12 +44,13 @@ message(STATUS "  - LArContent: ${PANDORA_CONTENT}")
 # Common CMake arguments to pass to all external projects
 # We enforce the same install prefix, build type, and C++ standard for consistency.
 list(APPEND COMMON_CMAKE_ARGS
-    "-DCMAKE_INSTALL_PREFIX=${STAGING_INSTALL_DIR}"
-    "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-    "-DCMAKE_CXX_STANDARD=17"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${STAGING_INSTALL_DIR}"
+    "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
+    "-DCMAKE_CXX_STANDARD:STRING=17"
     # Pass the CMAKE_PREFIX_PATH so sub-projects can find dependencies (like ROOT)
     # that the user has specified for the super-build.
-    "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+    "-DCMAKE_PREFIX_PATH:PATH=${CMAKE_PREFIX_PATH}"
+    "-DCMAKE_INSTALL_LIBDIR:STRING=lib"
 )
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,7 +61,7 @@ include(ExternalProject)
 ExternalProject_Add(PandoraSDK
     GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/PandoraSDK.git
     GIT_TAG           ${PANDORA_SDK_VERSION}
-    CMAKE_ARGS        ${COMMON_CMAKE_ARGS}
+    CMAKE_CACHE_ARGS  ${COMMON_CMAKE_ARGS}
     UPDATE_COMMAND    "" # Avoid re-pulling on every configure
 )
 
@@ -70,8 +71,8 @@ if(PANDORA_MONITORING)
         DEPENDS           PandoraSDK
         GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/PandoraMonitoring.git
         GIT_TAG           ${PANDORA_MONITORING_VERSION}
-        CMAKE_ARGS        ${COMMON_CMAKE_ARGS}
-                          -DCMAKE_PREFIX_PATH=${STAGING_INSTALL_DIR};${CMAKE_PREFIX_PATH}
+        CMAKE_CACHE_ARGS  ${COMMON_CMAKE_ARGS}
+                          -DCMAKE_PREFIX_PATH:PATH=${STAGING_INSTALL_DIR};${CMAKE_PREFIX_PATH}
         UPDATE_COMMAND    ""
     )
 
@@ -84,7 +85,7 @@ if(PANDORA_CONTENT)
     ExternalProject_Add(Eigen3
         URL               "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.gz"
         URL_HASH          SHA256=8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72
-        CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${STAGING_INSTALL_DIR}
+        CMAKE_CACHE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=${STAGING_INSTALL_DIR}
         UPDATE_COMMAND    ""
     )
 
@@ -98,7 +99,7 @@ if(PANDORA_CONTENT)
         DEPENDS           ${LAR_CONTENT_DEPS}
         GIT_REPOSITORY    ${GIT_REPOSITORY_ROOT}/LArContent.git
         GIT_TAG           ${LAR_CONTENT_VERSION}
-        CMAKE_ARGS        ${COMMON_CMAKE_ARGS} -DPANDORA_MONITORING=${PANDORA_MONITORING} -DPANDORA_LIBTORCH=${PANDORA_LIBTORCH}
+        CMAKE_CACHE_ARGS  ${COMMON_CMAKE_ARGS} -DPANDORA_MONITORING:BOOL=${PANDORA_MONITORING} -DPANDORA_LIBTORCH:BOOL=${PANDORA_LIBTORCH}
         UPDATE_COMMAND    ""
     )
 endif()
