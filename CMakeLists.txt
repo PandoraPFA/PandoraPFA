@@ -23,9 +23,9 @@ message(STATUS "All dependencies will be built and installed into: ${STAGING_INS
 # External project versions and repository locations
 set(GIT_REPOSITORY_ROOT "https://github.com/AndyChappell")
 
-set(PANDORA_SDK_VERSION "feature/modern_build")
-set(PANDORA_MONITORING_VERSION "feature/modern_build")
-set(LAR_CONTENT_VERSION "feature/modern_build")
+set(PANDORA_SDK_VERSION "v04-02-00")
+set(PANDORA_MONITORING_VERSION "v04-01-00")
+set(LAR_CONTENT_VERSION "v04_20_00")
 set(EIGEN3_VERSION "3.4.0")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
