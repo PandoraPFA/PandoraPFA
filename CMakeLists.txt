@@ -23,9 +23,9 @@ message(STATUS "All dependencies will be built and installed into: ${STAGING_INS
 # External project versions and repository locations
 set(GIT_REPOSITORY_ROOT "https://github.com/PandoraPFA")
 
-set(PANDORA_SDK_VERSION "origin/master")
-set(PANDORA_MONITORING_VERSION "origin/master")
-set(LAR_CONTENT_VERSION "origin/master")
+set(PANDORA_SDK_VERSION "v05-00-00")
+set(PANDORA_MONITORING_VERSION "v05-00-00")
+set(LAR_CONTENT_VERSION "v05_00_00")
 set(EIGEN3_VERSION "3.4.0")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
